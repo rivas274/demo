@@ -129,6 +129,7 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
         <p class="muted">Cada fila compara la misma animación hecha con SpriteCook (pagada) y generada con código a partir del sprite base (gratis).</p>
       </div>
       <div class="controls">
+        <button class="hit" id="playBtn" type="button" aria-pressed="true">Pausar</button>
         <span>Velocidad</span>
         <div class="seg" data-ctl="speed">
           <button data-v="0.5">½×</button><button data-v="1" aria-pressed="true">1×</button><button data-v="2">2×</button>
@@ -225,7 +226,14 @@ const ANIMS = __ANIMS__;
 const PESOS = __PESOS__;
 const BASE_SRC = "__BASE__";
 const state = { speed: 1, scale: 2, bg: "plain" };
-const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let playing = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+const playBtn = document.getElementById("playBtn");
+function syncPlay() {
+  playBtn.textContent = playing ? "Pausar" : "▶ Reproducir animaciones";
+  playBtn.setAttribute("aria-pressed", playing ? "true" : "false");
+}
+playBtn.addEventListener("click", () => { playing = !playing; syncPlay(); });
+syncPlay();
 
 const load = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = src; });
 
@@ -315,7 +323,7 @@ function card(anim, img) {
   const jump = document.getElementById("jump").getContext("2d");
   const hurt = document.getElementById("hurt").getContext("2d");
   let hitT = -1;
-  document.getElementById("hitBtn").addEventListener("click", () => { hitT = 0; });
+  document.getElementById("hitBtn").addEventListener("click", () => { hitT = 0; if (!playing) { playing = true; syncPlay(); } });
 
   let idleFrame = 0, idleAcc = 0, t = 0, last = performance.now();
   function drawScaled(ctx, frame, cx, groundY, sx, sy, fill) {
@@ -336,7 +344,7 @@ function card(anim, img) {
 
   function loop(now) {
     const dt = Math.min(0.1, (now - last) / 1000); last = now;
-    if (!reduce) {
+    if (playing) {
       players.forEach(p => p.tick(dt));
       idleAcc += dt * idle.fps * state.speed;
       while (idleAcc >= 1) { idleAcc -= 1; idleFrame = (idleFrame + 1) % idle.frames; }

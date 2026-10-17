@@ -11,11 +11,11 @@
 
 ## SpriteCook (generador de arte con IA)
 
-- **Conectado** como conector en claude.ai (`https://mcp.spritecook.ai/mcp/claude`), cuenta gratuita.
+- **Conectado** como conector en claude.ai (`https://mcp.spritecook.ai/mcp/claude`). Plan de pago "apprentice" desde el 2026-10-17 (800 créditos, 4 trabajos a la vez).
 - **Subir imágenes locales:** `create_asset_upload`, luego PUT con curl a la URL devuelta, luego `finalize_asset_upload`.
 - **Red del entorno:** deben estar permitidos `mcp.spritecook.ai` y `api.spritecook.ai`; sin el segundo no se pueden descargar ni ver las imágenes.
 - **Proyecto en SpriteCook:** "Siete Vidas, Cero Disculpas", id `126fcb42-c3f6-40b5-9f75-42715fbdce40`. Pasar siempre `project_id`.
-- **Créditos:** 40 iniciales; quedan **24** tras las pruebas v1 y v2 (2026-10-17). Subir imágenes de referencia no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
+- **Créditos:** 800 del plan de pago; quedan **780** tras la animación de prueba "quieto" (2026-10-17). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
 - **Regla de oro:** mostrar al creador el prompt, el modelo, los ajustes y el costo, y esperar aprobación antes de cada llamada que gaste créditos.
 
 ### Modelos y costos útiles (consultados el 2026-10-17)
@@ -25,6 +25,16 @@
 | `gemini-3.1-flash-lite-image` (Nano Banana 2 Lite) | 8 créditos | El más barato; usado en v1 con buen resultado; hasta 14 referencias |
 | `gpt-image-2.5-flare` calidad low | 5 créditos + 8 por imagen de referencia | Soporta transparencia |
 | `gemini-nano-banana-2.1` (por defecto) | 12 créditos | |
+
+### Costos de animación (consultados el 2026-10-17)
+
+- `animate_game_art` sobre un asset existente: 20 créditos por animación de 8 cuadros.
+- Flujo guiado de personaje (`generate_character` + `generate_character_animations`): 12 por el personaje base, 20 por animación, +12 para preparar las poses de caminar o correr.
+
+### Estrategia de animación (aprobada el 2026-10-17)
+
+- **A + C, y B solo si hace falta:** SpriteCook solo para animaciones estrella; el resto, por piezas (cutout) en Godot con huesos y estiramientos, sin créditos.
+- Primera prueba: animación "quieto" de Felipe A con `animate_game_art`.
 
 ### Trucos para ahorrar créditos
 
@@ -39,11 +49,12 @@
 | --- | --- | --- |
 | Felipe, prueba de 4 estilos v1 | `8868e7a2-dd1c-4ab4-a823-9d8b184f5f87` | `siete-vidas/arte/referencias/felipe-prueba-estilos-v1.png` |
 | Foto real de Felipe (referencia, no se publica) | `a0fbe97b-61b6-4d6d-8cb3-c5b4afaa6a74` | No está en el repositorio |
+| Felipe A base (recortado, sin fondo) | `14b3c27f-798c-4795-84fe-48ed15508247` | `siete-vidas/arte/felipe/felipe-A-base.png` |
 | Felipe híbrido v2 (versiones A y B) | `22529bf7-4fcc-4f41-9b17-488d276a206a` | `siete-vidas/arte/referencias/felipe-hibrido-v2.png` |
 
 ## Otras herramientas
 
-- **Motor:** Godot 4 (MIT). SpriteCook puede exportar paquetes de personaje y tilesets listos para Godot 4.
+- **Motor:** Godot 4 (MIT). En las sesiones en la nube se instala con: descargar `Godot_v4.3-stable_linux.x86_64.zip` de los releases de GitHub en `/opt/godot` y enlazarlo a `/usr/local/bin/godot` (se usa en modo `--headless`). SpriteCook puede exportar paquetes de personaje y tilesets listos para Godot 4.
 - **Retoque de pixel art:** Pixelorama (gratis, código abierto) o Aseprite.
 - **Niveles:** TileMap de Godot y LDtk.
 - **Audio:** Furnace o LMMS (música), jsfxr y Audacity (efectos).

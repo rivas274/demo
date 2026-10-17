@@ -1,6 +1,6 @@
 # Guía del personaje: Felipe
 
-Estado: **en definición**. El estilo híbrido (proporciones Chibi + acabado Cel-shaded) está aprobado como dirección; falta generar y aprobar el diseño final.
+Estado: **diseño aprobado: versión A del híbrido v2** (muy Chibi, cabeza grande, cuerpo redondo, vista 3/4). Sprite base sin fondo: `siete-vidas/arte/felipe/felipe-A-base.png` (86×94 px).
 
 ## Identidad
 
@@ -73,4 +73,4 @@ Quieto (respirando, mueve la cola), caminar, correr, saltar, caer, aterrizar, za
 | Versión | Fecha | Resultado |
 | --- | --- | --- |
 | v1 | 2026-10-17 | Hoja con 4 estilos (32-bit, 16-bit, Chibi, Cel-shaded) sin foto de referencia. Archivo: `siete-vidas/arte/referencias/felipe-prueba-estilos-v1.png`. Al creador le gustó Cel-shaded y a su novia Chibi; se decidió el híbrido. |
-| v2 | 2026-10-17 | Estilo híbrido con la foto real como referencia y v1 como guía de estilo; dos versiones en una imagen (8 créditos). A: muy Chibi, cabeza grande, cuerpo redondo. B: cuerpo más largo, sombreado más marcado. Archivo: `siete-vidas/arte/referencias/felipe-hibrido-v2.png`. Pendiente que el creador elija. |
+| v2 | 2026-10-17 | Estilo híbrido con la foto real como referencia y v1 como guía de estilo; dos versiones en una imagen (8 créditos). A: muy Chibi, cabeza grande, cuerpo redondo. B: cuerpo más largo, sombreado más marcado. Archivo: `siete-vidas/arte/referencias/felipe-hibrido-v2.png`. **Elegida la A** por el creador y su novia. |

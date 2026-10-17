@@ -48,6 +48,12 @@
 - Solo ensancha el cuerpo, del cuello a la panza, fila por fila; la cabeza y la cola no cambian. (La primera versión estiraba todo el sprite y se veía mal.)
 - Resultados en `siete-vidas/arte/felipe/pesos/`.
 
+### Salto (feedback del creador)
+
+- El salto que solo estira y aplasta "se ve mal, tiene que ser más dinámico para enganchar".
+- Versión actual (código, gratis): anticipación agachándose, despegue explosivo, pausa arriba, Doble Salto Imposible con vuelta completa, caída más rápida que la subida, aplastón y rebote al aterrizar, estela de imágenes fantasma y polvo al despegar y aterrizar. Implementado en la ficha (`pagina_felipe.template.html`, función `drawJump`); los mismos tiempos sirven para Godot.
+- Modo Buda por código "se ve mal": requiere una pose nueva (propuesta: editar Felipe A con SpriteCook, 8 créditos).
+
 ### Trucos para ahorrar créditos
 
 - Varias ideas en una sola imagen (hojas comparativas en cuadrícula) en vez de una llamada por idea.

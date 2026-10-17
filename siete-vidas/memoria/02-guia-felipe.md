@@ -57,7 +57,12 @@ El diseño se basa en el gato real del creador (fotos en la conversación origin
 
 ## Recursos visuales
 
-Todos en `siete-vidas/arte/felipe/` y en la ficha de concepto (`siete-vidas/concepto/felipe-concepto.html`): sprite base, animaciones (quieto, caminar, correr, zarpazo, comer, saltar, ronronear, desmayo), formas de peso (Flaco y Gordito por código, Modo Buda propio), Collar de la Vergüenza y 9 retratos para diálogos.
+Todos en `siete-vidas/arte/felipe/` y en la ficha de concepto (`siete-vidas/concepto/felipe-concepto.html`): sprite base, animaciones (quieto, caminar, correr, zarpazo, comer, saltar, ronronear, desmayo), poses de caída (en picada con las delanteras estiradas y contacto con las delanteras), formas de peso (Flaco y Gordito por código, Modo Buda propio), Collar de la Vergüenza y 9 retratos para diálogos.
+
+## Reglas de movimiento
+
+- **Al bajar, las patas delanteras van primero y tocan el piso primero.** Secuencia del salto: sube estirado, arriba recoge las patas, cae en picada con las delanteras estiradas (pose "caer" 0), toca con las delanteras (pose "caer" 1), baja la parte de atrás y se aplasta.
+- El doble salto lleva solo una inclinación leve (~20°); la vuelta completa se descartó por exagerada.
 
 ## Formas de peso
 

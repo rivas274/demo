@@ -1,0 +1,366 @@
+<title>Felipe Ron con Pasas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Work+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: ficha de personaje — cabecera con Felipe, comparador de animaciones, demos de código y rasgos */
+:root {
+  --bg: #f4efe9;
+  --surface: #fffdfa;
+  --stage: #ece6dd;
+  --fg: #2b2320;
+  --muted: #6f625b;
+  --line: #e0d6cc;
+  --accent: #b8553b;
+  --code: #3f7f63;
+  --sc: #7a5bb0;
+  --font-display: "Silkscreen", "Courier New", monospace;
+  --font-body: "Work Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1c1715; --surface: #26201d; --stage: #322a26; --fg: #f3ece6; --muted: #b5a79f; --line: #3d3430;
+    --accent: #ee8a6c; --code: #7fc6a2; --sc: #b49be4; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1c1715; --surface: #26201d; --stage: #322a26; --fg: #f3ece6; --muted: #b5a79f; --line: #3d3430;
+  --accent: #ee8a6c; --code: #7fc6a2; --sc: #b49be4; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.wrap {
+  max-width: 1120px; margin: 0 auto; display: grid; gap: 40px;
+  padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: 400; margin: 0; text-wrap: balance; }
+h2 { font-size: 22px; }
+h3 { font-size: 15px; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; max-width: 100%; }
+
+.hero { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; }
+.hero-art { background: var(--stage); border-radius: 12px; padding: 18px 26px 10px; }
+.hero-art canvas { width: calc(var(--bw) * 3px); }
+.hero-text { display: grid; gap: 10px; min-width: 0; }
+.eyebrow { font-family: var(--font-display); font-size: 12px; letter-spacing: .06em; color: var(--accent); text-transform: uppercase; }
+.hero h1 { font-size: clamp(28px, 5vw, 44px); line-height: 1.05; }
+.quote { font-size: 17px; font-style: italic; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font-size: 12.5px; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 3px 10px; }
+
+.section { display: grid; gap: 16px; align-content: start; }
+.section-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; }
+.section-head p { max-width: 62ch; }
+.controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; font-size: 13px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button {
+  font: inherit; background: var(--surface); color: var(--fg); border: 0; padding: 5px 10px; cursor: pointer;
+}
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--surface); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.compare { display: grid; gap: 18px; }
+.row { display: grid; grid-template-columns: 110px 1fr 1fr; gap: 14px; align-items: stretch; }
+.row-label { font-family: var(--font-display); font-size: 14px; align-self: center; }
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px;
+  display: grid; gap: 10px; min-width: 0; align-content: start;
+}
+.stage { background: var(--stage); border-radius: 6px; display: grid; place-items: end center; min-height: 140px; padding-top: 8px; overflow: hidden; }
+.stage.dusk { background: linear-gradient(#3b2c5a, #8a4a78 55%, #ec8f6c); }
+.card-meta { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-size: 12.5px; }
+.badge { font-family: var(--font-display); font-size: 10.5px; letter-spacing: .04em; padding: 3px 7px; border-radius: 4px; color: var(--surface); }
+.badge.sc { background: var(--sc); }
+.badge.code { background: var(--code); }
+.empty { font-size: 13px; color: var(--muted); padding: 30px 10px; text-align: center; }
+
+.demos { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+.weights { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; font-size: 12px; }
+.weights .stage { min-height: 120px; }
+.hit { font: inherit; font-size: 13px; background: var(--accent); color: var(--surface); border: 0; border-radius: 8px; padding: 6px 12px; cursor: pointer; justify-self: start; }
+
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
+.table-wrap { overflow-x: auto; }
+.swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+.sw { display: grid; gap: 4px; font-size: 11.5px; width: 84px; }
+.sw span:first-child { height: 34px; border-radius: 6px; border: 1px solid var(--line); }
+.sw code { font-size: 11px; color: var(--muted); }
+.two { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
+
+@media (max-width: 640px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-art { justify-self: start; }
+  .row { grid-template-columns: 1fr 1fr; }
+  .row-label { grid-column: 1 / -1; }
+  .weights { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+
+<div class="wrap" style="--bw: __BW__">
+  <header class="hero">
+    <div class="hero-art"><canvas id="hero" width="__BW__" height="__BH__" role="img" aria-label="Sprite base de Felipe"></canvas></div>
+    <div class="hero-text">
+      <div class="eyebrow">Felipe: Siete Vidas, Cero Disculpas · ficha del protagonista</div>
+      <h1>Su Majestad Felipe Ron con Pasas I</h1>
+      <p class="quote">"No estoy gordo. Estoy en modo invierno."</p>
+      <p class="muted">Gato de apartamento con ego de rey egipcio. Valeria le dice "Pipe". Basado en el gato real del creador del juego.</p>
+      <div class="chips">
+        <span class="chip">Estilo: Chibi + Cel-shaded</span>
+        <span class="chip">Sprite base: __BW__×__BH__ px</span>
+        <span class="chip">Resolución del juego: 640×360</span>
+        <span class="chip">Vista 3/4</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="section-head">
+      <div style="display:grid;gap:6px">
+        <h2>Animaciones: SpriteCook contra código</h2>
+        <p class="muted">Cada fila compara la misma animación hecha con SpriteCook (pagada) y generada con código a partir del sprite base (gratis).</p>
+      </div>
+      <div class="controls">
+        <span>Velocidad</span>
+        <div class="seg" data-ctl="speed">
+          <button data-v="0.5">½×</button><button data-v="1" aria-pressed="true">1×</button><button data-v="2">2×</button>
+        </div>
+        <span>Tamaño</span>
+        <div class="seg" data-ctl="scale">
+          <button data-v="1">1×</button><button data-v="2" aria-pressed="true">2×</button><button data-v="3">3×</button>
+        </div>
+        <span>Fondo</span>
+        <div class="seg" data-ctl="bg">
+          <button data-v="plain" aria-pressed="true">Liso</button><button data-v="dusk">Atardecer</button>
+        </div>
+      </div>
+    </div>
+    <div class="compare" id="compare"></div>
+    <p class="muted" style="font-size:13px">"1×" muestra el tamaño real en el juego a 1080p con escala ×3 del motor; súbelo para ver los píxeles.</p>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div style="display:grid;gap:6px">
+        <h2>Gratis con código en Godot</h2>
+        <p class="muted">Efectos que no gastan créditos: se aplican encima de cualquier animación.</p>
+      </div>
+    </div>
+    <div class="demos">
+      <div class="card">
+        <h3>Formas de peso</h3>
+        <div class="weights">
+          <div><div class="stage"><canvas data-weight="0.86,1.04"></canvas></div>Flaco</div>
+          <div><div class="stage"><canvas data-weight="1,1"></canvas></div>Normal</div>
+          <div><div class="stage"><canvas data-weight="1.16,0.97"></canvas></div>Gordito</div>
+          <div><div class="stage"><canvas data-weight="1.38,0.9"></canvas></div>Modo Buda</div>
+        </div>
+        <p class="muted" style="font-size:12.5px">El mismo sprite, ensanchado. Una sola animación sirve para las cuatro formas.</p>
+      </div>
+      <div class="card">
+        <h3>Salto con estirar y aplastar</h3>
+        <div class="stage" style="min-height:210px"><canvas id="jump" width="240" height="200"></canvas></div>
+        <p class="muted" style="font-size:12.5px">Se agacha, se estira al subir, cae y se aplasta al aterrizar.</p>
+      </div>
+      <div class="card">
+        <h3>Recibir daño</h3>
+        <div class="stage" style="min-height:210px"><canvas id="hurt" width="240" height="200"></canvas></div>
+        <button class="hit" id="hitBtn" type="button">Golpear a Felipe</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="two">
+    <div class="section">
+      <h2>Rasgos que no cambian</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Zona</th><th>Rasgo</th></tr></thead>
+          <tbody>
+            <tr><td>Pelaje</td><td>Blanco en pecho, vientre, patas, hocico y cara</td></tr>
+            <tr><td>Manchas</td><td>Atigrado gris-café con rayas oscuras en lomo y cola</td></tr>
+            <tr><td>Cabeza</td><td>Gorra atigrada sobre orejas y frente, con franja blanca en el centro</td></tr>
+            <tr><td>Ojos</td><td>Verde avellana, a media asta, mirada de reojo</td></tr>
+            <tr><td>Nariz</td><td>Rosada</td></tr>
+            <tr><td>Cola</td><td>Enorme, esponjada y atigrada</td></tr>
+            <tr><td>Proporción</td><td>Cabeza cerca del 40 % de la altura; cuerpo redondo; patas cortas</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="section">
+      <h2>Plan de animación</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Animación</th><th>Cómo</th><th>Costo</th></tr></thead>
+          <tbody>
+            <tr><td>Quieto</td><td>SpriteCook (hecha)</td><td>20</td></tr>
+            <tr><td>Caminar</td><td>SpriteCook (en comparación)</td><td>20</td></tr>
+            <tr><td>Correr / Zoomies</td><td>SpriteCook</td><td>20</td></tr>
+            <tr><td>Zarpazo</td><td>SpriteCook</td><td>20</td></tr>
+            <tr><td>Comer snack</td><td>SpriteCook</td><td>20</td></tr>
+            <tr><td>Saltar, caer, aterrizar</td><td>Código</td><td>0</td></tr>
+            <tr><td>Daño, ronronear, formas de peso</td><td>Código</td><td>0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3 style="margin-top:8px">Paleta</h3>
+      <div class="swatches">
+        <div class="sw"><span style="background:#F3EFE8"></span>Blanco<code>#F3EFE8</code></div>
+        <div class="sw"><span style="background:#CFC6BB"></span>Sombra<code>#CFC6BB</code></div>
+        <div class="sw"><span style="background:#8B7864"></span>Atigrado<code>#8B7864</code></div>
+        <div class="sw"><span style="background:#5B4D41"></span>Rayas<code>#5B4D41</code></div>
+        <div class="sw"><span style="background:#E59AA2"></span>Rosa<code>#E59AA2</code></div>
+        <div class="sw"><span style="background:#A3B06A"></span>Ojos<code>#A3B06A</code></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const ANIMS = __ANIMS__;
+const BASE_SRC = "__BASE__";
+const state = { speed: 1, scale: 2, bg: "plain" };
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const load = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = src; });
+
+document.querySelectorAll(".seg").forEach(seg => {
+  seg.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    seg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+    const key = seg.dataset.ctl, v = b.dataset.v;
+    state[key] = key === "bg" ? v : Number(v);
+    if (key === "bg") document.querySelectorAll("#compare .stage").forEach(s => s.classList.toggle("dusk", v === "dusk"));
+    if (key === "scale") players.forEach(p => p.resize());
+  });
+});
+
+const players = [];
+function makePlayer(anim, img) {
+  const c = document.createElement("canvas");
+  c.setAttribute("role", "img");
+  c.setAttribute("aria-label", `${anim.nombre}, ${anim.origen}`);
+  const ctx = c.getContext("2d");
+  const p = {
+    c, frame: 0, acc: 0,
+    resize() { c.width = anim.fw * state.scale; c.height = anim.fh * state.scale; ctx.imageSmoothingEnabled = false; p.draw(); },
+    draw() {
+      ctx.clearRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, p.frame * anim.fw, 0, anim.fw, anim.fh, 0, 0, c.width, c.height);
+    },
+    tick(dt) {
+      p.acc += dt * anim.fps * state.speed;
+      while (p.acc >= 1) { p.acc -= 1; p.frame = (p.frame + 1) % anim.frames; }
+      p.draw();
+    },
+  };
+  p.resize();
+  players.push(p);
+  return c;
+}
+
+function card(anim, img) {
+  const el = document.createElement("div");
+  el.className = "card";
+  if (!anim) {
+    el.innerHTML = '<div class="empty">Aún no generada</div>';
+    return el;
+  }
+  const isCode = anim.origen.startsWith("Código");
+  el.innerHTML = `<div class="stage"></div>
+    <div class="card-meta"><span class="badge ${isCode ? "code" : "sc"}">${isCode ? "CÓDIGO" : "SPRITECOOK"}</span>
+    <span>${anim.costo}</span><span class="muted">${anim.frames} cuadros · ${anim.fps} fps</span></div>`;
+  el.querySelector(".stage").appendChild(makePlayer(anim, img));
+  return el;
+}
+
+(async () => {
+  const imgs = Object.fromEntries(await Promise.all(ANIMS.map(async a => [a.id, await load(a.src)])));
+  const base = await load(BASE_SRC);
+  const hero = document.getElementById("hero").getContext("2d");
+  hero.drawImage(base, 0, 0);
+
+  const compare = document.getElementById("compare");
+  for (const [label, sc, code] of [["Quieto", "sc-idle", "code-idle"], ["Caminar", "sc-walk", "code-walk"]]) {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `<div class="row-label">${label}</div>`;
+    const a1 = ANIMS.find(a => a.id === sc), a2 = ANIMS.find(a => a.id === code);
+    row.appendChild(card(a1, a1 && imgs[a1.id]));
+    row.appendChild(card(a2, a2 && imgs[a2.id]));
+    compare.appendChild(row);
+  }
+
+  const idle = ANIMS.find(a => a.id === "sc-idle");
+  const idleImg = imgs["sc-idle"];
+  const weightCanvases = [...document.querySelectorAll("canvas[data-weight]")].map(c => {
+    const [sx, sy] = c.dataset.weight.split(",").map(Number);
+    c.width = Math.round(idle.fw * 1.45); c.height = idle.fh;
+    return { c, ctx: c.getContext("2d"), sx, sy };
+  });
+
+  const jump = document.getElementById("jump").getContext("2d");
+  const hurt = document.getElementById("hurt").getContext("2d");
+  let hitT = -1;
+  document.getElementById("hitBtn").addEventListener("click", () => { hitT = 0; });
+
+  let idleFrame = 0, idleAcc = 0, t = 0, last = performance.now();
+  function drawScaled(ctx, frame, cx, groundY, sx, sy, fill) {
+    const w = Math.round(idle.fw * sx), h = Math.round(idle.fh * sy);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(idleImg, frame * idle.fw, 0, idle.fw, idle.fh, Math.round(cx - w / 2), Math.round(groundY - h), w, h);
+    if (fill) {
+      ctx.globalCompositeOperation = "source-atop";
+      ctx.fillStyle = fill;
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.globalCompositeOperation = "source-over";
+    }
+  }
+  function shadow(ctx, cx, y, r) {
+    ctx.fillStyle = "rgba(40,25,20,0.18)";
+    ctx.beginPath(); ctx.ellipse(cx, y - 2, r, 4, 0, 0, Math.PI * 2); ctx.fill();
+  }
+
+  function loop(now) {
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    if (!reduce) {
+      players.forEach(p => p.tick(dt));
+      idleAcc += dt * idle.fps * state.speed;
+      while (idleAcc >= 1) { idleAcc -= 1; idleFrame = (idleFrame + 1) % idle.frames; }
+      t += dt * state.speed;
+    }
+    weightCanvases.forEach(w => {
+      w.ctx.clearRect(0, 0, w.c.width, w.c.height);
+      drawScaled(w.ctx, idleFrame, w.c.width / 2, w.c.height, w.sx, w.sy);
+    });
+
+    const J = 1.6, p = (t % J) / J;
+    let y = 0, sx = 1, sy = 1;
+    if (p < 0.15) { const k = p / 0.15; sx = 1 + 0.18 * k; sy = 1 - 0.18 * k; }
+    else if (p < 0.6) { const k = (p - 0.15) / 0.45; y = Math.sin(k * Math.PI) * 70; const up = k < 0.5; sx = up ? 0.86 : 0.9; sy = up ? 1.16 : 1.1; if (Math.abs(k - 0.5) < 0.12) { sx = 1; sy = 1; } }
+    else if (p < 0.72) { const k = (p - 0.6) / 0.12; sx = 1.22 - 0.22 * k; sy = 0.8 + 0.2 * k; }
+    jump.clearRect(0, 0, 240, 200);
+    shadow(jump, 120, 196, 30 - y * 0.15);
+    drawScaled(jump, idleFrame, 120, 196 - y, sx, sy);
+
+    hurt.clearRect(0, 0, 240, 200);
+    let fill = null, dx = 0;
+    if (hitT >= 0) {
+      hitT += dt;
+      if (hitT < 0.45) { fill = Math.floor(hitT / 0.06) % 2 ? "#ffffff" : null; dx = Math.round(Math.sin(hitT * 70) * 3); }
+      else hitT = -1;
+    }
+    shadow(hurt, 120, 196, 30);
+    drawScaled(hurt, idleFrame, 120 + dx, 196, 1, 1, fill);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>

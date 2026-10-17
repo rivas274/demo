@@ -15,7 +15,7 @@
 - **Subir imágenes locales:** `create_asset_upload`, luego PUT con curl a la URL devuelta, luego `finalize_asset_upload`.
 - **Red del entorno:** deben estar permitidos `mcp.spritecook.ai` y `api.spritecook.ai`; sin el segundo no se pueden descargar ni ver las imágenes.
 - **Proyecto en SpriteCook:** "Siete Vidas, Cero Disculpas", id `126fcb42-c3f6-40b5-9f75-42715fbdce40`. Pasar siempre `project_id`.
-- **Créditos:** 800 del plan de pago; quedan **780** tras la animación de prueba "quieto" (2026-10-17). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
+- **Créditos:** 800 del plan de pago; quedan **760** tras las animaciones "quieto" y "caminar" (2026-10-17). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
 - **Regla de oro:** mostrar al creador el prompt, el modelo, los ajustes y el costo, y esperar aprobación antes de cada llamada que gaste créditos.
 
 ### Modelos y costos útiles (consultados el 2026-10-17)
@@ -36,6 +36,12 @@
 - **A + C, y B solo si hace falta:** SpriteCook solo para animaciones estrella; el resto, por piezas (cutout) en Godot con huesos y estiramientos, sin créditos.
 - Primera prueba: animación "quieto" de Felipe A con `animate_game_art` (20 créditos, tardó 1 minuto). Resultado bueno: la cola se mece, el cuerpo respira y el estilo se mantiene igual en los 8 cuadros.
 
+### Comparación SpriteCook contra código (2026-10-17)
+
+- **Animación gratis por código:** `siete-vidas/herramientas/animar_felipe.py` separa el sprite en capas (cola, cuerpo, 4 patas) y las mueve pixel por pixel. Resultados en `siete-vidas/arte/felipe/codigo/`.
+- **Conclusión:** el código sirve para quieto, saltar, caer, aterrizar, daño, ronronear y formas de peso. Caminar, correr, zarpazo y comer necesitan poses nuevas: mejor con SpriteCook (la caminata de SpriteCook mueve patas y cabeza; la de código parece deslizarse).
+- **Ficha visual con las animaciones en movimiento:** https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe (se regenera con `siete-vidas/herramientas/pagina_felipe.py`).
+
 ### Trucos para ahorrar créditos
 
 - Varias ideas en una sola imagen (hojas comparativas en cuadrícula) en vez de una llamada por idea.
@@ -51,6 +57,7 @@
 | Foto real de Felipe (referencia, no se publica) | `a0fbe97b-61b6-4d6d-8cb3-c5b4afaa6a74` | No está en el repositorio |
 | Felipe A base (recortado, sin fondo) | `14b3c27f-798c-4795-84fe-48ed15508247` | `siete-vidas/arte/felipe/felipe-A-base.png` |
 | Felipe animación "quieto" (8 cuadros, 106×106, 8 fps) | `af423ca7-92f4-40e6-a26a-1959363e6892` | `siete-vidas/arte/felipe/felipe-idle-sheet.png` y `felipe-idle.webp` |
+| Felipe animación "caminar" (8 cuadros, 106×106) | `5890d9bd-c737-471c-ad0d-30169320104e` | `siete-vidas/arte/felipe/felipe-walk-sheet.png` y `felipe-walk.webp` |
 | Felipe híbrido v2 (versiones A y B) | `22529bf7-4fcc-4f41-9b17-488d276a206a` | `siete-vidas/arte/referencias/felipe-hibrido-v2.png` |
 
 ## Otras herramientas

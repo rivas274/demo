@@ -52,6 +52,7 @@
 
 - El salto que solo estira y aplasta "se ve mal, tiene que ser más dinámico para enganchar".
 - Versión actual: poses de la animación "saltar" de SpriteCook (cuadro por fase: agacharse 1, subir 2, pausa 3, doble salto 3, caer 2 sin inclinación, aterrizar 5, asentarse 6; el cuadro 4 viene inclinado en diagonal y se ve raro al caer, no usarlo) más efectos de código: anticipación agachándose, despegue explosivo, pausa arriba, Doble Salto Imposible con una inclinación leve de unos 20° (la vuelta completa de 360° le pareció exagerada al creador), caída más rápida que la subida, aplastón y rebote al aterrizar, estela de imágenes fantasma y polvo al despegar y aterrizar. Implementado en la ficha (`pagina_felipe.template.html`, función `drawJump`); los mismos tiempos sirven para Godot.
+- **Regla del creador: un gato aterriza primero con las patas delanteras.** Al caer, Felipe se inclina con la nariz hacia abajo (~18°) con las patas delanteras estiradas; al tocar el piso apoya las delanteras, gira sobre ellas mientras baja la parte trasera y después se aplasta con rebote.
 - Modo Buda por código "se ve mal": se resolvió editando Felipe A con SpriteCook (8 créditos): bola perfecta con sonrisa satisfecha. Flaco y Gordito siguen por código.
 
 ### Trucos para ahorrar créditos

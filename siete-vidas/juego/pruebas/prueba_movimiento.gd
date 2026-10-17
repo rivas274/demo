@@ -44,14 +44,17 @@ func _correr() -> void:
 		await physics_frame
 		if felipe.velocity.y > 250.0:
 			break
-	_comprobar(felipe.sprite.frame == Felipe.CUADRO_CAYENDO, "Al caer usa la pose de caída")
-	_comprobar(felipe.sprite.rotation * felipe.mirando > 0.1, "Al caer inclina la nariz hacia abajo (%.2f rad)" % felipe.sprite.rotation)
+	_comprobar(felipe.sprite.animation == "caer" and felipe.sprite.frame == Felipe.CUADRO_CAYENDO, "Al caer usa la pose de caída")
+	_comprobar(_patas_delanteras_abajo(felipe), "Al caer, lo más bajo de Felipe son las patas delanteras")
 	for i in 90:
 		await physics_frame
 		if felipe.is_on_floor():
 			break
 	await _esperar(1)
-	_comprobar(felipe.estado == Felipe.Estado.ATERRIZANDO and felipe.sprite.frame == Felipe.CUADRO_ATERRIZAJE, "Aterriza con la pose agachada")
+	_comprobar(felipe.estado == Felipe.Estado.ATERRIZANDO and felipe.sprite.animation == "caer" and felipe.sprite.frame == Felipe.CUADRO_CONTACTO, "Al tocar el piso usa la pose de contacto")
+	_comprobar(_patas_delanteras_abajo(felipe), "Al tocar el piso, las delanteras tocan primero")
+	await _esperar(6)
+	_comprobar(felipe.sprite.animation == "saltar" and felipe.sprite.frame == Felipe.CUADRO_ATERRIZAJE, "Después baja la parte de atrás y se aplasta")
 	await _esperar(12)
 	_comprobar(absf(felipe.sprite.rotation) < 0.02, "Después de aterrizar queda derecho")
 
@@ -75,6 +78,32 @@ func _correr() -> void:
 		printerr("FALLO: " + fallo)
 	print("Resultado: %d fallos" % _fallos.size())
 	quit(1 if _fallos.size() > 0 else 0)
+
+
+## Mira el cuadro que se está dibujando y compara dónde está su punto más bajo
+## con el centro del cuerpo: debe quedar del lado hacia donde mira Felipe.
+func _patas_delanteras_abajo(felipe: Felipe) -> bool:
+	var imagen := felipe.sprite.sprite_frames.get_frame_texture(felipe.sprite.animation, felipe.sprite.frame).get_image()
+	var suma_x := 0.0
+	var opacos := 0
+	var fila_mas_baja := -1
+	for y in imagen.get_height():
+		for x in imagen.get_width():
+			if imagen.get_pixel(x, y).a > 0.5:
+				suma_x += x
+				opacos += 1
+				fila_mas_baja = y
+	var suma_abajo := 0.0
+	var abajo := 0
+	for y in range(maxi(0, fila_mas_baja - 2), fila_mas_baja + 1):
+		for x in imagen.get_width():
+			if imagen.get_pixel(x, y).a > 0.5:
+				suma_abajo += x
+				abajo += 1
+	var lado := (suma_abajo / abajo) - (suma_x / opacos)
+	if felipe.sprite.flip_h:
+		lado = -lado
+	return lado > 3.0
 
 
 func _esperar(cuadros: int) -> void:

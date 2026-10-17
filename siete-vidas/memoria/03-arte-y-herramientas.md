@@ -15,7 +15,7 @@
 - **Subir imágenes locales:** `create_asset_upload`, luego PUT con curl a la URL devuelta, luego `finalize_asset_upload`.
 - **Red del entorno:** deben estar permitidos `mcp.spritecook.ai` y `api.spritecook.ai`; sin el segundo no se pueden descargar ni ver las imágenes.
 - **Proyecto en SpriteCook:** "Siete Vidas, Cero Disculpas", id `126fcb42-c3f6-40b5-9f75-42715fbdce40`. Pasar siempre `project_id`.
-- **Créditos:** 800 del plan de pago; quedan **612** (2026-10-17) tras: quieto, caminar, correr, zarpazo, comer, saltar, ronronear, desmayo (20 c/u), Modo Buda y cono (8 c/u) y retratos (12). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
+- **Créditos:** 800 del plan de pago; quedan **604** (tras las poses de caída, 8) (2026-10-17) tras: quieto, caminar, correr, zarpazo, comer, saltar, ronronear, desmayo (20 c/u), Modo Buda y cono (8 c/u) y retratos (12). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
 - **Regla de oro:** mostrar al creador el prompt, el modelo, los ajustes y el costo, y esperar aprobación antes de cada llamada que gaste créditos.
 
 ### Modelos y costos útiles (consultados el 2026-10-17)
@@ -53,7 +53,8 @@
 - El salto que solo estira y aplasta "se ve mal, tiene que ser más dinámico para enganchar".
 - Versión actual: poses de la animación "saltar" de SpriteCook (cuadro por fase: agacharse 1, subir 2, pausa 3, doble salto 3, caer 2 sin inclinación, aterrizar 5, asentarse 6; el cuadro 4 viene inclinado en diagonal y se ve raro al caer, no usarlo) más efectos de código: anticipación agachándose, despegue explosivo, pausa arriba, Doble Salto Imposible con una inclinación leve de unos 20° (la vuelta completa de 360° le pareció exagerada al creador), caída más rápida que la subida, aplastón y rebote al aterrizar, estela de imágenes fantasma y polvo al despegar y aterrizar. Implementado en la ficha (`pagina_felipe.template.html`, función `drawJump`); los mismos tiempos sirven para Godot.
 - **Lección (2026-10-17):** al pasar el salto de la ficha a Godot se perdieron las correcciones y el creador lo notó. Toda corrección de animación aprobada en la ficha debe aplicarse también en `siete-vidas/juego/` y quedar cubierta por una prueba.
-- **Regla del creador: un gato aterriza primero con las patas delanteras.** Al caer, Felipe se inclina con la nariz hacia abajo (~18°) con las patas delanteras estiradas; al tocar el piso apoya las delanteras, gira sobre ellas mientras baja la parte trasera y después se aplasta con rebote.
+- **Regla del creador: al bajar, las patas delanteras van primero y tocan el piso primero.** Inclinar una pose vertical NO basta (las traseras siguen quedando abajo hasta ~40°, y a ese ángulo parece que vuela de lado). Se resolvió con dos poses propias: "cayendo" (en picada, delanteras estiradas hacia el suelo, traseras recogidas, cola arriba) y "contacto" (solo las delanteras apoyadas). La prueba del juego mide el punto más bajo del dibujo para comprobarlo.
+- (Antes:) un gato aterriza primero con las patas delanteras. Al caer, Felipe se inclina con la nariz hacia abajo (~18°) con las patas delanteras estiradas; al tocar el piso apoya las delanteras, gira sobre ellas mientras baja la parte trasera y después se aplasta con rebote.
 - Modo Buda por código "se ve mal": se resolvió editando Felipe A con SpriteCook (8 créditos): bola perfecta con sonrisa satisfecha. Flaco y Gordito siguen por código.
 
 ### Trucos para ahorrar créditos
@@ -80,6 +81,7 @@
 | Felipe animación "desmayo" (cae boca abajo, sin ojos en X) | `0e90281b-f940-4f03-ae52-85e6b9d5254b` | `siete-vidas/arte/felipe/felipe-faint-sheet.png` |
 | Felipe con Collar de la Vergüenza (cono) | `1893e4a4-4b92-46b1-8b45-efbd5dbcf7e2` | `siete-vidas/arte/felipe/felipe-cono.png` |
 | Felipe 9 retratos para diálogos (3×3, 200×200) | `7657f269-815f-451f-a58a-17f2d6b2f014` | `siete-vidas/arte/felipe/felipe-retratos.png` |
+| Felipe poses de caída (en picada y contacto con las delanteras) | `6519b507-8c18-4582-b6fd-995ca133a7ea` | `siete-vidas/arte/felipe/felipe-caida-sheet.png` (2 cuadros de 106×106) |
 | Felipe animación "zarpazo" | `86da320a-f4cb-4269-ab76-b66648db1e20` | `siete-vidas/arte/felipe/felipe-attack-sheet.png` |
 | Felipe híbrido v2 (versiones A y B) | `22529bf7-4fcc-4f41-9b17-488d276a206a` | `siete-vidas/arte/referencias/felipe-hibrido-v2.png` |
 

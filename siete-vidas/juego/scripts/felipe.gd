@@ -14,11 +14,11 @@ const ESCALA_SPRITE := 0.5
 const CUADRO_AGACHADO := 1
 const CUADRO_SUBIENDO := 2
 const CUADRO_ARRIBA := 3
-const CUADRO_CAYENDO := 2
 const CUADRO_ATERRIZAJE := 5
 const CUADRO_ASENTARSE := 6
-## Inclinación al caer: nariz hacia abajo, buscando el suelo con las patas delanteras.
-const INCLINACION_CAIDA := 0.32
+## Cuadros de la hoja "caer": un gato cae con las patas delanteras primero.
+const CUADRO_CAYENDO := 0
+const CUADRO_CONTACTO := 1
 const INCLINACION_DOBLE_SALTO := -0.35
 
 @export_group("Movimiento")
@@ -191,7 +191,7 @@ func _aterrizar() -> void:
 	aterrizo.emit(fuerza)
 	if estado == Estado.AIRE:
 		estado = Estado.ATERRIZANDO
-		_tiempo_aterrizando = 0.2
+		_tiempo_aterrizando = 0.24
 	if fuerza > 0.25:
 		_soltar_polvo(int(8 + 8 * fuerza))
 	if _efecto:
@@ -212,7 +212,13 @@ func _actualizar_animacion(direccion: float) -> void:
 	if estado == Estado.ZOOMIES:
 		_reproducir("correr")
 	elif estado == Estado.ATERRIZANDO:
-		_poner_cuadro_salto(CUADRO_ATERRIZAJE if _tiempo_aterrizando > 0.1 else CUADRO_ASENTARSE)
+		# Primero tocan las delanteras, después baja la parte de atrás y se aplasta.
+		if _tiempo_aterrizando > 0.16:
+			_poner_cuadro("caer", CUADRO_CONTACTO)
+		elif _tiempo_aterrizando > 0.08:
+			_poner_cuadro("saltar", CUADRO_ATERRIZAJE)
+		else:
+			_poner_cuadro("saltar", CUADRO_ASENTARSE)
 	elif not is_on_floor():
 		_animar_aire()
 	elif absf(velocity.x) > velocidad_caminar + 5.0:
@@ -224,27 +230,27 @@ func _actualizar_animacion(direccion: float) -> void:
 
 
 ## Fases del salto: despegue agachado, subida estirada, pausa arriba con las patas
-## recogidas y caída con la nariz hacia abajo y las patas delanteras estiradas.
+## recogidas y caída en picada con las patas delanteras estiradas hacia el suelo
+## (la pose "caer" ya viene inclinada, así que no se rota el sprite).
 func _animar_aire() -> void:
 	if _tiempo_desde_salto < 0.06:
-		_poner_cuadro_salto(CUADRO_AGACHADO)
+		_poner_cuadro("saltar", CUADRO_AGACHADO)
 	elif velocity.y < -60.0:
-		_poner_cuadro_salto(CUADRO_SUBIENDO)
+		_poner_cuadro("saltar", CUADRO_SUBIENDO)
 	elif velocity.y < 60.0:
-		_poner_cuadro_salto(CUADRO_ARRIBA)
+		_poner_cuadro("saltar", CUADRO_ARRIBA)
 	else:
-		_poner_cuadro_salto(CUADRO_CAYENDO)
+		_poner_cuadro("caer", CUADRO_CAYENDO)
 		# La caída manda sobre cualquier giro anterior (por ejemplo, el del doble salto).
 		if _efecto and _efecto.is_running():
 			_efecto.kill()
 			sprite.scale = Vector2.ONE * ESCALA_SPRITE
-		var avance := clampf((velocity.y - 60.0) / 160.0, 0.0, 1.0)
-		sprite.rotation = lerpf(sprite.rotation, INCLINACION_CAIDA * mirando * avance, 0.3)
+		sprite.rotation = lerpf(sprite.rotation, 0.0, 0.3)
 
 
-func _poner_cuadro_salto(cuadro: int) -> void:
+func _poner_cuadro(animacion: String, cuadro: int) -> void:
 	sprite.stop()
-	sprite.animation = "saltar"
+	sprite.animation = animacion
 	sprite.frame = cuadro
 
 

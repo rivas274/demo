@@ -11,6 +11,10 @@ Esta carpeta guarda lo que ya se decidió, para que cualquier sesión nueva reto
 | [03-arte-y-herramientas.md](03-arte-y-herramientas.md) | Resolución, estilo visual, SpriteCook, créditos y assets generados |
 | [04-pendientes.md](04-pendientes.md) | Qué falta y en qué orden |
 
+## Concepto visual de personajes
+
+- **Felipe:** `../concepto/felipe-concepto.html` (copia local) y https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe (en línea). Al cambiar algo de Felipe, regenerar ambas con `../herramientas/pagina_felipe.py` y volver a publicar la versión en línea.
+
 ## Documento maestro
 
 La biblia completa del juego (historia, personajes, mundo, mecánicas, logros, revisión editorial y legal) está en dos lugares:

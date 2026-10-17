@@ -15,7 +15,7 @@
 - **Subir imágenes locales:** `create_asset_upload`, luego PUT con curl a la URL devuelta, luego `finalize_asset_upload`.
 - **Red del entorno:** deben estar permitidos `mcp.spritecook.ai` y `api.spritecook.ai`; sin el segundo no se pueden descargar ni ver las imágenes.
 - **Proyecto en SpriteCook:** "Siete Vidas, Cero Disculpas", id `126fcb42-c3f6-40b5-9f75-42715fbdce40`. Pasar siempre `project_id`.
-- **Créditos:** 800 del plan de pago; quedan **672** (2026-10-17) tras: quieto, caminar, correr, zarpazo, comer, saltar (20 c/u) y Modo Buda (8). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
+- **Créditos:** 800 del plan de pago; quedan **612** (2026-10-17) tras: quieto, caminar, correr, zarpazo, comer, saltar, ronronear, desmayo (20 c/u), Modo Buda y cono (8 c/u) y retratos (12). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
 - **Regla de oro:** mostrar al creador el prompt, el modelo, los ajustes y el costo, y esperar aprobación antes de cada llamada que gaste créditos.
 
 ### Modelos y costos útiles (consultados el 2026-10-17)
@@ -75,6 +75,10 @@
 | Felipe animación "correr / zoomies" | `9de2013a-ffd6-4cb6-a338-63f80c2d5e78` | `siete-vidas/arte/felipe/felipe-run-sheet.png` |
 | Felipe animación "comer snack" | `df2345fe-8e80-42c8-ba44-304490802633` | `siete-vidas/arte/felipe/felipe-eat-sheet.png` |
 | Felipe animación "saltar" (poses reales) | `2113c9a5-5acc-4289-8fcb-1f167c20d1ea` | `siete-vidas/arte/felipe/felipe-jump-sheet.png` |
+| Felipe animación "ronronear" | `4dbc1380-5c45-4066-858c-f1c03a87fb67` | `siete-vidas/arte/felipe/felipe-purr-sheet.png` |
+| Felipe animación "desmayo" (cae boca abajo, sin ojos en X) | `0e90281b-f940-4f03-ae52-85e6b9d5254b` | `siete-vidas/arte/felipe/felipe-faint-sheet.png` |
+| Felipe con Collar de la Vergüenza (cono) | `1893e4a4-4b92-46b1-8b45-efbd5dbcf7e2` | `siete-vidas/arte/felipe/felipe-cono.png` |
+| Felipe 9 retratos para diálogos (3×3, 200×200) | `7657f269-815f-451f-a58a-17f2d6b2f014` | `siete-vidas/arte/felipe/felipe-retratos.png` |
 | Felipe animación "zarpazo" | `86da320a-f4cb-4269-ab76-b66648db1e20` | `siete-vidas/arte/felipe/felipe-attack-sheet.png` |
 | Felipe híbrido v2 (versiones A y B) | `22529bf7-4fcc-4f41-9b17-488d276a206a` | `siete-vidas/arte/referencias/felipe-hibrido-v2.png` |
 

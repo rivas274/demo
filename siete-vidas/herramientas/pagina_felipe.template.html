@@ -178,6 +178,32 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
     </div>
   </section>
 
+  <section class="section">
+    <div class="section-head">
+      <div style="display:grid;gap:6px">
+        <h2>Estados y expresiones</h2>
+        <p class="muted">Lo que necesita la historia: perder una vida, el Collar de la Vergüenza y las caras para los diálogos.</p>
+      </div>
+    </div>
+    <div class="demos">
+      <div class="card">
+        <h3>Perder una vida</h3>
+        <div class="stage" style="min-height:250px"><canvas id="faint" width="260" height="240" role="img" aria-label="Felipe se desmaya y una de sus vidas sube como fantasma"></canvas></div>
+        <p class="muted" style="font-size:12.5px">Desmayo dramático (SpriteCook) y una de sus 7 vidas que sube como gatito fantasma (código).</p>
+      </div>
+      <div class="card">
+        <h3>Collar de la Vergüenza</h3>
+        <div class="stage" style="min-height:250px"><canvas id="cone" role="img" aria-label="Felipe con el cono de veterinario"></canvas></div>
+        <p class="muted" style="font-size:12.5px">"Esto no es un collar. Es una antena para hablar con mis ancestros egipcios."</p>
+      </div>
+      <div class="card wide">
+        <h3>Retratos para diálogos</h3>
+        <div class="stage" style="padding:12px"><canvas id="portraits" role="img" aria-label="Nueve expresiones de Felipe para diálogos"></canvas></div>
+        <p class="muted" style="font-size:12.5px">Nueve caras en una sola generación: reojo (por defecto), ofendido, sorprendido, satisfecho, enamorado, furioso y variantes.</p>
+      </div>
+    </div>
+  </section>
+
   <section class="two">
     <div class="section">
       <h2>Rasgos que no cambian</h2>
@@ -209,7 +235,11 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
             <tr><td>Comer snack</td><td>SpriteCook (hecha)</td><td>20</td></tr>
             <tr><td>Saltar (poses)</td><td>SpriteCook (hecha) + efectos de código</td><td>20</td></tr>
             <tr><td>Modo Buda (pose)</td><td>SpriteCook (hecha) + respiración por código</td><td>8</td></tr>
-            <tr><td>Daño, ronronear, Flaco, Gordito</td><td>Código</td><td>0</td></tr>
+            <tr><td>Ronronear</td><td>SpriteCook (hecha)</td><td>20</td></tr>
+            <tr><td>Desmayo + vida fantasma</td><td>SpriteCook + código</td><td>20</td></tr>
+            <tr><td>Collar de la Vergüenza</td><td>SpriteCook (edición)</td><td>8</td></tr>
+            <tr><td>9 retratos para diálogos</td><td>SpriteCook</td><td>12</td></tr>
+            <tr><td>Daño, Flaco, Gordito</td><td>Código</td><td>0</td></tr>
           </tbody>
         </table>
       </div>
@@ -229,6 +259,7 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
 <script>
 const ANIMS = __ANIMS__;
 const PESOS = __PESOS__;
+const EXTRAS = __EXTRAS__;
 const BASE_SRC = "__BASE__";
 const state = { speed: 1, scale: 2, bg: "plain" };
 let playing = !matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -310,7 +341,7 @@ function card(anim, img) {
   }
 
   const more = document.getElementById("more");
-  for (const id of ["sc-run", "sc-attack", "sc-eat", "sc-jump"]) {
+  for (const id of ["sc-run", "sc-attack", "sc-eat", "sc-jump", "sc-purr"]) {
     const a = ANIMS.find(x => x.id === id);
     if (!a) continue;
     const el = card(a, imgs[a.id]);
@@ -336,6 +367,45 @@ function card(anim, img) {
     const ctx = c.getContext("2d"); ctx.imageSmoothingEnabled = false;
     return { c, ctx, p, img: pesoImgs[i] };
   });
+
+  for (const [id, key, scale] of [["cone", "cono", 2], ["portraits", "retratos", 1]]) {
+    const c = document.getElementById(id), e = EXTRAS[key];
+    if (!e) { c.replaceWith(Object.assign(document.createElement("p"), { className: "empty", textContent: "Aún no generado" })); continue; }
+    const im = await load(e.src);
+    c.width = e.w * scale; c.height = e.h * scale;
+    c.style.width = key === "retratos" ? "100%" : (e.w * scale) + "px";
+    c.style.maxWidth = key === "retratos" ? "620px" : "100%";
+    const x = c.getContext("2d"); x.imageSmoothingEnabled = false; x.drawImage(im, 0, 0, c.width, c.height);
+  }
+  const faintAnim = ANIMS.find(a => a.id === "sc-faint");
+  const faintImg = faintAnim ? imgs["sc-faint"] : null;
+  const faint = document.getElementById("faint").getContext("2d");
+  function drawFaint(time) {
+    faint.clearRect(0, 0, 260, 240);
+    faint.imageSmoothingEnabled = false;
+    if (!faintImg) { faint.fillStyle = "#8a7d74"; faint.font = "13px sans-serif"; faint.fillText("Aún no generado", 80, 120); return; }
+    const cyc = time % 4.2, fw = faintAnim.fw, fh = faintAnim.fh, gx = 130 - fw, gy = 236 - fh * 2;
+    const frame = Math.min(faintAnim.frames - 1, Math.floor(cyc / 0.16));
+    faint.fillStyle = "rgba(40,25,20,0.18)";
+    faint.beginPath(); faint.ellipse(130, 232, 46, 5, 0, 0, Math.PI * 2); faint.fill();
+    faint.drawImage(faintImg, frame * fw, 0, fw, fh, gx, gy, fw * 2, fh * 2);
+    const g = cyc - 1.5;
+    if (g > 0 && g < 2.2) {
+      const k = g / 2.2;
+      faint.save();
+      faint.globalAlpha = 0.65 * (1 - k);
+      const s = 0.55, w = idle.fw * s, h = idle.fh * s;
+      const x = 130 - w / 2 + Math.sin(g * 5) * 6, y = 170 - k * 150 - h;
+      faint.drawImage(idleImg, 0, 0, idle.fw, idle.fh, Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+      faint.globalCompositeOperation = "source-atop";
+      faint.fillStyle = "rgba(255,255,255,0.55)";
+      faint.fillRect(x, y, w, h);
+      faint.restore();
+      faint.fillStyle = `rgba(184,85,59,${1 - k})`;
+      faint.font = "bold 13px 'Work Sans', sans-serif";
+      faint.fillText("-1 vida", 160, 150 - k * 60);
+    }
+  }
 
   const jump = document.getElementById("jump").getContext("2d");
   const hurt = document.getElementById("hurt").getContext("2d");
@@ -445,6 +515,7 @@ function card(anim, img) {
 
     jump.clearRect(0, 0, 300, 270);
     drawJump(jump, t, dt);
+    drawFaint(t);
 
     hurt.clearRect(0, 0, 240, 200);
     let fill = null, dx = 0;

@@ -55,6 +55,10 @@ El diseño se basa en el gato real del creador (fotos en la conversación origin
 5. **Enamorado:** ojos brillantes (Duquesa), pero intenta disimular.
 6. **Furioso:** bufido, pelo erizado, cola esponjada.
 
+## Recursos visuales
+
+Todos en `siete-vidas/arte/felipe/` y en la ficha de concepto (`siete-vidas/concepto/felipe-concepto.html`): sprite base, animaciones (quieto, caminar, correr, zarpazo, comer, saltar, ronronear, desmayo), formas de peso (Flaco y Gordito por código, Modo Buda propio), Collar de la Vergüenza y 9 retratos para diálogos.
+
 ## Formas de peso
 
 | Forma | Silueta |

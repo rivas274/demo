@@ -25,6 +25,10 @@ ANIMS = [
      "archivo": "felipe-eat-sheet.png", "frames": 8, "fps": 8},
     {"id": "sc-jump", "nombre": "Saltar", "origen": "SpriteCook", "costo": "20 créditos",
      "archivo": "felipe-jump-sheet.png", "frames": 8, "fps": 10},
+    {"id": "sc-purr", "nombre": "Ronronear", "origen": "SpriteCook", "costo": "20 créditos",
+     "archivo": "felipe-purr-sheet.png", "frames": 8, "fps": 8},
+    {"id": "sc-faint", "nombre": "Desmayo", "origen": "SpriteCook", "costo": "20 créditos",
+     "archivo": "felipe-faint-sheet.png", "frames": 8, "fps": 8},
     {"id": "code-idle", "nombre": "Quieto", "origen": "Código (gratis)", "costo": "0 créditos",
      "archivo": "codigo/felipe-quieto-codigo-sheet.png", "frames": 8, "fps": 6},
     {"id": "code-walk", "nombre": "Caminar", "origen": "Código (gratis)", "costo": "0 créditos",
@@ -54,7 +58,13 @@ def main():
             pesos.append({"nombre": etiqueta, "src": data_uri(p), "frames": 8, "fps": 8, "fw": w // 8, "fh": h})
     base = ARTE / "felipe-A-base.png"
     bw, bh = Image.open(base).size
-    html = TEMPLATE.replace("__ANIMS__", json.dumps(anims)).replace("__PESOS__", json.dumps(pesos)).replace("__BASE__", data_uri(base)) \
+    extras = {}
+    for clave, archivo in [("cono", "felipe-cono.png"), ("retratos", "felipe-retratos.png")]:
+        p = ARTE / archivo
+        if p.exists():
+            w, h = Image.open(p).size
+            extras[clave] = {"src": data_uri(p), "w": w, "h": h}
+    html = TEMPLATE.replace("__EXTRAS__", json.dumps(extras)).replace("__ANIMS__", json.dumps(anims)).replace("__PESOS__", json.dumps(pesos)).replace("__BASE__", data_uri(base)) \
         .replace("__BW__", str(bw)).replace("__BH__", str(bh))
     Path(sys.argv[1]).write_text(html, encoding="utf-8")
 

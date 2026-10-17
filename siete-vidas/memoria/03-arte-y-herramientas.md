@@ -5,6 +5,8 @@
 - **Resolución base: 640×360.** Escala exacta a 720p (×2), 1080p (×3) y 4K (×6). Se eligió tras comparar 320×180, 400×240, 480×270 y 640×360 (comparación: https://claude.ai/artifact/LPx28mVsZt5P4zcnoU6nHP).
 - **Estilo:** proporciones Chibi para los gatos + acabado Cel-shaded para todo. Ver `02-guia-felipe.md`.
 - **Bloques del escenario:** 16×16 px. Fondos con 3 o 4 capas de profundidad (parallax).
+- **Parallax (aprobado el 2026-10-17, referencia Silksong):** capas `Parallax2D` de Godot. En el apartamento: cielo 0.05, ciudad lejana 0.2, ciudad cercana 0.45 (se ven por las ventanas), pared y juego 1.0, luz de las ventanas encima de Felipe y primer plano de siluetas (plantas, silla, lámpara) a 1.3. Definidas en `siete-vidas/juego/scripts/fondo_apartamento.gd` (`CAPAS`).
+- **Arte provisional:** mientras se afina el concepto, escenarios y muebles se dibujan con código con la paleta del distrito; el arte final llega después.
 - **Paleta por distrito:** Barrio Viejo (terracota y atardecer), Neón (noche azul con magenta y cian), Downtown (gris azulado y dorado), Muelle (verde azulado y óxido), Basurero (oliva, café y verde tóxico), Torres Paradise (blanco, amarillo de obra y rojo).
 - **Interfaz:** sátira de redes sociales (afecto = corazones, respeto = garras, peso = báscula; diálogos como burbujas de chat; logros como notificaciones).
 - **Música:** un estilo por distrito; sin actores de voz. Aún no se cerró en detalle.

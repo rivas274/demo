@@ -45,6 +45,11 @@ Actualizado: 2026-10-17. Detalle completo en la biblia (ver README.md).
 - **Accesibilidad:** controles reasignables, subtítulos ajustables, modo daltónico, modo asistido que no bloquea logros.
 - **Logros:** 40 en Steam (lista en la biblia); coleccionables: 50 calcetines, 30 fotos vergonzosas, lagartijas.
 
+## Forma de construir (2026-10-17)
+
+- **Primero la prueba de concepto, después el arte final.** Los escenarios, enemigos e interfaz se arman con arte provisional dibujado por código (gratis) para afinar la jugabilidad; cuando el concepto esté cerrado, se reemplazan las texturas por las finales. No se gastan créditos de SpriteCook en escenarios hasta entonces.
+- **Profundidad con parallax en capas (como Silksong):** cada escena tiene capas lejanas que se mueven menos que la cámara, la capa de juego, y un primer plano de siluetas oscuras que se mueve más. La cámara se mueve en horizontal y en vertical.
+
 ## Legal (Steam)
 
 - Cero marcas reales dentro del juego (ya se cambiaron: R-00MBA → A.S.P.I., Garfield → Buda, Gato con Botas → Ojos de Súplica, WhatsApp/TikTok → "los chats"/"internet").

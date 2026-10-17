@@ -33,6 +33,9 @@ jobs:
       - name: Pruebas de movimiento
         run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_movimiento.gd
 
+      - name: Pruebas del escenario
+        run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_escenario.gd
+
       - name: Exportar Windows y Linux
         run: |
           mkdir -p build/windows build/linux

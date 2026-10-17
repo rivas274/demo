@@ -34,7 +34,7 @@
 ### Estrategia de animación (aprobada el 2026-10-17)
 
 - **A + C, y B solo si hace falta:** SpriteCook solo para animaciones estrella; el resto, por piezas (cutout) en Godot con huesos y estiramientos, sin créditos.
-- Primera prueba: animación "quieto" de Felipe A con `animate_game_art`.
+- Primera prueba: animación "quieto" de Felipe A con `animate_game_art` (20 créditos, tardó 1 minuto). Resultado bueno: la cola se mece, el cuerpo respira y el estilo se mantiene igual en los 8 cuadros.
 
 ### Trucos para ahorrar créditos
 
@@ -50,6 +50,7 @@
 | Felipe, prueba de 4 estilos v1 | `8868e7a2-dd1c-4ab4-a823-9d8b184f5f87` | `siete-vidas/arte/referencias/felipe-prueba-estilos-v1.png` |
 | Foto real de Felipe (referencia, no se publica) | `a0fbe97b-61b6-4d6d-8cb3-c5b4afaa6a74` | No está en el repositorio |
 | Felipe A base (recortado, sin fondo) | `14b3c27f-798c-4795-84fe-48ed15508247` | `siete-vidas/arte/felipe/felipe-A-base.png` |
+| Felipe animación "quieto" (8 cuadros, 106×106, 8 fps) | `af423ca7-92f4-40e6-a26a-1959363e6892` | `siete-vidas/arte/felipe/felipe-idle-sheet.png` y `felipe-idle.webp` |
 | Felipe híbrido v2 (versiones A y B) | `22529bf7-4fcc-4f41-9b17-488d276a206a` | `siete-vidas/arte/referencias/felipe-hibrido-v2.png` |
 
 ## Otras herramientas

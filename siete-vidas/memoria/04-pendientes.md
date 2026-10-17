@@ -15,7 +15,8 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [ ] Diseño de personajes secundarios (Valeria, Duquesa, Don Chucho, el Patrón, Rey Rata, A.S.P.I.).
 - [ ] Música y sonido en detalle.
 - [ ] Guion del primer acto (la fuga, La Cuadra, jefe A.S.P.I.).
-- [ ] Montar el proyecto de Godot en este repositorio, con reglas de código y exportación automática para PC.
+- [x] Proyecto de Godot montado en `siete-vidas/juego/` (2026-10-17): Felipe jugable (caminar, correr, salto con margen y salto recordado, altura variable, doble salto, Zoomies, zarpazo, comer, aterrizaje con patas delanteras), sala de prueba del apartamento, prueba automática, capturas/video y exportación automática a Windows y Linux con GitHub Actions.
+- [ ] Siguiente del prototipo: escenario dibujado del apartamento (tileset), A.S.P.I. como primer enemigo, snacks y medidores en pantalla.
 - [ ] Prototipo jugable: Felipe moviéndose en el apartamento de Valeria.
 - [ ] Lanzamiento: redes de Felipe, página de Steam, demo, lista legal.
 

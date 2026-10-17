@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3 uid="uid://b7aparta0001"]
+
+[ext_resource type="Script" path="res://scripts/sala.gd" id="1_sala"]
+[ext_resource type="PackedScene" uid="uid://b7felipe0001" path="res://escenas/felipe.tscn" id="2_felipe"]
+
+[node name="Apartamento" type="Node2D"]
+script = ExtResource("1_sala")
+
+[node name="Felipe" parent="." instance=ExtResource("2_felipe")]
+position = Vector2(80, 330)
+
+[node name="Interfaz" type="CanvasLayer" parent="."]
+
+[node name="Ayuda" type="Label" parent="Interfaz"]
+offset_left = 8.0
+offset_top = 6.0
+offset_right = 632.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(0.17, 0.14, 0.13, 1)
+theme_override_font_sizes/font_size = 10
+text = "A/D o flechas: moverse · Espacio: saltar (dos veces = Doble Salto) · Shift: Zoomies · J: zarpazo · Q: comer"

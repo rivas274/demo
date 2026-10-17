@@ -1,0 +1,53 @@
+name: Juego (pruebas y exportación)
+
+on:
+  push:
+    paths:
+      - "siete-vidas/juego/**"
+      - ".github/workflows/juego.yml"
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.3"
+
+jobs:
+  pruebas-y-exportar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar Godot y plantillas de exportación
+        run: |
+          mkdir -p ~/godot && cd ~/godot
+          curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip && mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 godot
+          curl -sSL -o templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          unzip -q templates.tpz "templates/linux_release.x86_64" "templates/windows_release_x86_64.exe" "templates/version.txt"
+          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          mv templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
+          echo "$HOME/godot" >> "$GITHUB_PATH"
+
+      - name: Importar el proyecto
+        run: godot --headless --path siete-vidas/juego --import
+
+      - name: Pruebas de movimiento
+        run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_movimiento.gd
+
+      - name: Exportar Windows y Linux
+        run: |
+          mkdir -p build/windows build/linux
+          godot --headless --path siete-vidas/juego --export-release "Windows"
+          godot --headless --path siete-vidas/juego --export-release "Linux"
+          ls -la build/windows build/linux
+
+      - name: Subir Windows
+        uses: actions/upload-artifact@v4
+        with:
+          name: FelipeSieteVidas-Windows
+          path: build/windows/
+
+      - name: Subir Linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: FelipeSieteVidas-Linux
+          path: build/linux/

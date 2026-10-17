@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://b7felipe0001"]
+
+[ext_resource type="Script" path="res://scripts/felipe.gd" id="1_felipe"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cuerpo"]
+size = Vector2(28, 24)
+
+[node name="Felipe" type="CharacterBody2D"]
+floor_snap_length = 4.0
+script = ExtResource("1_felipe")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -25)
+
+[node name="Cuerpo" type="CollisionShape2D" parent="."]
+position = Vector2(0, -12)
+shape = SubResource("RectangleShape2D_cuerpo")
+
+[node name="Camara" type="Camera2D" parent="."]
+position = Vector2(0, -30)
+position_smoothing_enabled = true
+position_smoothing_speed = 7.0

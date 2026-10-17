@@ -39,7 +39,23 @@ func _correr() -> void:
 	Input.action_release("saltar")
 	_comprobar(not felipe.tiene_doble_salto, "El doble salto se gasta en el aire")
 
-	await _esperar(90)
+	# Reglas del salto acordadas en la ficha de concepto.
+	for i in 90:
+		await physics_frame
+		if felipe.velocity.y > 250.0:
+			break
+	_comprobar(felipe.sprite.frame == Felipe.CUADRO_CAYENDO, "Al caer usa la pose de caída")
+	_comprobar(felipe.sprite.rotation * felipe.mirando > 0.1, "Al caer inclina la nariz hacia abajo (%.2f rad)" % felipe.sprite.rotation)
+	for i in 90:
+		await physics_frame
+		if felipe.is_on_floor():
+			break
+	await _esperar(1)
+	_comprobar(felipe.estado == Felipe.Estado.ATERRIZANDO and felipe.sprite.frame == Felipe.CUADRO_ATERRIZAJE, "Aterriza con la pose agachada")
+	await _esperar(12)
+	_comprobar(absf(felipe.sprite.rotation) < 0.02, "Después de aterrizar queda derecho")
+
+	await _esperar(60)
 	_comprobar(felipe.is_on_floor(), "Vuelve a aterrizar")
 	_comprobar(felipe.tiene_doble_salto, "Al aterrizar recupera el doble salto")
 

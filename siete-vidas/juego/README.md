@@ -40,4 +40,4 @@ xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script r
 - Datos separados de la lógica: animaciones en `AnimacionesFelipe.HOJAS`, salas en `Sala.PIEZAS`, valores de movimiento como `@export`.
 - Resolución base 640×360 con escala entera y filtro nítido; nada de suavizado en sprites.
 - Cada cambio de movimiento debe pasar `prueba_movimiento.gd`; si se agrega una mecánica, se agrega su comprobación.
-- Regla de animación del creador: los gatos aterrizan primero con las patas delanteras.
+- **El salto del juego debe seguir las reglas de la ficha de concepto** (fases y cuadros en las constantes `CUADRO_*` de `felipe.gd`): sube estirado, arriba recoge las patas, cae con la nariz hacia abajo (~18°) y las patas delanteras por delante, aterriza primero con las delanteras y en pose agachada, con polvo y estela. `prueba_movimiento.gd` comprueba estas reglas; no las quites.

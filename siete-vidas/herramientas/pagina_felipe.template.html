@@ -65,6 +65,8 @@ canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: bloc
 button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .compare { display: grid; gap: 18px; }
+.more { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+.card h4 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 13px; }
 .row { display: grid; grid-template-columns: 110px 1fr 1fr; gap: 14px; align-items: stretch; }
 .row-label { font-family: var(--font-display); font-size: 14px; align-self: center; }
 .card {
@@ -145,6 +147,8 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
       </div>
     </div>
     <div class="compare" id="compare"></div>
+    <h3 style="margin-top:6px">Más animaciones de SpriteCook</h3>
+    <div class="more" id="more"></div>
     <p class="muted" style="font-size:13px">"1×" muestra el tamaño real en el juego a 1080p con escala ×3 del motor; súbelo para ver los píxeles.</p>
   </section>
 
@@ -159,12 +163,12 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
       <div class="card wide">
         <h3>Formas de peso</h3>
         <div class="weights" id="weights"></div>
-        <p class="muted" style="font-size:12.5px">Solo engorda el cuerpo: la cabeza y la cola no cambian. Se genera con código a partir de cualquier animación.</p>
+        <p class="muted" style="font-size:12.5px">Flaco y Gordito se generan con código (solo engorda el cuerpo). Modo Buda es una pose propia hecha con SpriteCook, con respiración por código.</p>
       </div>
       <div class="card">
         <h3>Salto con estirar y aplastar</h3>
         <div class="stage" style="min-height:270px"><canvas id="jump" width="300" height="270" role="img" aria-label="Felipe haciendo un doble salto con vuelta"></canvas></div>
-        <p class="muted" style="font-size:12.5px">Se agacha, despega, hace el Doble Salto Imposible con vuelta completa, cae rápido y rebota al aterrizar.</p>
+        <p class="muted" style="font-size:12.5px">Poses de SpriteCook (agacharse, estirarse, recoger las patas, caer) más efectos de código: arco, Doble Salto Imposible con vuelta, estela, polvo y rebote.</p>
       </div>
       <div class="card">
         <h3>Recibir daño</h3>
@@ -199,12 +203,13 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
           <thead><tr><th>Animación</th><th>Cómo</th><th>Costo</th></tr></thead>
           <tbody>
             <tr><td>Quieto</td><td>SpriteCook (hecha)</td><td>20</td></tr>
-            <tr><td>Caminar</td><td>SpriteCook (en comparación)</td><td>20</td></tr>
-            <tr><td>Correr / Zoomies</td><td>SpriteCook</td><td>20</td></tr>
-            <tr><td>Zarpazo</td><td>SpriteCook</td><td>20</td></tr>
-            <tr><td>Comer snack</td><td>SpriteCook</td><td>20</td></tr>
-            <tr><td>Saltar, caer, aterrizar</td><td>Código</td><td>0</td></tr>
-            <tr><td>Daño, ronronear, formas de peso</td><td>Código</td><td>0</td></tr>
+            <tr><td>Caminar</td><td>SpriteCook (hecha)</td><td>20</td></tr>
+            <tr><td>Correr / Zoomies</td><td>SpriteCook (hecha)</td><td>20</td></tr>
+            <tr><td>Zarpazo</td><td>SpriteCook (hecha)</td><td>20</td></tr>
+            <tr><td>Comer snack</td><td>SpriteCook (hecha)</td><td>20</td></tr>
+            <tr><td>Saltar (poses)</td><td>SpriteCook (hecha) + efectos de código</td><td>20</td></tr>
+            <tr><td>Modo Buda (pose)</td><td>SpriteCook (hecha) + respiración por código</td><td>8</td></tr>
+            <tr><td>Daño, ronronear, Flaco, Gordito</td><td>Código</td><td>0</td></tr>
           </tbody>
         </table>
       </div>
@@ -304,6 +309,16 @@ function card(anim, img) {
     compare.appendChild(row);
   }
 
+  const more = document.getElementById("more");
+  for (const id of ["sc-run", "sc-attack", "sc-eat", "sc-jump"]) {
+    const a = ANIMS.find(x => x.id === id);
+    if (!a) continue;
+    const el = card(a, imgs[a.id]);
+    el.insertAdjacentHTML("afterbegin", `<h4>${a.nombre}</h4>`);
+    more.appendChild(el);
+  }
+  if (!more.children.length) more.innerHTML = '<p class="muted">Aún no generadas.</p>';
+
   const idle = ANIMS.find(a => a.id === "sc-idle");
   const idleImg = imgs["sc-idle"];
   const weightsEl = document.getElementById("weights");
@@ -313,6 +328,8 @@ function card(anim, img) {
     d.innerHTML = '<div class="stage"></div>' + p.nombre;
     const c = document.createElement("canvas");
     c.width = p.fw * 2; c.height = p.fh * 2;
+    const maxFw = Math.max(...PESOS.map(q => q.fw));
+    c.style.width = (p.fw / maxFw * 100) + "%";
     c.setAttribute("role", "img"); c.setAttribute("aria-label", "Felipe en forma " + p.nombre);
     d.querySelector(".stage").appendChild(c);
     weightsEl.appendChild(d);
@@ -352,14 +369,20 @@ function card(anim, img) {
       dust.push({ x, y, vx: Math.cos(a) * spread * (0.6 + Math.random() * 0.6), vy: up ? -Math.abs(Math.sin(a)) * spread * 0.5 : Math.sin(a) * spread * 0.6, life: 0.45, size: 3 + (i % 2) });
     }
   }
-  function felipeAt(ctx, frame, cx, bottom, sx, sy, ang, alpha) {
+  const jumpAnim = ANIMS.find(a => a.id === "sc-jump");
+  const jumpImg = jumpAnim ? imgs["sc-jump"] : null;
+  // Pose de SpriteCook para cada fase del salto (si existe); si no, la de "quieto".
+  const JUMP_FRAME = [1, 2, 3, 4, 4, 6, 7, -1];
+  function felipeAt(ctx, frame, cx, bottom, sx, sy, ang, alpha, phase) {
+    let img = idleImg;
+    if (jumpImg && phase !== undefined && JUMP_FRAME[phase] >= 0) { img = jumpImg; frame = JUMP_FRAME[phase]; }
     const w = idle.fw * sx, h = idle.fh * sy;
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.translate(Math.round(cx), Math.round(bottom - h / 2));
     ctx.rotate(ang);
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(idleImg, frame * idle.fw, 0, idle.fw, idle.fh, Math.round(-w / 2), Math.round(-h / 2), Math.round(w), Math.round(h));
+    ctx.drawImage(img, frame * idle.fw, 0, idle.fw, idle.fh, Math.round(-w / 2), Math.round(-h / 2), Math.round(w), Math.round(h));
     ctx.restore();
   }
   function drawJump(ctx, time, dt) {
@@ -380,7 +403,7 @@ function card(anim, img) {
       lastPhase = phase;
     }
     trailAcc += dt;
-    if (air && trailAcc > 0.035) { trailAcc = 0; trail.push({ y, sx, sy, ang, life: 0.22 }); }
+    if (air && trailAcc > 0.035) { trailAcc = 0; trail.push({ y, sx, sy, ang, phase, life: 0.22 }); }
     if (!air) trail.length = Math.min(trail.length, 6);
 
     const shadowR = Math.max(10, 32 - y * 0.16);
@@ -390,7 +413,7 @@ function card(anim, img) {
     for (let i = trail.length - 1; i >= 0; i--) {
       const g = trail[i]; g.life -= dt;
       if (g.life <= 0) { trail.splice(i, 1); continue; }
-      felipeAt(ctx, idleFrame, JX, JG - g.y, g.sx, g.sy, g.ang, (g.life / 0.22) * 0.28);
+      felipeAt(ctx, idleFrame, JX, JG - g.y, g.sx, g.sy, g.ang, (g.life / 0.22) * 0.28, g.phase);
     }
     for (let i = dust.length - 1; i >= 0; i--) {
       const d = dust[i]; d.life -= dt;
@@ -400,7 +423,8 @@ function card(anim, img) {
       const sz = Math.round(d.size * (0.6 + d.life));
       ctx.fillRect(Math.round(d.x - sz / 2), Math.round(d.y - sz / 2), sz, sz);
     }
-    felipeAt(ctx, idleFrame, JX, JG - y, sx, sy, ang, 1);
+    const soft = jumpImg ? 0.5 : 1;
+    felipeAt(ctx, idleFrame, JX, JG - y, 1 + (sx - 1) * soft, 1 + (sy - 1) * soft, ang, 1, phase);
   }
 
   function loop(now) {

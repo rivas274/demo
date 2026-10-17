@@ -5,7 +5,8 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 ## En curso
 
 - [x] **Diseño final de Felipe:** versión A del híbrido v2.
-- [ ] **Animaciones de Felipe** (estrategia A + C): prueba de "quieto" con SpriteCook en curso; luego el rig por piezas en Godot.
+- [x] **Animaciones base de Felipe:** quieto, caminar, correr, zarpazo, comer, saltar (SpriteCook) + Flaco/Gordito, Modo Buda, daño y efectos de salto (código). Ficha: https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe
+- [ ] Pendientes de Felipe: ronronear, recibir daño con pose propia (opcional), muerte/desmayo, expresiones para diálogos.
 
 ## Siguientes
 

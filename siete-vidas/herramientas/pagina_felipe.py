@@ -17,6 +17,14 @@ ANIMS = [
      "archivo": "felipe-idle-sheet.png", "frames": 8, "fps": 8},
     {"id": "sc-walk", "nombre": "Caminar", "origen": "SpriteCook", "costo": "20 créditos",
      "archivo": "felipe-walk-sheet.png", "frames": 8, "fps": 10},
+    {"id": "sc-run", "nombre": "Correr / Zoomies", "origen": "SpriteCook", "costo": "20 créditos",
+     "archivo": "felipe-run-sheet.png", "frames": 8, "fps": 12},
+    {"id": "sc-attack", "nombre": "Zarpazo", "origen": "SpriteCook", "costo": "20 créditos",
+     "archivo": "felipe-attack-sheet.png", "frames": 8, "fps": 12},
+    {"id": "sc-eat", "nombre": "Comer snack", "origen": "SpriteCook", "costo": "20 créditos",
+     "archivo": "felipe-eat-sheet.png", "frames": 8, "fps": 8},
+    {"id": "sc-jump", "nombre": "Saltar", "origen": "SpriteCook", "costo": "20 créditos",
+     "archivo": "felipe-jump-sheet.png", "frames": 8, "fps": 10},
     {"id": "code-idle", "nombre": "Quieto", "origen": "Código (gratis)", "costo": "0 créditos",
      "archivo": "codigo/felipe-quieto-codigo-sheet.png", "frames": 8, "fps": 6},
     {"id": "code-walk", "nombre": "Caminar", "origen": "Código (gratis)", "costo": "0 créditos",
@@ -39,6 +47,8 @@ def main():
     pesos = []
     for nombre, etiqueta in [("flaco", "Flaco"), ("normal", "Normal"), ("gordito", "Gordito"), ("buda", "Modo Buda")]:
         p = ARTE / "pesos" / f"felipe-quieto-{nombre}-sheet.png"
+        if nombre == "buda":
+            p = ARTE / "felipe-buda-quieto-sheet.png"
         if p.exists():
             w, h = Image.open(p).size
             pesos.append({"nombre": etiqueta, "src": data_uri(p), "frames": 8, "fps": 8, "fw": w // 8, "fh": h})

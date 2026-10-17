@@ -15,7 +15,7 @@
 - **Subir imágenes locales:** `create_asset_upload`, luego PUT con curl a la URL devuelta, luego `finalize_asset_upload`.
 - **Red del entorno:** deben estar permitidos `mcp.spritecook.ai` y `api.spritecook.ai`; sin el segundo no se pueden descargar ni ver las imágenes.
 - **Proyecto en SpriteCook:** "Siete Vidas, Cero Disculpas", id `126fcb42-c3f6-40b5-9f75-42715fbdce40`. Pasar siempre `project_id`.
-- **Créditos:** 800 del plan de pago; quedan **760** tras las animaciones "quieto" y "caminar" (2026-10-17). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
+- **Créditos:** 800 del plan de pago; quedan **672** (2026-10-17) tras: quieto, caminar, correr, zarpazo, comer, saltar (20 c/u) y Modo Buda (8). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
 - **Regla de oro:** mostrar al creador el prompt, el modelo, los ajustes y el costo, y esperar aprobación antes de cada llamada que gaste créditos.
 
 ### Modelos y costos útiles (consultados el 2026-10-17)
@@ -51,8 +51,8 @@
 ### Salto (feedback del creador)
 
 - El salto que solo estira y aplasta "se ve mal, tiene que ser más dinámico para enganchar".
-- Versión actual (código, gratis): anticipación agachándose, despegue explosivo, pausa arriba, Doble Salto Imposible con vuelta completa, caída más rápida que la subida, aplastón y rebote al aterrizar, estela de imágenes fantasma y polvo al despegar y aterrizar. Implementado en la ficha (`pagina_felipe.template.html`, función `drawJump`); los mismos tiempos sirven para Godot.
-- Modo Buda por código "se ve mal": requiere una pose nueva (propuesta: editar Felipe A con SpriteCook, 8 créditos).
+- Versión actual: poses de la animación "saltar" de SpriteCook (cuadro por fase: agacharse 1, subir 2, pausa 3, vuelta 4, caer 6, aterrizar 7) más efectos de código: anticipación agachándose, despegue explosivo, pausa arriba, Doble Salto Imposible con vuelta completa, caída más rápida que la subida, aplastón y rebote al aterrizar, estela de imágenes fantasma y polvo al despegar y aterrizar. Implementado en la ficha (`pagina_felipe.template.html`, función `drawJump`); los mismos tiempos sirven para Godot.
+- Modo Buda por código "se ve mal": se resolvió editando Felipe A con SpriteCook (8 créditos): bola perfecta con sonrisa satisfecha. Flaco y Gordito siguen por código.
 
 ### Trucos para ahorrar créditos
 
@@ -70,6 +70,11 @@
 | Felipe A base (recortado, sin fondo) | `14b3c27f-798c-4795-84fe-48ed15508247` | `siete-vidas/arte/felipe/felipe-A-base.png` |
 | Felipe animación "quieto" (8 cuadros, 106×106, 8 fps) | `af423ca7-92f4-40e6-a26a-1959363e6892` | `siete-vidas/arte/felipe/felipe-idle-sheet.png` y `felipe-idle.webp` |
 | Felipe animación "caminar" (8 cuadros, 106×106) | `5890d9bd-c737-471c-ad0d-30169320104e` | `siete-vidas/arte/felipe/felipe-walk-sheet.png` y `felipe-walk.webp` |
+| Felipe Modo Buda (pose editada de A) | `a9b8fd39-5976-492e-8b81-235ed49635cd` | `siete-vidas/arte/felipe/felipe-buda-base.png`; respiración por código en `felipe-buda-quieto-sheet.png` |
+| Felipe animación "correr / zoomies" | `9de2013a-ffd6-4cb6-a338-63f80c2d5e78` | `siete-vidas/arte/felipe/felipe-run-sheet.png` |
+| Felipe animación "comer snack" | `df2345fe-8e80-42c8-ba44-304490802633` | `siete-vidas/arte/felipe/felipe-eat-sheet.png` |
+| Felipe animación "saltar" (poses reales) | `2113c9a5-5acc-4289-8fcb-1f167c20d1ea` | `siete-vidas/arte/felipe/felipe-jump-sheet.png` |
+| Felipe animación "zarpazo" | `86da320a-f4cb-4269-ab76-b66648db1e20` | `siete-vidas/arte/felipe/felipe-attack-sheet.png` |
 | Felipe híbrido v2 (versiones A y B) | `22529bf7-4fcc-4f41-9b17-488d276a206a` | `siete-vidas/arte/referencias/felipe-hibrido-v2.png` |
 
 ## Otras herramientas

@@ -36,9 +36,15 @@ def main():
             continue
         w, h = Image.open(p).size
         anims.append({**a, "src": data_uri(p), "fw": w // a["frames"], "fh": h})
+    pesos = []
+    for nombre, etiqueta in [("flaco", "Flaco"), ("normal", "Normal"), ("gordito", "Gordito"), ("buda", "Modo Buda")]:
+        p = ARTE / "pesos" / f"felipe-quieto-{nombre}-sheet.png"
+        if p.exists():
+            w, h = Image.open(p).size
+            pesos.append({"nombre": etiqueta, "src": data_uri(p), "frames": 8, "fps": 8, "fw": w // 8, "fh": h})
     base = ARTE / "felipe-A-base.png"
     bw, bh = Image.open(base).size
-    html = TEMPLATE.replace("__ANIMS__", json.dumps(anims)).replace("__BASE__", data_uri(base)) \
+    html = TEMPLATE.replace("__ANIMS__", json.dumps(anims)).replace("__PESOS__", json.dumps(pesos)).replace("__BASE__", data_uri(base)) \
         .replace("__BW__", str(bw)).replace("__BH__", str(bh))
     Path(sys.argv[1]).write_text(html, encoding="utf-8")
 

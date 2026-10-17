@@ -42,6 +42,12 @@
 - **Conclusión:** el código sirve para quieto, saltar, caer, aterrizar, daño, ronronear y formas de peso. Caminar, correr, zarpazo y comer necesitan poses nuevas: mejor con SpriteCook (la caminata de SpriteCook mueve patas y cabeza; la de código parece deslizarse).
 - **Ficha visual con las animaciones en movimiento:** https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe (se regenera con `siete-vidas/herramientas/pagina_felipe.py`).
 
+### Formas de peso
+
+- `siete-vidas/herramientas/pesos_felipe.py` genera Flaco (0.84), Normal, Gordito (1.22) y Modo Buda (1.5) a partir de cualquier hoja de animación.
+- Solo ensancha el cuerpo, del cuello a la panza, fila por fila; la cabeza y la cola no cambian. (La primera versión estiraba todo el sprite y se veía mal.)
+- Resultados en `siete-vidas/arte/felipe/pesos/`.
+
 ### Trucos para ahorrar créditos
 
 - Varias ideas en una sola imagen (hojas comparativas en cuadrícula) en vez de una llamada por idea.

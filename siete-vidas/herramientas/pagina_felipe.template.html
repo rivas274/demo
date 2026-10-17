@@ -80,7 +80,9 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .empty { font-size: 13px; color: var(--muted); padding: 30px 10px; text-align: center; }
 
 .demos { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
-.weights { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; font-size: 12px; }
+.demos .card.wide { grid-column: 1 / -1; }
+.weights { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center; font-size: 13px; }
+.weights canvas { width: 100%; height: auto; max-width: 260px; }
 .weights .stage { min-height: 120px; }
 .hit { font: inherit; font-size: 13px; background: var(--accent); color: var(--surface); border: 0; border-radius: 8px; padding: 6px 12px; cursor: pointer; justify-self: start; }
 
@@ -153,15 +155,10 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
       </div>
     </div>
     <div class="demos">
-      <div class="card">
+      <div class="card wide">
         <h3>Formas de peso</h3>
-        <div class="weights">
-          <div><div class="stage"><canvas data-weight="0.86,1.04"></canvas></div>Flaco</div>
-          <div><div class="stage"><canvas data-weight="1,1"></canvas></div>Normal</div>
-          <div><div class="stage"><canvas data-weight="1.16,0.97"></canvas></div>Gordito</div>
-          <div><div class="stage"><canvas data-weight="1.38,0.9"></canvas></div>Modo Buda</div>
-        </div>
-        <p class="muted" style="font-size:12.5px">El mismo sprite, ensanchado. Una sola animación sirve para las cuatro formas.</p>
+        <div class="weights" id="weights"></div>
+        <p class="muted" style="font-size:12.5px">Solo engorda el cuerpo: la cabeza y la cola no cambian. Se genera con código a partir de cualquier animación.</p>
       </div>
       <div class="card">
         <h3>Salto con estirar y aplastar</h3>
@@ -225,6 +222,7 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
 
 <script>
 const ANIMS = __ANIMS__;
+const PESOS = __PESOS__;
 const BASE_SRC = "__BASE__";
 const state = { speed: 1, scale: 2, bg: "plain" };
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -300,10 +298,18 @@ function card(anim, img) {
 
   const idle = ANIMS.find(a => a.id === "sc-idle");
   const idleImg = imgs["sc-idle"];
-  const weightCanvases = [...document.querySelectorAll("canvas[data-weight]")].map(c => {
-    const [sx, sy] = c.dataset.weight.split(",").map(Number);
-    c.width = Math.round(idle.fw * 1.45); c.height = idle.fh;
-    return { c, ctx: c.getContext("2d"), sx, sy };
+  const weightsEl = document.getElementById("weights");
+  const pesoImgs = await Promise.all(PESOS.map(p => load(p.src)));
+  const weightCanvases = PESOS.map((p, i) => {
+    const d = document.createElement("div");
+    d.innerHTML = '<div class="stage"></div>' + p.nombre;
+    const c = document.createElement("canvas");
+    c.width = p.fw * 2; c.height = p.fh * 2;
+    c.setAttribute("role", "img"); c.setAttribute("aria-label", "Felipe en forma " + p.nombre);
+    d.querySelector(".stage").appendChild(c);
+    weightsEl.appendChild(d);
+    const ctx = c.getContext("2d"); ctx.imageSmoothingEnabled = false;
+    return { c, ctx, p, img: pesoImgs[i] };
   });
 
   const jump = document.getElementById("jump").getContext("2d");
@@ -338,7 +344,8 @@ function card(anim, img) {
     }
     weightCanvases.forEach(w => {
       w.ctx.clearRect(0, 0, w.c.width, w.c.height);
-      drawScaled(w.ctx, idleFrame, w.c.width / 2, w.c.height, w.sx, w.sy);
+      w.ctx.imageSmoothingEnabled = false;
+      w.ctx.drawImage(w.img, idleFrame * w.p.fw, 0, w.p.fw, w.p.fh, 0, 0, w.c.width, w.c.height);
     });
 
     const J = 1.6, p = (t % J) / J;

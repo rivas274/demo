@@ -12,9 +12,10 @@
 ## SpriteCook (generador de arte con IA)
 
 - **Conectado** como conector en claude.ai (`https://mcp.spritecook.ai/mcp/claude`), cuenta gratuita.
+- **Subir imágenes locales:** `create_asset_upload`, luego PUT con curl a la URL devuelta, luego `finalize_asset_upload`.
 - **Red del entorno:** deben estar permitidos `mcp.spritecook.ai` y `api.spritecook.ai`; sin el segundo no se pueden descargar ni ver las imágenes.
 - **Proyecto en SpriteCook:** "Siete Vidas, Cero Disculpas", id `126fcb42-c3f6-40b5-9f75-42715fbdce40`. Pasar siempre `project_id`.
-- **Créditos:** 40 iniciales; quedan **32** tras la prueba v1 (2026-10-17). Comprobar con `get_credit_balance` antes de gastar.
+- **Créditos:** 40 iniciales; quedan **24** tras las pruebas v1 y v2 (2026-10-17). Subir imágenes de referencia no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
 - **Regla de oro:** mostrar al creador el prompt, el modelo, los ajustes y el costo, y esperar aprobación antes de cada llamada que gaste créditos.
 
 ### Modelos y costos útiles (consultados el 2026-10-17)
@@ -37,6 +38,8 @@
 | Asset | Id SpriteCook | Archivo local |
 | --- | --- | --- |
 | Felipe, prueba de 4 estilos v1 | `8868e7a2-dd1c-4ab4-a823-9d8b184f5f87` | `siete-vidas/arte/referencias/felipe-prueba-estilos-v1.png` |
+| Foto real de Felipe (referencia, no se publica) | `a0fbe97b-61b6-4d6d-8cb3-c5b4afaa6a74` | No está en el repositorio |
+| Felipe híbrido v2 (versiones A y B) | `22529bf7-4fcc-4f41-9b17-488d276a206a` | `siete-vidas/arte/referencias/felipe-hibrido-v2.png` |
 
 ## Otras herramientas
 

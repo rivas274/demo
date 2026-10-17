@@ -13,10 +13,12 @@ Esta carpeta guarda lo que ya se decidió, para que cualquier sesión nueva reto
 
 ## Documento maestro
 
-La biblia completa del juego (historia, personajes, mundo, mecánicas, logros, revisión editorial y legal) vive en un documento de Claude Docs:
-https://claude.ai/code/artifact/bcd05221-e2ce-4971-969b-8cc982606828
+La biblia completa del juego (historia, personajes, mundo, mecánicas, logros, revisión editorial y legal) está en dos lugares:
 
-Si algo de esta carpeta contradice la biblia, gana la decisión más reciente. Anota aquí cualquier cambio.
+- **Copia en el repositorio:** [`../biblia/`](../biblia/) (`01-biblia.md`, `02-revision-editorial.md`, `03-revision-legal.md`). Las fotos de Felipe y el mapa interactivo solo están en la versión en línea.
+- **Versión en línea (la que se edita):** https://claude.ai/code/artifact/bcd05221-e2ce-4971-969b-8cc982606828
+
+Si la biblia en línea cambia, vuelve a exportarla a `../biblia/`. Si algo de esta carpeta contradice la biblia, gana la decisión más reciente. Anota aquí cualquier cambio.
 
 ## Cómo trabaja el creador del juego
 

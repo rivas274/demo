@@ -102,18 +102,6 @@ func _ready() -> void:
 	set_collision_mask_value(CAPA_ATRAVESABLE, true)
 	sprite.animation_finished.connect(_al_terminar_animacion)
 	sprite.play("quieto")
-	if _estambre:
-		_estambre.queue_free()
-		_estambre = null
-
-
-## El estambre va y viene frente a Felipe al ritmo de los golpes de la pata, girando al rodar.
-func _rodar_estambre() -> void:
-	if not _estambre:
-		return
-	var vaiven := sin(Time.get_ticks_msec() * 0.006) * 6.0
-	_estambre.position = Vector2(mirando * (DISTANCIA_ESTAMBRE + vaiven), -BOLA_ESTAMBRE.get_height() * 0.3)
-	_estambre.rotation = vaiven / 7.0
 
 
 func _physics_process(delta: float) -> void:
@@ -505,3 +493,16 @@ func _terminar_ocio() -> void:
 	sprite.scale = _escala_base()
 	sprite.position = _posicion_sprite
 	sprite.play("quieto")
+	if _estambre:
+		remove_child(_estambre)
+		_estambre.queue_free()
+		_estambre = null
+
+
+## El estambre va y viene frente a Felipe al ritmo de los golpes de la pata, girando al rodar.
+func _rodar_estambre() -> void:
+	if not _estambre:
+		return
+	var vaiven := sin(Time.get_ticks_msec() * 0.006) * 6.0
+	_estambre.position = Vector2(mirando * (DISTANCIA_ESTAMBRE + vaiven), -BOLA_ESTAMBRE.get_height() * 0.3)
+	_estambre.rotation = vaiven / 7.0

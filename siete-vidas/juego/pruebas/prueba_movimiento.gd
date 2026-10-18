@@ -153,7 +153,7 @@ func _correr() -> void:
 	await _esperar(2)
 	Input.action_release("saltar")
 	await _esperar(2)
-	_comprobar(felipe.get_node_or_null("Estambre") == null, "Al dejar de jugar la bola desaparece")
+	_comprobar(not felipe.get_children().any(func(n: Node) -> bool: return n is Sprite2D and n.texture == Felipe.BOLA_ESTAMBRE), "Al dejar de jugar la bola desaparece")
 	await _esperar(60)
 	for nombre: String in Felipe.OCIO:
 		var alto_ocio: float = _alto_visible(felipe.sprite.sprite_frames.get_frame_texture(nombre, 0).get_image()) * Felipe.OCIO[nombre][0]

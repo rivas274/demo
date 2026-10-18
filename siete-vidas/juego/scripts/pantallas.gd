@@ -108,7 +108,7 @@ func _draw() -> void:
 		Modo.TITULO:
 			draw_rect(Rect2(Vector2.ZERO, tam), FONDO)
 			_centrado(fuente, "FELIPE", 92, 34, ACENTO)
-			_centrado(fuente, "Siete Vidas, Cero Disculpas", 124, 16, CLARO)
+			_centrado(fuente, "Nueve Vidas, Cero Disculpas", 124, 16, CLARO)
 			_centrado(fuente, "Demo: La Gran Fuga", 160, 12, CLARO)
 			_centrado(fuente, "[%s] Jugar" % ("A" if usa_mando else "Enter"), 250, 12, ACENTO)
 		Modo.INTRO:

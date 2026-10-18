@@ -19,6 +19,9 @@ Actualizado: 2026-10-18. **Léelo al empezar un chat nuevo** para retomar sin re
 - **Peso:** sin formas y sin efecto en el movimiento; sube defensa, carisma y ataque (Ficha de Su Majestad). Los snacks se cargan (comer ya o guardar para la pelea). **Se quitó la báscula** de la interfaz.
 - **Prototipo v1: CAMBIAR.** Las acciones, la voz y lo épico funcionan, pero sin incentivo pierden sentido; el puntaje de CAOS no sirve.
 - **Guía de jefes en 8 pasos** (entrada épica y "jugo" en la pelea) en `.claude/skills/godot-felipe/SKILL.md` §6b, sacada de un video que pasó el creador.
+- **Título: *Nueve Vidas, Cero Disculpas*** (inglés *Nine Lives, Zero Regrets*); la carpeta sigue siendo `siete-vidas/`.
+- **Biblia en línea actualizada** (título, pilares, peso, 9 vidas).
+- **Reglas R17 a R19** (de los pilares) en `reglas-de-niveles.md`; el nivel 1 se ajusta al rehacerlo.
 - **Recursos gratis:** Kenney (CC0) sirve para sonido, partículas e interfaz; nunca personajes ni fondos (consistencia de estilo).
 
 ## Pendiente, en orden
@@ -30,6 +33,7 @@ Actualizado: 2026-10-18. **Léelo al empezar un chat nuevo** para retomar sin re
    - Bloqueantes: entrada del jefe en negro, puertas con un poste en medio (arte de 176 px para un hueco de 104), lámpara y caja de arena delante de puertas, Felipe flotando sobre la mesa, manotazo desincronizado.
    - Graves: ratones flotando, comida diminuta, escalera sin sentido y sin animación de subir, interacciones sin aviso, pelea que se gana sentado en la repisa, nada reacciona a Felipe.
    - Nuevo: Agenda de Su Majestad, diálogos con retratos, jugo épico, entrada de jefe en 8 pasos.
+   - Cumplir R17 a R19 y validarlas en `prueba_reglas_nivel.gd`.
    - Pruebas nuevas: arte contra colisión, tamaño de la comida (lado menor ≥ 24 px), entrar al jefe por la puerta.
 
 ## Para diseñar después
@@ -40,9 +44,8 @@ Actualizado: 2026-10-18. **Léelo al empezar un chat nuevo** para retomar sin re
 
 ## Decisiones abiertas (esperan al creador)
 
-- ¿Entran a `reglas-de-niveles.md` las 3 reglas que salen de los pilares? (lugar visto antes de alcanzarlo + atajo + historia por zona; una travesura con reacción por habitación; cada maña abre camino y sirve para molestar).
-- ¿Se actualiza la biblia en línea con los pilares nuevos?
-- Título: ¿sigue *Siete Vidas* con 9 vidas o cambia?
+- Ninguna por ahora.
+
 
 ## Cómo trabaja el creador (recordatorio)
 

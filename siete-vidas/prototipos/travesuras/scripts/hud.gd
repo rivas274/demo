@@ -16,6 +16,8 @@ var travesuras := 0
 var total_travesuras := 6
 ## Carteles que se mostraron (para la prueba): [titulo, nombre].
 var carteles: Array = []
+## Segundos entre la travesura y el cartel.
+@export var retraso_cartel := 0.5
 
 var _barra: Control
 var _cola: Array = []
@@ -87,7 +89,9 @@ func cartel(titulo: String, nombre: String, recompensa: String, secreta: bool, a
 	carteles.append([titulo, nombre])
 	_cola.append([titulo, nombre, recompensa, secreta, abajo])
 	if not _mostrando:
-		_siguiente_cartel()
+		# Medio segundo de espera: primero se ve el gag (el vaso en la cara), después el cartel.
+		_mostrando = true
+		create_tween().tween_callback(_siguiente_cartel).set_delay(retraso_cartel)
 
 
 func ocupado() -> bool:
@@ -133,7 +137,7 @@ func _siguiente_cartel() -> void:
 	var animar := create_tween()
 	animar.tween_property(caja, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	animar.parallel().tween_property(caja, "modulate:a", 1.0, 0.1)
-	animar.tween_interval(2.3)
+	animar.tween_interval(2.0)
 	animar.tween_property(caja, "position:x", -660.0, 0.25).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	animar.tween_callback(caja.queue_free)
 	animar.tween_callback(_siguiente_cartel)

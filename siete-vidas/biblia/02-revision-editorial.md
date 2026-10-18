@@ -10,7 +10,7 @@ Estas son las razones por las que este juego puede venderse. Ningún cambio debe
 - **El humor nace del punto de vista.** Un gato con ego de rey que juzga a los humanos es una premisa que se entiende en cualquier idioma y en un clip de 10 segundos.
 - **Las mecánicas son mañas de gato.** Tirar cosas de la mesa, el popo táctico o los zoomies se reconocen al instante y se comparten en redes.
 - **Los juegos de gatos venden.** *Stray* (2022) y *Little Kitty, Big City* (2024) demostraron que hay público. Ninguno es un metroidvania satírico: ese hueco está libre.
-- **El nombre se recuerda.** *Siete Vidas, Cero Disculpas* tiene actitud y dice qué tipo de juego es.
+- **El nombre se recuerda.** *Nueve Vidas, Cero Disculpas* tiene actitud y dice qué tipo de juego es.
 
 ## Cambios prioritarios
 
@@ -80,7 +80,7 @@ Controles reasignables, tamaño de subtítulos, modo para daltónicos y un modo 
 
 **Felipe debe ser famoso antes de que el juego exista.** Un indie sin presupuesto vende por la comunidad que construye mientras lo hace, y aquí el protagonista ya tiene cara.
 
-1. **Nombre buscable.** Usar *Felipe: Siete Vidas, Cero Disculpas* como título completo. "Felipe" es fácil de buscar y de recordar; el subtítulo da la actitud.
+1. **Nombre buscable.** Usar *Felipe: Nueve Vidas, Cero Disculpas* como título completo. "Felipe" es fácil de buscar y de recordar; el subtítulo da la actitud.
 2. **Felipe en redes desde ya.** Una cuenta de TikTok e Instagram donde Felipe "narra" el desarrollo con su voz sarcástica: una foto real de Felipe al lado de su sprite, un poder nuevo, una frase del juego. Es justo la estrategia del video que te gustó.
 3. **Demo corta y pulida.** Un primer acto completo en el Barrio Viejo: la fuga, La Cuadra, la tienda de Don Chucho y el primer jefe (A.S.P.I.). De 30 a 45 minutos, con el mejor chiste al inicio.
 4. **Página de Steam temprano.** Abrirla en cuanto exista un tráiler de 30 segundos, para juntar listas de deseos. Presentar la demo en un Steam Next Fest.

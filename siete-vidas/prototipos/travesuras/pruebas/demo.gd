@@ -47,6 +47,8 @@ func _correr() -> void:
 	await segundos(0.6)
 	await ronronear_a_valeria()
 	await recoger_todo()
+	# Como un jugador, mira el cartel antes de seguir.
+	await hasta(func() -> bool: return not sala.hud.ocupado(), 400)
 	# 4. La persiana subió: saltar al alféizar por el calcetín.
 	paso("4")
 	await ir_al_asiento(110)

@@ -19,7 +19,7 @@ Salen de lo que pidió el creador (consistencia, proporciones reales, humor, un 
 
 ## Reglas
 
-Una ✔ indica que `prueba_reglas_nivel.gd` la valida; 👁 que se revisa con capturas.
+Una ✔ indica que `prueba_reglas_nivel.gd` la valida; 👁 que se revisa con capturas. R17 a R19 salen de los pilares (`pilares.md`, aprobadas el 2026-10-18); el nivel 1 todavía no las cumple y se ajustará al rehacerlo.
 
 | # | Regla | Cómo se valida |
 | --- | --- | --- |
@@ -39,6 +39,10 @@ Una ✔ indica que `prueba_reglas_nivel.gd` la valida; 👁 que se revisa con ca
 | R14 | **Lectura clara.** Lo que se pisa, lo que hace daño y el fondo contrastan. Las siluetas del primer plano nunca tapan a Felipe ni lo que hay que leer. | 👁 capturas de cada zona |
 | R15 | **Felipe se ve siempre igual.** Las reglas de consistencia y proporciones de CLAUDE.md valen dentro de cualquier nivel. | ✔ `prueba_movimiento` (altura) y 👁 `comparar_felipe.py` |
 | R16 | **El jefe se presenta y cambia el mundo.** Una entrada de menos de 5 s congela el juego: acercamiento, «¡BATALLA INICIADA!» y el nombre del jefe. El escenario se transforma según la imaginación de Felipe (lo absurdo va en el fondo, sin colisión). La pelea tiene fases que se anuncian con un cartel y una pista de una línea, y al ganar todo vuelve de golpe a la normalidad. Todo jefe usa la misma presentación reutilizable, `PresentacionJefe` (`scripts/presentacion_jefe.gd`): cada pelea solo da nombre, título, colores y su propio "momento". | ✔ `prueba_jefe` (incluye un segundo jefe de prueba) |
+
+| R17 | **Un barrio que se descubre** (pilar 1). Cada zona tiene un lugar que se ve antes de poder alcanzarlo (se vuelve con una maña nueva), un atajo de vuelta y una historia contada con el escenario, no con texto. | 👁 por ahora; ✔ el lugar visto y el atajo cuando el nivel 1 se rehaga (pendiente). |
+| R18 | **Una travesura con reacción por habitación** (pilares 2 y 5). Cada habitación, salvo el alivio final, tiene al menos una travesura de la Agenda de Su Majestad con una reacción graciosa del mundo (alguien grita, algo se rompe, Felipe comenta). | 👁 por ahora; ✔ cuando el nivel tenga la Agenda (pendiente). |
+| R19 | **Cada maña es llave y travesura** (pilar 2). Cada maña nueva que el nivel enseña abre al menos un camino y además sirve para molestar a alguien. | 👁 |
 
 ## Al diseñar un nivel nuevo
 

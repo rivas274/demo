@@ -4,7 +4,7 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 
 ## Ahora (Fase 1 – Concepto y pilares)
 
-1. [x] **Pilares** (2026-10-18): `siete-vidas/diseno/pilares.md`. Falta: actualizar la biblia en línea y decidir si las "reglas que se notarán en los niveles" entran a `reglas-de-niveles.md`.
+1. [x] **Pilares** (2026-10-18): `siete-vidas/diseno/pilares.md`. Biblia en línea actualizada; las reglas entraron como R17 a R19.
 2. [ ] **Prototipo de acciones de gato** (Fase 2): `/prototipo` para responder "¿es divertido ser Felipe?" (botón de acción para comer, tirar y arañar; maullar; intimidar) en `siete-vidas/prototipos/`, sin tocar el nivel.
    - v1 hecha (`siete-vidas/prototipos/travesuras/`): CAMBIAR. Ahora v2 con la Agenda de Su Majestad en lugar del medidor de CAOS.
    - Incluir en el prototipo (pilar 5): cuadro de diálogo con retratos (pensamientos de Felipe) y respuesta jugosa tipo Balatro.
@@ -57,7 +57,6 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 
 ## Preguntas abiertas
 
-- Título con 9 vidas: el juego ahora da 9 vidas, pero el título en español dice *Siete Vidas*. ¿Se cambia a *Nueve Vidas, Cero Disculpas* o se deja como guiño?
 
 - Gemini (Nano Banana) directo: falta que el creador agregue `GEMINI_API_KEY` al entorno (se lee en una sesión nueva). Sirve para imágenes fijas, no animaciones.
 

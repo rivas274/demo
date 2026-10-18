@@ -27,7 +27,7 @@ Las menciones a *Blasphemous*, *Hollow Knight*, *Stray* y otros juegos se quedan
 
 ## Antes de publicar en Steam
 
-- [ ] **Buscar el nombre** *Felipe: Siete Vidas, Cero Disculpas* en Steam, en la SIC (Colombia) y en WIPO, para confirmar que no está registrado.
+- [ ] **Buscar el nombre** *Felipe: Nueve Vidas, Cero Disculpas* en Steam, en la SIC (Colombia) y en WIPO, para confirmar que no está registrado.
 - [ ] **Registrar la marca** del juego en la SIC, por lo menos en Colombia.
 - [ ] **Buscar cada nombre inventado** (Torres Paradise, Puerto Algoritmo, Ratópolis, A.S.P.I.) para descartar empresas o productos reales con el mismo nombre.
 - [ ] **Decidir si publicas como persona o como empresa.** Una empresa (por ejemplo, una S.A.S.) separa tu patrimonio del juego.

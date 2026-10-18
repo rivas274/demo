@@ -231,7 +231,9 @@ func _travesura(evento: String, texto: String, ruido: float, posicion: Vector2, 
 	jugo.congelar(lerpf(0.06, congelado_travesura, fuerza))
 	jugo.sacudir(0.12 + 0.18 * fuerza, 0.4 + 0.6 * fuerza)
 	jugo.destello(0.25 + 0.35 * fuerza)
-	jugo.palabra(texto, posicion, Color(1.0, 0.88, 0.3), 16 + int(8 * fuerza))
+	if hablar:
+		# Si el objeto le cayó encima a Valeria, la palabra es "¡IMPACTO DIRECTO!" (no se pisan).
+		jugo.palabra(texto, posicion, Color(1.0, 0.88, 0.3), 16 + int(8 * fuerza))
 	sonidos.sonar(sonido)
 	sonidos.sonar("peso", 1.0 - 0.15 * fuerza)
 	valeria.oir(ruido)
@@ -255,7 +257,8 @@ func _al_cumplir(t: Dictionary) -> void:
 	_anotar("AGENDA: %s -> %s" % [t["nombre"], t["recompensa"]])
 	hud.travesuras = agenda.cumplidas()
 	hud.golpear("agenda")
-	hud.cartel(titulo, t["nombre"], t["recompensa"], secreta, felipe.global_position.y < 200.0)
+	# Abajo si Felipe está arriba, o si lo importante pasa arriba (la persiana que se abre).
+	hud.cartel(titulo, t["nombre"], t["recompensa"], secreta, felipe.global_position.y < 200.0 or t["id"] == "tele")
 	jugo.congelar(congelado_agenda)
 	jugo.destello(0.45, Color(1.0, 0.6, 0.95) if secreta else Color(1.0, 0.95, 0.6))
 	jugo.sacudir(0.2, 0.6)
@@ -291,7 +294,10 @@ func terminar_dia() -> void:
 	_anotar("RESUMEN: travesuras %d/%d, secretas %d/%d, calcetines %d/3, fotos %d, snacks %d, perdones %d" % [agenda.cumplidas(), agenda.total(), agenda.secretas_cumplidas(), agenda.total_secretas(), hud.calcetines, hud.fotos, hud.snacks, perdones])
 	resumen = Resumen.new()
 	resumen.mostrar(filas, frase, sonidos)
-	resumen.cerrado.connect(func() -> void: libreta.bloqueada = false)
+	dialogo.visible = false
+	resumen.cerrado.connect(func() -> void:
+		libreta.bloqueada = false
+		dialogo.visible = true)
 	add_child(resumen)
 
 
@@ -405,8 +411,9 @@ func _revisar_golpes_a_valeria() -> void:
 		jugo.congelar(0.12)
 		jugo.sacudir(0.3, 1.0)
 		jugo.destello(0.4, Color(0.6, 0.85, 1.0))
-		jugo.palabra("¡IMPACTO DIRECTO!", objeto.position + Vector2(0, -40), Color(0.5, 0.85, 1.0), 22)
+		jugo.palabra("¡IMPACTO DIRECTO!", Vector2(valeria.position.x + 20.0, SUELO - 56.0), Color(0.5, 0.85, 1.0), 22)
 		sonidos.sonar("felipe_grito", 1.3)
+		jugo.palabra("¡AAAY!", Vector2(valeria.position.x + 58.0, valeria.position.y - 150.0), Color(1.0, 0.35, 0.3), 20, 0.1)
 		var estaba := valeria.presente()
 		_motivo_grito = "golpeada"
 		valeria.golpeada()
@@ -470,7 +477,7 @@ func _al_intimidar(centro: Vector2) -> void:
 	var cerca := absf(aspiradora.position.x - felipe.global_position.x) <= aspiradora.alcance_intimidar and felipe.global_position.y > SUELO - 30.0
 	if cerca and aspiradora.asustar(felipe.global_position.x):
 		_travesura("intimidar", "¡FSSSHH! TERROR", ruido_intimidar, centro + Vector2(0, -58), 0.6, "golpe", false)
-		jugo.palabra("¡PÁNICO ELECTRODOMÉSTICO!", aspiradora.position + Vector2(0, -50), Color(1.0, 0.45, 0.3), 16, 0.15)
+		jugo.palabra("¡PÁNICO ELECTRODOMÉSTICO!", Vector2(aspiradora.position.x + 90.0, SUELO - 24.0), Color(1.0, 0.45, 0.3), 15, 0.15)
 		return
 	_travesura("intimidar", "¡FSSSHH! TERROR", ruido_intimidar, centro + Vector2(0, -58), 0.6, "golpe")
 

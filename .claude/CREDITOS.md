@@ -1,6 +1,6 @@
 # Créditos del equipo de agentes y comandos
 
-Los agentes de `.claude/agents/` (salvo `revisor-niveles`, que es propio) y los comandos de `.claude/skills/` son una adaptación libre, en español y para *Felipe: Siete Vidas, Cero Disculpas*, de ideas, estructura y plantillas de estos proyectos con licencia MIT. No se copió su código ni sus scripts; se tomaron métodos (pilares, puertas de fase, prototipos con veredicto, informes de prueba, recetas de Godot) y se reescribieron para este repositorio.
+Los agentes de `.claude/agents/` (salvo `revisor-niveles`, que es propio) y los comandos de `.claude/skills/` son una adaptación libre, en español y para *Felipe: Nueve Vidas, Cero Disculpas*, de ideas, estructura y plantillas de estos proyectos con licencia MIT. No se copió su código ni sus scripts; se tomaron métodos (pilares, puertas de fase, prototipos con veredicto, informes de prueba, recetas de Godot) y se reescribieron para este repositorio.
 
 | Proyecto | Repositorio | Qué se adaptó |
 | --- | --- | --- |

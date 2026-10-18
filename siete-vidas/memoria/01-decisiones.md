@@ -4,7 +4,7 @@ Actualizado: 2026-10-18. Detalle completo en la biblia (ver README.md).
 
 ## Producto
 
-- **Título:** *Felipe: Siete Vidas, Cero Disculpas* (inglés: *Nine Lives, Zero Regrets*).
+- **Título (2026-10-18):** *Felipe: Nueve Vidas, Cero Disculpas* (inglés: *Nine Lives, Zero Regrets*). Antes era *Siete Vidas*; se cambió para que coincida con las 9 vidas en todos los idiomas. La carpeta del repositorio sigue llamándose `siete-vidas/` para no romper rutas.
 - **Género:** metroidvania 2D en pixel art, con equipables al estilo Blasphemous.
 - **Tono:** sátira picante, clasificación +16. Lo explícito siempre tapado con "censura irónica" (narrador de documental, pegatina de pescadito, aviso de "contenido sensible" que muestra una papa).
 - **Duración:** 6 a 10 horas. **Alcance completo:** seis distritos y cinco finales. Dividir en etapas queda solo como plan B.
@@ -47,7 +47,7 @@ Actualizado: 2026-10-18. Detalle completo en la biblia (ver README.md).
 - **Peso (2026-10-18):** no cambia el dibujo ni el movimiento de Felipe (para mantenerlo simple). **Las formas (Flaco, Gordito, Modo Buda) se descartan.** El peso sube de verdad la **defensa, el carisma y el ataque**; la velocidad aparece solo como chiste y no cambia. Se ve en la **"Ficha de Su Majestad"** del menú de pausa (retrato, barras y una frase satírica por estadística, como "Así se ve un rey"); no hay báscula en la interfaz.
 - **Diálogos con retratos (2026-10-18):** los pensamientos y ocurrencias de Felipe salen en un cuadro con su retrato (las 9 caras); en las conversaciones sale también el del otro personaje. Es el gancho del humor (pilar 5).
 - **Estilo épico (2026-10-18):** todo se ve y se siente épico como Broforce y Balatro (carteles, cámara lenta, palabras y números que saltan, sacudidas): Felipe es el más pro en su cabeza.
-- **Nueve vidas** por partida (2026-10-18; antes 7: se pasa a 9 para que sea internacional, como en inglés). El título sigue siendo *Siete Vidas, Cero Disculpas* hasta que el creador decida; al perderlas, Felipe despierta en casa con el **Collar de la Vergüenza** (baja el respeto hasta reconquistar a Valeria).
+- **Nueve vidas** por partida (2026-10-18; antes 7: se pasa a 9 para que sea internacional, como en inglés).; al perderlas, Felipe despierta en casa con el **Collar de la Vergüenza** (baja el respeto hasta reconquistar a Valeria).
 - **Poderes (moverse y pelear), en orden:** Zarpazo, Caer de Pie (apartamento), Afilar Garras (Barrio Viejo), Doble Salto (Neón), Zoomies (Downtown), Licuado (Muelle). La puerta final pide respeto y afecto altos.
 - **Mañas:** 17 equipables con ventaja y precio; 2 ranuras al inicio, hasta 6 (10 calcetines = 1 ranura).
 - **Acciones de gato:** pedir comida, infiltrarse, popo táctico, tirar cosas de la mesa, meterse en cajas, peleas en los techos, casas paralelas.

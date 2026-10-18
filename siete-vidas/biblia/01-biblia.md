@@ -1,4 +1,4 @@
-# Siete Vidas, Cero Disculpas — Biblia del juego
+# Nueve Vidas, Cero Disculpas — Biblia del juego
 
 Oct 17, 2026 · @Hugo jose rivas soto
 
@@ -6,7 +6,7 @@ Oct 17, 2026 · @Hugo jose rivas soto
 
 **Un metroidvania en pixel art donde eres un gato doméstico que se escapa de casa y descubre que el barrio es un reino que debería pertenecerle.** Explorar, saltar y equiparte poderes como en Blasphemous, pero los poderes son mañas de gato y el mundo se mira con el ego de un gato.
 
-Nombre del juego: **Siete Vidas, Cero Disculpas** (en inglés: *Nine Lives, Zero Regrets*, porque allá los gatos tienen nueve).
+Nombre del juego: **Nueve Vidas, Cero Disculpas** (en inglés: *Nine Lives, Zero Regrets*). Decisión del 2026-10-18: el mismo número en todos los idiomas, a juego con las 9 vidas del juego (antes era *Siete Vidas*, el dicho en español).
 
 Tono: sátira picante sobre los humanos, las redes sociales y la vida en la gran ciudad, narrada por un gato que se cree un dios caído. Clasificación +16: lo explícito aparece, pero siempre tapado con una censura irónica que es parte del chiste.
 
@@ -292,7 +292,7 @@ Todos los controles se pueden reasignar.
 | **Galería Viral** | Encontrar las 30 fotos vergonzosas de Felipe que Valeria subió |
 | **Libertad Financiera** | Vencer al Rey Rata sin comprarle nada |
 | **Gato de Una Sola Casa** | Terminar el juego sin tener ninguna casa paralela |
-| **Siete Vidas, Cero Disculpas** | Terminar el juego sin perder una sola vida |
+| **Nueve Vidas, Cero Disculpas** | Terminar el juego sin perder una sola vida |
 | **No Era Por Ti** | Conseguir el final del Hijo Pródigo |
 | **La Revolución Puede Esperar** | Conseguir el Final Buda |
 | **La Verdad del Video** | Conseguir el final verdadero |
@@ -399,6 +399,6 @@ Para cerrar la idea antes de empezar a programar:
 - [x] Picante: +16, con lo explícito tapado por censura irónica.
 - [x] Peleas: enemigos normales fáciles y graciosos; los jefes sí son un reto que hay que aprender.
 - [x] Muerte: 9 vidas por partida y el Collar de la Vergüenza.
-- [x] Nombre: Siete Vidas, Cero Disculpas.
+- [x] Nombre: Nueve Vidas, Cero Disculpas.
 - [x] Duración: 6 a 10 horas para la historia principal.
 - [x] Distritos: los cinco propuestos más El Basurero con Ratópolis.

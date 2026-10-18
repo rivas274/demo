@@ -1,6 +1,6 @@
 # Juego (Godot 4.3)
 
-Demo jugable de **Felipe: Siete Vidas, Cero Disculpas**: el primer nivel, **"La Gran Fuga"**, el apartamento de Valeria como tutorial. Título → introducción → cada mueble enseña un movimiento → A.S.P.I. (jefa) cuida la puerta del balcón → escapar por el balcón da Caer de Pie → pantalla final.
+Demo jugable de **Felipe: Nueve Vidas, Cero Disculpas**: el primer nivel, **"La Gran Fuga"**, el apartamento de Valeria como tutorial. Título → introducción → cada mueble enseña un movimiento → A.S.P.I. (jefa) cuida la puerta del balcón → escapar por el balcón da Caer de Pie → pantalla final.
 
 ## Cómo jugarlo
 

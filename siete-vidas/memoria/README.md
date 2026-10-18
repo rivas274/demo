@@ -1,4 +1,4 @@
-# Memoria del proyecto: Siete Vidas, Cero Disculpas
+# Memoria del proyecto: Nueve Vidas, Cero Disculpas
 
 Esta carpeta guarda lo que ya se decidió, para que cualquier sesión nueva retome el desarrollo sin repetir conversaciones. Léela completa antes de proponer algo.
 

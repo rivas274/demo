@@ -66,3 +66,17 @@ Estilo de todas: el de Felipe A (pixel art chibi cel-shaded, dos tonos planos, c
 Estado: las 12 imágenes llegaron y están en el juego (ver `memoria/03-arte-y-herramientas.md`). El ropero quedó de 1,53 m y 1 m de ancho para que su imagen no se deforme. Prioridad que se usó: 5 (paredes), 8, 9, 10, 11, 12 y después los muebles.
 
 
+
+## Encargo de arte a Gemini, tanda 2 (piezas que faltan)
+
+Para la sesión "gemini" (el creador le escribe **"sí, adelante"** en su propio chat). Mismo estilo que la tanda 1: pixel art chibi cel-shaded del de Felipe A, dos tonos planos, contorno café oscuro, sin degradados, paleta del Barrio Viejo, **vista lateral recta de juego de plataformas** (las puertas, cuadros y enchufes de frente, como se ven en la pared), **fondo blanco liso, sin texto, sin números ni líneas de medida**, cada pieza separada de las demás con espacio blanco alrededor. Adjuntar `siete-vidas/arte/felipe/felipe-A-base.png` y `siete-vidas/arte/referencias/gemini/muebles-sala.png` como referencias de estilo. Guardar en `siete-vidas/arte/referencias/gemini/` y subir en un solo commit a `claude/split-bill-csubjd`.
+
+| # | Archivo | Contenido (medidas reales; las proporciones importan) |
+| --- | --- | --- |
+| 13 | `muebles-extra.png` | Escritorio de madera con dos cajones (1,30 m de ancho, 81 cm de alto, patas que dejan 30 cm libres debajo); caja de arena para gato de plástico azul con arena (50 cm × 20 cm de alto); cojín redondo rosado para gato (50 cm × 12 cm); base de carga de aspiradora robot, gris oscuro, con una luz verde (40 cm × 15 cm); repisa de pared de madera con dos ménsulas (60 cm) |
+| 14 | `puertas.png` | Puerta interior de madera **abierta** (de frente: marco de 90 cm × 2,05 m, hoja abierta hacia adentro y el hueco oscuro); la misma puerta **cerrada** con manilla dorada; puerta-ventana del balcón **cerrada** con vidrios; un **vano bajo** sin hoja (90 cm × 1,10 m) para el final de la escalera |
+| 15 | `escalera-9.png` | Escalera recta de madera de **9 escalones que suben de izquierda a derecha**, vista lateral exacta: cada escalón 20 cm de huella y 26 cm de alto (la escalera completa es 3 de ancho por 4 de alto), pasamanos con barrotes y zanca de madera por debajo, sin descanso arriba |
+| 16 | `detalles.png` | Cortina larga y angosta de tela terracota con su barral (de frente, 30 cm × 2,40 m); enchufe doble de pared blanco **con** el enchufe negro conectado y el cable bajando; el mismo enchufe **sin** conectar con el cable colgando; bola de pelo gris; mancha de tierra en el piso con trozos de maceta rota (vista lateral, plana) |
+| 17 | `cuadros.png` | "Retrato oficial de Su Majestad": Felipe A (gato persa gris y blanco) posando solemne en un marco dorado ornamentado; un paisaje del Barrio Viejo en marco de madera; un reloj de pared redondo |
+
+**En el juego** (cuando lleguen): escritorio del estudio (deja de usar el aparador), caja de arena, cojín, base de carga y repisas; puertas abiertas y cerrada (balcón) y el vano de la escalera; escalera de 9 escalones encima de la colisión actual; cortina del dormitorio; enchufes (conectado y tirado), bolas de pelo y manchas; cuadros en la sala, el dormitorio y el pasillo. Se procesan con `preparar_arte_nivel.py` (sumar las piezas a su tabla).

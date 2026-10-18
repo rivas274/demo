@@ -172,10 +172,13 @@ func _correr() -> void:
 	await hasta(func() -> bool: return agenda.esta_cumplida("encima"), 120)
 	_comprobar(agenda.esta_cumplida("encima"), "el vaso le cae encima a Valeria y cumple la secreta")
 	_comprobar(agenda.secretas_cumplidas() == 2, "las 2 secretas cumplidas")
+	var snacks_antes := sala.hud.snacks
+	await _recoger("snack")
+	_comprobar(sala.hud.snacks == snacks_antes + 1, "el snack de emergencia de Valeria se guarda (snacks %d)" % sala.hud.snacks)
 
 	print("Prueba: resumen")
 	var salio := await hasta(func() -> bool: return is_instance_valid(sala.resumen), 600)
-	_comprobar(salio and agenda.completa(), "con la agenda completa sale el resumen solo")
+	_comprobar(salio and agenda.completa(), "con la agenda completa y nada por recoger, sale el resumen solo")
 	if salio:
 		await hasta(func() -> bool: return sala.resumen.terminado, 900)
 		var filas: Array = sala.resumen.filas

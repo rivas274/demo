@@ -74,13 +74,27 @@ func _correr() -> void:
 	await saltar_a(420, true)
 	await ir_a(434)
 	await mirar(1)
+	# Espera a que Valeria no esté cruzando bajo la repisa (si no, el florero le cae encima).
+	await hasta(func() -> bool: return sala.valeria.estado != Valeria.Estado.SALIENDO, 600)
 	await tocar("accion")
 	await segundos(2.0)
 	await recoger_todo()
 	await ver_agenda(2.6)
 	# 7. Tirarle el vaso encima a Valeria (secreta): esperar a que esté libre, llamarla con un maullido
-	paso("7")
 	#    desde la mesa y, con ella al lado, manotazo al vaso.
+	paso("7")
+	if not sala.agenda.esta_cumplida("encima"):
+		await tirar_vaso_a_valeria()
+	# 8. Agenda completa: el resumen sale solo cuando no queda nada por recoger.
+	paso("8")
+	await recoger_todo()
+	await hasta(func() -> bool: return is_instance_valid(sala.resumen) and sala.resumen.terminado, 900)
+	await segundos(4.0)
+	print("--- Fin de la demo: %.1f s, agenda %d/%d, secretas %d/%d, calcetines %d, snacks %d, fotos %d, perdones %d ---" % [cuadros / 60.0, sala.agenda.cumplidas(), sala.agenda.total(), sala.agenda.secretas_cumplidas(), sala.agenda.total_secretas(), sala.hud.calcetines, sala.hud.snacks, sala.hud.fotos, sala.perdones])
+	quit(0)
+
+
+func tirar_vaso_a_valeria() -> void:
 	await hasta(func() -> bool: return sala.valeria.estado == Valeria.Estado.FUERA, 1200)
 	await ir_a(225)
 	await saltar_a(290, true)
@@ -98,9 +112,3 @@ func _correr() -> void:
 	await tocar("accion")
 	await segundos(1.5)
 	await recoger_todo()
-	# 8. Agenda completa: el resumen sale solo. Esperar a que termine de contar.
-	paso("8")
-	await hasta(func() -> bool: return is_instance_valid(sala.resumen) and sala.resumen.terminado, 900)
-	await segundos(4.0)
-	print("--- Fin de la demo: %.1f s, agenda %d/%d, secretas %d/%d, calcetines %d, snacks %d, fotos %d, perdones %d ---" % [cuadros / 60.0, sala.agenda.cumplidas(), sala.agenda.total(), sala.agenda.secretas_cumplidas(), sala.agenda.total_secretas(), sala.hud.calcetines, sala.hud.snacks, sala.hud.fotos, sala.perdones])
-	quit(0)

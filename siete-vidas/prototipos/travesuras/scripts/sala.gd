@@ -142,7 +142,7 @@ func _physics_process(delta: float) -> void:
 	puerta_abierta = move_toward(puerta_abierta, objetivo, delta * 4.0)
 	_revisar_golpes_a_valeria()
 	_reponer_lo_pendiente()
-	if agenda.completa() and not _resumen_automatico_hecho and not hud.ocupado():
+	if agenda.completa() and not _resumen_automatico_hecho and not hud.ocupado() and not _hay_recompensas_sueltas():
 		if _espera_resumen < 0.0:
 			_espera_resumen = espera_resumen
 		_espera_resumen -= delta
@@ -672,3 +672,11 @@ func _dibujar_tele() -> void:
 		draw_rect(TELE, Color(0.2, 0.22, 0.25))
 		draw_line(TELE.position + Vector2(8, 8), TELE.position + Vector2(28, 28), Color(1, 1, 1, 0.12), 3.0)
 	draw_rect(Rect2(TELE.position + Vector2(TELE.size.x / 2.0 - 4, TELE.size.y + 3), Vector2(8, 6)), Color(0.1, 0.1, 0.12))
+
+
+## El resumen automático espera a que Felipe recoja lo que quedó en el piso.
+func _hay_recompensas_sueltas() -> bool:
+	for n in get_children():
+		if n is Recogible and not n.get("_recogido"):
+			return true
+	return false

@@ -8,7 +8,7 @@ Actualizado: 2026-10-18. **Léelo al empezar un chat nuevo** para retomar sin re
 
 ## En curso
 
-- **Prototipo "travesuras" v2 con la Agenda de Su Majestad** (`siete-vidas/prototipos/travesuras/`, ver su `INFORME.md` y `README.md`). Reemplaza el medidor de CAOS por 6 travesuras con nombre (2 secretas) y recompensas útiles (calcetín, snack por perdón, foto vergonzosa, un camino que se abre) y un resumen tipo Balatro al final. Cuando esté listo: mandar el video al creador, que lo juega (Godot 4.3, F5) y da el veredicto SEGUIR / CAMBIAR / DESCARTAR.
+- **Prototipo "travesuras" v2 con la Agenda de Su Majestad** (`siete-vidas/prototipos/travesuras/`, ver su `INFORME.md` y `README.md`). Reemplaza el medidor de CAOS por 6 travesuras con nombre (2 secretas) y recompensas útiles (calcetín, snack por perdón, foto vergonzosa, un camino que se abre) y un resumen tipo Balatro al final. **Lista (2026-10-18):** video enviado; falta que el creador la juegue (Godot 4.3, F5; Tab = agenda, F = terminar el día) y dé el veredicto SEGUIR / CAMBIAR / DESCARTAR. Abierto: para qué sirven los snacks y los calcetines.
 
 ## Ya cerrado (2026-10-18)
 

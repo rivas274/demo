@@ -59,3 +59,77 @@ El creador: tirar cosas divierte "en un principio sí, pero sin incentivos para 
   - Valeria: viene con 3 de ruido acumulado (una rotura sola basta) y perdona con 0,9 s de ronroneo a menos de 110 px. Da 5 s para el encanto antes de perseguir, y persigue 3 s.
   - Felipe: tira el objeto parado a 34 px; da 2 arañazos por pulsación; maullar dura 0,75 s e intimidar 1,0 s, ambos con deformación de hasta 8 %.
   - Texto: 55 letras por segundo; cada frase espera 1,3 s más 0,035 s por letra.
+
+## v2: Agenda de Su Majestad
+Fecha: 2026-10-18 · Misma carpeta, 0 créditos.
+
+### Pregunta
+Si cada travesura es un objetivo con nombre y una recompensa útil (la Agenda de Su Majestad, como la lista de Untitled Goose Game), el jugador va a buscar y planear travesuras en vez de romper al azar. Lo vamos a notar en que busca las secretas, intenta completar la lista y se detiene a leer la agenda.
+Suposición más arriesgada: que una lista con recompensas dé ganas de seguir en un cuarto chico.
+
+### Qué se construyó
+- **Fuera el CAOS:** no quedan medidor, "+N CAOS", combos ni números de puntaje (la prueba lo revisa en todas las etiquetas de la pantalla). Se queda lo épico: congelado, palabras que saltan ("¡CRÍTICO! FLORERO: 0", "¡ZAPPING DEFINITIVO!", "¡IMPACTO DIRECTO!"), sacudida, destello, sonido y la voz de Felipe.
+- **La Agenda (Tab o Select):** una libreta con letra inclinada de Felipe, casillas, tachado, "¡HECHO!" y la recompensa de cada renglón. Mientras está abierta, el juego queda en pausa. Tiene 6 travesuras, 4 visibles y 2 secretas que se ven como "???" hasta cumplirlas:
+
+  | Travesura | Recompensa |
+  | --- | --- |
+  | Derribar el florero heredado de la abuela | Foto vergonzosa (Valeria en pijama de unicornio; estaba escondida en el florero) |
+  | Arañar el sofá nuevo (todavía tiene el plástico) | Calcetín (con 6 arañazos se rompe el plástico y sale de entre los cojines) |
+  | Tirar el control mientras Valeria ve su serie | Camino: el control cae, la persiana sube y el alféizar pasa a ser una plataforma con un calcetín |
+  | Que Valeria me perdone 2 veces | Un snack por cada perdón, que se guarda |
+  | ??? Tirarle algo encima a Valeria | Snack de emergencia (se le cae del bolsillo) |
+  | ??? Intimidar a la aspiradora | Calcetín (huye en pánico y lo escupe) |
+- **Cosas nuevas en el cuarto, todas a escala de gato:** una ventana con persiana sobre el sofá (alféizar de 128 px a 1,40 m), una tele en la pared, una aspiradora robot de 48 × 18 px bajo la mesa, el plástico con su etiqueta "NUEVO" en el sofá, y recompensas que se recogen al pasar (calcetín de 24 × 26, snack de 32 × 16 y foto de 30 × 26).
+- **Valeria cambió un poco:** cuando perdona queda de buenas y se sienta a ver su serie 12 s (sentada, con cabritas). Si le tiran el control, se para y regaña. Si le cae algo encima, se sobresalta ("¡AAAY!").
+- **Pistas en el cuarto:** la etiqueta "NUEVO", la punta de un calcetín que asoma bajo la persiana y la aspiradora que ronca ("z") bajo la mesa.
+- **Respuesta al cumplir:** congelado, destello, el cartel "¡TRAVESURA CUMPLIDA!" (dorado) o "¡TRAVESURA SECRETA!" (rosado) con el nombre y la recompensa, y una frase de Felipe ("Spoiler: se cortó la serie."). El cartel sale medio segundo después de la travesura para que primero se vea el gag. Si Felipe está arriba, o si lo que importa pasa arriba (la persiana), el cartel va más abajo.
+- **Íconos arriba a la izquierda:** AGENDA n/6, calcetines n/3, snacks y fotos. Saltan al sumar.
+- **Resumen del día, tipo Balatro:** sale con la agenda completa (cuando no queda nada por recoger) o con F. Las filas aparecen una a una con números que suben contando: Travesuras, Secretas, Calcetines, Fotos vergonzosas, Snacks guardados y las veces que Valeria te perdonó. Al final, una frase de Felipe ("Seis de seis. La casa es mía. Como siempre fue.").
+- **Fallos de la v1 arreglados:**
+  - Una frase que espera en la cola se descarta a los 2 s, así que Felipe ya no contesta cuando Valeria se fue.
+  - Si Felipe está donde va un objeto (el florero en la repisa), Valeria espera a que se mueva para reponerlo.
+  - Los dos arañazos de una pulsación ya no pisan sus palabras.
+
+### Qué pasó
+Solo lo que se ve en el video del bot (`pruebas/demo.gd`, 74 s con sonido, los mismos botones que una persona). Los segundos son de juego y no cuentan los ratos con la agenda abierta. Aquí no hay jugadores de verdad: falta la prueba del creador.
+- **Al empezar:** el bot abre la agenda (3 s). Se lee completa en una pantalla, con las dos secretas como "???".
+- **0–8 s, sofá:** tres pulsaciones de arañar (6 arañazos) rompen el plástico a los 6,1 s ("¡PLÁSTICO: 0!" y cartel). El calcetín salta de los cojines y lo recoge a los 7,4 s (calcetines 1/3).
+- **9–21 s, la cadena con Valeria:**
+  - El ruido de arañar la trae (9,6 s). Felipe ronronea, ella lo perdona (11,3 s, "AGENDA: 1/2") y el snack queda guardado.
+  - De buenas, se sienta a ver su serie (14,9 s, la tele se enciende). Felipe sube al asiento y tira el control del brazo (17,5 s): "¡ZAPPING DEFINITIVO!", ella se para ("¡FELIPE! ¡MI SERIE!"), la persiana sube y se cumple la travesura.
+  - Ronronea otra vez y llega el segundo perdón (19,7 s), que cumple "perdóname 2 veces".
+  - Una travesura dejó lista la siguiente: la del control solo se puede hacer después de un perdón.
+- **22–33 s, el camino y la primera secreta:**
+  - Felipe salta del asiento al alféizar y agarra el calcetín (23,9 s, 2/3). El bot vuelve a abrir la agenda: 3 tachadas con su recompensa en verde.
+  - Baja, le bufa a la aspiradora (≈29 s): "¡PÁNICO ELECTRODOMÉSTICO!", huye chocando, escupe el calcetín ("¡PTUH!", 30,0 s) y sale "¡TRAVESURA SECRETA!". Calcetines 3/3.
+- **39–44 s, florero:** Valeria termina su serie y se va (39,4 s). Felipe tira el florero desde la repisa (40,4 s, "¡CRÍTICO! FLORERO: 0" y cartel), la foto cae flotando y la recoge a los 43,9 s ("Valeria en pijama de unicornio. Esto vale oro.").
+- **47–56 s, segunda secreta:** desde la mesa maúlla 3 veces hasta que Valeria entra (52,7 s). Con ella al lado, el manotazo le revienta el vaso encima (53,2 s): "¡IMPACTO DIRECTO!", "¡AAAY!" y "¡TRAVESURA SECRETA!". Se le cae el snack de emergencia (snacks 3).
+- **58 s, resumen:** Travesuras 6/6 · Secretas 2/2 · Calcetines 3/3 · Fotos 1 · Snacks 3 · Valeria te perdonó 2 veces, con la frase final.
+- **Problemas que se ven en el video:**
+  - Dos carteles seguidos (control y segundo perdón) tapan la mitad de arriba unos 4 s. El bot espera a que terminen; un jugador podría perderse lo que pasa arriba.
+  - En una toma anterior, el florero le cayó encima a Valeria mientras ella salía, así que la secreta se cumplió por casualidad y el resumen salió con recompensas todavía en el piso. Se arregló: el resumen espera a que no quede nada suelto. La casualidad en sí es buena señal (las secretas pueden salir solas), pero también significa que una secreta se puede cumplir sin entenderla.
+  - Valeria no reacciona a lo que pasa mientras sale (el florero puede romperse delante de ella sin un grito).
+  - El calcetín del alféizar se puede agarrar con la cabeza en medio del salto, sin pararse en el alféizar.
+  - Los snacks se juntan pero todavía no sirven para nada (solo se cuentan).
+  - Sentada en el sofá, Valeria queda pegada a Felipe cuando él está en el asiento; se lee, pero está apretado.
+- **Capturas:**
+  - `capturas/v2-agenda.png`
+  - `capturas/v2-persiana-se-abre.png`
+  - `capturas/v2-alfeizar-calcetin.png`
+  - `capturas/v2-vaso-encima-de-valeria.png`
+  - `capturas/v2-resumen.png`
+- **Video:** `prototipo-travesuras-v2.mp4` (1280×720, con sonido), entregado aparte.
+- **Pruebas:** `prueba_agenda.gd` (36 comprobaciones) y `prueba_impacto.gd` (13 de la v1) pasan.
+
+### Qué aprendimos
+Pendiente de la prueba del creador. Lo único que confirma el bot es técnico:
+- La agenda completa cabe en el cuarto chico, en unos 60 s de juego.
+- Las travesuras se pueden encadenar: perdón → serie → control → persiana → calcetín.
+- Las recompensas aparecen donde se ven.
+
+Si eso hace que alguien *planee*, lo tiene que decir alguien jugando.
+
+### Veredicto (v2): PENDIENTE
+Lo decide el creador jugando (F5). Qué mirar: las preguntas de "Qué mirar en la v2" del README.
+
+**Siguientes preguntas (para otros prototipos, no para este):** ¿para qué sirven los snacks y los calcetines (llave, ronroneo más fuerte, cosmética)? ¿Una agenda por habitación o una por día?

@@ -17,7 +17,7 @@
 - **Subir imágenes locales:** `create_asset_upload`, luego PUT con curl a la URL devuelta, luego `finalize_asset_upload`.
 - **Red del entorno:** deben estar permitidos `mcp.spritecook.ai` y `api.spritecook.ai`; sin el segundo no se pueden descargar ni ver las imágenes.
 - **Proyecto en SpriteCook:** "Siete Vidas, Cero Disculpas", id `126fcb42-c3f6-40b5-9f75-42715fbdce40`. Pasar siempre `project_id`.
-- **Créditos:** 800 del plan de pago; quedan **576** (tras las poses de caída, 8, y la pose agachada y el gateo, 28) (2026-10-17) tras: quieto, caminar, correr, zarpazo, comer, saltar, ronronear, desmayo (20 c/u), Modo Buda y cono (8 c/u) y retratos (12). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
+- **Créditos:** 800 del plan de pago; quedan **500** (2026-10-18). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
 - **Regla de oro:** mostrar al creador el prompt, el modelo, los ajustes y el costo, y esperar aprobación antes de cada llamada que gaste créditos.
 
 ### Modelos y costos útiles (consultados el 2026-10-17)
@@ -33,35 +33,14 @@
 - `animate_game_art` sobre un asset existente: 20 créditos por animación de 8 cuadros.
 - Flujo guiado de personaje (`generate_character` + `generate_character_animations`): 12 por el personaje base, 20 por animación, +12 para preparar las poses de caminar o correr.
 
-### Estrategia de animación (aprobada el 2026-10-17)
+### Cómo se hace el arte de Felipe
 
-- **A + C, y B solo si hace falta:** SpriteCook solo para animaciones estrella; el resto, por piezas (cutout) en Godot con huesos y estiramientos, sin créditos.
-- Primera prueba: animación "quieto" de Felipe A con `animate_game_art` (20 créditos, tardó 1 minuto). Resultado bueno: la cola se mece, el cuerpo respira y el estilo se mantiene igual en los 8 cuadros.
-
-### Comparación SpriteCook contra código (2026-10-17)
-
-- **Animación gratis por código:** `siete-vidas/herramientas/animar_felipe.py` separa el sprite en capas (cola, cuerpo, 4 patas) y las mueve pixel por pixel. Resultados en `siete-vidas/arte/felipe/codigo/`.
-- **Conclusión:** el código sirve para quieto, saltar, caer, aterrizar, daño, ronronear y formas de peso. Caminar, correr, zarpazo y comer necesitan poses nuevas: mejor con SpriteCook (la caminata de SpriteCook mueve patas y cabeza; la de código parece deslizarse).
-- **Ficha visual con las animaciones en movimiento:** https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe (se regenera con `siete-vidas/herramientas/pagina_felipe.py`).
-
-### Formas de peso
-
-- `siete-vidas/herramientas/pesos_felipe.py` genera Flaco (0.84), Normal, Gordito (1.22) y Modo Buda (1.5) a partir de cualquier hoja de animación.
-- Solo ensancha el cuerpo, del cuello a la panza, fila por fila; la cabeza y la cola no cambian. (La primera versión estiraba todo el sprite y se veía mal.)
-- Resultados en `siete-vidas/arte/felipe/pesos/`.
-
-### Salto (feedback del creador)
-
-- El salto que solo estira y aplasta "se ve mal, tiene que ser más dinámico para enganchar".
-- Versión actual: poses de la animación "saltar" de SpriteCook (cuadro por fase: agacharse 1, subir 2, pausa 3, doble salto 3, caer 2 sin inclinación, aterrizar 5, asentarse 6; el cuadro 4 viene inclinado en diagonal y se ve raro al caer, no usarlo) más efectos de código: anticipación agachándose, despegue explosivo, pausa arriba, Doble Salto Imposible con una inclinación leve de unos 20° (la vuelta completa de 360° le pareció exagerada al creador), caída más rápida que la subida, aplastón y rebote al aterrizar, estela de imágenes fantasma y polvo al despegar y aterrizar. Implementado en la ficha (`pagina_felipe.template.html`, función `drawJump`); los mismos tiempos sirven para Godot.
-- **Lección (2026-10-17):** al pasar el salto de la ficha a Godot se perdieron las correcciones y el creador lo notó. Toda corrección de animación aprobada en la ficha debe aplicarse también en `siete-vidas/juego/` y quedar cubierta por una prueba.
-- **Regla del creador: al bajar, las patas delanteras van primero y tocan el piso primero.** Inclinar una pose vertical NO basta (las traseras siguen quedando abajo hasta ~40°, y a ese ángulo parece que vuela de lado). Se resolvió con dos poses propias: "cayendo" (en picada, delanteras estiradas hacia el suelo, traseras recogidas, cola arriba) y "contacto" (solo las delanteras apoyadas). La prueba del juego mide el punto más bajo del dibujo para comprobarlo.
-- (Antes:) un gato aterriza primero con las patas delanteras. Al caer, Felipe se inclina con la nariz hacia abajo (~18°) con las patas delanteras estiradas; al tocar el piso apoya las delanteras, gira sobre ellas mientras baja la parte trasera y después se aplasta con rebote.
-- Modo Buda por código "se ve mal": se resolvió editando Felipe A con SpriteCook (8 créditos): bola perfecta con sonrisa satisfecha. Flaco y Gordito siguen por código.
-
-### Agacharse y gatear (2026-10-18)
-
-- Pose agachada editando Felipe A (8 créditos, `gemini-3.1-flash-lite-image`, vista de lado mirando a la derecha) y gateo de 8 cuadros con `animate_game_art` a partir de esa pose (20 créditos, prompt sin auto-mejora, "walking in place"). Los cuadros salen de 256×256 con el gato apoyado abajo: en el juego se dibujan a escala 0.4 (mide ~35 px y cabe bajo muebles de 30 cm).
+- **Consistencia primero (regla del creador, 2026-10-18):** toda animación se genera con `animate_game_art` (20 créditos, 8 cuadros) **directamente desde Felipe A**, describiendo el movimiento completo, con `auto_enhance_prompt` apagado y "cat stays in place". No se usan poses editadas como paso intermedio: se comprobó que cambian la vista a perfil, las proporciones y la expresión (pasó con caída, gatear, acicalarse y estambre). Los objetos (estambre, comida) van aparte, por código.
+- **Revisión antes de usar:** `python3 siete-vidas/herramientas/comparar_felipe.py <salida.png>` pone a Felipe A junto a un cuadro de cada animación al tamaño del juego. Se muestra al creador antes de integrar.
+- **Efectos de código (gratis, en Godot y en la ficha):** estirar y aplastar, estela de imágenes fantasma, polvo, inclinación del Doble Salto, parpadeo de daño, vida fantasma, transición de agacharse, respiración del Modo Buda.
+- **Formas de peso:** Flaco (0.84) y Gordito (1.22) con `siete-vidas/herramientas/pesos_felipe.py`, que ensancha solo el cuerpo, del cuello a la panza (resultados en `siete-vidas/arte/felipe/pesos/`). Modo Buda es una pose propia de SpriteCook con respiración por código.
+- **Tamaños de hoja:** SpriteCook entrega cada hoja en la resolución de su pose (106, 92, 184 o 256 px por cuadro). Casi todas son de 106×106 y se dibujan a 0.72. Las demás llevan su propia escala para que la cabeza mida lo mismo que la de Felipe de pie: gatear 0.4, acicalarse 0.9, jugar 0.6 (`Felipe.ESCALA_AGACHADO` y `Felipe.OCIO`). Cada hoja nueva se compara con "quieto" sobre el mismo piso antes de usarla, y la prueba de movimiento comprueba su altura.
+- **Salto (tiempos de la ficha, iguales en Godot):** se agacha (cuadro 1 de `saltar`), sale estirado (2), recoge las patas arriba (3), Doble Salto con ~20° de inclinación, cae en picada (`caer` 0), toca con las delanteras (`caer` 1), baja la parte de atrás (5) y se asienta (6). No usar el cuadro 4 de `saltar` (viene en diagonal).
 
 ### Trucos para ahorrar créditos
 
@@ -70,28 +49,35 @@
 - Hacer bocetos de poses y composición en texto (o a mano) y solo generar cuando la idea esté aprobada.
 - Retocar a mano en Pixelorama o Aseprite en vez de regenerar por detalles pequeños.
 
-### Assets generados
+### Assets de Felipe (vigentes)
 
-| Asset | Id SpriteCook | Archivo local |
-| --- | --- | --- |
-| Felipe, prueba de 4 estilos v1 | `8868e7a2-dd1c-4ab4-a823-9d8b184f5f87` | `siete-vidas/arte/referencias/felipe-prueba-estilos-v1.png` |
-| Foto real de Felipe (referencia, no se publica) | `a0fbe97b-61b6-4d6d-8cb3-c5b4afaa6a74` | No está en el repositorio |
-| Felipe A base (recortado, sin fondo) | `14b3c27f-798c-4795-84fe-48ed15508247` | `siete-vidas/arte/felipe/felipe-A-base.png` |
-| Felipe animación "quieto" (8 cuadros, 106×106, 8 fps) | `af423ca7-92f4-40e6-a26a-1959363e6892` | `siete-vidas/arte/felipe/felipe-idle-sheet.png` y `felipe-idle.webp` |
-| Felipe animación "caminar" (8 cuadros, 106×106) | `5890d9bd-c737-471c-ad0d-30169320104e` | `siete-vidas/arte/felipe/felipe-walk-sheet.png` y `felipe-walk.webp` |
-| Felipe Modo Buda (pose editada de A) | `a9b8fd39-5976-492e-8b81-235ed49635cd` | `siete-vidas/arte/felipe/felipe-buda-base.png`; respiración por código en `felipe-buda-quieto-sheet.png` |
-| Felipe animación "correr / zoomies" | `9de2013a-ffd6-4cb6-a338-63f80c2d5e78` | `siete-vidas/arte/felipe/felipe-run-sheet.png` |
-| Felipe animación "comer snack" | `df2345fe-8e80-42c8-ba44-304490802633` | `siete-vidas/arte/felipe/felipe-eat-sheet.png` |
-| Felipe animación "saltar" (poses reales) | `2113c9a5-5acc-4289-8fcb-1f167c20d1ea` | `siete-vidas/arte/felipe/felipe-jump-sheet.png` |
-| Felipe animación "ronronear" | `4dbc1380-5c45-4066-858c-f1c03a87fb67` | `siete-vidas/arte/felipe/felipe-purr-sheet.png` |
-| Felipe animación "desmayo" (cae boca abajo, sin ojos en X) | `0e90281b-f940-4f03-ae52-85e6b9d5254b` | `siete-vidas/arte/felipe/felipe-faint-sheet.png` |
-| Felipe con Collar de la Vergüenza (cono) | `1893e4a4-4b92-46b1-8b45-efbd5dbcf7e2` | `siete-vidas/arte/felipe/felipe-cono.png` |
-| Felipe 9 retratos para diálogos (3×3, 200×200) | `7657f269-815f-451f-a58a-17f2d6b2f014` | `siete-vidas/arte/felipe/felipe-retratos.png` |
-| Felipe poses de caída (en picada y contacto con las delanteras) | `6519b507-8c18-4582-b6fd-995ca133a7ea` | `siete-vidas/arte/felipe/felipe-caida-sheet.png` (2 cuadros de 106×106) |
-| Felipe pose agachada | `0d4f04f1-5da7-4e11-9017-1fa8742e63fc` | `siete-vidas/arte/felipe/felipe-agachado-base.png` |
-| Felipe animación "gatear" (8 cuadros de 256×256) | `16d9e097-693e-455f-a9a3-a99c1d87e67b` | `siete-vidas/arte/felipe/felipe-gatear-sheet.png` |
-| Felipe animación "zarpazo" | `86da320a-f4cb-4269-ab76-b66648db1e20` | `siete-vidas/arte/felipe/felipe-attack-sheet.png` |
-| Felipe híbrido v2 (versiones A y B) | `22529bf7-4fcc-4f41-9b17-488d276a206a` | `siete-vidas/arte/referencias/felipe-hibrido-v2.png` |
+Solo lo que se usa. ⚠ = hecho desde una pose editada; no es consistente con Felipe A y se rehace desde Felipe A (ver pendientes). Se usa mientras tanto.
+
+| Asset | Godot | Id SpriteCook | Archivo en `siete-vidas/arte/felipe/` |
+| --- | --- | --- | --- |
+| Felipe A base (diseño aprobado, sin fondo, 86×94) | — | `14b3c27f-798c-4795-84fe-48ed15508247` | `felipe-A-base.png` |
+| Quieto (8 cuadros de 106×106) | `quieto` | `af423ca7-92f4-40e6-a26a-1959363e6892` | `felipe-idle-sheet.png` |
+| Caminar | `caminar` | `5890d9bd-c737-471c-ad0d-30169320104e` | `felipe-walk-sheet.png` |
+| Correr / Zoomies | `correr` | `9de2013a-ffd6-4cb6-a338-63f80c2d5e78` | `felipe-run-sheet.png` |
+| Saltar | `saltar` | `2113c9a5-5acc-4289-8fcb-1f167c20d1ea` | `felipe-jump-sheet.png` |
+| ⚠ Caer y contacto (2 cuadros) | `caer` | `6519b507-8c18-4582-b6fd-995ca133a7ea` | `felipe-caida-sheet.png` (original: `felipe-caida-poses.png`) |
+| ⚠ Pose agachada | — | `0d4f04f1-5da7-4e11-9017-1fa8742e63fc` | `felipe-agachado-base.png` |
+| ⚠ Gatear (8 cuadros de 256×256) | `gatear` | `16d9e097-693e-455f-a9a3-a99c1d87e67b` | `felipe-gatear-sheet.png` |
+| Zarpazo | `zarpazo` | `86da320a-f4cb-4269-ab76-b66648db1e20` | `felipe-attack-sheet.png` |
+| Comer | `comer` | `df2345fe-8e80-42c8-ba44-304490802633` | `felipe-eat-sheet.png` |
+| Ronronear | `ronronear` | `4dbc1380-5c45-4066-858c-f1c03a87fb67` | `felipe-purr-sheet.png` |
+| Desmayo (cae boca abajo) | `desmayo` | `0e90281b-f940-4f03-ae52-85e6b9d5254b` | `felipe-faint-sheet.png` |
+| Modo Buda (pose) | — | `a9b8fd39-5976-492e-8b81-235ed49635cd` | `felipe-buda-base.png`; respiración en `felipe-buda-quieto-sheet.png` |
+| Collar de la Vergüenza | — | `1893e4a4-4b92-46b1-8b45-efbd5dbcf7e2` | `felipe-cono.png` |
+| 9 retratos para diálogos (3×3, 200×200) | — | `7657f269-815f-451f-a58a-17f2d6b2f014` | `felipe-retratos.png` |
+| ⚠ Pose sentado | — | `0fb977b7-3346-40d5-8a18-e669607b29f4` | `felipe-sentado-base.png` |
+| ⚠ Ocio: acicalarse (8 cuadros de 92×92, escala 0.9) | `acicalarse` | `6dfd5a1f-52c2-4498-89ab-adee29d78744` | `felipe-acicalarse-sheet.png` |
+| ⚠ Pose jugando con estambre | — | `d9da7997-8421-4fd3-b9c4-f0dfed24cee5` | `felipe-estambre-base.png` |
+| ⚠ Ocio: jugar con estambre (8 cuadros de 184×184, escala 0.6) | `jugar` | `de07b8c8-317f-4c65-b476-700d96c77875` | `felipe-estambre-sheet.png` |
+| Ocio: perseguirse la cola (8 cuadros de 106×106, escala 0.72) | `vueltas` | `bc3dbbc7-7d04-446f-ae5c-e05f6b7cfb73` | `felipe-vueltas-sheet.png` |
+| Flaco, Normal, Gordito | — | Código (`pesos_felipe.py`) | `pesos/` |
+
+Referencias de diseño (no se usan en el juego): foto real de Felipe (`a0fbe97b-61b6-4d6d-8cb3-c5b4afaa6a74`, no está en el repositorio), prueba de 4 estilos v1 (`8868e7a2-…`, `../referencias/felipe-prueba-estilos-v1.png`), híbrido v2 A y B (`22529bf7-…`, `../referencias/felipe-hibrido-v2.png`) y comparación de proporciones (`../referencias/proporciones-felipe.png`).
 
 ## Otras herramientas
 

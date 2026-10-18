@@ -8,7 +8,8 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [x] **Animaciones base de Felipe:** quieto, caminar, correr, zarpazo, comer, saltar (SpriteCook) + Flaco/Gordito, Modo Buda, daño y efectos de salto (código). Ficha: https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe
 - [x] Pendientes de Felipe: ronronear, desmayo (+ vida fantasma por código), Collar de la Vergüenza, 9 retratos para diálogos.
 - [x] Animación de agacharse y gatear (SpriteCook, 28 créditos, 2026-10-18).
-- [ ] Animaciones de ocio cuando no se toca nada: sentarse y acicalarse, jugar con estambre, dar vueltas persiguiendo la cola (propuesta con costo presentada el 2026-10-18).
+- [x] Animaciones de ocio (2026-10-18, 76 créditos): acicalarse, jugar con estambre y perseguirse la cola, en el juego tras 8 s sin tocar nada.
+- [ ] **Consistencia:** rehacer desde Felipe A las animaciones que salieron de poses editadas (gatear, acicalarse, jugar con estambre; la caída queda a decisión del creador). El estambre pasa a ser un objeto aparte movido por código.
 - [ ] Decidir si Felipe sigue cargando 3 snacks para curarse o si toda la comida se toma del mundo con el botón de acción.
 - [ ] Opcional de Felipe: daño con pose propia; desmayo patas arriba con ojos en X (el actual cae boca abajo).
 

@@ -1,4 +1,4 @@
-"""Genera la página de Felipe (guía + animaciones en movimiento) como un HTML autocontenido.
+"""Genera la ficha de Felipe (guía del personaje: acciones, animaciones aprobadas, rasgos y proporciones) como un HTML autocontenido.
 
 Uso: python3 pagina_felipe.py <salida.html>
 Lee los sprites de siete-vidas/arte/felipe/.
@@ -13,26 +13,23 @@ from PIL import Image
 ARTE = Path(__file__).resolve().parent.parent / "arte" / "felipe"
 
 ANIMS = [
-    {"id": "sc-idle", "nombre": "Quieto", "origen": "SpriteCook", "costo": "20 créditos",
-     "archivo": "felipe-idle-sheet.png", "frames": 8, "fps": 8},
-    {"id": "sc-walk", "nombre": "Caminar", "origen": "SpriteCook", "costo": "20 créditos",
-     "archivo": "felipe-walk-sheet.png", "frames": 8, "fps": 10},
-    {"id": "sc-run", "nombre": "Correr / Zoomies", "origen": "SpriteCook", "costo": "20 créditos",
-     "archivo": "felipe-run-sheet.png", "frames": 8, "fps": 12},
-    {"id": "sc-attack", "nombre": "Zarpazo", "origen": "SpriteCook", "costo": "20 créditos",
-     "archivo": "felipe-attack-sheet.png", "frames": 8, "fps": 12},
-    {"id": "sc-eat", "nombre": "Comer snack", "origen": "SpriteCook", "costo": "20 créditos",
-     "archivo": "felipe-eat-sheet.png", "frames": 8, "fps": 8},
-    {"id": "sc-jump", "nombre": "Saltar", "origen": "SpriteCook", "costo": "20 créditos",
-     "archivo": "felipe-jump-sheet.png", "frames": 8, "fps": 10},
-    {"id": "sc-purr", "nombre": "Ronronear", "origen": "SpriteCook", "costo": "20 créditos",
-     "archivo": "felipe-purr-sheet.png", "frames": 8, "fps": 8},
-    {"id": "sc-faint", "nombre": "Desmayo", "origen": "SpriteCook", "costo": "20 créditos",
-     "archivo": "felipe-faint-sheet.png", "frames": 8, "fps": 8},
-    {"id": "code-idle", "nombre": "Quieto", "origen": "Código (gratis)", "costo": "0 créditos",
-     "archivo": "codigo/felipe-quieto-codigo-sheet.png", "frames": 8, "fps": 6},
-    {"id": "code-walk", "nombre": "Caminar", "origen": "Código (gratis)", "costo": "0 créditos",
-     "archivo": "codigo/felipe-caminar-codigo-sheet.png", "frames": 8, "fps": 10},
+    {"id": "sc-idle", "nombre": "Quieto", "godot": "quieto", "archivo": "felipe-idle-sheet.png", "frames": 8, "fps": 8},
+    {"id": "sc-walk", "nombre": "Caminar", "godot": "caminar", "archivo": "felipe-walk-sheet.png", "frames": 8, "fps": 10},
+    {"id": "sc-run", "nombre": "Correr / Zoomies", "godot": "correr", "archivo": "felipe-run-sheet.png", "frames": 8, "fps": 12},
+    {"id": "sc-jump", "nombre": "Saltar", "godot": "saltar", "archivo": "felipe-jump-sheet.png", "frames": 8, "fps": 10},
+    {"id": "sc-gatear", "nombre": "Gatear", "godot": "gatear", "rehacer": True, "archivo": "felipe-gatear-sheet.png", "frames": 8, "fps": 10,
+     "escala": 0.4 / 0.72},
+    {"id": "sc-attack", "nombre": "Zarpazo", "godot": "zarpazo", "archivo": "felipe-attack-sheet.png", "frames": 8, "fps": 12},
+    {"id": "sc-eat", "nombre": "Comer", "godot": "comer", "archivo": "felipe-eat-sheet.png", "frames": 8, "fps": 8},
+    {"id": "sc-purr", "nombre": "Ronronear", "godot": "ronronear", "archivo": "felipe-purr-sheet.png", "frames": 8, "fps": 8},
+    {"id": "sc-faint", "nombre": "Desmayo", "godot": "desmayo", "archivo": "felipe-faint-sheet.png", "frames": 8, "fps": 8},
+    # Ocio: "escala" = escala en el juego / 0.72, para verlas del mismo tamaño que las hojas de 106 px.
+    {"id": "sc-acicalarse", "nombre": "Ocio: acicalarse", "godot": "acicalarse", "rehacer": True, "archivo": "felipe-acicalarse-sheet.png",
+     "frames": 8, "fps": 8, "escala": 0.9 / 0.72},
+    {"id": "sc-jugar", "nombre": "Ocio: jugar con estambre", "godot": "jugar", "rehacer": True, "archivo": "felipe-estambre-sheet.png",
+     "frames": 8, "fps": 10, "escala": 0.6 / 0.72},
+    {"id": "sc-vueltas", "nombre": "Ocio: perseguirse la cola", "godot": "vueltas", "archivo": "felipe-vueltas-sheet.png",
+     "frames": 8, "fps": 10},
 ]
 
 
@@ -59,7 +56,7 @@ def main():
     base = ARTE / "felipe-A-base.png"
     bw, bh = Image.open(base).size
     extras = {}
-    for clave, archivo in [("cono", "felipe-cono.png"), ("retratos", "felipe-retratos.png"), ("caida", "felipe-caida-sheet.png"), ("gatear", "felipe-gatear-sheet.png")]:
+    for clave, archivo in [("cono", "felipe-cono.png"), ("retratos", "felipe-retratos.png"), ("caida", "felipe-caida-sheet.png")]:
         p = ARTE / archivo
         if p.exists():
             w, h = Image.open(p).size

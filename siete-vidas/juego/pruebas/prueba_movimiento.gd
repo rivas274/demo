@@ -137,6 +137,19 @@ func _correr() -> void:
 	await _esperar(60)
 	_comprobar(root.get_tree().get_nodes_in_group(Comida.GRUPO).size() == platos - 1, "La comida desaparece al comerla")
 
+	# Ocio: sin tocar nada, se pone a acicalarse, jugar o dar vueltas; cualquier botón lo corta.
+	await _poner_en(felipe, Vector2(200, Sala.SUELO))
+	felipe.espera_ocio = 1.0
+	await _esperar(80)
+	_comprobar(felipe.estado == Felipe.Estado.OCIO and felipe.sprite.animation in Felipe.OCIO.keys(), "Sin tocar nada se entretiene solo (%s)" % felipe.sprite.animation)
+	Input.action_press("mover_derecha")
+	await _esperar(3)
+	Input.action_release("mover_derecha")
+	_comprobar(felipe.estado != Felipe.Estado.OCIO and felipe.sprite.animation == "caminar" and is_equal_approx(felipe.sprite.scale.x, Felipe.ESCALA_SPRITE), "Al tocar un botón deja de entretenerse y vuelve a su tamaño")
+	for nombre: String in Felipe.OCIO:
+		var alto_ocio: float = _alto_visible(felipe.sprite.sprite_frames.get_frame_texture(nombre, 0).get_image()) * Felipe.OCIO[nombre][0]
+		_comprobar(alto_ocio > 55.0 and alto_ocio < 95.0, "La animación %s tiene el tamaño de Felipe (%.0f px)" % [nombre, alto_ocio])
+
 	for fallo in _fallos:
 		printerr("FALLO: " + fallo)
 	print("Resultado: %d fallos" % _fallos.size())

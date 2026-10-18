@@ -1,4 +1,4 @@
-"""Genera las formas de peso de Felipe (Flaco, Normal, Gordito, Modo Buda) a partir de una hoja de animación.
+"""Genera las formas de peso de Felipe (Flaco, Normal y Gordito) a partir de una hoja de animación.
 
 Solo ensancha el cuerpo: la cabeza y la cola no cambian. El ensanche crece desde el cuello
 hasta la panza y se aplica fila por fila con vecino más cercano, así sigue siendo pixel art.
@@ -10,7 +10,8 @@ from pathlib import Path
 
 from PIL import Image
 
-FORMAS = {"flaco": 0.84, "normal": 1.0, "gordito": 1.22, "buda": 1.5}
+# Modo Buda no se hace aquí: es una pose propia de SpriteCook (felipe-buda-base.png).
+FORMAS = {"flaco": 0.84, "normal": 1.0, "gordito": 1.22}
 CUELLO, PANZA = 0.56, 0.84  # posiciones relativas a la altura del personaje
 MARGEN = 24
 

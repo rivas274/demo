@@ -56,16 +56,41 @@ El diseño se basa en el gato real del creador (fotos en la conversación origin
 5. **Enamorado:** ojos brillantes (Duquesa), pero intenta disimular.
 6. **Furioso:** bufido, pelo erizado, cola esponjada.
 
-## Recursos visuales
+## Acciones de Felipe
 
-Todos en `siete-vidas/arte/felipe/` y en la ficha de concepto (`siete-vidas/concepto/felipe-concepto.html`): sprite base, animaciones (quieto, caminar, correr, zarpazo, comer, saltar, ronronear, desmayo), poses de caída (en picada con las delanteras estiradas y contacto con las delanteras), pose agachada y animación de gatear, formas de peso (Flaco y Gordito por código, Modo Buda propio), Collar de la Vergüenza y 9 retratos para diálogos.
+Lista oficial (la misma de la ficha de concepto). Toda acción nueva se agrega aquí y en la ficha. Los nombres de animación son los de Godot (`AnimacionesFelipe.HOJAS`).
+
+| Acción | Teclado | Mando | Qué hace | Animación | Estado |
+| --- | --- | --- | --- | --- | --- |
+| Quieto | — | — | Respira y mece la cola | `quieto` | En el juego |
+| Caminar | A / D o ← / → | Palanca izquierda o cruceta | 120 px/s | `caminar` | En el juego |
+| Correr | Mantener Shift | Mantener RB | 190 px/s | `correr` | En el juego |
+| Zoomies | Tocar Shift | Tocar RB | Impulso de 380 px/s durante 0,18 s con estela; espera de 0,45 s | `correr` + estirón | En el juego |
+| Saltar | Espacio | A | ~79 px; soltar corta el salto; margen de 0,1 s al salir de un borde; salto recordado de 0,12 s | `saltar` (cuadros 1, 2, 3) | En el juego |
+| Doble Salto | Espacio en el aire | A en el aire | ~140 px en total; inclinación leve (~20°); se recupera al tocar el piso | `saltar` (cuadro 3) | En el juego |
+| Caer y aterrizar | — | — | Delanteras primero: cae en picada, toca con las delanteras, baja la parte de atrás y se aplasta, con polvo | `caer` 0 y 1, `saltar` 5 y 6 | En el juego |
+| Agacharse y gatear | S o ↓ | Palanca abajo o cruceta abajo | 55 px/s; colisión de 28 px de alto (de pie, 52); cabe bajo muebles con 30 cm libres; bajo un mueble no se para aunque se suelte el botón; al bajar se aplasta y al pararse se estira | `gatear` (quieto: cuadro 0) | En el juego |
+| Bajar de una repisa | S + Espacio | Abajo + A | Atraviesa hacia abajo los muebles que se atraviesan desde abajo (repisas, mesa, estantes) | — | En el juego |
+| Zarpazo | J | X | Ataque con la pata | `zarpazo` | En el juego (sin enemigos aún) |
+| Acción | E | Y | Usa el objeto más cercano (hasta 48 px de lado y 40 px de alto); si es comida, se la come; sin objeto no hace nada. No hay botón de comer suelto | `comer` (con comida) | En el juego |
+| Ronronear | — | — | Con humanos, sube el afecto | `ronronear` | Animación lista; falta la mecánica |
+| Recibir daño | — | — | Parpadeo blanco y sacudida | Efecto de código | Falta en el juego |
+| Perder una vida | — | — | Desmayo y una de sus 7 vidas sube como fantasma | `desmayo` + código | Animación lista; falta la mecánica |
+| Ocio | Nada durante 8 s (`espera_ocio`) | — | Elige al azar: sentarse y acicalarse, jugar con estambre o perseguirse la cola; repite el ciclo 2 o 3 veces y vuelve a quieto; cualquier botón lo interrumpe | `acicalarse` (escala 0.9), `jugar` (0.6), `vueltas` (0.72) | En el juego |
+
+## Consistencia
+
+Felipe es siempre el mismo gato: vista 3/4 como Felipe A, cabeza cerca del 40 % de la altura, rasgos de la tabla de arriba y reojo por defecto. Las animaciones se generan directamente desde Felipe A (ver `CLAUDE.md`). Hoy gatear, acicalarse, jugar con estambre y la caída salieron de poses editadas y no cumplen: están marcadas para rehacer.
 
 ## Reglas de movimiento
 
-- **Al bajar, las patas delanteras van primero y tocan el piso primero.** Secuencia del salto: sube estirado, arriba recoge las patas, cae en picada con las delanteras estiradas (pose "caer" 0), toca con las delanteras (pose "caer" 1), baja la parte de atrás y se aplasta.
-- El doble salto lleva solo una inclinación leve (~20°); la vuelta completa se descartó por exagerada.
-- **Agacharse (2026-10-18):** S, ↓ o palanca abajo. Agachado gatea más lento (55 px/s) y su caja de colisión baja de 52 a 28 px, así que cabe bajo muebles con 30 cm libres (36 px). Bajo un mueble no se para aunque se suelte el botón. Agachado + saltar sobre un mueble que se atraviesa desde abajo (repisas, mesa) lo hace bajar a través de él. Animación "gatear" propia (SpriteCook): agachado y quieto usa su primer cuadro; al bajar se aplasta y al pararse se estira (código).
-- **Botón de acción (2026-10-18):** E o Y del mando. Interactúa con el objeto más cercano (hasta 48 px de lado y 40 px de alto); si es comida, se la come. Sin un objeto cerca no hace nada. Ya no existe un botón de comer suelto.
+- **Al bajar, las patas delanteras van primero y tocan el piso primero.** Inclinar una pose de pie no basta: se usan las poses propias "caer" 0 (en picada, delanteras estiradas) y 1 (contacto). La prueba del juego mide que el punto más bajo del dibujo esté del lado al que mira Felipe.
+- El Doble Salto lleva solo una inclinación leve (~20°).
+- Toda corrección de animación aprobada en la ficha se aplica también en el juego y queda cubierta por una prueba.
+
+## Recursos visuales
+
+Todos en `siete-vidas/arte/felipe/` y en la ficha de concepto (`siete-vidas/concepto/felipe-concepto.html`). La lista de archivos, ids de SpriteCook y costos está en `03-arte-y-herramientas.md` (Assets de Felipe).
 
 ## Formas de peso
 
@@ -75,14 +100,3 @@ Todos en `siete-vidas/arte/felipe/` y en la ficha de concepto (`siete-vidas/conc
 | Normal | Silueta base |
 | Gordito | Cuerpo más ancho, panza que cuelga |
 | Modo Buda | Casi una esfera; patas apenas visibles |
-
-## Animaciones mínimas (primer prototipo)
-
-Quieto (respirando, mueve la cola), caminar, correr, saltar, caer, aterrizar, zarpazo, comer snack, ronronear, recibir daño. Cada una de 6 a 8 cuadros, con estiramiento y aplastamiento de caricatura.
-
-## Historial de pruebas
-
-| Versión | Fecha | Resultado |
-| --- | --- | --- |
-| v1 | 2026-10-17 | Hoja con 4 estilos (32-bit, 16-bit, Chibi, Cel-shaded) sin foto de referencia. Archivo: `siete-vidas/arte/referencias/felipe-prueba-estilos-v1.png`. Al creador le gustó Cel-shaded y a su novia Chibi; se decidió el híbrido. |
-| v2 | 2026-10-17 | Estilo híbrido con la foto real como referencia y v1 como guía de estilo; dos versiones en una imagen (8 créditos). A: muy Chibi, cabeza grande, cuerpo redondo. B: cuerpo más largo, sombreado más marcado. Archivo: `siete-vidas/arte/referencias/felipe-hibrido-v2.png`. **Elegida la A** por el creador y su novia. |

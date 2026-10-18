@@ -4,7 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Work+Sans:wght@400;500;600&display=swap">
 <style>
-/* Layout: ficha de personaje — cabecera con Felipe, comparador de animaciones, demos de código y rasgos */
+/* Layout: guía del personaje — cabecera, tabla de acciones, animaciones aprobadas, movimiento, estados, rasgos y proporciones */
 :root {
   --bg: #f4efe9;
   --surface: #fffdfa;
@@ -64,11 +64,8 @@ canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: bloc
 .seg button[aria-pressed="true"] { background: var(--fg); color: var(--surface); }
 button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.compare { display: grid; gap: 18px; }
 .more { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
 .card h4 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 13px; }
-.row { display: grid; grid-template-columns: 110px 1fr 1fr; gap: 14px; align-items: stretch; }
-.row-label { font-family: var(--font-display); font-size: 14px; align-self: center; }
 .card {
   background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px;
   display: grid; gap: 10px; min-width: 0; align-content: start;
@@ -76,9 +73,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .stage { background: var(--stage); border-radius: 6px; display: grid; place-items: end center; min-height: 140px; padding-top: 8px; overflow: hidden; }
 .stage.dusk { background: linear-gradient(#3b2c5a, #8a4a78 55%, #ec8f6c); }
 .card-meta { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-size: 12.5px; }
-.badge { font-family: var(--font-display); font-size: 10.5px; letter-spacing: .04em; padding: 3px 7px; border-radius: 4px; color: var(--surface); }
-.badge.sc { background: var(--sc); }
-.badge.code { background: var(--code); }
+.rehacer { font-size: 11.5px; font-weight: 600; color: var(--surface); background: var(--accent); border-radius: 4px; padding: 2px 6px; }
 .empty { font-size: 13px; color: var(--muted); padding: 30px 10px; text-align: center; }
 
 .demos { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
@@ -101,8 +96,6 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
 @media (max-width: 640px) {
   .hero { grid-template-columns: 1fr; }
   .hero-art { justify-self: start; }
-  .row { grid-template-columns: 1fr 1fr; }
-  .row-label { grid-column: 1 / -1; }
   .weights { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
@@ -128,8 +121,39 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
   <section class="section">
     <div class="section-head">
       <div style="display:grid;gap:6px">
-        <h2>Animaciones: SpriteCook contra código</h2>
-        <p class="muted">Cada fila compara la misma animación hecha con SpriteCook (pagada) y generada con código a partir del sprite base (gratis).</p>
+        <h2>Acciones de Felipe</h2>
+        <p class="muted">Lista oficial de lo que Felipe puede hacer. Es la referencia para programar, diseñar niveles y generar arte: toda acción nueva se agrega aquí y en la memoria del proyecto. Los nombres de animación son los de Godot (<code>AnimacionesFelipe.HOJAS</code>).</p>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Acción</th><th>Teclado</th><th>Mando</th><th>Qué hace</th><th>Animación</th><th>Estado</th></tr></thead>
+        <tbody>
+          <tr><td>Quieto</td><td>—</td><td>—</td><td>Respira y mece la cola.</td><td><code>quieto</code></td><td>En el juego</td></tr>
+          <tr><td>Caminar</td><td>A / D o ← / →</td><td>Palanca izquierda o cruceta</td><td>120 px/s.</td><td><code>caminar</code></td><td>En el juego</td></tr>
+          <tr><td>Correr</td><td>Mantener Shift</td><td>Mantener RB</td><td>190 px/s.</td><td><code>correr</code></td><td>En el juego</td></tr>
+          <tr><td>Zoomies</td><td>Tocar Shift</td><td>Tocar RB</td><td>Impulso de 380 px/s durante 0,18 s, con estela; espera de 0,45 s entre usos.</td><td><code>correr</code> + estirón</td><td>En el juego</td></tr>
+          <tr><td>Saltar</td><td>Espacio</td><td>A</td><td>Unos 79 px. Soltar antes corta el salto. Margen de 0,1 s al salir de un borde y salto recordado de 0,12 s.</td><td><code>saltar</code> (agachado, subiendo, arriba)</td><td>En el juego</td></tr>
+          <tr><td>Doble Salto</td><td>Espacio en el aire</td><td>A en el aire</td><td>Unos 140 px en total, con una inclinación leve (~20°). Se recupera al tocar el piso.</td><td><code>saltar</code> (arriba)</td><td>En el juego</td></tr>
+          <tr><td>Caer y aterrizar</td><td>—</td><td>—</td><td>Siempre con las patas delanteras primero: cae en picada, toca con las delanteras, baja la parte de atrás y se aplasta, con polvo.</td><td><code>caer</code> 0 y 1, <code>saltar</code> 5 y 6</td><td>En el juego</td></tr>
+          <tr><td>Agacharse y gatear</td><td>S o ↓</td><td>Palanca abajo o cruceta abajo</td><td>Gatea a 55 px/s y cabe bajo muebles con 30 cm libres. Bajo un mueble no se para aunque se suelte el botón.</td><td><code>gatear</code></td><td>En el juego</td></tr>
+          <tr><td>Bajar de una repisa</td><td>S + Espacio</td><td>Abajo + A</td><td>Atraviesa hacia abajo repisas, mesas y estantes.</td><td>—</td><td>En el juego</td></tr>
+          <tr><td>Zarpazo</td><td>J</td><td>X</td><td>Ataque con la pata.</td><td><code>zarpazo</code></td><td>En el juego (todavía sin enemigos)</td></tr>
+          <tr><td>Acción</td><td>E</td><td>Y</td><td>Usa el objeto más cercano (hasta 48 px de lado). Si es comida, se la come. Sin nada cerca, no hace nada.</td><td><code>comer</code> (con comida)</td><td>En el juego</td></tr>
+          <tr><td>Ronronear</td><td>—</td><td>—</td><td>Con los humanos, para subir el afecto.</td><td><code>ronronear</code></td><td>Animación lista; falta la mecánica</td></tr>
+          <tr><td>Recibir daño</td><td>—</td><td>—</td><td>Parpadeo blanco y sacudida.</td><td>Efecto de código</td><td>Falta en el juego</td></tr>
+          <tr><td>Perder una vida</td><td>—</td><td>—</td><td>Desmayo y una de sus 7 vidas sube como fantasma.</td><td><code>desmayo</code> + código</td><td>Animación lista; falta la mecánica</td></tr>
+          <tr><td>Ocio</td><td>Nada durante unos 8 s</td><td>—</td><td>Elige al azar: sentarse y acicalarse, jugar con estambre o perseguirse la cola. Repite el ciclo 2 o 3 veces y vuelve a quedarse quieto. Cualquier botón lo interrumpe.</td><td><code>acicalarse</code>, <code>jugar</code>, <code>vueltas</code></td><td>En el juego</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div style="display:grid;gap:6px">
+        <h2>Animaciones</h2>
+        <p class="muted">Solo las aprobadas y en uso, con su nombre en Godot. Hechas con SpriteCook directamente desde Felipe A. Las marcadas "Rehacer" salieron de una pose editada y no son consistentes con Felipe (vista de perfil, otras proporciones); se usan mientras se rehacen.</p>
       </div>
       <div class="controls">
         <button class="hit" id="playBtn" type="button" aria-pressed="true">Pausar</button>
@@ -147,34 +171,32 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
         </div>
       </div>
     </div>
-    <div class="compare" id="compare"></div>
-    <h3 style="margin-top:6px">Más animaciones de SpriteCook</h3>
     <div class="more" id="more"></div>
-    <p class="muted" style="font-size:13px">"1×" muestra la hoja a su tamaño original (106 px por cuadro). En el juego Felipe se dibuja al 72 %: mide 67 px de alto en 640×360, un tercio de Valeria, para que se sienta el persa grande de 8 kilos que es.</p>
+    <p class="muted" style="font-size:13px">"1×" muestra a Felipe con el tamaño de las hojas (106 px por cuadro). En el juego se dibuja al 72 %.</p>
   </section>
 
   <section class="section">
     <div class="section-head">
       <div style="display:grid;gap:6px">
-        <h2>Gratis con código en Godot</h2>
-        <p class="muted">Efectos que no gastan créditos: se aplican encima de cualquier animación.</p>
+        <h2>Movimiento y efectos</h2>
+        <p class="muted">Cómo se combinan las animaciones con efectos de código (estirar, aplastar, estela, polvo) en el juego.</p>
       </div>
     </div>
     <div class="demos">
       <div class="card wide">
         <h3>Formas de peso</h3>
         <div class="weights" id="weights"></div>
-        <p class="muted" style="font-size:12.5px">Flaco y Gordito se generan con código (solo engorda el cuerpo). Modo Buda es una pose propia hecha con SpriteCook, con respiración por código.</p>
+        <p class="muted" style="font-size:12.5px">Flaco y Gordito: código que ensancha solo el cuerpo, del cuello a la panza. Modo Buda: pose propia de SpriteCook con respiración por código.</p>
       </div>
       <div class="card">
-        <h3>Salto con estirar y aplastar</h3>
-        <div class="stage" style="min-height:270px"><canvas id="jump" width="300" height="270" role="img" aria-label="Felipe haciendo un doble salto con vuelta"></canvas></div>
-        <p class="muted" style="font-size:12.5px">Poses de SpriteCook: agacharse, estirarse, recoger las patas, caer en picada con las delanteras estiradas y tocar el piso primero con ellas. Efectos de código: arco, Doble Salto con inclinación leve, estela, polvo y rebote.</p>
+        <h3>Salto, Doble Salto y caída</h3>
+        <div class="stage" style="min-height:270px"><canvas id="jump" width="300" height="270" role="img" aria-label="Felipe haciendo un doble salto y cayendo con las patas delanteras primero"></canvas></div>
+        <p class="muted" style="font-size:12.5px">Se agacha, sale estirado, recoge las patas arriba, cae en picada con las delanteras estiradas y toca el piso primero con ellas; después baja la parte de atrás y se aplasta con rebote. El Doble Salto lleva una inclinación leve (~20°). Estela y polvo de código.</p>
       </div>
       <div class="card">
         <h3>Agacharse y gatear</h3>
         <div class="stage" style="min-height:210px"><canvas id="crouch" width="360" height="200" role="img" aria-label="Felipe se agacha y gatea por debajo de un aparador"></canvas></div>
-        <p class="muted" style="font-size:12.5px">S o ↓ para agacharse: gatea más lento y cabe bajo muebles con 30 cm libres. Bajo un mueble no se para aunque se suelte el botón. Agachado + saltar sobre una repisa la atraviesa hacia abajo. Pose y gateo hechos con SpriteCook (28 créditos); la transición (aplastón al bajar y estirón al subir) es de código.</p>
+        <p class="muted" style="font-size:12.5px">Gatea bajo un aparador con 30 cm libres. Al bajar se aplasta un instante y al pararse se estira (código).</p>
       </div>
       <div class="card">
         <h3>Recibir daño</h3>
@@ -229,24 +251,40 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
       </div>
     </div>
     <div class="section">
-      <h2>Plan de animación</h2>
+      <h2>Proporciones</h2>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Animación</th><th>Cómo</th><th>Costo</th></tr></thead>
           <tbody>
-            <tr><td>Quieto</td><td>SpriteCook (hecha)</td><td>20</td></tr>
-            <tr><td>Caminar</td><td>SpriteCook (hecha)</td><td>20</td></tr>
-            <tr><td>Correr / Zoomies</td><td>SpriteCook (hecha)</td><td>20</td></tr>
-            <tr><td>Zarpazo</td><td>SpriteCook (hecha)</td><td>20</td></tr>
-            <tr><td>Comer snack</td><td>SpriteCook (hecha)</td><td>20</td></tr>
-            <tr><td>Saltar (poses)</td><td>SpriteCook (hecha) + efectos de código</td><td>20</td></tr>
-            <tr><td>Caer y contacto (delanteras primero)</td><td>SpriteCook (2 poses)</td><td>8</td></tr>
-            <tr><td>Modo Buda (pose)</td><td>SpriteCook (hecha) + respiración por código</td><td>8</td></tr>
-            <tr><td>Ronronear</td><td>SpriteCook (hecha)</td><td>20</td></tr>
-            <tr><td>Desmayo + vida fantasma</td><td>SpriteCook + código</td><td>20</td></tr>
-            <tr><td>Collar de la Vergüenza</td><td>SpriteCook (edición)</td><td>8</td></tr>
-            <tr><td>9 retratos para diálogos</td><td>SpriteCook</td><td>12</td></tr>
-            <tr><td>Daño, Flaco, Gordito</td><td>Código</td><td>0</td></tr>
+            <tr><td>Felipe en el juego</td><td>67 px de alto en 640×360 (hojas de 106 px al 72 %); gateando, unos 35 px. Cada hoja de otro tamaño lleva su propia escala para que la cabeza mida lo mismo (gatear 0.4, acicalarse 0.9, jugar 0.6)</td></tr>
+            <tr><td>Escala del mundo</td><td>1,21 px por cm, muebles con medidas reales</td></tr>
+            <tr><td>Humanos</td><td>3 Felipes (Valeria, 1,65 m ≈ 200 px), proporciones normales</td></tr>
+            <tr><td>Sensación</td><td>Persa grande de 8 kilos, grande y no obeso: llega casi a la altura de una mesa</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h2 style="margin-top:8px">Assets</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Asset</th><th>Godot</th><th>Archivo</th><th>Créditos</th></tr></thead>
+          <tbody>
+            <tr><td>Quieto</td><td><code>quieto</code></td><td>felipe-idle-sheet.png</td><td>20</td></tr>
+            <tr><td>Caminar</td><td><code>caminar</code></td><td>felipe-walk-sheet.png</td><td>20</td></tr>
+            <tr><td>Correr / Zoomies</td><td><code>correr</code></td><td>felipe-run-sheet.png</td><td>20</td></tr>
+            <tr><td>Saltar</td><td><code>saltar</code></td><td>felipe-jump-sheet.png</td><td>20</td></tr>
+            <tr><td>Caer y contacto</td><td><code>caer</code></td><td>felipe-caida-sheet.png</td><td>8</td></tr>
+            <tr><td>Pose agachada</td><td>—</td><td>felipe-agachado-base.png</td><td>8</td></tr>
+            <tr><td>Gatear</td><td><code>gatear</code></td><td>felipe-gatear-sheet.png</td><td>20</td></tr>
+            <tr><td>Zarpazo</td><td><code>zarpazo</code></td><td>felipe-attack-sheet.png</td><td>20</td></tr>
+            <tr><td>Comer</td><td><code>comer</code></td><td>felipe-eat-sheet.png</td><td>20</td></tr>
+            <tr><td>Ronronear</td><td><code>ronronear</code></td><td>felipe-purr-sheet.png</td><td>20</td></tr>
+            <tr><td>Desmayo</td><td><code>desmayo</code></td><td>felipe-faint-sheet.png</td><td>20</td></tr>
+            <tr><td>Pose sentado + acicalarse</td><td><code>acicalarse</code></td><td>felipe-sentado-base.png, felipe-acicalarse-sheet.png</td><td>28</td></tr>
+            <tr><td>Pose con estambre + jugar</td><td><code>jugar</code></td><td>felipe-estambre-base.png, felipe-estambre-sheet.png</td><td>28</td></tr>
+            <tr><td>Perseguirse la cola</td><td><code>vueltas</code></td><td>felipe-vueltas-sheet.png</td><td>20</td></tr>
+            <tr><td>Modo Buda</td><td>—</td><td>felipe-buda-base.png</td><td>8</td></tr>
+            <tr><td>Collar de la Vergüenza</td><td>—</td><td>felipe-cono.png</td><td>8</td></tr>
+            <tr><td>9 retratos</td><td>—</td><td>felipe-retratos.png</td><td>12</td></tr>
+            <tr><td>Flaco, Gordito, daño, vida fantasma</td><td>—</td><td>Código</td><td>0</td></tr>
           </tbody>
         </table>
       </div>
@@ -286,7 +324,7 @@ document.querySelectorAll(".seg").forEach(seg => {
     seg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
     const key = seg.dataset.ctl, v = b.dataset.v;
     state[key] = key === "bg" ? v : Number(v);
-    if (key === "bg") document.querySelectorAll("#compare .stage").forEach(s => s.classList.toggle("dusk", v === "dusk"));
+    if (key === "bg") document.querySelectorAll("#more .stage").forEach(s => s.classList.toggle("dusk", v === "dusk"));
     if (key === "scale") players.forEach(p => p.resize());
   });
 });
@@ -299,7 +337,8 @@ function makePlayer(anim, img) {
   const ctx = c.getContext("2d");
   const p = {
     c, frame: 0, acc: 0,
-    resize() { c.width = anim.fw * state.scale; c.height = anim.fh * state.scale; ctx.imageSmoothingEnabled = false; p.draw(); },
+    // "escala" iguala hojas de otro tamaño (gatear: 256 px) al tamaño de Felipe en las demás.
+    resize() { const k = state.scale * (anim.escala || 1); c.width = Math.round(anim.fw * k); c.height = Math.round(anim.fh * k); ctx.imageSmoothingEnabled = false; p.draw(); },
     draw() {
       ctx.clearRect(0, 0, c.width, c.height);
       ctx.drawImage(img, p.frame * anim.fw, 0, anim.fw, anim.fh, 0, 0, c.width, c.height);
@@ -322,10 +361,8 @@ function card(anim, img) {
     el.innerHTML = '<div class="empty">Aún no generada</div>';
     return el;
   }
-  const isCode = anim.origen.startsWith("Código");
   el.innerHTML = `<div class="stage"></div>
-    <div class="card-meta"><span class="badge ${isCode ? "code" : "sc"}">${isCode ? "CÓDIGO" : "SPRITECOOK"}</span>
-    <span>${anim.costo}</span><span class="muted">${anim.frames} cuadros · ${anim.fps} fps</span></div>`;
+    <div class="card-meta">${anim.rehacer ? '<span class="rehacer">Rehacer: no es consistente</span>' : ""}<span class="muted">${anim.frames} cuadros · ${anim.fps} fps</span></div>`;
   el.querySelector(".stage").appendChild(makePlayer(anim, img));
   return el;
 }
@@ -336,23 +373,10 @@ function card(anim, img) {
   const hero = document.getElementById("hero").getContext("2d");
   hero.drawImage(base, 0, 0);
 
-  const compare = document.getElementById("compare");
-  for (const [label, sc, code] of [["Quieto", "sc-idle", "code-idle"], ["Caminar", "sc-walk", "code-walk"]]) {
-    const row = document.createElement("div");
-    row.className = "row";
-    row.innerHTML = `<div class="row-label">${label}</div>`;
-    const a1 = ANIMS.find(a => a.id === sc), a2 = ANIMS.find(a => a.id === code);
-    row.appendChild(card(a1, a1 && imgs[a1.id]));
-    row.appendChild(card(a2, a2 && imgs[a2.id]));
-    compare.appendChild(row);
-  }
-
   const more = document.getElementById("more");
-  for (const id of ["sc-run", "sc-attack", "sc-eat", "sc-jump", "sc-purr"]) {
-    const a = ANIMS.find(x => x.id === id);
-    if (!a) continue;
+  for (const a of ANIMS) {
     const el = card(a, imgs[a.id]);
-    el.insertAdjacentHTML("afterbegin", `<h4>${a.nombre}</h4>`);
+    el.insertAdjacentHTML("afterbegin", `<h4>${a.nombre} · <code>${a.godot}</code></h4>`);
     more.appendChild(el);
   }
   if (!more.children.length) more.innerHTML = '<p class="muted">Aún no generadas.</p>';
@@ -512,8 +536,8 @@ function card(anim, img) {
   // Agacharse: a la escala de la ficha (1,69 px por cm), el aparador deja 30 cm (51 px) libres debajo.
   const crouch = document.getElementById("crouch").getContext("2d");
   const walkImg = imgs["sc-walk"] || idleImg;
-  // Gateo de SpriteCook: 8 cuadros de 256 px, se dibuja al 0,4 / 0,72 de su tamaño para igualar la escala del juego.
-  const gatearImg = EXTRAS.gatear ? await load(EXTRAS.gatear.src) : null;
+  // Gateo: 8 cuadros de 256 px, se dibuja al 0,4 / 0,72 de su tamaño para igualar la escala del juego.
+  const gatearImg = imgs["sc-gatear"] || null;
   function drawCrouch(ctx, time) {
     const G = 192, A0 = 140, A1 = 250, LIBRE = 51, ALTO = 137;
     const c = time % 5;

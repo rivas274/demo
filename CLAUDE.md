@@ -10,11 +10,25 @@ Al cerrar cualquier decisión nueva, actualiza esos archivos.
 
 Cuando cambies cualquier cosa de un personaje (sprites, animaciones, reglas de movimiento, rasgos), en el mismo trabajo y sin que te lo pidan:
 
-1. **Memoria:** actualiza `siete-vidas/memoria/` (guía del personaje, arte y herramientas con assets y créditos, pendientes).
+1. **Memoria:** actualiza `siete-vidas/memoria/` (guía del personaje con la tabla **Acciones de Felipe**, arte y herramientas con assets y créditos, pendientes).
 2. **Ficha de concepto:** regenera la copia local (`python3 siete-vidas/herramientas/pagina_felipe.py siete-vidas/concepto/felipe-concepto.html`) y vuelve a publicar la versión en línea (https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe). Revisa que tablas y textos de la ficha mencionen el cambio.
 3. **Juego:** si afecta al juego, aplícalo en `siete-vidas/juego/`, cúbrelo con una prueba y corre las pruebas.
 
+Además:
+
+- **Toda acción nueva o cambiada** (controles, qué hace, animación, estado) se registra en la tabla "Acciones de Felipe", que existe igual en la ficha y en `02-guia-felipe.md`.
+- **La ficha y la memoria son la guía vigente** para el desarrollador, el diseñador y Claude: muestran solo lo aprobado y en uso. Lo descartado se quita de ambas (y sus archivos se borran del repositorio); no se guarda historial ahí.
+
 Al terminar, confirma al creador cuáles de los tres actualizaste.
+
+## Regla fija: consistencia del personaje (prioridad máxima)
+
+Felipe debe verse siempre como el mismo gato. Esto pesa más que ahorrar créditos o tener una pose exacta.
+
+- **Toda animación nueva se genera directamente desde Felipe A** (`14b3c27f-798c-4795-84fe-48ed15508247`) con `animate_game_art`, describiendo el movimiento completo (por ejemplo, "se sienta y se lame la pata"). No se edita una pose intermedia: las poses editadas cambian la vista (quedan de perfil), las proporciones y la expresión.
+- **Vista 3/4 como Felipe A**, cabeza cerca del 40 % de la altura, rasgos de la guía y expresión por defecto de reojo, salvo que la acción pida otra.
+- **Objetos que no están en Felipe A** (estambre, comida, juguetes) se dibujan aparte y se mueven por código; no se piden dentro de la animación.
+- **Antes de usar una animación**, se compara con `python3 siete-vidas/herramientas/comparar_felipe.py <salida.png>` (Felipe A junto a un cuadro de cada animación, al tamaño del juego) y se muestra al creador. Si no es el mismo gato, no entra.
 
 ## Regla fija: proporciones
 

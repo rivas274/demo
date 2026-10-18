@@ -16,6 +16,7 @@ Prototipo jugable de **Felipe: Siete Vidas, Cero Disculpas**.
 | Zoomies (tocar = impulso; mantener = correr) | Shift | RB |
 | Zarpazo | J | X |
 | Acción: usar el objeto cercano; si es comida, comerla | E | Y |
+| (Ocio: sin tocar nada 8 s, Felipe se acicala, juega o da vueltas) | — | — |
 
 ## Estructura
 

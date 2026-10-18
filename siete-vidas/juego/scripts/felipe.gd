@@ -6,7 +6,7 @@ extends CharacterBody2D
 
 signal aterrizo(fuerza: float)
 
-enum Estado { SUELO, AIRE, ZOOMIES, ZARPAZO, COMIENDO, ATERRIZANDO }
+enum Estado { SUELO, AIRE, ZOOMIES, ZARPAZO, COMIENDO, ATERRIZANDO, OCIO }
 
 ## Felipe mide unos 67 px de alto: Valeria (1,65 m) mide 3 Felipes. Ver la guía del personaje.
 const ESCALA_SPRITE := 0.72
@@ -30,6 +30,16 @@ const ESCALA_AGACHADO := 0.4
 const POSICION_AGACHADO := Vector2(0, -51)
 ## Capa de los muebles que se atraviesan desde abajo (agachado + saltar baja a través de ellos).
 const CAPA_ATRAVESABLE := 2
+## Animaciones de ocio: nombre -> [escala, posición del sprite, vueltas del ciclo antes de volver a quieto].
+## Las hojas vienen de resoluciones distintas: la escala iguala el tamaño de la cabeza con Felipe de pie
+## y la posición deja las patas sobre el piso.
+const OCIO := {
+	"acicalarse": [0.9, Vector2(0, -41), 3],
+	"jugar": [0.6, Vector2(0, -55), 3],
+	"vueltas": [0.72, Vector2(0, -38), 2],
+}
+## Acciones que, presionadas, cuentan como "estar jugando" (cortan el ocio y reinician la espera).
+const ACCIONES := ["mover_izquierda", "mover_derecha", "saltar", "zoomies", "zarpazo", "interactuar", "agacharse"]
 ## Distancia (horizontal, vertical) a la que el botón de acción alcanza un objeto.
 const ALCANCE := Vector2(48, 40)
 
@@ -52,6 +62,9 @@ const ALCANCE := Vector2(48, 40)
 @export var velocidad_zoomies := 380.0
 @export var duracion_zoomies := 0.18
 @export var espera_zoomies := 0.45
+@export_group("Ocio")
+## Segundos quieto y sin tocar nada antes de ponerse a acicalarse, jugar o dar vueltas.
+@export var espera_ocio := 8.0
 
 var estado := Estado.SUELO
 var mirando := 1.0
@@ -67,6 +80,8 @@ var _tiempo_desde_salto := 99.0
 var _tiempo_aterrizando := 0.0
 var _tiempo_estela := 0.0
 var _tiempo_bajando := 0.0
+var _tiempo_sin_tocar := 0.0
+var _tiempo_ocio := 0.0
 var _efecto: Tween
 var _posicion_sprite: Vector2
 
@@ -93,12 +108,13 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("saltar"):
 		_tiempo_salto_pedido = 0.0
 	_actualizar_bajada(delta)
+	_actualizar_ocio(delta)
 	_actualizar_agachado()
 
 	match estado:
 		Estado.ZOOMIES:
 			_actualizar_zoomies(delta)
-		Estado.ZARPAZO, Estado.COMIENDO:
+		Estado.ZARPAZO, Estado.COMIENDO, Estado.OCIO:
 			_frenar(delta)
 			_aplicar_gravedad(delta)
 		Estado.ATERRIZANDO:
@@ -259,7 +275,7 @@ func _aterrizar() -> void:
 
 func _actualizar_animacion(direccion: float) -> void:
 	sprite.flip_h = mirando < 0.0
-	if estado in [Estado.ZARPAZO, Estado.COMIENDO]:
+	if estado in [Estado.ZARPAZO, Estado.COMIENDO, Estado.OCIO]:
 		return
 	if estado == Estado.ZOOMIES:
 		_reproducir("correr")
@@ -427,3 +443,41 @@ func _actualizar_bajada(delta: float) -> void:
 	_tiempo_bajando -= delta
 	if _tiempo_bajando <= 0.0:
 		set_collision_mask_value(CAPA_ATRAVESABLE, true)
+
+
+## Ocio: tras unos segundos quieto y sin tocar nada, elige al azar acicalarse, jugar con estambre
+## o dar vueltas persiguiéndose la cola. Cualquier acción lo corta y vuelve a contar desde cero.
+func _actualizar_ocio(delta: float) -> void:
+	var tocando := ACCIONES.any(func(accion: String) -> bool: return Input.is_action_pressed(accion))
+	if estado == Estado.OCIO:
+		_tiempo_ocio -= delta
+		if tocando or _tiempo_ocio <= 0.0 or not is_on_floor():
+			_terminar_ocio()
+		return
+	if tocando or estado != Estado.SUELO or agachado or not is_on_floor() or absf(velocity.x) > 1.0:
+		_tiempo_sin_tocar = 0.0
+		return
+	_tiempo_sin_tocar += delta
+	if _tiempo_sin_tocar >= espera_ocio:
+		_empezar_ocio(OCIO.keys().pick_random())
+
+
+func _empezar_ocio(nombre: String) -> void:
+	var datos: Array = OCIO[nombre]
+	estado = Estado.OCIO
+	if _efecto:
+		_efecto.kill()
+	sprite.rotation = 0.0
+	sprite.scale = Vector2.ONE * datos[0]
+	sprite.position = datos[1]
+	sprite.play(nombre)
+	var frames := sprite.sprite_frames
+	_tiempo_ocio = frames.get_frame_count(nombre) / frames.get_animation_speed(nombre) * datos[2]
+
+
+func _terminar_ocio() -> void:
+	estado = Estado.SUELO if is_on_floor() else Estado.AIRE
+	_tiempo_sin_tocar = 0.0
+	sprite.scale = _escala_base()
+	sprite.position = _posicion_sprite
+	sprite.play("quieto")

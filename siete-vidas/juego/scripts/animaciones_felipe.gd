@@ -20,6 +20,10 @@ const HOJAS := {
 	"caer": ["felipe-caida-sheet.png", 0.0, false, 2],
 	## Gateo agachado: cuadros de 256×256 (más grandes que los demás); se dibuja con Felipe.ESCALA_AGACHADO.
 	"gatear": ["felipe-gatear-sheet.png", 10.0, true],
+	## Ocio (sin tocar nada unos segundos). Cada hoja tiene su tamaño de cuadro; ver Felipe.OCIO.
+	"acicalarse": ["felipe-acicalarse-sheet.png", 8.0, true],
+	"jugar": ["felipe-estambre-sheet.png", 10.0, true],
+	"vueltas": ["felipe-vueltas-sheet.png", 10.0, true],
 }
 
 

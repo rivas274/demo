@@ -80,7 +80,7 @@ Referencias de diseño (no se usan en el juego): foto real de Felipe (`a0fbe97b-
 ## Gemini (Nano Banana) para imágenes fijas (2026-10-18)
 
 - **Para qué:** imágenes fijas (fondos, muebles, objetos, iconos de interfaz) sin gastar créditos de SpriteCook. **No para animaciones de Felipe**: esas siguen en SpriteCook desde Felipe A (regla de consistencia).
-- **Cómo:** la sesión en la nube no llega a la computadora del creador. Se usa su sesión de Remote Control "emergencias" (`session_01BaNYjKLABkD7kjEzfX3JYu`), que maneja su Chrome con la extensión de Claude: en https://gemini.google.com/app?hl=es_419 está su cuenta iniciada y el menú "+" → "Crear imagen". Se le escribe con `send_message`; responde por mensajes entre sesiones.
+- **Cómo:** la sesión en la nube no llega a la computadora del creador. Se usa su sesión de Remote Control **"hrivas-dell-recursive-planet"** (`session_01Gg1U6nrhg2HGDFM7cR41gL`), en su Dell, con este repositorio clonado en la rama del juego (antes se usó "emergencias", `session_01BaNYjKLABkD7kjEzfX3JYu`, sin el repositorio). Maneja su Chrome con la extensión de Claude: en https://gemini.google.com/app?hl=es_419 está su cuenta iniciada y el menú "+" → "Crear imagen". Se le escribe con `send_message`; responde por mensajes entre sesiones.
 - **Flujo acordado (opción A):** esa sesión genera la imagen, clona `rivas274/demo` y la sube a la rama del juego; la sesión del juego la revisa e integra. Antes de generar, esa sesión confirma con el creador.
 - **API directa (alternativa):** agregar `GEMINI_API_KEY` en la configuración del entorno (se lee en una sesión nueva). La red de la nube sí llega a `generativelanguage.googleapis.com`.
 

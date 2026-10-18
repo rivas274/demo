@@ -55,13 +55,13 @@ Actualizado: 2026-10-18. Detalle completo en la biblia (ver README.md).
 - **Nivel 1, rediseño 3 (2026-10-18): habitaciones con puertas.** Cada habitación es un espacio aparte (cámara dentro del cuarto) y se pasa por **puertas** con el botón de acción o arriba (fundido a negro). Ruta: sala → recibidor (caja de arena, librero, dos rejas para bebés apiladas y la escalera) → cocina opcional → pasillo de arriba (cojín) → dormitorio opcional → estudio (A.S.P.I.) → balcón. **Se sube por la escalera de fondo** (dibujada en la pared; al pie, arriba o E y Felipe sube en diagonal, como una puerta), no por una cortina ni por escalones en primer plano: las rejas (1,5 m) se cruzan trepando el librero y se abren desde la escalera (atajo). La cortina queda en el dormitorio para un calcetín secreto. Diseño en `siete-vidas/diseno/nivel-01-gran-fuga.md`.
 - **La demo es el tutorial del apartamento**, como dice la biblia: cada mueble enseña un movimiento con un aviso de una línea y la tecla o el botón del mando en uso. Recorrido vigente: sala → recibidor → (cocina) → escalera → pasillo → (dormitorio) → estudio con A.S.P.I. → balcón, donde gana **Caer de Pie** y termina la demo; detalle por zona en `siete-vidas/diseno/nivel-01-gran-fuga.md`.
 - Pantallas de título, introducción (el video viral; "Me voy de esta casa"), pausa y final (tiempo, calcetines 3, logros, vidas perdidas). Logros de la demo: La Gravedad Funciona, Desenchufada, Coleccionista de Calcetines, Caer de Pie.
-- **Peso con personalidad:** báscula con aguja y humor de Felipe (Atlético, Esponjoso, Modo Invierno, Modo Buda).
+- **Peso con personalidad:** humor de Felipe según los kilos (Atlético, Esponjoso, Modo Invierno, Modo Buda). La báscula de la interfaz se quitó (2026-10-18: "se ve mal").
 
 ## Prototipo jugable (2026-10-18)
 
 - **Vida:** 5 corazones por vida y 9 vidas; al perderlas todas, vuelven las 9 con el Collar de la Vergüenza. Comer cura 1 corazón y suma 0,3 kg.
 - **A.S.P.I.** es el primer enemigo: patrulla, persigue a Felipe si lo ve a su altura, quita 1 corazón al tocarlo y se apaga con 3 zarpazos.
-- **Interfaz** con estilo de red social: corazones como "me gusta", vidas, báscula en kilos y logros como notificaciones.
+- **Interfaz** con estilo de red social: corazones como "me gusta", vidas y logros como notificaciones.
 
 ## Forma de construir (2026-10-17)
 

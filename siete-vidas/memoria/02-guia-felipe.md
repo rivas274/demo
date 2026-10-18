@@ -80,7 +80,7 @@ Lista oficial (la misma de la ficha de concepto). Toda acción nueva se agrega a
 | Ronronear | — | — | Con humanos, sube el afecto | `ronronear` | Animación lista; falta la mecánica |
 | Recibir daño | — | — | Quita 1 de 5 corazones, lo empuja lejos del golpe y queda 1,2 s invulnerable, parpadeando | Efecto de código | En el juego |
 | Perder una vida | — | — | Sin corazones se desmaya, una de sus 9 vidas sube como fantasma y a los 1,8 s reaparece en el último punto de descanso que pisó (caja de arena o cojín) con los corazones llenos. Sin vidas, vuelven las 9 con el Collar de la Vergüenza | `desmayo` + código | En el juego |
-| Peso | — | — | Empieza en 8,0 kg; cada comida suma 0,3 kg. No cambia el dibujo: báscula con aguja en la interfaz y el humor de Felipe según los kilos: Atlético (< 8,5), Esponjoso (< 9,5), Modo Invierno (< 11), Modo Buda | — | En el juego (indicador) |
+| Peso | — | — | Empieza en 8,0 kg; cada comida suma 0,3 kg. No cambia el dibujo ni el movimiento, y no se muestra en la interfaz (la báscula se quitó, 2026-10-18); Felipe tiene un humor de Felipe según los kilos: Atlético (< 8,5), Esponjoso (< 9,5), Modo Invierno (< 11), Modo Buda | — | En el juego (indicador) |
 | Ocio | Nada durante 8 s (`espera_ocio`) | — | Elige al azar: sentarse y acicalarse, jugar con estambre o perseguirse la cola; repite el ciclo 2 o 3 veces y vuelve a quieto; cualquier botón lo interrumpe | `acicalarse` (de pie), `jugar` (+ bola de estambre por código), `vueltas` | En el juego |
 
 ## Proporciones medidas (Felipe A, cuadro de 106 px)

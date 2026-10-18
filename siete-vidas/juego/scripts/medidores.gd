@@ -1,7 +1,7 @@
 class_name Medidores
 extends Control
-## Interfaz con estilo de red social: corazones ("me gusta") de vida, vidas restantes, peso en kilos
-## y notificaciones de logros. Arte provisional dibujado con código.
+## Interfaz con estilo de red social: corazones ("me gusta") de vida, vidas restantes
+## y notificaciones de logros. El peso no se muestra aquí (se quitó la báscula). Arte provisional dibujado con código.
 
 const ROJO := Color("e0483b")
 const VACIO := Color(0.25, 0.18, 0.18, 0.55)
@@ -36,13 +36,12 @@ func _draw() -> void:
 	if not felipe or (pantallas and pantallas.modo != Pantallas.Modo.JUGANDO):
 		return
 	var fuente := ThemeDB.fallback_font
-	draw_rect(Rect2(6, 6, 246, 34), FONDO)
+	draw_rect(Rect2(6, 6, 92, 34), FONDO)
 	for i in Felipe.CORAZONES_MAX:
 		_corazon(Vector2(16 + i * 16, 16), ROJO if i < felipe.corazones else VACIO)
 	draw_string(fuente, Vector2(12, 36), "%d vidas" % felipe.vidas, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, TEXTO)
-	_bascula(Vector2(86, 20), fuente)
 	if felipe.tiene_collar:
-		draw_string(fuente, Vector2(100, 20), "Collar de la Vergüenza", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, ROJO)
+		draw_string(fuente, Vector2(104, 20), "Collar de la Vergüenza", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, ROJO)
 	if _tiempo_notificacion > 0.0:
 		var caja := Rect2(get_viewport_rect().size.x - 216, 8, 208, 34)
 		draw_rect(caja, FONDO)
@@ -51,7 +50,7 @@ func _draw() -> void:
 		draw_string(fuente, caja.position + Vector2(8, 27), _notificacion, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, TEXTO)
 
 
-## Peso con personalidad: el humor de Felipe según los kilos (no cambia su dibujo).
+## Peso con personalidad: el humor de Felipe según los kilos (no cambia su dibujo ni su movimiento).
 const NIVELES_PESO := [[8.5, "Atlético"], [9.5, "Esponjoso"], [11.0, "Modo Invierno"], [INF, "Modo Buda"]]
 
 
@@ -60,21 +59,6 @@ static func nivel_de_peso(kilos: float) -> String:
 		if kilos < nivel[0]:
 			return nivel[1]
 	return NIVELES_PESO[-1][1]
-
-
-## Báscula de baño en miniatura: la aguja va de 6 kg (izquierda) a 12 kg (derecha).
-func _bascula(origen: Vector2, fuente: Font) -> void:
-	var cuerpo := Rect2(origen + Vector2(16, -14), Vector2(26, 22))
-	draw_rect(cuerpo, Color("d8cbb8"))
-	draw_rect(cuerpo, Color("6e3a26"), false, 1.0)
-	var centro := cuerpo.position + Vector2(13, 12)
-	draw_arc(centro, 8.0, PI, TAU, 10, Color("6e3a26"), 1.0)
-	var t := clampf((felipe.peso - 6.0) / 6.0, 0.0, 1.0)
-	var angulo := PI + t * PI
-	draw_line(centro, centro + Vector2(cos(angulo), sin(angulo)) * 7.0, ROJO, 1.5)
-	var texto := ("%.1f kg" % felipe.peso).replace(".", ",")
-	draw_string(fuente, origen + Vector2(48, -2), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, TEXTO)
-	draw_string(fuente, origen + Vector2(48, 11), nivel_de_peso(felipe.peso), HORIZONTAL_ALIGNMENT_LEFT, -1, 9, ROJO)
 
 
 func _corazon(centro: Vector2, color: Color) -> void:

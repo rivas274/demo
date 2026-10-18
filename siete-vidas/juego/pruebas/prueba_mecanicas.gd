@@ -42,7 +42,7 @@ func _correr() -> void:
 	_comprobar(is_equal_approx(felipe.peso, peso_antes + Felipe.PESO_POR_COMIDA), "Comer sube el peso (%.1f kg)" % felipe.peso)
 	await _esperar(60)
 
-	_comprobar(Medidores.nivel_de_peso(8.0) == "Atlético" and Medidores.nivel_de_peso(10.0) == "Modo Invierno" and Medidores.nivel_de_peso(12.0) == "Modo Buda", "La báscula pone el humor de Felipe según el peso")
+	_comprobar(Medidores.nivel_de_peso(8.0) == "Atlético" and Medidores.nivel_de_peso(10.0) == "Modo Invierno" and Medidores.nivel_de_peso(12.0) == "Modo Buda", "El peso le pone un humor a Felipe según los kilos")
 
 	# Desmayo y reaparición.
 	for i in Felipe.CORAZONES_MAX:

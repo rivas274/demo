@@ -17,7 +17,7 @@
 - **Subir imágenes locales:** `create_asset_upload`, luego PUT con curl a la URL devuelta, luego `finalize_asset_upload`.
 - **Red del entorno:** deben estar permitidos `mcp.spritecook.ai` y `api.spritecook.ai`; sin el segundo no se pueden descargar ni ver las imágenes.
 - **Proyecto en SpriteCook:** "Siete Vidas, Cero Disculpas", id `126fcb42-c3f6-40b5-9f75-42715fbdce40`. Pasar siempre `project_id`.
-- **Créditos:** 800 del plan de pago; quedan **440** (2026-10-18). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
+- **Créditos:** 800 del plan de pago; quedan **414** (2026-10-18). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
 - **Regla de oro:** mostrar al creador el prompt, el modelo, los ajustes y el costo, y esperar aprobación antes de cada llamada que gaste créditos.
 
 ### Modelos y costos útiles (consultados el 2026-10-17)
@@ -41,7 +41,7 @@
 - **Efectos de código (gratis, en Godot y en la ficha):** estirar y aplastar, estela de imágenes fantasma, polvo, inclinación del Doble Salto, parpadeo de daño, vida fantasma, transición de agacharse.
 - **Peso:** no tiene arte de Felipe; es un indicador de la interfaz (ver `02-guia-felipe.md`, sección Peso).
 - **Tamaños de hoja:** animando Felipe A salen cuadros de 106×106, que se dibujan todos a 0.72. Las poses editadas salen de otros tamaños (80, 164, 234 px) y obligaban a usar otra escala, por eso la cabeza cambiaba de tamaño: no se usan. La prueba de movimiento comprueba que cada animación tenga cuadros de 106 px.
-- **Gatear desde Felipe A (2026-10-18, 20 créditos, `ace113a8-…`):** no sirvió: solo baja la cabeza, no se pega al piso y la cola queda arriba. No se integró.
+- **Movimientos difíciles (pegarse al piso, poses poco comunes):** el modelo por defecto no los logra desde Felipe A (gatear salió de pie, 20 créditos perdidos). Con `model="pixel-engine-v1.5"` (26 créditos) sí: gatear salió consistente y con la transición incluida en los primeros cuadros.
 - **Salto (tiempos de la ficha, iguales en Godot):** se agacha (cuadro 1 de `saltar`), sale estirado (2), recoge las patas arriba (3), Doble Salto con ~20° de inclinación, cae en picada (`caer` 0), toca con las delanteras (`caer` 1), baja la parte de atrás (5) y se asienta (6). No usar el cuadro 4 de `saltar` (viene en diagonal).
 
 ### Trucos para ahorrar créditos
@@ -53,7 +53,7 @@
 
 ### Assets de Felipe (vigentes)
 
-Solo lo que se usa (las formas de peso dibujadas, el Modo Buda, la pose sentado y la pose con estambre se descartaron el 2026-10-18). ⚠ = hecho desde una pose editada; no es consistente con Felipe A y se rehace desde Felipe A (ver pendientes). Se usa mientras tanto.
+Solo lo que se usa (las formas de peso dibujadas, el Modo Buda, la pose sentado, la pose con estambre y la pose agachada se descartaron el 2026-10-18). ⚠ = hecho desde una pose editada; no es consistente con Felipe A y se rehace desde Felipe A (ver pendientes). Se usa mientras tanto.
 
 | Asset | Godot | Id SpriteCook | Archivo en `siete-vidas/arte/felipe/` |
 | --- | --- | --- | --- |
@@ -63,8 +63,7 @@ Solo lo que se usa (las formas de peso dibujadas, el Modo Buda, la pose sentado 
 | Correr / Zoomies | `correr` | `9de2013a-ffd6-4cb6-a338-63f80c2d5e78` | `felipe-run-sheet.png` |
 | Saltar | `saltar` | `2113c9a5-5acc-4289-8fcb-1f167c20d1ea` | `felipe-jump-sheet.png` |
 | ⚠ Caer y contacto (2 cuadros) | `caer` | `6519b507-8c18-4582-b6fd-995ca133a7ea` | `felipe-caida-sheet.png` (original: `felipe-caida-poses.png`) |
-| ⚠ Pose agachada | — | `0d4f04f1-5da7-4e11-9017-1fa8742e63fc` | `felipe-agachado-base.png` |
-| ⚠ Gatear (8 cuadros de 256×256) | `gatear` | `16d9e097-693e-455f-a9a3-a99c1d87e67b` | `felipe-gatear-sheet.png` |
+| Agacharse + gatear (una hoja: 0 a 2 transición, 3 a 7 gateo; `pixel-engine-v1.5`) | `agacharse`, `gatear` | `9e26566c-e8ab-4a4b-8ef0-d1cb2c4ee70b` | `felipe-gatear-sheet.png` |
 | Zarpazo | `zarpazo` | `86da320a-f4cb-4269-ab76-b66648db1e20` | `felipe-attack-sheet.png` |
 | Comer | `comer` | `df2345fe-8e80-42c8-ba44-304490802633` | `felipe-eat-sheet.png` |
 | Ronronear | `ronronear` | `4dbc1380-5c45-4066-858c-f1c03a87fb67` | `felipe-purr-sheet.png` |

@@ -69,7 +69,7 @@ Lista oficial (la misma de la ficha de concepto). Toda acción nueva se agrega a
 | Saltar | Espacio | A | ~79 px; soltar corta el salto; margen de 0,1 s al salir de un borde; salto recordado de 0,12 s | `saltar` (cuadros 1, 2, 3) | En el juego |
 | Doble Salto | Espacio en el aire | A en el aire | ~140 px en total; inclinación leve (~20°); se recupera al tocar el piso | `saltar` (cuadro 3) | En el juego |
 | Caer y aterrizar | — | — | Delanteras primero: cae en picada, toca con las delanteras, baja la parte de atrás y se aplasta, con polvo | `caer` 0 y 1, `saltar` 5 y 6 | En el juego |
-| Agacharse y gatear | S o ↓ | Palanca abajo o cruceta abajo | 55 px/s; colisión de 28 px de alto (de pie, 52); cabe bajo muebles con 30 cm libres; bajo un mueble no se para aunque se suelte el botón; al bajar se aplasta y al pararse se estira | `gatear` (quieto: cuadro 0) | En el juego |
+| Agacharse y gatear | S o ↓ | Palanca abajo o cruceta abajo | Transición dibujada al bajar y al pararse (al revés); gatea a 55 px/s con la panza al piso y patas alternadas; colisión de 50 px (de pie, 58); cabe bajo muebles con 45 cm libres (54 px); bajo un mueble no se para aunque se suelte el botón | `agacharse` (cuadros 0 a 2 de la hoja), `gatear` (3 a 7) | En el juego |
 | Bajar de una repisa | S + Espacio | Abajo + A | Atraviesa hacia abajo los muebles que se atraviesan desde abajo (repisas, mesa, estantes) | — | En el juego |
 | Zarpazo | J | X | Ataque con la pata | `zarpazo` | En el juego (sin enemigos aún) |
 | Acción | E | Y | Usa el objeto más cercano (hasta 48 px de lado y 40 px de alto); si es comida, se la come; sin objeto no hace nada. No hay botón de comer suelto | `comer` (con comida) | En el juego |
@@ -87,13 +87,14 @@ Lista oficial (la misma de la ficha de concepto). Toda acción nueva se agrega a
 | Cabeza (orejas a barbilla) | filas 25 a 70: 45 px de alto, 55 de ancho | 32 × 40 px |
 | Orejas a patas | filas 25 a 105: 80 px | 58 px |
 | Con la cola | 93 px | 67 px |
+| Agachado (orejas a patas) | 73 px | 52 px |
 | Cabeza / altura | 56 % | 56 % |
 
 Todas las animaciones deben respetar estas medidas: misma hoja de 106 px, misma escala, deformación máxima ±8 %.
 
 ## Consistencia
 
-Felipe es siempre el mismo gato: vista 3/4 como Felipe A, cabeza cerca del 40 % de la altura, rasgos de la tabla de arriba y reojo por defecto. Las animaciones se generan directamente desde Felipe A (ver `CLAUDE.md`). Hoy gatear y la caída salieron de poses editadas y no cumplen (la cabeza cambia de tamaño y la vista pasa a perfil): están marcadas para rehacer, con una transición de pie → agachado.
+Felipe es siempre el mismo gato: vista 3/4 como Felipe A, cabeza cerca del 40 % de la altura, rasgos de la tabla de arriba y reojo por defecto. Las animaciones se generan directamente desde Felipe A (ver `CLAUDE.md`). Hoy solo la caída del salto salió de una pose editada y no cumple (la cabeza cambia de tamaño): está marcada para rehacer.
 
 ## Reglas de movimiento
 

@@ -24,13 +24,11 @@ const INCLINACION_DOBLE_SALTO := -0.35
 ## Estirar y aplastar deforman la cabeza junto con el cuerpo: nunca más de ±8 % para que Felipe
 ## conserve sus proporciones (regla del creador).
 const DEFORMACION_MAXIMA := 0.08
-## Alto de la caja de colisión de pie y agachado: agachado cabe bajo muebles de 30 cm (36 px).
-const ALTO_DE_PIE := 52.0
-const ALTO_AGACHADO := 28.0
-## Animación "gatear" (cuadros de 256 px con el gato apoyado abajo): a esta escala mide unos 36 px de alto
-## y cabe bajo un mueble de 30 cm. POSICION_AGACHADO deja las patas sobre el piso.
-const ESCALA_AGACHADO := 0.4
-const POSICION_AGACHADO := Vector2(0, -51)
+## Alto de la caja de colisión de pie y agachado.
+## De pie mide 58 px de las orejas a las patas; agachado, unos 52 px (la cabeza no se aplasta).
+## Pasa agachado bajo muebles con 45 cm libres (54 px).
+const ALTO_DE_PIE := 58.0
+const ALTO_AGACHADO := 50.0
 ## Capa de los muebles que se atraviesan desde abajo (agachado + saltar baja a través de ellos).
 const CAPA_ATRAVESABLE := 2
 ## Animaciones de ocio: nombre -> vueltas del ciclo antes de volver a quieto.
@@ -45,6 +43,8 @@ const BOLA_ESTAMBRE := preload("res://assets/felipe/estambre-bola.png")
 const DISTANCIA_ESTAMBRE := 34.0
 ## Acciones que, presionadas, cuentan como "estar jugando" (cortan el ocio y reinician la espera).
 const ACCIONES := ["mover_izquierda", "mover_derecha", "saltar", "zoomies", "zarpazo", "interactuar", "agacharse"]
+## Duración de la transición "agacharse" (3 cuadros a 12 fps), también al pararse.
+const DURACION_TRANSICION := 0.25
 ## Distancia (horizontal, vertical) a la que el botón de acción alcanza un objeto.
 const ALCANCE := Vector2(48, 40)
 
@@ -86,6 +86,7 @@ var _tiempo_aterrizando := 0.0
 var _tiempo_estela := 0.0
 var _tiempo_bajando := 0.0
 var _tiempo_sin_tocar := 0.0
+var _tiempo_levantandose := 0.0
 var _tiempo_ocio := 0.0
 var _estambre: Sprite2D
 var _efecto: Tween
@@ -296,11 +297,16 @@ func _actualizar_animacion(direccion: float) -> void:
 	elif not is_on_floor():
 		_animar_aire()
 	elif agachado:
-		# Gatea; quieto, se queda pegado al piso en el primer cuadro.
-		if direccion != 0.0:
+		# Primero termina de agacharse; después gatea, o se queda pegado al piso en el primer cuadro.
+		if sprite.animation == "agacharse" and sprite.is_playing():
+			pass
+		elif direccion != 0.0:
 			_reproducir("gatear")
 		else:
 			_poner_cuadro("gatear", 0)
+	elif _tiempo_levantandose > 0.0:
+		# Se está parando: la transición de agacharse al revés.
+		_tiempo_levantandose -= get_physics_process_delta_time()
 	elif absf(velocity.x) > velocidad_caminar + 5.0:
 		_reproducir("correr")
 	elif direccion != 0.0:
@@ -408,18 +414,17 @@ func _poner_agachado(valor: bool) -> void:
 	if _efecto:
 		_efecto.kill()
 	sprite.rotation = 0.0
-	sprite.position = POSICION_AGACHADO if valor else _posicion_sprite
+	sprite.scale = _escala_base()
+	# Transición dibujada (cuadros 0 a 2 de la hoja de gatear): al bajar hacia adelante, al pararse al revés.
 	if valor:
-		sprite.play("gatear")
-		sprite.stop()
-	# Transición rápida: un aplastón al bajar y un estirón al pararse.
-	sprite.scale = _escala_base() * (Vector2(1.04, 0.96) if valor else Vector2(0.96, 1.04))
-	_efecto = create_tween()
-	_efecto.tween_property(sprite, "scale", _escala_base(), 0.1)
+		sprite.play("agacharse")
+	elif is_on_floor():
+		sprite.play_backwards("agacharse")
+		_tiempo_levantandose = DURACION_TRANSICION
 
 
 func _escala_base() -> Vector2:
-	return Vector2.ONE * (ESCALA_AGACHADO if agachado else ESCALA_SPRITE)
+	return Vector2.ONE * ESCALA_SPRITE
 
 
 ## ¿Hay espacio arriba para pararse? (Los muebles que se atraviesan desde abajo no estorban.)

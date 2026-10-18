@@ -4,7 +4,7 @@ extends SceneTree
 ## Termina con código 0 si todo pasa y 1 si algo falla.
 
 ## Animaciones hechas desde poses editadas, que no tienen las proporciones de Felipe A (ver pendientes).
-const PENDIENTES_DE_REHACER := ["gatear", "caer"]
+const PENDIENTES_DE_REHACER := ["caer"]
 
 var _fallos: Array[String] = []
 
@@ -91,18 +91,23 @@ func _correr() -> void:
 
 	# Agacharse y gatear.
 	Input.action_press("agacharse")
-	await _esperar(4)
-	_comprobar(felipe.agachado, "S lo agacha")
+	await _esperar(2)
+	_comprobar(felipe.agachado and felipe.sprite.animation == "agacharse", "S lo agacha, primero con la transición")
 	Input.action_press("mover_derecha")
 	await _esperar(40)
 	_comprobar(absf(felipe.velocity.x) <= felipe.velocidad_gatear + 1.0, "Agachado gatea más lento (%.0f px/s)" % absf(felipe.velocity.x))
 	_comprobar(felipe.sprite.animation == "gatear" and felipe.sprite.is_playing(), "Agachado y en movimiento usa la animación de gatear")
-	var alto_gateando := _alto_visible(felipe.sprite.sprite_frames.get_frame_texture("gatear", 0).get_image()) * Felipe.ESCALA_AGACHADO
-	_comprobar(alto_gateando <= 36.0, "Gateando cabe bajo un mueble de 30 cm (%.0f px)" % alto_gateando)
+	var hueco := Sala.SUELO - _pieza("Aparador").end.y
+	var alto_gateando := 0.0
+	for i in felipe.sprite.sprite_frames.get_frame_count("gatear"):
+		alto_gateando = maxf(alto_gateando, _alto_visible(felipe.sprite.sprite_frames.get_frame_texture("gatear", i).get_image()) * Felipe.ESCALA_SPRITE)
+	_comprobar(alto_gateando <= hueco, "Gateando cabe bajo el aparador (%.0f px de %.0f libres)" % [alto_gateando, hueco])
 	Input.action_release("mover_derecha")
 	Input.action_release("agacharse")
-	await _esperar(4)
-	_comprobar(not felipe.agachado, "Al soltar S se para")
+	await _esperar(2)
+	_comprobar(not felipe.agachado and felipe.sprite.animation == "agacharse", "Al soltar S se para con la transición al revés")
+	await _esperar(20)
+	_comprobar(felipe.sprite.animation == "quieto", "Después de pararse queda quieto")
 
 	# Debajo del aparador (30 cm libres) solo se pasa agachado.
 	var aparador := _pieza("Aparador")

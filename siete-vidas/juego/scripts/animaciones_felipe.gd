@@ -6,7 +6,7 @@ extends RefCounted
 const CARPETA := "res://assets/felipe/"
 const CUADROS := 8
 
-## nombre -> [archivo, fps, en bucle, cuadros (opcional, 8 por defecto)]
+## nombre -> [archivo, fps, en bucle, cuadros de la hoja (opcional, 8 por defecto), [primer, último] cuadro que usa (opcional)]
 const HOJAS := {
 	"quieto": ["felipe-idle-sheet.png", 8.0, true],
 	"caminar": ["felipe-walk-sheet.png", 10.0, true],
@@ -18,8 +18,9 @@ const HOJAS := {
 	"desmayo": ["felipe-faint-sheet.png", 8.0, false],
 	## Poses propias de la caída: 0 = cayendo con las delanteras estiradas, 1 = contacto con las delanteras.
 	"caer": ["felipe-caida-sheet.png", 0.0, false, 2],
-	## Gateo agachado: cuadros de 256×256 (más grandes que los demás); se dibuja con Felipe.ESCALA_AGACHADO.
-	"gatear": ["felipe-gatear-sheet.png", 10.0, true],
+	## Una sola hoja: 0 a 2 = transición de pie a agachado (al pararse se reproduce al revés), 3 a 7 = gateo.
+	"agacharse": ["felipe-gatear-sheet.png", 12.0, false, 8, [0, 2]],
+	"gatear": ["felipe-gatear-sheet.png", 10.0, true, 8, [3, 7]],
 	## Ocio (sin tocar nada unos segundos); ver Felipe.OCIO.
 	"acicalarse": ["felipe-acicalarse-sheet.png", 8.0, true],
 	"jugar": ["felipe-jugar-sheet.png", 10.0, true],
@@ -38,7 +39,8 @@ static func crear() -> SpriteFrames:
 		frames.add_animation(nombre)
 		frames.set_animation_speed(nombre, datos[1])
 		frames.set_animation_loop(nombre, datos[2])
-		for i in cuadros:
+		var rango: Array = datos[4] if datos.size() > 4 else [0, cuadros - 1]
+		for i in range(rango[0], rango[1] + 1):
 			var cuadro := AtlasTexture.new()
 			cuadro.atlas = hoja
 			cuadro.region = Rect2(i * ancho, 0, ancho, hoja.get_height())

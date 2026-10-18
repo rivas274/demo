@@ -21,7 +21,7 @@ const PIEZAS := [
 	[Rect2(0, -20, ANCHO, 20), false, "Techo", "invisible"],
 	[Rect2(260, 370, 230, 10), true, "Sofá", "sofa"],  # asiento a 45 cm
 	[Rect2(550, 333, 133, 8), true, "Mesa", "mesa"],  # 75 cm
-	[Rect2(700, SUELO - 98, 150, 62), false, "Aparador", "aparador"],  # 81 cm, con 30 cm libres debajo: se pasa agachado
+	[Rect2(700, SUELO - 98, 150, 44), false, "Aparador", "aparador"],  # 81 cm, con 45 cm libres debajo: se pasa agachado
 	[Rect2(730, 255, 110, 8), true, "Estante bajo", "repisa"],  # 1,40 m
 	[Rect2(880, 200, 110, 8), true, "Estante alto", "repisa"],  # 1,85 m
 	[Rect2(1040, 303, 220, 8), true, "Repisa de la ventana", "repisa"],  # 1 m

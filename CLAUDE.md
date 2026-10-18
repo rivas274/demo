@@ -37,6 +37,7 @@ Felipe es un persa grande (unos 8 kilos), grande y no obeso; en el juego debe se
 - **Felipe mide 67 px de alto** en la resolución base 640×360 (58 px de las orejas a las patas). Todas sus hojas son de 8 cuadros de 106×106 hechas desde Felipe A y se dibujan a **una sola escala, 0.72** (`Felipe.ESCALA_SPRITE`). No se usa otra escala por animación: si una hoja sale de otro tamaño, se rehace.
 - **Cabeza: 56 % de la altura de las orejas a las patas.** En el cuadro de 106 px va de la fila 25 a la 70 (45 × 55 px); en el juego, 32 × 40 px. Tiene que medir lo mismo en todas las animaciones.
 - **Estirar y aplastar: como mucho ±8 %** (`Felipe.DEFORMACION_MAXIMA`), en el juego y en la ficha. Más deforma la cabeza y se ve antinatural.
+- **Agachado mide 52 px** (la cabeza no se aplasta): los huecos para pasar agachado son de al menos 45 cm (54 px). De pie, la colisión mide 58 px; agachado, 50.
 - **Transiciones:** entre poses muy distintas (de pie a agachado, salto a caída) hace falta una animación de transición desde Felipe A, no un cambio brusco de hoja ni un estirón de código.
 - **Escala del mundo: 1,21 px por cm.** Muebles, puertas y objetos usan medidas reales (sofá 45 cm, mesa 75 cm, mesón 90 cm, refrigerador 1,80 m, puerta 2,05 m). Felipe "mide" unos 55 cm con la cabeza: llega casi a la altura de una mesa de comedor.
 - **Humanos: 3 Felipes** (Valeria, 1,65 m ≈ 200 px), con proporciones normales. Solo los gatos son Chibi.

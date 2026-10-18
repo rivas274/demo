@@ -24,6 +24,8 @@ const MADERA_OSCURA := Color("6e3a26")
 const CORTINA := Color("c46a5a")
 const SILUETA := Color(0.17, 0.1, 0.13, 0.94)
 const LUZ := Color(1.0, 0.85, 0.55, 0.09)
+## Mosaico de Gemini por habitación (assets/nivel1/).
+const MOSAICO_PARED := {"sala": "pared_tapiz", "escalera": "pared_tapiz", "pasillo": "pared_tapiz", "cocina": "pared_azulejo", "dormitorio": "pared_rosa"}
 ## estilo de pared -> [color base, color del dibujo]
 const PAREDES := {
 	"sala": [Color("e8d6c3"), Color("dfc9b2")],
@@ -51,12 +53,15 @@ func _ready() -> void:
 		capa.name = nombre
 		capa.scroll_scale = Vector2(datos[0], datos[0])
 		capa.z_index = datos[1]
-		capa.add_child(_lienzo(datos[2]))
+		var lienzo := _lienzo(datos[2])
+		lienzo.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+		capa.add_child(lienzo)
 		add_child(capa)
 	_textura_pared = ImageTexture.create_from_image(_crear_pared())
 	var pared := _lienzo("_dibujar_pared")
 	pared.name = "Pared"
 	pared.z_index = -20
+	pared.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	add_child(pared)
 	var luz := _lienzo("_dibujar_luz")
 	luz.name = "Luz"
@@ -70,6 +75,28 @@ func _lienzo(funcion: String) -> Node2D:
 	return lienzo
 
 
+## Imagen de assets/nivel1/ como Image (para armar la pared), o null si no está.
+func _imagen(nombre: String) -> Image:
+	var textura := ArteNivel.textura(nombre) if nombre != "" else null
+	if textura == null:
+		return null
+	var imagen := textura.get_image()
+	imagen.convert(Image.FORMAT_RGBA8)
+	return imagen
+
+
+## Repite el mosaico dentro del rectángulo.
+func _repetir(destino: Image, mosaico: Image, rect: Rect2i) -> void:
+	var y := rect.position.y
+	while y < rect.end.y:
+		var x := rect.position.x
+		while x < rect.end.x:
+			var tam := Vector2i(mini(mosaico.get_width(), rect.end.x - x), mini(mosaico.get_height(), rect.end.y - y))
+			destino.blit_rect(mosaico, Rect2i(Vector2i.ZERO, tam), Vector2i(x, y))
+			x += mosaico.get_width()
+		y += mosaico.get_height()
+
+
 ## Pinta cada habitación con su estilo y deja transparentes las ventanas.
 func _crear_pared() -> Image:
 	var imagen := Image.create(int(ancho), int(alto), false, Image.FORMAT_RGBA8)
@@ -77,6 +104,14 @@ func _crear_pared() -> Image:
 		var rect: Rect2i = Rect2i(habitacion[0])
 		var colores: Array = PAREDES[habitacion[1]]
 		imagen.fill_rect(rect, colores[0])
+		var mosaico := _imagen(MOSAICO_PARED.get(habitacion[1], ""))
+		if mosaico:
+			_repetir(imagen, mosaico, rect)
+			var moldura := _imagen("moldura")
+			if moldura:
+				_repetir(imagen, moldura, Rect2i(rect.position.x, rect.position.y, rect.size.x, moldura.get_height()))
+				_repetir(imagen, moldura, Rect2i(rect.position.x, rect.end.y - moldura.get_height(), rect.size.x, moldura.get_height()))
+			continue
 		match habitacion[1]:
 			"cocina":
 				# Azulejos.
@@ -106,6 +141,12 @@ func _degradado(c: CanvasItem, rect: Rect2, arriba: Color, abajo: Color) -> void
 
 
 func _dibujar_cielo(c: Node2D) -> void:
+	var cielo := ArteNivel.textura("cielo")
+	if cielo:
+		c.draw_rect(Rect2(-200, -300, 1600, 300), Color("4f3a7a"))
+		c.draw_rect(Rect2(-200, 790, 1600, 300), Color("f0915a"))
+		c.draw_texture_rect(cielo, Rect2(-200, -100, 1600, 894), false)
+		return
 	var cortes := [-200.0, 160.0, 320.0, 450.0, 900.0]
 	for i in CIELO.size():
 		var siguiente: Color = CIELO[mini(i + 1, CIELO.size() - 1)]
@@ -119,6 +160,8 @@ func _dibujar_cielo(c: Node2D) -> void:
 
 
 func _dibujar_ciudad_lejana(c: Node2D) -> void:
+	if _dibujar_ciudad(c, "ciudad_lejana", 150.0, Color("a0626e")):
+		return
 	var azar := RandomNumberGenerator.new()
 	azar.seed = 7
 	var x := -40.0
@@ -133,6 +176,8 @@ func _dibujar_ciudad_lejana(c: Node2D) -> void:
 
 
 func _dibujar_ciudad_cercana(c: Node2D) -> void:
+	if _dibujar_ciudad(c, "ciudad_cercana", 290.0, Color("8a7a76")):
+		return
 	var azar := RandomNumberGenerator.new()
 	azar.seed = 11
 	var x := -40.0
@@ -154,6 +199,17 @@ func _dibujar_ciudad_cercana(c: Node2D) -> void:
 		x += w + azar.randf_range(4, 18)
 
 
+## Fila de casas de Gemini repetida a lo ancho, con su base rellena hacia abajo.
+func _dibujar_ciudad(c: Node2D, nombre: String, arriba: float, base: Color) -> bool:
+	var ciudad := ArteNivel.textura(nombre)
+	if ciudad == null:
+		return false
+	var tam := ciudad.get_size()
+	c.draw_texture_rect(ciudad, Rect2(-200, arriba, 3400, tam.y), true)
+	c.draw_rect(Rect2(-200, arriba + tam.y - 2, 3400, 900), base)
+	return true
+
+
 func _dibujar_pared(c: Node2D) -> void:
 	c.draw_texture(_textura_pared, Vector2.ZERO)
 	for ventana: Rect2 in Sala.VENTANAS:
@@ -168,7 +224,11 @@ func _dibujar_pared(c: Node2D) -> void:
 	c.draw_rect(Rect2(2050, 160, 60, 50), MADERA_OSCURA)
 	c.draw_rect(Rect2(2055, 165, 50, 40), Color("6f8f8a"))
 	# Pisos de madera de las dos plantas.
+	var madera := ArteNivel.textura("piso")
 	for piso: Array in [[0.0, Sala.SUELO, ancho], [1886.0, Sala.PISO_ALTO, ancho]]:
+		if madera:
+			c.draw_texture_rect(madera, Rect2(piso[0], piso[1], piso[2] - piso[0], madera.get_height()), true)
+			continue
 		c.draw_rect(Rect2(piso[0], piso[1], piso[2] - piso[0], 30), MADERA)
 		var tabla: float = piso[0]
 		while tabla < piso[2]:

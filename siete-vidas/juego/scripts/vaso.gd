@@ -73,6 +73,8 @@ func _al_caer() -> void:
 
 
 func _draw() -> void:
+	if not roto and ArteNivel.dibujar(self, tipo, 0.0, 0.0):
+		return
 	match tipo:
 		"rollo":
 			draw_rect(Rect2(-6, -10, 12, 10), Color("f3efe8"))

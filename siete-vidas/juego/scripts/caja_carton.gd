@@ -42,6 +42,8 @@ func _draw() -> void:
 		for trozo: Rect2 in [Rect2(-26, -8, 18, 8), Rect2(-4, -6, 14, 6), Rect2(12, -9, 16, 9)]:
 			draw_rect(trozo, carton)
 		return
+	if ArteNivel.dibujar(self, "caja", 0.0, 0.0):
+		return
 	draw_rect(Rect2(-LADO / 2.0, -LADO, LADO, LADO), carton)
 	draw_rect(Rect2(-LADO / 2.0, -LADO, LADO, 6), carton.darkened(0.15))
 	draw_rect(Rect2(-3, -LADO, 6, LADO), Color("d9c7a0"))

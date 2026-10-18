@@ -31,7 +31,8 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [x] Pelea con A.S.P.I. con entrada tipo Broforce, imaginación gigante y tres fases (2026-10-18); prueba `prueba_jefe.gd`.
 - [x] Presentación de jefe reutilizable (`PresentacionJefe`) y bot que juega el nivel completo (`partida.gd`, también graba el video del gameplay) (2026-10-18).
 - [ ] Música de la pelea (coro épico) y arte final de la bestia gigante y del fin del mundo (pedir a Gemini).
-- [ ] Cambiar el arte provisional del nivel (muebles, paredes, objetos, A.S.P.I.) por las imágenes que genere la sesión "gemini" en `siete-vidas/arte/referencias/gemini/`.
+- [x] Arte de Gemini integrado en el nivel 1 (2026-10-18): muebles, paredes, piso, objetos, A.S.P.I., cielo y ciudad en parallax, fin del mundo y A.S.P.I. gigante (`preparar_arte_nivel.py`).
+- [ ] Falta arte de Gemini para: caja de arena, cortina, escalera de 14 escalones, cuadros de la pared, cojín, láser y bolas de pelo (hoy siguen dibujados por código).
 - [ ] Siguiente después de la demo: La Cuadra, afecto y respeto, música.
 - [ ] Hojas finales de Felipe generadas a ~67 px de alto (hoy se reducen al 72 % y los pixeles quedan disparejos).
 - [ ] Arte final de escenarios (tileset, fondos por capa, muebles) cuando el concepto esté afinado.

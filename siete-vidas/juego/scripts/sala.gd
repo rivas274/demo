@@ -29,6 +29,14 @@ const HABITACIONES := [
 ## Ventanas: huecos de la pared por donde se ve la ciudad.
 const VENTANAS := [Rect2(290, 600, 180, 145), Rect2(2205, 540, 90, 150), Rect2(2560, 90, 150, 120)]
 
+## Arte de Gemini por mueble: nombre -> [imagen en assets/nivel1/ ("" = lo dibuja otra pieza), corrimiento en x].
+const ARTE_MUEBLES := {
+	"Sofá": ["sofa", 0.0], "Mesa": ["comedor", 0.0], "Silla": ["", 0.0], "Silla 2": ["", 0.0],
+	"Banco": ["banco", 0.0], "Aparador": ["aparador", 0.0], "Mesón": ["meson", 0.0], "Refrigerador": ["refrigerador", 0.0],
+	"Cama": ["cama", 0.0], "Cabecera": ["", 0.0], "Cómoda": ["comoda", 0.0], "Ropero": ["ropero", 0.0],
+	"Baranda": ["baranda", -87.0],
+}
+
 ## [rectángulo, se atraviesa desde abajo, nombre, estilo de dibujo]. Entre paréntesis, la altura real.
 const PIEZAS := [
 	[Rect2(0, SUELO, ANCHO, 30), false, "Piso", "invisible"],
@@ -55,7 +63,7 @@ const PIEZAS := [
 	[Rect2(1970, PISO_ALTO - 66, 240, 30), false, "Cama", "cama"],  # 55 cm, con 30 cm libres debajo
 	[Rect2(1970, PISO_ALTO - 120, 30, 8), true, "Cabecera", "repisa"],  # 1 m
 	[Rect2(2280, PISO_ALTO - 97, 80, 97), false, "Cómoda", "comoda"],  # 80 cm
-	[Rect2(2380, PISO_ALTO - 218, 70, 218), false, "Ropero", "ropero"],  # 1,80 m
+	[Rect2(2370, PISO_ALTO - 185, 100, 185), false, "Ropero", "ropero"],  # 1,53 m
 	# Planta alta: pasillo de A.S.P.I. y balcón.
 	[Rect2(2530, PISO_ALTO - 55, 40, 8), true, "Silla del pasillo", "silla"],
 	[Rect2(2600, PISO_ALTO - 160, 200, 8), true, "Repisa de las macetas", "repisa"],  # 1,30 m
@@ -85,7 +93,7 @@ const AVISOS := [
 	[Rect2(2480, 0, 140, PISO_ALTO), "A.S.P.I. solo se aturde si le cae algo encima"],
 ]
 ## Calcetines: sobre la repisa de la escalera, en el clóset (el láser lleva ahí) y sobre el ropero.
-const CALCETINES := [Vector2(1585, SUELO - 260), Vector2(1925, PISO_ALTO), Vector2(2415, PISO_ALTO - 218)]
+const CALCETINES := [Vector2(1585, SUELO - 260), Vector2(1925, PISO_ALTO), Vector2(2420, PISO_ALTO - 185)]
 const CAJA_CARTON := Vector2(2330, SUELO)
 ## Ratones de cuerda: [posición, límite izquierdo, límite derecho].
 const RATONES := [
@@ -356,7 +364,7 @@ func _crear_pieza(rect: Rect2, atravesable: bool, nombre: String, estilo: String
 	if estilo != "invisible":
 		var dibujo := Node2D.new()
 		dibujo.z_index = -1
-		dibujo.draw.connect(_dibujar_mueble.bind(dibujo, rect.size, estilo))
+		dibujo.draw.connect(_dibujar_mueble.bind(dibujo, rect.size, estilo, nombre))
 		cuerpo.add_child(dibujo)
 	add_child(cuerpo)
 
@@ -367,9 +375,16 @@ static func piso_bajo(y: float) -> float:
 
 
 ## Dibuja el mueble provisional. (0, 0) es la esquina de arriba a la izquierda de la parte donde se para Felipe.
-func _dibujar_mueble(c: Node2D, tamano: Vector2, estilo: String) -> void:
+func _dibujar_mueble(c: Node2D, tamano: Vector2, estilo: String, nombre: String) -> void:
 	var y := (c.get_parent() as Node2D).position.y
 	var hasta_suelo := piso_bajo(y) - y
+	if ARTE_MUEBLES.has(nombre):
+		var arte: Array = ARTE_MUEBLES[nombre]
+		# Sin imagen propia (sillas y cabecera van dentro del comedor y de la cama): no se dibuja nada.
+		if arte[0] == "" and ArteNivel.textura("comedor") != null:
+			return
+		if ArteNivel.dibujar(c, arte[0], tamano.x / 2.0 + arte[1], hasta_suelo):
+			return
 	match estilo:
 		"sofa":
 			c.draw_rect(Rect2(0, -48, tamano.x, 54), TELA.darkened(0.2))
@@ -489,14 +504,11 @@ func _dibujar_decorado(c: Node2D) -> void:
 	var cojin: Rect2 = DESCANSOS[1]
 	c.draw_rect(Rect2(cojin.position.x + 4, PISO_ALTO - 10, cojin.size.x - 8, 10), Color("c8576b"))
 	c.draw_rect(Rect2(cojin.position.x + 8, PISO_ALTO - 13, cojin.size.x - 16, 4), Color("e07a85"))
+	# Alacenas sobre el mesón (decorado: a 1,50 m, Felipe no llega).
+	ArteNivel.dibujar(c, "alacenas", 2060.0, SUELO - 182.0)
 	# Lámpara de pie encendida junto a la caja de arena.
-	c.draw_rect(Rect2(1512, SUELO - 160, 4, 160), MADERA_OSCURA)
-	c.draw_colored_polygon(PackedVector2Array([Vector2(1498, SUELO - 160), Vector2(1530, SUELO - 160), Vector2(1524, SUELO - 185), Vector2(1504, SUELO - 185)]), Color("f2d36b"))
-	c.draw_circle(Vector2(1514, SUELO - 150), 40.0, Color(1, 0.85, 0.5, 0.12))
-	# Macetas en la baranda del balcón.
-	for x: float in [2930.0, 2990.0, 3040.0]:
-		c.draw_rect(Rect2(x - 8, PISO_ALTO - 16, 16, 16), Color("b0613f"))
-		c.draw_circle(Vector2(x, PISO_ALTO - 22), 9.0, Color("5f8f5a"))
+	ArteNivel.dibujar(c, "lampara", 1514.0, SUELO)
+	c.draw_circle(Vector2(1514, SUELO - 140), 30.0, Color(1.0, 0.9, 0.5, 0.15))
 
 
 ## Ropa colgada del clóset, delante de Felipe: esconde el calcetín secreto.

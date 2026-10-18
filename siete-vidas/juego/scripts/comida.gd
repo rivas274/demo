@@ -29,6 +29,8 @@ func interactuar(felipe: Felipe) -> void:
 
 
 func _draw() -> void:
+	if ArteNivel.dibujar(self, tipo, 0.0, 0.0):
+		return
 	match tipo:
 		"plato":
 			draw_rect(Rect2(-16, -8, 32, 8), Color("c8576b"))

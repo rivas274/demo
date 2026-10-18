@@ -117,18 +117,20 @@ func recibir_zarpazo(felipe: Felipe) -> void:
 
 
 func _draw() -> void:
-	var cuerpo := Color("3a3d44") if not apagada else Color("6a6d72")
-	draw_rect(Rect2(-ancho / 2.0 + 3.0, -alto, ancho - 6.0, alto), cuerpo)
-	draw_circle(Vector2(-ANCHO / 2.0 + 4.0, -ALTO / 2.0), ALTO / 2.0, cuerpo)
-	draw_circle(Vector2(ANCHO / 2.0 - 4.0, -ALTO / 2.0), ALTO / 2.0, cuerpo)
-	draw_rect(Rect2(-ANCHO / 2.0 + 4.0, -ALTO, ANCHO - 8.0, 3.0), cuerpo.lightened(0.25))
+	# El ratón de cuerda hereda de A.S.P.I. pero tiene su propio dibujo.
+	if not ArteNivel.dibujar(self, "aspi", 0.0, 1.0, false, Color(0.6, 0.6, 0.62) if apagada else Color.WHITE):
+		var cuerpo := Color("3a3d44") if not apagada else Color("6a6d72")
+		draw_rect(Rect2(-ancho / 2.0 + 3.0, -alto, ancho - 6.0, alto), cuerpo)
+		draw_circle(Vector2(-ANCHO / 2.0 + 4.0, -ALTO / 2.0), ALTO / 2.0, cuerpo)
+		draw_circle(Vector2(ANCHO / 2.0 - 4.0, -ALTO / 2.0), ALTO / 2.0, cuerpo)
+	# Luz de estado: verde patrullando, roja persiguiendo, apagada sin luz.
 	var luz := Color("e0483b") if persiguiendo else Color("5fd18a")
 	if apagada:
 		luz = Color("2a2a2a")
-	draw_circle(Vector2(_direccion * 8.0, -ALTO + 1.5), 2.0, luz)
+	draw_circle(Vector2(_direccion * 9.0, -ALTO - 3.0), 2.0, luz)
 	if _tiempo_aturdida > 0.0:
 		for i in 3:
 			var angulo := Time.get_ticks_msec() * 0.006 + i * TAU / 3.0
-			draw_circle(Vector2(cos(angulo) * 12.0, -alto - 6.0 + sin(angulo) * 3.0), 2.0, Color("f2d36b"))
+			draw_circle(Vector2(cos(angulo) * 14.0, -32.0 + sin(angulo) * 3.0), 2.0, Color("f2d36b"))
 	if _tiempo_golpe > 0.0:
-		draw_rect(Rect2(-ANCHO / 2.0, -ALTO - 2.0, ANCHO, ALTO + 2.0), Color(1, 1, 1, 0.5))
+		draw_rect(Rect2(-22.0, -26.0, 44.0, 27.0), Color(1, 1, 1, 0.5))

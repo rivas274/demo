@@ -34,7 +34,7 @@ const ESPERA_BOLAS := 1.6
 const VELOCIDAD_BOLA := 150.0
 const ESCALA_GIGANTE := 8.5
 ## Justo sobre la cabeza de Felipe, para que se vea entera con la cámara del juego.
-const CENTRO_GIGANTE := Vector2(2700, Sala.PISO_ALTO - 128)
+const CENTRO_GIGANTE := Vector2(2700, Sala.PISO_ALTO - 150)
 const PISTAS := {
 	Fase.SUCCION: "¡Te aspira! Mantén {agacharse} para aferrarte",
 	Fase.ATURDIR: "Tírale una maceta con {interactuar} y remátala con {zarpazo}",
@@ -289,22 +289,11 @@ func _draw() -> void:
 	var tiempo := Time.get_ticks_msec() / 1000.0
 	if transformacion > 0.0:
 		var a := transformacion
-		var bandas := 24
-		for i in bandas:
-			var k := float(i) / bandas
-			var color: Color = CIELO[mini(int(k * 3.0), 2)].lerp(CIELO[mini(int(k * 3.0) + 1, 3)], fmod(k * 3.0, 1.0))
-			draw_rect(Rect2(ARENA.position.x, ARENA.position.y + ARENA.size.y * k, ARENA.size.x, ARENA.size.y / bandas + 1.0), Color(color, a))
-		draw_circle(Vector2(ARENA.position.x + 300, ARENA.end.y - 120), 70.0, Color(Color("ff5a3a"), 0.55 * a))
-		# Ciudad en llamas a lo lejos.
-		# Siluetas claras y bajas: Felipe (gris y blanco) tiene que destacar delante.
-		for i in 9:
-			var x := ARENA.position.x + i * 48.0
-			var alto := 26.0 + fmod(i * 37.0, 40.0)
-			draw_rect(Rect2(x, ARENA.end.y - alto, 40, alto), Color(Color("7a2a32"), 0.8 * a))
-			var llama := 8.0 + sin(tiempo * 9.0 + i) * 4.0
-			for j in 3:
-				var base := Vector2(x + 8 + j * 12, ARENA.end.y - alto)
-				draw_colored_polygon(PackedVector2Array([base + Vector2(-6, 0), base + Vector2(6, 0), base + Vector2(sin(tiempo * 7.0 + i + j) * 3.0, -llama - j * 3.0)]), Color(LLAMA[j], a))
+		var fondo := ArteNivel.textura("fin_del_mundo")
+		if fondo:
+			draw_texture_rect(fondo, ARENA, false, Color(1, 1, 1, a))
+		else:
+			draw_rect(ARENA, Color(CIELO[2], a))
 		# Calcetines y cuadros flotando.
 		for i in 4:
 			var p := Vector2(ARENA.position.x + 60 + i * 95, ARENA.position.y + 60 + sin(tiempo * 1.5 + i * 2.0) * 10.0)
@@ -335,6 +324,10 @@ func _dibujar_gigante(tiempo: float) -> void:
 	if fase == Fase.ENTRADA and gigante < 1.0:
 		centro += Vector2(sin(tiempo * 40.0), cos(tiempo * 33.0)) * 2.0
 	draw_set_transform(centro, sin(tiempo * 1.3) * 0.03 * k, Vector2(escala, escala))
+	var arte := ArteNivel.textura("aspi_gigante")
+	if arte:
+		_dibujar_gigante_arte(arte, centro, k, tiempo)
+		return
 	var w := Aspi.ANCHO
 	var h := Aspi.ALTO
 	var aturdida := aspi.esta_aturdida()
@@ -375,6 +368,26 @@ func _dibujar_gigante(tiempo: float) -> void:
 			var angulo := tiempo * 5.0 + i * TAU / 3.0
 			draw_circle(Vector2(cos(angulo) * 10.0, -h / 2.0 - 3.0 + sin(angulo) * 2.0), 1.0, Color("f2d36b"))
 	draw_set_transform(Vector2.ZERO)
+
+
+## La bestia de Gemini: crece desde el tamaño real y mira hacia Felipe.
+func _dibujar_gigante_arte(arte: Texture2D, centro: Vector2, k: float, tiempo: float) -> void:
+	var tam := arte.get_size()
+	var escala := lerpf(Aspi.ANCHO / tam.x, 1.0, k)
+	var mira := 1.0 if felipe.global_position.x >= centro.x else -1.0
+	draw_set_transform(centro, sin(tiempo * 1.3) * 0.03 * k, Vector2(escala * mira, escala))
+	var tinte := Color(1.0, 0.85, 0.5) if aspi.esta_aturdida() else Color.WHITE
+	draw_texture(arte, -tam / 2.0, tinte)
+	if succionando:
+		# Remolino frente a la boca (abajo a la derecha de la imagen).
+		for i in 3:
+			var r := fmod(tiempo * 6.0 + i, 3.0) * 14.0
+			draw_arc(Vector2(tam.x * 0.42, tam.y * 0.28), 70.0 - r, -PI / 2.0, PI / 2.0, 12, Color(Color("9fd8ff"), 0.6), 4.0)
+	draw_set_transform(Vector2.ZERO)
+	if aspi.esta_aturdida():
+		for i in 3:
+			var angulo := tiempo * 5.0 + i * TAU / 3.0
+			draw_circle(centro + Vector2(cos(angulo) * 60.0, -tam.y * escala * 0.45 + sin(angulo) * 10.0), 6.0, Color("f2d36b"))
 
 
 func _dibujar_viento() -> void:

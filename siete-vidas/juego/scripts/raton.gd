@@ -18,6 +18,9 @@ func _draw() -> void:
 	if apagada:
 		draw_rect(Rect2(-8, -4, 16, 4), Color("8a8f96"))
 		return
+	# La imagen mira a la izquierda.
+	if ArteNivel.dibujar(self, "raton", 0.0, 0.0, _direccion_dibujo() > 0.0):
+		return
 	var cuerpo := Color("9aa0a8")
 	draw_circle(Vector2(0, -5), 5.0, cuerpo)
 	draw_rect(Rect2(-6, -6, 10, 6), cuerpo)

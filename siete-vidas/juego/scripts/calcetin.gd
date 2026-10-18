@@ -22,6 +22,8 @@ func _process(_delta: float) -> void:
 
 
 func _draw() -> void:
+	if ArteNivel.dibujar(self, "calcetin", 0.0, 0.0):
+		return
 	var color := Color("5b4d7a")
 	draw_rect(Rect2(-3, -16, 6, 11), color)
 	draw_rect(Rect2(-3, -7, 10, 5), color)

@@ -57,7 +57,7 @@ Estilo de todas: el de Felipe A (pixel art chibi cel-shaded, dos tonos planos, c
 | 11 | `fin-del-mundo.png` | El pasillo en la imaginación de Felipe: cielo rojo con rayos, ciudad en llamas a lo lejos, calcetines y cuadros flotando, 416 × 424, absurdo y épico |
 | 12 | `aspi-gigante.png` | A.S.P.I. como bestia gigante imaginaria: misma aspiradora redonda de vista lateral, pero con ojo rojo furioso, dientes en la boca de succión y cepillos girando, fondo transparente, 360 × 100 |
 
-Prioridad si no alcanza el tiempo: 5 (paredes), 8, 9, 10, 11, 12 y después los muebles.
+Estado: las 12 imágenes llegaron y están en el juego (ver `memoria/03-arte-y-herramientas.md`). El ropero quedó de 1,53 m y 1 m de ancho para que su imagen no se deforme. Prioridad que se usó: 5 (paredes), 8, 9, 10, 11, 12 y después los muebles.
 
 
 ## Pelea con A.S.P.I.: "La Bestia del Pasillo"

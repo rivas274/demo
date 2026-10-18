@@ -51,6 +51,13 @@ Estilo de todas: el de Felipe A (pixel art chibi cel-shaded, dos tonos planos, c
 | 5 | `paredes.png` | Muestras de pared: papel tapiz de la sala, azulejos de cocina, pared del dormitorio, moldura y piso de madera |
 | 6 | `objetos.png` | Vaso, plato de croquetas, lata de atún, calcetín, rollo de papel higiénico, maceta pequeña, libro, piezas de juguete en el piso, caja de cartón, ratón de cuerda |
 | 7 | `aspi-gemini-1.png` | A.S.P.I. (ya encargado) |
+| 8 | `fondo-ciudad-lejana.png` | Capa de parallax: siluetas del Barrio Viejo al atardecer, techos de teja y campanarios, colores apagados, 1920 × 360, se repite a lo ancho, cielo transparente |
+| 9 | `fondo-ciudad-cercana.png` | Capa de parallax más cercana: casas de 2 pisos con ventanas encendidas, balcones y antenas, 1920 × 360, se repite, cielo transparente |
+| 10 | `fondo-cielo.png` | Cielo de atardecer en degradado por bandas (morado, rosa, naranja) con sol bajo y nubes, 640 × 360 |
+| 11 | `fin-del-mundo.png` | El pasillo en la imaginación de Felipe: cielo rojo con rayos, ciudad en llamas a lo lejos, calcetines y cuadros flotando, 416 × 424, absurdo y épico |
+| 12 | `aspi-gigante.png` | A.S.P.I. como bestia gigante imaginaria: misma aspiradora redonda de vista lateral, pero con ojo rojo furioso, dientes en la boca de succión y cepillos girando, fondo transparente, 360 × 100 |
+
+Prioridad si no alcanza el tiempo: 5 (paredes), 8, 9, 10, 11, 12 y después los muebles.
 
 
 ## Pelea con A.S.P.I.: "La Bestia del Pasillo"

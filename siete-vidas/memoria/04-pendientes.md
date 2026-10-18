@@ -26,7 +26,9 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [x] Mecánicas del prototipo (2026-10-18, arte provisional): corazones y 7 vidas con desmayo y reaparición, comer cura y suma peso, báscula en la interfaz, A.S.P.I. (patrulla, persigue, 3 zarpazos), vaso con el logro "La Gravedad Funciona" y notificaciones de logros. Prueba `prueba_mecanicas.gd`.
 - [x] **Demo jugable: primer nivel "La Gran Fuga"** (2026-10-18): tutorial completo con título, avisos, ratón, caja de cartón, calcetines, láser, cortina para trepar, A.S.P.I. jefa, balcón con Caer de Pie, pausa, final y sonidos provisionales. Prueba `prueba_nivel.gd`.
 - [ ] Arte de A.S.P.I. con Gemini (encargado a la sesión "gemini" de la Dell; integrar al llegar a `siete-vidas/arte/referencias/gemini/`).
-- [ ] Animación de trepar desde Felipe A (hoy usa el cuadro "subiendo" del salto). Proponer con `pixel-engine-v1.5` (26 créditos).
+- [x] Animación de trepar desde Felipe A (2026-10-18, `pixel-engine-v1.5`, 26 créditos).
+- [x] Nivel 1 rediseñado como dúplex de dos pisos (2026-10-18): trepar, atajo del dormitorio, A.S.P.I. que se aturde; las 4 pruebas pasan.
+- [ ] Cambiar el arte provisional del nivel (muebles, paredes, objetos, A.S.P.I.) por las imágenes que genere la sesión "gemini" en `siete-vidas/arte/referencias/gemini/`.
 - [ ] Siguiente después de la demo: La Cuadra, afecto y respeto, música.
 - [ ] Hojas finales de Felipe generadas a ~67 px de alto (hoy se reducen al 72 % y los pixeles quedan disparejos).
 - [ ] Arte final de escenarios (tileset, fondos por capa, muebles) cuando el concepto esté afinado.

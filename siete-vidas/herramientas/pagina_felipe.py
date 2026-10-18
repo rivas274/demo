@@ -29,6 +29,7 @@ ANIMS = [
      "frames": 8, "fps": 10},
     {"id": "sc-vueltas", "nombre": "Ocio: perseguirse la cola", "godot": "vueltas", "archivo": "felipe-vueltas-sheet.png",
      "frames": 8, "fps": 10},
+    {"id": "sc-trepar", "nombre": "Trepar", "godot": "trepar", "archivo": "felipe-trepar-sheet.png", "frames": 8, "fps": 10},
 ]
 
 

@@ -49,7 +49,8 @@ Actualizado: 2026-10-17. Detalle completo en la biblia (ver README.md).
 
 ## Demo: primer nivel "La Gran Fuga" (2026-10-18)
 
-- **La demo es el tutorial del apartamento**, como dice la biblia: cada mueble enseña un movimiento con un aviso de una línea y la tecla o el botón del mando en uso. Recorrido: caminar → sofá (saltar) → vaso (E, logro) → aparador (agacharse, calcetín) → ratón de cuerda (zarpazo) → caja de arena (punto de descanso) → caja de cartón (zarpazo, calcetín) → librero (doble salto) → cocina (comer, puntero láser imposible de atrapar) → alacena y refrigerador → cortina (trepar) → **A.S.P.I. jefa** frente a la puerta del balcón → balcón: gana **Caer de Pie** y termina la demo.
+- **Nivel 1 rediseñado como dúplex (2026-10-18):** el apartamento de Valeria tiene dos pisos (sala, escalera, cocina abajo; dormitorio y pasillo arriba). Se sube trepando la cortina de la cocina; la puerta del dormitorio se abre solo desde dentro y deja un atajo por la escalera hasta la caja de arena; A.S.P.I. en el pasillo se aturde tirándole un rollo o una maceta y no ve a Felipe agachado. Diseño y principios en `siete-vidas/diseno/nivel-01-gran-fuga.md`.
+- **La demo es el tutorial del apartamento**, como dice la biblia: cada mueble enseña un movimiento con un aviso de una línea y la tecla o el botón del mando en uso. Recorrido vigente (dúplex): sala → escalera cerrada → cocina → cortina (trepar) → dormitorio (abrir el atajo) → pasillo con A.S.P.I. → balcón, donde gana **Caer de Pie** y termina la demo; detalle por zona en `siete-vidas/diseno/nivel-01-gran-fuga.md`.
 - Pantallas de título, introducción (el video viral; "Me voy de esta casa"), pausa y final (tiempo, calcetines 3, logros, vidas perdidas). Logros de la demo: La Gravedad Funciona, Desenchufada, Coleccionista de Calcetines, Caer de Pie.
 - **Peso con personalidad:** báscula con aguja y humor de Felipe (Atlético, Esponjoso, Modo Invierno, Modo Buda).
 

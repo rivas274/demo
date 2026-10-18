@@ -17,7 +17,7 @@
 - **Subir imágenes locales:** `create_asset_upload`, luego PUT con curl a la URL devuelta, luego `finalize_asset_upload`.
 - **Red del entorno:** deben estar permitidos `mcp.spritecook.ai` y `api.spritecook.ai`; sin el segundo no se pueden descargar ni ver las imágenes.
 - **Proyecto en SpriteCook:** "Siete Vidas, Cero Disculpas", id `126fcb42-c3f6-40b5-9f75-42715fbdce40`. Pasar siempre `project_id`.
-- **Créditos:** 800 del plan de pago; quedan **362** (2026-10-18). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
+- **Créditos:** 800 del plan de pago; quedan **336** (2026-10-18). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
 - **Regla de oro:** mostrar al creador el prompt, el modelo, los ajustes y el costo, y esperar aprobación antes de cada llamada que gaste créditos.
 
 ### Modelos y costos útiles (consultados el 2026-10-17)
@@ -74,6 +74,7 @@ Solo lo que se usa (las formas de peso dibujadas, el Modo Buda, la pose sentado,
 | Ocio: jugar (desde Felipe A) | `jugar` | `b8caf6cf-7c3f-4e9c-bb34-a38833bb4c63` | `felipe-jugar-sheet.png` |
 | Bola de estambre (recortada de una pose descartada, se mueve por código) | — | — | `estambre-bola.png` |
 | Ocio: perseguirse la cola (desde Felipe A) | `vueltas` | `bc3dbbc7-7d04-446f-ae5c-e05f6b7cfb73` | `felipe-vueltas-sheet.png` |
+| Trepar (desde Felipe A, `pixel-engine-v1.5`, 26 créditos) | `trepar` (cuadros 3-7) | `e49fc39b-d07a-4369-a9fa-1d365e95411d` | `felipe-trepar-sheet.png` |
 
 Referencias de diseño (no se usan en el juego): foto real de Felipe (`a0fbe97b-61b6-4d6d-8cb3-c5b4afaa6a74`, no está en el repositorio), prueba de 4 estilos v1 (`8868e7a2-…`, `../referencias/felipe-prueba-estilos-v1.png`), híbrido v2 A y B (`22529bf7-…`, `../referencias/felipe-hibrido-v2.png`) y comparación de proporciones (`../referencias/proporciones-felipe.png`).
 

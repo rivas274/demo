@@ -88,6 +88,9 @@ func _correr() -> void:
 	Input.action_press("mover_derecha")
 	await _esperar(40)
 	_comprobar(absf(felipe.velocity.x) <= felipe.velocidad_gatear + 1.0, "Agachado gatea más lento (%.0f px/s)" % absf(felipe.velocity.x))
+	_comprobar(felipe.sprite.animation == "gatear" and felipe.sprite.is_playing(), "Agachado y en movimiento usa la animación de gatear")
+	var alto_gateando := _alto_visible(felipe.sprite.sprite_frames.get_frame_texture("gatear", 0).get_image()) * Felipe.ESCALA_AGACHADO
+	_comprobar(alto_gateando <= 36.0, "Gateando cabe bajo un mueble de 30 cm (%.0f px)" % alto_gateando)
 	Input.action_release("mover_derecha")
 	Input.action_release("agacharse")
 	await _esperar(4)
@@ -168,7 +171,11 @@ func _patas_delanteras_abajo(felipe: Felipe) -> bool:
 
 ## Alto en pantalla de Felipe en la pose de referencia (primer cuadro de "quieto", con la cola abajo).
 func _alto_dibujado(felipe: Felipe) -> float:
-	var imagen := felipe.sprite.sprite_frames.get_frame_texture("quieto", 0).get_image()
+	return _alto_visible(felipe.sprite.sprite_frames.get_frame_texture("quieto", 0).get_image()) * Felipe.ESCALA_SPRITE
+
+
+## Filas de la imagen con pixeles visibles (opacidad mayor a 0,5).
+func _alto_visible(imagen: Image) -> float:
 	var arriba := -1
 	var abajo := -1
 	for y in imagen.get_height():
@@ -178,7 +185,7 @@ func _alto_dibujado(felipe: Felipe) -> float:
 					arriba = y
 				abajo = y
 				break
-	return (abajo - arriba + 1) * Felipe.ESCALA_SPRITE
+	return abajo - arriba + 1
 
 
 func _pieza(nombre: String) -> Rect2:

@@ -174,7 +174,7 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
       <div class="card">
         <h3>Agacharse y gatear</h3>
         <div class="stage" style="min-height:210px"><canvas id="crouch" width="360" height="200" role="img" aria-label="Felipe se agacha y gatea por debajo de un aparador"></canvas></div>
-        <p class="muted" style="font-size:12.5px">S o ↓ para agacharse: gatea más lento y cabe bajo muebles con 30 cm libres. Bajo un mueble no se para aunque se suelte el botón. Agachado + saltar sobre una repisa la atraviesa hacia abajo. Pose provisional: el cuadro "agacharse" del salto, aplastado con código.</p>
+        <p class="muted" style="font-size:12.5px">S o ↓ para agacharse: gatea más lento y cabe bajo muebles con 30 cm libres. Bajo un mueble no se para aunque se suelte el botón. Agachado + saltar sobre una repisa la atraviesa hacia abajo. Pose y gateo hechos con SpriteCook (28 créditos); la transición (aplastón al bajar y estirón al subir) es de código.</p>
       </div>
       <div class="card">
         <h3>Recibir daño</h3>
@@ -512,15 +512,18 @@ function card(anim, img) {
   // Agacharse: a la escala de la ficha (1,69 px por cm), el aparador deja 30 cm (51 px) libres debajo.
   const crouch = document.getElementById("crouch").getContext("2d");
   const walkImg = imgs["sc-walk"] || idleImg;
+  // Gateo de SpriteCook: 8 cuadros de 256 px, se dibuja al 0,4 / 0,72 de su tamaño para igualar la escala del juego.
+  const gatearImg = EXTRAS.gatear ? await load(EXTRAS.gatear.src) : null;
   function drawCrouch(ctx, time) {
     const G = 192, A0 = 140, A1 = 250, LIBRE = 51, ALTO = 137;
     const c = time % 5;
     const x = lerp(-10, 380, c / 5);
     const agachado = x > A0 - 50 && x < A1 + 45;
     shadow(ctx, x, G, agachado ? 34 : 28);
-    if (agachado && jumpImg) {
-      const bob = Math.round(Math.sin(time * 18));
-      felipeAt(ctx, 1, x, G + bob, 1.15, 0.6, 0, 1, 0);
+    if (agachado && gatearImg) {
+      const f = Math.floor(time * 10) % 8, s = 256 * 0.4 / 0.72;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(gatearImg, f * 256, 0, 256, 256, Math.round(x - s / 2), Math.round(G - s), Math.round(s), Math.round(s));
     } else {
       const f = Math.floor(time * 10) % 8;
       ctx.imageSmoothingEnabled = false;

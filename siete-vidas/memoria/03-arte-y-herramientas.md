@@ -17,7 +17,7 @@
 - **Subir imágenes locales:** `create_asset_upload`, luego PUT con curl a la URL devuelta, luego `finalize_asset_upload`.
 - **Red del entorno:** deben estar permitidos `mcp.spritecook.ai` y `api.spritecook.ai`; sin el segundo no se pueden descargar ni ver las imágenes.
 - **Proyecto en SpriteCook:** "Siete Vidas, Cero Disculpas", id `126fcb42-c3f6-40b5-9f75-42715fbdce40`. Pasar siempre `project_id`.
-- **Créditos:** 800 del plan de pago; quedan **604** (tras las poses de caída, 8) (2026-10-17) tras: quieto, caminar, correr, zarpazo, comer, saltar, ronronear, desmayo (20 c/u), Modo Buda y cono (8 c/u) y retratos (12). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
+- **Créditos:** 800 del plan de pago; quedan **576** (tras las poses de caída, 8, y la pose agachada y el gateo, 28) (2026-10-17) tras: quieto, caminar, correr, zarpazo, comer, saltar, ronronear, desmayo (20 c/u), Modo Buda y cono (8 c/u) y retratos (12). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
 - **Regla de oro:** mostrar al creador el prompt, el modelo, los ajustes y el costo, y esperar aprobación antes de cada llamada que gaste créditos.
 
 ### Modelos y costos útiles (consultados el 2026-10-17)
@@ -59,9 +59,9 @@
 - (Antes:) un gato aterriza primero con las patas delanteras. Al caer, Felipe se inclina con la nariz hacia abajo (~18°) con las patas delanteras estiradas; al tocar el piso apoya las delanteras, gira sobre ellas mientras baja la parte trasera y después se aplasta con rebote.
 - Modo Buda por código "se ve mal": se resolvió editando Felipe A con SpriteCook (8 créditos): bola perfecta con sonrisa satisfecha. Flaco y Gordito siguen por código.
 
-### Agacharse (provisional)
+### Agacharse y gatear (2026-10-18)
 
-- Sin animación propia todavía: el juego y la ficha usan el cuadro 1 de "saltar" (agacharse para saltar) aplastado a 1.15 × 0.6 y bajado para que toque el piso, con un vaivén de 1 px al gatear.
+- Pose agachada editando Felipe A (8 créditos, `gemini-3.1-flash-lite-image`, vista de lado mirando a la derecha) y gateo de 8 cuadros con `animate_game_art` a partir de esa pose (20 créditos, prompt sin auto-mejora, "walking in place"). Los cuadros salen de 256×256 con el gato apoyado abajo: en el juego se dibujan a escala 0.4 (mide ~35 px y cabe bajo muebles de 30 cm).
 
 ### Trucos para ahorrar créditos
 
@@ -88,6 +88,8 @@
 | Felipe con Collar de la Vergüenza (cono) | `1893e4a4-4b92-46b1-8b45-efbd5dbcf7e2` | `siete-vidas/arte/felipe/felipe-cono.png` |
 | Felipe 9 retratos para diálogos (3×3, 200×200) | `7657f269-815f-451f-a58a-17f2d6b2f014` | `siete-vidas/arte/felipe/felipe-retratos.png` |
 | Felipe poses de caída (en picada y contacto con las delanteras) | `6519b507-8c18-4582-b6fd-995ca133a7ea` | `siete-vidas/arte/felipe/felipe-caida-sheet.png` (2 cuadros de 106×106) |
+| Felipe pose agachada | `0d4f04f1-5da7-4e11-9017-1fa8742e63fc` | `siete-vidas/arte/felipe/felipe-agachado-base.png` |
+| Felipe animación "gatear" (8 cuadros de 256×256) | `16d9e097-693e-455f-a9a3-a99c1d87e67b` | `siete-vidas/arte/felipe/felipe-gatear-sheet.png` |
 | Felipe animación "zarpazo" | `86da320a-f4cb-4269-ab76-b66648db1e20` | `siete-vidas/arte/felipe/felipe-attack-sheet.png` |
 | Felipe híbrido v2 (versiones A y B) | `22529bf7-4fcc-4f41-9b17-488d276a206a` | `siete-vidas/arte/referencias/felipe-hibrido-v2.png` |
 

@@ -24,8 +24,10 @@ const INCLINACION_DOBLE_SALTO := -0.35
 ## Alto de la caja de colisión de pie y agachado: agachado cabe bajo muebles de 30 cm (36 px).
 const ALTO_DE_PIE := 52.0
 const ALTO_AGACHADO := 28.0
-## Pose provisional de agachado: el cuadro "agachado" del salto, aplastado.
-const APLASTADO_AGACHADO := Vector2(1.15, 0.6)
+## Animación "gatear" (cuadros de 256 px con el gato apoyado abajo): a esta escala mide unos 36 px de alto
+## y cabe bajo un mueble de 30 cm. POSICION_AGACHADO deja las patas sobre el piso.
+const ESCALA_AGACHADO := 0.4
+const POSICION_AGACHADO := Vector2(0, -51)
 ## Capa de los muebles que se atraviesan desde abajo (agachado + saltar baja a través de ellos).
 const CAPA_ATRAVESABLE := 2
 ## Distancia (horizontal, vertical) a la que el botón de acción alcanza un objeto.
@@ -272,10 +274,11 @@ func _actualizar_animacion(direccion: float) -> void:
 	elif not is_on_floor():
 		_animar_aire()
 	elif agachado:
-		# Gatea con un leve vaivén; quieto, se queda pegado al piso.
-		_poner_cuadro("saltar", CUADRO_AGACHADO)
-		var vaiven := sin(Time.get_ticks_msec() * 0.02) if direccion != 0.0 else 0.0
-		sprite.position = _posicion_agachado() + Vector2(0, vaiven)
+		# Gatea; quieto, se queda pegado al piso en el primer cuadro.
+		if direccion != 0.0:
+			_reproducir("gatear")
+		else:
+			_poner_cuadro("gatear", 0)
 	elif absf(velocity.x) > velocidad_caminar + 5.0:
 		_reproducir("correr")
 	elif direccion != 0.0:
@@ -382,18 +385,18 @@ func _poner_agachado(valor: bool) -> void:
 	if _efecto:
 		_efecto.kill()
 	sprite.rotation = 0.0
-	sprite.scale = _escala_base()
-	sprite.position = _posicion_agachado() if valor else _posicion_sprite
+	sprite.position = POSICION_AGACHADO if valor else _posicion_sprite
+	if valor:
+		sprite.play("gatear")
+		sprite.stop()
+	# Transición rápida: un aplastón al bajar y un estirón al pararse.
+	sprite.scale = _escala_base() * (Vector2(1.12, 0.85) if valor else Vector2(0.9, 1.1))
+	_efecto = create_tween()
+	_efecto.tween_property(sprite, "scale", _escala_base(), 0.1)
 
 
 func _escala_base() -> Vector2:
-	var escala := Vector2.ONE * ESCALA_SPRITE
-	return escala * APLASTADO_AGACHADO if agachado else escala
-
-
-## Al aplastar el sprite hay que bajarlo para que siga apoyado en el piso.
-func _posicion_agachado() -> Vector2:
-	return Vector2(_posicion_sprite.x, _posicion_sprite.y * APLASTADO_AGACHADO.y)
+	return Vector2.ONE * (ESCALA_AGACHADO if agachado else ESCALA_SPRITE)
 
 
 ## ¿Hay espacio arriba para pararse? (Los muebles que se atraviesan desde abajo no estorban.)

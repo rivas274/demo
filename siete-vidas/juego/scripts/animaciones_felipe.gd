@@ -18,6 +18,8 @@ const HOJAS := {
 	"desmayo": ["felipe-faint-sheet.png", 8.0, false],
 	## Poses propias de la caída: 0 = cayendo con las delanteras estiradas, 1 = contacto con las delanteras.
 	"caer": ["felipe-caida-sheet.png", 0.0, false, 2],
+	## Gateo agachado: cuadros de 256×256 (más grandes que los demás); se dibuja con Felipe.ESCALA_AGACHADO.
+	"gatear": ["felipe-gatear-sheet.png", 10.0, true],
 }
 
 

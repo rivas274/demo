@@ -59,7 +59,7 @@ def main():
     base = ARTE / "felipe-A-base.png"
     bw, bh = Image.open(base).size
     extras = {}
-    for clave, archivo in [("cono", "felipe-cono.png"), ("retratos", "felipe-retratos.png"), ("caida", "felipe-caida-sheet.png")]:
+    for clave, archivo in [("cono", "felipe-cono.png"), ("retratos", "felipe-retratos.png"), ("caida", "felipe-caida-sheet.png"), ("gatear", "felipe-gatear-sheet.png")]:
         p = ARTE / archivo
         if p.exists():
             w, h = Image.open(p).size

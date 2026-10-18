@@ -82,9 +82,10 @@ func _texto(fuente: Font, pos: Vector2, texto: String, tamano: int, color: Color
 
 
 ## Cartel épico en cola: título grande, nombre de la travesura y la recompensa.
-func cartel(titulo: String, nombre: String, recompensa: String, secreta: bool) -> void:
+## "abajo": si Felipe está arriba (repisa, alféizar), el cartel va más abajo para no taparlo.
+func cartel(titulo: String, nombre: String, recompensa: String, secreta: bool, abajo := false) -> void:
 	carteles.append([titulo, nombre])
-	_cola.append([titulo, nombre, recompensa, secreta])
+	_cola.append([titulo, nombre, recompensa, secreta, abajo])
 	if not _mostrando:
 		_siguiente_cartel()
 
@@ -104,7 +105,7 @@ func _siguiente_cartel() -> void:
 	var caja := Control.new()
 	caja.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	caja.size = Vector2(640, 96)
-	caja.position = Vector2(0, 52)
+	caja.position = Vector2(0, 168 if datos[4] else 52)
 	caja.pivot_offset = Vector2(320, 48)
 	add_child(caja)
 	# Franja de fondo inclinada (como la presentación de un jefe, en chico).

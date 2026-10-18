@@ -16,8 +16,10 @@ func _correr() -> void:
 	await cargar()
 	await segundos(1.0)
 	# 0. Mirar la agenda antes de empezar (como un jugador nuevo).
+	paso("0")
 	await ver_agenda(3.2)
 	# 1. Sofá nuevo: subir al asiento y arañar hasta romper el plástico (3 pulsaciones).
+	paso("1")
 	await saltar_a(100, true)
 	await ir_a(100)
 	await mirar(-1)
@@ -27,11 +29,13 @@ func _correr() -> void:
 	await segundos(0.6)
 	await recoger_todo()
 	# 2. Valeria llegó por el ruido: ronronear para que perdone (perdón 1) y guardar el snack.
+	paso("2")
 	await hasta(func() -> bool: return sala.valeria.presente(), 600)
 	await segundos(0.8)
 	await ronronear_a_valeria()
 	await recoger_todo()
 	# 3. De buenas, se sienta a ver su serie: tirar el control del brazo del sofá.
+	paso("3")
 	await hasta(func() -> bool: return sala.valeria.viendo_tele(), 600)
 	await segundos(1.6)
 	await ir_al_asiento(165)
@@ -44,11 +48,14 @@ func _correr() -> void:
 	await ronronear_a_valeria()
 	await recoger_todo()
 	# 4. La persiana subió: saltar al alféizar por el calcetín.
+	paso("4")
 	await ir_al_asiento(110)
 	await saltar_a(SalaProto.CALCETIN_ALFEIZAR_X, true)
+	await ir_a(SalaProto.CALCETIN_ALFEIZAR_X)
 	await segundos(1.0)
 	await ver_agenda(2.6)
 	# 5. Bajar y bufarle a la aspiradora que duerme bajo la mesa (secreta).
+	paso("5")
 	await saltar_a(150, false)
 	await saltar_a(250, false)
 	await ir_a(240)
@@ -58,6 +65,7 @@ func _correr() -> void:
 	await segundos(0.4)
 	await recoger_todo()
 	# 6. Florero heredado: mesa, repisa y manotazo. La foto vergonzosa cae flotando.
+	paso("6")
 	await ir_a(225)
 	await saltar_a(290, true)
 	await ir_a(330)
@@ -67,7 +75,9 @@ func _correr() -> void:
 	await tocar("accion")
 	await segundos(2.0)
 	await recoger_todo()
+	await ver_agenda(2.6)
 	# 7. Tirarle el vaso encima a Valeria (secreta): esperar a que esté libre, llamarla con un maullido
+	paso("7")
 	#    desde la mesa y, con ella al lado, manotazo al vaso.
 	await hasta(func() -> bool: return sala.valeria.estado == Valeria.Estado.FUERA, 1200)
 	await ir_a(225)
@@ -87,7 +97,8 @@ func _correr() -> void:
 	await segundos(1.5)
 	await recoger_todo()
 	# 8. Agenda completa: el resumen sale solo. Esperar a que termine de contar.
+	paso("8")
 	await hasta(func() -> bool: return is_instance_valid(sala.resumen) and sala.resumen.terminado, 900)
-	await segundos(3.0)
+	await segundos(4.0)
 	print("--- Fin de la demo: %.1f s, agenda %d/%d, secretas %d/%d, calcetines %d, snacks %d, fotos %d, perdones %d ---" % [cuadros / 60.0, sala.agenda.cumplidas(), sala.agenda.total(), sala.agenda.secretas_cumplidas(), sala.agenda.total_secretas(), sala.hud.calcetines, sala.hud.snacks, sala.hud.fotos, sala.perdones])
 	quit(0)

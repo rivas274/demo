@@ -69,6 +69,7 @@ var tiempo := 0.0
 
 var _ultimo_aranazo_hablado := -99.0
 var _ultimo_en_su_cara := -99.0
+var _ultima_palabra_aranazo := -99.0
 
 
 func _ready() -> void:
@@ -254,7 +255,7 @@ func _al_cumplir(t: Dictionary) -> void:
 	_anotar("AGENDA: %s -> %s" % [t["nombre"], t["recompensa"]])
 	hud.travesuras = agenda.cumplidas()
 	hud.golpear("agenda")
-	hud.cartel(titulo, t["nombre"], t["recompensa"], secreta)
+	hud.cartel(titulo, t["nombre"], t["recompensa"], secreta, felipe.global_position.y < 200.0)
 	jugo.congelar(congelado_agenda)
 	jugo.destello(0.45, Color(1.0, 0.6, 0.95) if secreta else Color(1.0, 0.95, 0.6))
 	jugo.sacudir(0.2, 0.6)
@@ -425,8 +426,11 @@ func _al_aranar(_sofa: Sofa, punto: Vector2) -> void:
 		_ultimo_aranazo_hablado = tiempo
 	jugo.congelar(0.06)
 	jugo.sacudir(0.1, 0.35)
-	var arriba := Vector2(punto.x, minf(punto.y, felipe.global_position.y - 70.0))
-	jugo.palabra(["¡RIIIP!", "¡FIRMA DE AUTOR!", "¡RASS!"].pick_random() if hablar else "¡RIIIP!", arriba + Vector2(0, -12), Color(1.0, 0.92, 0.75), 16)
+	# Una palabra por pulsación (los dos arañazos seguidos ya no se pisan las palabras).
+	if tiempo - _ultima_palabra_aranazo > 0.8:
+		_ultima_palabra_aranazo = tiempo
+		var arriba := Vector2(punto.x, minf(punto.y, felipe.global_position.y - 70.0))
+		jugo.palabra(["¡RIIIP!", "¡FIRMA DE AUTOR!", "¡RASS!"].pick_random() if hablar else "¡RIIIP!", arriba + Vector2(0, -12), Color(1.0, 0.92, 0.75), 16)
 	valeria.oir(ruido_aranazo)
 	_anotar("arañar")
 	if hablar and sofa.con_plastico:

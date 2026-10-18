@@ -36,7 +36,7 @@ func segundos(s: float) -> void:
 
 func tocar(accion: String) -> void:
 	if OS.get_cmdline_user_args().has("--detalle"):
-		print("        %s en (%.0f, %.0f) mirando %d estado %d" % [accion, felipe.global_position.x, felipe.global_position.y, felipe.mirando, felipe.estado])
+		print("        %.2f s %s en (%.0f, %.0f) mirando %d estado %d" % [sala.tiempo, accion, felipe.global_position.x, felipe.global_position.y, felipe.mirando, felipe.estado])
 	Input.action_press(accion)
 	await cuadro()
 	await cuadro()
@@ -59,9 +59,16 @@ func hasta(condicion: Callable, maximo: int) -> bool:
 
 
 func ir_a(x: float, maximo := 400) -> void:
+	var trabado := 0
+	var antes := felipe.global_position.x
 	for i in maximo:
 		var dx := x - felipe.global_position.x
 		if absf(dx) < 4.0:
+			break
+		# Si choca con algo (p. ej. el brazo del sofá) y no avanza, se rinde como lo haría una persona.
+		trabado = trabado + 1 if absf(felipe.global_position.x - antes) < 0.2 else 0
+		antes = felipe.global_position.x
+		if trabado > 12 and i > 12:
 			break
 		var derecha := dx > 0.0
 		Input.action_press("derecha" if derecha else "izquierda")
@@ -85,12 +92,23 @@ func saltar_a(x: float, doble: bool) -> void:
 	var accion := "derecha" if x > felipe.global_position.x else "izquierda"
 	Input.action_press(accion)
 	Input.action_press("saltar")
-	await esperar(14)
+	for i in 14:
+		if absf(felipe.global_position.x - x) < 6.0:
+			Input.action_release(accion)
+		await cuadro()
 	Input.action_release("saltar")
 	if doble:
-		await hasta(func() -> bool: return felipe.velocity.y > -60.0, 40)
+		for i in 40:
+			if felipe.velocity.y > -60.0:
+				break
+			if absf(felipe.global_position.x - x) < 6.0:
+				Input.action_release(accion)
+			await cuadro()
 		Input.action_press("saltar")
-		await esperar(12)
+		for i in 12:
+			if absf(felipe.global_position.x - x) < 6.0:
+				Input.action_release(accion)
+			await cuadro()
 		Input.action_release("saltar")
 	for i in 120:
 		if absf(felipe.global_position.x - x) < 6.0:
@@ -144,12 +162,18 @@ func recoger_todo(altura_minima := 150.0) -> void:
 				break
 		if objetivo == null:
 			return
-		await hasta(func() -> bool: return not is_instance_valid(objetivo) or objetivo.quieto, 150)
-		if not is_instance_valid(objetivo):
+		paso("recoger %s en (%.0f, %.0f)" % [objetivo.tipo, objetivo.position.x, objetivo.position.y])
+		await hasta(func() -> bool: return not is_instance_valid(objetivo) or objetivo.quieto or objetivo.get("_recogido"), 150)
+		if not is_instance_valid(objetivo) or objetivo.get("_recogido"):
 			continue
 		var dy := objetivo.position.y - felipe.global_position.y
 		if absf(dy) > 10.0:
 			await saltar_a(objetivo.position.x, dy < -50.0)
-		if is_instance_valid(objetivo):
+		if is_instance_valid(objetivo) and not objetivo.get("_recogido"):
 			await ir_a(objetivo.position.x)
 		await esperar(12)
+
+
+func paso(texto: String) -> void:
+	if OS.get_cmdline_user_args().has("--detalle"):
+		print("  -- paso %s a los %.2f s" % [texto, sala.tiempo])

@@ -7,8 +7,8 @@ extends SceneTree
 const SUBIDA_MAXIMA := 125.0
 const HUECO_MAXIMO := 160.0
 
-## Piezas que no hace falta alcanzar: las invisibles (piso, paredes) y la puerta del balcón, que se abre sola.
-const SIN_ALCANZAR := ["invisible", "puerta"]
+## Piezas que no hace falta alcanzar: las invisibles (piso, paredes), los muros y la puerta del balcón, que se abre sola.
+const SIN_ALCANZAR := ["invisible", "puerta", "muro"]
 
 var _fallos: Array[String] = []
 
@@ -38,7 +38,7 @@ func _correr() -> void:
 	_comprobar(lejos < 0.3 and cerca > 1.0, "Hay capas lejanas (más lentas) y de primer plano (más rápidas)")
 
 	var antes := _posiciones_en_pantalla(sala, capas)
-	felipe.position = Vector2(1650, 164)
+	felipe.position = Vector2(2700, Sala.PISO_ALTO)
 	await _esperar(180)
 	var despues := _posiciones_en_pantalla(sala, capas)
 	var movimiento_juego: Vector2 = despues[0] - antes[0]
@@ -71,6 +71,8 @@ func _comprobar_alcanzables() -> void:
 	for pieza: Array in Sala.PIEZAS:
 		if not pieza[3] in SIN_ALCANZAR:
 			superficies.append(pieza[0])
+	for i in Sala.ESCALONES:
+		superficies.append(Rect2(Sala.ESCALERA_X + i * Sala.ANCHO_ESCALON, Sala.SUELO - 32.0 * (i + 1), Sala.ANCHO_ESCALON, 8))
 	var alcanzadas: Array[Rect2] = [Rect2(0, Sala.SUELO, Sala.ANCHO, 0)]
 	# Las cortinas que llegan al piso se suben trepando: su parte de arriba cuenta como alcanzada.
 	for zona: Rect2 in Sala.TREPABLES:

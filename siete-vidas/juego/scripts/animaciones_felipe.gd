@@ -25,6 +25,8 @@ const HOJAS := {
 	"acicalarse": ["felipe-acicalarse-sheet.png", 8.0, true],
 	"jugar": ["felipe-jugar-sheet.png", 10.0, true],
 	"vueltas": ["felipe-vueltas-sheet.png", 10.0, true],
+	## Trepar (cortinas): se usan los cuadros 3 a 7, de pie en dos patas clavando las uñas.
+	"trepar": ["felipe-trepar-sheet.png", 8.0, true, 8, [3, 7]],
 }
 
 

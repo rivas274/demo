@@ -32,6 +32,8 @@ const ACENTO := Color("ffd58a")
 
 var modo := Modo.JUGANDO
 var aviso := ""
+## Aviso que manda sobre el del tutorial (por ejemplo, al mostrar la meta).
+var aviso_fijo := ""
 var usa_mando := false
 var datos_fin := {}
 
@@ -132,8 +134,9 @@ func _draw() -> void:
 				_centrado(fuente, lineas[i], 160 + i * 20, 11, CLARO)
 			_centrado(fuente, "Continuará en La Cuadra...   [%s] Jugar de nuevo" % ("A" if usa_mando else "Enter"), 290, 10, ACENTO)
 		Modo.JUGANDO:
-			if aviso != "":
-				var texto := etiquetar(aviso)
+			var mostrado := aviso_fijo if aviso_fijo != "" else aviso
+			if mostrado != "":
+				var texto := etiquetar(mostrado)
 				var ancho := fuente.get_string_size(texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x + 20.0
 				var caja := Rect2((tam.x - ancho) / 2.0, tam.y - 44, ancho, 22)
 				draw_rect(caja, Color(0.13, 0.09, 0.1, 0.75))

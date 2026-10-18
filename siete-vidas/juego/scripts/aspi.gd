@@ -22,6 +22,8 @@ var alto := ALTO
 var golpes_para_apagar := GOLPES_PARA_APAGAR
 var limite_izquierdo: float
 var limite_derecho: float
+## La jefa solo recibe zarpazos mientras está aturdida (algo le cayó encima).
+var necesita_aturdir := false
 var golpes := 0
 var apagada := false
 var persiguiendo := false
@@ -29,6 +31,7 @@ var persiguiendo := false
 var _direccion := 1.0
 var _tiempo_golpe := 0.0
 var _felipe: Felipe
+var _tiempo_aturdida := 0.0
 
 
 func _init(izquierda: float, derecha: float) -> void:
@@ -55,12 +58,14 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	velocity.y += 980.0 * delta
 	_tiempo_golpe = maxf(0.0, _tiempo_golpe - delta)
-	if apagada:
+	_tiempo_aturdida = maxf(0.0, _tiempo_aturdida - delta)
+	if apagada or _tiempo_aturdida > 0.0:
 		velocity.x = move_toward(velocity.x, 0.0, 400.0 * delta)
 		move_and_slide()
 		return
 	var distancia := _felipe.global_position - global_position if _felipe else Vector2.INF
-	persiguiendo = absf(distancia.x) < vision and absf(distancia.y) < 30.0 and _felipe.estado != Felipe.Estado.DESMAYADO
+	# Agachado (por ejemplo, debajo de la cama), Felipe se esconde: no lo ve.
+	persiguiendo = absf(distancia.x) < vision and absf(distancia.y) < 30.0 and _felipe.estado != Felipe.Estado.DESMAYADO and not _felipe.agachado
 	if persiguiendo:
 		_direccion = signf(distancia.x) if distancia.x != 0.0 else _direccion
 	elif global_position.x <= limite_izquierdo:
@@ -77,8 +82,24 @@ func _physics_process(delta: float) -> void:
 	queue_redraw()
 
 
+func aturdir(segundos: float) -> void:
+	if apagada:
+		return
+	_tiempo_aturdida = segundos
+	queue_redraw()
+
+
+func esta_aturdida() -> bool:
+	return _tiempo_aturdida > 0.0
+
+
 func recibir_zarpazo(felipe: Felipe) -> void:
 	if apagada:
+		return
+	if necesita_aturdir and _tiempo_aturdida <= 0.0:
+		# Sin aturdir, el zarpazo rebota en la carcasa.
+		_tiempo_golpe = 0.15
+		velocity.x = felipe.mirando * 60.0
 		return
 	golpes += 1
 	_tiempo_golpe = 0.3
@@ -91,7 +112,7 @@ func recibir_zarpazo(felipe: Felipe) -> void:
 
 func _draw() -> void:
 	var cuerpo := Color("3a3d44") if not apagada else Color("6a6d72")
-	draw_rect(Rect2(-ANCHO / 2.0 + 3.0, -ALTO, ANCHO - 6.0, ALTO), cuerpo)
+	draw_rect(Rect2(-ancho / 2.0 + 3.0, -alto, ancho - 6.0, alto), cuerpo)
 	draw_circle(Vector2(-ANCHO / 2.0 + 4.0, -ALTO / 2.0), ALTO / 2.0, cuerpo)
 	draw_circle(Vector2(ANCHO / 2.0 - 4.0, -ALTO / 2.0), ALTO / 2.0, cuerpo)
 	draw_rect(Rect2(-ANCHO / 2.0 + 4.0, -ALTO, ANCHO - 8.0, 3.0), cuerpo.lightened(0.25))
@@ -99,5 +120,9 @@ func _draw() -> void:
 	if apagada:
 		luz = Color("2a2a2a")
 	draw_circle(Vector2(_direccion * 8.0, -ALTO + 1.5), 2.0, luz)
+	if _tiempo_aturdida > 0.0:
+		for i in 3:
+			var angulo := Time.get_ticks_msec() * 0.006 + i * TAU / 3.0
+			draw_circle(Vector2(cos(angulo) * 12.0, -alto - 6.0 + sin(angulo) * 3.0), 2.0, Color("f2d36b"))
 	if _tiempo_golpe > 0.0:
 		draw_rect(Rect2(-ANCHO / 2.0, -ALTO - 2.0, ANCHO, ALTO + 2.0), Color(1, 1, 1, 0.5))

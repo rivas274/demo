@@ -16,6 +16,7 @@ func _initialize() -> void:
 func _correr() -> void:
 	var sala: Node = load("res://escenas/apartamento.tscn").instantiate()
 	sala.mostrar_titulo = false
+	sala.peligros_activos = false
 	root.add_child(sala)
 	var felipe: Felipe = sala.get_node("Felipe")
 	# Esta prueba es solo del movimiento: los enemigos se prueban en prueba_mecanicas.gd.
@@ -148,7 +149,7 @@ func _correr() -> void:
 
 	# Con comida cerca, el botón de acción la come.
 	var platos := root.get_tree().get_nodes_in_group(Comida.GRUPO).size()
-	await _poner_en(felipe, Vector2(1400, Sala.SUELO))
+	await _poner_en(felipe, Vector2(2320, Sala.PISO_ALTO - 97))
 	await _tocar("interactuar")
 	_comprobar(felipe.estado == Felipe.Estado.COMIENDO and felipe.sprite.animation == "comer", "Junto a la comida, el botón de acción la come")
 	await _esperar(60)

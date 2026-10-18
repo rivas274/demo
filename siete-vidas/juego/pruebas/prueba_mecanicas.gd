@@ -31,7 +31,7 @@ func _correr() -> void:
 
 	# Comer cura y suma peso.
 	var peso_antes := felipe.peso
-	await _poner_en(felipe, Vector2(1400, Sala.SUELO))
+	await _poner_en(felipe, Vector2(2320, Sala.PISO_ALTO - 97))
 	await _tocar("interactuar")
 	_comprobar(felipe.corazones == 5, "Comer cura un corazón")
 	_comprobar(is_equal_approx(felipe.peso, peso_antes + Felipe.PESO_POR_COMIDA), "Comer sube el peso (%.1f kg)" % felipe.peso)
@@ -57,8 +57,8 @@ func _correr() -> void:
 
 	# A.S.P.I.: persigue y hace daño al tocar.
 	await _esperar(90)
-	aspi.global_position = Vector2(1040, Sala.SUELO)
-	await _poner_en(felipe, Vector2(910, Sala.SUELO))
+	aspi.global_position = Vector2(2780, Sala.PISO_ALTO)
+	await _poner_en(felipe, Vector2(2650, Sala.PISO_ALTO))
 	var corazones_antes := felipe.corazones
 	for i in 180:
 		await physics_frame
@@ -70,7 +70,15 @@ func _correr() -> void:
 	# Tres zarpazos la apagan (Felipe invulnerable para que el contacto no lo empuje entre golpe y golpe).
 	await _esperar(90)
 	felipe._tiempo_invulnerable = 99.0
+	felipe.global_position = aspi.global_position + Vector2(-30, 0)
+	felipe.mirando = 1.0
+	felipe.estado = Felipe.Estado.SUELO
+	await _esperar(2)
+	await _tocar("zarpazo")
+	await _esperar(30)
+	_comprobar(aspi.golpes == 0, "Sin aturdir, el zarpazo rebota en A.S.P.I.")
 	for i in Aspi.GOLPES_PARA_APAGAR:
+		aspi.aturdir(3.0)
 		felipe.global_position = aspi.global_position + Vector2(-30, 0)
 		felipe.mirando = 1.0
 		felipe.velocity = Vector2.ZERO
@@ -78,7 +86,7 @@ func _correr() -> void:
 		await _esperar(2)
 		await _tocar("zarpazo")
 		await _esperar(30)
-	_comprobar(aspi.apagada, "Tres zarpazos apagan a A.S.P.I. (%d golpes)" % aspi.golpes)
+	_comprobar(aspi.apagada, "Tres zarpazos con A.S.P.I. aturdida la apagan (%d golpes)" % aspi.golpes)
 	felipe._tiempo_invulnerable = 0.0
 
 	# Vaso: tirarlo da el logro.

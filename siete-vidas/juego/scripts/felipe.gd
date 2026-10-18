@@ -68,7 +68,7 @@ const ALCANCE := Vector2(48, 40)
 @export var aceleracion := 1200.0
 @export var friccion := 1450.0
 @export var velocidad_gatear := 55.0
-@export var velocidad_trepar := 90.0
+@export var velocidad_trepar := 140.0
 @export_group("Salto")
 @export var gravedad := 1410.0
 @export var gravedad_cayendo := 1940.0
@@ -99,6 +99,7 @@ var tiene_caer_de_pie := false
 ## Zonas donde puede trepar (cortinas), en coordenadas del mundo. Las pone la sala.
 var zonas_trepables: Array[Rect2] = []
 var trepando := false
+var _tiempo_sin_trepar := 0.0
 var punto_reaparicion: Vector2
 
 var _tiempo_fuera_del_suelo := 0.0
@@ -648,14 +649,15 @@ func _reaparecer() -> void:
 
 ## Trepar: dentro de una zona trepable (cortina), mantener arriba sube y abajo baja; saltar se suelta.
 ## Al llegar arriba da un saltito para pasar al otro lado. Devuelve true si este cuadro estuvo trepando.
-## Animación provisional: el cuadro "subiendo" del salto (falta una animación propia desde Felipe A).
+## Animación "trepar" desde Felipe A (quieto en la cortina, se queda en su primer cuadro).
 func _actualizar_trepar(direccion: float) -> bool:
+	_tiempo_sin_trepar = maxf(0.0, _tiempo_sin_trepar - get_physics_process_delta_time())
 	var zona := _zona_trepable()
 	if zona == Rect2() or agachado or estado in [Estado.DESMAYADO, Estado.OCIO, Estado.ZARPAZO, Estado.COMIENDO]:
 		trepando = false
 		return false
 	if not trepando:
-		if not Input.is_action_pressed("mover_arriba"):
+		if _tiempo_sin_trepar > 0.0 or not Input.is_action_pressed("mover_arriba"):
 			return false
 		trepando = true
 	if Input.is_action_just_pressed("saltar"):
@@ -665,18 +667,24 @@ func _actualizar_trepar(direccion: float) -> bool:
 	var vertical := Input.get_axis("mover_arriba", "agacharse")
 	if direccion != 0.0:
 		mirando = signf(direccion)
-	velocity = Vector2(direccion * 50.0, vertical * velocidad_trepar)
+	# Colgado de la cortina se mantiene centrado en ella (así pasa limpio por huecos angostos).
+	velocity = Vector2((zona.get_center().x - global_position.x) * 8.0, vertical * velocidad_trepar)
 	estado = Estado.AIRE
 	tiene_doble_salto = true
 	move_and_slide()
-	if global_position.y - ALTO_DE_PIE < zona.position.y:
-		# Llegó arriba: un saltito para subirse a lo que hay al lado.
+	if global_position.y - 20.0 < zona.position.y + 4.0:
+		# Llegó arriba: se pasa hacia el lado al que mira y se suelta un momento de la cortina.
 		trepando = false
-		velocity.y = -260.0
+		_tiempo_sin_trepar = 0.5
+		move_and_collide(Vector2(mirando * 40.0, 0.0))
+		velocity = Vector2(mirando * 60.0, -120.0)
 	elif is_on_floor() and vertical > 0.0:
 		trepando = false
 	sprite.flip_h = mirando < 0.0
-	_poner_cuadro("saltar", CUADRO_SUBIENDO)
+	if vertical != 0.0:
+		_reproducir("trepar")
+	else:
+		_poner_cuadro("trepar", 0)
 	return true
 
 

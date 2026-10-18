@@ -1,8 +1,9 @@
 class_name FondoApartamento
 extends Node2D
-## Escenario provisional del apartamento, dibujado con código y separado en capas con parallax
-## (como Silksong): lo lejano se mueve menos que la cámara y el primer plano, más.
-## Es arte de prueba de concepto: se reemplaza por el arte final sin tocar el resto del juego.
+## Fondo del dúplex, en capas con parallax (como Silksong): lo lejano se mueve menos que la cámara
+## y el primer plano, más. La pared es una imagen armada por habitación (Sala.HABITACIONES) con las
+## ventanas recortadas (Sala.VENTANAS); por los huecos y el balcón se ve la ciudad.
+## Arte provisional: cada estilo de pared se reemplaza por su textura final sin tocar el resto.
 
 ## nombre -> [cuánto sigue a la cámara (1 = igual que el juego), z_index, función que la dibuja]
 const CAPAS := {
@@ -11,34 +12,35 @@ const CAPAS := {
 	"CiudadCercana": [0.45, -30, "_dibujar_ciudad_cercana"],
 	"PrimerPlano": [1.3, 20, "_dibujar_primer_plano"],
 }
-## Huecos de la pared por donde se ve la ciudad (coordenadas de la sala).
-const VENTANAS := [Rect2(290, 158, 180, 145), Rect2(1040, 158, 220, 145)]
-
 ## Paleta del Barrio Viejo: terracota y atardecer.
 const CIELO := [Color("3b2a5a"), Color("c8576b"), Color("f2a65a"), Color("ffd58a")]
 const SOL := Color("ffe3a3")
 const CIUDAD_LEJANA := Color("7a4262")
 const CIUDAD_CERCANA := [Color("8f4a4a"), Color("a65a45"), Color("7d3f3f")]
 const VENTANA_ENCENDIDA := Color("ffcf7a")
-const PARED := Color("e8d6c3")
-const PARED_RAYA := Color("dfc9b2")
 const MOLDURA := Color("7f3b30")
 const MADERA := Color("9a5b3c")
 const MADERA_OSCURA := Color("6e3a26")
 const CORTINA := Color("c46a5a")
 const SILUETA := Color(0.17, 0.1, 0.13, 0.94)
 const LUZ := Color(1.0, 0.85, 0.55, 0.09)
+## estilo de pared -> [color base, color del dibujo]
+const PAREDES := {
+	"sala": [Color("e8d6c3"), Color("dfc9b2")],
+	"escalera": [Color("e6d2b8"), Color("dcc4a6")],
+	"cocina": [Color("dfe7e2"), Color("c9d6cf")],
+	"dormitorio": [Color("c9d3b6"), Color("b8c4a2")],
+	"pasillo": [Color("e8d6c3"), Color("d9c3aa")],
+}
 
 var ancho: float
-var ancho_piso: float
-var suelo: float
+var alto: float
+var _textura_pared: ImageTexture
 
 
-## ancho_pared: hasta dónde llega la pared del apartamento; ancho_total: hasta dónde llega el piso (balcón).
-func _init(ancho_pared: float, y_suelo: float, ancho_total: float = 0.0) -> void:
-	ancho = ancho_pared
-	ancho_piso = maxf(ancho_total, ancho_pared)
-	suelo = y_suelo
+func _init(ancho_nivel: float, alto_nivel: float) -> void:
+	ancho = ancho_nivel
+	alto = alto_nivel
 	name = "Fondo"
 
 
@@ -51,6 +53,7 @@ func _ready() -> void:
 		capa.z_index = datos[1]
 		capa.add_child(_lienzo(datos[2]))
 		add_child(capa)
+	_textura_pared = ImageTexture.create_from_image(_crear_pared())
 	var pared := _lienzo("_dibujar_pared")
 	pared.name = "Pared"
 	pared.z_index = -20
@@ -67,20 +70,50 @@ func _lienzo(funcion: String) -> Node2D:
 	return lienzo
 
 
+## Pinta cada habitación con su estilo y deja transparentes las ventanas.
+func _crear_pared() -> Image:
+	var imagen := Image.create(int(ancho), int(alto), false, Image.FORMAT_RGBA8)
+	for habitacion: Array in Sala.HABITACIONES:
+		var rect: Rect2i = Rect2i(habitacion[0])
+		var colores: Array = PAREDES[habitacion[1]]
+		imagen.fill_rect(rect, colores[0])
+		match habitacion[1]:
+			"cocina":
+				# Azulejos.
+				for y in range(rect.position.y + 150, rect.end.y, 16):
+					imagen.fill_rect(Rect2i(rect.position.x, y, rect.size.x, 1), colores[1])
+				for x in range(rect.position.x, rect.end.x, 16):
+					imagen.fill_rect(Rect2i(x, rect.position.y + 150, 1, rect.size.y - 150), colores[1])
+			"dormitorio":
+				# Florecitas.
+				for y in range(rect.position.y + 30, rect.end.y - 20, 36):
+					for x in range(rect.position.x + 10 + (y / 36 % 2) * 18, rect.end.x, 36):
+						imagen.fill_rect(Rect2i(x, y, 3, 3), colores[1])
+			_:
+				for x in range(rect.position.x, rect.end.x, 24):
+					imagen.fill_rect(Rect2i(x, rect.position.y, 10, rect.size.y), colores[1])
+		# Moldura del techo y zócalo.
+		imagen.fill_rect(Rect2i(rect.position.x, rect.position.y, rect.size.x, 10), MOLDURA)
+		imagen.fill_rect(Rect2i(rect.position.x, rect.end.y - 12, rect.size.x, 12), MOLDURA)
+	for ventana: Rect2 in Sala.VENTANAS:
+		imagen.fill_rect(Rect2i(ventana), Color(0, 0, 0, 0))
+	return imagen
+
+
 func _degradado(c: CanvasItem, rect: Rect2, arriba: Color, abajo: Color) -> void:
 	var puntos := PackedVector2Array([rect.position, Vector2(rect.end.x, rect.position.y), rect.end, Vector2(rect.position.x, rect.end.y)])
 	c.draw_polygon(puntos, PackedColorArray([arriba, arriba, abajo, abajo]))
 
 
 func _dibujar_cielo(c: Node2D) -> void:
-	var cortes := [-200.0, 120.0, 260.0, 380.0, 700.0]
+	var cortes := [-200.0, 160.0, 320.0, 450.0, 900.0]
 	for i in CIELO.size():
 		var siguiente: Color = CIELO[mini(i + 1, CIELO.size() - 1)]
-		_degradado(c, Rect2(-200, cortes[i], 1400, cortes[i + 1] - cortes[i]), CIELO[i], siguiente)
+		_degradado(c, Rect2(-200, cortes[i], 1600, cortes[i + 1] - cortes[i]), CIELO[i], siguiente)
 	for i in 4:
-		c.draw_circle(Vector2(430, 300), 70.0 - i * 10.0, Color(SOL, 0.12 + i * 0.05))
-	c.draw_circle(Vector2(430, 300), 34.0, SOL)
-	for nube: Vector3 in [Vector3(120, 140, 1.0), Vector3(620, 100, 1.4), Vector3(900, 170, 0.8)]:
+		c.draw_circle(Vector2(520, 360), 70.0 - i * 10.0, Color(SOL, 0.12 + i * 0.05))
+	c.draw_circle(Vector2(520, 360), 34.0, SOL)
+	for nube: Vector3 in [Vector3(160, 180, 1.0), Vector3(760, 140, 1.4), Vector3(1050, 220, 0.8)]:
 		for j in 4:
 			c.draw_circle(Vector2(nube.x + j * 16 * nube.z, nube.y - (j % 2) * 7 * nube.z), 12.0 * nube.z, Color("f4a3a8", 0.55))
 
@@ -89,10 +122,10 @@ func _dibujar_ciudad_lejana(c: Node2D) -> void:
 	var azar := RandomNumberGenerator.new()
 	azar.seed = 7
 	var x := -40.0
-	while x < 1500.0:
+	while x < 1400.0:
 		var w := azar.randf_range(30, 70)
-		var arriba := azar.randf_range(100, 230)
-		c.draw_rect(Rect2(x, arriba, w, 500 - arriba), CIUDAD_LEJANA)
+		var arriba := azar.randf_range(160, 330)
+		c.draw_rect(Rect2(x, arriba, w, 700 - arriba), CIUDAD_LEJANA)
 		match azar.randi() % 4:
 			0: c.draw_circle(Vector2(x + w / 2, arriba), w / 3, CIUDAD_LEJANA)
 			1: c.draw_line(Vector2(x + w * 0.7, arriba), Vector2(x + w * 0.7, arriba - 25), CIUDAD_LEJANA, 2)
@@ -103,92 +136,65 @@ func _dibujar_ciudad_cercana(c: Node2D) -> void:
 	var azar := RandomNumberGenerator.new()
 	azar.seed = 11
 	var x := -40.0
-	while x < 1900.0:
+	while x < 2100.0:
 		var w := azar.randf_range(60, 120)
-		var arriba := azar.randf_range(130, 270)
+		var arriba := azar.randf_range(160, 420)
 		var color: Color = CIUDAD_CERCANA[azar.randi() % CIUDAD_CERCANA.size()]
-		c.draw_rect(Rect2(x, arriba, w, 560 - arriba), color)
+		c.draw_rect(Rect2(x, arriba, w, 900 - arriba), color)
 		c.draw_rect(Rect2(x - 3, arriba, w + 6, 6), color.darkened(0.25))
 		var fila := arriba + 18
-		while fila < 520:
+		while fila < 880:
 			var col := x + 10
 			while col < x + w - 12:
-				if azar.randf() < 0.35:
-					c.draw_rect(Rect2(col, fila, 8, 11), VENTANA_ENCENDIDA)
-				else:
-					c.draw_rect(Rect2(col, fila, 8, 11), color.darkened(0.3))
+				c.draw_rect(Rect2(col, fila, 8, 11), VENTANA_ENCENDIDA if azar.randf() < 0.35 else color.darkened(0.3))
 				col += 18
 			fila += 24
 		if azar.randf() < 0.4:
 			c.draw_rect(Rect2(x + w * 0.3, arriba - 22, 22, 18), color.darkened(0.4))
-			c.draw_line(Vector2(x + w * 0.3 + 4, arriba), Vector2(x + w * 0.3 + 4, arriba - 4), color.darkened(0.4), 2)
 		x += w + azar.randf_range(4, 18)
 
 
 func _dibujar_pared(c: Node2D) -> void:
-	var arriba_ventanas: float = VENTANAS[0].position.y
-	var abajo_ventanas: float = VENTANAS[0].end.y
-	var bandas: Array[Rect2] = [Rect2(0, 0, ancho, arriba_ventanas), Rect2(0, abajo_ventanas, ancho, suelo - abajo_ventanas)]
-	var x := 0.0
-	for ventana: Rect2 in VENTANAS:
-		bandas.append(Rect2(x, arriba_ventanas, ventana.position.x - x, ventana.size.y))
-		x = ventana.end.x
-	bandas.append(Rect2(x, arriba_ventanas, ancho - x, abajo_ventanas - arriba_ventanas))
-	for banda in bandas:
-		c.draw_rect(banda, PARED)
-		var raya := floorf(banda.position.x / 24.0) * 24.0
-		while raya < banda.end.x:
-			var izquierda := maxf(raya, banda.position.x)
-			var derecha := minf(raya + 10, banda.end.x)
-			if derecha > izquierda:
-				c.draw_rect(Rect2(izquierda, banda.position.y, derecha - izquierda, banda.size.y), PARED_RAYA)
-			raya += 24
-	c.draw_rect(Rect2(0, 0, ancho, 22), MOLDURA)
-	c.draw_rect(Rect2(0, 22, ancho, 4), MOLDURA.darkened(0.3))
-	c.draw_rect(Rect2(0, suelo - 14, ancho, 14), MOLDURA)
-	for ventana: Rect2 in VENTANAS:
+	c.draw_texture(_textura_pared, Vector2.ZERO)
+	for ventana: Rect2 in Sala.VENTANAS:
 		c.draw_rect(ventana.grow(3), MADERA_OSCURA, false, 6)
 		c.draw_line(Vector2(ventana.get_center().x, ventana.position.y), Vector2(ventana.get_center().x, ventana.end.y), MADERA_OSCURA, 4)
 		c.draw_line(Vector2(ventana.position.x, ventana.get_center().y), Vector2(ventana.end.x, ventana.get_center().y), MADERA_OSCURA, 4)
-		c.draw_rect(Rect2(ventana.position.x - 22, ventana.position.y - 14, 18, ventana.size.y + 30), CORTINA)
-		c.draw_rect(Rect2(ventana.end.x + 4, ventana.position.y - 14, 18, ventana.size.y + 30), CORTINA)
 		c.draw_rect(Rect2(ventana.position.x - 30, ventana.position.y - 18, ventana.size.x + 60, 5), MADERA_OSCURA)
-	# Cuadros en la pared: el retrato oficial de Su Majestad y un paisaje.
-	c.draw_rect(Rect2(600, 150, 70, 84), MADERA_OSCURA)
-	c.draw_rect(Rect2(606, 156, 58, 72), Color("d9a65b"))
-	c.draw_circle(Vector2(635, 188), 18, Color("8b7864"))
-	c.draw_rect(Rect2(1330, 60, 110, 70), MADERA_OSCURA)
-	c.draw_rect(Rect2(1336, 66, 98, 58), Color("6f8f8a"))
-	# Piso de madera.
-	c.draw_rect(Rect2(0, suelo, ancho_piso, 200), MADERA)
-	var tabla := 0.0
-	while tabla < ancho_piso:
-		c.draw_line(Vector2(tabla, suelo), Vector2(tabla, suelo + 30), MADERA_OSCURA, 2)
-		tabla += 64
-	c.draw_line(Vector2(0, suelo + 15), Vector2(ancho_piso, suelo + 15), MADERA_OSCURA, 1)
+	# Cuadros: el retrato oficial de Su Majestad (sala) y una foto de Valeria (dormitorio).
+	c.draw_rect(Rect2(640, Sala.TECHO_BAJO + 90, 70, 84), MADERA_OSCURA)
+	c.draw_rect(Rect2(646, Sala.TECHO_BAJO + 96, 58, 72), Color("d9a65b"))
+	c.draw_circle(Vector2(675, Sala.TECHO_BAJO + 128), 18, Color("8b7864"))
+	c.draw_rect(Rect2(2050, 160, 60, 50), MADERA_OSCURA)
+	c.draw_rect(Rect2(2055, 165, 50, 40), Color("6f8f8a"))
+	# Pisos de madera de las dos plantas.
+	for piso: Array in [[0.0, Sala.SUELO, ancho], [1886.0, Sala.PISO_ALTO, ancho]]:
+		c.draw_rect(Rect2(piso[0], piso[1], piso[2] - piso[0], 30), MADERA)
+		var tabla: float = piso[0]
+		while tabla < piso[2]:
+			c.draw_line(Vector2(tabla, piso[1]), Vector2(tabla, piso[1] + 24), MADERA_OSCURA, 2)
+			tabla += 64
+		c.draw_line(Vector2(piso[0], piso[1] + 12), Vector2(piso[2], piso[1] + 12), MADERA_OSCURA, 1)
 
 
 func _dibujar_luz(c: Node2D) -> void:
-	for ventana: Rect2 in VENTANAS:
+	for ventana: Rect2 in Sala.VENTANAS:
+		var piso := Sala.piso_bajo(ventana.end.y)
 		var rayo := PackedVector2Array([
 			ventana.position, Vector2(ventana.end.x, ventana.position.y),
-			Vector2(ventana.end.x + 140, suelo), Vector2(ventana.position.x + 90, suelo),
+			Vector2(ventana.end.x + 140, piso), Vector2(ventana.position.x + 90, piso),
 		])
 		c.draw_colored_polygon(rayo, LUZ)
 
 
 func _dibujar_primer_plano(c: Node2D) -> void:
-	# Siluetas oscuras delante de Felipe: dan profundidad y enmarcan la sala.
-	_planta(c, Vector2(300, 520), 0.8)
-	_planta(c, Vector2(2280, 520), 1.0)
-	# Respaldo de una silla.
-	c.draw_rect(Rect2(1380, 400, 12, 160), SILUETA)
-	c.draw_rect(Rect2(1450, 400, 12, 160), SILUETA)
-	c.draw_rect(Rect2(1374, 400, 94, 14), SILUETA)
-	c.draw_rect(Rect2(1374, 440, 94, 8), SILUETA)
-	# Lámpara colgando del techo.
-	c.draw_line(Vector2(1020, -60), Vector2(1020, 60), SILUETA, 3)
-	c.draw_colored_polygon(PackedVector2Array([Vector2(995, 90), Vector2(1045, 90), Vector2(1030, 58), Vector2(1010, 58)]), SILUETA)
+	# Siluetas oscuras delante de Felipe, a la altura de la planta baja: dan profundidad y enmarcan.
+	_planta(c, Vector2(380, 1150), 0.6)
+	_planta(c, Vector2(2650, 1150), 0.7)
+	for x: float in [1700.0, 1780.0]:
+		c.draw_rect(Rect2(x, 1020, 12, 160), SILUETA)
+	c.draw_rect(Rect2(1694, 1020, 100, 14), SILUETA)
+	c.draw_rect(Rect2(1694, 1060, 100, 8), SILUETA)
 
 
 func _planta(c: CanvasItem, base: Vector2, tamano: float) -> void:

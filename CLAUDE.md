@@ -6,6 +6,8 @@ Antes de proponer o construir algo, lee la memoria del proyecto en `siete-vidas/
 
 Al cerrar cualquier decisión nueva, actualiza esos archivos.
 
+**Equipo de diseño y fase actual:** el proyecto avanza por fases con agentes (`.claude/agents/`) y comandos (`.claude/skills/`: `/pilares`, `/prototipo`, `/prueba-juego`, `/revision-diseno`, `/puerta-fase`, `/godot-felipe`). Fase actual: **Fase 1 – Concepto y pilares**; detalle en `siete-vidas/memoria/README.md` (Equipo de diseño).
+
 ## Regla fija: cada cambio de un personaje se refleja en tres lugares
 
 Cuando cambies cualquier cosa de un personaje (sprites, animaciones, reglas de movimiento, rasgos), en el mismo trabajo y sin que te lo pidan:

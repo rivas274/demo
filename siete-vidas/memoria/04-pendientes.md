@@ -2,6 +2,12 @@
 
 Orden acordado: un tema a la vez, con propuesta y aprobación.
 
+## Ahora (Fase 1 – Concepto y pilares)
+
+1. [ ] **Pilares:** `/pilares` para afilar la fantasía y los pilares de la biblia → `siete-vidas/diseno/pilares.md`.
+2. [ ] **Prototipo de acciones de gato** (Fase 2): `/prototipo` para responder "¿es divertido ser Felipe?" (botón de acción para comer, tirar y arañar; maullar; intimidar) en `siete-vidas/prototipos/`, sin tocar el nivel.
+3. [ ] **Volver al nivel 1** con lo que el prototipo apruebe (regla de los tres lugares) y seguir hacia el vertical slice. Antes de cada cambio de fase, `/puerta-fase`.
+
 ## En curso
 
 - [x] **Diseño final de Felipe:** versión A del híbrido v2.

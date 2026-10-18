@@ -12,6 +12,27 @@ Esta carpeta guarda lo que ya se decidió, para que cualquier sesión nueva reto
 | [04-pendientes.md](04-pendientes.md) | Qué falta y en qué orden |
 | [../diseno/reglas-de-niveles.md](../diseno/reglas-de-niveles.md) | Reglas para diseñar niveles (se validan con `prueba_reglas_nivel.gd`) |
 
+## Equipo de diseño (agentes y comandos)
+
+**Fase actual: Fase 1 – Concepto y pilares** (desde el 2026-10-18). Fases: 1 Concepto y pilares → 2 Prototipo de concepto (¿es divertido ser Felipe?) → 3 Vertical slice (nivel 1 con calidad final) → 4 Producción → 5 Pulido y lanzamiento (Steam). El nivel 1 ya construido queda como base; se vuelve a él después del prototipo de acciones de gato. Pasar de fase se decide con `/puerta-fase`.
+
+Adaptado de Claude Code Game Studios y GodotPrompter (MIT; créditos en `.claude/CREDITOS.md`). Agentes en `.claude/agents/`, comandos en `.claude/skills/`.
+
+| Nombre | Tipo | Qué hace |
+| --- | --- | --- |
+| `director-creativo` | Agente | Guarda la visión y los pilares; decide si algo encaja con el tono; opina en las puertas de fase |
+| `disenador-juego` | Agente | Mecánicas y bucle principal; propone 2 a 4 opciones con recomendación |
+| `prototipador` | Agente | Prototipos feos y rápidos en `siete-vidas/prototipos/<nombre>/` para una sola pregunta |
+| `qa-juego` | Agente | Prueba como jugador (capturas, bot, pruebas) y separa errores de problemas de diseño |
+| `director-arte` | Agente | Consistencia visual de Felipe y del mundo; prepara encargos a SpriteCook/Gemini con costo |
+| `revisor-niveles` | Agente | Revisa niveles con capturas contra las reglas de niveles |
+| `/pilares` | Comando | Define o revisa fantasía y pilares → `siete-vidas/diseno/pilares.md` |
+| `/prototipo` | Comando | Pregunta, alcance, construcción y veredicto → `siete-vidas/prototipos/<nombre>/INFORME.md` |
+| `/prueba-juego` | Comando | Informe de prueba de juego → `siete-vidas/diseno/pruebas-de-juego/` |
+| `/revision-diseno` | Comando | Revisa un documento de diseño contra pilares, reglas y memoria |
+| `/puerta-fase` | Comando | ¿Se pasa de fase? SEGUIR / CAMBIAR / DETENER; actualiza la fase aquí |
+| `/godot-felipe` | Comando | Guía técnica corta para tocar `felipe.gd` (sensación, estados, animación, tween, cámara) |
+
 ## Concepto visual de personajes
 
 - **Felipe:** `../concepto/felipe-concepto.html` (copia local) y https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe (en línea). Al cambiar algo de Felipe, regenerar ambas con `../herramientas/pagina_felipe.py` y volver a publicar la versión en línea.

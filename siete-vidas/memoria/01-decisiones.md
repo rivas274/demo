@@ -1,6 +1,6 @@
 # Decisiones cerradas
 
-Actualizado: 2026-10-17. Detalle completo en la biblia (ver README.md).
+Actualizado: 2026-10-18. Detalle completo en la biblia (ver README.md).
 
 ## Producto
 
@@ -65,6 +65,7 @@ Actualizado: 2026-10-17. Detalle completo en la biblia (ver README.md).
 
 ## Forma de construir (2026-10-17)
 
+- **Método por fases y equipo chico (2026-10-18, decisión del creador):** el desarrollo avanza por fases (1 Concepto y pilares → 2 Prototipo de concepto → 3 Vertical slice → 4 Producción → 5 Pulido y lanzamiento) con un equipo chico de agentes y comandos de Claude Code adaptado de Claude Code Game Studios y GodotPrompter (MIT, créditos en `.claude/CREDITOS.md`). Se empieza por los pilares y un prototipo de las acciones de gato; el nivel 1 queda como base y se vuelve a él después. Detalle y fase actual en `README.md` (Equipo de diseño).
 - **Primero la prueba de concepto, después el arte final.** Los escenarios, enemigos e interfaz se arman con arte provisional dibujado por código (gratis) para afinar la jugabilidad; cuando el concepto esté cerrado, se reemplazan las texturas por las finales. No se gastan créditos de SpriteCook en escenarios hasta entonces.
 - **Proporciones (2026-10-18):** Felipe es un gato grande (persa de 8 kilos, grande y no obeso): Valeria mide 3 Felipes y Felipe ocupa 67 px de alto en pantalla. El mundo usa medidas reales a 1,21 px por cm.
 - **Profundidad con parallax en capas (como Silksong):** cada escena tiene capas lejanas que se mueven menos que la cámara, la capa de juego, y un primer plano de siluetas oscuras que se mueve más. La cámara se mueve en horizontal y en vertical.

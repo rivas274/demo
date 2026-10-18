@@ -40,7 +40,7 @@ const OCIO := {
 }
 ## Bola de estambre del ocio "jugar": objeto aparte (la animación es solo Felipe) que rueda frente a él.
 const BOLA_ESTAMBRE := preload("res://assets/felipe/estambre-bola.png")
-const DISTANCIA_ESTAMBRE := 34.0
+const DISTANCIA_ESTAMBRE := 28.0
 ## Acciones que, presionadas, cuentan como "estar jugando" (cortan el ocio y reinician la espera).
 const ACCIONES := ["mover_izquierda", "mover_derecha", "saltar", "zoomies", "zarpazo", "interactuar", "agacharse"]
 ## Duración de la transición "agacharse" (3 cuadros a 12 fps), también al pararse.
@@ -487,7 +487,7 @@ func _empezar_ocio(nombre: String) -> void:
 		_estambre = Sprite2D.new()
 		_estambre.name = "Estambre"
 		_estambre.texture = BOLA_ESTAMBRE
-		_estambre.scale = Vector2.ONE * 0.5
+		_estambre.scale = Vector2.ONE * ESCALA_SPRITE
 		add_child(_estambre)
 		_rodar_estambre()
 	var frames := sprite.sprite_frames

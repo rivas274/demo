@@ -30,8 +30,9 @@ El diseño se basa en el gato real del creador (fotos en la conversación origin
 
 - **Proporciones Chibi:** cabeza grande (aprox. 40 % de la altura), cuerpo compacto y redondo, patas cortas. La cara es el centro de la comedia.
 - **Acabado Cel-shaded:** sombras planas en 2 tonos por color, contorno oscuro marcado (no negro puro), sin degradados.
-- **Solo los gatos son Chibi.** Los humanos usan proporciones normales, en Cel-shaded, y miden el doble que Felipe.
-- **Tamaño en juego:** resolución base 640×360; Felipe en forma Normal mide unos 48 a 64 px de largo.
+- **Solo los gatos son Chibi.** Los humanos usan proporciones normales, en Cel-shaded, y miden **3 Felipes** (Valeria, 1,65 m).
+- **Felipe es un gato grande:** el real es un persa de pelo largo de unos 8 kilos; es grande, no obeso. En el juego debe sentirse así: llega casi a la altura de una mesa de comedor.
+- **Tamaño en juego (aprobado el 2026-10-18):** resolución base 640×360; Felipe mide **67 px de alto** (las hojas de 106 px se dibujan al 72 %). El mundo va a 1,21 px por cm, así que Felipe "mide" unos 55 cm con la cabeza. Se descartaron el tamaño real (Valeria = 4,3 Felipes, 46 px: parecía un gatito) y la regla anterior del doble (Valeria = 2 Felipes, 100 px: casa de muñecas). Comparación: `siete-vidas/arte/referencias/proporciones-felipe.png`.
 
 ## Paleta propuesta (a validar con el diseño generado)
 

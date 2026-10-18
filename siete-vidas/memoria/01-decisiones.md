@@ -48,6 +48,7 @@ Actualizado: 2026-10-17. Detalle completo en la biblia (ver README.md).
 ## Forma de construir (2026-10-17)
 
 - **Primero la prueba de concepto, después el arte final.** Los escenarios, enemigos e interfaz se arman con arte provisional dibujado por código (gratis) para afinar la jugabilidad; cuando el concepto esté cerrado, se reemplazan las texturas por las finales. No se gastan créditos de SpriteCook en escenarios hasta entonces.
+- **Proporciones (2026-10-18):** Felipe es un gato grande (persa de 8 kilos, grande y no obeso): Valeria mide 3 Felipes y Felipe ocupa 67 px de alto en pantalla. El mundo usa medidas reales a 1,21 px por cm.
 - **Profundidad con parallax en capas (como Silksong):** cada escena tiene capas lejanas que se mueven menos que la cámara, la capa de juego, y un primer plano de siluetas oscuras que se mueve más. La cámara se mueve en horizontal y en vertical.
 
 ## Legal (Steam)

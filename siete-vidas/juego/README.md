@@ -20,7 +20,7 @@ Prototipo jugable de **Felipe: Siete Vidas, Cero Disculpas**.
 
 | Carpeta | Contenido |
 | --- | --- |
-| `escenas/` | `apartamento.tscn` (apartamento de prueba de 1920×540, escena principal) y `felipe.tscn` |
+| `escenas/` | `apartamento.tscn` (apartamento de prueba de 1920×454, escena principal) y `felipe.tscn` |
 | `scripts/` | `felipe.gd` (movimiento y efectos), `animaciones_felipe.gd` (arma las animaciones desde las hojas), `sala.gd` (sala armada desde datos, con muebles provisionales), `fondo_apartamento.gd` (fondo provisional en capas con parallax) |
 | `assets/felipe/` | Hojas de animación de Felipe (8 cuadros de 106×106) |
 | `pruebas/` | Pruebas automáticas de movimiento y de escenario, capturas y video |
@@ -44,3 +44,4 @@ xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script r
 - **El salto del juego debe seguir las reglas de la ficha de concepto** (fases y cuadros en las constantes `CUADRO_*` de `felipe.gd`): sube estirado, arriba recoge las patas, cae en picada con la pose "caer" (delanteras estiradas hacia el suelo), toca primero con las delanteras (pose de contacto), después baja la parte de atrás y se aplasta, con polvo y estela. `prueba_movimiento.gd` comprueba estas reglas; no las quites.
 - **Arte provisional:** el escenario es una prueba de concepto dibujada con código. El arte final se cambia después en `FondoApartamento` y en `Sala._dibujar_mueble`, sin tocar colisiones ni lógica.
 - **Parallax:** el fondo va en capas `Parallax2D` definidas en `FondoApartamento.CAPAS` (cielo 0.05, ciudad lejana 0.2, ciudad cercana 0.45, pared y juego 1.0, primer plano 1.3). `prueba_escenario.gd` comprueba que cada capa siga a la cámara en su proporción y que todos los muebles se puedan alcanzar saltando; al mover muebles, debe seguir pasando.
+- **Proporciones:** Felipe mide 67 px de alto (`Felipe.ESCALA_SPRITE` = 0.72) y el mundo va a 1,21 px por cm con muebles de medidas reales (ver los comentarios de `Sala.PIEZAS`). Si cambia el tamaño de Felipe, escalar en la misma proporción su colisión, cámara, velocidades y gravedad. `prueba_movimiento.gd` comprueba su altura.

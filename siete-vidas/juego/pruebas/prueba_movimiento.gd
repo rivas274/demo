@@ -17,6 +17,8 @@ func _correr() -> void:
 
 	await _esperar(30)
 	_comprobar(felipe.is_on_floor(), "Felipe empieza apoyado en el piso")
+	var alto := _alto_dibujado(felipe)
+	_comprobar(alto > 60.0 and alto < 74.0, "Felipe mide unos 67 px, un tercio de Valeria (%.0f px)" % alto)
 
 	var x_inicial := felipe.position.x
 	Input.action_press("mover_derecha")
@@ -104,6 +106,21 @@ func _patas_delanteras_abajo(felipe: Felipe) -> bool:
 	if felipe.sprite.flip_h:
 		lado = -lado
 	return lado > 3.0
+
+
+## Alto en pantalla de Felipe en la pose de referencia (primer cuadro de "quieto", con la cola abajo).
+func _alto_dibujado(felipe: Felipe) -> float:
+	var imagen := felipe.sprite.sprite_frames.get_frame_texture("quieto", 0).get_image()
+	var arriba := -1
+	var abajo := -1
+	for y in imagen.get_height():
+		for x in imagen.get_width():
+			if imagen.get_pixel(x, y).a > 0.5:
+				if arriba < 0:
+					arriba = y
+				abajo = y
+				break
+	return (abajo - arriba + 1) * Felipe.ESCALA_SPRITE
 
 
 func _esperar(cuadros: int) -> void:

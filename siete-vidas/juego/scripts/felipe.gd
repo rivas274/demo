@@ -8,7 +8,8 @@ signal aterrizo(fuerza: float)
 
 enum Estado { SUELO, AIRE, ZOOMIES, ZARPAZO, COMIENDO, ATERRIZANDO }
 
-const ESCALA_SPRITE := 0.5
+## Felipe mide unos 67 px de alto: Valeria (1,65 m) mide 3 Felipes. Ver la guía del personaje.
+const ESCALA_SPRITE := 0.72
 ## Cuadros de la hoja "saltar" para cada fase (los mismos de la ficha de concepto).
 ## El cuadro 4 viene inclinado en diagonal y se ve raro: no se usa.
 const CUADRO_AGACHADO := 1
@@ -22,21 +23,21 @@ const CUADRO_CONTACTO := 1
 const INCLINACION_DOBLE_SALTO := -0.35
 
 @export_group("Movimiento")
-@export var velocidad_caminar := 95.0
-@export var velocidad_correr := 150.0
-@export var aceleracion := 900.0
-@export var friccion := 1100.0
+@export var velocidad_caminar := 120.0
+@export var velocidad_correr := 190.0
+@export var aceleracion := 1200.0
+@export var friccion := 1450.0
 @export_group("Salto")
-@export var gravedad := 980.0
-@export var gravedad_cayendo := 1350.0
-@export var velocidad_salto := -330.0
-@export var velocidad_doble_salto := -290.0
-@export var caida_maxima := 420.0
+@export var gravedad := 1410.0
+@export var gravedad_cayendo := 1940.0
+@export var velocidad_salto := -475.0
+@export var velocidad_doble_salto := -420.0
+@export var caida_maxima := 600.0
 @export var corte_salto := 0.45
 @export var margen_salto := 0.1
 @export var salto_recordado := 0.12
 @export_group("Zoomies")
-@export var velocidad_zoomies := 300.0
+@export var velocidad_zoomies := 380.0
 @export var duracion_zoomies := 0.18
 @export var espera_zoomies := 0.45
 
@@ -235,9 +236,9 @@ func _actualizar_animacion(direccion: float) -> void:
 func _animar_aire() -> void:
 	if _tiempo_desde_salto < 0.06:
 		_poner_cuadro("saltar", CUADRO_AGACHADO)
-	elif velocity.y < -60.0:
+	elif velocity.y < -85.0:
 		_poner_cuadro("saltar", CUADRO_SUBIENDO)
-	elif velocity.y < 60.0:
+	elif velocity.y < 85.0:
 		_poner_cuadro("saltar", CUADRO_ARRIBA)
 	else:
 		_poner_cuadro("caer", CUADRO_CAYENDO)

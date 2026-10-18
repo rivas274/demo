@@ -12,7 +12,7 @@ const CAPAS := {
 	"PrimerPlano": [1.3, 20, "_dibujar_primer_plano"],
 }
 ## Huecos de la pared por donde se ve la ciudad (coordenadas de la sala).
-const VENTANAS := [Rect2(250, 150, 150, 140), Rect2(870, 150, 180, 140)]
+const VENTANAS := [Rect2(290, 158, 180, 145), Rect2(1040, 158, 220, 145)]
 
 ## Paleta del Barrio Viejo: terracota y atardecer.
 const CIELO := [Color("3b2a5a"), Color("c8576b"), Color("f2a65a"), Color("ffd58a")]
@@ -151,11 +151,11 @@ func _dibujar_pared(c: Node2D) -> void:
 		c.draw_rect(Rect2(ventana.end.x + 4, ventana.position.y - 14, 18, ventana.size.y + 30), CORTINA)
 		c.draw_rect(Rect2(ventana.position.x - 30, ventana.position.y - 18, ventana.size.x + 60, 5), MADERA_OSCURA)
 	# Cuadros en la pared: el retrato oficial de Su Majestad y un paisaje.
-	c.draw_rect(Rect2(560, 120, 70, 84), MADERA_OSCURA)
-	c.draw_rect(Rect2(566, 126, 58, 72), Color("d9a65b"))
-	c.draw_circle(Vector2(595, 158), 18, Color("8b7864"))
-	c.draw_rect(Rect2(1480, 250, 110, 70), MADERA_OSCURA)
-	c.draw_rect(Rect2(1486, 256, 98, 58), Color("6f8f8a"))
+	c.draw_rect(Rect2(600, 150, 70, 84), MADERA_OSCURA)
+	c.draw_rect(Rect2(606, 156, 58, 72), Color("d9a65b"))
+	c.draw_circle(Vector2(635, 188), 18, Color("8b7864"))
+	c.draw_rect(Rect2(1330, 60, 110, 70), MADERA_OSCURA)
+	c.draw_rect(Rect2(1336, 66, 98, 58), Color("6f8f8a"))
 	# Piso de madera.
 	c.draw_rect(Rect2(0, suelo, ancho, 200), MADERA)
 	var tabla := 0.0
@@ -176,13 +176,13 @@ func _dibujar_luz(c: Node2D) -> void:
 
 func _dibujar_primer_plano(c: Node2D) -> void:
 	# Siluetas oscuras delante de Felipe: dan profundidad y enmarcan la sala.
-	_planta(c, Vector2(300, 610), 0.8)
-	_planta(c, Vector2(2280, 610), 1.0)
+	_planta(c, Vector2(300, 520), 0.8)
+	_planta(c, Vector2(2280, 520), 1.0)
 	# Respaldo de una silla.
-	c.draw_rect(Rect2(1380, 470, 12, 160), SILUETA)
-	c.draw_rect(Rect2(1450, 470, 12, 160), SILUETA)
-	c.draw_rect(Rect2(1374, 470, 94, 14), SILUETA)
-	c.draw_rect(Rect2(1374, 510, 94, 8), SILUETA)
+	c.draw_rect(Rect2(1380, 400, 12, 160), SILUETA)
+	c.draw_rect(Rect2(1450, 400, 12, 160), SILUETA)
+	c.draw_rect(Rect2(1374, 400, 94, 14), SILUETA)
+	c.draw_rect(Rect2(1374, 440, 94, 8), SILUETA)
 	# Lámpara colgando del techo.
 	c.draw_line(Vector2(1020, -60), Vector2(1020, 60), SILUETA, 3)
 	c.draw_colored_polygon(PackedVector2Array([Vector2(995, 90), Vector2(1045, 90), Vector2(1030, 58), Vector2(1010, 58)]), SILUETA)

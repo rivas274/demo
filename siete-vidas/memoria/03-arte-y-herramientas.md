@@ -90,7 +90,8 @@
 ## Otras herramientas
 
 - **Motor:** Godot 4 (MIT). En las sesiones en la nube se instala con: descargar `Godot_v4.3-stable_linux.x86_64.zip` de los releases de GitHub en `/opt/godot` y enlazarlo a `/usr/local/bin/godot` (se usa en modo `--headless`). Para exportar hacen falta las plantillas: de `Godot_v4.3-stable_export_templates.tpz` (1 GB) basta extraer `linux_release.x86_64`, `windows_release_x86_64.exe` y `version.txt` en `~/.local/share/godot/export_templates/4.3.stable/`. Para capturas o video: `xvfb-run -a godot ... --rendering-driver opengl3`.
-- **Tamaño de Felipe en el juego:** las hojas son de 106×106 y se dibujan a escala 0.5 (Felipe mide unos 45 px de alto en 640×360). Si se ven detalles perdidos, generar los sprites finales directamente a ese tamaño. SpriteCook puede exportar paquetes de personaje y tilesets listos para Godot 4.
+- **Tamaño de Felipe en el juego:** las hojas son de 106×106 y se dibujan a escala 0.72 (Felipe mide 67 px de alto en 640×360; antes era 0.5 y parecía un gatito). Al 72 % los pixeles quedan algo disparejos: sirve para la prueba de concepto, pero **las hojas finales deben generarse directamente a ~67 px de alto** (cuadros de unos 76×76).
+- **Escala del mundo:** 1,21 px por cm; muebles con medidas reales (sofá 45 cm, mesa 75 cm, mesón 90 cm, refrigerador 1,80 m). Las casas antiguas del Barrio Viejo tienen techo alto (3,5 m) para dejar espacio a trepar. SpriteCook puede exportar paquetes de personaje y tilesets listos para Godot 4.
 - **Retoque de pixel art:** Pixelorama (gratis, código abierto) o Aseprite.
 - **Niveles:** TileMap de Godot y LDtk.
 - **Audio:** Furnace o LMMS (música), jsfxr y Audacity (efectos).

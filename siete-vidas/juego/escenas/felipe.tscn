@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/felipe.gd" id="1_felipe"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cuerpo"]
-size = Vector2(28, 24)
+size = Vector2(40, 34)
 
 [sub_resource type="Gradient" id="Gradient_polvo"]
 colors = PackedColorArray(0.88, 0.84, 0.79, 0.9, 0.88, 0.84, 0.79, 0)
@@ -13,7 +13,7 @@ floor_snap_length = 4.0
 script = ExtResource("1_felipe")
 
 [node name="Sprite" type="AnimatedSprite2D" parent="."]
-position = Vector2(0, -25)
+position = Vector2(0, -36)
 
 [node name="Polvo" type="CPUParticles2D" parent="."]
 emitting = false
@@ -22,7 +22,7 @@ lifetime = 0.4
 one_shot = true
 explosiveness = 1.0
 emission_shape = 3
-emission_rect_extents = Vector2(12, 1)
+emission_rect_extents = Vector2(17, 1)
 direction = Vector2(0, -1)
 spread = 80.0
 gravity = Vector2(0, 140)
@@ -33,10 +33,10 @@ scale_amount_max = 3.0
 color_ramp = SubResource("Gradient_polvo")
 
 [node name="Cuerpo" type="CollisionShape2D" parent="."]
-position = Vector2(0, -12)
+position = Vector2(0, -17)
 shape = SubResource("RectangleShape2D_cuerpo")
 
 [node name="Camara" type="Camera2D" parent="."]
-position = Vector2(0, -30)
+position = Vector2(0, -43)
 position_smoothing_enabled = true
 position_smoothing_speed = 7.0

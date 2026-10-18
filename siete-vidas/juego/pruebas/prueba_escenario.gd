@@ -3,9 +3,9 @@ extends SceneTree
 ##   godot --headless --path siete-vidas/juego --script res://pruebas/prueba_escenario.gd
 ## Termina con código 0 si todo pasa y 1 si algo falla.
 
-## Altura máxima con doble salto (~98 px) con un poco de margen, y distancia horizontal máxima entre muebles.
-const SUBIDA_MAXIMA := 90.0
-const HUECO_MAXIMO := 120.0
+## Altura máxima con doble salto (~140 px) con margen, y distancia horizontal máxima entre muebles.
+const SUBIDA_MAXIMA := 125.0
+const HUECO_MAXIMO := 160.0
 
 var _fallos: Array[String] = []
 
@@ -34,11 +34,11 @@ func _correr() -> void:
 	_comprobar(lejos < 0.3 and cerca > 1.0, "Hay capas lejanas (más lentas) y de primer plano (más rápidas)")
 
 	var antes := _posiciones_en_pantalla(sala, capas)
-	felipe.position = Vector2(1500, 150)
+	felipe.position = Vector2(1650, 164)
 	await _esperar(180)
 	var despues := _posiciones_en_pantalla(sala, capas)
 	var movimiento_juego: Vector2 = despues[0] - antes[0]
-	_comprobar(absf(movimiento_juego.x) > 300.0 and absf(movimiento_juego.y) > 50.0, "La cámara se movió en horizontal y vertical (%.0f, %.0f)" % [movimiento_juego.x, movimiento_juego.y])
+	_comprobar(absf(movimiento_juego.x) > 300.0 and absf(movimiento_juego.y) > 40.0, "La cámara se movió en horizontal y vertical (%.0f, %.0f)" % [movimiento_juego.x, movimiento_juego.y])
 	for i in capas.size():
 		var movimiento: Vector2 = despues[i + 1] - antes[i + 1]
 		var proporcion := movimiento / movimiento_juego

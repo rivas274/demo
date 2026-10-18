@@ -7,7 +7,7 @@
 script = ExtResource("1_sala")
 
 [node name="Felipe" parent="." instance=ExtResource("2_felipe")]
-position = Vector2(80, 510)
+position = Vector2(80, 424)
 
 [node name="Interfaz" type="CanvasLayer" parent="."]
 

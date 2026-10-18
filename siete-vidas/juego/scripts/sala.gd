@@ -3,32 +3,35 @@ extends Node2D
 ## Sala armada desde datos: piezas sólidas y muebles que se atraviesan desde abajo.
 ## El dibujo es provisional (prueba de concepto); el fondo con parallax está en FondoApartamento.
 
+## Escala del mundo: 1,21 px por cm (Felipe mide unos 55 cm de alto contando la cabeza; Valeria = 3 Felipes).
+## Techo alto de casa antigua del Barrio Viejo: 3,5 m.
 const ANCHO := 1920.0
-const ALTO := 540.0
-const SUELO := 510.0
+const SUELO := 424.0
+const ALTO := SUELO + 30.0
 const TELA := Color("4f6d7a")
 const MADERA := Color("b0613f")
 const MADERA_OSCURA := Color("6e3a26")
 const LOMOS := [Color("c8576b"), Color("6f8f8a"), Color("d9a65b"), Color("5b4d7a")]
 
-## [rectángulo, se atraviesa desde abajo, nombre, estilo de dibujo]
+## [rectángulo, se atraviesa desde abajo, nombre, estilo de dibujo]. Entre paréntesis, la altura real del mueble.
 const PIEZAS := [
 	[Rect2(0, SUELO, ANCHO, 30), false, "Piso", "invisible"],
 	[Rect2(-20, 0, 20, ALTO), false, "Pared izquierda", "invisible"],
 	[Rect2(ANCHO, 0, 20, ALTO), false, "Pared derecha", "invisible"],
 	[Rect2(0, -20, ANCHO, 20), false, "Techo", "invisible"],
-	[Rect2(150, 470, 140, 10), true, "Sofá", "sofa"],
-	[Rect2(380, 430, 110, 8), true, "Mesa", "mesa"],
-	[Rect2(560, 380, 90, 8), true, "Estante bajo", "repisa"],
-	[Rect2(720, 330, 90, 8), true, "Estante alto", "repisa"],
-	[Rect2(870, 290, 180, 8), true, "Repisa de la ventana", "repisa"],
-	[Rect2(1000, 480, 80, 30), false, "Caja de arena", "caja"],
-	[Rect2(1110, 250, 90, 10), true, "Librero", "librero"],
-	[Rect2(1250, 200, 80, 8), true, "Repisa de la lámpara", "repisa"],
-	[Rect2(1320, 465, 40, 8), true, "Banco", "mesa"],
-	[Rect2(1380, 150, 300, 10), true, "Alacena", "alacena"],
-	[Rect2(1400, 430, 280, 80), false, "Mesón", "meson"],
-	[Rect2(1740, 300, 100, 210), false, "Refrigerador", "refri"],
+	[Rect2(260, 370, 230, 10), true, "Sofá", "sofa"],  # asiento a 45 cm
+	[Rect2(550, 333, 133, 8), true, "Mesa", "mesa"],  # 75 cm
+	[Rect2(730, 255, 110, 8), true, "Estante bajo", "repisa"],  # 1,40 m
+	[Rect2(880, 200, 110, 8), true, "Estante alto", "repisa"],  # 1,85 m
+	[Rect2(1040, 303, 220, 8), true, "Repisa de la ventana", "repisa"],  # 1 m
+	[Rect2(1100, 400, 100, 24), false, "Caja de arena", "caja"],  # 20 cm
+	[Rect2(1180, 90, 100, 8), true, "Repisa alta", "repisa"],  # 2,75 m
+	[Rect2(1320, 206, 110, 10), true, "Librero", "librero"],  # 1,80 m
+	[Rect2(1480, 345, 50, 8), true, "Banco", "mesa"],  # 65 cm
+	[Rect2(1460, 240, 70, 8), true, "Repisa de la lámpara", "repisa"],  # 1,52 m
+	[Rect2(1560, 164, 220, 10), true, "Alacena", "alacena"],  # 2,15 m
+	[Rect2(1560, 315, 220, 109), false, "Mesón", "meson"],  # 90 cm
+	[Rect2(1800, 206, 100, 218), false, "Refrigerador", "refri"],  # 1,80 m
 ]
 
 @onready var felipe: Felipe = $Felipe
@@ -69,7 +72,7 @@ func _dibujar_mueble(c: Node2D, tamano: Vector2, estilo: String) -> void:
 	var hasta_suelo := SUELO - (c.get_parent() as Node2D).position.y
 	match estilo:
 		"sofa":
-			c.draw_rect(Rect2(0, -34, tamano.x, 40), TELA.darkened(0.2))
+			c.draw_rect(Rect2(0, -48, tamano.x, 54), TELA.darkened(0.2))
 			c.draw_rect(Rect2(0, 0, tamano.x, hasta_suelo - 6), TELA)
 			c.draw_rect(Rect2(tamano.x / 2 - 1, 0, 2, 14), TELA.darkened(0.3))
 			c.draw_rect(Rect2(-10, -10, 14, hasta_suelo + 4), TELA.darkened(0.1))
@@ -96,7 +99,7 @@ func _dibujar_mueble(c: Node2D, tamano: Vector2, estilo: String) -> void:
 				fila += 52
 			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), MADERA)
 		"alacena":
-			c.draw_rect(Rect2(0, 0, tamano.x, 90), MADERA)
+			c.draw_rect(Rect2(0, 0, tamano.x, 85), MADERA)
 			var puerta := 6.0
 			while puerta < tamano.x - 10:
 				c.draw_rect(Rect2(puerta, 14, 66, 70), MADERA.lightened(0.1))

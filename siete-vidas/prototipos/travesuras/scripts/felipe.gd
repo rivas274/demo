@@ -56,6 +56,9 @@ const ALCANCE := Vector2(48, 40)
 @export var duracion_intimidar := 1.0
 ## Arañazos seguidos por cada pulsación sobre el sofá.
 @export var aranazos_por_accion := 2
+## Distancia a la que Felipe se para antes de tirar algo (si está más cerca, da un pasito atrás
+## para que la pata llegue al objeto en el cuadro de impacto en vez de taparlo con el pecho).
+@export var distancia_tirar := 34.0
 
 var estado := Estado.SUELO
 var mirando := 1.0
@@ -249,6 +252,8 @@ func _empezar_accion(objeto: Node2D) -> void:
 	estado = Estado.ACCION
 	velocity.x = 0.0
 	sprite.flip_h = mirando < 0.0
+	if _tipo_pendiente == "tirar" and absf(punto.x - global_position.x) < distancia_tirar:
+		create_tween().tween_property(self, "global_position:x", punto.x - mirando * distancia_tirar, 0.1)
 	if _tipo_pendiente == "comer":
 		_repeticiones = 0
 		_reiniciar("comer")

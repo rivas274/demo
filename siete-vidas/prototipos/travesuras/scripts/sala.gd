@@ -80,6 +80,8 @@ func _ready() -> void:
 	valeria.se_va.connect(_al_rendirse)
 	valeria.se_fue.connect(_al_irse)
 	add_child(valeria)
+	# Valeria va detrás de los objetos: no tapa el florero ni el vaso cuando se para frente a la repisa.
+	move_child(valeria, sofa.get_index() + 1)
 	felipe = FelipeProto.new()
 	felipe.name = "Felipe"
 	felipe.position = Vector2(235, SUELO)

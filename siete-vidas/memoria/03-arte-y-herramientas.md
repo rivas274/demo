@@ -77,6 +77,13 @@ Solo lo que se usa (las formas de peso dibujadas, el Modo Buda, la pose sentado,
 
 Referencias de diseño (no se usan en el juego): foto real de Felipe (`a0fbe97b-61b6-4d6d-8cb3-c5b4afaa6a74`, no está en el repositorio), prueba de 4 estilos v1 (`8868e7a2-…`, `../referencias/felipe-prueba-estilos-v1.png`), híbrido v2 A y B (`22529bf7-…`, `../referencias/felipe-hibrido-v2.png`) y comparación de proporciones (`../referencias/proporciones-felipe.png`).
 
+## Gemini (Nano Banana) para imágenes fijas (2026-10-18)
+
+- **Para qué:** imágenes fijas (fondos, muebles, objetos, iconos de interfaz) sin gastar créditos de SpriteCook. **No para animaciones de Felipe**: esas siguen en SpriteCook desde Felipe A (regla de consistencia).
+- **Cómo:** la sesión en la nube no llega a la computadora del creador. Se usa su sesión de Remote Control "emergencias" (`session_01BaNYjKLABkD7kjEzfX3JYu`), que maneja su Chrome con la extensión de Claude: en https://gemini.google.com/app?hl=es_419 está su cuenta iniciada y el menú "+" → "Crear imagen". Se le escribe con `send_message`; responde por mensajes entre sesiones.
+- **Flujo acordado (opción A):** esa sesión genera la imagen, clona `rivas274/demo` y la sube a la rama del juego; la sesión del juego la revisa e integra. Antes de generar, esa sesión confirma con el creador.
+- **API directa (alternativa):** agregar `GEMINI_API_KEY` en la configuración del entorno (se lee en una sesión nueva). La red de la nube sí llega a `generativelanguage.googleapis.com`.
+
 ## Otras herramientas
 
 - **Motor:** Godot 4 (MIT). En las sesiones en la nube se instala con: descargar `Godot_v4.3-stable_linux.x86_64.zip` de los releases de GitHub en `/opt/godot` y enlazarlo a `/usr/local/bin/godot` (se usa en modo `--headless`). Para exportar hacen falta las plantillas: de `Godot_v4.3-stable_export_templates.tpz` (1 GB) basta extraer `linux_release.x86_64`, `windows_release_x86_64.exe` y `version.txt` en `~/.local/share/godot/export_templates/4.3.stable/`. Para capturas o video: `xvfb-run -a godot ... --rendering-driver opengl3`. Para la versión web hace falta además `web_nothreads_release.zip` del mismo paquete (preset "Web" sin hilos, no necesita cabeceras especiales del servidor; pesa ~35 MB, demasiado para un artifact de Claude).

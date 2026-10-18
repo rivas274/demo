@@ -1,0 +1,95 @@
+class_name Aspi
+extends CharacterBody2D
+## A.S.P.I., la aspiradora robot de Valeria: patrulla el piso, persigue a Felipe si lo ve cerca
+## y le quita un corazón al tocarlo. Tres zarpazos la apagan. Arte provisional dibujado con código.
+## Medidas reales: 34 cm de diámetro y 9 cm de alto (41 × 11 px).
+
+const ANCHO := 41.0
+const ALTO := 11.0
+const GOLPES_PARA_APAGAR := 3
+
+@export var velocidad_patrulla := 40.0
+@export var velocidad_persecucion := 80.0
+## Distancia a la que ve a Felipe (solo si está más o menos a su altura).
+@export var vision := 170.0
+
+var limite_izquierdo: float
+var limite_derecho: float
+var golpes := 0
+var apagada := false
+var persiguiendo := false
+
+var _direccion := 1.0
+var _tiempo_golpe := 0.0
+var _felipe: Felipe
+
+
+func _init(izquierda: float, derecha: float) -> void:
+	limite_izquierdo = izquierda
+	limite_derecho = derecha
+	name = "ASPI"
+
+
+func _ready() -> void:
+	add_to_group("enemigos")
+	# Choca con el piso y los muebles sólidos, pero no con Felipe (el daño se calcula por distancia).
+	collision_layer = 0
+	set_collision_layer_value(4, true)
+	collision_mask = 1
+	var forma := CollisionShape2D.new()
+	var caja := RectangleShape2D.new()
+	caja.size = Vector2(ANCHO, ALTO)
+	forma.shape = caja
+	forma.position = Vector2(0, -ALTO / 2.0)
+	add_child(forma)
+	_felipe = get_tree().get_first_node_in_group("felipe")
+
+
+func _physics_process(delta: float) -> void:
+	velocity.y += 980.0 * delta
+	_tiempo_golpe = maxf(0.0, _tiempo_golpe - delta)
+	if apagada:
+		velocity.x = move_toward(velocity.x, 0.0, 400.0 * delta)
+		move_and_slide()
+		return
+	var distancia := _felipe.global_position - global_position if _felipe else Vector2.INF
+	persiguiendo = absf(distancia.x) < vision and absf(distancia.y) < 30.0 and _felipe.estado != Felipe.Estado.DESMAYADO
+	if persiguiendo:
+		_direccion = signf(distancia.x) if distancia.x != 0.0 else _direccion
+	elif global_position.x <= limite_izquierdo:
+		_direccion = 1.0
+	elif global_position.x >= limite_derecho:
+		_direccion = -1.0
+	if _tiempo_golpe <= 0.0:
+		velocity.x = _direccion * (velocidad_persecucion if persiguiendo else velocidad_patrulla)
+	move_and_slide()
+	if is_on_wall():
+		_direccion = -_direccion
+	if _felipe and absf(distancia.x) < (ANCHO / 2.0 + 18.0) and distancia.y > -30.0 and distancia.y < 8.0:
+		_felipe.recibir_dano(1, global_position.x)
+	queue_redraw()
+
+
+func recibir_zarpazo(felipe: Felipe) -> void:
+	if apagada:
+		return
+	golpes += 1
+	_tiempo_golpe = 0.3
+	velocity.x = felipe.mirando * 160.0
+	if golpes >= GOLPES_PARA_APAGAR:
+		apagada = true
+	queue_redraw()
+
+
+func _draw() -> void:
+	var cuerpo := Color("3a3d44") if not apagada else Color("6a6d72")
+	draw_rect(Rect2(-ANCHO / 2.0 + 3.0, -ALTO, ANCHO - 6.0, ALTO), cuerpo)
+	draw_circle(Vector2(-ANCHO / 2.0 + 4.0, -ALTO / 2.0), ALTO / 2.0, cuerpo)
+	draw_circle(Vector2(ANCHO / 2.0 - 4.0, -ALTO / 2.0), ALTO / 2.0, cuerpo)
+	draw_rect(Rect2(-ANCHO / 2.0 + 4.0, -ALTO, ANCHO - 8.0, 3.0), cuerpo.lightened(0.25))
+	var luz := Color("e0483b") if persiguiendo else Color("5fd18a")
+	if apagada:
+		luz = Color("2a2a2a")
+	draw_circle(Vector2(_direccion * 8.0, -ALTO + 1.5), 2.0, luz)
+	if _tiempo_golpe > 0.0:
+		draw_rect(Rect2(-ANCHO / 2.0, -ALTO - 2.0, ANCHO, ALTO + 2.0), Color(1, 1, 1, 0.5))

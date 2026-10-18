@@ -17,6 +17,9 @@ func _correr() -> void:
 	var sala: Node = load("res://escenas/apartamento.tscn").instantiate()
 	root.add_child(sala)
 	var felipe: Felipe = sala.get_node("Felipe")
+	# Esta prueba es solo del movimiento: los enemigos se prueban en prueba_mecanicas.gd.
+	for enemigo in root.get_tree().get_nodes_in_group("enemigos"):
+		enemigo.queue_free()
 
 	await _esperar(30)
 	_comprobar(felipe.is_on_floor(), "Felipe empieza apoyado en el piso")

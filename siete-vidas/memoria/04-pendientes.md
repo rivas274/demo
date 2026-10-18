@@ -23,7 +23,8 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [ ] Guion del primer acto (la fuga, La Cuadra, jefe A.S.P.I.).
 - [x] Proyecto de Godot montado en `siete-vidas/juego/` (2026-10-17): Felipe jugable (caminar, correr, salto con margen y salto recordado, altura variable, doble salto, Zoomies, zarpazo, comer, aterrizaje con patas delanteras), sala de prueba del apartamento, prueba automática, capturas/video y exportación automática a Windows y Linux con GitHub Actions.
 - [x] Escenario provisional del apartamento (2026-10-17; escala corregida el 2026-10-18): 1920×454 con techo de 3,5 m, Felipe de 67 px, 13 muebles con medidas reales y alcanzables, fondo del Barrio Viejo en 4 capas de parallax más pared, luz y primer plano; prueba `prueba_escenario.gd`.
-- [ ] Siguiente del prototipo (con arte provisional): corazones y 7 vidas con desmayo y reaparición, snacks (Q cura y suma peso), A.S.P.I. como primer enemigo (patrulla, persigue, 3 zarpazos), vaso que se puede tirar (logro "La Gravedad Funciona") e interfaz estilo redes sociales.
+- [x] Mecánicas del prototipo (2026-10-18, arte provisional): corazones y 7 vidas con desmayo y reaparición, comer cura y suma peso, báscula en la interfaz, A.S.P.I. (patrulla, persigue, 3 zarpazos), vaso con el logro "La Gravedad Funciona" y notificaciones de logros. Prueba `prueba_mecanicas.gd`.
+- [ ] Siguiente: arte final de A.S.P.I., mapa del apartamento como primer nivel (salida a La Cuadra), afecto y respeto, sonido.
 - [ ] Hojas finales de Felipe generadas a ~67 px de alto (hoy se reducen al 72 % y los pixeles quedan disparejos).
 - [ ] Arte final de escenarios (tileset, fondos por capa, muebles) cuando el concepto esté afinado.
 - [ ] Prototipo jugable: Felipe moviéndose en el apartamento de Valeria.

@@ -35,11 +35,20 @@ const PIEZAS := [
 	[Rect2(1800, 206, 100, 218), false, "Refrigerador", "refri"],  # 1,80 m
 ]
 
+signal logro_desbloqueado(titulo: String)
+
 ## Comida en el apartamento: [posición sobre la superficie, tipo].
 const COMIDA := [
 	[Vector2(1435, SUELO), "plato"],  # croquetas en el piso de la cocina
 	[Vector2(935, 200), "lata"],  # atún escondido en el estante alto
 ]
+
+## Vaso sobre la mesa (se tira con el botón de acción).
+const VASO := Vector2(670, 333)
+## A.S.P.I.: [posición inicial, límite izquierdo y derecho de la patrulla].
+const ASPI := [Vector2(1000, SUELO), 900.0, 1090.0]
+
+var logros: Array[String] = []
 
 @onready var felipe: Felipe = $Felipe
 
@@ -52,6 +61,16 @@ func _ready() -> void:
 		var objeto := Comida.new(comida[1])
 		objeto.position = comida[0]
 		add_child(objeto)
+	var vaso := Vaso.new(SUELO)
+	vaso.position = VASO
+	add_child(vaso)
+	var aspi := Aspi.new(ASPI[1], ASPI[2])
+	aspi.position = ASPI[0]
+	add_child(aspi)
+	var medidores := Medidores.new()
+	medidores.felipe = felipe
+	logro_desbloqueado.connect(medidores.mostrar_logro)
+	$Interfaz.add_child(medidores)
 	var camara: Camera2D = felipe.get_node("Camara")
 	camara.limit_left = 0
 	camara.limit_top = 0
@@ -146,3 +165,10 @@ func _dibujar_mueble(c: Node2D, tamano: Vector2, estilo: String) -> void:
 			c.draw_rect(Rect2(4, 0, tamano.x - 8, 6), Color("d9c7a0"))
 		_:
 			c.draw_rect(Rect2(Vector2.ZERO, tamano), MADERA)
+
+
+func desbloquear_logro(titulo: String) -> void:
+	if titulo in logros:
+		return
+	logros.append(titulo)
+	logro_desbloqueado.emit(titulo)

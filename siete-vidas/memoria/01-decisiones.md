@@ -47,6 +47,12 @@ Actualizado: 2026-10-17. Detalle completo en la biblia (ver README.md).
 - **Accesibilidad:** controles reasignables, subtítulos ajustables, modo daltónico, modo asistido que no bloquea logros.
 - **Logros:** 40 en Steam (lista en la biblia); coleccionables: 50 calcetines, 30 fotos vergonzosas, lagartijas.
 
+## Prototipo jugable (2026-10-18)
+
+- **Vida:** 5 corazones por vida y 7 vidas; al perderlas todas, vuelven las 7 con el Collar de la Vergüenza. Comer cura 1 corazón y suma 0,3 kg.
+- **A.S.P.I.** es el primer enemigo: patrulla, persigue a Felipe si lo ve a su altura, quita 1 corazón al tocarlo y se apaga con 3 zarpazos.
+- **Interfaz** con estilo de red social: corazones como "me gusta", vidas, báscula en kilos y logros como notificaciones.
+
 ## Forma de construir (2026-10-17)
 
 - **Primero la prueba de concepto, después el arte final.** Los escenarios, enemigos e interfaz se arman con arte provisional dibujado por código (gratis) para afinar la jugabilidad; cuando el concepto esté cerrado, se reemplazan las texturas por las finales. No se gastan créditos de SpriteCook en escenarios hasta entonces.

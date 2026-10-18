@@ -60,7 +60,7 @@ El diseño se basa en el gato real del creador (fotos en la conversación origin
 
 Lista oficial (la misma de la ficha de concepto). Toda acción nueva se agrega aquí y en la ficha. Los nombres de animación son los de Godot (`AnimacionesFelipe.HOJAS`).
 
-| Acción | Teclado | Mando | Qué hace | Animación | Estado |
+| Acción | E | Y | Usa el objeto más cercano (hasta 48 px de lado y 40 px de alto): si es comida se la come (cura 1 corazón y suma 0,3 kg); si es el vaso, lo tira de un manotazo (logro "La Gravedad Funciona"); sin objeto no hace nada. No hay botón de comer suelto | `comer`, `zarpazo` (manotazo) | En el juego |
 | --- | --- | --- | --- | --- | --- |
 | Quieto | — | — | Respira y mece la cola | `quieto` | En el juego |
 | Caminar | A / D o ← / → | Palanca izquierda o cruceta | 120 px/s | `caminar` | En el juego |
@@ -71,12 +71,12 @@ Lista oficial (la misma de la ficha de concepto). Toda acción nueva se agrega a
 | Caer y aterrizar | — | — | Delanteras primero: cae en picada, toca con las delanteras, baja la parte de atrás y se aplasta, con polvo | `caer` 3 (cayendo) y 5 (contacto), `saltar` 5 y 6 | En el juego |
 | Agacharse y gatear | S o ↓ | Palanca abajo o cruceta abajo | Transición dibujada al bajar y al pararse (al revés); gatea a 55 px/s con la panza al piso y patas alternadas; colisión de 32 px (de pie, 58); cabe bajo muebles con 30 cm libres (36 px); bajo un mueble no se para aunque se suelte el botón | `agacharse` (cuadros 0 a 3 de la hoja), `gatear` (4 a 7) | En el juego |
 | Bajar de una repisa | S + Espacio | Abajo + A | Atraviesa hacia abajo los muebles que se atraviesan desde abajo (repisas, mesa, estantes) | — | En el juego |
-| Zarpazo | J | X | Ataque con la pata | `zarpazo` | En el juego (sin enemigos aún) |
+| Zarpazo | J | X | Ataque con la pata: golpea a los enemigos enfrente (hasta 56 px). A.S.P.I. se apaga con 3 | `zarpazo` | En el juego |
 | Acción | E | Y | Usa el objeto más cercano (hasta 48 px de lado y 40 px de alto); si es comida, se la come; sin objeto no hace nada. No hay botón de comer suelto | `comer` (con comida) | En el juego |
 | Ronronear | — | — | Con humanos, sube el afecto | `ronronear` | Animación lista; falta la mecánica |
-| Recibir daño | — | — | Parpadeo blanco y sacudida | Efecto de código | Falta en el juego |
-| Perder una vida | — | — | Desmayo y una de sus 7 vidas sube como fantasma | `desmayo` + código | Animación lista; falta la mecánica |
-| Peso | — | — | Comer sube el peso; no cambia el dibujo, se ve en un indicador arriba junto a la vida | — | Decidido; falta en el juego |
+| Recibir daño | — | — | Quita 1 de 5 corazones, lo empuja lejos del golpe y queda 1,2 s invulnerable, parpadeando | Efecto de código | En el juego |
+| Perder una vida | — | — | Sin corazones se desmaya, una de sus 7 vidas sube como fantasma y a los 1,8 s reaparece en el punto de descanso con los corazones llenos. Sin vidas, vuelven las 7 con el Collar de la Vergüenza | `desmayo` + código | En el juego |
+| Peso | — | — | Empieza en 8,0 kg; cada comida suma 0,3 kg. No cambia el dibujo: se ve en la báscula de la interfaz, arriba junto a la vida | — | En el juego (solo indicador) |
 | Ocio | Nada durante 8 s (`espera_ocio`) | — | Elige al azar: sentarse y acicalarse, jugar con estambre o perseguirse la cola; repite el ciclo 2 o 3 veces y vuelve a quieto; cualquier botón lo interrumpe | `acicalarse` (de pie), `jugar` (+ bola de estambre por código), `vueltas` | En el juego |
 
 ## Proporciones medidas (Felipe A, cuadro de 106 px)

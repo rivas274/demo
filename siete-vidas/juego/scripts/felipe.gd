@@ -6,7 +6,7 @@ extends CharacterBody2D
 
 signal aterrizo(fuerza: float)
 
-enum Estado { SUELO, AIRE, ZOOMIES, ZARPAZO, COMIENDO, ATERRIZANDO, OCIO }
+enum Estado { SUELO, AIRE, ZOOMIES, ZARPAZO, COMIENDO, ATERRIZANDO, OCIO, DESMAYADO }
 
 ## Felipe mide unos 67 px de alto: Valeria (1,65 m) mide 3 Felipes. Ver la guía del personaje.
 const ESCALA_SPRITE := 0.72
@@ -43,6 +43,18 @@ const BOLA_ESTAMBRE := preload("res://assets/felipe/estambre-bola.png")
 const DISTANCIA_ESTAMBRE := 28.0
 ## Acciones que, presionadas, cuentan como "estar jugando" (cortan el ocio y reinician la espera).
 const ACCIONES := ["mover_izquierda", "mover_derecha", "saltar", "zoomies", "zarpazo", "interactuar", "agacharse"]
+## Vida: corazones por vida y vidas por partida. Al perder la última, despierta en casa con el Collar de la Vergüenza.
+const CORAZONES_MAX := 5
+const VIDAS_MAX := 7
+## Segundos sin recibir más daño después de un golpe (parpadea).
+const TIEMPO_INVULNERABLE := 1.2
+## Segundos desmayado antes de reaparecer.
+const TIEMPO_DESMAYO := 1.8
+## Peso en kilos: no cambia el dibujo de Felipe, solo el indicador de la interfaz.
+const PESO_INICIAL := 8.0
+const PESO_POR_COMIDA := 0.3
+## Alcance del zarpazo frente a Felipe (horizontal, vertical).
+const ALCANCE_ZARPAZO := Vector2(56, 40)
 ## Duración de la transición "agacharse" (4 cuadros a 12 fps), también al pararse.
 const DURACION_TRANSICION := 0.33
 ## Distancia (horizontal, vertical) a la que el botón de acción alcanza un objeto.
@@ -75,6 +87,11 @@ var estado := Estado.SUELO
 var mirando := 1.0
 var tiene_doble_salto := true
 var agachado := false
+var corazones := CORAZONES_MAX
+var vidas := VIDAS_MAX
+var peso := PESO_INICIAL
+var tiene_collar := false
+var punto_reaparicion: Vector2
 
 var _tiempo_fuera_del_suelo := 0.0
 var _tiempo_salto_pedido := 99.0
@@ -88,6 +105,8 @@ var _tiempo_bajando := 0.0
 var _tiempo_sin_tocar := 0.0
 var _tiempo_levantandose := 0.0
 var _tiempo_ocio := 0.0
+var _tiempo_invulnerable := 0.0
+var _tiempo_desmayado := 0.0
 var _estambre: Sprite2D
 var _efecto: Tween
 var _posicion_sprite: Vector2
@@ -103,7 +122,12 @@ func _ready() -> void:
 	_posicion_sprite = sprite.position
 	cuerpo.shape = cuerpo.shape.duplicate()
 	set_collision_mask_value(CAPA_ATRAVESABLE, true)
+	# Felipe va en su propia capa (3): los enemigos no chocan con él; el daño se calcula por distancia.
+	collision_layer = 0
+	set_collision_layer_value(3, true)
 	sprite.animation_finished.connect(_al_terminar_animacion)
+	add_to_group("felipe")
+	punto_reaparicion = global_position
 	sprite.play("quieto")
 
 
@@ -115,6 +139,7 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("saltar"):
 		_tiempo_salto_pedido = 0.0
 	_actualizar_bajada(delta)
+	_actualizar_invulnerable(delta)
 	_actualizar_ocio(delta)
 	_actualizar_agachado()
 
@@ -124,10 +149,18 @@ func _physics_process(delta: float) -> void:
 		Estado.ZARPAZO, Estado.COMIENDO, Estado.OCIO:
 			_frenar(delta)
 			_aplicar_gravedad(delta)
+		Estado.DESMAYADO:
+			_frenar(delta)
+			_aplicar_gravedad(delta)
+			_tiempo_desmayado -= delta
+			if _tiempo_desmayado <= 0.0:
+				_reaparecer()
 		Estado.ATERRIZANDO:
 			_mover(direccion, delta)
 			_aplicar_gravedad(delta)
 			_intentar_saltar()
+			if estado == Estado.ATERRIZANDO:
+				_intentar_acciones(direccion)
 			_tiempo_aterrizando -= delta
 			if _tiempo_aterrizando <= 0.0 and estado == Estado.ATERRIZANDO:
 				estado = Estado.SUELO
@@ -216,6 +249,7 @@ func _intentar_acciones(direccion: float) -> void:
 	elif Input.is_action_just_pressed("zarpazo"):
 		estado = Estado.ZARPAZO
 		sprite.play("zarpazo")
+		_golpear()
 	elif Input.is_action_just_pressed("interactuar") and is_on_floor():
 		var objeto := objeto_cercano()
 		if objeto:
@@ -233,10 +267,20 @@ func objeto_cercano() -> Node2D:
 	return mejor
 
 
+## Comer cura un corazón y suma peso.
 func comer() -> void:
 	estado = Estado.COMIENDO
 	velocity.x = 0.0
 	sprite.play("comer")
+	corazones = mini(corazones + 1, CORAZONES_MAX)
+	peso += PESO_POR_COMIDA
+
+
+## Tirar algo de un manotazo (por ejemplo, el vaso de la mesa): usa la animación del zarpazo.
+func dar_manotazo() -> void:
+	estado = Estado.ZARPAZO
+	velocity.x = 0.0
+	sprite.play("zarpazo")
 
 
 func _actualizar_zoomies(delta: float) -> void:
@@ -282,7 +326,7 @@ func _aterrizar() -> void:
 
 func _actualizar_animacion(direccion: float) -> void:
 	sprite.flip_h = mirando < 0.0
-	if estado in [Estado.ZARPAZO, Estado.COMIENDO, Estado.OCIO]:
+	if estado in [Estado.ZARPAZO, Estado.COMIENDO, Estado.OCIO, Estado.DESMAYADO]:
 		return
 	if estado == Estado.ZOOMIES:
 		_reproducir("correr")
@@ -513,3 +557,74 @@ func _rodar_estambre() -> void:
 	var vaiven := sin(Time.get_ticks_msec() * 0.006) * 6.0
 	_estambre.position = Vector2(mirando * (DISTANCIA_ESTAMBRE + vaiven), -BOLA_ESTAMBRE.get_height() * 0.3)
 	_estambre.rotation = vaiven / 7.0
+
+
+## El zarpazo golpea a los enemigos que estén justo enfrente.
+func _golpear() -> void:
+	for enemigo: Node2D in get_tree().get_nodes_in_group("enemigos"):
+		var distancia := enemigo.global_position - global_position
+		var enfrente := signf(distancia.x) == mirando or absf(distancia.x) < 8.0
+		if enfrente and absf(distancia.x) <= ALCANCE_ZARPAZO.x and absf(distancia.y) <= ALCANCE_ZARPAZO.y:
+			enemigo.call("recibir_zarpazo", self)
+
+
+## Daño: quita corazones, empuja lejos de quien golpea y deja un rato invulnerable (parpadea).
+## Sin corazones, se desmaya y pierde una vida.
+func recibir_dano(cantidad: int, desde_x: float) -> void:
+	if _tiempo_invulnerable > 0.0 or estado == Estado.DESMAYADO:
+		return
+	if estado == Estado.OCIO:
+		_terminar_ocio()
+	if agachado:
+		_poner_agachado(false)
+	corazones = maxi(corazones - cantidad, 0)
+	if corazones == 0:
+		_desmayarse()
+		return
+	_tiempo_invulnerable = TIEMPO_INVULNERABLE
+	var lado := signf(global_position.x - desde_x)
+	velocity = Vector2((lado if lado != 0.0 else -mirando) * 220.0, -220.0)
+	estado = Estado.AIRE
+
+
+func _actualizar_invulnerable(delta: float) -> void:
+	if _tiempo_invulnerable <= 0.0:
+		return
+	_tiempo_invulnerable -= delta
+	sprite.modulate.a = 0.35 if int(_tiempo_invulnerable * 12.0) % 2 == 0 else 1.0
+	if _tiempo_invulnerable <= 0.0:
+		sprite.modulate.a = 1.0
+
+
+func _desmayarse() -> void:
+	estado = Estado.DESMAYADO
+	_tiempo_desmayado = TIEMPO_DESMAYO
+	vidas -= 1
+	velocity.x = 0.0
+	sprite.modulate.a = 1.0
+	sprite.play("desmayo")
+	# Una de sus siete vidas sube como gatito fantasma.
+	var fantasma := Sprite2D.new()
+	fantasma.texture = sprite.sprite_frames.get_frame_texture("quieto", 0)
+	fantasma.scale = Vector2.ONE * ESCALA_SPRITE * 0.6
+	fantasma.global_position = sprite.global_position
+	fantasma.modulate = Color(1, 1, 1, 0.7)
+	fantasma.z_index = 10
+	get_parent().add_child(fantasma)
+	var subir := fantasma.create_tween().set_parallel()
+	subir.tween_property(fantasma, "global_position:y", fantasma.global_position.y - 70.0, 1.4)
+	subir.tween_property(fantasma, "modulate:a", 0.0, 1.4)
+	subir.chain().tween_callback(fantasma.queue_free)
+
+
+## Reaparece en el último punto de descanso. Sin vidas, vuelven las siete pero con el Collar de la Vergüenza.
+func _reaparecer() -> void:
+	if vidas <= 0:
+		vidas = VIDAS_MAX
+		tiene_collar = true
+	corazones = CORAZONES_MAX
+	global_position = punto_reaparicion
+	velocity = Vector2.ZERO
+	estado = Estado.SUELO
+	sprite.play("quieto")
+	_tiempo_invulnerable = TIEMPO_INVULNERABLE

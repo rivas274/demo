@@ -23,9 +23,9 @@ Prototipo jugable de **Felipe: Siete Vidas, Cero Disculpas**.
 | Carpeta | Contenido |
 | --- | --- |
 | `escenas/` | `apartamento.tscn` (apartamento de prueba de 1920×454, escena principal) y `felipe.tscn` |
-| `scripts/` | `felipe.gd` (movimiento y efectos), `animaciones_felipe.gd` (arma las animaciones desde las hojas), `sala.gd` (sala armada desde datos, con muebles provisionales), `fondo_apartamento.gd` (fondo provisional en capas con parallax), `comida.gd` (comida que se come con el botón de acción) |
+| `scripts/` | `felipe.gd` (movimiento y efectos), `animaciones_felipe.gd` (arma las animaciones desde las hojas), `sala.gd` (sala armada desde datos, con muebles provisionales), `fondo_apartamento.gd` (fondo provisional en capas con parallax), `comida.gd` (comida que se come con el botón de acción), `vaso.gd` (se tira de la mesa: logro), `aspi.gd` (A.S.P.I., primer enemigo), `medidores.gd` (corazones, vidas, peso y logros) |
 | `assets/felipe/` | Hojas de animación de Felipe (8 cuadros de 106×106) |
-| `pruebas/` | Pruebas automáticas de movimiento y de escenario, capturas y video |
+| `pruebas/` | Pruebas automáticas de movimiento, escenario y mecánicas, capturas y video |
 
 ## Comandos
 
@@ -33,6 +33,7 @@ Prototipo jugable de **Felipe: Siete Vidas, Cero Disculpas**.
 godot --headless --path siete-vidas/juego --import
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_movimiento.gd
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_escenario.gd
+godot --headless --path siete-vidas/juego --script res://pruebas/prueba_mecanicas.gd
 # Capturas y video (en la nube, con pantalla virtual):
 xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/video.gd -- /ruta/cuadros
 ```

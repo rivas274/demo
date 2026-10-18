@@ -12,6 +12,7 @@ func _initialize() -> void:
 func _correr() -> void:
 	var sala: Sala = load("res://escenas/apartamento.tscn").instantiate()
 	sala.mostrar_titulo = false
+	sala.batalla_con_jefe = false
 	root.add_child(sala)
 	var felipe: Felipe = sala.get_node("Felipe")
 	var aspi: Aspi = sala.get_node("ASPI")

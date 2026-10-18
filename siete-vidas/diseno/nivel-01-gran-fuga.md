@@ -2,7 +2,7 @@
 
 ## Reglas que cumple
 
-Cumple las 15 reglas de [reglas-de-niveles.md](reglas-de-niveles.md); `prueba_reglas_nivel.gd` las valida. Ajustes que hizo falta al aplicarlas: segundo descanso (cojín del dormitorio, junto al atajo y antes de A.S.P.I.: R5 y R6), juguetes y ratones corridos para que la entrada de cada aviso sea segura (R2), A.S.P.I. patrulla desde x 2560 (R2) y repisa de la escalera dentro de la escalera, con su calcetín (R13).
+Cumple las 16 reglas de [reglas-de-niveles.md](reglas-de-niveles.md); `prueba_reglas_nivel.gd` las valida. Ajustes que hizo falta al aplicarlas: segundo descanso (cojín del dormitorio, junto al atajo y antes de A.S.P.I.: R5 y R6), juguetes y ratones corridos para que la entrada de cada aviso sea segura (R2), A.S.P.I. patrulla desde x 2560 (R2) y repisa de la escalera dentro de la escalera, con su calcetín (R13).
 
 ## Crítica del nivel actual
 
@@ -51,3 +51,8 @@ Estilo de todas: el de Felipe A (pixel art chibi cel-shaded, dos tonos planos, c
 | 5 | `paredes.png` | Muestras de pared: papel tapiz de la sala, azulejos de cocina, pared del dormitorio, moldura y piso de madera |
 | 6 | `objetos.png` | Vaso, plato de croquetas, lata de atún, calcetín, rollo de papel higiénico, maceta pequeña, libro, piezas de juguete en el piso, caja de cartón, ratón de cuerda |
 | 7 | `aspi-gemini-1.png` | A.S.P.I. (ya encargado) |
+
+
+## Pelea con A.S.P.I.: "La Bestia del Pasillo"
+
+Desde la cabeza de Felipe (R16). Entrada tipo Broforce de 4,5 s: congela, acercamiento a Felipe con «¡BATALLA INICIADA!», barrido a la jefa, que crece hasta gigante dentro de una nube de pensamiento, y su nombre en una franja. El pasillo se vuelve el fin del mundo. Fases: succión (agacharse para aferrarse; 3 succiones rompen el escudo), aturdir (maceta y 2 zarpazos), furia (bolas de pelo que se saltan; 2 zarpazos más). Al apagarla, todo vuelve de golpe al pasillo y Felipe se acicala. Código en `siete-vidas/juego/scripts/batalla_aspi.gd`; prueba en `prueba_jefe.gd`.

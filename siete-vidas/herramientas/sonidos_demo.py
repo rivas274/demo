@@ -50,6 +50,10 @@ SONIDOS = {
     "logro": lambda: tono(523, 523, 0.09, "triangulo", 0.3) + tono(659, 659, 0.09, "triangulo", 0.3) + tono(784, 784, 0.2, "triangulo", 0.3),
     "calcetin": lambda: tono(880, 1320, 0.12, "triangulo", 0.3),
     "caja": lambda: tono(160, 90, 0.18, "cuadrada", 0.3, ruido=0.6),
+    "batalla": lambda: tono(147, 147, 0.1, "cuadrada", 0.4, ruido=0.2) + tono(147, 147, 0.1, "cuadrada", 0.4, ruido=0.2)
+    + tono(110, 55, 0.7, "cuadrada", 0.45, ruido=0.4),
+    "succion": lambda: tono(90, 600, 1.4, "seno", 0.3, ruido=0.85),
+    "puf": lambda: tono(500, 70, 0.35, "seno", 0.35, ruido=0.6),
 }
 
 if __name__ == "__main__":

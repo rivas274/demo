@@ -43,6 +43,7 @@ Felipe es un persa grande (unos 8 kilos), grande y no obeso; en el juego debe se
 - **Humanos: 3 Felipes** (Valeria, 1,65 m ≈ 200 px), con proporciones normales. Solo los gatos son Chibi.
 - **Otros gatos** a la misma escala que Felipe según su tamaño real (un gato común, un poco más bajo que él).
 - **Casas del Barrio Viejo:** techo alto (3,5 m) para dejar espacio a trepar.
+- **Excepción: las imaginaciones de Felipe** (por ejemplo, A.S.P.I. gigante en la pelea de jefe) pueden tener cualquier tamaño, solo como decorado de fondo y sin colisión. Lo que se toca y lo que hace daño sigue a escala real.
 - Si cambia el tamaño de Felipe, escalar en la misma proporción su colisión, cámara, velocidades y gravedad, y mantener la comprobación de altura de `prueba_movimiento.gd`.
 
 Detalle y comparación descartada en `siete-vidas/memoria/02-guia-felipe.md` (sección Estilo aprobado) y `siete-vidas/arte/referencias/proporciones-felipe.png`.

@@ -87,7 +87,7 @@ Referencias de diseño (no se usan en el juego): foto real de Felipe (`a0fbe97b-
 
 ## Otras herramientas
 
-- **Sonidos provisionales:** `siete-vidas/herramientas/sonidos_demo.py` sintetiza los WAV de la demo (salto, zarpazo, golpe, comer, vidrio, logro, calcetín, caja) en `siete-vidas/juego/assets/sonidos/`. Se reemplazarán por sonidos finales.
+- **Sonidos provisionales:** `siete-vidas/herramientas/sonidos_demo.py` sintetiza los WAV de la demo (salto, zarpazo, golpe, comer, vidrio, logro, calcetín, caja, y para la pelea: batalla, succión y puf) en `siete-vidas/juego/assets/sonidos/`. Se reemplazarán por sonidos finales.
 
 - **Motor:** Godot 4 (MIT). En las sesiones en la nube se instala con: descargar `Godot_v4.3-stable_linux.x86_64.zip` de los releases de GitHub en `/opt/godot` y enlazarlo a `/usr/local/bin/godot` (se usa en modo `--headless`). Para exportar hacen falta las plantillas: de `Godot_v4.3-stable_export_templates.tpz` (1 GB) basta extraer `linux_release.x86_64`, `windows_release_x86_64.exe` y `version.txt` en `~/.local/share/godot/export_templates/4.3.stable/`. Para capturas o video: `xvfb-run -a godot ... --rendering-driver opengl3`. Para la versión web hace falta además `web_nothreads_release.zip` del mismo paquete (preset "Web" sin hilos, no necesita cabeceras especiales del servidor; pesa ~35 MB, demasiado para un artifact de Claude).
 - **Tamaño de Felipe en el juego:** las hojas son de 106×106 y se dibujan a escala 0.72 (Felipe mide 67 px de alto en 640×360; antes era 0.5 y parecía un gatito). Al 72 % los pixeles quedan algo disparejos: sirve para la prueba de concepto, pero **las hojas finales deben generarse directamente a ~67 px de alto** (cuadros de unos 76×76).

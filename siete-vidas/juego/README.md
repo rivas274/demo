@@ -12,6 +12,7 @@ Demo jugable de **Felipe: Siete Vidas, Cero Disculpas**: el primer nivel, **"La 
 | --- | --- | --- |
 | Moverse | A / D o flechas | Palanca izquierda o cruceta |
 | Trepar (en la cortina) | W o ↑ | Palanca arriba o cruceta arriba |
+| Aferrarse (cuando A.S.P.I. aspira) | Mantener S o ↓ | Palanca abajo o cruceta abajo |
 | Pausa | Esc | Start |
 | Agacharse y gatear (agachado + saltar = bajar de una repisa) | S o ↓ | Palanca abajo o cruceta abajo |
 | Saltar (dos veces = Doble Salto) | Espacio | A |
@@ -39,6 +40,7 @@ godot --headless --path siete-vidas/juego --script res://pruebas/prueba_escenari
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_mecanicas.gd
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_nivel.gd
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_reglas_nivel.gd  # reglas de siete-vidas/diseno/reglas-de-niveles.md
+godot --headless --path siete-vidas/juego --script res://pruebas/prueba_jefe.gd  # pelea con A.S.P.I.
 # Capturas y video (en la nube, con pantalla virtual):
 xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/video.gd -- /ruta/cuadros
 ```

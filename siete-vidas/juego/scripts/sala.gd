@@ -126,6 +126,8 @@ static func orden_en_ruta(punto: Vector2) -> int:
 
 ## Muestra la pantalla de título al empezar (las pruebas la apagan).
 @export var mostrar_titulo := true
+## Cruzarse con A.S.P.I. arranca la pelea de jefe (la prueba de mecánicas la apaga para probar a A.S.P.I. sola).
+@export var batalla_con_jefe := true
 ## Las piezas de juguete hacen daño (la prueba de movimiento las apaga).
 @export var peligros_activos := true
 
@@ -134,6 +136,7 @@ var calcetines := 0
 var tiempo := 0.0
 var terminado := false
 var pantallas: Pantallas
+var batalla: BatallaAspi
 var _piezas := {}
 var _sonidos: Array[AudioStreamPlayer] = []
 var _avisos_vistos := {}
@@ -165,6 +168,9 @@ func _ready() -> void:
 	aspi.necesita_aturdir = true
 	aspi.apagado.connect(_abrir_balcon)
 	add_child(aspi)
+	if batalla_con_jefe:
+		batalla = BatallaAspi.new(aspi, felipe, self)
+		add_child(batalla)
 	for datos: Array in RATONES:
 		var raton := Raton.new(datos[1], datos[2])
 		raton.position = datos[0]

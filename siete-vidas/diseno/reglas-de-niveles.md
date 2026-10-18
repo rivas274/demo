@@ -13,6 +13,7 @@ Salen de lo que pidió el creador (consistencia, proporciones reales, humor, un 
 | Hollow Knight | Bancos cerca de los jefes. Atajos que se abren desde el otro lado y vuelven al banco. Cada zona tiene su identidad visual. Los jugadores critican los jefes lejos de un banco. | R5, R6, R9 |
 | Stray | El mundo se ve desde un gato: los muebles y los tubos son el recorrido. La verticalidad viene de lo que haría un gato. La guía es ambiental (luces y carteles), sin flechas. | R7, R8, R13 |
 | Zelda y Mega Man | El jefe se gana con lo que la mazmorra acaba de enseñar. | R12 |
+| Broforce y Cuphead | El jefe se presenta: todo se congela, la cámara se acerca de golpe y aparece su nombre en una franja. La pelea cambia la pantalla y va por fases. | R16 |
 | Ori y Hollow Knight | Secretos que premian mirar y trepar, fuera del camino principal. | R10 |
 | Diseño clásico de ritmo | Alternar tensión y calma. Tras el jefe, un alivio. | R11 |
 
@@ -33,10 +34,11 @@ Una ✔ indica que `prueba_reglas_nivel.gd` la valida; 👁 que se revisa con ca
 | R9 | **Un hito por zona.** Cada habitación tiene su pared, su color y un objeto reconocible, para orientarse sin mapa. | ✔ pared distinta. 👁 el hito. |
 | R10 | **Exploración premiada.** Hay al menos 3 calcetines. Cada uno descansa sobre algo donde Felipe se puede parar, y al menos uno pide subir o mirar fuera del camino. | ✔ |
 | R11 | **Ritmo.** Entre dos zonas de daño fuertes (juguetes, A.S.P.I.) de una misma habitación hay al menos una pantalla (640 px) de calma. Los ratones son práctica. El nivel cierra con un alivio (el balcón). | ✔ calma. 👁 alivio. |
-| R12 | **El jefe es un examen.** El jefe pide al menos dos mecánicas enseñadas antes: A.S.P.I. hay que aturdirla tirándole algo y luego darle zarpazos. Agacharse esconde de ella. | ✔ |
+| R12 | **El jefe es un examen.** El jefe pide al menos dos mecánicas enseñadas antes: con A.S.P.I., agacharse (aferrarse a la succión), tirar cosas (aturdirla), zarpazo y saltar (bolas de pelo). | ✔ |
 | R13 | **Cada habitación tiene con qué jugar**, y con humor de gato: algo que tirar, perseguir, romper o comer. | ✔ hay algo. 👁 el chiste. |
 | R14 | **Lectura clara.** Lo que se pisa, lo que hace daño y el fondo contrastan. Las siluetas del primer plano nunca tapan a Felipe ni lo que hay que leer. | 👁 capturas de cada zona |
 | R15 | **Felipe se ve siempre igual.** Las reglas de consistencia y proporciones de CLAUDE.md valen dentro de cualquier nivel. | ✔ `prueba_movimiento` (altura) y 👁 `comparar_felipe.py` |
+| R16 | **El jefe se presenta y cambia el mundo.** Una entrada de menos de 5 s congela el juego: acercamiento, «¡BATALLA INICIADA!» y el nombre del jefe. El escenario se transforma según la imaginación de Felipe (lo absurdo va en el fondo, sin colisión). La pelea tiene fases que se anuncian con un cartel y una pista de una línea, y al ganar todo vuelve de golpe a la normalidad. | ✔ `prueba_jefe` |
 
 ## Al diseñar un nivel nuevo
 

@@ -45,6 +45,9 @@ jobs:
       - name: Reglas de diseño de niveles
         run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_reglas_nivel.gd
 
+      - name: Pelea con A.S.P.I.
+        run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_jefe.gd
+
       - name: Exportar Windows, Linux y Web
         run: |
           mkdir -p build/windows build/linux build/web

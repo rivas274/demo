@@ -96,7 +96,13 @@ func _correr() -> void:
 	await _esperar(5)
 	_comprobar(felipe.agachado and not aspi.persiguiendo, "Agachado, A.S.P.I. no ve a Felipe")
 	Input.action_release("agacharse")
-	await _esperar(10)
+	# De pie, cruzarse con ella arranca la pelea; la entrada dura unos segundos y luego vienen las fases.
+	for i in 400:
+		await physics_frame
+		if sala.batalla.fase == BatallaAspi.Fase.SUCCION:
+			break
+	_comprobar(sala.batalla.fase == BatallaAspi.Fase.SUCCION and not paused, "Cruzarse con A.S.P.I. arranca la pelea de jefe (prueba completa en prueba_jefe)")
+	sala.batalla.forzar_fase(BatallaAspi.Fase.ATURDIR)
 	aspi.velocidad_patrulla = 0.0
 	aspi.vision = 0.0
 	aspi.global_position = Vector2(2705, Sala.PISO_ALTO)
@@ -106,10 +112,12 @@ func _correr() -> void:
 	await _tocar("interactuar")
 	await _esperar(60)
 	_comprobar(aspi.esta_aturdida(), "Una maceta que le cae encima aturde a A.S.P.I.")
-	for i in Aspi.GOLPES_PARA_APAGAR:
+	for i in BatallaAspi.GOLPES_TOTALES:
 		aspi.aturdir(3.0)
+		aspi.velocidad_patrulla = 0.0
+		aspi.velocidad_persecucion = 0.0
 		await _zarpazo_a(felipe, aspi)
-	_comprobar(aspi.apagada, "Aturdida, tres zarpazos la apagan")
+	_comprobar(aspi.apagada, "Aturdida, %d zarpazos la apagan" % BatallaAspi.GOLPES_TOTALES)
 	_comprobar(sala.get_node_or_null("Puerta del balcón") == null and "Desenchufada" in sala.logros, "Apagarla abre la puerta del balcón (logro Desenchufada)")
 
 	# Pausa.

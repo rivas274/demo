@@ -24,6 +24,10 @@ var limite_izquierdo: float
 var limite_derecho: float
 ## La jefa solo recibe zarpazos mientras está aturdida (algo le cayó encima).
 var necesita_aturdir := false
+## En la primera fase de la pelea tiene escudo: todo zarpazo rebota.
+var invulnerable := false
+## Se queda quieta (por ejemplo, mientras aspira).
+var quieta := false
 var golpes := 0
 var apagada := false
 var persiguiendo := false
@@ -72,7 +76,9 @@ func _physics_process(delta: float) -> void:
 		_direccion = 1.0
 	elif global_position.x >= limite_derecho:
 		_direccion = -1.0
-	if _tiempo_golpe <= 0.0:
+	if quieta:
+		velocity.x = 0.0
+	elif _tiempo_golpe <= 0.0:
 		velocity.x = _direccion * (velocidad_persecucion if persiguiendo else velocidad_patrulla)
 	move_and_slide()
 	if is_on_wall():
@@ -96,7 +102,7 @@ func esta_aturdida() -> bool:
 func recibir_zarpazo(felipe: Felipe) -> void:
 	if apagada:
 		return
-	if necesita_aturdir and _tiempo_aturdida <= 0.0:
+	if invulnerable or (necesita_aturdir and _tiempo_aturdida <= 0.0):
 		# Sin aturdir, el zarpazo rebota en la carcasa.
 		_tiempo_golpe = 0.15
 		velocity.x = felipe.mirando * 60.0

@@ -101,6 +101,8 @@ var zonas_trepables: Array[Rect2] = []
 var trepando := false
 var _tiempo_sin_trepar := 0.0
 var punto_reaparicion: Vector2
+## Arrastre de afuera en px/s (la succión de A.S.P.I.); agachado se aferra con las uñas y no lo mueve.
+var empuje := Vector2.ZERO
 
 var _tiempo_fuera_del_suelo := 0.0
 var _tiempo_salto_pedido := 99.0
@@ -183,7 +185,10 @@ func _physics_process(delta: float) -> void:
 
 	var estaba_en_suelo := is_on_floor()
 	_velocidad_al_caer = velocity.y
+	var arrastre := Vector2.ZERO if agachado or estado == Estado.DESMAYADO else empuje
+	velocity += arrastre
 	move_and_slide()
+	velocity -= arrastre
 	_actualizar_suelo(estaba_en_suelo, delta)
 	_actualizar_animacion(direccion)
 	_actualizar_estela(delta)
@@ -550,6 +555,12 @@ func _empezar_ocio(nombre: String) -> void:
 		_rodar_estambre()
 	var frames := sprite.sprite_frames
 	_tiempo_ocio = frames.get_frame_count(nombre) / frames.get_animation_speed(nombre) * OCIO[nombre]
+
+
+## Se lame la pata como si nada (al final de la pelea con A.S.P.I.).
+func acicalarse() -> void:
+	if is_on_floor() and estado == Estado.SUELO:
+		_empezar_ocio("acicalarse")
 
 
 func _terminar_ocio() -> void:

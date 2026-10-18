@@ -6,6 +6,7 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 
 1. [x] **Pilares** (2026-10-18): `siete-vidas/diseno/pilares.md`. Falta: actualizar la biblia en línea y decidir si las "reglas que se notarán en los niveles" entran a `reglas-de-niveles.md`.
 2. [ ] **Prototipo de acciones de gato** (Fase 2): `/prototipo` para responder "¿es divertido ser Felipe?" (botón de acción para comer, tirar y arañar; maullar; intimidar) en `siete-vidas/prototipos/`, sin tocar el nivel.
+   - v1 hecha (`siete-vidas/prototipos/travesuras/`): CAMBIAR. Ahora v2 con la Agenda de Su Majestad en lugar del medidor de CAOS.
    - Incluir en el prototipo (pilar 5): cuadro de diálogo con retratos (pensamientos de Felipe) y respuesta jugosa tipo Balatro.
 3. [ ] **Volver al nivel 1** con lo que el prototipo apruebe (regla de los tres lugares) y seguir hacia el vertical slice. Antes de cada cambio de fase, `/puerta-fase`.
 

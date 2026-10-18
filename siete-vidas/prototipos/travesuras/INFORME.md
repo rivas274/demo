@@ -40,8 +40,8 @@ Solo lo que se ve en el video del bot (`pruebas/demo.gd`, 65,8 s, juega con los 
 - **Sorpresa:** "en su cara" (romper delante de Valeria vale el doble) da una razón para esperarla en vez de escapar, y le da la vuelta al sigilo, como pide el anti-pilar.
 - **Siguiente pregunta (otro prototipo):** ¿maullar e intimidar sirven como llave además de travesura (pilar 2)? Aquí solo traen a Valeria y suman caos; no abren nada.
 
-## Veredicto: PENDIENTE
-Lo decide el creador después de jugarlo (F5). Preguntas para decidir: ¿qué hiciste sin que te lo pidiéramos? ¿Te reíste con alguna frase? ¿Qué te aburrió? ¿Lo harías en cada habitación? ¿Maullar e intimidar se ven bien así o piden animación?
+## Veredicto (v1): CAMBIAR — 2026-10-18
+El creador: tirar cosas divierte "en un principio sí, pero sin incentivos para hacerlo pierde sentido"; el medidor de CAOS "no tiene sentido" y el puntaje no es útil. La base (acciones, voz, respuesta épica, Valeria) se queda; falta el motivo. Variante a probar (v2): la **Agenda de Su Majestad** (lista de travesuras con nombre, algunas secretas, con recompensa real) en lugar del medidor de CAOS.
 
 ## Si seguimos
 - **Diseño a cerrar:**

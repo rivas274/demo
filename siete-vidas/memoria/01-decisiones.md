@@ -34,6 +34,10 @@ Actualizado: 2026-10-18. Detalle completo en la biblia (ver README.md).
 
 - **Fantasía y pilares aprobados** en `siete-vidas/diseno/pilares.md`: "Es como Hollow Knight, con la ironía de Untitled Goose Game, y además el castigo nunca llega". Pilares: 1 Un barrio que se descubre, 2 Cada maña es llave y travesura, 3 Siempre te sales con la suya, 4 Tus decisiones tienen peso, 5 Épico en su cabeza. Con anti-pilares y juegos de referencia. Desempatan toda decisión.
 
+## Prototipos
+
+- **Travesuras v1 (2026-10-18): CAMBIAR.** Tirar, arañar, maullar e intimidar con la voz de Felipe y respuesta épica divierten al principio, pero sin incentivo pierden sentido; el medidor de CAOS y el puntaje no sirven. Se prueba en v2 la **Agenda de Su Majestad**: lista de 5 a 8 travesuras con nombre por nivel (algunas secretas), cada una con recompensa útil (calcetín, snack por perdón, foto vergonzosa o un camino nuevo) y resumen al final del nivel; sin contador de puntos.
+
 ## Mecánicas
 
 - **Tres medidores:** afecto humano (por casa), respeto felino, peso. No hay medidor de hambre.

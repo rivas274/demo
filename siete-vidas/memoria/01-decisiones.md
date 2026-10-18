@@ -30,13 +30,19 @@ Actualizado: 2026-10-18. Detalle completo en la biblia (ver README.md).
 5. **El Basurero:** Ratópolis, esquema piramidal del Rey Rata.
 6. **Torres Paradise** (final): la obra, la perrera, A.S.P.I. MAX.
 
+## Pilares (2026-10-18)
+
+- **Fantasía y pilares aprobados** en `siete-vidas/diseno/pilares.md`: "Es como Hollow Knight, con la ironía de Untitled Goose Game, y además el castigo nunca llega". Pilares: 1 Un barrio que se descubre, 2 Cada maña es llave y travesura, 3 Siempre te sales con la suya, 4 Tus decisiones tienen peso, 5 Épico en su cabeza. Con anti-pilares y juegos de referencia. Desempatan toda decisión.
+
 ## Mecánicas
 
 - **Tres medidores:** afecto humano (por casa), respeto felino, peso. No hay medidor de hambre.
-- **Snacks = curación:** Felipe carga 3 al inicio; cada uno cura y suma peso. Sin daño por hambre ni temporizadores. *(Pendiente de revisar con el botón de acción: hoy la comida se come del mundo.)*
+- **Snacks = curación (2026-10-18):** Felipe carga snacks (3 al inicio): los come ya o los guarda para una pelea; también come la comida del mundo con el botón de acción. Cada uno cura y suma peso. Sin daño por hambre ni temporizadores.
 - **Botón de acción (2026-10-18):** un solo botón para interactuar con objetos; si el objeto es comida, Felipe la come. No hay botón de comer suelto ("comer sin comida no tiene sentido").
 - **Agacharse (2026-10-18):** Felipe se agacha y gatea para pasar bajo muebles; agachado + saltar baja a través de repisas.
-- **Peso (2026-10-18):** no cambia el dibujo de Felipe, por el límite de cuadros de las animaciones. Es un indicador en la parte de arriba, junto a la barra de vida. *(Abierto: si el peso cambia algo del movimiento, como la biblia pedía para Flaco, Gordito y Modo Buda, y cómo queda el Final Buda.)*
+- **Peso (2026-10-18):** no cambia el dibujo ni el movimiento de Felipe (para mantenerlo simple). **Las formas (Flaco, Gordito, Modo Buda) se descartan.** El peso sube de verdad la **defensa, el carisma y el ataque**; la velocidad aparece solo como chiste y no cambia. Se ve en la **"Ficha de Su Majestad"** del menú de pausa (retrato, barras y una frase satírica por estadística, como "Así se ve un rey"); no hay báscula en la interfaz.
+- **Diálogos con retratos (2026-10-18):** los pensamientos y ocurrencias de Felipe salen en un cuadro con su retrato (las 9 caras); en las conversaciones sale también el del otro personaje. Es el gancho del humor (pilar 5).
+- **Estilo épico (2026-10-18):** todo se ve y se siente épico como Broforce y Balatro (carteles, cámara lenta, palabras y números que saltan, sacudidas): Felipe es el más pro en su cabeza.
 - **Nueve vidas** por partida (2026-10-18; antes 7: se pasa a 9 para que sea internacional, como en inglés). El título sigue siendo *Siete Vidas, Cero Disculpas* hasta que el creador decida; al perderlas, Felipe despierta en casa con el **Collar de la Vergüenza** (baja el respeto hasta reconquistar a Valeria).
 - **Poderes (moverse y pelear), en orden:** Zarpazo, Caer de Pie (apartamento), Afilar Garras (Barrio Viejo), Doble Salto (Neón), Zoomies (Downtown), Licuado (Muelle). La puerta final pide respeto y afecto altos.
 - **Mañas:** 17 equipables con ventaja y precio; 2 ranuras al inicio, hasta 6 (10 calcetines = 1 ranura).

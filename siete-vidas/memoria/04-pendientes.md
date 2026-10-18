@@ -4,9 +4,16 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 
 ## Ahora (Fase 1 – Concepto y pilares)
 
-1. [ ] **Pilares:** `/pilares` para afilar la fantasía y los pilares de la biblia → `siete-vidas/diseno/pilares.md`.
+1. [x] **Pilares** (2026-10-18): `siete-vidas/diseno/pilares.md`. Falta: actualizar la biblia en línea y decidir si las "reglas que se notarán en los niveles" entran a `reglas-de-niveles.md`.
 2. [ ] **Prototipo de acciones de gato** (Fase 2): `/prototipo` para responder "¿es divertido ser Felipe?" (botón de acción para comer, tirar y arañar; maullar; intimidar) en `siete-vidas/prototipos/`, sin tocar el nivel.
+   - Incluir en el prototipo (pilar 5): cuadro de diálogo con retratos (pensamientos de Felipe) y respuesta jugosa tipo Balatro.
 3. [ ] **Volver al nivel 1** con lo que el prototipo apruebe (regla de los tres lugares) y seguir hacia el vertical slice. Antes de cada cambio de fase, `/puerta-fase`.
+
+## Diseñar después (de los pilares)
+
+- [ ] **Ficha de Su Majestad** (menú de pausa): retrato, defensa, carisma, ataque y velocidad (chiste) con frases satíricas según el peso; definir cuánto sube cada una.
+- [ ] Snacks cargados: cuántos, cómo se usan en pelea, dónde se recargan.
+- [ ] Retratos de otros personajes para los diálogos (Valeria, gatos del techo): encargo a Gemini con costo.
 
 ## En curso
 
@@ -18,7 +25,6 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [x] Acicalarse y jugar rehechos desde Felipe A (40 créditos); estambre como objeto por código; una sola escala; deformación máxima ±8 %.
 - [x] Gatear desde Felipe A con `pixel-engine-v1.5` (26 créditos): consistente, con transición al bajar y al pararse; huecos para pasar agachado de 45 cm.
 - [x] Agacharse (baja la cabeza al piso) y caída rehechos desde Felipe A con `v1.5` (52 créditos). Todas las animaciones son consistentes.
-- [ ] Decidir si Felipe sigue cargando 3 snacks para curarse o si toda la comida se toma del mundo con el botón de acción.
 - [ ] Opcional de Felipe: daño con pose propia; desmayo patas arriba con ojos en X (el actual cae boca abajo).
 
 ## Siguientes
@@ -53,6 +59,5 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 
 - Gemini (Nano Banana) directo: falta que el creador agregue `GEMINI_API_KEY` al entorno (se lee en una sesión nueva). Sirve para imágenes fijas, no animaciones.
 
-- Peso como indicador: ¿afecta el movimiento (salto, velocidad, vida) o es solo informativo? ¿Vuelve el medidor de hambre? ¿Cómo queda el Final Buda?
 
 - ¿Valeria está basada en una persona real?

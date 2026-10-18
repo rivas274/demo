@@ -12,11 +12,15 @@ Tono: sátira picante sobre los humanos, las redes sociales y la vida en la gran
 
 ### Pilares de diseño
 
-1. **Explorar es la recompensa.** Cada techo, patio y cocina esconde un secreto, un atajo o un humano que conquistar.
-2. **Ser gato es el sistema de juego.** Ronronear, arañar, maullar por comida o dejar un regalo en el zapato de alguien son mecánicas, no adornos.
-3. **Tus decisiones tienen peso, literalmente.** Cada snack te cura pero te engorda; pelear y explorar te devuelve la figura.
-4. **Dos reputaciones, un ego.** Lo que los humanos piensan de ti y lo que los gatos piensan de ti abren caminos distintos.
-5. **Todo chiste se puede traducir.** El humor se escribe pensando en varios idiomas desde el día uno.
+Detalle con ejemplos, anti-pilares y referencias en `../diseno/pilares.md` (aprobados el 2026-10-18).
+
+**Es como Hollow Knight, con la ironía de Untitled Goose Game, y además el castigo nunca llega: el carisma de Felipe lo saca de cualquier lío.**
+
+1. **Un barrio que se descubre.** Mundo conectado como Hollow Knight y Silksong; la historia no se cuenta, se encuentra.
+2. **Cada maña es llave y travesura.** Las habilidades que abren camino son mañas de gato que también sirven para molestar.
+3. **Siempre te sales con la suya.** Travesura → te pillan → te sales con la tuya con encanto. Dos reputaciones (humanos y gatos) deciden quién te perdona.
+4. **Tus decisiones tienen peso, literalmente.** Los snacks curan y engordan; el peso sube defensa, carisma y ataque, sin cambiar el movimiento.
+5. **Épico en su cabeza.** Todo se ve épico como Broforce y Balatro; los pensamientos de Felipe salen con su retrato. Todo chiste se escribe para poder traducirse.
 
 ## Historia
 
@@ -123,16 +127,11 @@ No hay medidor de hambre: el hambre vive dentro de los snacks.
 - Hay snacks especiales que curan más o dan efectos (el atún del Muelle cura todo; la croqueta de dieta cura poco pero no engorda).
 - Si te quedas sin snacks, no te curas. No hay daño por hambre ni temporizadores.
 
-### Peso: la forma de Felipe
+### Peso: quién es Felipe
 
-El peso no es un castigo sino una forma de jugar. Sube con los snacks y baja al explorar y pelear, pero en las bases Felipe también puede cambiar de forma a propósito: la caminadora de El Fit adelgaza, la despensa de Don Chucho engorda. Algunos caminos solo se abren con una forma concreta.
+El peso no cambia cómo se mueve Felipe (decisión del 2026-10-18; las formas Flaco, Gordito y Modo Buda se descartaron). Sube con los snacks y baja al explorar y pelear, y cambia sus estadísticas: **más kilos, más defensa, más carisma (los humanos perdonan más fácil) y más ataque**. La velocidad aparece solo como chiste ("Un rey no corre: lo esperan").
 
-| Estado | Ventaja | Desventaja |
-| --- | --- | --- |
-| **Flaco** | Salta más alto, cabe por rejas y tuberías | Menos vida, empujones lo tumban, carga menos snacks |
-| **Normal** | Equilibrado | Ninguna |
-| **Gordito** | Más vida, aplasta enemigos al caer, rompe tablas débiles | Más lento, no alcanza ciertos techos |
-| **Modo Buda** | Ataque "Aplastada de Panza", humanos lo encuentran irresistible | Casi no salta, no cabe por la gatera |
+Todo se ve en la **Ficha de Su Majestad** (menú de pausa): el retrato de Felipe, una barra por estadística y debajo una frase satírica ("Así se ve un rey"). No hay báscula en pantalla.
 
 ### Poderes gatunos (equipables, estilo Blasphemous)
 
@@ -283,7 +282,7 @@ Todos los controles se pueden reasignar.
 | **Tres Familias, Cero Remordimientos** | Tener tres casas paralelas a la vez |
 | **Arte Conceptual** | Hacer popo táctico en 10 lugares distintos |
 | **Collar de la Vergüenza** | Perder las 9 vidas por primera vez |
-| **Era de Abundancia** | Llegar al Modo Buda |
+| **Era de Abundancia** | Llegar al peso máximo (humor "Modo Buda") |
 | **Puro Músculo** | Terminar un distrito en forma flaca |
 | **Zoomies de las 3 a.m.** | Atravesar 50 enemigos con el dash |
 | **El Rey de los Tejados** | Ganar todas las peleas en los techos |

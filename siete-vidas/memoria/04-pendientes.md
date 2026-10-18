@@ -8,6 +8,7 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 2. [ ] **Prototipo de acciones de gato** (Fase 2): `/prototipo` para responder "¿es divertido ser Felipe?" (botón de acción para comer, tirar y arañar; maullar; intimidar) en `siete-vidas/prototipos/`, sin tocar el nivel.
    - v1 hecha (`siete-vidas/prototipos/travesuras/`): CAMBIAR. Ahora v2 con la Agenda de Su Majestad en lugar del medidor de CAOS.
    - Incluir en el prototipo (pilar 5): cuadro de diálogo con retratos (pensamientos de Felipe) y respuesta jugosa tipo Balatro.
+   - Al volver al nivel: **entrada de jefe en 8 pasos** dentro de `PresentacionJefe` (sin vuelta atrás, espera, revelar de abajo arriba, nombre, barra que se llena, música, tamaño, rugido) y jugo en la pelea; lista en `.claude/skills/godot-felipe/SKILL.md` §6b. Recursos gratis CC0 de Kenney (sonidos, partículas, interfaz) como opción, anotando créditos.
 3. [ ] **Volver al nivel 1** con lo que el prototipo apruebe (regla de los tres lugares) y seguir hacia el vertical slice. Antes de cada cambio de fase, `/puerta-fase`.
 
 ## Diseñar después (de los pilares)

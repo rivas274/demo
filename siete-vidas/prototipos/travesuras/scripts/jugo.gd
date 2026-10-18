@@ -1,32 +1,21 @@
 # PROTOTIPO: no es código del juego.
-# Pregunta: ¿hacer travesuras de gato con la voz de Felipe y una respuesta épica es divertido por sí solo?
+# Pregunta (v2): si cada travesura es un objetivo con nombre y recompensa útil (la Agenda de Su Majestad), ¿el jugador busca y planea travesuras en vez de romper al azar?
 # Fecha: 2026-10-18
 class_name Jugo
 extends CanvasLayer
 ## Respuesta épica tipo Balatro/Broforce: congelar un instante, palabras que saltan y rebotan,
-## sacudida de cámara, destello y el contador de CAOS con combo.
+## sacudida de cámara y destello. (v2: sin contador de CAOS ni combo: el motivo ahora es la Agenda.)
 
-signal caos_cambio(total: int)
-
-## Segundos entre travesuras para que el combo siga.
-@export var ventana_combo := 3.0
-@export var combo_maximo := 5
 ## Píxeles de la sacudida más fuerte.
 @export var sacudida_maxima := 6.0
 
-var caos := 0
-var combo := 0
 var camara: Camera2D
 
 var _tiempo := 0.0
-var _ultima_travesura := -99.0
 var _congelado := 0.0
 var _sacudida := 0.0
 var _fuerza_sacudida := 0.0
 var _flash: ColorRect
-var _etiqueta_caos: Label
-var _etiqueta_combo: Label
-var _caos_mostrado := 0.0
 
 
 func _ready() -> void:
@@ -37,17 +26,6 @@ func _ready() -> void:
 	_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_flash.size = Vector2(640, 360)
 	add_child(_flash)
-	_etiqueta_caos = _etiqueta("CAOS 0", 18, Color(1.0, 0.85, 0.3))
-	_etiqueta_caos.position = Vector2(500, 6)
-	_etiqueta_caos.size = Vector2(132, 24)
-	_etiqueta_caos.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_etiqueta_caos.pivot_offset = Vector2(110, 12)
-	add_child(_etiqueta_caos)
-	_etiqueta_combo = _etiqueta("", 13, Color(1.0, 0.45, 0.3))
-	_etiqueta_combo.position = Vector2(500, 28)
-	_etiqueta_combo.size = Vector2(132, 18)
-	_etiqueta_combo.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	add_child(_etiqueta_combo)
 
 
 func _etiqueta(texto: String, tamano: int, color: Color) -> Label:
@@ -59,23 +37,6 @@ func _etiqueta(texto: String, tamano: int, color: Color) -> Label:
 	etiqueta.add_theme_constant_override("outline_size", 5)
 	etiqueta.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return etiqueta
-
-
-## Suma caos con el combo y devuelve los puntos que se sumaron.
-func sumar_caos(puntos: int) -> int:
-	if _tiempo - _ultima_travesura <= ventana_combo:
-		combo = mini(combo + 1, combo_maximo)
-	else:
-		combo = 1
-	_ultima_travesura = _tiempo
-	var total := puntos * combo
-	caos += total
-	caos_cambio.emit(caos)
-	_etiqueta_combo.text = "COMBO x%d" % combo if combo > 1 else ""
-	var golpe := create_tween()
-	golpe.tween_property(_etiqueta_caos, "scale", Vector2.ONE * (1.25 + 0.08 * combo), 0.05)
-	golpe.tween_property(_etiqueta_caos, "scale", Vector2.ONE, 0.35).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-	return total
 
 
 ## Congela el juego un instante (hitstop). Los efectos de esta capa siguen.
@@ -133,10 +94,3 @@ func _process(delta: float) -> void:
 		else:
 			_fuerza_sacudida = 0.0
 			camara.offset = Vector2.ZERO
-	# El número del contador sube contando.
-	if int(_caos_mostrado) != caos:
-		_caos_mostrado = move_toward(_caos_mostrado, caos, maxf(60.0, absf(caos - _caos_mostrado) * 6.0) * real)
-		_etiqueta_caos.text = "CAOS %d" % int(_caos_mostrado)
-	if _tiempo - _ultima_travesura > ventana_combo and combo > 0:
-		combo = 0
-		_etiqueta_combo.text = ""

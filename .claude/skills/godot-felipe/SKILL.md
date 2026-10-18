@@ -76,6 +76,20 @@ Otras reglas: `animation_finished` solo para animaciones sin bucle; no llames `p
 - En pausa: los nodos con `PROCESS_MODE_ALWAYS` (pantallas, medidores, `PresentacionJefe`) siguen animando; si un tween debe correr en pausa, créalo desde uno de ellos.
 - Para hacer algo al terminar, `tween_callback()` en vez de `await` si el nodo puede desaparecer antes.
 
+## 6b. Jefes: entrada y "jugo"
+
+Toda pelea usa `PresentacionJefe`; la entrada sigue estos 8 pasos (del video "5 ways to make your boss entry feel EPIC", @motionbykrit), y cada jefe solo pone sus datos:
+1. **Sin vuelta atrás:** se cierra la puerta detrás de Felipe (con una frase suya).
+2. **La espera:** cuarto vacío, retumbo grave que crece, polvo o pelusa que tiembla.
+3. **Revelar despacio:** la cámara empieza abajo (ruedas, pies) y sube hasta la cara.
+4. **Nombre y título** grandes, de golpe.
+5. **La barra se llena** delante del jugador, con sonido.
+6. **Entra la música**, grave y lenta.
+7. **Vender el tamaño:** cámara baja; cada paso sacude la pantalla.
+8. **El rugido:** una ola de polvo y todo el escenario reacciona (cortinas, papeles, pelusas).
+
+Durante la pelea: **anticipación** antes de cada ataque (se echa atrás, vibra, la luz cambia), **congelar 0,1 s + destello + sacudida** al golpearlo, **polvo y escombros** en cada impacto, **sonido en capas** (grave + crujido + eco). Ningún jefe se gana desde un lugar seguro sin moverse.
+
 ## 6. Cámara
 
 - `Camara` (`Camera2D`) es hija de Felipe, con suavizado (`position_smoothing_speed = 7`). `Sala` le pone los límites de cada habitación al cruzar una puerta: la cámara nunca muestra otro cuarto.

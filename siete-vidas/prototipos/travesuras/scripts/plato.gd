@@ -1,5 +1,5 @@
 # PROTOTIPO: no es código del juego.
-# Pregunta: ¿hacer travesuras de gato con la voz de Felipe y una respuesta épica es divertido por sí solo?
+# Pregunta (v2): si cada travesura es un objetivo con nombre y recompensa útil (la Agenda de Su Majestad), ¿el jugador busca y planea travesuras en vez de romper al azar?
 # Fecha: 2026-10-18
 class_name Plato
 extends Node2D

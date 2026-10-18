@@ -1,5 +1,5 @@
 # PROTOTIPO: no es código del juego.
-# Pregunta: ¿hacer travesuras de gato con la voz de Felipe y una respuesta épica es divertido por sí solo?
+# Pregunta (v2): si cada travesura es un objetivo con nombre y recompensa útil (la Agenda de Su Majestad), ¿el jugador busca y planea travesuras en vez de romper al azar?
 # Fecha: 2026-10-18
 class_name Controles
 extends RefCounted
@@ -15,7 +15,9 @@ const MAPA := {
 	"maullar": [[KEY_Q], [JOY_BUTTON_X], null],
 	"intimidar": [[KEY_R], [JOY_BUTTON_B], null],
 	"ronronear": [[KEY_S, KEY_DOWN], [JOY_BUTTON_DPAD_DOWN], [JOY_AXIS_LEFT_Y, 1.0]],
-	"saltar_dialogo": [[KEY_ENTER, KEY_TAB], [JOY_BUTTON_LEFT_SHOULDER], null],
+	"saltar_dialogo": [[KEY_ENTER], [JOY_BUTTON_LEFT_SHOULDER], null],
+	"agenda": [[KEY_TAB], [JOY_BUTTON_BACK], null],
+	"terminar": [[KEY_F], [JOY_BUTTON_START], null],
 }
 
 

@@ -4,7 +4,8 @@ Prototipo jugable de **Felipe: Siete Vidas, Cero Disculpas**.
 
 ## Cómo jugarlo
 
-- **Descargar:** en GitHub, pestaña *Actions* → flujo "Juego (pruebas y exportación)" → última ejecución → *Artifacts* → `FelipeSieteVidas-Windows` o `FelipeSieteVidas-Linux`.
+- **Descargar:** en GitHub, pestaña *Actions* → flujo "Juego (pruebas y exportación)" → última ejecución → *Artifacts* → `FelipeSieteVidas-Windows`, `FelipeSieteVidas-Linux` o `FelipeSieteVidas-Web`.
+- **Versión web descargada:** descomprimir `FelipeSieteVidas-Web`, abrir una terminal en esa carpeta y correr `python -m http.server 8000`; después abrir http://localhost:8000 en Chrome, Edge o Firefox (abrir `index.html` con doble clic no funciona).
 - **Desde el editor:** abrir esta carpeta con Godot 4.3 y presionar F5.
 
 | Acción | Teclado | Mando (Xbox) |

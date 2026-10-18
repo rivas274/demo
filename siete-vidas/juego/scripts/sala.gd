@@ -2,9 +2,9 @@ class_name Sala
 extends Node2D
 ## Primer nivel y demo: "La Gran Fuga", la casa de Valeria como tutorial (diseño en siete-vidas/diseno/nivel-01-gran-fuga.md).
 ## Cada habitación es un espacio aparte y se pasa de una a otra por puertas (fundido a negro; la cámara queda dentro
-## del cuarto). Se sube por la escalera, bloqueada por dos rejas para bebés: se cruzan trepando el librero y se abren
-## desde arriba (atajo). Cada mecánica se enseña sin peligro antes de pedirla; la meta (el balcón) se muestra al empezar;
-## A.S.P.I. espera en el estudio y se vence ensuciando el piso para distraerla y desenchufándola.
+## del cuarto). Se sube por la escalera del fondo, bloqueada por dos rejas para bebés: se cruzan trepando el librero y
+## se abren desde el lado de la escalera (atajo). Cada mecánica se enseña sin peligro antes de pedirla; la meta (el balcón) se muestra al empezar;
+## A.S.P.I. espera en el estudio: se vence ensuciando el piso hasta llenarle el depósito y apagándola de un salto.
 ## Todo se arma desde datos; el arte es de Gemini (ArteNivel) y el fondo con parallax está en FondoApartamento.
 
 ## Escala del mundo: 1,21 px por cm (Felipe mide unos 55 cm de alto contando la cabeza; Valeria = 3 Felipes).
@@ -38,7 +38,7 @@ const PUERTAS := [
 	["recibidor<sala", Vector2(1605, SUELO), "sala>recibidor"],
 	["recibidor>cocina", Vector2(1810, SUELO), "cocina<recibidor"],
 	["cocina<recibidor", Vector2(2570, SUELO), "recibidor>cocina"],
-	["recibidor>pasillo", Vector2(2320, SUELO - 288), "pasillo<recibidor"],  # arriba de la escalera
+	["recibidor>pasillo", Vector2(2100, SUELO), "pasillo<recibidor"],  # al pie de la escalera de fondo
 	["pasillo<recibidor", Vector2(3530, SUELO), "recibidor>pasillo"],
 	["pasillo>dormitorio", Vector2(3830, SUELO), "dormitorio<pasillo"],
 	["dormitorio<pasillo", Vector2(4390, SUELO), "pasillo>dormitorio"],
@@ -48,6 +48,10 @@ const PUERTAS := [
 	["balcon<estudio", Vector2(6040, SUELO), "estudio>balcon"],
 ]
 const PUERTA_BALCON := "estudio>balcon"
+## La escalera está dibujada en la pared del fondo: al pie, se sube como por una puerta (Felipe sube en diagonal).
+const PUERTA_ESCALERA := "recibidor>pasillo"
+const ESCALERA_PIE := Vector2(2100, SUELO)
+const ESCALERA_CIMA := Vector2(2330, SUELO - 288)
 
 ## Arte de Gemini por mueble: nombre -> [imagen en assets/nivel1/ ("" = va dentro de otra imagen), corrimiento en x].
 const ARTE_MUEBLES := {
@@ -76,7 +80,6 @@ const PIEZAS := [
 	[Rect2(1880, SUELO - 109, 92, 6), true, "Repisa del librero 2", "arte"],
 	[Rect2(1880, SUELO - 163, 92, 6), true, "Repisa del librero 3", "arte"],
 	[Rect2(1880, SUELO - 218, 92, 8), true, "Librero", "arte"],  # 1,80 m
-	[Rect2(2246, SUELO - 288, 114, 8), true, "Descanso de la escalera", "escalon"],
 	# Cocina.
 	[Rect2(2700, SUELO - 109, 204, 109), false, "Mesón", "arte"],  # 90 cm
 	[Rect2(2940, SUELO - 218, 84, 218), false, "Refrigerador", "arte"],  # 1,80 m
@@ -92,15 +95,9 @@ const PIEZAS := [
 	[Rect2(5360, SUELO - 98, 156, 62), false, "Escritorio", "arte"],  # 81 cm
 	[Rect2(5556, SUELO - 79, 52, 8), true, "Taburete", "arte"],  # 65 cm
 	[Rect2(5620, SUELO - 160, 160, 8), true, "Repisa de las macetas", "repisa"],  # 1,30 m
-	[Rect2(5772, SUELO - 250, 60, 8), true, "Repisita del enchufe", "repisa"],  # 2,05 m
 	# Balcón.
 	[Rect2(6630, SUELO - 94, 10, 94), false, "Baranda", "arte"],  # 78 cm
 ]
-## Escalera del recibidor: escalones que se atraviesan desde abajo.
-const ESCALERA_X := 2030.0
-const ESCALONES := 9
-const ANCHO_ESCALON := 24.0
-const SUBIDA_ESCALON := 32.0
 ## Dos rejas para bebés apiladas (1,5 m) al pie de la escalera.
 const REJA := Rect2(1990, SUELO - 182, 40, 182)
 ## Piezas de juguete en la alfombra: quitan un corazón.
@@ -145,8 +142,6 @@ const TIRABLES := [
 const COMIDA := [[Vector2(2885, SUELO - 109), "lata"]]
 ## A.S.P.I.: [base de carga, límite izquierdo, límite derecho] dentro del estudio.
 const ASPI := [Vector2(5700, SUELO), 5290.0, 5790.0]
-## Enchufes de la base de carga: abajo junto al escritorio, sobre el escritorio y en la repisita alta.
-const ENCHUFES := [Vector2(5532, SUELO), Vector2(5420, SUELO - 98), Vector2(5802, SUELO - 250)]
 ## Puntos de descanso: la caja de arena (recibidor) y el cojín (pasillo, junto a la puerta del jefe).
 const DESCANSOS := [Rect2(1660, SUELO - 40, 100, 50), Rect2(3990, SUELO - 40, 60, 50)]
 ## Pasar esta x en el balcón termina la demo.
@@ -211,15 +206,13 @@ func _ready() -> void:
 		var cuarto: Rect2 = datos[0]
 		_crear_pieza(Rect2(cuarto.position.x - 20, 0, 20, ALTO), false, "Pared izquierda de %s" % datos[1], "invisible")
 		_crear_pieza(Rect2(cuarto.end.x, 0, 20, ALTO), false, "Pared derecha de %s" % datos[1], "invisible")
-	for i in ESCALONES:
-		var escalon := Rect2(ESCALERA_X + i * ANCHO_ESCALON, SUELO - SUBIDA_ESCALON * (i + 1), ANCHO_ESCALON, 8)
-		_crear_pieza(escalon, true, "Escalón %d" % (i + 1), "escalon")
 	var reja := Reja.new(REJA)
 	reja.abierta.connect(func() -> void: desbloquear_logro("Atajo de Gato"))
 	add_child(reja)
 	for datos: Array in PUERTAS:
 		var puerta := Puerta.new(datos[0], datos[1], datos[2], datos[1].y - TECHO)
 		puerta.cerrada = datos[0] == PUERTA_BALCON
+		puerta.escalera = datos[0] == PUERTA_ESCALERA
 		puerta.cruzada.connect(cruzar)
 		add_child(puerta)
 		puertas[datos[0]] = puerta
@@ -232,11 +225,6 @@ func _ready() -> void:
 	aspi.necesita_aturdir = true
 	aspi.apagado.connect(_abrir_balcon)
 	add_child(aspi)
-	var enchufes: Array[Enchufe] = []
-	for posicion: Vector2 in ENCHUFES:
-		var enchufe := Enchufe.new(posicion)
-		add_child(enchufe)
-		enchufes.append(enchufe)
 	var tirables: Array[Vaso] = []
 	for tirable: Array in TIRABLES:
 		var objeto := Vaso.new(SUELO, tirable[1])
@@ -244,7 +232,7 @@ func _ready() -> void:
 		add_child(objeto)
 		tirables.append(objeto)
 	if batalla_con_jefe:
-		batalla = BatallaAspi.new(aspi, felipe, self, enchufes)
+		batalla = BatallaAspi.new(aspi, felipe, self)
 		add_child(batalla)
 		for objeto in tirables:
 			objeto.caido.connect(batalla.agregar_mancha)
@@ -351,6 +339,14 @@ func cruzar(puerta: Puerta) -> void:
 	_cruzando = true
 	sonar("salto")
 	felipe.set_physics_process(false)
+	if puerta.escalera:
+		# Sube la escalera del fondo en diagonal antes del fundido.
+		felipe.mirando = 1.0
+		felipe.sprite.flip_h = false
+		felipe.sprite.play("caminar")
+		var subida := create_tween()
+		subida.tween_property(felipe, "global_position", ESCALERA_CIMA, 1.0)
+		await subida.finished
 	var fundido := create_tween()
 	fundido.tween_property(_fundido, "modulate:a", 1.0, 0.15)
 	await fundido.finished
@@ -490,7 +486,7 @@ func _crear_pieza(rect: Rect2, atravesable: bool, nombre: String, estilo: String
 
 
 ## Dibuja el mueble. (0, 0) es la esquina de arriba a la izquierda de la parte donde se para Felipe.
-## Los muebles con arte de Gemini se apoyan en el piso; los demás (repisas, escalones, caja de arena) son dibujo.
+## Los muebles con arte de Gemini se apoyan en el piso; los demás (repisas, caja de arena) son dibujo.
 func _dibujar_mueble(c: Node2D, tamano: Vector2, estilo: String, nombre: String) -> void:
 	var hasta_suelo := SUELO - (c.get_parent() as Node2D).position.y
 	match estilo:
@@ -498,19 +494,16 @@ func _dibujar_mueble(c: Node2D, tamano: Vector2, estilo: String, nombre: String)
 			var arte: Array = ARTE_MUEBLES[nombre]
 			if arte[0] != "":
 				ArteNivel.dibujar(c, arte[0], tamano.x / 2.0 + arte[1], hasta_suelo)
-		"repisa", "escalon":
+		"repisa":
 			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), MADERA)
-			if estilo == "escalon":
-				c.draw_rect(Rect2(0, tamano.y, tamano.x, 24), MADERA_OSCURA)
-			else:
-				for x: float in [4.0, tamano.x - 16.0]:
-					c.draw_colored_polygon(PackedVector2Array([Vector2(x, tamano.y), Vector2(x + 12, tamano.y), Vector2(x, tamano.y + 14)]), MADERA_OSCURA)
+			for x: float in [4.0, tamano.x - 16.0]:
+				c.draw_colored_polygon(PackedVector2Array([Vector2(x, tamano.y), Vector2(x + 12, tamano.y), Vector2(x, tamano.y + 14)]), MADERA_OSCURA)
 		"caja":
 			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), Color("5f8fa8"))
 			c.draw_rect(Rect2(4, 0, tamano.x - 8, 6), Color("d9c7a0"))
 
 
-## Decorado sin colisión: juguetes, escalera, lámpara (hito del descanso), alacenas, cojín, perchero y base de carga.
+## Decorado sin colisión: juguetes, escalera de fondo, lámpara (hito del descanso), alacenas, cojín, perchero y base de carga.
 func _dibujar_decorado(c: Node2D) -> void:
 	var colores := [Color("e0483b"), Color("5fa8d3"), Color("f2d36b"), Color("5fd18a")]
 	for peligro: Rect2 in PELIGROS:
@@ -521,15 +514,8 @@ func _dibujar_decorado(c: Node2D) -> void:
 			c.draw_rect(Rect2(x, SUELO - 5 - (i % 2) * 2, 8, 5 + (i % 2) * 2), colores[i % colores.size()])
 			x += 13.0
 			i += 1
-	# Zanca y pasamanos de la escalera: los escalones se leen como una sola pieza.
-	var pie := Vector2(ESCALERA_X, SUELO)
-	var cima := Vector2(ESCALERA_X + ESCALONES * ANCHO_ESCALON, SUELO - SUBIDA_ESCALON * ESCALONES)
-	c.draw_colored_polygon(PackedVector2Array([pie, cima + Vector2(0, 8), cima + Vector2(0, 40), pie + Vector2(40, 0)]), MADERA_OSCURA.darkened(0.2))
-	c.draw_line(pie + Vector2(0, -60), cima + Vector2(0, -60), MADERA_OSCURA, 4)
-	for i in range(0, ESCALONES, 2):
-		var x := ESCALERA_X + i * ANCHO_ESCALON + ANCHO_ESCALON / 2
-		var y := SUELO - SUBIDA_ESCALON * (i + 1)
-		c.draw_line(Vector2(x, y), Vector2(x, y - 44), MADERA_OSCURA, 2)
+	# Escalera de fondo (no se pisa: al pie se sube como por una puerta), un poco más apagada que los muebles.
+	ArteNivel.dibujar(c, "escalera", (ESCALERA_PIE.x + ESCALERA_CIMA.x) / 2.0, SUELO, true, Color(0.78, 0.74, 0.72))
 	ArteNivel.dibujar(c, "lampara", 1790.0, SUELO)
 	c.draw_circle(Vector2(1790, SUELO - 140), 30.0, Color(1.0, 0.9, 0.5, 0.15))
 	# Alacenas sobre el mesón (a 1,50 m, Felipe no llega).

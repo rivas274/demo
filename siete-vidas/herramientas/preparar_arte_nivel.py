@@ -1,5 +1,6 @@
 """Prepara el arte de Gemini del nivel 1 para el juego: quita el fondo blanco, separa cada pieza de las hojas
-y la lleva a su tamaño en el juego (1,21 px por cm, medidas reales de sala.gd), sin suavizar los pixeles.
+y la lleva a su tamaño en el juego (escala de gato: alturas de muebles casi reales, 1,21 px por cm; lo que le
+importa al gato, más grande; ver CLAUDE.md), sin suavizar los pixeles.
 
 Uso: python3 preparar_arte_nivel.py
 Lee siete-vidas/arte/referencias/gemini/ y escribe siete-vidas/juego/assets/nivel1/.
@@ -34,21 +35,22 @@ PIEZAS = {
     "ropero": ("muebles-dormitorio", 1, (104, 185), None),  # 1,53 m
     "cama": ("muebles-dormitorio", 2, (244, 110), None),  # colchón a 55 cm
     "perchero": ("muebles-dormitorio", 4, (40, 160), None),
+    "escalera": ("escalera-y-baranda", 0, (300, 288), None),  # de fondo: se dibuja en la pared
     # Recibidor y balcón.
     "reja": ("escalera-y-baranda", 1, (64, 91), None),  # una reja para bebés de 75 cm; van dos apiladas
     "baranda": ("escalera-y-baranda", 2, (184, 128), None),
     # Objetos.
-    "vaso": ("objetos", 0, (11, 15), None),
-    "lata": ("objetos", 1, (18, 11), None),
-    "plato": ("objetos", 2, (30, 12), None),
-    "maceta": ("objetos", 3, (18, 24), None),
-    "calcetin": ("objetos", 4, (13, 18), None),
-    "rollo": ("objetos", 5, (20, 14), None),
+    "vaso": ("objetos", 0, (20, 27), None),
+    "lata": ("objetos", 1, (30, 18), None),
+    "plato": ("objetos", 2, (40, 16), None),
+    "maceta": ("objetos", 3, (28, 37), None),
+    "calcetin": ("objetos", 4, (22, 30), None),
+    "rollo": ("objetos", 5, (30, 21), None),
     "juguetes": ("objetos", 7, (26, 18), None),
-    "caja": ("objetos", 8, (52, 44), None),
-    "raton": ("objetos", 9, (16, 14), None),
-    # A.S.P.I.: la real mide 34 cm (41 px); la gigante es imaginación de Felipe.
-    "aspi": ("aspi-gemini-1", 0, (44, 27), None),
+    "caja": ("objetos", 8, (64, 54), None),
+    "raton": ("objetos", 9, (62, 54), None),  # escala de gato: la mitad de Felipe
+    # A.S.P.I. (escala de gato: más grande que una real); la gigante es imaginación de Felipe.
+    "aspi": ("aspi-gemini-1", 0, (76, 47), None),
     "aspi_gigante": ("aspi-gigante", 0, (330, 270), None),
 }
 

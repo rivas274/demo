@@ -1,14 +1,15 @@
 class_name Raton
 extends Aspi
 ## Ratón de cuerda: el enemigo más fácil del apartamento. Va y viene sin perseguir y cae de un zarpazo.
-## Medidas reales: 12 cm de largo (15 px de cuerpo). Arte provisional dibujado con código.
+## Escala de gato: mide la mitad que Felipe, para que se lea como el juguete enorme que es para él.
 
 
 func _init(izquierda: float, derecha: float) -> void:
 	super(izquierda, derecha)
 	name = "Raton"
-	ancho = 18.0
-	alto = 9.0
+	# Escala de gato: la mitad de Felipe.
+	ancho = 48.0
+	alto = 30.0
 	golpes_para_apagar = 1
 	velocidad_patrulla = 55.0
 	vision = 0.0

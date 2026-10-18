@@ -16,6 +16,10 @@ func _correr() -> void:
 	root.add_child(sala)
 	var felipe: Felipe = sala.get_node("Felipe")
 	var aspi: Aspi = sala.get_node("ASPI")
+	# Los ratones de cuerda tienen su propia prueba (prueba_nivel); aquí estorbarían junto a la lata del mesón.
+	for hijo in sala.get_children():
+		if hijo is Raton:
+			hijo.queue_free()
 	await _esperar(30)
 
 	# Interfaz.

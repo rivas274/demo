@@ -33,7 +33,7 @@ func _correr() -> void:
 	var avisos := Sala.AVISOS
 	var aparador: Rect2 = _pieza("Aparador")
 	for exigida: Array in [
-			["{interactuar}", Sala.ENCHUFES[0], "tirar y desenchufar (pelea)"],
+			["{interactuar}", Sala.ASPI[0], "tirar cosas (ensuciar en la pelea)"],
 			["{agacharse}", Vector2(aparador.get_center().x, Sala.SUELO), "agacharse (bajo el aparador)"],
 			["{zarpazo}", Sala.RATONES[1][0], "zarpazo (ratones de la cocina)"],
 			["{saltar}", Vector2(Sala.REJA.get_center().x, Sala.SUELO), "doble salto (librero y reja)"],
@@ -91,12 +91,11 @@ func _correr() -> void:
 	_comprobar(Sala.REJA.size.y > 140.0, "R6 La reja no se salta desde el piso (%.0f px, doble salto ~140)" % Sala.REJA.size.y)
 
 	# R7. Verticalidad de gato y habitaciones unidas por puertas que van y vuelven.
-	var tope := Vector2(Sala.ESCALERA_X + Sala.ESCALONES * Sala.ANCHO_ESCALON, Sala.SUELO - Sala.SUBIDA_ESCALON * Sala.ESCALONES)
-	var puerta_arriba := Vector2.INF
+	var escalera := Vector2.INF
 	for datos: Array in Sala.PUERTAS:
-		if datos[1].y < Sala.SUELO - 1.0:
-			puerta_arriba = datos[1]
-	_comprobar(absf(puerta_arriba.y - tope.y) < 2.0, "R7 La escalera llega a la puerta del piso de arriba")
+		if datos[0] == Sala.PUERTA_ESCALERA:
+			escalera = datos[1]
+	_comprobar(escalera.x > Sala.REJA.end.x and Sala.habitacion_de(escalera) == Sala.habitacion_de(Sala.REJA.get_center()), "R7 La escalera está detrás de las rejas")
 	var altas := 0
 	for pieza: Array in Sala.PIEZAS:
 		if pieza[3] != "invisible" and Sala.SUELO - pieza[0].position.y >= 150.0:
@@ -123,6 +122,14 @@ func _correr() -> void:
 		var hueco: float = Sala.SUELO - pieza[0].end.y
 		_comprobar(hueco <= 0.5 or hueco >= HUECO_AGACHADO, "R8 Hueco bajo %s: %.0f px (0 o al menos %d)" % [pieza[2], hueco, HUECO_AGACHADO])
 
+	# R8. Escala de gato: los ratones miden la mitad de Felipe y nada interactuable mide menos de 24 px.
+	var raton := ArteNivel.textura("raton").get_size()
+	_comprobar(raton.y >= 30.0, "R8 El ratón de cuerda mide la mitad de Felipe (%.0f px de alto)" % raton.y)
+	for nombre: String in ["vaso", "rollo", "maceta", "lata", "plato", "calcetin", "caja", "raton", "aspi"]:
+		var tam := ArteNivel.textura(nombre).get_size()
+		_comprobar(maxf(tam.x, tam.y) >= 24.0, "R8 %s se lee (%.0f × %.0f px)" % [nombre, tam.x, tam.y])
+	_comprobar(Puerta.ANCHO >= 100.0, "R8 Las puertas son gruesas (%.0f px)" % Puerta.ANCHO)
+
 	# R9. Hitos: cada habitación tiene su propia pared.
 	var estilos := {}
 	for habitacion: Array in Sala.HABITACIONES:
@@ -146,21 +153,18 @@ func _correr() -> void:
 			if Sala.habitacion_de(fuertes[i].get_center()) == Sala.habitacion_de(fuertes[j].get_center()):
 				_comprobar(_distancia(fuertes[i], fuertes[j]) >= CALMA, "R11 Calma entre zonas de daño")
 
-	# R12. El jefe es un examen: hay con qué ensuciar y enchufes a distintas alturas (pide subir).
+	# R12. El jefe es un examen: hay con qué ensuciar y algo de eso pide subir.
 	var en_estudio := 0
 	for tirable: Array in Sala.TIRABLES:
 		if Sala.habitacion_de(tirable[0]) == jefe:
 			en_estudio += 1
-	var alturas := {}
-	for enchufe: Vector2 in Sala.ENCHUFES:
-		alturas[int(enchufe.y)] = true
+	var en_alto := Sala.TIRABLES.any(func(t: Array) -> bool: return Sala.habitacion_de(t[0]) == jefe and t[0].y < Sala.SUELO - 150.0)
 	_comprobar(en_estudio >= 3, "R12 En el cuarto del jefe hay al menos 3 cosas para tirar (%d)" % en_estudio)
-	_comprobar(alturas.size() >= 3 and Sala.ENCHUFES.any(func(e: Vector2) -> bool: return e.y < Sala.SUELO - 200.0), "R12 Los enchufes están a distintas alturas y uno pide trepar")
+	_comprobar(en_alto, "R12 Algo para tirar pide subir (repisa)")
 
 	# R13. Cada habitación tiene algo con qué jugar (salvo el alivio final).
 	var cosas: Array[Vector2] = []
 	cosas.append_array(Sala.CALCETINES)
-	cosas.append_array(Sala.ENCHUFES)
 	cosas.append(Sala.CAJA_CARTON)
 	cosas.append(Sala.LASER[0])
 	cosas.append(Sala.REJA.get_center())

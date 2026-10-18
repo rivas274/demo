@@ -5,14 +5,17 @@ extends Node2D
 
 signal cruzada(puerta: Puerta)
 
-const ANCHO := 64.0
+## Escala de gato: puertas gruesas y legibles.
+const ANCHO := 104.0
 ## Puerta de 2,05 m; si el techo queda más cerca (arriba de la escalera), es un vano más bajo.
 const ALTO_MAXIMO := 248.0
-const CERCA := 30.0
+const CERCA := 44.0
 
 var destino: String
 var alto := ALTO_MAXIMO
 var cerrada := false
+## Pie de la escalera de fondo: no se dibuja marco, solo la flecha (la sala anima la subida).
+var escalera := false
 var _felipe: Felipe
 var _cerca := false
 
@@ -47,6 +50,10 @@ func _physics_process(_delta: float) -> void:
 
 
 func _draw() -> void:
+	if escalera:
+		if _cerca:
+			_flecha(-90.0)
+		return
 	var marco := Color("6e3a26")
 	draw_rect(Rect2(-ANCHO / 2.0 - 6.0, -alto - 6.0, ANCHO + 12.0, alto + 6.0), marco)
 	draw_rect(Rect2(-ANCHO / 2.0, -alto, ANCHO, alto), Color("2a1d1a"))
@@ -58,6 +65,9 @@ func _draw() -> void:
 		# Luz que sale del otro cuarto.
 		draw_rect(Rect2(-ANCHO / 2.0 + 6.0, -alto + 6.0, ANCHO - 12.0, alto - 6.0), Color(1.0, 0.85, 0.6, 0.12))
 	if _cerca:
-		# Flecha que invita a entrar.
-		var y := -alto - 18.0
-		draw_colored_polygon(PackedVector2Array([Vector2(-8, y + 6), Vector2(8, y + 6), Vector2(0, y - 6)]), Color("ffe066"))
+		_flecha(-alto - 18.0)
+
+
+## Flecha que invita a entrar.
+func _flecha(y: float) -> void:
+	draw_colored_polygon(PackedVector2Array([Vector2(-8, y + 6), Vector2(8, y + 6), Vector2(0, y - 6)]), Color("ffe066"))

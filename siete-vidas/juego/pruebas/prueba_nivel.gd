@@ -96,10 +96,12 @@ func _correr() -> void:
 	await _tocar("interactuar")
 	_comprobar(reja.abierta_ya and "Atajo de Gato" in sala.logros, "Desde la escalera se abre la reja (logro Atajo de Gato)")
 
-	# Arriba de la escalera, la puerta al pasillo.
+	# Al pie de la escalera de fondo se sube como por una puerta (Felipe sube en diagonal).
 	await _poner_en(felipe, sala.puertas["recibidor>pasillo"].global_position)
 	await _tocar("interactuar")
 	await _esperar(30)
+	_comprobar(felipe.global_position.y < Sala.SUELO - 100.0, "Al pie de la escalera, Felipe la sube en diagonal")
+	await _esperar(70)
 	_comprobar(sala.habitacion == "pasillo", "La escalera lleva al pasillo de arriba")
 
 	# Cojín del pasillo: descanso antes del jefe.
@@ -140,12 +142,16 @@ func _correr() -> void:
 	await _esperar(30)
 	_comprobar(sala.habitacion == "estudio" and "Cerrada" in sala.pantallas.aviso_fijo, "Con A.S.P.I. encendida, la puerta del balcón no abre")
 
-	# Desenchufarla (la pelea completa está en prueba_jefe) abre el balcón.
-	for i in Sala.ENCHUFES.size():
-		await _poner_en(felipe, Sala.ENCHUFES[i])
-		sala.aspi.aturdir(3.0)
-		await _tocar("interactuar")
-	_comprobar(sala.aspi.apagada and "Desenchufada" in sala.logros, "Con los 3 enchufes A.S.P.I. se apaga (logro Desenchufada)")
+	# Apagarla tres veces con el depósito lleno (la pelea completa está en prueba_jefe) abre el balcón.
+	var batalla := sala.batalla
+	for i in BatallaAspi.APAGADOS_TOTALES:
+		batalla.deposito = BatallaAspi.CAPACIDAD[batalla.apagados] - 1
+		batalla.agregar_mancha(sala.aspi.global_position)
+		await _esperar_que(func() -> bool: return batalla.llena, 400)
+		felipe.global_position = sala.aspi.global_position + Vector2(0, -130)
+		felipe.velocity = Vector2.ZERO
+		await _esperar(60)
+	_comprobar(sala.aspi.apagada and "Desenchufada" in sala.logros, "Apagada tres veces, A.S.P.I. se apaga del todo (logro Desenchufada)")
 	await _poner_en(felipe, sala.puertas[Sala.PUERTA_BALCON].global_position)
 	await _tocar("interactuar")
 	await _esperar(30)

@@ -78,11 +78,7 @@ func _correr() -> void:
 	await _ir_a(1962)
 	await _saltar(1.0, true, INF, true)
 	_paso("Salta la reja desde el librero (x %.0f)" % felipe.global_position.x)
-	for intento in 20:
-		if felipe.global_position.y <= Sala.SUELO - Sala.SUBIDA_ESCALON * Sala.ESCALONES + 1.0:
-			break
-		await _saltar(1.0, false)
-	await _entrar("recibidor>pasillo")
+	await _entrar(Sala.PUERTA_ESCALERA)
 
 	# Dormitorio: cortina hasta la repisa alta, cómoda y ropero; vuelta por debajo de la cama.
 	await _ir_a(3830)
@@ -119,18 +115,23 @@ func _correr() -> void:
 	await _ir_a(4130)
 	await _entrar("pasillo>estudio")
 
-	# Pelea: ensuciar el piso para distraerla y desenchufar los tres enchufes.
+	# Pelea: ensuciar el piso para llenarle el depósito y, cuando se detiene, caerle encima (tres veces).
 	var batalla := sala.batalla
 	await _hasta(func() -> bool: return batalla.fase == BatallaAspi.Fase.PELEA, 400)
 	_paso("Entrada de la jefa")
-	for enchufe in [2, 1, 0]:
-		await _ronda_contra_aspi(enchufe)
-		if batalla.fase == BatallaAspi.Fase.FIN:
-			break
+	while batalla.fase == BatallaAspi.Fase.PELEA and _cuadros < LIMITE_CUADROS:
+		if batalla.llena:
+			await _apagar_de_un_salto()
+			continue
+		if batalla.manchas.is_empty():
+			await _ensuciar_con_maceta()
+		await _hasta(func() -> bool: return batalla.llena or batalla.manchas.is_empty() or batalla.fase != BatallaAspi.Fase.PELEA, 600)
 	_paso("Apaga a A.S.P.I." if batalla.fase == BatallaAspi.Fase.FIN else "No pudo con A.S.P.I.")
 	await _esperar(90)
 
 	# Balcón.
+	if felipe.global_position.y < Sala.SUELO - 2.0:
+		await _bajar()
 	await _entrar(Sala.PUERTA_BALCON)
 	await _ir_a(Sala.SALIDA + 40, 400)
 	await _hasta(func() -> bool: return sala.pantallas.modo == Pantallas.Modo.FIN, 300)
@@ -150,71 +151,54 @@ func _entrar(nombre: String) -> void:
 	if OS.get_cmdline_user_args().has("--detalle"):
 		print("        puerta %s: estado %d, suelo %s, objeto %s" % [nombre, felipe.estado, felipe.is_on_floor(), felipe.objeto_cercano()])
 	await _tocar("interactuar")
-	await _esperar(30)
+	# La escalera de fondo tarda más: Felipe la sube en diagonal antes del fundido.
+	await _esperar(100 if puerta.escalera else 30)
 	_paso("Entra a %s" % sala.habitacion)
 
 
-## Una ronda: ensucia el piso para que A.S.P.I. vaya a limpiar y, mientras limpia, tira del enchufe.
-## Enchufe alto: maceta desde la repisa y salto a la repisita. Escritorio: el rollo, tirado desde el mismo escritorio.
-## Enchufe de abajo: maceta lejos y carrera hasta la puerta.
-func _ronda_contra_aspi(indice: int) -> void:
-	var batalla := sala.batalla
-	var objetivo: Vector2 = Sala.ENCHUFES[indice]
-	for intento in 4:
-		if batalla.enchufes[indice].tirado:
-			return
-		if indice == 1:
-			await _ensuciar_con_rollo()
-		else:
-			# Para el enchufe de abajo, la maceta de más a la derecha: la succión no llega hasta el enchufe.
-			await _ensuciar_con_maceta(indice == 0)
-		# Ocupada: limpiando o aturdida (si la maceta le cayó encima).
-		await _hasta(func() -> bool: return batalla.puede_desenchufar(), 300)
-		if OS.get_cmdline_user_args().has("--detalle"):
-			print("        %.1f s limpia en %s (felipe x %.0f y %.0f)" % [_cuadros / 60.0, batalla.manchas, felipe.global_position.x, felipe.global_position.y])
-		match indice:
-			2:
-				await _ir_a(5770, 120)
-				await _subir_a(objetivo.x, objetivo.y, true)
-			0:
-				await _bajar()
-				if OS.get_cmdline_user_args().has("--detalle"):
-					print("        %.1f s bajó (x %.0f y %.0f, estado %d)" % [_cuadros / 60.0, felipe.global_position.x, felipe.global_position.y, felipe.estado])
-				await _ir_a(objetivo.x, 400, true)
-		await _ir_a(objetivo.x, 60)
-		if OS.get_cmdline_user_args().has("--detalle"):
-			print("        %.1f s enchufe %d: limpiando %s, manchas %s" % [_cuadros / 60.0, indice, batalla.limpiando, batalla.manchas])
-		await _tocar("interactuar")
-		await _esperar(20)
-		_paso("Ronda contra A.S.P.I.: enchufes %d" % batalla.tirados)
-
-
-func _ensuciar_con_maceta(lejos: bool) -> void:
+## Sube a la repisa (taburete y doble salto) y tira la primera maceta que haya: la mancha llena el depósito.
+func _ensuciar_con_maceta() -> void:
 	if felipe.global_position.y > Sala.SUELO - 150.0:
-		if felipe.global_position.y < Sala.SUELO - 50.0:
-			await _bajar()
-		await _ir_a(5540, 600, true)
-		await _subir_a(5582, Sala.SUELO - 79, false)
+		# Desde la derecha del taburete: es lo más cerca de donde suele quedar A.S.P.I.
+		await _ir_a(5640, 200, true)
+		await _subir_a(5590, Sala.SUELO - 79, false)
 		await _subir_a(5636, Sala.SUELO - 160, true)
-	if _maceta_mas_cercana(lejos) == null:
-		await _hasta(func() -> bool: return _maceta_mas_cercana(lejos) != null, 300)
-	var maceta := _maceta_mas_cercana(lejos)
+	if _maceta_mas_cercana() == null:
+		await _hasta(func() -> bool: return _maceta_mas_cercana() != null, 300)
+	var maceta := _maceta_mas_cercana()
+	if maceta == null:
+		return
 	await _ir_a(maceta.global_position.x - 16.0, 120)
 	felipe.mirando = 1.0
 	await _tocar("interactuar")
+	_paso("Ensucia el piso (depósito %d)" % sala.batalla.deposito)
 
 
-func _ensuciar_con_rollo() -> void:
-	if absf(felipe.global_position.y - (Sala.SUELO - 98.0)) > 2.0:
-		if felipe.global_position.y < Sala.SUELO - 50.0:
-			await _bajar()
-		await _ir_a(5540, 400)
-		await _subir_a(5470, Sala.SUELO - 98, true)
-	await _ir_a(5462, 60)
-	felipe.mirando = 1.0
-	await _tocar("interactuar")
-	await _esperar(30)
-	await _ir_a(Sala.ENCHUFES[1].x, 120)
+## Depósito lleno: baja, se pone junto a ella y salta para caerle encima.
+func _apagar_de_un_salto() -> void:
+	var batalla := sala.batalla
+	if felipe.global_position.y < Sala.SUELO - 2.0:
+		# Se aparta antes de bajar, para no gastar el rebote cayéndole encima desde la repisa.
+		var lado := -1.0 if sala.aspi.global_position.x > 5700.0 else 1.0
+		await _ir_a(clampf(sala.aspi.global_position.x + lado * 80.0, 5628.0, 5772.0), 90)
+		await _bajar()
+	var antes := batalla.apagados
+	for intento in 3:
+		if not batalla.llena:
+			break
+		await _ir_a(sala.aspi.global_position.x - 20.0, 200, true)
+		Input.action_press("saltar")
+		await _esperar(12)
+		Input.action_release("saltar")
+		await _hasta(func() -> bool: return batalla.apagados > antes or felipe.is_on_floor(), 90)
+		if batalla.apagados > antes:
+			# Rebota en ella y con el doble salto vuelve a la repisa.
+			await _hasta(func() -> bool: return felipe.velocity.y > -60.0, 60)
+			Input.action_press("saltar")
+			await _esperar(12)
+			Input.action_release("saltar")
+			await _hasta(func() -> bool: return felipe.is_on_floor(), 120)
+	_paso("Le salta encima: apagados %d" % batalla.apagados)
 
 
 ## Baja de la repisa atravesándola (agachado + saltar).

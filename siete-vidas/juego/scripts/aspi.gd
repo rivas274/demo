@@ -2,10 +2,10 @@ class_name Aspi
 extends CharacterBody2D
 ## A.S.P.I., la aspiradora robot de Valeria: patrulla el piso, persigue a Felipe si lo ve cerca
 ## y le quita un corazón al tocarlo. Tres zarpazos la apagan. Arte provisional dibujado con código.
-## Medidas reales: 34 cm de diámetro y 9 cm de alto (41 × 11 px).
+## Escala de gato: más grande que una aspiradora real (72 × 26 px de cuerpo).
 
-const ANCHO := 41.0
-const ALTO := 11.0
+const ANCHO := 72.0
+const ALTO := 26.0
 const GOLPES_PARA_APAGAR := 3
 
 ## Avisa cuando la apagan (en la demo, abre la puerta del balcón).
@@ -26,6 +26,8 @@ var limite_derecho: float
 var necesita_aturdir := false
 ## En la primera fase de la pelea tiene escudo: todo zarpazo rebota.
 var invulnerable := false
+## No hace daño al tocarla (por ejemplo, detenida con el depósito lleno).
+var inofensiva := false
 ## Se queda quieta (por ejemplo, mientras aspira).
 var quieta := false
 ## Si no es INF, va hasta esa x sin perseguir a nadie (por ejemplo, a limpiar una mancha).
@@ -89,7 +91,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	if is_on_wall():
 		_direccion = -_direccion
-	if _felipe and absf(distancia.x) < (ancho / 2.0 + 18.0) and distancia.y > -30.0 and distancia.y < 8.0:
+	if _felipe and not inofensiva and absf(distancia.x) < (ancho / 2.0 + 18.0) and distancia.y > -30.0 and distancia.y < 8.0:
 		_felipe.recibir_dano(1, global_position.x)
 	queue_redraw()
 
@@ -133,10 +135,10 @@ func _draw() -> void:
 	var luz := Color("e0483b") if persiguiendo else Color("5fd18a")
 	if apagada:
 		luz = Color("2a2a2a")
-	draw_circle(Vector2(_direccion * 9.0, -ALTO - 3.0), 2.0, luz)
+	draw_circle(Vector2(_direccion * 18.0, -40.0), 3.0, luz)
 	if _tiempo_aturdida > 0.0:
 		for i in 3:
 			var angulo := Time.get_ticks_msec() * 0.006 + i * TAU / 3.0
-			draw_circle(Vector2(cos(angulo) * 14.0, -32.0 + sin(angulo) * 3.0), 2.0, Color("f2d36b"))
+			draw_circle(Vector2(cos(angulo) * 22.0, -54.0 + sin(angulo) * 4.0), 3.0, Color("f2d36b"))
 	if _tiempo_golpe > 0.0:
-		draw_rect(Rect2(-22.0, -26.0, 44.0, 27.0), Color(1, 1, 1, 0.5))
+		draw_rect(Rect2(-38.0, -47.0, 76.0, 48.0), Color(1, 1, 1, 0.5))

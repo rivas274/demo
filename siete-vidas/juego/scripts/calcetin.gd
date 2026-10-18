@@ -15,7 +15,7 @@ func _process(_delta: float) -> void:
 	if not activo or not visible:
 		return
 	var felipe: Felipe = get_tree().get_first_node_in_group("felipe")
-	if felipe and felipe.global_position.distance_to(global_position) < 26.0:
+	if felipe and felipe.global_position.distance_to(global_position) < 32.0:
 		activo = false
 		recogido.emit()
 		queue_free()

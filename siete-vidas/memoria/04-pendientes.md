@@ -33,7 +33,8 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [ ] Música de la pelea (coro épico) y arte final de la bestia gigante y del fin del mundo (pedir a Gemini).
 - [x] Arte de Gemini integrado en el nivel 1 (2026-10-18): muebles, paredes, piso, objetos, A.S.P.I., cielo y ciudad en parallax, fin del mundo y A.S.P.I. gigante (`preparar_arte_nivel.py`).
 - [x] Rediseño 3 del nivel 1 (2026-10-18): habitaciones con puertas, escalera con rejas y librero, pelea en el estudio (ensuciar y desenchufar), imaginación solo en la entrada, arte sin partes blancas. Un bot (`partida.gd`) lo termina con los 3 calcetines.
-- [ ] Falta arte de Gemini para: caja de arena, cortina, escalera de 9 escalones, puertas, enchufes y base de carga, escritorio propio (hoy usa el aparador), cuadros, cojín, láser, bolas de pelo y manchas (hoy siguen dibujados por código).
+- [x] Escala de gato, escalera de fondo y pelea de depósito lleno (2026-10-18); el bot termina sin recibir golpes.
+- [ ] Falta arte de Gemini (tanda 2 encargada) para: caja de arena, cortina, escalera de fondo, puertas, A.S.P.I. con el depósito lleno y base de carga, escritorio propio (hoy usa el aparador), cuadros, cojín, láser, bolas de pelo y manchas (hoy siguen dibujados por código).
 - [ ] Siguiente después de la demo: La Cuadra, afecto y respeto, música.
 - [ ] Hojas finales de Felipe generadas a ~67 px de alto (hoy se reducen al 72 % y los pixeles quedan disparejos).
 - [ ] Arte final de escenarios (tileset, fondos por capa, muebles) cuando el concepto esté afinado.

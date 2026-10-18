@@ -73,8 +73,6 @@ func _comprobar_alcanzables() -> void:
 	for pieza: Array in Sala.PIEZAS:
 		if not pieza[3] in SIN_ALCANZAR:
 			superficies.append(pieza[0])
-	for i in Sala.ESCALONES:
-		superficies.append(Rect2(Sala.ESCALERA_X + i * Sala.ANCHO_ESCALON, Sala.SUELO - Sala.SUBIDA_ESCALON * (i + 1), Sala.ANCHO_ESCALON, 8))
 	# El piso de cada habitación (se llega por sus puertas).
 	var alcanzadas: Array[Rect2] = []
 	for habitacion: Array in Sala.HABITACIONES:

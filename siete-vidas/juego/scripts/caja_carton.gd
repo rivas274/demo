@@ -5,7 +5,7 @@ extends StaticBody2D
 
 signal rota
 
-const LADO := 48.0
+const LADO := 60.0
 
 var roto := false
 

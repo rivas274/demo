@@ -3,7 +3,7 @@ extends Node2D
 ## Objeto que Felipe tira de un manotazo con el botón de acción: cae y, según el tipo,
 ## se rompe (vaso: logro "La Gravedad Funciona") o aturde al enemigo que esté debajo (rollo, maceta).
 ## Las macetas vuelven a su lugar mientras A.S.P.I. siga encendida, para no quedarse sin munición.
-## Medidas reales: vaso 12 cm (15 px), rollo 11 cm, maceta 15 cm. Arte provisional.
+## Escala de gato: vaso, rollo y maceta al doble de su tamaño real.
 
 ## Se rompió en el piso (en la pelea deja una mancha que A.S.P.I. va a limpiar).
 signal caido(posicion: Vector2)
@@ -11,7 +11,7 @@ signal caido(posicion: Vector2)
 const LOGRO := "La Gravedad Funciona"
 ## Segundos que queda aturdido el enemigo al que le cae encima.
 const ATURDIR := 3.0
-const RADIO_IMPACTO := 30.0
+const RADIO_IMPACTO := 44.0
 
 var tipo: String
 var roto := false

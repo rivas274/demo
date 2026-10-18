@@ -4,7 +4,7 @@ Este repositorio contiene el desarrollo del juego **Felipe: Siete Vidas, Cero Di
 
 Antes de proponer o construir algo, lee la memoria del proyecto en `siete-vidas/memoria/README.md` y los archivos que enlaza. Ahí están las decisiones ya cerradas, la guía del personaje, las herramientas y los pendientes.
 
-Al cerrar cualquier decisión nueva, actualiza esos archivos.
+Al empezar un chat nuevo, lee primero `siete-vidas/memoria/05-estado-actual.md` (dónde vamos). Al cerrar cualquier decisión nueva, actualiza esos archivos, incluido ese.
 
 **Equipo de diseño y fase actual:** el proyecto avanza por fases con agentes (`.claude/agents/`) y comandos (`.claude/skills/`: `/pilares`, `/prototipo`, `/prueba-juego`, `/revision-diseno`, `/puerta-fase`, `/godot-felipe`). Fase actual: **Fase 1 – Concepto y pilares**; detalle en `siete-vidas/memoria/README.md` (Equipo de diseño).
 

@@ -47,6 +47,12 @@ Actualizado: 2026-10-17. Detalle completo en la biblia (ver README.md).
 - **Accesibilidad:** controles reasignables, subtítulos ajustables, modo daltónico, modo asistido que no bloquea logros.
 - **Logros:** 40 en Steam (lista en la biblia); coleccionables: 50 calcetines, 30 fotos vergonzosas, lagartijas.
 
+## Demo: primer nivel "La Gran Fuga" (2026-10-18)
+
+- **La demo es el tutorial del apartamento**, como dice la biblia: cada mueble enseña un movimiento con un aviso de una línea y la tecla o el botón del mando en uso. Recorrido: caminar → sofá (saltar) → vaso (E, logro) → aparador (agacharse, calcetín) → ratón de cuerda (zarpazo) → caja de arena (punto de descanso) → caja de cartón (zarpazo, calcetín) → librero (doble salto) → cocina (comer, puntero láser imposible de atrapar) → alacena y refrigerador → cortina (trepar) → **A.S.P.I. jefa** frente a la puerta del balcón → balcón: gana **Caer de Pie** y termina la demo.
+- Pantallas de título, introducción (el video viral; "Me voy de esta casa"), pausa y final (tiempo, calcetines 3, logros, vidas perdidas). Logros de la demo: La Gravedad Funciona, Desenchufada, Coleccionista de Calcetines, Caer de Pie.
+- **Peso con personalidad:** báscula con aguja y humor de Felipe (Atlético, Esponjoso, Modo Invierno, Modo Buda).
+
 ## Prototipo jugable (2026-10-18)
 
 - **Vida:** 5 corazones por vida y 7 vidas; al perderlas todas, vuelven las 7 con el Collar de la Vergüenza. Comer cura 1 corazón y suma 0,3 kg.

@@ -15,6 +15,7 @@ func _initialize() -> void:
 
 func _correr() -> void:
 	var sala: Node = load("res://escenas/apartamento.tscn").instantiate()
+	sala.mostrar_titulo = false
 	root.add_child(sala)
 	await _esperar(30)
 	await _capturar("1-quieto")

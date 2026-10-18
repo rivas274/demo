@@ -8,11 +8,18 @@ const ANCHO := 41.0
 const ALTO := 11.0
 const GOLPES_PARA_APAGAR := 3
 
+## Avisa cuando la apagan (en la demo, abre la puerta del balcón).
+signal apagado
+
 @export var velocidad_patrulla := 40.0
 @export var velocidad_persecucion := 80.0
 ## Distancia a la que ve a Felipe (solo si está más o menos a su altura).
 @export var vision := 170.0
 
+## Tamaño y resistencia (el ratón de cuerda hereda de A.S.P.I. y los cambia).
+var ancho := ANCHO
+var alto := ALTO
+var golpes_para_apagar := GOLPES_PARA_APAGAR
 var limite_izquierdo: float
 var limite_derecho: float
 var golpes := 0
@@ -38,9 +45,9 @@ func _ready() -> void:
 	collision_mask = 1
 	var forma := CollisionShape2D.new()
 	var caja := RectangleShape2D.new()
-	caja.size = Vector2(ANCHO, ALTO)
+	caja.size = Vector2(ancho, alto)
 	forma.shape = caja
-	forma.position = Vector2(0, -ALTO / 2.0)
+	forma.position = Vector2(0, -alto / 2.0)
 	add_child(forma)
 	_felipe = get_tree().get_first_node_in_group("felipe")
 
@@ -65,7 +72,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	if is_on_wall():
 		_direccion = -_direccion
-	if _felipe and absf(distancia.x) < (ANCHO / 2.0 + 18.0) and distancia.y > -30.0 and distancia.y < 8.0:
+	if _felipe and absf(distancia.x) < (ancho / 2.0 + 18.0) and distancia.y > -30.0 and distancia.y < 8.0:
 		_felipe.recibir_dano(1, global_position.x)
 	queue_redraw()
 
@@ -76,8 +83,9 @@ func recibir_zarpazo(felipe: Felipe) -> void:
 	golpes += 1
 	_tiempo_golpe = 0.3
 	velocity.x = felipe.mirando * 160.0
-	if golpes >= GOLPES_PARA_APAGAR:
+	if golpes >= golpes_para_apagar:
 		apagada = true
+		apagado.emit()
 	queue_redraw()
 
 

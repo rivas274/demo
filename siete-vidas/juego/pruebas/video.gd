@@ -36,7 +36,9 @@ func _initialize() -> void:
 
 
 func _correr() -> void:
-	root.add_child(load("res://escenas/apartamento.tscn").instantiate())
+	var sala: Sala = load("res://escenas/apartamento.tscn").instantiate()
+	sala.mostrar_titulo = false
+	root.add_child(sala)
 	var presionadas: Array = []
 	for paso: Array in GUION:
 		for accion: String in presionadas:

@@ -1,6 +1,6 @@
 # Juego (Godot 4.3)
 
-Prototipo jugable de **Felipe: Siete Vidas, Cero Disculpas**.
+Demo jugable de **Felipe: Siete Vidas, Cero Disculpas**: el primer nivel, **"La Gran Fuga"**, el apartamento de Valeria como tutorial. Título → introducción → cada mueble enseña un movimiento → A.S.P.I. (jefa) cuida la puerta del balcón → escapar por el balcón da Caer de Pie → pantalla final.
 
 ## Cómo jugarlo
 
@@ -11,6 +11,8 @@ Prototipo jugable de **Felipe: Siete Vidas, Cero Disculpas**.
 | Acción | Teclado | Mando (Xbox) |
 | --- | --- | --- |
 | Moverse | A / D o flechas | Palanca izquierda o cruceta |
+| Trepar (en la cortina) | W o ↑ | Palanca arriba o cruceta arriba |
+| Pausa | Esc | Start |
 | Agacharse y gatear (agachado + saltar = bajar de una repisa) | S o ↓ | Palanca abajo o cruceta abajo |
 | Saltar (dos veces = Doble Salto) | Espacio | A |
 | Zoomies (tocar = impulso; mantener = correr) | Shift | RB |
@@ -23,7 +25,8 @@ Prototipo jugable de **Felipe: Siete Vidas, Cero Disculpas**.
 | Carpeta | Contenido |
 | --- | --- |
 | `escenas/` | `apartamento.tscn` (apartamento de prueba de 1920×454, escena principal) y `felipe.tscn` |
-| `scripts/` | `felipe.gd` (movimiento y efectos), `animaciones_felipe.gd` (arma las animaciones desde las hojas), `sala.gd` (sala armada desde datos, con muebles provisionales), `fondo_apartamento.gd` (fondo provisional en capas con parallax), `comida.gd` (comida que se come con el botón de acción), `vaso.gd` (se tira de la mesa: logro), `aspi.gd` (A.S.P.I., primer enemigo), `medidores.gd` (corazones, vidas, peso y logros) |
+| `scripts/` | `felipe.gd` (movimiento y efectos), `animaciones_felipe.gd` (arma las animaciones desde las hojas), `sala.gd` (sala armada desde datos, con muebles provisionales), `fondo_apartamento.gd` (fondo provisional en capas con parallax), `comida.gd` (comida que se come con el botón de acción), `vaso.gd` (se tira de la mesa: logro), `aspi.gd` (A.S.P.I., primer enemigo), `medidores.gd` (corazones, vidas, báscula y logros), `pantallas.gd` (título, intro, pausa, final y avisos del tutorial), `raton.gd`, `caja_carton.gd`, `calcetin.gd`, `laser.gd` |
+| `assets/sonidos/` | Sonidos provisionales generados con `siete-vidas/herramientas/sonidos_demo.py` |
 | `assets/felipe/` | Hojas de animación de Felipe (8 cuadros de 106×106) |
 | `pruebas/` | Pruebas automáticas de movimiento, escenario y mecánicas, capturas y video |
 
@@ -34,6 +37,7 @@ godot --headless --path siete-vidas/juego --import
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_movimiento.gd
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_escenario.gd
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_mecanicas.gd
+godot --headless --path siete-vidas/juego --script res://pruebas/prueba_nivel.gd
 # Capturas y video (en la nube, con pantalla virtual):
 xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/video.gd -- /ruta/cuadros
 ```

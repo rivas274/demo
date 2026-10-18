@@ -24,7 +24,10 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [x] Proyecto de Godot montado en `siete-vidas/juego/` (2026-10-17): Felipe jugable (caminar, correr, salto con margen y salto recordado, altura variable, doble salto, Zoomies, zarpazo, comer, aterrizaje con patas delanteras), sala de prueba del apartamento, prueba automática, capturas/video y exportación automática a Windows y Linux con GitHub Actions.
 - [x] Escenario provisional del apartamento (2026-10-17; escala corregida el 2026-10-18): 1920×454 con techo de 3,5 m, Felipe de 67 px, 13 muebles con medidas reales y alcanzables, fondo del Barrio Viejo en 4 capas de parallax más pared, luz y primer plano; prueba `prueba_escenario.gd`.
 - [x] Mecánicas del prototipo (2026-10-18, arte provisional): corazones y 7 vidas con desmayo y reaparición, comer cura y suma peso, báscula en la interfaz, A.S.P.I. (patrulla, persigue, 3 zarpazos), vaso con el logro "La Gravedad Funciona" y notificaciones de logros. Prueba `prueba_mecanicas.gd`.
-- [ ] Siguiente: arte final de A.S.P.I., mapa del apartamento como primer nivel (salida a La Cuadra), afecto y respeto, sonido.
+- [x] **Demo jugable: primer nivel "La Gran Fuga"** (2026-10-18): tutorial completo con título, avisos, ratón, caja de cartón, calcetines, láser, cortina para trepar, A.S.P.I. jefa, balcón con Caer de Pie, pausa, final y sonidos provisionales. Prueba `prueba_nivel.gd`.
+- [ ] Arte de A.S.P.I. con Gemini (encargado a la sesión "gemini" de la Dell; integrar al llegar a `siete-vidas/arte/referencias/gemini/`).
+- [ ] Animación de trepar desde Felipe A (hoy usa el cuadro "subiendo" del salto). Proponer con `pixel-engine-v1.5` (26 créditos).
+- [ ] Siguiente después de la demo: La Cuadra, afecto y respeto, música.
 - [ ] Hojas finales de Felipe generadas a ~67 px de alto (hoy se reducen al 72 % y los pixeles quedan disparejos).
 - [ ] Arte final de escenarios (tileset, fondos por capa, muebles) cuando el concepto esté afinado.
 - [ ] Prototipo jugable: Felipe moviéndose en el apartamento de Valeria.

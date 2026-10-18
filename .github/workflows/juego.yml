@@ -39,6 +39,9 @@ jobs:
       - name: Pruebas de mecánicas
         run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_mecanicas.gd
 
+      - name: Prueba del primer nivel (tutorial)
+        run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_nivel.gd
+
       - name: Exportar Windows, Linux y Web
         run: |
           mkdir -p build/windows build/linux build/web

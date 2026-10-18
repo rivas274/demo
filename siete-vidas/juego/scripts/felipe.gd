@@ -5,6 +5,8 @@ extends CharacterBody2D
 ## y efectos de caricatura (estirar, aplastar y aterrizar con las patas delanteras).
 
 signal aterrizo(fuerza: float)
+## Pide un efecto de sonido (la sala lo reproduce).
+signal sonido(nombre: String)
 
 enum Estado { SUELO, AIRE, ZOOMIES, ZARPAZO, COMIENDO, ATERRIZANDO, OCIO, DESMAYADO }
 
@@ -66,6 +68,7 @@ const ALCANCE := Vector2(48, 40)
 @export var aceleracion := 1200.0
 @export var friccion := 1450.0
 @export var velocidad_gatear := 55.0
+@export var velocidad_trepar := 90.0
 @export_group("Salto")
 @export var gravedad := 1410.0
 @export var gravedad_cayendo := 1940.0
@@ -91,6 +94,11 @@ var corazones := CORAZONES_MAX
 var vidas := VIDAS_MAX
 var peso := PESO_INICIAL
 var tiene_collar := false
+## Poder que gana al escapar por el balcón (fin del tutorial).
+var tiene_caer_de_pie := false
+## Zonas donde puede trepar (cortinas), en coordenadas del mundo. Las pone la sala.
+var zonas_trepables: Array[Rect2] = []
+var trepando := false
 var punto_reaparicion: Vector2
 
 var _tiempo_fuera_del_suelo := 0.0
@@ -140,6 +148,8 @@ func _physics_process(delta: float) -> void:
 		_tiempo_salto_pedido = 0.0
 	_actualizar_bajada(delta)
 	_actualizar_invulnerable(delta)
+	if _actualizar_trepar(direccion):
+		return
 	_actualizar_ocio(delta)
 	_actualizar_agachado()
 
@@ -227,6 +237,7 @@ func _intentar_saltar() -> void:
 
 
 func _saltar(fuerza: float) -> void:
+	sonido.emit("salto")
 	velocity.y = fuerza
 	_tiempo_desde_salto = 0.0
 	sprite.rotation = 0.0
@@ -249,6 +260,7 @@ func _intentar_acciones(direccion: float) -> void:
 	elif Input.is_action_just_pressed("zarpazo"):
 		estado = Estado.ZARPAZO
 		sprite.play("zarpazo")
+		sonido.emit("zarpazo")
 		_golpear()
 	elif Input.is_action_just_pressed("interactuar") and is_on_floor():
 		var objeto := objeto_cercano()
@@ -274,6 +286,7 @@ func comer() -> void:
 	sprite.play("comer")
 	corazones = mini(corazones + 1, CORAZONES_MAX)
 	peso += PESO_POR_COMIDA
+	sonido.emit("comer")
 
 
 ## Tirar algo de un manotazo (por ejemplo, el vaso de la mesa): usa la animación del zarpazo.
@@ -578,6 +591,8 @@ func recibir_dano(cantidad: int, desde_x: float) -> void:
 	if agachado:
 		_poner_agachado(false)
 	corazones = maxi(corazones - cantidad, 0)
+	trepando = false
+	sonido.emit("golpe")
 	if corazones == 0:
 		_desmayarse()
 		return
@@ -628,3 +643,45 @@ func _reaparecer() -> void:
 	estado = Estado.SUELO
 	sprite.play("quieto")
 	_tiempo_invulnerable = TIEMPO_INVULNERABLE
+
+
+
+## Trepar: dentro de una zona trepable (cortina), mantener arriba sube y abajo baja; saltar se suelta.
+## Al llegar arriba da un saltito para pasar al otro lado. Devuelve true si este cuadro estuvo trepando.
+## Animación provisional: el cuadro "subiendo" del salto (falta una animación propia desde Felipe A).
+func _actualizar_trepar(direccion: float) -> bool:
+	var zona := _zona_trepable()
+	if zona == Rect2() or agachado or estado in [Estado.DESMAYADO, Estado.OCIO, Estado.ZARPAZO, Estado.COMIENDO]:
+		trepando = false
+		return false
+	if not trepando:
+		if not Input.is_action_pressed("mover_arriba"):
+			return false
+		trepando = true
+	if Input.is_action_just_pressed("saltar"):
+		trepando = false
+		_saltar(velocidad_salto)
+		return false
+	var vertical := Input.get_axis("mover_arriba", "agacharse")
+	if direccion != 0.0:
+		mirando = signf(direccion)
+	velocity = Vector2(direccion * 50.0, vertical * velocidad_trepar)
+	estado = Estado.AIRE
+	tiene_doble_salto = true
+	move_and_slide()
+	if global_position.y - ALTO_DE_PIE < zona.position.y:
+		# Llegó arriba: un saltito para subirse a lo que hay al lado.
+		trepando = false
+		velocity.y = -260.0
+	elif is_on_floor() and vertical > 0.0:
+		trepando = false
+	sprite.flip_h = mirando < 0.0
+	_poner_cuadro("saltar", CUADRO_SUBIENDO)
+	return true
+
+
+func _zona_trepable() -> Rect2:
+	for zona in zonas_trepables:
+		if zona.grow_individual(12, 0, 12, 0).has_point(global_position + Vector2(0, -20)):
+			return zona
+	return Rect2()

@@ -15,6 +15,7 @@ func _initialize() -> void:
 
 func _correr() -> void:
 	var sala: Node = load("res://escenas/apartamento.tscn").instantiate()
+	sala.mostrar_titulo = false
 	root.add_child(sala)
 	var felipe: Felipe = sala.get_node("Felipe")
 	# Esta prueba es solo del movimiento: los enemigos se prueban en prueba_mecanicas.gd.

@@ -40,6 +40,8 @@ func _physics_process(delta: float) -> void:
 		roto = true
 		queue_redraw()
 		var sala := get_parent()
+		if sala.has_method("sonar"):
+			sala.sonar("vidrio")
 		if sala.has_method("desbloquear_logro"):
 			sala.desbloquear_logro(LOGRO)
 

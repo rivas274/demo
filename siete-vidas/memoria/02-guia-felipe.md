@@ -70,13 +70,15 @@ Lista oficial (la misma de la ficha de concepto). Toda acción nueva se agrega a
 | Doble Salto | Espacio en el aire | A en el aire | ~140 px en total; inclinación leve (~20°); se recupera al tocar el piso | `saltar` (cuadro 3) | En el juego |
 | Caer y aterrizar | — | — | Delanteras primero: cae en picada, toca con las delanteras, baja la parte de atrás y se aplasta, con polvo | `caer` 3 (cayendo) y 5 (contacto), `saltar` 5 y 6 | En el juego |
 | Agacharse y gatear | S o ↓ | Palanca abajo o cruceta abajo | Transición dibujada al bajar y al pararse (al revés); gatea a 55 px/s con la panza al piso y patas alternadas; colisión de 32 px (de pie, 58); cabe bajo muebles con 30 cm libres (36 px); bajo un mueble no se para aunque se suelte el botón | `agacharse` (cuadros 0 a 3 de la hoja), `gatear` (4 a 7) | En el juego |
+| Trepar | W o ↑ (en una cortina) | Palanca o cruceta arriba | Sube a 90 px/s y baja con abajo; saltar lo suelta; al llegar arriba da un saltito para pasar al otro lado | Provisional: `saltar` cuadro 2 (falta animación propia desde Felipe A) | En el juego |
+| Pausa | Esc | Start | Pausa con continuar, reiniciar (R) y salir (Q) | — | En el juego |
 | Bajar de una repisa | S + Espacio | Abajo + A | Atraviesa hacia abajo los muebles que se atraviesan desde abajo (repisas, mesa, estantes) | — | En el juego |
-| Zarpazo | J | X | Ataque con la pata: golpea a los enemigos enfrente (hasta 56 px). A.S.P.I. se apaga con 3 | `zarpazo` | En el juego |
+| Zarpazo | J | X | Ataque con la pata: golpea a los enemigos enfrente (hasta 56 px). El ratón de cuerda cae de 1, A.S.P.I. con 3; rompe cajas de cartón | `zarpazo` | En el juego |
 | Acción | E | Y | Usa el objeto más cercano (hasta 48 px de lado y 40 px de alto); si es comida, se la come; sin objeto no hace nada. No hay botón de comer suelto | `comer` (con comida) | En el juego |
 | Ronronear | — | — | Con humanos, sube el afecto | `ronronear` | Animación lista; falta la mecánica |
 | Recibir daño | — | — | Quita 1 de 5 corazones, lo empuja lejos del golpe y queda 1,2 s invulnerable, parpadeando | Efecto de código | En el juego |
 | Perder una vida | — | — | Sin corazones se desmaya, una de sus 7 vidas sube como fantasma y a los 1,8 s reaparece en el punto de descanso con los corazones llenos. Sin vidas, vuelven las 7 con el Collar de la Vergüenza | `desmayo` + código | En el juego |
-| Peso | — | — | Empieza en 8,0 kg; cada comida suma 0,3 kg. No cambia el dibujo: se ve en la báscula de la interfaz, arriba junto a la vida | — | En el juego (solo indicador) |
+| Peso | — | — | Empieza en 8,0 kg; cada comida suma 0,3 kg. No cambia el dibujo: báscula con aguja en la interfaz y el humor de Felipe según los kilos: Atlético (< 8,5), Esponjoso (< 9,5), Modo Invierno (< 11), Modo Buda | — | En el juego (indicador) |
 | Ocio | Nada durante 8 s (`espera_ocio`) | — | Elige al azar: sentarse y acicalarse, jugar con estambre o perseguirse la cola; repite el ciclo 2 o 3 veces y vuelve a quieto; cualquier botón lo interrumpe | `acicalarse` (de pie), `jugar` (+ bola de estambre por código), `vueltas` | En el juego |
 
 ## Proporciones medidas (Felipe A, cuadro de 106 px)

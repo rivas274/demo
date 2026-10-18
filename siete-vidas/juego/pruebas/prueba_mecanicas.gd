@@ -11,6 +11,7 @@ func _initialize() -> void:
 
 func _correr() -> void:
 	var sala: Sala = load("res://escenas/apartamento.tscn").instantiate()
+	sala.mostrar_titulo = false
 	root.add_child(sala)
 	var felipe: Felipe = sala.get_node("Felipe")
 	var aspi: Aspi = sala.get_node("ASPI")
@@ -35,6 +36,8 @@ func _correr() -> void:
 	_comprobar(felipe.corazones == 5, "Comer cura un corazón")
 	_comprobar(is_equal_approx(felipe.peso, peso_antes + Felipe.PESO_POR_COMIDA), "Comer sube el peso (%.1f kg)" % felipe.peso)
 	await _esperar(60)
+
+	_comprobar(Medidores.nivel_de_peso(8.0) == "Atlético" and Medidores.nivel_de_peso(10.0) == "Modo Invierno" and Medidores.nivel_de_peso(12.0) == "Modo Buda", "La báscula pone el humor de Felipe según el peso")
 
 	# Desmayo y reaparición.
 	for i in Felipe.CORAZONES_MAX:

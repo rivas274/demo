@@ -30,11 +30,14 @@ const SILUETA := Color(0.17, 0.1, 0.13, 0.94)
 const LUZ := Color(1.0, 0.85, 0.55, 0.09)
 
 var ancho: float
+var ancho_piso: float
 var suelo: float
 
 
-func _init(ancho_sala: float, y_suelo: float) -> void:
-	ancho = ancho_sala
+## ancho_pared: hasta dónde llega la pared del apartamento; ancho_total: hasta dónde llega el piso (balcón).
+func _init(ancho_pared: float, y_suelo: float, ancho_total: float = 0.0) -> void:
+	ancho = ancho_pared
+	ancho_piso = maxf(ancho_total, ancho_pared)
 	suelo = y_suelo
 	name = "Fondo"
 
@@ -86,7 +89,7 @@ func _dibujar_ciudad_lejana(c: Node2D) -> void:
 	var azar := RandomNumberGenerator.new()
 	azar.seed = 7
 	var x := -40.0
-	while x < 1300.0:
+	while x < 1500.0:
 		var w := azar.randf_range(30, 70)
 		var arriba := azar.randf_range(100, 230)
 		c.draw_rect(Rect2(x, arriba, w, 500 - arriba), CIUDAD_LEJANA)
@@ -100,7 +103,7 @@ func _dibujar_ciudad_cercana(c: Node2D) -> void:
 	var azar := RandomNumberGenerator.new()
 	azar.seed = 11
 	var x := -40.0
-	while x < 1500.0:
+	while x < 1900.0:
 		var w := azar.randf_range(60, 120)
 		var arriba := azar.randf_range(130, 270)
 		var color: Color = CIUDAD_CERCANA[azar.randi() % CIUDAD_CERCANA.size()]
@@ -157,12 +160,12 @@ func _dibujar_pared(c: Node2D) -> void:
 	c.draw_rect(Rect2(1330, 60, 110, 70), MADERA_OSCURA)
 	c.draw_rect(Rect2(1336, 66, 98, 58), Color("6f8f8a"))
 	# Piso de madera.
-	c.draw_rect(Rect2(0, suelo, ancho, 200), MADERA)
+	c.draw_rect(Rect2(0, suelo, ancho_piso, 200), MADERA)
 	var tabla := 0.0
-	while tabla < ancho:
+	while tabla < ancho_piso:
 		c.draw_line(Vector2(tabla, suelo), Vector2(tabla, suelo + 30), MADERA_OSCURA, 2)
 		tabla += 64
-	c.draw_line(Vector2(0, suelo + 15), Vector2(ancho, suelo + 15), MADERA_OSCURA, 1)
+	c.draw_line(Vector2(0, suelo + 15), Vector2(ancho_piso, suelo + 15), MADERA_OSCURA, 1)
 
 
 func _dibujar_luz(c: Node2D) -> void:

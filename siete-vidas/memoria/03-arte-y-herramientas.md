@@ -59,6 +59,10 @@
 - (Antes:) un gato aterriza primero con las patas delanteras. Al caer, Felipe se inclina con la nariz hacia abajo (~18°) con las patas delanteras estiradas; al tocar el piso apoya las delanteras, gira sobre ellas mientras baja la parte trasera y después se aplasta con rebote.
 - Modo Buda por código "se ve mal": se resolvió editando Felipe A con SpriteCook (8 créditos): bola perfecta con sonrisa satisfecha. Flaco y Gordito siguen por código.
 
+### Agacharse (provisional)
+
+- Sin animación propia todavía: el juego y la ficha usan el cuadro 1 de "saltar" (agacharse para saltar) aplastado a 1.15 × 0.6 y bajado para que toque el piso, con un vaivén de 1 px al gatear.
+
 ### Trucos para ahorrar créditos
 
 - Varias ideas en una sola imagen (hojas comparativas en cuadrícula) en vez de una llamada por idea.

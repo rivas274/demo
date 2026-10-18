@@ -172,6 +172,11 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
         <p class="muted" style="font-size:12.5px">Poses de SpriteCook: agacharse, estirarse, recoger las patas, caer en picada con las delanteras estiradas y tocar el piso primero con ellas. Efectos de código: arco, Doble Salto con inclinación leve, estela, polvo y rebote.</p>
       </div>
       <div class="card">
+        <h3>Agacharse y gatear</h3>
+        <div class="stage" style="min-height:210px"><canvas id="crouch" width="360" height="200" role="img" aria-label="Felipe se agacha y gatea por debajo de un aparador"></canvas></div>
+        <p class="muted" style="font-size:12.5px">S o ↓ para agacharse: gatea más lento y cabe bajo muebles con 30 cm libres. Bajo un mueble no se para aunque se suelte el botón. Agachado + saltar sobre una repisa la atraviesa hacia abajo. Pose provisional: el cuadro "agacharse" del salto, aplastado con código.</p>
+      </div>
+      <div class="card">
         <h3>Recibir daño</h3>
         <div class="stage" style="min-height:210px"><canvas id="hurt" width="240" height="200"></canvas></div>
         <button class="hit" id="hitBtn" type="button">Golpear a Felipe</button>
@@ -504,6 +509,30 @@ function card(anim, img) {
     felipeAt(ctx, idleFrame, JX, JG - y, 1 + (sx - 1) * soft, 1 + (sy - 1) * soft, ang, 1, phase);
   }
 
+  // Agacharse: a la escala de la ficha (1,69 px por cm), el aparador deja 30 cm (51 px) libres debajo.
+  const crouch = document.getElementById("crouch").getContext("2d");
+  const walkImg = imgs["sc-walk"] || idleImg;
+  function drawCrouch(ctx, time) {
+    const G = 192, A0 = 140, A1 = 250, LIBRE = 51, ALTO = 137;
+    const c = time % 5;
+    const x = lerp(-10, 380, c / 5);
+    const agachado = x > A0 - 50 && x < A1 + 45;
+    shadow(ctx, x, G, agachado ? 34 : 28);
+    if (agachado && jumpImg) {
+      const bob = Math.round(Math.sin(time * 18));
+      felipeAt(ctx, 1, x, G + bob, 1.15, 0.6, 0, 1, 0);
+    } else {
+      const f = Math.floor(time * 10) % 8;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(walkImg, f * idle.fw, 0, idle.fw, idle.fh, Math.round(x - idle.fw / 2), G - idle.fh, idle.fw, idle.fh);
+    }
+    ctx.fillStyle = "#b0613f"; ctx.fillRect(A0, G - ALTO, A1 - A0, ALTO - LIBRE);
+    ctx.fillStyle = "#6e3a26"; ctx.fillRect(A0 - 3, G - ALTO, A1 - A0 + 6, 6);
+    ctx.fillRect(A0 + 6, G - LIBRE, 6, LIBRE); ctx.fillRect(A1 - 12, G - LIBRE, 6, LIBRE);
+    ctx.fillStyle = "#c27556"; ctx.fillRect(A0 + 8, G - ALTO + 14, (A1 - A0) / 2 - 12, ALTO - LIBRE - 22); ctx.fillRect(A0 + (A1 - A0) / 2 + 4, G - ALTO + 14, (A1 - A0) / 2 - 12, ALTO - LIBRE - 22);
+    ctx.fillStyle = "#9a5b3c"; ctx.fillRect(0, G, 360, 8);
+  }
+
   function loop(now) {
     const dt = Math.min(0.1, (now - last) / 1000); last = now;
     if (playing) {
@@ -521,6 +550,9 @@ function card(anim, img) {
     jump.clearRect(0, 0, 300, 270);
     drawJump(jump, t, dt);
     drawFaint(t);
+
+    crouch.clearRect(0, 0, 360, 200);
+    drawCrouch(crouch, t);
 
     hurt.clearRect(0, 0, 240, 200);
     let fill = null, dx = 0;

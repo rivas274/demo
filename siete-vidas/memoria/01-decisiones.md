@@ -33,7 +33,9 @@ Actualizado: 2026-10-17. Detalle completo en la biblia (ver README.md).
 ## Mecánicas
 
 - **Tres medidores:** afecto humano (por casa), respeto felino, peso. No hay medidor de hambre.
-- **Snacks = curación:** Felipe carga 3 al inicio; cada uno cura y suma peso. Sin daño por hambre ni temporizadores.
+- **Snacks = curación:** Felipe carga 3 al inicio; cada uno cura y suma peso. Sin daño por hambre ni temporizadores. *(Pendiente de revisar con el botón de acción: hoy la comida se come del mundo.)*
+- **Botón de acción (2026-10-18):** un solo botón para interactuar con objetos; si el objeto es comida, Felipe la come. No hay botón de comer suelto ("comer sin comida no tiene sentido").
+- **Agacharse (2026-10-18):** Felipe se agacha y gatea para pasar bajo muebles; agachado + saltar baja a través de repisas.
 - **Peso = forma:** Flaco, Normal, Gordito, Modo Buda; se cambia a propósito en las bases (caminadora de El Fit, despensa de Don Chucho).
 - **Siete vidas** por partida; al perderlas, Felipe despierta en casa con el **Collar de la Vergüenza** (baja el respeto hasta reconquistar a Valeria).
 - **Poderes (moverse y pelear), en orden:** Zarpazo, Caer de Pie (apartamento), Afilar Garras (Barrio Viejo), Doble Salto (Neón), Zoomies (Downtown), Licuado (Muelle). La puerta final pide respeto y afecto altos.

@@ -19,7 +19,7 @@ const GUION := [
 	[["mover_izquierda"], 20],
 	[["mover_izquierda", "zoomies"], 30],
 	[[], 50],
-	[["comer_snack"], 4],
+	[["interactuar"], 4],
 	[[], 70],
 ]
 

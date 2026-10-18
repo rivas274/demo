@@ -18,4 +18,4 @@ offset_right = 632.0
 offset_bottom = 40.0
 theme_override_colors/font_color = Color(0.17, 0.14, 0.13, 1)
 theme_override_font_sizes/font_size = 10
-text = "A/D o flechas: moverse · Espacio: saltar (dos veces = Doble Salto) · Shift: Zoomies · J: zarpazo · Q: comer"
+text = "A/D: mover · S: agacharse · Espacio: saltar (x2 = Doble Salto) · Shift: Zoomies · J: zarpazo · E: acción"

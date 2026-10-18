@@ -1,7 +1,7 @@
 class_name Felipe
 extends CharacterBody2D
 ## Controlador de Felipe: movimiento de plataformas con sensación moderna
-## (margen de salto, salto recordado, altura variable, doble salto, zoomies)
+## (margen de salto, salto recordado, altura variable, doble salto, zoomies, agacharse y gatear)
 ## y efectos de caricatura (estirar, aplastar y aterrizar con las patas delanteras).
 
 signal aterrizo(fuerza: float)
@@ -21,12 +21,22 @@ const CUADRO_ASENTARSE := 6
 const CUADRO_CAYENDO := 0
 const CUADRO_CONTACTO := 1
 const INCLINACION_DOBLE_SALTO := -0.35
+## Alto de la caja de colisión de pie y agachado: agachado cabe bajo muebles de 30 cm (36 px).
+const ALTO_DE_PIE := 52.0
+const ALTO_AGACHADO := 28.0
+## Pose provisional de agachado: el cuadro "agachado" del salto, aplastado.
+const APLASTADO_AGACHADO := Vector2(1.15, 0.6)
+## Capa de los muebles que se atraviesan desde abajo (agachado + saltar baja a través de ellos).
+const CAPA_ATRAVESABLE := 2
+## Distancia (horizontal, vertical) a la que el botón de acción alcanza un objeto.
+const ALCANCE := Vector2(48, 40)
 
 @export_group("Movimiento")
 @export var velocidad_caminar := 120.0
 @export var velocidad_correr := 190.0
 @export var aceleracion := 1200.0
 @export var friccion := 1450.0
+@export var velocidad_gatear := 55.0
 @export_group("Salto")
 @export var gravedad := 1410.0
 @export var gravedad_cayendo := 1940.0
@@ -44,6 +54,7 @@ const INCLINACION_DOBLE_SALTO := -0.35
 var estado := Estado.SUELO
 var mirando := 1.0
 var tiene_doble_salto := true
+var agachado := false
 
 var _tiempo_fuera_del_suelo := 0.0
 var _tiempo_salto_pedido := 99.0
@@ -53,15 +64,21 @@ var _velocidad_al_caer := 0.0
 var _tiempo_desde_salto := 99.0
 var _tiempo_aterrizando := 0.0
 var _tiempo_estela := 0.0
+var _tiempo_bajando := 0.0
 var _efecto: Tween
+var _posicion_sprite: Vector2
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 @onready var polvo: CPUParticles2D = $Polvo
+@onready var cuerpo: CollisionShape2D = $Cuerpo
 
 
 func _ready() -> void:
 	sprite.sprite_frames = AnimacionesFelipe.crear()
 	sprite.scale = Vector2.ONE * ESCALA_SPRITE
+	_posicion_sprite = sprite.position
+	cuerpo.shape = cuerpo.shape.duplicate()
+	set_collision_mask_value(CAPA_ATRAVESABLE, true)
 	sprite.animation_finished.connect(_al_terminar_animacion)
 	sprite.play("quieto")
 
@@ -73,6 +90,8 @@ func _physics_process(delta: float) -> void:
 	_espera_zoomies = maxf(0.0, _espera_zoomies - delta)
 	if Input.is_action_just_pressed("saltar"):
 		_tiempo_salto_pedido = 0.0
+	_actualizar_bajada(delta)
+	_actualizar_agachado()
 
 	match estado:
 		Estado.ZOOMIES:
@@ -103,6 +122,8 @@ func _physics_process(delta: float) -> void:
 
 func _mover(direccion: float, delta: float) -> void:
 	var maxima := velocidad_correr if Input.is_action_pressed("zoomies") else velocidad_caminar
+	if agachado:
+		maxima = velocidad_gatear
 	if direccion != 0.0:
 		mirando = signf(direccion)
 		velocity.x = move_toward(velocity.x, direccion * maxima, aceleracion * delta)
@@ -127,6 +148,14 @@ func _aplicar_gravedad(delta: float) -> void:
 func _intentar_saltar() -> void:
 	if _tiempo_salto_pedido > salto_recordado:
 		return
+	if agachado:
+		_tiempo_salto_pedido = 99.0
+		if _sobre_mueble_atravesable():
+			_bajar_por_mueble()
+			return
+		if not _cabe_de_pie():
+			return
+		_poner_agachado(false)
 	if is_on_floor() or _tiempo_fuera_del_suelo < margen_salto:
 		_saltar(velocidad_salto)
 		_soltar_polvo(10)
@@ -149,6 +178,8 @@ func _saltar(fuerza: float) -> void:
 
 
 func _intentar_acciones(direccion: float) -> void:
+	if agachado:
+		return
 	if Input.is_action_just_pressed("zoomies") and _espera_zoomies == 0.0:
 		estado = Estado.ZOOMIES
 		_tiempo_zoomies = duracion_zoomies
@@ -160,9 +191,27 @@ func _intentar_acciones(direccion: float) -> void:
 	elif Input.is_action_just_pressed("zarpazo"):
 		estado = Estado.ZARPAZO
 		sprite.play("zarpazo")
-	elif Input.is_action_just_pressed("comer_snack") and is_on_floor():
-		estado = Estado.COMIENDO
-		sprite.play("comer")
+	elif Input.is_action_just_pressed("interactuar") and is_on_floor():
+		var objeto := objeto_cercano()
+		if objeto:
+			objeto.call("interactuar", self)
+
+
+## El objeto interactuable más cercano al alcance, o null si no hay ninguno (el botón no hace nada).
+func objeto_cercano() -> Node2D:
+	var mejor: Node2D = null
+	for objeto: Node2D in get_tree().get_nodes_in_group(Comida.GRUPO):
+		var distancia := objeto.global_position - global_position
+		if absf(distancia.x) <= ALCANCE.x and absf(distancia.y) <= ALCANCE.y:
+			if mejor == null or absf(distancia.x) < absf(mejor.global_position.x - global_position.x):
+				mejor = objeto
+	return mejor
+
+
+func comer() -> void:
+	estado = Estado.COMIENDO
+	velocity.x = 0.0
+	sprite.play("comer")
 
 
 func _actualizar_zoomies(delta: float) -> void:
@@ -201,7 +250,7 @@ func _aterrizar() -> void:
 	# y después se aplasta con un rebote.
 	_efecto = create_tween()
 	_efecto.tween_property(sprite, "rotation", 0.0, 0.08).from(sprite.rotation)
-	var base := Vector2.ONE * ESCALA_SPRITE
+	var base := _escala_base()
 	_efecto.tween_property(sprite, "scale", base * Vector2(1.0 + 0.3 * fuerza, 1.0 - 0.3 * fuerza), 0.05)
 	_efecto.tween_property(sprite, "scale", base, 0.14).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
@@ -222,6 +271,11 @@ func _actualizar_animacion(direccion: float) -> void:
 			_poner_cuadro("saltar", CUADRO_ASENTARSE)
 	elif not is_on_floor():
 		_animar_aire()
+	elif agachado:
+		# Gatea con un leve vaivén; quieto, se queda pegado al piso.
+		_poner_cuadro("saltar", CUADRO_AGACHADO)
+		var vaiven := sin(Time.get_ticks_msec() * 0.02) if direccion != 0.0 else 0.0
+		sprite.position = _posicion_agachado() + Vector2(0, vaiven)
 	elif absf(velocity.x) > velocidad_caminar + 5.0:
 		_reproducir("correr")
 	elif direccion != 0.0:
@@ -296,7 +350,7 @@ func _al_terminar_animacion() -> void:
 func _estirar(forma: Vector2, duracion: float) -> void:
 	if _efecto:
 		_efecto.kill()
-	var base := Vector2.ONE * ESCALA_SPRITE
+	var base := _escala_base()
 	_efecto = create_tween()
 	_efecto.tween_property(sprite, "scale", base * forma, duracion * 0.3)
 	_efecto.tween_property(sprite, "scale", base, duracion * 0.7)
@@ -308,3 +362,65 @@ func _inclinar(angulo: float, duracion: float) -> void:
 	_efecto = create_tween()
 	_efecto.tween_property(sprite, "rotation", angulo * mirando, duracion * 0.5)
 	_efecto.tween_property(sprite, "rotation", 0.0, duracion * 0.5)
+
+
+## Agacharse: solo en el piso. Bajo un mueble no se puede parar aunque se suelte el botón.
+func _actualizar_agachado() -> void:
+	var quiere := Input.is_action_pressed("agacharse") and is_on_floor() and estado in [Estado.SUELO, Estado.ATERRIZANDO]
+	if quiere and not agachado:
+		_poner_agachado(true)
+	elif agachado and not quiere and _cabe_de_pie():
+		_poner_agachado(false)
+
+
+func _poner_agachado(valor: bool) -> void:
+	agachado = valor
+	var caja := cuerpo.shape as RectangleShape2D
+	var alto := ALTO_AGACHADO if valor else ALTO_DE_PIE
+	caja.size.y = alto
+	cuerpo.position.y = -alto / 2.0
+	if _efecto:
+		_efecto.kill()
+	sprite.rotation = 0.0
+	sprite.scale = _escala_base()
+	sprite.position = _posicion_agachado() if valor else _posicion_sprite
+
+
+func _escala_base() -> Vector2:
+	var escala := Vector2.ONE * ESCALA_SPRITE
+	return escala * APLASTADO_AGACHADO if agachado else escala
+
+
+## Al aplastar el sprite hay que bajarlo para que siga apoyado en el piso.
+func _posicion_agachado() -> Vector2:
+	return Vector2(_posicion_sprite.x, _posicion_sprite.y * APLASTADO_AGACHADO.y)
+
+
+## ¿Hay espacio arriba para pararse? (Los muebles que se atraviesan desde abajo no estorban.)
+func _cabe_de_pie() -> bool:
+	return not test_move(global_transform, Vector2(0, -(ALTO_DE_PIE - ALTO_AGACHADO)))
+
+
+func _sobre_mueble_atravesable() -> bool:
+	for i in get_slide_collision_count():
+		var choque := get_slide_collision(i)
+		var objeto := choque.get_collider() as CollisionObject2D
+		if choque.get_normal().y < -0.5 and objeto and objeto.get_collision_layer_value(CAPA_ATRAVESABLE):
+			return true
+	return false
+
+
+## Agachado + saltar sobre una repisa: deja de chocar con los muebles atravesables un instante y cae.
+func _bajar_por_mueble() -> void:
+	set_collision_mask_value(CAPA_ATRAVESABLE, false)
+	_tiempo_bajando = 0.25
+	_poner_agachado(false)
+	position.y += 2.0
+
+
+func _actualizar_bajada(delta: float) -> void:
+	if _tiempo_bajando <= 0.0:
+		return
+	_tiempo_bajando -= delta
+	if _tiempo_bajando <= 0.0:
+		set_collision_mask_value(CAPA_ATRAVESABLE, true)

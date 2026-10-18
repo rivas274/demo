@@ -11,18 +11,18 @@ Prototipo jugable de **Felipe: Siete Vidas, Cero Disculpas**.
 | Acción | Teclado | Mando (Xbox) |
 | --- | --- | --- |
 | Moverse | A / D o flechas | Palanca izquierda o cruceta |
+| Agacharse y gatear (agachado + saltar = bajar de una repisa) | S o ↓ | Palanca abajo o cruceta abajo |
 | Saltar (dos veces = Doble Salto) | Espacio | A |
 | Zoomies (tocar = impulso; mantener = correr) | Shift | RB |
 | Zarpazo | J | X |
-| Acción de gato | E | Y |
-| Comer snack | Q | LB |
+| Acción: usar el objeto cercano; si es comida, comerla | E | Y |
 
 ## Estructura
 
 | Carpeta | Contenido |
 | --- | --- |
 | `escenas/` | `apartamento.tscn` (apartamento de prueba de 1920×454, escena principal) y `felipe.tscn` |
-| `scripts/` | `felipe.gd` (movimiento y efectos), `animaciones_felipe.gd` (arma las animaciones desde las hojas), `sala.gd` (sala armada desde datos, con muebles provisionales), `fondo_apartamento.gd` (fondo provisional en capas con parallax) |
+| `scripts/` | `felipe.gd` (movimiento y efectos), `animaciones_felipe.gd` (arma las animaciones desde las hojas), `sala.gd` (sala armada desde datos, con muebles provisionales), `fondo_apartamento.gd` (fondo provisional en capas con parallax), `comida.gd` (comida que se come con el botón de acción) |
 | `assets/felipe/` | Hojas de animación de Felipe (8 cuadros de 106×106) |
 | `pruebas/` | Pruebas automáticas de movimiento y de escenario, capturas y video |
 

@@ -64,6 +64,8 @@ Todos en `siete-vidas/arte/felipe/` y en la ficha de concepto (`siete-vidas/conc
 
 - **Al bajar, las patas delanteras van primero y tocan el piso primero.** Secuencia del salto: sube estirado, arriba recoge las patas, cae en picada con las delanteras estiradas (pose "caer" 0), toca con las delanteras (pose "caer" 1), baja la parte de atrás y se aplasta.
 - El doble salto lleva solo una inclinación leve (~20°); la vuelta completa se descartó por exagerada.
+- **Agacharse (2026-10-18):** S, ↓ o palanca abajo. Agachado gatea más lento (55 px/s) y su caja de colisión baja de 52 a 28 px, así que cabe bajo muebles con 30 cm libres (36 px). Bajo un mueble no se para aunque se suelte el botón. Agachado + saltar sobre un mueble que se atraviesa desde abajo (repisas, mesa) lo hace bajar a través de él. Pose provisional: cuadro "agacharse" del salto aplastado (1.15 × 0.6); falta animación propia.
+- **Botón de acción (2026-10-18):** E o Y del mando. Interactúa con el objeto más cercano (hasta 48 px de lado y 40 px de alto); si es comida, se la come. Sin un objeto cerca no hace nada. Ya no existe un botón de comer suelto.
 
 ## Formas de peso
 

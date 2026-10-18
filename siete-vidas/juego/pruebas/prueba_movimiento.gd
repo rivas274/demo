@@ -76,6 +76,64 @@ func _correr() -> void:
 	Input.action_release("zarpazo")
 	_comprobar(felipe.sprite.animation == "zarpazo", "El zarpazo reproduce su animación")
 
+	# Botón de acción: solo hace algo si hay un objeto cerca.
+	await _esperar(40)
+	await _tocar("interactuar")
+	_comprobar(felipe.estado != Felipe.Estado.COMIENDO, "Sin comida cerca, el botón de acción no hace nada")
+
+	# Agacharse y gatear.
+	Input.action_press("agacharse")
+	await _esperar(4)
+	_comprobar(felipe.agachado, "S lo agacha")
+	Input.action_press("mover_derecha")
+	await _esperar(40)
+	_comprobar(absf(felipe.velocity.x) <= felipe.velocidad_gatear + 1.0, "Agachado gatea más lento (%.0f px/s)" % absf(felipe.velocity.x))
+	Input.action_release("mover_derecha")
+	Input.action_release("agacharse")
+	await _esperar(4)
+	_comprobar(not felipe.agachado, "Al soltar S se para")
+
+	# Debajo del aparador (30 cm libres) solo se pasa agachado.
+	var aparador := _pieza("Aparador")
+	await _poner_en(felipe, Vector2(aparador.position.x - 60, Sala.SUELO))
+	Input.action_press("mover_derecha")
+	await _esperar(60)
+	_comprobar(felipe.position.x < aparador.position.x, "De pie no cabe bajo el aparador")
+	Input.action_press("agacharse")
+	for i in 240:
+		await physics_frame
+		if felipe.position.x > aparador.get_center().x:
+			break
+	Input.action_release("agacharse")
+	await _esperar(4)
+	_comprobar(felipe.position.x > aparador.get_center().x and felipe.agachado, "Bajo el aparador sigue agachado aunque suelte S")
+	for i in 240:
+		await physics_frame
+		if felipe.position.x > aparador.end.x + 30:
+			break
+	await _esperar(4)
+	Input.action_release("mover_derecha")
+	_comprobar(felipe.position.x > aparador.end.x and not felipe.agachado, "Al salir del aparador se para solo")
+
+	# Agachado + saltar sobre un mueble atravesable: baja a través de él.
+	var mesa := _pieza("Mesa")
+	await _poner_en(felipe, Vector2(mesa.get_center().x, mesa.position.y))
+	_comprobar(felipe.is_on_floor() and felipe.position.y <= mesa.position.y + 1.0, "Se para sobre la mesa")
+	Input.action_press("agacharse")
+	await _esperar(4)
+	await _tocar("saltar")
+	Input.action_release("agacharse")
+	await _esperar(40)
+	_comprobar(felipe.position.y > mesa.position.y + 40.0, "Agachado + saltar baja a través de la mesa")
+
+	# Con comida cerca, el botón de acción la come.
+	var platos := root.get_tree().get_nodes_in_group(Comida.GRUPO).size()
+	await _poner_en(felipe, Vector2(1400, Sala.SUELO))
+	await _tocar("interactuar")
+	_comprobar(felipe.estado == Felipe.Estado.COMIENDO and felipe.sprite.animation == "comer", "Junto a la comida, el botón de acción la come")
+	await _esperar(60)
+	_comprobar(root.get_tree().get_nodes_in_group(Comida.GRUPO).size() == platos - 1, "La comida desaparece al comerla")
+
 	for fallo in _fallos:
 		printerr("FALLO: " + fallo)
 	print("Resultado: %d fallos" % _fallos.size())
@@ -121,6 +179,25 @@ func _alto_dibujado(felipe: Felipe) -> float:
 				abajo = y
 				break
 	return (abajo - arriba + 1) * Felipe.ESCALA_SPRITE
+
+
+func _pieza(nombre: String) -> Rect2:
+	for pieza: Array in Sala.PIEZAS:
+		if pieza[2] == nombre:
+			return pieza[0]
+	return Rect2()
+
+
+func _poner_en(felipe: Felipe, posicion: Vector2) -> void:
+	felipe.position = posicion
+	felipe.velocity = Vector2.ZERO
+	await _esperar(20)
+
+
+func _tocar(accion: String) -> void:
+	Input.action_press(accion)
+	await _esperar(2)
+	Input.action_release(accion)
 
 
 func _esperar(cuadros: int) -> void:

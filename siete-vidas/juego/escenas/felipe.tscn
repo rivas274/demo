@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/felipe.gd" id="1_felipe"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cuerpo"]
-size = Vector2(40, 34)
+size = Vector2(40, 52)
 
 [sub_resource type="Gradient" id="Gradient_polvo"]
 colors = PackedColorArray(0.88, 0.84, 0.79, 0.9, 0.88, 0.84, 0.79, 0)
@@ -33,7 +33,7 @@ scale_amount_max = 3.0
 color_ramp = SubResource("Gradient_polvo")
 
 [node name="Cuerpo" type="CollisionShape2D" parent="."]
-position = Vector2(0, -17)
+position = Vector2(0, -26)
 shape = SubResource("RectangleShape2D_cuerpo")
 
 [node name="Camara" type="Camera2D" parent="."]

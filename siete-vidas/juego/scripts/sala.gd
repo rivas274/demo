@@ -21,6 +21,7 @@ const PIEZAS := [
 	[Rect2(0, -20, ANCHO, 20), false, "Techo", "invisible"],
 	[Rect2(260, 370, 230, 10), true, "Sofá", "sofa"],  # asiento a 45 cm
 	[Rect2(550, 333, 133, 8), true, "Mesa", "mesa"],  # 75 cm
+	[Rect2(700, SUELO - 98, 150, 62), false, "Aparador", "aparador"],  # 81 cm, con 30 cm libres debajo: se pasa agachado
 	[Rect2(730, 255, 110, 8), true, "Estante bajo", "repisa"],  # 1,40 m
 	[Rect2(880, 200, 110, 8), true, "Estante alto", "repisa"],  # 1,85 m
 	[Rect2(1040, 303, 220, 8), true, "Repisa de la ventana", "repisa"],  # 1 m
@@ -34,6 +35,12 @@ const PIEZAS := [
 	[Rect2(1800, 206, 100, 218), false, "Refrigerador", "refri"],  # 1,80 m
 ]
 
+## Comida en el apartamento: [posición sobre la superficie, tipo].
+const COMIDA := [
+	[Vector2(1435, SUELO), "plato"],  # croquetas en el piso de la cocina
+	[Vector2(935, 200), "lata"],  # atún escondido en el estante alto
+]
+
 @onready var felipe: Felipe = $Felipe
 
 
@@ -41,6 +48,10 @@ func _ready() -> void:
 	add_child(FondoApartamento.new(ANCHO, SUELO))
 	for pieza: Array in PIEZAS:
 		_crear_pieza(pieza[0], pieza[1], pieza[2], pieza[3])
+	for comida: Array in COMIDA:
+		var objeto := Comida.new(comida[1])
+		objeto.position = comida[0]
+		add_child(objeto)
 	var camara: Camera2D = felipe.get_node("Camara")
 	camara.limit_left = 0
 	camara.limit_top = 0
@@ -58,6 +69,9 @@ func _crear_pieza(rect: Rect2, atravesable: bool, nombre: String, estilo: String
 	forma.shape = caja
 	forma.position = rect.size / 2.0
 	forma.one_way_collision = atravesable
+	if atravesable:
+		cuerpo.collision_layer = 0
+		cuerpo.set_collision_layer_value(Felipe.CAPA_ATRAVESABLE, true)
 	cuerpo.add_child(forma)
 	if estilo != "invisible":
 		var dibujo := Node2D.new()
@@ -106,6 +120,14 @@ func _dibujar_mueble(c: Node2D, tamano: Vector2, estilo: String) -> void:
 				c.draw_rect(Rect2(puerta + 56, 44, 4, 10), MADERA_OSCURA)
 				puerta += 74
 			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), MADERA_OSCURA)
+		"aparador":
+			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), MADERA)
+			c.draw_rect(Rect2(-3, 0, tamano.x + 6, 6), MADERA_OSCURA)
+			for cajon: float in [8.0, tamano.x / 2 + 4]:
+				c.draw_rect(Rect2(cajon, 14, tamano.x / 2 - 12, tamano.y - 22), MADERA.lightened(0.1))
+				c.draw_rect(Rect2(cajon + tamano.x / 4 - 10, 28, 8, 3), MADERA_OSCURA)
+			for pata: float in [6.0, tamano.x - 12.0]:
+				c.draw_rect(Rect2(pata, tamano.y, 6, hasta_suelo - tamano.y), MADERA_OSCURA)
 		"meson":
 			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), Color("d8cbb8"))
 			c.draw_rect(Rect2(-4, 0, tamano.x + 8, 8), Color("8a8f96"))

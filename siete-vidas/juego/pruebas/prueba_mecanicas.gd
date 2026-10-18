@@ -87,6 +87,7 @@ func _correr() -> void:
 	await _poner_en(felipe, Vector2(vaso.position.x - 30, vaso.position.y))
 	felipe.mirando = 1.0
 	await _tocar("interactuar")
+	_comprobar(felipe.sprite.animation == "zarpazo", "Tirar el vaso con el botón de acción usa la animación del zarpazo")
 	await _esperar(90)
 	_comprobar(vaso.roto, "El vaso cae y se rompe")
 	_comprobar("La Gravedad Funciona" in sala.logros, "Tirar el vaso da el logro La Gravedad Funciona")

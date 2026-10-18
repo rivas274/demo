@@ -6,6 +6,8 @@ extends Node2D
 ## Valeria provisional (rectángulos, 200 px = 3 Felipes). Oye el ruido, entra por la puerta, se enoja
 ## ("¡FELIPE!") y abre una ventana de encanto: si Felipe ronronea cerca de ella, lo perdona y le deja
 ## un snack. Si no, lo persigue un poco (sin castigo) y se va. Al irse lo deja todo en su lugar.
+## v2: cuando perdona queda de buenas y se sienta en el sofá a ver su serie un rato (si Felipe le tira
+## el control, se para y lo regaña). Si le cae algo encima, se sobresalta.
 ## La posición es la de sus pies.
 
 signal grita(valeria: Valeria)
@@ -13,8 +15,9 @@ signal perdona(valeria: Valeria)
 signal persigue(valeria: Valeria)
 signal se_va(valeria: Valeria)
 signal se_fue(valeria: Valeria)
+signal se_sento(valeria: Valeria)
 
-enum Estado { FUERA, ENTRANDO, REGANANDO, PERSIGUIENDO, PERDONANDO, SALIENDO }
+enum Estado { FUERA, ENTRANDO, REGANANDO, PERSIGUIENDO, PERDONANDO, SALIENDO, YENDO_TELE, VIENDO_TELE }
 
 const ALTO := 200.0
 const PUERTA_X := 582.0
@@ -36,6 +39,9 @@ const PUERTA_X := 582.0
 @export var distancia_cara := 66.0
 ## Segundos que no vuelve después de irse.
 @export var descanso := 2.0
+## Dónde se sienta a ver la tele (sobre el asiento del sofá) y cuánto rato.
+@export var asiento_x := 78.0
+@export var duracion_tele := 12.0
 
 var estado := Estado.FUERA
 var ruido := 0.0
@@ -46,6 +52,8 @@ var _tiempo := 0.0
 var _paso := 0.0
 var _descanso := 0.0
 var _corazones: Array = []
+var _susto := 0.0
+var _tiempo_tele := 0.0
 
 
 func _ready() -> void:
@@ -59,6 +67,43 @@ func oir(cantidad: float) -> void:
 
 func presente() -> bool:
 	return estado in [Estado.REGANANDO, Estado.PERSIGUIENDO]
+
+
+func viendo_tele() -> bool:
+	return estado == Estado.VIENDO_TELE
+
+
+## Rectángulo del cuerpo en el mundo (para saber si algo le cae encima). Sin las piernas.
+func cuerpo() -> Rect2:
+	if not visible or estado == Estado.FUERA:
+		return Rect2()
+	if estado == Estado.VIENDO_TELE:
+		return Rect2(position + Vector2(-20, -150), Vector2(52, 100))
+	return Rect2(position + Vector2(-20, -205), Vector2(40, 115))
+
+
+## Le tiraron el control mientras veía la tele: se para y regaña.
+func interrumpir() -> void:
+	if estado != Estado.VIENDO_TELE and estado != Estado.YENDO_TELE:
+		return
+	estado = Estado.REGANANDO
+	_tiempo = 0.0
+	ronroneo_acumulado = 0.0
+	grita.emit(self)
+
+
+## Le cayó algo encima: salto de susto; si estaba entrando o viendo la tele, regaña ya.
+func golpeada() -> void:
+	_susto = 0.6
+	if estado in [Estado.ENTRANDO, Estado.VIENDO_TELE, Estado.YENDO_TELE]:
+		estado = Estado.REGANANDO
+		_tiempo = 0.0
+		ronroneo_acumulado = 0.0
+		grita.emit(self)
+	elif estado in [Estado.REGANANDO, Estado.PERSIGUIENDO]:
+		# Recarga la paciencia: el regaño empieza de nuevo.
+		estado = Estado.REGANANDO
+		_tiempo = 0.0
 
 
 func _physics_process(delta: float) -> void:
@@ -99,6 +144,18 @@ func _physics_process(delta: float) -> void:
 				se_va.emit(self)
 		Estado.PERDONANDO:
 			if _tiempo > 2.2:
+				# De buenas: se va a ver su serie.
+				estado = Estado.YENDO_TELE
+		Estado.YENDO_TELE:
+			if _caminar_hacia(asiento_x, velocidad, delta):
+				estado = Estado.VIENDO_TELE
+				mirando = 1.0
+				_tiempo_tele = 0.0
+				se_sento.emit(self)
+		Estado.VIENDO_TELE:
+			_tiempo_tele += delta
+			ruido = 0.0
+			if _tiempo_tele > duracion_tele:
 				estado = Estado.SALIENDO
 		Estado.SALIENDO:
 			if _caminar_hacia(PUERTA_X, velocidad, delta):
@@ -108,6 +165,7 @@ func _physics_process(delta: float) -> void:
 				ruido = 0.0
 				se_fue.emit(self)
 	ruido = maxf(0.0, ruido - olvido_ruido * delta)
+	_susto = maxf(0.0, _susto - delta)
 	queue_redraw()
 
 
@@ -164,6 +222,11 @@ func _actualizar_corazones(delta: float) -> void:
 
 
 func _draw() -> void:
+	if estado == Estado.VIENDO_TELE:
+		_dibujar_sentada()
+		_dibujar_susto()
+		return
+	_dibujar_susto()
 	var enojada := estado in [Estado.REGANANDO, Estado.PERSIGUIENDO, Estado.ENTRANDO]
 	var feliz := estado == Estado.PERDONANDO
 	var piel := Color(0.93, 0.76, 0.62)
@@ -229,3 +292,45 @@ func _draw() -> void:
 		draw_circle(p + Vector2(-3, 0), 3.5, c)
 		draw_circle(p + Vector2(3, 0), 3.5, c)
 		draw_colored_polygon(PackedVector2Array([p + Vector2(-6.5, 1), p + Vector2(6.5, 1), p + Vector2(0, 8)]), c)
+
+
+## Sentada en el sofá mirando a la derecha (la tele), con un bowl de cabritas.
+func _dibujar_sentada() -> void:
+	var piel := Color(0.93, 0.76, 0.62)
+	var pelo := Color(0.28, 0.16, 0.1)
+	var polera := Color(0.35, 0.55, 0.62)
+	var jeans := Color(0.22, 0.27, 0.45)
+	# Asiento a 54 px del piso (sofá de 45 cm). Muslos hacia adelante, canillas al piso.
+	draw_rect(Rect2(-12, -66, 44, 14), jeans)
+	draw_rect(Rect2(22, -56, 12, 52), jeans.darkened(0.1))
+	draw_rect(Rect2(20, -6, 18, 6), Color(0.9, 0.9, 0.9))
+	# Torso un poco reclinado.
+	draw_rect(Rect2(-20, -124, 36, 60), polera)
+	# Brazo con el bowl de cabritas sobre las piernas.
+	draw_rect(Rect2(0, -112, 9, 34), polera.darkened(0.15))
+	draw_rect(Rect2(6, -82, 22, 10), Color(0.85, 0.3, 0.3))
+	for i in 4:
+		draw_circle(Vector2(10 + i * 5, -84 - (i % 2) * 2), 3.0, Color(1.0, 0.97, 0.85))
+	draw_rect(Rect2(-5, -130, 10, 8), piel)
+	# Cabeza mirando a la tele (de perfil), cola de caballo atrás.
+	draw_rect(Rect2(-22, -150, 10, 24), pelo)
+	draw_rect(Rect2(-13, -158, 26, 30), piel)
+	draw_rect(Rect2(-14, -160, 28, 9), pelo)
+	draw_rect(Rect2(-16, -156, 12, 16), pelo)
+	draw_rect(Rect2(Vector2(4.5, -145.5), Vector2(3, 3)), Color(0.15, 0.1, 0.1))
+	# Sonrisa tranquila y brillo de la tele en la cara.
+	draw_arc(Vector2(6, -135), 3.0, 0.2, PI - 0.2, 5, Color(0.6, 0.2, 0.2), 1.5)
+	draw_rect(Rect2(8, -156, 5, 26), Color(0.5, 0.8, 1.0, 0.18 + 0.1 * sin(_tiempo_tele * 9.0)))
+
+
+func _dibujar_susto() -> void:
+	if _susto <= 0.0:
+		return
+	# Estrellitas y gotas sobre la cabeza.
+	var arriba := -160.0 if estado == Estado.VIENDO_TELE else -212.0
+	for i in 3:
+		var a := _susto * 8.0 + i * TAU / 3.0
+		var p := Vector2(cos(a) * 16.0, arriba + sin(a) * 5.0)
+		draw_rect(Rect2(p - Vector2(2, 2), Vector2(4, 4)), Color(1.0, 0.9, 0.3))
+	draw_circle(Vector2(-14, arriba + 14), 3.0, Color(0.55, 0.8, 1.0))
+	draw_circle(Vector2(16, arriba + 10), 2.5, Color(0.55, 0.8, 1.0))

@@ -115,10 +115,23 @@ func _tocar_superficie() -> void:
 	giro *= 0.6
 
 
-func _romper() -> void:
+## v2: le cayó encima a Valeria. Lo frágil se revienta contra ella y los trozos caen al piso;
+## lo demás rebota. Devuelve true si se rompió.
+func chocar_con_valeria(piso_y: float) -> bool:
+	if fragil:
+		var punto := global_position + Vector2(0, -12)
+		position.y = piso_y
+		_romper(punto)
+		return true
+	velocidad = Vector2(-velocidad.x * 0.4, -90.0)
+	giro = -giro
+	return false
+
+
+func _romper(punto_chispas := Vector2.INF) -> void:
 	estado = Estado.ROTO
 	rotation = 0.0
-	_chispas.global_position = global_position + Vector2(0, -6)
+	_chispas.global_position = global_position + Vector2(0, -6) if punto_chispas == Vector2.INF else punto_chispas
 	_chispas.restart()
 	_chispas.emitting = true
 	# Pedazos que quedan en el piso.

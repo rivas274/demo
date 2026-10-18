@@ -16,6 +16,9 @@ const LADO_RETRATO := 200.0 / 3.0
 ## Segundos que queda la frase completa antes de cerrarse sola (más un poco por letra).
 @export var espera_base := 1.3
 @export var espera_por_letra := 0.035
+## v2: una frase que espera en la cola se descarta si ya pasó este tiempo (para que Felipe no conteste
+## "Persecución mediocre." cuando Valeria ya se fue).
+@export var caducidad_cola := 2.0
 
 var hablando := ""
 var texto_actual := ""
@@ -28,6 +31,7 @@ var _retrato_valeria: RetratoValeria
 var _visibles := 0.0
 var _espera := 0.0
 var _ultimo_sonido := 0
+var _reloj := 0.0
 var sonidos: Sonidos
 
 
@@ -85,7 +89,7 @@ func decir(quien: String, texto: String, retrato: int, urgente := false) -> void
 	if urgente or not _caja.visible or hablando == quien:
 		_mostrar(quien, texto, retrato)
 	else:
-		_cola.append([quien, texto, retrato])
+		_cola.append([quien, texto, retrato, _reloj])
 		if _cola.size() > 2:
 			_cola.pop_front()
 
@@ -135,12 +139,16 @@ func saltar() -> void:
 func _cerrar() -> void:
 	_caja.visible = false
 	hablando = ""
-	if not _cola.is_empty():
+	while not _cola.is_empty():
 		var siguiente: Array = _cola.pop_front()
+		if _reloj - float(siguiente[3]) > caducidad_cola:
+			continue
 		_mostrar(siguiente[0], siguiente[1], siguiente[2])
+		return
 
 
 func _process(delta: float) -> void:
+	_reloj += delta
 	if Input.is_action_just_pressed("saltar_dialogo"):
 		saltar()
 	if not _caja.visible:

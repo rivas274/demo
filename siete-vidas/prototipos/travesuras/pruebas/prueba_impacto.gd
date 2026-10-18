@@ -111,8 +111,9 @@ func _correr() -> void:
 	Input.action_release("ronronear")
 	_comprobar(perdono, "ronronear cerca de Valeria la hace perdonar")
 	await esperar(30)
-	_comprobar(is_instance_valid(sala.snack), "Valeria deja un snack")
-	var se_fue := await hasta(func() -> bool: return sala.valeria.estado == Valeria.Estado.FUERA, 900)
+	_comprobar(is_instance_valid(sala.snack) or sala.hud.snacks > 0, "Valeria deja un snack")
+	# v2: de buenas, ve su serie un rato antes de irse.
+	var se_fue := await hasta(func() -> bool: return sala.valeria.estado == Valeria.Estado.FUERA, 1800)
 	_comprobar(se_fue and sala.vaso.estado == Tirable.Estado.EN_SITIO, "Valeria se va y repone el vaso")
 
 	print("Resultado: %s (%d fallas)" % ["PASA" if _fallas == 0 else "FALLA", _fallas])

@@ -100,3 +100,56 @@ func saltar_a(x: float, doble: bool) -> void:
 		await cuadro()
 	Input.action_release(accion)
 	await esperar(8)
+
+
+## v2: abre la agenda (Tab), la deja abierta unos segundos y la cierra.
+func ver_agenda(s: float) -> void:
+	await tocar("agenda")
+	await segundos(s)
+	await tocar("agenda")
+	await esperar(10)
+
+
+## v2: llega al asiento del sofá (desde el piso, saltando por encima del brazo).
+func ir_al_asiento(x: float) -> void:
+	if felipe.global_position.y > Sofa.ASIENTO.position.y + 10.0 or felipe.global_position.x > Sofa.BRAZO_DERECHO.end.x:
+		await saltar_a(x, true)
+	await ir_a(x)
+
+
+## v2: se acerca a Valeria y ronronea hasta que perdona.
+func ronronear_a_valeria() -> void:
+	var v := sala.valeria
+	if absf(v.position.x - felipe.global_position.x) > 90.0:
+		var lado := signf(felipe.global_position.x - v.position.x)
+		var destino := clampf(v.position.x + lado * 55.0, 30.0, 600.0)
+		if felipe.global_position.y < SalaProto.SUELO - 10.0:
+			await saltar_a(destino, false)
+		await ir_a(destino)
+	Input.action_press("ronronear")
+	await hasta(func() -> bool: return v.estado == Valeria.Estado.PERDONANDO, 180)
+	await segundos(0.3)
+	Input.action_release("ronronear")
+	await segundos(0.6)
+
+
+## v2: recoge las recompensas que quedaron sueltas (salta si están en otra altura).
+## No va a las que están más arriba que "altura_minima" (el alféizar se visita a propósito).
+func recoger_todo(altura_minima := 150.0) -> void:
+	for intento in 6:
+		var objetivo: Recogible = null
+		for n: Node in sala.get_children():
+			if n is Recogible and not n.get("_recogido") and n.position.y >= altura_minima:
+				objetivo = n
+				break
+		if objetivo == null:
+			return
+		await hasta(func() -> bool: return not is_instance_valid(objetivo) or objetivo.quieto, 150)
+		if not is_instance_valid(objetivo):
+			continue
+		var dy := objetivo.position.y - felipe.global_position.y
+		if absf(dy) > 10.0:
+			await saltar_a(objetivo.position.x, dy < -50.0)
+		if is_instance_valid(objetivo):
+			await ir_a(objetivo.position.x)
+		await esperar(12)

@@ -74,6 +74,28 @@ const FELIPE := {
 		["Un rey no corre. Trota con dignidad.", 1],
 		["Persecución mediocre. Dos estrellas.", 0],
 	],
+	"recoger_calcetin": [
+		["Un calcetín. Mío ahora. Así funcionan las cosas.", 7],
+		["Otro calcetín para la colección real.", 4],
+		["Huele a pie humano. Perfecto.", 6],
+	],
+	"recoger_snack": [
+		["Lo guardo. Un rey planifica.", 3],
+		["Snack confiscado.", 7],
+	],
+	"recoger_foto": [
+		["Valeria en pijama de unicornio. Esto vale oro.", 6],
+	],
+	"tele": [
+		["Su serie. Qué conveniente.", 0],
+		["Ah, la serie. Y el control tan cerca del borde...", 4],
+	],
+	"persiana": [
+		["¡La persiana! El control también sirve para algo.", 2],
+	],
+	"agenda_completa": [
+		["Agenda completa. Hoy fui un genio. Como ayer.", 7],
+	],
 	"se_fue": [
 		["Volverá. Siempre vuelven.", 4],
 		["Lo repuso todo. Qué falta de imaginación.", 0],
@@ -100,6 +122,19 @@ const VALERIA := {
 		["¡Ven acá, bandido!", 0],
 		["¡No te escondas, te vi!", 0],
 	],
+	"tele": [
+		["Ya, ya. Voy a ver mi serie. Pórtate bien.", 2],
+		["Bueno. Un capítulo y me acuesto.", 2],
+	],
+	"interrumpida": [
+		["¡FELIPE! ¡MI SERIE!", 0],
+		["¡¿El control?! ¡Estaba en lo mejor!", 0],
+	],
+	"golpeada": [
+		["¡AY! ¿¡ME TIRASTE ESO ENCIMA!?", 0],
+		["¡FELIPE! ¡Me mojaste entera!", 0],
+	],
+	"persiana": [["¿Y quién subió la persiana?", 2]],
 	"se_va": [
 		["Ash. Gato.", 2],
 		["Yo ordeno, tú desordenas. Qué lindo.", 2],

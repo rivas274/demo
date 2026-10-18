@@ -146,6 +146,15 @@ func _correr() -> void:
 	await _esperar(3)
 	Input.action_release("mover_derecha")
 	_comprobar(felipe.estado != Felipe.Estado.OCIO and felipe.sprite.animation == "caminar" and is_equal_approx(felipe.sprite.scale.x, Felipe.ESCALA_SPRITE), "Al tocar un botón deja de entretenerse y vuelve a su tamaño")
+	felipe._empezar_ocio("jugar")
+	await _esperar(2)
+	_comprobar(felipe.get_node_or_null("Estambre") != null, "Al jugar aparece la bola de estambre frente a Felipe")
+	Input.action_press("saltar")
+	await _esperar(2)
+	Input.action_release("saltar")
+	await _esperar(2)
+	_comprobar(felipe.get_node_or_null("Estambre") == null, "Al dejar de jugar la bola desaparece")
+	await _esperar(60)
 	for nombre: String in Felipe.OCIO:
 		var alto_ocio: float = _alto_visible(felipe.sprite.sprite_frames.get_frame_texture(nombre, 0).get_image()) * Felipe.OCIO[nombre][0]
 		_comprobar(alto_ocio > 55.0 and alto_ocio < 95.0, "La animación %s tiene el tamaño de Felipe (%.0f px)" % [nombre, alto_ocio])

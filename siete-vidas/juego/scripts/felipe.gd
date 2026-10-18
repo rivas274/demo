@@ -38,6 +38,9 @@ const OCIO := {
 	"jugar": [0.6, Vector2(0, -55), 3],
 	"vueltas": [0.72, Vector2(0, -38), 2],
 }
+## Bola de estambre del ocio "jugar": objeto aparte (la animación es solo Felipe) que rueda frente a él.
+const BOLA_ESTAMBRE := preload("res://assets/felipe/estambre-bola.png")
+const DISTANCIA_ESTAMBRE := 34.0
 ## Acciones que, presionadas, cuentan como "estar jugando" (cortan el ocio y reinician la espera).
 const ACCIONES := ["mover_izquierda", "mover_derecha", "saltar", "zoomies", "zarpazo", "interactuar", "agacharse"]
 ## Distancia (horizontal, vertical) a la que el botón de acción alcanza un objeto.
@@ -82,6 +85,7 @@ var _tiempo_estela := 0.0
 var _tiempo_bajando := 0.0
 var _tiempo_sin_tocar := 0.0
 var _tiempo_ocio := 0.0
+var _estambre: Sprite2D
 var _efecto: Tween
 var _posicion_sprite: Vector2
 
@@ -98,6 +102,18 @@ func _ready() -> void:
 	set_collision_mask_value(CAPA_ATRAVESABLE, true)
 	sprite.animation_finished.connect(_al_terminar_animacion)
 	sprite.play("quieto")
+	if _estambre:
+		_estambre.queue_free()
+		_estambre = null
+
+
+## El estambre va y viene frente a Felipe al ritmo de los golpes de la pata, girando al rodar.
+func _rodar_estambre() -> void:
+	if not _estambre:
+		return
+	var vaiven := sin(Time.get_ticks_msec() * 0.006) * 6.0
+	_estambre.position = Vector2(mirando * (DISTANCIA_ESTAMBRE + vaiven), -BOLA_ESTAMBRE.get_height() * 0.3)
+	_estambre.rotation = vaiven / 7.0
 
 
 func _physics_process(delta: float) -> void:
@@ -451,6 +467,7 @@ func _actualizar_ocio(delta: float) -> void:
 	var tocando := ACCIONES.any(func(accion: String) -> bool: return Input.is_action_pressed(accion))
 	if estado == Estado.OCIO:
 		_tiempo_ocio -= delta
+		_rodar_estambre()
 		if tocando or _tiempo_ocio <= 0.0 or not is_on_floor():
 			_terminar_ocio()
 		return
@@ -471,6 +488,13 @@ func _empezar_ocio(nombre: String) -> void:
 	sprite.scale = Vector2.ONE * datos[0]
 	sprite.position = datos[1]
 	sprite.play(nombre)
+	if nombre == "jugar":
+		_estambre = Sprite2D.new()
+		_estambre.name = "Estambre"
+		_estambre.texture = BOLA_ESTAMBRE
+		_estambre.scale = Vector2.ONE * 0.6
+		add_child(_estambre)
+		_rodar_estambre()
 	var frames := sprite.sprite_frames
 	_tiempo_ocio = frames.get_frame_count(nombre) / frames.get_animation_speed(nombre) * datos[2]
 

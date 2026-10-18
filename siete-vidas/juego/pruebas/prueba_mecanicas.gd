@@ -20,7 +20,7 @@ func _correr() -> void:
 	# Interfaz.
 	var medidores := sala.get_node("Interfaz/Medidores") as Medidores
 	_comprobar(medidores != null and medidores.felipe == felipe, "La interfaz muestra los medidores de Felipe")
-	_comprobar(felipe.corazones == Felipe.CORAZONES_MAX and felipe.vidas == Felipe.VIDAS_MAX, "Empieza con 5 corazones y 7 vidas")
+	_comprobar(felipe.corazones == Felipe.CORAZONES_MAX and felipe.vidas == Felipe.VIDAS_MAX, "Empieza con 5 corazones y 9 vidas")
 
 	# Daño e invulnerabilidad.
 	felipe.recibir_dano(1, felipe.global_position.x + 10.0)

@@ -37,7 +37,7 @@ Actualizado: 2026-10-17. Detalle completo en la biblia (ver README.md).
 - **Botón de acción (2026-10-18):** un solo botón para interactuar con objetos; si el objeto es comida, Felipe la come. No hay botón de comer suelto ("comer sin comida no tiene sentido").
 - **Agacharse (2026-10-18):** Felipe se agacha y gatea para pasar bajo muebles; agachado + saltar baja a través de repisas.
 - **Peso (2026-10-18):** no cambia el dibujo de Felipe, por el límite de cuadros de las animaciones. Es un indicador en la parte de arriba, junto a la barra de vida. *(Abierto: si el peso cambia algo del movimiento, como la biblia pedía para Flaco, Gordito y Modo Buda, y cómo queda el Final Buda.)*
-- **Siete vidas** por partida; al perderlas, Felipe despierta en casa con el **Collar de la Vergüenza** (baja el respeto hasta reconquistar a Valeria).
+- **Nueve vidas** por partida (2026-10-18; antes 7: se pasa a 9 para que sea internacional, como en inglés). El título sigue siendo *Siete Vidas, Cero Disculpas* hasta que el creador decida; al perderlas, Felipe despierta en casa con el **Collar de la Vergüenza** (baja el respeto hasta reconquistar a Valeria).
 - **Poderes (moverse y pelear), en orden:** Zarpazo, Caer de Pie (apartamento), Afilar Garras (Barrio Viejo), Doble Salto (Neón), Zoomies (Downtown), Licuado (Muelle). La puerta final pide respeto y afecto altos.
 - **Mañas:** 17 equipables con ventaja y precio; 2 ranuras al inicio, hasta 6 (10 calcetines = 1 ranura).
 - **Acciones de gato:** pedir comida, infiltrarse, popo táctico, tirar cosas de la mesa, meterse en cajas, peleas en los techos, casas paralelas.
@@ -49,6 +49,7 @@ Actualizado: 2026-10-17. Detalle completo en la biblia (ver README.md).
 
 ## Demo: primer nivel "La Gran Fuga" (2026-10-18)
 
+- **Reglas de diseño de niveles (2026-10-18):** todo nivel cumple `siete-vidas/diseno/reglas-de-niveles.md` (15 reglas sacadas de Mario, Celeste, Hollow Knight, Stray y otros); se aplican al diseñar y `prueba_reglas_nivel.gd` valida las medibles. Aplicarlas al nivel 1 sumó un segundo descanso (el cojín del dormitorio, al final del atajo y antes de A.S.P.I.).
 - **Nivel 1 rediseñado como dúplex (2026-10-18):** el apartamento de Valeria tiene dos pisos (sala, escalera, cocina abajo; dormitorio y pasillo arriba). Se sube trepando la cortina de la cocina; la puerta del dormitorio se abre solo desde dentro y deja un atajo por la escalera hasta la caja de arena; A.S.P.I. en el pasillo se aturde tirándole un rollo o una maceta y no ve a Felipe agachado. Diseño y principios en `siete-vidas/diseno/nivel-01-gran-fuga.md`.
 - **La demo es el tutorial del apartamento**, como dice la biblia: cada mueble enseña un movimiento con un aviso de una línea y la tecla o el botón del mando en uso. Recorrido vigente (dúplex): sala → escalera cerrada → cocina → cortina (trepar) → dormitorio (abrir el atajo) → pasillo con A.S.P.I. → balcón, donde gana **Caer de Pie** y termina la demo; detalle por zona en `siete-vidas/diseno/nivel-01-gran-fuga.md`.
 - Pantallas de título, introducción (el video viral; "Me voy de esta casa"), pausa y final (tiempo, calcetines 3, logros, vidas perdidas). Logros de la demo: La Gravedad Funciona, Desenchufada, Coleccionista de Calcetines, Caer de Pie.
@@ -56,7 +57,7 @@ Actualizado: 2026-10-17. Detalle completo en la biblia (ver README.md).
 
 ## Prototipo jugable (2026-10-18)
 
-- **Vida:** 5 corazones por vida y 7 vidas; al perderlas todas, vuelven las 7 con el Collar de la Vergüenza. Comer cura 1 corazón y suma 0,3 kg.
+- **Vida:** 5 corazones por vida y 9 vidas; al perderlas todas, vuelven las 9 con el Collar de la Vergüenza. Comer cura 1 corazón y suma 0,3 kg.
 - **A.S.P.I.** es el primer enemigo: patrulla, persigue a Felipe si lo ve a su altura, quita 1 corazón al tocarlo y se apaga con 3 zarpazos.
 - **Interfaz** con estilo de red social: corazones como "me gusta", vidas, báscula en kilos y logros como notificaciones.
 

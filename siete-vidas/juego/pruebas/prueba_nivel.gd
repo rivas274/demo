@@ -81,6 +81,7 @@ func _correr() -> void:
 	await _poner_en(felipe, Vector2(Sala.PUERTA_DORMITORIO.end.x + 24, Sala.PISO_ALTO))
 	await _tocar("interactuar")
 	_comprobar(puerta.abierta_ya and "Atajo de Gato" in sala.logros, "Desde el dormitorio se abre el atajo (logro Atajo de Gato)")
+	_comprobar(Sala.DESCANSOS[1].has_point(felipe.punto_reaparicion), "El cojín junto al atajo es punto de descanso")
 
 	# A.S.P.I.: no ve a Felipe agachado; una maceta encima la aturde; aturdida, tres zarpazos.
 	var aspi: Aspi

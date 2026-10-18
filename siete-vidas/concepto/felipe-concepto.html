@@ -141,7 +141,7 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
           <tr><td>Ronronear</td><td>—</td><td>—</td><td>Con los humanos, para subir el afecto.</td><td><code>ronronear</code></td><td>Animación lista; falta la mecánica</td></tr>
           <tr><td>Peso</td><td>—</td><td>—</td><td>Empieza en 8,0 kg y cada comida suma 0,3 kg. No cambia el dibujo de Felipe: báscula con aguja en la interfaz y su humor según los kilos: Atlético, Esponjoso, Modo Invierno o Modo Buda.</td><td>— (indicador)</td><td>En el juego</td></tr>
           <tr><td>Recibir daño</td><td>—</td><td>—</td><td>Quita 1 de 5 corazones, lo empuja lejos del golpe y queda 1,2 s invulnerable, parpadeando.</td><td>Efecto de código</td><td>En el juego</td></tr>
-          <tr><td>Perder una vida</td><td>—</td><td>—</td><td>Sin corazones se desmaya, una de sus 7 vidas sube como fantasma y reaparece en el punto de descanso. Sin vidas, vuelven las 7 con el Collar de la Vergüenza.</td><td><code>desmayo</code> + código</td><td>En el juego</td></tr>
+          <tr><td>Perder una vida</td><td>—</td><td>—</td><td>Sin corazones se desmaya, una de sus 9 vidas sube como fantasma y reaparece en el último punto de descanso que pisó (caja de arena o cojín). Sin vidas, vuelven las 7 con el Collar de la Vergüenza.</td><td><code>desmayo</code> + código</td><td>En el juego</td></tr>
           <tr><td>Ocio</td><td>Nada durante unos 8 s</td><td>—</td><td>Elige al azar: acicalarse (se lame la pata de pie), jugar con una bola de estambre que rueda frente a él (objeto aparte) o perseguirse la cola. Repite el ciclo 2 o 3 veces y vuelve a quedarse quieto. Cualquier botón lo interrumpe.</td><td><code>acicalarse</code>, <code>jugar</code>, <code>vueltas</code></td><td>En el juego</td></tr>
         </tbody>
       </table>
@@ -211,7 +211,7 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
       <div class="card">
         <h3>Perder una vida</h3>
         <div class="stage" style="min-height:250px"><canvas id="faint" width="260" height="240" role="img" aria-label="Felipe se desmaya y una de sus vidas sube como fantasma"></canvas></div>
-        <p class="muted" style="font-size:12.5px">Desmayo dramático (SpriteCook) y una de sus 7 vidas que sube como gatito fantasma (código).</p>
+        <p class="muted" style="font-size:12.5px">Desmayo dramático (SpriteCook) y una de sus 9 vidas que sube como gatito fantasma (código).</p>
       </div>
       <div class="card">
         <h3>Collar de la Vergüenza</h3>

@@ -47,6 +47,10 @@ Felipe es un persa grande (unos 8 kilos), grande y no obeso; en el juego debe se
 
 Detalle y comparación descartada en `siete-vidas/memoria/02-guia-felipe.md` (sección Estilo aprobado) y `siete-vidas/arte/referencias/proporciones-felipe.png`.
 
+## Regla fija: diseño de niveles
+
+Todo nivel cumple `siete-vidas/diseno/reglas-de-niveles.md`. Al diseñarlo, su documento dice cómo cumple cada regla; al probarlo, `prueba_reglas_nivel.gd` valida las medibles y las demás se revisan con capturas. Si una regla no se cumple, se cambia el nivel; cambiar una regla lo decide el creador.
+
 ## Juego en Godot
 
 El proyecto está en `siete-vidas/juego/` (Godot 4.3, GDScript con tipos). Antes de subir cambios al juego, corre la prueba de movimiento (ver `siete-vidas/juego/README.md`). Si Godot no está instalado en la sesión, instálalo como indica `siete-vidas/memoria/03-arte-y-herramientas.md`.

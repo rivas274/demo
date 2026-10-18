@@ -47,7 +47,7 @@ const PIEZAS := [
 	[Rect2(880, SUELO - 79, 50, 8), true, "Banco", "mesa"],  # 65 cm, sobre los juguetes
 	[Rect2(1010, SUELO - 98, 150, 62), false, "Aparador", "aparador"],  # 81 cm, con 30 cm libres debajo
 	[Rect2(1400, SUELO - 24, 100, 24), false, "Caja de arena", "caja"],  # 20 cm
-	[Rect2(1480, SUELO - 260, 50, 8), true, "Repisa de la escalera", "repisa"],  # 2,15 m; se alcanza desde la escalera
+	[Rect2(1560, SUELO - 260, 50, 8), true, "Repisa de la escalera", "repisa"],  # 2,15 m; se alcanza desde la escalera
 	# Planta baja: cocina.
 	[Rect2(1960, SUELO - 109, 200, 109), false, "Mesón", "meson"],  # 90 cm
 	[Rect2(2400, SUELO - 218, 80, 218), false, "Refrigerador", "refri"],  # 1,80 m
@@ -69,7 +69,7 @@ const ANCHO_ESCALON := 24.0
 ## Puerta del dormitorio, arriba de la escalera: se abre desde el dormitorio (atajo de vuelta).
 const PUERTA_DORMITORIO := Rect2(1886, PISO_ALTO - 248, 16, 248)
 ## Piezas de juguete en la alfombra: quitan un corazón.
-const PELIGROS := [Rect2(805, SUELO - 6, 200, 6)]
+const PELIGROS := [Rect2(805, SUELO - 6, 180, 6)]
 ## Zonas para trepar: la cortina de la cocina sube por el hueco del entrepiso hasta el dormitorio.
 const TREPABLES := [Rect2(2227, PISO_ALTO - 40, 36, SUELO - PISO_ALTO + 40)]
 
@@ -81,17 +81,18 @@ const AVISOS := [
 	[Rect2(1180, TECHO_BAJO, 200, 424), "{zarpazo} zarpazo"],
 	[Rect2(1400, TECHO_BAJO, 140, 424), "Caja de arena: aquí reapareces"],
 	[Rect2(2180, TECHO_BAJO, 120, 424), "Mantén {mover_arriba} para trepar"],
+	[Rect2(1886, 0, 84, PISO_ALTO), "Cojín: aquí reapareces"],
 	[Rect2(2480, 0, 140, PISO_ALTO), "A.S.P.I. solo se aturde si le cae algo encima"],
 ]
 ## Calcetines: sobre la repisa de la escalera, en el clóset (el láser lleva ahí) y sobre el ropero.
-const CALCETINES := [Vector2(1505, SUELO - 260), Vector2(1925, PISO_ALTO), Vector2(2415, PISO_ALTO - 218)]
+const CALCETINES := [Vector2(1585, SUELO - 260), Vector2(1925, PISO_ALTO), Vector2(2415, PISO_ALTO - 218)]
 const CAJA_CARTON := Vector2(2330, SUELO)
 ## Ratones de cuerda: [posición, límite izquierdo, límite derecho].
 const RATONES := [
-	[Vector2(1280, SUELO), 1180.0, 1390.0],
+	[Vector2(1300, SUELO), 1260.0, 1390.0],
 	[Vector2(2000, SUELO - 109), 1965.0, 2060.0],
 	[Vector2(2110, SUELO - 109), 2065.0, 2155.0],
-	[Vector2(2100, PISO_ALTO), 1910.0, 2270.0],
+	[Vector2(2100, PISO_ALTO), 2020.0, 2270.0],
 ]
 const LASER := [Vector2(2100, PISO_ALTO), 1905.0, 2000.0]
 ## Objetos que se tiran con el botón de acción: [posición, tipo, piso donde caen].
@@ -104,14 +105,24 @@ const TIRABLES := [
 ]
 ## Comida: [posición, tipo]. El plato sale de la caja de cartón.
 const COMIDA := [[Vector2(2340, PISO_ALTO - 97), "lata"]]
-const ASPI := [Vector2(2700, PISO_ALTO), 2500.0, 2860.0]
-## Punto de descanso: la caja de arena.
-const DESCANSO := Rect2(1400, SUELO - 40, 100, 50)
+const ASPI := [Vector2(2700, PISO_ALTO), 2560.0, 2860.0]
+## Puntos de descanso: la caja de arena y el cojín del dormitorio (al final del atajo, antes de A.S.P.I.).
+const DESCANSOS := [Rect2(1400, SUELO - 40, 100, 50), Rect2(1906, PISO_ALTO - 40, 60, 50)]
+## Orden en que se recorren las habitaciones (las reglas de diseño lo usan para comprobar que se enseña antes de probar).
+const RUTA := ["sala", "escalera", "cocina", "dormitorio", "pasillo"]
 ## Pasar esta x en el balcón termina la demo.
 const SALIDA := 2930.0
 const TOTAL_CALCETINES := 3
 
 signal logro_desbloqueado(titulo: String)
+
+## Índice en RUTA de la habitación que contiene el punto, mirando un píxel arriba para que el piso cuente (-1 si está fuera).
+static func orden_en_ruta(punto: Vector2) -> int:
+	for habitacion: Array in HABITACIONES:
+		if (habitacion[0] as Rect2).has_point(punto - Vector2(0, 1)):
+			return RUTA.find(habitacion[1])
+	return -1
+
 
 ## Muestra la pantalla de título al empezar (las pruebas la apagan).
 @export var mostrar_titulo := true
@@ -125,7 +136,6 @@ var terminado := false
 var pantallas: Pantallas
 var _piezas := {}
 var _sonidos: Array[AudioStreamPlayer] = []
-var _avisado_descanso := false
 var _avisos_vistos := {}
 var _tiempo_peligro := 0.0
 
@@ -212,12 +222,13 @@ func _physics_process(delta: float) -> void:
 	if terminado:
 		return
 	tiempo += delta
-	# Punto de descanso: la caja de arena.
-	if DESCANSO.has_point(felipe.global_position) and felipe.is_on_floor():
-		felipe.punto_reaparicion = Vector2(DESCANSO.get_center().x, DESCANSO.position.y + 10)
-		if not _avisado_descanso:
-			_avisado_descanso = true
-			sonar("logro")
+	# Puntos de descanso: la caja de arena y el cojín.
+	for descanso: Rect2 in DESCANSOS:
+		if descanso.has_point(felipe.global_position) and felipe.is_on_floor():
+			var punto := Vector2(descanso.get_center().x, descanso.position.y + 10)
+			if felipe.punto_reaparicion != punto:
+				felipe.punto_reaparicion = punto
+				sonar("logro")
 	# Piezas de juguete: duelen al pisarlas.
 	_tiempo_peligro = maxf(0.0, _tiempo_peligro - delta)
 	for peligro: Rect2 in PELIGROS if peligros_activos else []:
@@ -462,12 +473,16 @@ func _dibujar_decorado(c: Node2D) -> void:
 	# Zanca y pasamanos de la escalera: los escalones se leen como una sola pieza.
 	var pie := Vector2(ESCALERA_X, SUELO)
 	var cima := Vector2(ESCALERA_X + ESCALONES * ANCHO_ESCALON, SUELO - 32.0 * ESCALONES)
-	c.draw_colored_polygon(PackedVector2Array([pie, cima + Vector2(0, 8), cima + Vector2(0, 40), pie + Vector2(-ANCHO_ESCALON, 0)]), MADERA_OSCURA.darkened(0.2))
+	c.draw_colored_polygon(PackedVector2Array([pie, cima + Vector2(0, 8), cima + Vector2(0, 40), pie + Vector2(40, 0)]), MADERA_OSCURA.darkened(0.2))
 	c.draw_line(pie + Vector2(0, -60), cima + Vector2(0, -60), MADERA_OSCURA, 4)
 	for i in range(0, ESCALONES, 2):
 		var x := ESCALERA_X + i * ANCHO_ESCALON + ANCHO_ESCALON / 2
 		var y := SUELO - 32.0 * (i + 1)
 		c.draw_line(Vector2(x, y), Vector2(x, y - 60 + 16), MADERA_OSCURA, 2)
+	# Cojín del dormitorio: segundo punto de descanso.
+	var cojin: Rect2 = DESCANSOS[1]
+	c.draw_rect(Rect2(cojin.position.x + 4, PISO_ALTO - 10, cojin.size.x - 8, 10), Color("c8576b"))
+	c.draw_rect(Rect2(cojin.position.x + 8, PISO_ALTO - 13, cojin.size.x - 16, 4), Color("e07a85"))
 	# Lámpara de pie encendida junto a la caja de arena.
 	c.draw_rect(Rect2(1512, SUELO - 160, 4, 160), MADERA_OSCURA)
 	c.draw_colored_polygon(PackedVector2Array([Vector2(1498, SUELO - 160), Vector2(1530, SUELO - 160), Vector2(1524, SUELO - 185), Vector2(1504, SUELO - 185)]), Color("f2d36b"))

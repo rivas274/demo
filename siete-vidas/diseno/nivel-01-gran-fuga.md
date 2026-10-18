@@ -1,15 +1,8 @@
 # Nivel 1: "La Gran Fuga" (rediseño, propuesta del 2026-10-18)
 
-## Principios que se aplican
+## Reglas que cumple
 
-1. **Propósito claro:** el primer nivel enseña y engancha. Cada mecánica sigue **enseñar → probar → girar**: se presenta sin peligro, se pone a prueba con un riesgo leve y después se usa de una forma inesperada o combinada.
-2. **Mostrar antes que decir:** el nivel enseña con la forma del espacio; los avisos de texto aparecen una sola vez y solo para el botón.
-3. **Meta visible desde el inicio:** el balcón abierto (la libertad) se ve desde el primer minuto, pero no se puede alcanzar.
-4. **Verticalidad y bucles:** dos pisos; el camino de ida no es el de vuelta; un atajo abre la ruta de regreso al punto de descanso.
-5. **Riesgo y recompensa:** los calcetines están donde hay que arriesgarse o mirar con atención, nunca a la vista en el camino.
-6. **Ritmo:** calma → tensión creciente → jefa → alivio (el balcón con la ciudad al atardecer).
-7. **El jefe examina lo aprendido:** la pelea con A.S.P.I. combina tirar cosas, saltar, agacharse y zarpazo.
-8. **Lectura clara:** contraste entre lo que se pisa, lo que daña y el fondo; un hito visual por zona.
+Cumple las 15 reglas de [reglas-de-niveles.md](reglas-de-niveles.md); `prueba_reglas_nivel.gd` las valida. Ajustes que hizo falta al aplicarlas: segundo descanso (cojín del dormitorio, junto al atajo y antes de A.S.P.I.: R5 y R6), juguetes y ratones corridos para que la entrada de cada aviso sea segura (R2), A.S.P.I. patrulla desde x 2560 (R2) y repisa de la escalera dentro de la escalera, con su calcetín (R13).
 
 ## Crítica del nivel actual
 

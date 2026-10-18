@@ -47,7 +47,7 @@ const DISTANCIA_ESTAMBRE := 28.0
 const ACCIONES := ["mover_izquierda", "mover_derecha", "saltar", "zoomies", "zarpazo", "interactuar", "agacharse"]
 ## Vida: corazones por vida y vidas por partida. Al perder la última, despierta en casa con el Collar de la Vergüenza.
 const CORAZONES_MAX := 5
-const VIDAS_MAX := 7
+const VIDAS_MAX := 9
 ## Segundos sin recibir más daño después de un golpe (parpadea).
 const TIEMPO_INVULNERABLE := 1.2
 ## Segundos desmayado antes de reaparecer.
@@ -619,7 +619,7 @@ func _desmayarse() -> void:
 	velocity.x = 0.0
 	sprite.modulate.a = 1.0
 	sprite.play("desmayo")
-	# Una de sus siete vidas sube como gatito fantasma.
+	# Una de sus nueve vidas sube como gatito fantasma.
 	var fantasma := Sprite2D.new()
 	fantasma.texture = sprite.sprite_frames.get_frame_texture("quieto", 0)
 	fantasma.scale = Vector2.ONE * ESCALA_SPRITE * 0.6
@@ -633,7 +633,7 @@ func _desmayarse() -> void:
 	subir.chain().tween_callback(fantasma.queue_free)
 
 
-## Reaparece en el último punto de descanso. Sin vidas, vuelven las siete pero con el Collar de la Vergüenza.
+## Reaparece en el último punto de descanso. Sin vidas, vuelven las nueve pero con el Collar de la Vergüenza.
 func _reaparecer() -> void:
 	if vidas <= 0:
 		vidas = VIDAS_MAX

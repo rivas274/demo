@@ -214,9 +214,9 @@ La casa de Valeria es tu base: ahí guardas, cambias el equipo y descansas. Con 
 
 Cada casa te pone un nombre distinto (*"Pipe"*, *"Michi"*, *"Don Gato"*), y los dueños no saben que compartes.
 
-### Siete vidas y el Collar de la Vergüenza
+### Nueve vidas y el Collar de la Vergüenza
 
-Felipe tiene **7 vidas por partida**. Cada muerte gasta una y lo devuelve al último punto de descanso. Al perder la séptima, despierta en casa de Valeria con un **collar de cono**, al que él llama *"el Collar de la Vergüenza"*:
+Felipe tiene **9 vidas por partida**. Cada muerte gasta una y lo devuelve al último punto de descanso. Al perder la novena, despierta en casa de Valeria con un **collar de cono**, al que él llama *"el Collar de la Vergüenza"*:
 
 - Mientras lo lleva, los demás gatos se burlan y el respeto felino baja.
 - Para quitárselo hay que ganarse el afecto de Valeria otra vez (ronronear, dejarse cargar, posar para una foto).
@@ -282,7 +282,7 @@ Todos los controles se pueden reasignar.
 | **La Gravedad Funciona** | Tirar 100 objetos de mesas |
 | **Tres Familias, Cero Remordimientos** | Tener tres casas paralelas a la vez |
 | **Arte Conceptual** | Hacer popo táctico en 10 lugares distintos |
-| **Collar de la Vergüenza** | Perder las 7 vidas por primera vez |
+| **Collar de la Vergüenza** | Perder las 9 vidas por primera vez |
 | **Era de Abundancia** | Llegar al Modo Buda |
 | **Puro Músculo** | Terminar un distrito en forma flaca |
 | **Zoomies de las 3 a.m.** | Atravesar 50 enemigos con el dash |
@@ -399,7 +399,7 @@ Para cerrar la idea antes de empezar a programar:
 - [x] Ambientación: ciudad internacional inventada, Puerto Algoritmo.
 - [x] Picante: +16, con lo explícito tapado por censura irónica.
 - [x] Peleas: enemigos normales fáciles y graciosos; los jefes sí son un reto que hay que aprender.
-- [x] Muerte: 7 vidas por partida y el Collar de la Vergüenza.
+- [x] Muerte: 9 vidas por partida y el Collar de la Vergüenza.
 - [x] Nombre: Siete Vidas, Cero Disculpas.
 - [x] Duración: 6 a 10 horas para la historia principal.
 - [x] Distritos: los cinco propuestos más El Basurero con Ratópolis.

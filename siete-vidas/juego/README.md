@@ -38,6 +38,7 @@ godot --headless --path siete-vidas/juego --script res://pruebas/prueba_movimien
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_escenario.gd
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_mecanicas.gd
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_nivel.gd
+godot --headless --path siete-vidas/juego --script res://pruebas/prueba_reglas_nivel.gd  # reglas de siete-vidas/diseno/reglas-de-niveles.md
 # Capturas y video (en la nube, con pantalla virtual):
 xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/video.gd -- /ruta/cuadros
 ```

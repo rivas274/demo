@@ -10,6 +10,7 @@ Esta carpeta guarda lo que ya se decidió, para que cualquier sesión nueva reto
 | [02-guia-felipe.md](02-guia-felipe.md) | Guía del personaje principal (model sheet en texto) |
 | [03-arte-y-herramientas.md](03-arte-y-herramientas.md) | Resolución, estilo visual, SpriteCook, créditos y assets generados |
 | [04-pendientes.md](04-pendientes.md) | Qué falta y en qué orden |
+| [../diseno/reglas-de-niveles.md](../diseno/reglas-de-niveles.md) | Reglas para diseñar niveles (se validan con `prueba_reglas_nivel.gd`) |
 
 ## Concepto visual de personajes
 

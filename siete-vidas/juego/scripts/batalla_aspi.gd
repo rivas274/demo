@@ -1,7 +1,8 @@
 class_name BatallaAspi
 extends Node2D
 ## Pelea con A.S.P.I. desde la cabeza de Felipe. Al cruzarse con ella, su imaginación la vuelve una bestia gigante:
-## entrada tipo Broforce (todo se congela, acercamiento a Felipe, «¡BATALLA INICIADA!», salto a la jefa y su nombre),
+## entrada tipo Broforce (PresentacionJefe, la misma para todos los jefes: congela, acercamiento a Felipe,
+## «¡BATALLA INICIADA!», barrido a la jefa, que crece en su momento, y su nombre),
 ## el pasillo se vuelve el fin del mundo y la pelea tiene tres fases:
 ##   1. Succión: aspira y arrastra a Felipe; agachado se aferra. Aguantar SUCCIONES rompe su escudo.
 ##   2. Aturdir: una maceta encima la aturde y los zarpazos le hacen daño.
@@ -20,6 +21,8 @@ const TITULO := "Devoradora de Pelos · Nivel 99"
 ## El pasillo de A.S.P.I.: ahí se transforma el mundo.
 const ARENA := Rect2(2480, 0, 416, Sala.PISO_ALTO)
 const DISTANCIA_ENCUENTRO := 150.0
+## Distancia a la que queda la jefa de Felipe al empezar la pelea.
+const DISTANCIA_INICIAL := 170.0
 const SUCCIONES := 3
 const PATRULLA_ENTRE_SUCCIONES := 2.0
 const DURACION_SUCCION := 2.4
@@ -32,15 +35,6 @@ const VELOCIDAD_BOLA := 150.0
 const ESCALA_GIGANTE := 8.5
 ## Justo sobre la cabeza de Felipe, para que se vea entera con la cámara del juego.
 const CENTRO_GIGANTE := Vector2(2700, Sala.PISO_ALTO - 128)
-## Línea de tiempo de la entrada, en segundos.
-const ENTRADA_ACERCAMIENTO := 0.35
-const ENTRADA_CARTEL := 1.45
-const ENTRADA_GIRO := 1.75
-const ENTRADA_CRECER := 2.65
-const ENTRADA_NOMBRE := 4.0
-const ENTRADA_FIN := 4.5
-const ZOOM_FELIPE := 2.6
-const ZOOM_JEFA := 3.0
 const PISTAS := {
 	Fase.SUCCION: "¡Te aspira! Mantén {agacharse} para aferrarte",
 	Fase.ATURDIR: "Tírale una maceta con {interactuar} y remátala con {zarpazo}",
@@ -56,28 +50,18 @@ var felipe: Felipe
 var sala: Sala
 var succiones := 0
 var succionando := false
-## Mayor zoom que alcanzó la cámara en la entrada (lo revisan las pruebas).
-var zoom_maximo := 1.0
-## Texto grande que se ve ahora en pantalla (lo revisan las pruebas).
-var texto_en_pantalla := ""
 ## 0 = pasillo normal, 1 = fin del mundo.
 var transformacion := 0.0
 ## 0 = A.S.P.I. de tamaño real, 1 = bestia gigante del fondo.
 var gigante := 0.0
 var bolas: Array[Node2D] = []
+## Entrada tipo Broforce, carteles y barra de vida (componente reutilizable para cualquier jefe).
+var presentacion: PresentacionJefe
 
-var _t := 0.0
 var _reloj := 0.0
 var _rayo := 0.0
 var _proximo_rayo := 1.0
-var _flash := 0.0
-var _sacudida := 0.0
-var _barras := 0.0
-var _cartel_fase := 0.0
-var _texto_fase := ""
 var _origen_gigante := Vector2.ZERO
-var _camara: Camera2D
-var _interfaz: Node2D
 var _viento: Node2D
 var _azar := RandomNumberGenerator.new()
 
@@ -97,34 +81,29 @@ func _ready() -> void:
 	aspi.apagado.connect(_terminar)
 	# Sin jefa no hay pelea (algunas pruebas la quitan).
 	aspi.tree_exiting.connect(queue_free)
-	_camara = Camera2D.new()
-	_camara.name = "Camara de batalla"
-	_camara.limit_left = 0
-	_camara.limit_top = 0
-	_camara.limit_right = int(Sala.ANCHO)
-	_camara.limit_bottom = int(Sala.ALTO)
-	add_child(_camara)
+	presentacion = PresentacionJefe.new(NOMBRE, TITULO)
+	presentacion.encuadre_momento = CENTRO_GIGANTE + Vector2(0, 40)
+	presentacion.terminada.connect(_al_terminar_presentacion)
+	add_child(presentacion)
 	_viento = Node2D.new()
 	_viento.name = "Viento"
 	_viento.z_index = 30
 	_viento.draw.connect(_dibujar_viento)
 	add_child(_viento)
-	var capa := CanvasLayer.new()
-	capa.layer = 30
-	add_child(capa)
-	_interfaz = Node2D.new()
-	_interfaz.name = "Interfaz de batalla"
-	_interfaz.draw.connect(_dibujar_interfaz)
-	capa.add_child(_interfaz)
 
 
 func _process(delta: float) -> void:
-	_flash = maxf(0.0, _flash - delta * 3.0)
-	_sacudida = maxf(0.0, _sacudida - delta)
-	_cartel_fase = maxf(0.0, _cartel_fase - delta)
 	_rayo = maxf(0.0, _rayo - delta * 4.0)
 	if fase == Fase.ENTRADA:
-		_actualizar_entrada(delta)
+		# La imaginación de Felipe la vuelve gigante mientras la presentación muestra a la jefa.
+		gigante = ease(presentacion.momento, 0.4)
+		transformacion = presentacion.momento
+		aspi.visible = gigante < 0.15 or presentacion.t >= PresentacionJefe.MOMENTO
+		# Mientras está oculta en la imaginación de Felipe, la real toma distancia: la pelea no empieza con un golpe gratis.
+		if not aspi.visible:
+			var lejos := felipe.global_position.x + (DISTANCIA_INICIAL if felipe.global_position.x < ARENA.get_center().x else -DISTANCIA_INICIAL)
+			aspi.global_position.x = clampf(lejos, aspi.limite_izquierdo, aspi.limite_derecho)
+	_actualizar_barra()
 	if fase in [Fase.SUCCION, Fase.ATURDIR, Fase.FURIA]:
 		_proximo_rayo -= delta
 		if _proximo_rayo <= 0.0:
@@ -132,7 +111,6 @@ func _process(delta: float) -> void:
 			_proximo_rayo = _azar.randf_range(1.5, 3.2)
 	queue_redraw()
 	_viento.queue_redraw()
-	_interfaz.queue_redraw()
 
 
 func _physics_process(delta: float) -> void:
@@ -159,91 +137,38 @@ func empezar() -> void:
 	if fase != Fase.ESPERANDO:
 		return
 	fase = Fase.ENTRADA
-	_t = 0.0
 	aspi.golpes_para_apagar = GOLPES_TOTALES
 	aspi.necesita_aturdir = true
 	aspi.invulnerable = true
 	felipe.empuje = Vector2.ZERO
 	_origen_gigante = aspi.global_position + Vector2(0, -Aspi.ALTO / 2.0)
-	_camara.global_position = felipe.global_position + Vector2(0, -30)
-	_camara.zoom = Vector2.ONE
-	_camara.make_current()
-	_flash = 1.0
+	presentacion.divisiones = GOLPES_TOTALES
+	presentacion.pantallas = sala.pantallas
 	sala.sonar("batalla")
-	get_tree().paused = true
+	presentacion.presentar(felipe, aspi, Rect2(0, 0, Sala.ANCHO, Sala.ALTO))
 	empezada.emit()
 
 
 ## Para pruebas y depuración: salta la entrada o una fase.
 func forzar_fase(nueva: Fase) -> void:
-	if fase == Fase.ENTRADA:
-		_terminar_entrada()
+	presentacion.saltar()
 	_cambiar_fase(nueva)
 
 
-func _actualizar_entrada(delta: float) -> void:
-	_t += delta
-	var en_felipe := felipe.global_position + Vector2(0, -30)
-	var en_jefa := aspi.global_position + Vector2(0, -20)
-	texto_en_pantalla = ""
-	if _t < ENTRADA_ACERCAMIENTO:
-		# Golpe de cámara a la cara de Felipe.
-		var k := ease(_t / ENTRADA_ACERCAMIENTO, 0.3)
-		_camara.zoom = Vector2.ONE * lerpf(1.0, ZOOM_FELIPE, k)
-		_camara.global_position = en_felipe
-		_barras = k
-		_sacudida = 0.2
-	elif _t < ENTRADA_CARTEL:
-		texto_en_pantalla = "¡BATALLA INICIADA!"
-		_camara.zoom = Vector2.ONE * ZOOM_FELIPE
-		_barras = 1.0
-		if _t - delta < ENTRADA_ACERCAMIENTO:
-			_sacudida = 0.35
-			_flash = 0.6
-	elif _t < ENTRADA_GIRO:
-		# Barrido rápido hasta la jefa.
-		var k := ease((_t - ENTRADA_CARTEL) / (ENTRADA_GIRO - ENTRADA_CARTEL), -2.0)
-		_camara.global_position = en_felipe.lerp(en_jefa, k)
-		_camara.zoom = Vector2.ONE * lerpf(ZOOM_FELIPE, ZOOM_JEFA, k)
-	elif _t < ENTRADA_CRECER:
-		# La imaginación de Felipe la vuelve gigante; la cámara se aleja para que quepa.
-		var k := (_t - ENTRADA_GIRO) / (ENTRADA_CRECER - ENTRADA_GIRO)
-		gigante = ease(k, 0.4)
-		aspi.visible = gigante < 0.15
-		_camara.zoom = Vector2.ONE * lerpf(ZOOM_JEFA, 1.15, ease(k, 0.5))
-		_camara.global_position = en_jefa.lerp(CENTRO_GIGANTE + Vector2(0, 40), ease(k, 0.5))
-		transformacion = k
-		_sacudida = 0.1
-	elif _t < ENTRADA_NOMBRE:
-		texto_en_pantalla = NOMBRE
-		gigante = 1.0
-		transformacion = 1.0
-		if _t - delta < ENTRADA_CRECER:
-			_sacudida = 0.4
-			_flash = 0.5
-	elif _t < ENTRADA_FIN:
-		var k := (_t - ENTRADA_NOMBRE) / (ENTRADA_FIN - ENTRADA_NOMBRE)
-		_barras = 1.0 - k
-		_camara.zoom = Vector2.ONE * lerpf(1.15, 1.0, k)
-		_camara.global_position = _camara.global_position.lerp(en_felipe, k)
+func _actualizar_barra() -> void:
+	if fase in [Fase.SUCCION, Fase.ATURDIR, Fase.FURIA]:
+		presentacion.vida = 1.0 - float(aspi.golpes) / GOLPES_TOTALES
+		presentacion.escudo = 1.0 - float(succiones) / SUCCIONES if fase == Fase.SUCCION else 0.0
 	else:
-		_terminar_entrada()
-		_cambiar_fase(Fase.SUCCION)
-		return
-	zoom_maximo = maxf(zoom_maximo, _camara.zoom.x)
-	_camara.offset = Vector2(_azar.randf_range(-1, 1), _azar.randf_range(-1, 1)) * 6.0 * minf(_sacudida * 3.0, 1.0)
+		presentacion.vida = -1.0
 
 
-func _terminar_entrada() -> void:
-	texto_en_pantalla = ""
+func _al_terminar_presentacion() -> void:
 	gigante = 1.0
 	transformacion = 1.0
-	_barras = 0.0
 	aspi.visible = true
-	_camara.offset = Vector2.ZERO
-	felipe.get_node("Camara").make_current()
-	if sala.pantallas == null or sala.pantallas.modo == Pantallas.Modo.JUGANDO:
-		get_tree().paused = false
+	if fase == Fase.ENTRADA:
+		_cambiar_fase(Fase.SUCCION)
 
 
 func _cambiar_fase(nueva: Fase) -> void:
@@ -257,12 +182,12 @@ func _cambiar_fase(nueva: Fase) -> void:
 		aspi.velocidad_patrulla = 70.0
 		aspi.velocidad_persecucion = 105.0
 	if CARTELES.has(nueva):
-		_texto_fase = CARTELES[nueva]
-		_cartel_fase = 1.4
-		_flash = 0.4
-		_sacudida = 0.25
+		presentacion.cartel(CARTELES[nueva])
+		presentacion.destello(0.4)
+		presentacion.sacudir(0.25)
 	if sala.pantallas:
 		sala.pantallas.aviso_fijo = PISTAS.get(nueva, "")
+	_actualizar_barra()
 	fase_cambiada.emit(nueva)
 
 
@@ -331,15 +256,13 @@ func _quitar_bola(bola: Node2D) -> void:
 
 ## Al apagarla, todo vuelve de golpe a ser un pasillo; la bestia se desinfla y Felipe se acicala.
 func _terminar() -> void:
-	if fase == Fase.ENTRADA:
-		_terminar_entrada()
+	presentacion.saltar()
 	fase = Fase.FIN
 	succionando = false
 	felipe.empuje = Vector2.ZERO
 	transformacion = 0.0
-	_flash = 1.0
-	_texto_fase = "¡DESENCHUFADA!"
-	_cartel_fase = 1.6
+	presentacion.destello(1.0)
+	presentacion.cartel("¡DESENCHUFADA!", 1.6)
 	if sala.pantallas:
 		sala.pantallas.aviso_fijo = ""
 	sala.sonar("puf")
@@ -466,72 +389,3 @@ func _dibujar_viento() -> void:
 		var y := Sala.PISO_ALTO - 6.0 - fmod(i * 23.0, 70.0)
 		if ARENA.has_point(Vector2(x, y)):
 			_viento.draw_line(Vector2(x, y), Vector2(x + lado * 18.0, y), Color(Color("dff3ff"), 0.7 * avance), 1.5)
-
-
-## Barras de cine, destellos, carteles y barra de vida de la jefa (en pantalla).
-func _dibujar_interfaz() -> void:
-	var c := _interfaz
-	var tam := c.get_viewport_rect().size
-	var fuente := ThemeDB.fallback_font
-	if _barras > 0.0:
-		c.draw_rect(Rect2(0, 0, tam.x, 44.0 * _barras), Color.BLACK)
-		c.draw_rect(Rect2(0, tam.y - 44.0 * _barras, tam.x, 44.0 * _barras), Color.BLACK)
-	if fase == Fase.ENTRADA and _t >= ENTRADA_GIRO and _t < ENTRADA_CRECER:
-		# Nube de pensamiento: es la imaginación de Felipe.
-		var tiempo := Time.get_ticks_msec() / 1000.0
-		for i in 22:
-			var angulo := i * TAU / 22.0
-			var p := tam / 2.0 + Vector2(cos(angulo) * tam.x * 0.56, sin(angulo) * tam.y * 0.62)
-			c.draw_circle(p, 38.0 + sin(tiempo * 6.0 + i) * 5.0, Color(Color("f5d0e6"), 0.55))
-	if texto_en_pantalla == "¡BATALLA INICIADA!":
-		var k := clampf((_t - ENTRADA_ACERCAMIENTO) / 0.15, 0.0, 1.0)
-		_banda(c, tam, tam.y * 0.5, Color("c81e2a"), -1.0)
-		c.draw_set_transform(tam / 2.0 + Vector2(0, 10), -0.06, Vector2.ONE * lerpf(2.6, 1.0, k))
-		var texto := texto_en_pantalla
-		var ancho := fuente.get_string_size(texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 30).x
-		c.draw_string(fuente, Vector2(-ancho / 2.0 + 2, 2), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 30, Color.BLACK)
-		c.draw_string(fuente, Vector2(-ancho / 2.0, 0), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 30, Color("ffe066"))
-		c.draw_set_transform(Vector2.ZERO)
-		c.draw_string(fuente, Vector2(20, tam.y - 56), "FELIPE · 8 kg de furia", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
-	elif texto_en_pantalla == NOMBRE:
-		var k := clampf((_t - ENTRADA_CRECER) / 0.2, 0.0, 1.0)
-		var desliza := (1.0 - ease(k, 0.3)) * tam.x
-		_banda(c, tam, tam.y * 0.68, Color("15101a"), 1.0, desliza)
-		c.draw_set_transform(Vector2(tam.x * 0.5 + desliza, tam.y * 0.68), 0.05)
-		var ancho := fuente.get_string_size(NOMBRE, HORIZONTAL_ALIGNMENT_LEFT, -1, 40).x
-		c.draw_string(fuente, Vector2(-ancho / 2.0 + 3, 6), NOMBRE, HORIZONTAL_ALIGNMENT_LEFT, -1, 40, Color("c81e2a"))
-		c.draw_string(fuente, Vector2(-ancho / 2.0, 3), NOMBRE, HORIZONTAL_ALIGNMENT_LEFT, -1, 40, Color("ffe066"))
-		var sub := fuente.get_string_size(TITULO, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
-		c.draw_string(fuente, Vector2(-sub / 2.0, 24), TITULO, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
-		c.draw_set_transform(Vector2.ZERO)
-	if _cartel_fase > 0.0 and _texto_fase != "":
-		var ancho := fuente.get_string_size(_texto_fase, HORIZONTAL_ALIGNMENT_LEFT, -1, 22).x
-		var y := tam.y * 0.38
-		c.draw_rect(Rect2(0, y - 22, tam.x, 30), Color(0.08, 0.03, 0.05, 0.8 * minf(_cartel_fase * 2.0, 1.0)))
-		c.draw_string(fuente, Vector2((tam.x - ancho) / 2.0, y), _texto_fase, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(Color("ffe066"), minf(_cartel_fase * 2.0, 1.0)))
-	if fase in [Fase.SUCCION, Fase.ATURDIR, Fase.FURIA]:
-		# Arriba a la derecha, lejos de los corazones y la báscula.
-		var caja := Rect2(tam.x - 232, 22, 220, 9)
-		c.draw_rect(Rect2(caja.position.x - 6, 4, caja.size.x + 12, 34), Color(0.1, 0.05, 0.07, 0.6))
-		c.draw_string(fuente, Vector2(caja.position.x, 16), "%s — %s" % [NOMBRE, TITULO], HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color.WHITE)
-		c.draw_rect(caja.grow(2), Color(0.1, 0.05, 0.07, 0.85))
-		var vida := 1.0 - float(aspi.golpes) / GOLPES_TOTALES
-		c.draw_rect(Rect2(caja.position, Vector2(caja.size.x * vida, caja.size.y)), Color("c81e2a"))
-		for i in range(1, GOLPES_TOTALES):
-			c.draw_line(caja.position + Vector2(caja.size.x * i / GOLPES_TOTALES, 0), caja.position + Vector2(caja.size.x * i / GOLPES_TOTALES, caja.size.y), Color(0, 0, 0, 0.6), 1.0)
-		if fase == Fase.SUCCION:
-			# Escudo: se rompe al aguantar las succiones.
-			var escudo := 1.0 - float(succiones) / SUCCIONES
-			c.draw_rect(Rect2(caja.position + Vector2(0, caja.size.y - 3), Vector2(caja.size.x * escudo, 3)), Color("7fd0ff"))
-	if _flash > 0.0:
-		c.draw_rect(Rect2(Vector2.ZERO, tam), Color(1, 1, 1, minf(_flash, 1.0) * 0.8))
-
-
-## Franja inclinada que cruza la pantalla.
-func _banda(c: Node2D, tam: Vector2, y: float, color: Color, inclinacion: float, desliza := 0.0) -> void:
-	var alto := 56.0
-	var caida := 14.0 * inclinacion
-	c.draw_colored_polygon(PackedVector2Array([
-		Vector2(desliza - 20, y - alto / 2.0 + caida), Vector2(tam.x + desliza + 20, y - alto / 2.0 - caida),
-		Vector2(tam.x + desliza + 20, y + alto / 2.0 - caida), Vector2(desliza - 20, y + alto / 2.0 + caida),
-	]), color)

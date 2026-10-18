@@ -52,6 +52,8 @@ Detalle y comparación descartada en `siete-vidas/memoria/02-guia-felipe.md` (se
 
 Todo nivel cumple `siete-vidas/diseno/reglas-de-niveles.md`. Al diseñarlo, su documento dice cómo cumple cada regla; al probarlo, `prueba_reglas_nivel.gd` valida las medibles y las demás se revisan con capturas. Si una regla no se cumple, se cambia el nivel; cambiar una regla lo decide el creador.
 
+Todo jefe se presenta con el componente reutilizable `PresentacionJefe` (`siete-vidas/juego/scripts/presentacion_jefe.gd`: entrada tipo Broforce, nombre y título en franja, carteles de fase y barra de vida). No se hace una presentación nueva por jefe: cada pelea solo da sus datos y su "momento".
+
 ## Juego en Godot
 
 El proyecto está en `siete-vidas/juego/` (Godot 4.3, GDScript con tipos). Antes de subir cambios al juego, corre la prueba de movimiento (ver `siete-vidas/juego/README.md`). Si Godot no está instalado en la sesión, instálalo como indica `siete-vidas/memoria/03-arte-y-herramientas.md`.

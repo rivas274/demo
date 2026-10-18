@@ -29,6 +29,7 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [x] Animación de trepar desde Felipe A (2026-10-18, `pixel-engine-v1.5`, 26 créditos).
 - [x] Nivel 1 rediseñado como dúplex de dos pisos (2026-10-18): trepar, atajo del dormitorio, A.S.P.I. que se aturde; las 4 pruebas pasan.
 - [x] Pelea con A.S.P.I. con entrada tipo Broforce, imaginación gigante y tres fases (2026-10-18); prueba `prueba_jefe.gd`.
+- [x] Presentación de jefe reutilizable (`PresentacionJefe`) y bot que juega el nivel completo (`partida.gd`, también graba el video del gameplay) (2026-10-18).
 - [ ] Música de la pelea (coro épico) y arte final de la bestia gigante y del fin del mundo (pedir a Gemini).
 - [ ] Cambiar el arte provisional del nivel (muebles, paredes, objetos, A.S.P.I.) por las imágenes que genere la sesión "gemini" en `siete-vidas/arte/referencias/gemini/`.
 - [ ] Siguiente después de la demo: La Cuadra, afecto y respeto, música.

@@ -31,18 +31,21 @@ func _correr() -> void:
 	var gigante_maximo := 0.0
 	for i in 600:
 		await physics_frame
-		textos[batalla.texto_en_pantalla] = true
+		textos[batalla.presentacion.texto_en_pantalla] = true
 		oculta = oculta or not aspi.visible
 		gigante_maximo = maxf(gigante_maximo, batalla.gigante)
 		if batalla.fase != BatallaAspi.Fase.ENTRADA:
 			break
-	_comprobar(textos.has("¡BATALLA INICIADA!"), "La entrada muestra «¡BATALLA INICIADA!»")
+	_comprobar(textos.has(PresentacionJefe.TEXTO_INICIO), "La entrada muestra «¡BATALLA INICIADA!»")
+	_comprobar(batalla.presentacion.t < 5.0, "La entrada dura menos de 5 s (%.1f s)" % batalla.presentacion.t)
 	_comprobar(textos.has(BatallaAspi.NOMBRE), "La entrada presenta a la jefa por su nombre")
-	_comprobar(batalla.zoom_maximo >= 2.5, "La cámara se acerca como en Broforce (zoom %.1f)" % batalla.zoom_maximo)
+	_comprobar(batalla.presentacion.zoom_maximo >= 2.5, "La cámara se acerca como en Broforce (zoom %.1f)" % batalla.presentacion.zoom_maximo)
 	_comprobar(oculta and gigante_maximo >= 1.0, "En la imaginación de Felipe, A.S.P.I. se vuelve gigante")
 	_comprobar(batalla.fase == BatallaAspi.Fase.SUCCION and not paused, "Tras la entrada sigue el juego en la fase 1")
 	_comprobar(aspi.visible and felipe.get_node("Camara").is_current(), "Vuelven la A.S.P.I. real y la cámara de Felipe")
 	_comprobar(batalla.transformacion >= 1.0, "El pasillo se vuelve el fin del mundo")
+	_comprobar(absf(aspi.global_position.x - felipe.global_position.x) >= 100.0, "La pelea empieza con la jefa lejos de Felipe (%.0f px)" % absf(aspi.global_position.x - felipe.global_position.x))
+	_comprobar(batalla.presentacion.vida == 1.0 and batalla.presentacion.escudo == 1.0, "La barra de la jefa aparece llena y con escudo")
 	_comprobar("agacharse" in sala.pantallas.aviso_fijo, "La pista de la fase 1 dice que hay que agacharse")
 
 	# Fase 1, succión: con escudo, de pie lo arrastra y agachado se aferra.
@@ -111,6 +114,24 @@ func _correr() -> void:
 	_comprobar(batalla.gigante == 0.0 and batalla.bolas.is_empty(), "La bestia imaginaria se desinfla y no quedan bolas")
 	_comprobar(felipe.estado == Felipe.Estado.OCIO and felipe.sprite.animation == "acicalarse", "Felipe se lame la pata como si nada")
 	_comprobar(sala.get_node_or_null("Puerta del balcón") == null and "Desenchufada" in sala.logros, "Se abre el balcón (logro Desenchufada)")
+
+	# La presentación es reutilizable: sirve igual para otro jefe cualquiera.
+	var otro := Node2D.new()
+	otro.position = Vector2(400, Sala.SUELO)
+	sala.add_child(otro)
+	var presentacion := PresentacionJefe.new("EL CARTERO", "Timbre del Terror · Nivel 12")
+	presentacion.imaginacion = false
+	presentacion.pantallas = sala.pantallas
+	sala.add_child(presentacion)
+	await physics_frame
+	presentacion.presentar(felipe, otro, Rect2(0, 0, Sala.ANCHO, Sala.ALTO))
+	var vio_nombre := false
+	for i in 600:
+		await physics_frame
+		vio_nombre = vio_nombre or presentacion.texto_en_pantalla == "EL CARTERO"
+		if not presentacion.presentando:
+			break
+	_comprobar(vio_nombre and not presentacion.presentando and not paused, "La misma presentación sirve para otro jefe (EL CARTERO)")
 
 	for fallo in _fallos:
 		printerr("FALLO: " + fallo)

@@ -29,7 +29,7 @@ Demo jugable de **Felipe: Siete Vidas, Cero Disculpas**: el primer nivel, **"La 
 | `scripts/` | `felipe.gd` (movimiento y efectos), `animaciones_felipe.gd` (arma las animaciones desde las hojas), `sala.gd` (sala armada desde datos, con muebles provisionales), `fondo_apartamento.gd` (fondo provisional en capas con parallax), `comida.gd` (comida que se come con el botón de acción), `vaso.gd` (se tira de la mesa: logro), `aspi.gd` (A.S.P.I., primer enemigo), `medidores.gd` (corazones, vidas, báscula y logros), `pantallas.gd` (título, intro, pausa, final y avisos del tutorial), `raton.gd`, `caja_carton.gd`, `calcetin.gd`, `laser.gd` |
 | `assets/sonidos/` | Sonidos provisionales generados con `siete-vidas/herramientas/sonidos_demo.py` |
 | `assets/felipe/` | Hojas de animación de Felipe (8 cuadros de 106×106) |
-| `pruebas/` | Pruebas automáticas de movimiento, escenario y mecánicas, capturas y video |
+| `pruebas/` | Pruebas automáticas (movimiento, escenario, mecánicas, nivel, reglas de diseño, jefe) y `partida.gd`, un bot que juega el nivel completo y sirve para grabar video |
 
 ## Comandos
 
@@ -41,8 +41,11 @@ godot --headless --path siete-vidas/juego --script res://pruebas/prueba_mecanica
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_nivel.gd
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_reglas_nivel.gd  # reglas de siete-vidas/diseno/reglas-de-niveles.md
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_jefe.gd  # pelea con A.S.P.I.
-# Capturas y video (en la nube, con pantalla virtual):
-xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/video.gd -- /ruta/cuadros
+# Partida completa jugada por un bot (prueba de que el nivel se puede terminar):
+godot --headless --path siete-vidas/juego --fixed-fps 60 --script res://pruebas/partida.gd
+# Video del gameplay (imagen y sonido) con el modo de grabación de Godot, en una pantalla virtual:
+xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --write-movie partida.avi --fixed-fps 30 --script res://pruebas/partida.gd
+ffmpeg -i partida.avi -c:v libx264 -pix_fmt yuv420p -crf 20 -c:a aac partida.mp4
 ```
 
 ## Reglas de código

@@ -38,13 +38,14 @@ Una ✔ indica que `prueba_reglas_nivel.gd` la valida; 👁 que se revisa con ca
 | R13 | **Cada habitación tiene con qué jugar**, y con humor de gato: algo que tirar, perseguir, romper o comer. | ✔ hay algo. 👁 el chiste. |
 | R14 | **Lectura clara.** Lo que se pisa, lo que hace daño y el fondo contrastan. Las siluetas del primer plano nunca tapan a Felipe ni lo que hay que leer. | 👁 capturas de cada zona |
 | R15 | **Felipe se ve siempre igual.** Las reglas de consistencia y proporciones de CLAUDE.md valen dentro de cualquier nivel. | ✔ `prueba_movimiento` (altura) y 👁 `comparar_felipe.py` |
-| R16 | **El jefe se presenta y cambia el mundo.** Una entrada de menos de 5 s congela el juego: acercamiento, «¡BATALLA INICIADA!» y el nombre del jefe. El escenario se transforma según la imaginación de Felipe (lo absurdo va en el fondo, sin colisión). La pelea tiene fases que se anuncian con un cartel y una pista de una línea, y al ganar todo vuelve de golpe a la normalidad. | ✔ `prueba_jefe` |
+| R16 | **El jefe se presenta y cambia el mundo.** Una entrada de menos de 5 s congela el juego: acercamiento, «¡BATALLA INICIADA!» y el nombre del jefe. El escenario se transforma según la imaginación de Felipe (lo absurdo va en el fondo, sin colisión). La pelea tiene fases que se anuncian con un cartel y una pista de una línea, y al ganar todo vuelve de golpe a la normalidad. Todo jefe usa la misma presentación reutilizable, `PresentacionJefe` (`scripts/presentacion_jefe.gd`): cada pelea solo da nombre, título, colores y su propio "momento". | ✔ `prueba_jefe` (incluye un segundo jefe de prueba) |
 
 ## Al diseñar un nivel nuevo
 
 1. Escribir `nivel-XX-*.md` con el propósito del nivel, la ruta y una línea por regla que diga cómo la cumple.
 2. Armarlo desde datos en el script del nivel (como `Sala`: `HABITACIONES`, `RUTA`, `PIEZAS`, `AVISOS`, `DESCANSOS`, etc.) para que la prueba de reglas pueda leerlo.
 3. Correr `prueba_reglas_nivel.gd` (y las demás) y revisar las reglas 👁 con capturas de cada zona.
+4. Comprobar que un bot lo termina con los botones de una persona (como `pruebas/partida.gd` en el nivel 1) y grabar el video del gameplay para el creador.
 
 ## Fuentes
 

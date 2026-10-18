@@ -7,8 +7,8 @@ extends SceneTree
 const SUBIDA_MAXIMA := 125.0
 const HUECO_MAXIMO := 160.0
 
-## Piezas que no hace falta alcanzar: las invisibles (piso, paredes), los muros y la puerta del balcón, que se abre sola.
-const SIN_ALCANZAR := ["invisible", "puerta", "muro"]
+## Piezas que no hace falta alcanzar: las invisibles (piso, techo, paredes de cada habitación).
+const SIN_ALCANZAR := ["invisible"]
 
 var _fallos: Array[String] = []
 
@@ -39,7 +39,8 @@ func _correr() -> void:
 	_comprobar(lejos < 0.3 and cerca > 1.0, "Hay capas lejanas (más lentas) y de primer plano (más rápidas)")
 
 	var antes := _posiciones_en_pantalla(sala, capas)
-	felipe.position = Vector2(2700, Sala.PISO_ALTO)
+	# Arriba del librero del recibidor: la cámara cambia de habitación y sube.
+	felipe.position = Vector2(1925, Sala.SUELO - 218)
 	await _esperar(180)
 	var despues := _posiciones_en_pantalla(sala, capas)
 	var movimiento_juego: Vector2 = despues[0] - antes[0]
@@ -73,8 +74,12 @@ func _comprobar_alcanzables() -> void:
 		if not pieza[3] in SIN_ALCANZAR:
 			superficies.append(pieza[0])
 	for i in Sala.ESCALONES:
-		superficies.append(Rect2(Sala.ESCALERA_X + i * Sala.ANCHO_ESCALON, Sala.SUELO - 32.0 * (i + 1), Sala.ANCHO_ESCALON, 8))
-	var alcanzadas: Array[Rect2] = [Rect2(0, Sala.SUELO, Sala.ANCHO, 0)]
+		superficies.append(Rect2(Sala.ESCALERA_X + i * Sala.ANCHO_ESCALON, Sala.SUELO - Sala.SUBIDA_ESCALON * (i + 1), Sala.ANCHO_ESCALON, 8))
+	# El piso de cada habitación (se llega por sus puertas).
+	var alcanzadas: Array[Rect2] = []
+	for habitacion: Array in Sala.HABITACIONES:
+		var cuarto: Rect2 = habitacion[0]
+		alcanzadas.append(Rect2(cuarto.position.x, Sala.SUELO, cuarto.size.x, 0))
 	# Las cortinas que llegan al piso se suben trepando: su parte de arriba cuenta como alcanzada.
 	for zona: Rect2 in Sala.TREPABLES:
 		if zona.end.y >= Sala.SUELO:
@@ -88,7 +93,8 @@ func _comprobar_alcanzables() -> void:
 			for desde in alcanzadas:
 				var subida := desde.position.y - superficie.position.y
 				var hueco := maxf(0.0, maxf(superficie.position.x - desde.end.x, desde.position.x - superficie.end.x))
-				if subida <= SUBIDA_MAXIMA and hueco <= HUECO_MAXIMO:
+				var misma_habitacion := Sala.habitacion_de(superficie.get_center()) == Sala.habitacion_de(desde.get_center())
+				if misma_habitacion and subida <= SUBIDA_MAXIMA and hueco <= HUECO_MAXIMO:
 					alcanzadas.append(superficie)
 					hubo_cambio = true
 					break

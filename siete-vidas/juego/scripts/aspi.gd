@@ -28,6 +28,8 @@ var necesita_aturdir := false
 var invulnerable := false
 ## Se queda quieta (por ejemplo, mientras aspira).
 var quieta := false
+## Si no es INF, va hasta esa x sin perseguir a nadie (por ejemplo, a limpiar una mancha).
+var destino := INF
 var golpes := 0
 var apagada := false
 var persiguiendo := false
@@ -76,7 +78,11 @@ func _physics_process(delta: float) -> void:
 		_direccion = 1.0
 	elif global_position.x >= limite_derecho:
 		_direccion = -1.0
-	if quieta:
+	if destino != INF:
+		var falta := destino - global_position.x
+		_direccion = signf(falta) if absf(falta) > 1.0 else _direccion
+		velocity.x = 0.0 if absf(falta) < 4.0 else signf(falta) * velocidad_persecucion
+	elif quieta:
 		velocity.x = 0.0
 	elif _tiempo_golpe <= 0.0:
 		velocity.x = _direccion * (velocidad_persecucion if persiguiendo else velocidad_patrulla)

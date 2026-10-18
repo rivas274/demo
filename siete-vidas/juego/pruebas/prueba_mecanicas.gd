@@ -32,7 +32,7 @@ func _correr() -> void:
 
 	# Comer cura y suma peso.
 	var peso_antes := felipe.peso
-	await _poner_en(felipe, Vector2(2320, Sala.PISO_ALTO - 97))
+	await _poner_en(felipe, Vector2(2870, Sala.SUELO - 109))
 	await _tocar("interactuar")
 	_comprobar(felipe.corazones == 5, "Comer cura un corazón")
 	_comprobar(is_equal_approx(felipe.peso, peso_antes + Felipe.PESO_POR_COMIDA), "Comer sube el peso (%.1f kg)" % felipe.peso)
@@ -58,8 +58,8 @@ func _correr() -> void:
 
 	# A.S.P.I.: persigue y hace daño al tocar.
 	await _esperar(90)
-	aspi.global_position = Vector2(2780, Sala.PISO_ALTO)
-	await _poner_en(felipe, Vector2(2650, Sala.PISO_ALTO))
+	aspi.global_position = Vector2(5700, Sala.SUELO)
+	await _poner_en(felipe, Vector2(5580, Sala.SUELO))
 	var corazones_antes := felipe.corazones
 	for i in 180:
 		await physics_frame

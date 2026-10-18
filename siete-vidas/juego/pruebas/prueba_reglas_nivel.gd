@@ -9,14 +9,14 @@ const ENTRADA_SEGURA := 80.0
 const SEPARACION_AVISOS := 150.0
 ## R3: avisos de una línea.
 const LARGO_AVISO := 48
-## R5: distancia máxima (en x más y) entre cualquier daño y un punto de descanso.
-const DISTANCIA_DESCANSO := 700.0
 ## R6: el atajo termina cerca de un descanso.
-const ATAJO_A_DESCANSO := 200.0
+const ATAJO_A_DESCANSO := 400.0
 ## R8: hueco mínimo para pasar agachado (30 cm).
 const HUECO_AGACHADO := 36.0
 ## R11: calma entre dos zonas de daño (una pantalla).
 const CALMA := 640.0
+## R13: la habitación final es el alivio (no necesita con qué jugar).
+const ALIVIO := "balcon"
 
 var _fallos: Array[String] = []
 
@@ -27,11 +27,16 @@ func _initialize() -> void:
 
 func _correr() -> void:
 	var danos := _zonas_de_dano()
+	var conexiones := _conexiones()
 
 	# R1. Enseñar → probar → girar: cada mecánica que el nivel exige tiene su aviso antes en la ruta, y los avisos van de a uno.
 	var avisos := Sala.AVISOS
-	for exigida: Array in [["{interactuar}", Sala.ASPI[0], "tirar (para aturdir a A.S.P.I.)"], ["{zarpazo}", Sala.ASPI[0], "zarpazo"],
-			["{agacharse}", Vector2(Sala.PIEZAS[13][0].get_center().x, Sala.SUELO - 1), "agacharse (bajo el aparador)"],
+	var aparador: Rect2 = _pieza("Aparador")
+	for exigida: Array in [
+			["{interactuar}", Sala.ENCHUFES[0], "tirar y desenchufar (pelea)"],
+			["{agacharse}", Vector2(aparador.get_center().x, Sala.SUELO), "agacharse (bajo el aparador)"],
+			["{zarpazo}", Sala.RATONES[1][0], "zarpazo (ratones de la cocina)"],
+			["{saltar}", Vector2(Sala.REJA.get_center().x, Sala.SUELO), "doble salto (librero y reja)"],
 			["{mover_arriba}", Sala.TREPABLES[0].get_center(), "trepar"]]:
 		var ensenada := false
 		for aviso: Array in avisos:
@@ -42,7 +47,7 @@ func _correr() -> void:
 		for j in range(i + 1, avisos.size()):
 			var a: Rect2 = avisos[i][0]
 			var b: Rect2 = avisos[j][0]
-			if a.position.y == b.position.y:
+			if Sala.habitacion_de(a.get_center()) == Sala.habitacion_de(b.get_center()):
 				_comprobar(absf(a.position.x - b.position.x) >= SEPARACION_AVISOS, "R1 Avisos separados: «%s» y «%s»" % [avisos[i][1], avisos[j][1]])
 
 	# R2. Enseñar sin peligro: la entrada de cada aviso está libre de daño.
@@ -59,91 +64,112 @@ func _correr() -> void:
 		var sin_teclas := RegEx.create_from_string("\\{[a-z_]+\\}").sub(texto, "X", true)
 		_comprobar(sin_teclas.length() <= LARGO_AVISO and not "\n" in texto, "R3 Aviso de una línea: «%s»" % texto)
 
-	# R4. Meta a la vista: la salida está en el nivel y del lado contrario al inicio.
-	_comprobar(Sala.SALIDA > Sala.ANCHO * 0.75, "R4 La meta (balcón) está al final del recorrido")
+	# R4. Meta a la vista: la salida está en la última habitación de la ruta (se muestra al empezar: prueba_nivel).
+	_comprobar(Sala.orden_en_ruta(Vector2(Sala.SALIDA, Sala.SUELO)) == Sala.RUTA.size() - 1, "R4 La meta (balcón) es la última habitación de la ruta")
 
-	# R5. Descanso cerca del peligro.
-	for dano: Rect2 in danos:
-		var cerca := INF
-		for descanso: Rect2 in Sala.DESCANSOS:
-			cerca = minf(cerca, _distancia(dano, descanso))
-		_comprobar(cerca <= DISTANCIA_DESCANSO, "R5 Hay un descanso a %.0f px de la zona de daño en %s" % [cerca, dano.position])
-	var ultimo_descanso := -1
+	# R5. Descanso cerca del peligro: en la misma habitación o en una contigua, y uno junto a la puerta del jefe.
+	var cuartos_descanso := []
 	for descanso: Rect2 in Sala.DESCANSOS:
-		ultimo_descanso = maxi(ultimo_descanso, Sala.orden_en_ruta(descanso.get_center()))
-	_comprobar(ultimo_descanso >= 0 and ultimo_descanso < Sala.orden_en_ruta(Sala.ASPI[0]), "R5 Hay un descanso antes del jefe")
+		cuartos_descanso.append(Sala.habitacion_de(descanso.get_center()))
+	for dano: Rect2 in danos:
+		var cuarto := Sala.habitacion_de(dano.get_center())
+		var cerca := cuarto in cuartos_descanso
+		for vecino: String in conexiones.get(cuarto, []):
+			cerca = cerca or vecino in cuartos_descanso
+		_comprobar(cerca, "R5 Hay un descanso en %s o en una habitación contigua" % cuarto)
+	var jefe := Sala.habitacion_de(Sala.ASPI[0])
+	var antes_del_jefe := false
+	for cuarto: String in cuartos_descanso:
+		antes_del_jefe = antes_del_jefe or (cuarto in conexiones.get(jefe, []) and Sala.RUTA.find(cuarto) < Sala.RUTA.find(jefe))
+	_comprobar(antes_del_jefe, "R5 Hay un descanso junto a la puerta del jefe")
 
-	# R6. Atajos: la puerta del dormitorio se abre solo desde el lado lejano y deja junto a un descanso.
-	var puerta := Sala.PUERTA_DORMITORIO
+	# R6. Atajos: la reja se abre solo desde la escalera y deja junto a la caja de arena.
 	var junto := false
 	for descanso: Rect2 in Sala.DESCANSOS:
-		junto = junto or _distancia(puerta, descanso) <= ATAJO_A_DESCANSO
-	_comprobar(junto, "R6 El atajo termina junto a un punto de descanso")
-	var tope_escalera := Vector2(Sala.ESCALERA_X + Sala.ESCALONES * Sala.ANCHO_ESCALON, Sala.SUELO - 32.0 * Sala.ESCALONES)
-	_comprobar(absf(tope_escalera.x - puerta.position.x) <= 40.0 and absf(tope_escalera.y - Sala.PISO_ALTO) <= 32.0, "R6 La escalera llega a la puerta del atajo")
+		junto = junto or (Sala.habitacion_de(descanso.get_center()) == Sala.habitacion_de(Sala.REJA.get_center()) and _distancia(Sala.REJA, descanso) <= ATAJO_A_DESCANSO)
+	_comprobar(junto, "R6 El atajo (la reja) termina junto a un punto de descanso")
+	_comprobar(Sala.REJA.size.y > 140.0, "R6 La reja no se salta desde el piso (%.0f px, doble salto ~140)" % Sala.REJA.size.y)
 
-	# R7. Verticalidad de gato: dos pisos y algo que trepar (que todo se alcance lo valida prueba_escenario).
-	var en_piso_alto := 0
+	# R7. Verticalidad de gato y habitaciones unidas por puertas que van y vuelven.
+	var tope := Vector2(Sala.ESCALERA_X + Sala.ESCALONES * Sala.ANCHO_ESCALON, Sala.SUELO - Sala.SUBIDA_ESCALON * Sala.ESCALONES)
+	var puerta_arriba := Vector2.INF
+	for datos: Array in Sala.PUERTAS:
+		if datos[1].y < Sala.SUELO - 1.0:
+			puerta_arriba = datos[1]
+	_comprobar(absf(puerta_arriba.y - tope.y) < 2.0, "R7 La escalera llega a la puerta del piso de arriba")
+	var altas := 0
 	for pieza: Array in Sala.PIEZAS:
-		if pieza[0].end.y <= Sala.PISO_ALTO and pieza[3] != "invisible":
-			en_piso_alto += 1
-	_comprobar(en_piso_alto >= 3 and Sala.TREPABLES.size() >= 1, "R7 Hay segundo piso con recorrido (%d piezas) y algo que trepar" % en_piso_alto)
+		if pieza[3] != "invisible" and Sala.SUELO - pieza[0].position.y >= 150.0:
+			altas += 1
+	_comprobar(altas >= 3 and Sala.TREPABLES.size() >= 1, "R7 Hay muebles altos para trepar (%d) y algo que trepar" % altas)
+	var destinos := {}
+	for datos: Array in Sala.PUERTAS:
+		destinos[datos[0]] = datos[2]
+	for nombre: String in destinos:
+		_comprobar(destinos.get(destinos[nombre], "") == nombre, "R7 La puerta %s va y vuelve" % nombre)
+	var visitadas := {Sala.RUTA[0]: true}
+	var pendientes: Array = [Sala.RUTA[0]]
+	while not pendientes.is_empty():
+		for vecino: String in conexiones.get(pendientes.pop_back(), []):
+			if not visitadas.has(vecino):
+				visitadas[vecino] = true
+				pendientes.append(vecino)
+	_comprobar(visitadas.size() == Sala.HABITACIONES.size(), "R7 Desde la sala se llega por puertas a todas las habitaciones (%d)" % visitadas.size())
 
 	# R8. Medidas reales y huecos legibles: bajo un mueble sólido o no hay hueco o se pasa agachado.
 	for pieza: Array in Sala.PIEZAS:
-		if pieza[1] or pieza[3] in ["invisible", "muro", "entrepiso", "puerta"]:
+		if pieza[1] or pieza[3] == "invisible":
 			continue
-		var piso := Sala.SUELO if pieza[0].end.y > Sala.TECHO_BAJO else Sala.PISO_ALTO
-		var hueco: float = piso - pieza[0].end.y
+		var hueco: float = Sala.SUELO - pieza[0].end.y
 		_comprobar(hueco <= 0.5 or hueco >= HUECO_AGACHADO, "R8 Hueco bajo %s: %.0f px (0 o al menos %d)" % [pieza[2], hueco, HUECO_AGACHADO])
 
 	# R9. Hitos: cada habitación tiene su propia pared.
 	var estilos := {}
 	for habitacion: Array in Sala.HABITACIONES:
-		estilos[habitacion[1]] = true
+		estilos[habitacion[2]] = true
 	_comprobar(estilos.size() == Sala.HABITACIONES.size(), "R9 Cada habitación tiene una pared distinta")
 
 	# R10. Exploración: al menos 3 calcetines, cada uno sobre algo donde pararse, y alguno lejos del piso.
 	_comprobar(Sala.CALCETINES.size() >= 3, "R10 Hay al menos 3 calcetines")
 	var alguno_alto := false
 	for calcetin: Vector2 in Sala.CALCETINES:
-		alguno_alto = alguno_alto or (calcetin.y < Sala.SUELO - 150 and calcetin.y != Sala.PISO_ALTO)
+		alguno_alto = alguno_alto or calcetin.y < Sala.SUELO - 150
 		_comprobar(_hay_superficie(calcetin), "R10 El calcetín en %s está sobre algo" % calcetin)
 	_comprobar(alguno_alto, "R10 Algún calcetín pide subir")
 
-	# R11. Ritmo: entre dos zonas de daño de un mismo piso hay al menos una pantalla de calma (los ratones son práctica).
+	# R11. Ritmo: entre dos zonas de daño fuertes de una misma habitación hay al menos una pantalla de calma.
 	var fuertes: Array[Rect2] = []
 	fuertes.append_array(Sala.PELIGROS)
 	fuertes.append(_patrulla(Sala.ASPI))
 	for i in fuertes.size():
 		for j in range(i + 1, fuertes.size()):
-			if Sala.orden_en_ruta(fuertes[i].get_center()) == Sala.orden_en_ruta(fuertes[j].get_center()):
+			if Sala.habitacion_de(fuertes[i].get_center()) == Sala.habitacion_de(fuertes[j].get_center()):
 				_comprobar(_distancia(fuertes[i], fuertes[j]) >= CALMA, "R11 Calma entre zonas de daño")
 
-	# R12. El jefe es un examen: A.S.P.I. pide aturdir (tirar) y zarpazo, ambos enseñados antes.
-	var aspi := Aspi.new(Sala.ASPI[1], Sala.ASPI[2])
-	_comprobar(aspi.golpes_para_apagar >= 2, "R12 A.S.P.I. pide más de un zarpazo")
-	aspi.free()
-	var sala: Sala = load("res://escenas/apartamento.tscn").instantiate()
-	sala.mostrar_titulo = false
-	root.add_child(sala)
-	await physics_frame
-	var jefa: Aspi = sala.get_node("ASPI") if sala.has_node("ASPI") else null
-	if jefa == null:
-		for hijo in sala.get_children():
-			if hijo is Aspi and not hijo is Raton:
-				jefa = hijo
-	_comprobar(jefa != null and jefa.necesita_aturdir, "R12 A.S.P.I. hay que aturdirla tirándole algo")
+	# R12. El jefe es un examen: hay con qué ensuciar y enchufes a distintas alturas (pide subir).
+	var en_estudio := 0
+	for tirable: Array in Sala.TIRABLES:
+		if Sala.habitacion_de(tirable[0]) == jefe:
+			en_estudio += 1
+	var alturas := {}
+	for enchufe: Vector2 in Sala.ENCHUFES:
+		alturas[int(enchufe.y)] = true
+	_comprobar(en_estudio >= 3, "R12 En el cuarto del jefe hay al menos 3 cosas para tirar (%d)" % en_estudio)
+	_comprobar(alturas.size() >= 3 and Sala.ENCHUFES.any(func(e: Vector2) -> bool: return e.y < Sala.SUELO - 200.0), "R12 Los enchufes están a distintas alturas y uno pide trepar")
 
-	# R13. Cada habitación tiene algo con qué jugar.
+	# R13. Cada habitación tiene algo con qué jugar (salvo el alivio final).
 	var cosas: Array[Vector2] = []
 	cosas.append_array(Sala.CALCETINES)
+	cosas.append_array(Sala.ENCHUFES)
 	cosas.append(Sala.CAJA_CARTON)
 	cosas.append(Sala.LASER[0])
+	cosas.append(Sala.REJA.get_center())
 	for lista: Array in [Sala.RATONES, Sala.TIRABLES, Sala.COMIDA]:
 		for cosa: Array in lista:
 			cosas.append(cosa[0])
 	for habitacion: Array in Sala.HABITACIONES:
+		if habitacion[1] == ALIVIO:
+			continue
 		var hay := false
 		for cosa in cosas:
 			hay = hay or (habitacion[0] as Rect2).grow(1).has_point(cosa)
@@ -153,6 +179,22 @@ func _correr() -> void:
 		printerr("FALLO: " + fallo)
 	print("Resultado: %d fallos" % _fallos.size())
 	quit(1 if _fallos.size() > 0 else 0)
+
+
+## Habitación -> habitaciones a las que se llega por una puerta.
+func _conexiones() -> Dictionary:
+	var posicion := {}
+	for datos: Array in Sala.PUERTAS:
+		posicion[datos[0]] = datos[1]
+	var conexiones := {}
+	for datos: Array in Sala.PUERTAS:
+		var desde := Sala.habitacion_de(datos[1])
+		var hasta := Sala.habitacion_de(posicion.get(datos[2], Vector2.INF))
+		if not conexiones.has(desde):
+			conexiones[desde] = []
+		if hasta != "" and not hasta in conexiones[desde]:
+			conexiones[desde].append(hasta)
+	return conexiones
 
 
 ## Zonas que quitan corazones: juguetes del piso, ratones y A.S.P.I.
@@ -167,6 +209,13 @@ func _zonas_de_dano() -> Array[Rect2]:
 
 func _patrulla(datos: Array) -> Rect2:
 	return Rect2(datos[1], datos[0].y - 40.0, datos[2] - datos[1], 40.0)
+
+
+func _pieza(nombre: String) -> Rect2:
+	for pieza: Array in Sala.PIEZAS:
+		if pieza[2] == nombre:
+			return pieza[0]
+	return Rect2()
 
 
 func _antes_en_ruta(a: Vector2, b: Vector2) -> bool:

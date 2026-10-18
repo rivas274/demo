@@ -60,7 +60,7 @@ El diseño se basa en el gato real del creador (fotos en la conversación origin
 
 Lista oficial (la misma de la ficha de concepto). Toda acción nueva se agrega aquí y en la ficha. Los nombres de animación son los de Godot (`AnimacionesFelipe.HOJAS`).
 
-| Acción | E | Y | Usa el objeto más cercano (hasta 48 px de lado y 40 px de alto): si es comida se la come (cura 1 corazón y suma 0,3 kg); si es el vaso, lo tira de un manotazo (logro "La Gravedad Funciona"); sin objeto no hace nada. No hay botón de comer suelto | `comer`, `zarpazo` (manotazo) | En el juego |
+| Acción | Teclado | Mando | Qué hace | Animación | Estado |
 | --- | --- | --- | --- | --- | --- |
 | Quieto | — | — | Respira y mece la cola | `quieto` | En el juego |
 | Caminar | A / D o ← / → | Palanca izquierda o cruceta | 120 px/s | `caminar` | En el juego |
@@ -71,11 +71,12 @@ Lista oficial (la misma de la ficha de concepto). Toda acción nueva se agrega a
 | Caer y aterrizar | — | — | Delanteras primero: cae en picada, toca con las delanteras, baja la parte de atrás y se aplasta, con polvo | `caer` 3 (cayendo) y 5 (contacto), `saltar` 5 y 6 | En el juego |
 | Agacharse y gatear | S o ↓ | Palanca abajo o cruceta abajo | Transición dibujada al bajar y al pararse (al revés); gatea a 55 px/s con la panza al piso y patas alternadas; colisión de 32 px (de pie, 58); cabe bajo muebles con 30 cm libres (36 px); bajo un mueble no se para aunque se suelte el botón | `agacharse` (cuadros 0 a 3 de la hoja), `gatear` (4 a 7) | En el juego |
 | Aferrarse (pelea con A.S.P.I.) | Mantener S o ↓ | Palanca abajo o cruceta abajo | Mientras A.S.P.I. aspira, de pie la succión lo arrastra a 150 px/s (más que caminar); agachado clava las uñas y no se mueve. Al apagarla se lame la pata como si nada | `agacharse` / `gatear` y `acicalarse` al final | En el juego |
-| Trepar | W o ↑ (en una cortina) | Palanca o cruceta arriba | Sube a 140 px/s centrado en la cortina y baja con abajo; quieto se queda agarrado; saltar lo suelta; al llegar arriba da un saltito para pasar al piso de arriba | `trepar` (cuadros 3-7; quieto, cuadro 3), desde Felipe A | En el juego |
+| Trepar | W o ↑ (en una cortina) | Palanca o cruceta arriba | Sube a 140 px/s centrado en la cortina y baja con abajo; quieto se queda agarrado; saltar lo suelta; al llegar arriba da un saltito hacia donde mira (la repisa alta del dormitorio) | `trepar` (cuadros 3-7; quieto, cuadro 3), desde Felipe A | En el juego |
+| Entrar por una puerta | E o W/↑ junto a la puerta | Y o arriba | Aparece una flecha sobre la puerta; fundido a negro y Felipe aparece en la puerta del otro cuarto; la cámara queda dentro de la habitación. La puerta del balcón está cerrada hasta apagar a A.S.P.I. | `quieto` (durante el fundido) | En el juego |
 | Pausa | Esc | Start | Pausa con continuar, reiniciar (R) y salir (Q) | — | En el juego |
 | Bajar de una repisa | S + Espacio | Abajo + A | Atraviesa hacia abajo los muebles que se atraviesan desde abajo (repisas, mesa, estantes) | — | En el juego |
-| Zarpazo | J | X | Ataque con la pata: golpea a los enemigos enfrente (hasta 56 px). El ratón de cuerda cae de 1, A.S.P.I. con 3; rompe cajas de cartón | `zarpazo` | En el juego |
-| Acción | E | Y | Usa el objeto más cercano (hasta 48 px de lado y 40 px de alto); si es comida, se la come; sin objeto no hace nada. No hay botón de comer suelto | `comer` (con comida) | En el juego |
+| Zarpazo | J | X | Ataque con la pata: golpea a los enemigos enfrente (hasta 56 px). El ratón de cuerda cae de 1; en A.S.P.I. rebota (carcasa de titanio); rompe cajas de cartón | `zarpazo` | En el juego |
+| Acción | E | Y | Usa lo más cercano (hasta 48 px de lado y 40 px de alto): come la comida (cura 1 corazón y suma 0,3 kg); tira de un manotazo vasos, rollos y macetas (el vaso da el logro "La Gravedad Funciona"); cruza puertas; abre la reja desde la escalera; tira del enchufe de A.S.P.I. si está ocupada. Sin nada cerca no hace nada. No hay botón de comer suelto | `comer`, `zarpazo` (manotazo) | En el juego |
 | Ronronear | — | — | Con humanos, sube el afecto | `ronronear` | Animación lista; falta la mecánica |
 | Recibir daño | — | — | Quita 1 de 5 corazones, lo empuja lejos del golpe y queda 1,2 s invulnerable, parpadeando | Efecto de código | En el juego |
 | Perder una vida | — | — | Sin corazones se desmaya, una de sus 9 vidas sube como fantasma y a los 1,8 s reaparece en el último punto de descanso que pisó (caja de arena o cojín) con los corazones llenos. Sin vidas, vuelven las 9 con el Collar de la Vergüenza | `desmayo` + código | En el juego |

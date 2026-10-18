@@ -149,7 +149,7 @@ func _correr() -> void:
 
 	# Con comida cerca, el botón de acción la come.
 	var platos := root.get_tree().get_nodes_in_group(Comida.GRUPO).size()
-	await _poner_en(felipe, Vector2(2320, Sala.PISO_ALTO - 97))
+	await _poner_en(felipe, Vector2(2870, Sala.SUELO - 109))
 	await _tocar("interactuar")
 	_comprobar(felipe.estado == Felipe.Estado.COMIENDO and felipe.sprite.animation == "comer", "Junto a la comida, el botón de acción la come")
 	await _esperar(60)

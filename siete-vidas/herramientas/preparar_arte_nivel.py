@@ -23,6 +23,7 @@ PIEZAS = {
     "sofa": ("muebles-sala", 1, (240, 102), None),  # 85 cm de alto
     "aparador": ("muebles-sala", 4, (156, 98), None),  # 81 cm
     "lampara": ("muebles-sala", 3, (34, 160), None),
+    "librero": ("muebles-sala", 2, (92, 218), None),  # 1,80 m; sus repisas son plataformas
     # Cocina.
     "alacenas": ("muebles-cocina", 0, (210, 66), None),
     "refrigerador": ("muebles-cocina", 2, (84, 218), None),  # 1,80 m
@@ -32,7 +33,9 @@ PIEZAS = {
     "comoda": ("muebles-dormitorio", 0, (84, 97), (0.0, 0.47, 1.0, 1.0)),  # 80 cm, sin el espejo
     "ropero": ("muebles-dormitorio", 1, (104, 185), None),  # 1,53 m
     "cama": ("muebles-dormitorio", 2, (244, 110), None),  # colchón a 55 cm
-    # Balcón.
+    "perchero": ("muebles-dormitorio", 4, (40, 160), None),
+    # Recibidor y balcón.
+    "reja": ("escalera-y-baranda", 1, (64, 91), None),  # una reja para bebés de 75 cm; van dos apiladas
     "baranda": ("escalera-y-baranda", 2, (184, 128), None),
     # Objetos.
     "vaso": ("objetos", 0, (11, 15), None),
@@ -48,6 +51,9 @@ PIEZAS = {
     "aspi": ("aspi-gemini-1", 0, (44, 27), None),
     "aspi_gigante": ("aspi-gigante", 0, (330, 270), None),
 }
+
+# Piezas con huecos (entre patas, barrotes, respaldos): el blanco encerrado también es fondo.
+HUECOS = {"comedor", "aparador", "banco", "baranda", "librero", "perchero", "reja", "lampara"}
 
 # Texturas que se repiten: nombre -> (hoja, índice, tamaño del mosaico, suavizado).
 # El suavizado (0 a 1) acerca cada pixel al color promedio: las paredes no deben competir con Felipe (regla R14).
@@ -75,6 +81,13 @@ def sin_fondo(imagen):
     etiquetas, _ = ndimage.label(blanco)
     borde = set(np.unique(np.concatenate([etiquetas[0], etiquetas[-1], etiquetas[:, 0], etiquetas[:, -1]]))) - {0}
     fondo = np.isin(etiquetas, list(borde))
+    # Halo claro del JPEG alrededor del contorno: los pixeles claros pegados al fondo también son fondo.
+    claro = a.min(axis=2) > 200
+    for _ in range(3):
+        vecino = ndimage.binary_dilation(fondo) & claro & ~fondo
+        if not vecino.any():
+            break
+        fondo = fondo | vecino
     rgba = np.dstack([a.astype(np.uint8), np.where(fondo, 0, 255).astype(np.uint8)])
     return Image.fromarray(rgba, "RGBA"), ~fondo
 
@@ -88,6 +101,18 @@ def piezas(nombre):
             cajas.append((s[1].start, s[0].start, s[1].stop, s[0].stop))
     cajas.sort(key=lambda c: (c[1] // 120, c[0]))
     return imagen, cajas
+
+
+def sin_huecos(imagen):
+    """Vuelve transparente el blanco encerrado dentro de la pieza (huecos entre patas o barrotes)."""
+    a = np.asarray(imagen).copy()
+    blanco = (a[:, :, :3].min(axis=2) > 236) & (a[:, :, 3] > 0)
+    etiquetas, cantidad = ndimage.label(blanco)
+    tamanos = ndimage.sum(blanco, etiquetas, range(1, cantidad + 1))
+    for i, tamano in enumerate(tamanos, start=1):
+        if tamano >= 12:
+            a[etiquetas == i, 3] = 0
+    return Image.fromarray(a, "RGBA")
 
 
 def recortar(imagen, caja, fraccion):
@@ -106,6 +131,8 @@ def main():
             hojas[hoja] = piezas(hoja)
         imagen, cajas = hojas[hoja]
         recorte = recortar(imagen, cajas[indice], fraccion)
+        if nombre in HUECOS:
+            recorte = sin_huecos(recorte)
         recorte.resize(tamano, Image.NEAREST).save(DESTINO / f"{nombre}.png")
     for nombre, (hoja, indice, tamano, suavizado) in MOSAICOS.items():
         if hoja not in hojas:

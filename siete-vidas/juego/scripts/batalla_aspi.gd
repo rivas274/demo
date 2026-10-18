@@ -1,90 +1,98 @@
 class_name BatallaAspi
 extends Node2D
-## Pelea con A.S.P.I. desde la cabeza de Felipe. Al cruzarse con ella, su imaginación la vuelve una bestia gigante:
-## entrada tipo Broforce (PresentacionJefe, la misma para todos los jefes: congela, acercamiento a Felipe,
-## «¡BATALLA INICIADA!», barrido a la jefa, que crece en su momento, y su nombre),
-## el pasillo se vuelve el fin del mundo y la pelea tiene tres fases:
-##   1. Succión: aspira y arrastra a Felipe; agachado se aferra. Aguantar SUCCIONES rompe su escudo.
-##   2. Aturdir: una maceta encima la aturde y los zarpazos le hacen daño.
-##   3. Furia: escupe bolas de pelo por el piso que hay que saltar.
-## Al apagarla, todo vuelve de golpe a ser un pasillo y Felipe se lame la pata como si nada.
-## La gigante es solo imaginación: se dibuja en el fondo, sin colisión. La A.S.P.I. real conserva su tamaño (34 cm).
+## Pelea con A.S.P.I. en el estudio de Valeria ("La Bestia del Estudio"). Al entrar, A.S.P.I. despierta en su base y
+## la presentación de jefe (PresentacionJefe, la misma para todos) congela el juego: en la imaginación de Felipe crece
+## hasta volverse una bestia gigante en un estudio en llamas. Al terminar la entrada, la imaginación se desvanece y
+## el estudio vuelve a verse normal.
+## La pelea: los zarpazos rebotan en la carcasa. A.S.P.I. persigue a Felipe; cuando algo se rompe en el piso deja una
+## mancha y ella va a limpiarla (aspira: de pie arrastra a Felipe, agachado se aferra). Solo mientras limpia o está
+## aturdida se puede tirar de un enchufe de su base. Cada enchufe sube una fase (más rápida, limpia menos; en la
+## tercera escupe bolas de pelo). Con los tres, se apaga: se abre la puerta del balcón y Felipe se lame la pata.
 
 signal empezada
 signal fase_cambiada(fase: Fase)
 signal terminada
 
-enum Fase { ESPERANDO, ENTRADA, SUCCION, ATURDIR, FURIA, FIN }
+enum Fase { ESPERANDO, ENTRADA, PELEA, FIN }
 
 const NOMBRE := "A.S.P.I."
 const TITULO := "Devoradora de Pelos · Nivel 99"
-## El pasillo de A.S.P.I.: ahí se transforma el mundo.
-const ARENA := Rect2(2480, 0, 416, Sala.PISO_ALTO)
-const DISTANCIA_ENCUENTRO := 150.0
-## Distancia a la que queda la jefa de Felipe al empezar la pelea.
-const DISTANCIA_INICIAL := 170.0
-const SUCCIONES := 3
-const PATRULLA_ENTRE_SUCCIONES := 2.0
-const DURACION_SUCCION := 2.4
+const ENCHUFES_TOTALES := 3
+## Segundos limpiando cada mancha, por fase (0, 1 o 2 enchufes tirados).
+const TIEMPO_LIMPIEZA := [6.0, 5.0, 4.5]
+const VELOCIDAD := [60.0, 85.0, 105.0]
 ## Más que caminar (120 px/s): de pie no se escapa; hay que agacharse.
 const FUERZA_SUCCION := 150.0
-const GOLPES_FASE_ATURDIR := 2
-const GOLPES_TOTALES := 4
+const RADIO_SUCCION := 200.0
 const ESPERA_BOLAS := 1.6
 const VELOCIDAD_BOLA := 150.0
-const ESCALA_GIGANTE := 8.5
-## Justo sobre la cabeza de Felipe, para que se vea entera con la cámara del juego.
-const CENTRO_GIGANTE := Vector2(2700, Sala.PISO_ALTO - 150)
-const PISTAS := {
-	Fase.SUCCION: "¡Te aspira! Mantén {agacharse} para aferrarte",
-	Fase.ATURDIR: "Tírale una maceta con {interactuar} y remátala con {zarpazo}",
-	Fase.FURIA: "¡Furia! Salta las bolas de pelo",
-}
-const CARTELES := {Fase.SUCCION: "FASE 1: ¡SUCCIÓN!", Fase.ATURDIR: "FASE 2: ¡ATÚRDELA!", Fase.FURIA: "FASE 3: ¡FURIA!"}
-const CIELO := [Color("1d0f2b"), Color("5a1430"), Color("b3262e"), Color("f07a2a")]
-const LLAMA := [Color("ffcf4a"), Color("f07a2a"), Color("d43a2a")]
+const DESVANECER := 0.8
+const PISTAS := [
+	"Ensucia el piso y desenchúfala con {interactuar}",
+	"¡Más rápida! Si te aspira, mantén {agacharse}",
+	"¡Furia! Salta las bolas de pelo",
+]
+const CARTELES := ["FASE 1: ¡ENSUCIA Y DESENCHUFA!", "FASE 2: ¡MÁS RÁPIDA!", "FASE 3: ¡FURIA!"]
 
 var fase := Fase.ESPERANDO
 var aspi: Aspi
 var felipe: Felipe
 var sala: Sala
-var succiones := 0
+var enchufes: Array[Enchufe] = []
+var tirados := 0
+var manchas: Array[float] = []
+var limpiando := false
 var succionando := false
-## 0 = pasillo normal, 1 = fin del mundo.
+## 0 = estudio normal, 1 = fin del mundo (solo en la entrada).
 var transformacion := 0.0
-## 0 = A.S.P.I. de tamaño real, 1 = bestia gigante del fondo.
+## 0 = A.S.P.I. de tamaño real, 1 = bestia gigante del fondo (solo en la entrada).
 var gigante := 0.0
 var bolas: Array[Node2D] = []
 ## Entrada tipo Broforce, carteles y barra de vida (componente reutilizable para cualquier jefe).
 var presentacion: PresentacionJefe
+## El estudio: ahí se pelea.
+var arena: Rect2
 
 var _reloj := 0.0
 var _rayo := 0.0
-var _proximo_rayo := 1.0
 var _origen_gigante := Vector2.ZERO
+var _centro_gigante := Vector2.ZERO
 var _viento: Node2D
-var _azar := RandomNumberGenerator.new()
+var _manchas_dibujo: Node2D
 
 
-func _init(jefa: Aspi, gato: Felipe, nivel: Sala) -> void:
+func _init(jefa: Aspi, gato: Felipe, nivel: Sala, tomas: Array[Enchufe]) -> void:
 	aspi = jefa
 	felipe = gato
 	sala = nivel
+	enchufes = tomas
 	name = "Batalla"
-	# Detrás de los muebles y delante de la pared: el fin del mundo se ve por el pasillo.
+	arena = Sala.rect_de("estudio")
+	_centro_gigante = Vector2(arena.get_center().x, Sala.SUELO - 160)
+	# Detrás de los muebles y delante de la pared: la imaginación se ve en el estudio.
 	z_index = -10
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_azar.seed = 99
 
 
 func _ready() -> void:
 	aspi.apagado.connect(_terminar)
+	aspi.quieta = true
+	aspi.invulnerable = true
 	# Sin jefa no hay pelea (algunas pruebas la quitan).
 	aspi.tree_exiting.connect(queue_free)
+	for enchufe in enchufes:
+		enchufe.permiso = puede_desenchufar
+		enchufe.desenchufado.connect(_al_desenchufar)
+		enchufe.rechazado.connect(_al_rechazar)
 	presentacion = PresentacionJefe.new(NOMBRE, TITULO)
-	presentacion.encuadre_momento = CENTRO_GIGANTE + Vector2(0, 40)
+	presentacion.encuadre_momento = _centro_gigante + Vector2(0, 40)
 	presentacion.terminada.connect(_al_terminar_presentacion)
 	add_child(presentacion)
+	_manchas_dibujo = Node2D.new()
+	_manchas_dibujo.name = "Manchas"
+	_manchas_dibujo.z_index = 9
+	_manchas_dibujo.draw.connect(_dibujar_manchas)
+	add_child(_manchas_dibujo)
 	_viento = Node2D.new()
 	_viento.name = "Viento"
 	_viento.z_index = 30
@@ -95,22 +103,15 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_rayo = maxf(0.0, _rayo - delta * 4.0)
 	if fase == Fase.ENTRADA:
-		# La imaginación de Felipe la vuelve gigante mientras la presentación muestra a la jefa.
 		gigante = ease(presentacion.momento, 0.4)
 		transformacion = presentacion.momento
 		aspi.visible = gigante < 0.15 or presentacion.t >= PresentacionJefe.MOMENTO
-		# Mientras está oculta en la imaginación de Felipe, la real toma distancia: la pelea no empieza con un golpe gratis.
-		if not aspi.visible:
-			var lejos := felipe.global_position.x + (DISTANCIA_INICIAL if felipe.global_position.x < ARENA.get_center().x else -DISTANCIA_INICIAL)
-			aspi.global_position.x = clampf(lejos, aspi.limite_izquierdo, aspi.limite_derecho)
-	_actualizar_barra()
-	if fase in [Fase.SUCCION, Fase.ATURDIR, Fase.FURIA]:
-		_proximo_rayo -= delta
-		if _proximo_rayo <= 0.0:
+		if presentacion.momento > 0.0 and fmod(presentacion.t, 0.9) < delta:
 			_rayo = 1.0
-			_proximo_rayo = _azar.randf_range(1.5, 3.2)
+	_actualizar_barra()
 	queue_redraw()
 	_viento.queue_redraw()
+	_manchas_dibujo.queue_redraw()
 
 
 func _physics_process(delta: float) -> void:
@@ -118,17 +119,11 @@ func _physics_process(delta: float) -> void:
 		return
 	match fase:
 		Fase.ESPERANDO:
-			var distancia := felipe.global_position - aspi.global_position
-			var se_cruzan := absf(distancia.x) < DISTANCIA_ENCUENTRO and absf(distancia.y) < 40.0 and not felipe.agachado
-			if se_cruzan or aspi.esta_aturdida() or aspi.golpes > 0:
+			# Al entrar al estudio, A.S.P.I. despierta.
+			if arena.grow_individual(-30, 0, -30, 0).has_point(felipe.global_position - Vector2(0, 1)) and felipe.is_on_floor():
 				empezar()
-		Fase.SUCCION:
-			_actualizar_succion(delta)
-		Fase.ATURDIR:
-			if aspi.golpes >= GOLPES_FASE_ATURDIR:
-				_cambiar_fase(Fase.FURIA)
-		Fase.FURIA:
-			_actualizar_furia(delta)
+		Fase.PELEA:
+			_actualizar_pelea(delta)
 	_mover_bolas(delta)
 
 
@@ -137,89 +132,122 @@ func empezar() -> void:
 	if fase != Fase.ESPERANDO:
 		return
 	fase = Fase.ENTRADA
-	aspi.golpes_para_apagar = GOLPES_TOTALES
 	aspi.necesita_aturdir = true
 	aspi.invulnerable = true
+	aspi.quieta = true
 	felipe.empuje = Vector2.ZERO
 	_origen_gigante = aspi.global_position + Vector2(0, -Aspi.ALTO / 2.0)
-	presentacion.divisiones = GOLPES_TOTALES
+	presentacion.divisiones = ENCHUFES_TOTALES
 	presentacion.pantallas = sala.pantallas
 	sala.sonar("batalla")
-	presentacion.presentar(felipe, aspi, Rect2(0, 0, Sala.ANCHO, Sala.ALTO))
+	presentacion.presentar(felipe, aspi, Rect2(arena.position.x, 0, arena.size.x, Sala.ALTO))
 	empezada.emit()
 
 
-## Para pruebas y depuración: salta la entrada o una fase.
-func forzar_fase(nueva: Fase) -> void:
+## Para pruebas y depuración: termina la entrada de golpe.
+func saltar_entrada() -> void:
 	presentacion.saltar()
-	_cambiar_fase(nueva)
+
+
+## Se puede tirar de un enchufe mientras A.S.P.I. está ocupada: limpiando o aturdida.
+func puede_desenchufar() -> bool:
+	return fase == Fase.PELEA and (limpiando or aspi.esta_aturdida())
+
+
+## Algo se rompió en el piso: si es en el estudio y hay pelea, queda una mancha para limpiar.
+func agregar_mancha(posicion: Vector2) -> void:
+	if fase in [Fase.ESPERANDO, Fase.FIN] or not arena.grow(4).has_point(posicion - Vector2(0, 1)):
+		return
+	manchas.append(clampf(posicion.x, aspi.limite_izquierdo, aspi.limite_derecho))
 
 
 func _actualizar_barra() -> void:
-	if fase in [Fase.SUCCION, Fase.ATURDIR, Fase.FURIA]:
-		presentacion.vida = 1.0 - float(aspi.golpes) / GOLPES_TOTALES
-		presentacion.escudo = 1.0 - float(succiones) / SUCCIONES if fase == Fase.SUCCION else 0.0
-	else:
-		presentacion.vida = -1.0
+	presentacion.vida = 1.0 - float(tirados) / ENCHUFES_TOTALES if fase == Fase.PELEA else -1.0
+	presentacion.escudo = 0.0
 
 
 func _al_terminar_presentacion() -> void:
-	gigante = 1.0
-	transformacion = 1.0
 	aspi.visible = true
-	if fase == Fase.ENTRADA:
-		_cambiar_fase(Fase.SUCCION)
-
-
-func _cambiar_fase(nueva: Fase) -> void:
-	fase = nueva
-	_reloj = 0.0
-	succionando = false
-	aspi.quieta = false
-	felipe.empuje = Vector2.ZERO
-	aspi.invulnerable = nueva == Fase.SUCCION
-	if nueva == Fase.FURIA:
-		aspi.velocidad_patrulla = 70.0
-		aspi.velocidad_persecucion = 105.0
-	if CARTELES.has(nueva):
-		presentacion.cartel(CARTELES[nueva])
-		presentacion.destello(0.4)
-		presentacion.sacudir(0.25)
-	if sala.pantallas:
-		sala.pantallas.aviso_fijo = PISTAS.get(nueva, "")
-	_actualizar_barra()
-	fase_cambiada.emit(nueva)
-
-
-func _actualizar_succion(delta: float) -> void:
-	_reloj += delta
-	var aspirando := _reloj >= PATRULLA_ENTRE_SUCCIONES
-	if aspirando and not succionando:
-		sala.sonar("succion")
-	succionando = aspirando
-	aspi.quieta = aspirando
-	felipe.empuje = Vector2.ZERO
-	if aspirando and _en_arena(felipe.global_position):
-		var hacia := signf(aspi.global_position.x - felipe.global_position.x)
-		if absf(aspi.global_position.x - felipe.global_position.x) > 6.0:
-			felipe.empuje = Vector2(hacia * FUERZA_SUCCION, 0.0)
-	if _reloj >= PATRULLA_ENTRE_SUCCIONES + DURACION_SUCCION:
-		_reloj = 0.0
-		succiones += 1
-		succionando = false
-		aspi.quieta = false
-		felipe.empuje = Vector2.ZERO
-		if succiones >= SUCCIONES:
-			_cambiar_fase(Fase.ATURDIR)
-
-
-func _actualizar_furia(delta: float) -> void:
-	if aspi.esta_aturdida():
+	if fase != Fase.ENTRADA:
 		return
-	_reloj += delta
-	if _reloj >= ESPERA_BOLAS:
-		_reloj = 0.0
-		_escupir_bola()
+	fase = Fase.PELEA
+	aspi.quieta = false
+	aspi.vision = arena.size.x
+	_cambiar_fase()
+	# La imaginación se desvanece: el resto de la pelea se ve el estudio normal.
+	var vuelta := create_tween().set_parallel()
+	vuelta.tween_property(self, "gigante", 0.0, DESVANECER)
+	vuelta.tween_property(self, "transformacion", 0.0, DESVANECER)
+
+
+func _cambiar_fase() -> void:
+	_reloj = 0.0
+	aspi.velocidad_patrulla = VELOCIDAD[tirados] * 0.7
+	aspi.velocidad_persecucion = VELOCIDAD[tirados]
+	presentacion.cartel(CARTELES[tirados])
+	presentacion.destello(0.4)
+	presentacion.sacudir(0.25)
+	if sala.pantallas:
+		sala.pantallas.aviso_fijo = PISTAS[tirados]
+	fase_cambiada.emit(fase)
+
+
+func _actualizar_pelea(delta: float) -> void:
+	felipe.empuje = Vector2.ZERO
+	succionando = false
+	if aspi.esta_aturdida():
+		limpiando = false
+		aspi.destino = INF
+		return
+	if not manchas.is_empty():
+		var mancha := manchas[0]
+		aspi.destino = mancha
+		if absf(aspi.global_position.x - mancha) < 6.0:
+			if not limpiando:
+				limpiando = true
+				_reloj = 0.0
+				sala.sonar("succion")
+			_reloj += delta
+			succionando = true
+			_aspirar()
+			if _reloj >= TIEMPO_LIMPIEZA[tirados]:
+				manchas.pop_front()
+				limpiando = false
+				_reloj = 0.0
+		return
+	limpiando = false
+	aspi.destino = INF
+	if tirados >= 2:
+		_reloj += delta
+		if _reloj >= ESPERA_BOLAS:
+			_reloj = 0.0
+			_escupir_bola()
+
+
+## Mientras limpia aspira: de pie, Felipe se desliza hacia ella; agachado se aferra.
+func _aspirar() -> void:
+	var distancia := aspi.global_position.x - felipe.global_position.x
+	if absf(distancia) < RADIO_SUCCION and absf(distancia) > 6.0 and absf(felipe.global_position.y - aspi.global_position.y) < 40.0:
+		felipe.empuje = Vector2(signf(distancia) * FUERZA_SUCCION, 0.0)
+
+
+func _al_desenchufar(_enchufe: Enchufe) -> void:
+	tirados += 1
+	sala.sonar("golpe")
+	# Se enoja: deja de limpiar y va por Felipe.
+	manchas.clear()
+	limpiando = false
+	aspi.destino = INF
+	if tirados >= ENCHUFES_TOTALES:
+		aspi.apagada = true
+		aspi.apagado.emit()
+		return
+	_cambiar_fase()
+
+
+func _al_rechazar(_enchufe: Enchufe) -> void:
+	sala.sonar("golpe")
+	presentacion.cartel("¡TE VIO! DISTRÁELA PRIMERO", 1.2)
 
 
 func _escupir_bola() -> void:
@@ -245,7 +273,7 @@ func _mover_bolas(delta: float) -> void:
 		if absf(distancia.x) < 12.0 and distancia.y > -4.0 and distancia.y < 14.0:
 			felipe.recibir_dano(1, bola.global_position.x)
 			_quitar_bola(bola)
-		elif not ARENA.grow(20).has_point(bola.global_position) or fase == Fase.FIN:
+		elif not arena.grow(20).has_point(bola.global_position) or fase == Fase.FIN:
 			_quitar_bola(bola)
 
 
@@ -254,27 +282,23 @@ func _quitar_bola(bola: Node2D) -> void:
 	bola.queue_free()
 
 
-## Al apagarla, todo vuelve de golpe a ser un pasillo; la bestia se desinfla y Felipe se acicala.
+## Al desenchufarla se apaga: cartel, puerta del balcón abierta (lo hace la sala) y Felipe se acicala.
 func _terminar() -> void:
 	presentacion.saltar()
 	fase = Fase.FIN
 	succionando = false
+	limpiando = false
+	manchas.clear()
+	aspi.destino = INF
 	felipe.empuje = Vector2.ZERO
-	transformacion = 0.0
 	presentacion.destello(1.0)
 	presentacion.cartel("¡DESENCHUFADA!", 1.6)
 	if sala.pantallas:
 		sala.pantallas.aviso_fijo = ""
 	sala.sonar("puf")
-	var desinflar := create_tween()
-	desinflar.tween_property(self, "gigante", 0.0, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	await get_tree().create_timer(0.9, false).timeout
 	felipe.acicalarse()
 	terminada.emit()
-
-
-func _en_arena(punto: Vector2) -> bool:
-	return ARENA.grow_individual(0, 0, 0, 2).has_point(punto)
 
 
 func _dibujar_bola(bola: Node2D) -> void:
@@ -284,110 +308,36 @@ func _dibujar_bola(bola: Node2D) -> void:
 		bola.draw_line(Vector2.from_angle(angulo) * 3.0, Vector2.from_angle(angulo + 0.4) * 8.0, Color("b8a894"), 1.0)
 
 
-## El pasillo como fin del mundo y la bestia gigante, en el mundo (detrás de los muebles).
+## La imaginación de Felipe en la entrada: el estudio en llamas y la bestia gigante (detrás de los muebles).
 func _draw() -> void:
 	var tiempo := Time.get_ticks_msec() / 1000.0
 	if transformacion > 0.0:
 		var a := transformacion
-		var fondo := ArteNivel.textura("fin_del_mundo")
-		if fondo:
-			draw_texture_rect(fondo, ARENA, false, Color(1, 1, 1, a))
-		else:
-			draw_rect(ARENA, Color(CIELO[2], a))
-		# Calcetines y cuadros flotando.
-		for i in 4:
-			var p := Vector2(ARENA.position.x + 60 + i * 95, ARENA.position.y + 60 + sin(tiempo * 1.5 + i * 2.0) * 10.0)
-			draw_set_transform(p, sin(tiempo + i) * 0.4)
-			if i % 2 == 0:
-				draw_rect(Rect2(-5, -10, 10, 14), Color(Color("f2e6d0"), a))
-				draw_rect(Rect2(-5, 0, 14, 6), Color(Color("f2e6d0"), a))
-			else:
-				draw_rect(Rect2(-12, -9, 24, 18), Color(Color("7f3b30"), a))
-				draw_rect(Rect2(-9, -6, 18, 12), Color(Color("d9a65b"), a))
-			draw_set_transform(Vector2.ZERO)
+		draw_texture_rect(ArteNivel.textura("fin_del_mundo"), arena, false, Color(1, 1, 1, a))
 		if _rayo > 0.0:
-			var x := ARENA.position.x + 80 + fmod(_proximo_rayo * 997.0, ARENA.size.x - 160)
-			var puntos := PackedVector2Array([Vector2(x, ARENA.position.y)])
-			for i in 6:
-				puntos.append(Vector2(x + (i % 2 * 2 - 1) * 14.0, ARENA.position.y + (i + 1) * 40.0))
-			draw_polyline(puntos, Color(1, 1, 0.9, _rayo * a), 3.0)
-			draw_rect(ARENA, Color(1, 0.9, 0.9, 0.15 * _rayo * a))
+			draw_rect(arena, Color(1, 0.9, 0.9, 0.18 * _rayo * a))
 	if gigante > 0.0:
-		_dibujar_gigante(tiempo)
+		var arte := ArteNivel.textura("aspi_gigante")
+		var tam := arte.get_size()
+		var k := ease(gigante, 0.6)
+		var escala := lerpf(Aspi.ANCHO / tam.x, 1.0, k)
+		var centro := _origen_gigante.lerp(_centro_gigante + Vector2(0, sin(tiempo * 2.0) * 5.0), k)
+		if fase == Fase.ENTRADA and gigante < 1.0:
+			# Temblor de sueño mientras crece.
+			centro += Vector2(sin(tiempo * 40.0), cos(tiempo * 33.0)) * 2.0
+		var mira := 1.0 if felipe.global_position.x >= centro.x else -1.0
+		draw_set_transform(centro, sin(tiempo * 1.3) * 0.03 * k, Vector2(escala * mira, escala))
+		draw_texture(arte, -tam / 2.0, Color(1, 1, 1, minf(gigante * 3.0, 1.0)))
+		draw_set_transform(Vector2.ZERO)
 
 
-func _dibujar_gigante(tiempo: float) -> void:
-	var k := ease(gigante, 0.6)
-	var escala := lerpf(1.0, ESCALA_GIGANTE, k)
-	var centro := _origen_gigante.lerp(CENTRO_GIGANTE + Vector2(0, sin(tiempo * 2.0) * 5.0), k)
-	# Temblor de sueño mientras crece.
-	if fase == Fase.ENTRADA and gigante < 1.0:
-		centro += Vector2(sin(tiempo * 40.0), cos(tiempo * 33.0)) * 2.0
-	draw_set_transform(centro, sin(tiempo * 1.3) * 0.03 * k, Vector2(escala, escala))
-	var arte := ArteNivel.textura("aspi_gigante")
-	if arte:
-		_dibujar_gigante_arte(arte, centro, k, tiempo)
-		return
-	var w := Aspi.ANCHO
-	var h := Aspi.ALTO
-	var aturdida := aspi.esta_aturdida()
-	var cuerpo := Color("2c2f36")
-	# Cepillos laterales que giran.
-	for lado: float in [-1.0, 1.0]:
-		var eje := Vector2(lado * (w / 2.0 - 2.0), h / 2.0 - 1.0)
-		for i in 3:
-			var angulo := tiempo * (14.0 if succionando else 6.0) * lado + i * TAU / 3.0
-			draw_line(eje, eje + Vector2.from_angle(angulo) * 5.0, Color("d9a65b"), 0.6)
-	draw_rect(Rect2(-w / 2.0 + 3.0, -h / 2.0, w - 6.0, h), cuerpo)
-	draw_circle(Vector2(-w / 2.0 + 4.0, 0), h / 2.0, cuerpo)
-	draw_circle(Vector2(w / 2.0 - 4.0, 0), h / 2.0, cuerpo)
-	draw_rect(Rect2(-w / 2.0 + 4.0, -h / 2.0, w - 8.0, 2.0), cuerpo.lightened(0.3))
-	# Cara de villano: ceja, ojo rojo que brilla y boca con dientes.
-	var ojo := Color("ff3b2f") if not aturdida else Color("f2d36b")
-	draw_circle(Vector2(6, -1), 2.6, Color(ojo, 0.35))
-	if aturdida:
-		draw_line(Vector2(4, -3), Vector2(8, 1), ojo, 0.8)
-		draw_line(Vector2(8, -3), Vector2(4, 1), ojo, 0.8)
-	else:
-		draw_circle(Vector2(6, -1), 1.4, ojo)
-	draw_line(Vector2(2, -4.5), Vector2(10, -2.5), Color("0e0f12"), 1.0)
-	var boca := 2.5 if succionando else 1.0
-	draw_rect(Rect2(-12, 2.0, 20, boca), Color("120a0c"))
-	for i in 5:
-		draw_colored_polygon(PackedVector2Array([Vector2(-11 + i * 4, 2.0), Vector2(-9 + i * 4, 2.0), Vector2(-10 + i * 4, 3.2)]), Color("e8e2d6"))
-	if succionando:
-		for i in 3:
-			var r := fmod(tiempo * 6.0 + i, 3.0) * 3.0
-			draw_arc(Vector2(-2, 3.0), 12.0 - r, 0.0, PI, 10, Color(Color("9fd8ff"), 0.6), 0.5)
-	# Grietas: una por golpe.
-	for i in aspi.golpes:
-		var x := -12.0 + i * 7.0
-		draw_polyline(PackedVector2Array([Vector2(x, -h / 2.0), Vector2(x + 2, -1), Vector2(x - 1, 1.5)]), Color("f2e6d0"), 0.5)
-	if aturdida:
-		for i in 3:
-			var angulo := tiempo * 5.0 + i * TAU / 3.0
-			draw_circle(Vector2(cos(angulo) * 10.0, -h / 2.0 - 3.0 + sin(angulo) * 2.0), 1.0, Color("f2d36b"))
-	draw_set_transform(Vector2.ZERO)
-
-
-## La bestia de Gemini: crece desde el tamaño real y mira hacia Felipe.
-func _dibujar_gigante_arte(arte: Texture2D, centro: Vector2, k: float, tiempo: float) -> void:
-	var tam := arte.get_size()
-	var escala := lerpf(Aspi.ANCHO / tam.x, 1.0, k)
-	var mira := 1.0 if felipe.global_position.x >= centro.x else -1.0
-	draw_set_transform(centro, sin(tiempo * 1.3) * 0.03 * k, Vector2(escala * mira, escala))
-	var tinte := Color(1.0, 0.85, 0.5) if aspi.esta_aturdida() else Color.WHITE
-	draw_texture(arte, -tam / 2.0, tinte)
-	if succionando:
-		# Remolino frente a la boca (abajo a la derecha de la imagen).
-		for i in 3:
-			var r := fmod(tiempo * 6.0 + i, 3.0) * 14.0
-			draw_arc(Vector2(tam.x * 0.42, tam.y * 0.28), 70.0 - r, -PI / 2.0, PI / 2.0, 12, Color(Color("9fd8ff"), 0.6), 4.0)
-	draw_set_transform(Vector2.ZERO)
-	if aspi.esta_aturdida():
-		for i in 3:
-			var angulo := tiempo * 5.0 + i * TAU / 3.0
-			draw_circle(centro + Vector2(cos(angulo) * 60.0, -tam.y * escala * 0.45 + sin(angulo) * 10.0), 6.0, Color("f2d36b"))
+## Las manchas en el piso (tierra de maceta, agua, papel) que A.S.P.I. va a limpiar.
+func _dibujar_manchas() -> void:
+	var c := _manchas_dibujo
+	for x in manchas:
+		c.draw_rect(Rect2(x - 16, Sala.SUELO - 3, 32, 3), Color("6e4a2c"))
+		c.draw_circle(Vector2(x - 8, Sala.SUELO - 3), 4.0, Color("7d5634"))
+		c.draw_circle(Vector2(x + 6, Sala.SUELO - 2), 3.0, Color("7d5634"))
 
 
 func _dibujar_viento() -> void:
@@ -398,7 +348,7 @@ func _dibujar_viento() -> void:
 	for i in 16:
 		var lado := -1.0 if i % 2 == 0 else 1.0
 		var avance := fmod(tiempo * 1.4 + i * 0.37, 1.0)
-		var x := x_jefa + lado * (1.0 - avance) * 200.0
-		var y := Sala.PISO_ALTO - 6.0 - fmod(i * 23.0, 70.0)
-		if ARENA.has_point(Vector2(x, y)):
+		var x := x_jefa + lado * (1.0 - avance) * RADIO_SUCCION
+		var y := Sala.SUELO - 6.0 - fmod(i * 23.0, 70.0)
+		if arena.has_point(Vector2(x, y)):
 			_viento.draw_line(Vector2(x, y), Vector2(x + lado * 18.0, y), Color(Color("dff3ff"), 0.7 * avance), 1.5)

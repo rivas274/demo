@@ -1,42 +1,48 @@
-# Nivel 1: "La Gran Fuga" (rediseño, propuesta del 2026-10-18)
+# Nivel 1: "La Gran Fuga" (rediseño 3, 2026-10-18)
 
-## Reglas que cumple
+## Qué se corrige (opinión del creador sobre el dúplex)
 
-Cumple las 16 reglas de [reglas-de-niveles.md](reglas-de-niveles.md); `prueba_reglas_nivel.gd` las valida. Ajustes que hizo falta al aplicarlas: segundo descanso (cojín del dormitorio, junto al atajo y antes de A.S.P.I.: R5 y R6), juguetes y ratones corridos para que la entrada de cada aviso sea segura (R2), A.S.P.I. patrulla desde x 2560 (R2) y repisa de la escalera dentro de la escalera, con su calcetín (R13).
+1. **Habitaciones continuas:** pasar de un cuarto a otro sin puertas se siente raro. Ahora **cada habitación es un espacio aparte** y se entra por una **puerta** (botón de acción): fundido a negro, Felipe aparece en la puerta del otro lado y la cámara queda dentro de ese cuarto.
+2. **Subir trepando una cortina no tiene sentido.** Ahora se sube por la **escalera**, que Valeria bloqueó con **dos rejas para bebés apiladas** (1,5 m). La solución es de gato: **trepar el librero** y saltar la reja desde arriba. Desde la escalera la reja se abre (atajo de vuelta a la caja de arena). La cortina se trepa solo en el dormitorio, para un calcetín secreto.
+3. **Imaginación de fondo durante toda la pelea:** confunde. Ahora la bestia gigante y el fin del mundo **solo se ven en la entrada**; después todo vuelve a ser el cuarto normal.
+4. **La pelea pasa a su propio cuarto** (el estudio de Valeria) y cambia de idea: no se le pega a A.S.P.I. (su carcasa es de titanio). **Se ensucia el piso para distraerla** y, mientras limpia, Felipe corre a **desenchufarla**.
+5. **Partes blancas en los muebles** (entre las patas del comedor, las sillas, la reja del balcón): la herramienta de arte también quita el blanco encerrado en las piezas que tienen huecos.
 
-## Crítica del nivel actual
+## Las habitaciones (en orden de ruta)
 
-- Es un pasillo plano: todo pasa a la misma altura y de izquierda a derecha.
-- Enseña cada mecánica una vez y **nunca la pone a prueba**: no hay giro ni combinación.
-- No hay peligro hasta A.S.P.I.; la pelea es quedarse quieto y pegar tres veces.
-- Demasiado texto: un cartel por mueble.
-- La meta no se ve; el láser es un chiste sin función; los calcetines están casi a la vista.
-- No hay atajos, secretos ni regreso: no se siente metroidvania.
-- Un solo papel tapiz y muebles de colores planos: no hay hitos para orientarse.
+Todas miden 3,5 m de alto (424 px) y tienen el piso a la misma altura; en el mundo están separadas por muros y se pasa de una a otra por puertas. "Arriba" son el pasillo, el dormitorio, el estudio y el balcón: se llega por la escalera.
 
-## Nuevo diseño: dúplex de Valeria (casa antigua del Barrio Viejo)
+| # | Habitación | Ancho | Qué enseña o pide | Qué hay |
+| --- | --- | --- | --- | --- |
+| 1 | **Sala** (inicio) | 1400 | Caminar, saltar, tirar (vaso), agacharse (aparador), zarpazo (ratón), entrar por una puerta | Sofá, comedor con vaso, banco sobre los juguetes, aparador, ratón de cuerda, ventana |
+| 2 | **Recibidor** | 800 | Descanso, doble salto y trepar muebles: el librero es la escalera del gato | Caja de arena (descanso 1), lámpara, librero con 4 repisas, dos rejas apiladas, escalera de 11 escalones, puerta arriba al pasillo y abajo a la cocina |
+| 3 | **Cocina** (opcional) | 800 | Comer; subir mesón → refrigerador | Mesón con 2 ratones y la lata, alacenas, refrigerador con calcetín arriba, caja de cartón con plato |
+| 4 | **Pasillo de arriba** | 700 | Descanso antes del jefe | Cojín (descanso 2), consola con un vaso, láser, perchero, 3 puertas: escalera, dormitorio y estudio |
+| 5 | **Dormitorio** (opcional) | 700 | Trepar (cortina) | Cama (pasar agachado), cómoda, ropero con calcetín, cortina hasta una repisa alta con calcetín |
+| 6 | **Estudio de Valeria** (jefe) | 640, una pantalla | Examen: tirar, agacharse, saltar, doble salto | Escritorio, silla, repisa con 3 macetas, repisita alta, 3 enchufes, base de carga de A.S.P.I., puerta del balcón cerrada |
+| 7 | **Balcón** | 400 | Alivio y meta | Baranda con macetas, la ciudad al atardecer; al llegar al final, "Caer de Pie" |
 
-Planta baja (sala y cocina) y planta alta (dormitorio, baño y balcón). Alto total: dos pisos de 3,5 m; la cámara se mueve en vertical.
+La meta se muestra al empezar (la cámara pasa por el balcón). El nivel es en forma de árbol: el recibidor reparte a la cocina (opcional) y arriba; el pasillo reparte al dormitorio (opcional) y al estudio. Los opcionales guardan calcetines (exploración premiada).
 
-| Zona | Enseña / prueba | Cómo |
-| --- | --- | --- |
-| 1. Sofá (despierta) | **Enseñar** caminar y saltar | Sin peligro. Por la ventana del segundo piso se ve el **balcón abierto**: la meta. |
-| 2. Mesa del comedor | **Enseñar** botón de acción | El vaso: tirarlo da el primer logro. |
-| 3. Alfombra con juguetes | **Probar** el salto | Piezas de juguete en el piso **quitan un corazón**; hay que saltar de silla en silla. |
-| 4. Aparador | **Enseñar** agacharse | Detrás, a la vista pero fuera de alcance, un calcetín: se ve la recompensa antes de saber llegar. |
-| 5. Ratón de cuerda | **Enseñar** zarpazo | Uno solo, en el piso, con espacio para reaccionar. |
-| 6. Caja de arena | Punto de descanso | Hito: la lámpara de pie encendida. |
-| 7. Escalera (bloqueada) | — | Una **reja para bebés** cierra la escalera. Hay que buscar otro camino: **girar** la idea de "subir". |
-| 8. Cocina | **Probar** zarpazo y doble salto | Dos ratones en el mesón; las alacenas altas llevan al hueco del techo. |
-| 9. Cortina del ventanal | **Enseñar** trepar | Sin peligro al principio; arriba, un ratón: **probar** trepar con zarpazo. |
-| 10. Hueco del techo (pasa al 2.º piso) | **Girar** agacharse | Se entra gateando por el hueco del entrepiso. |
-| 11. Dormitorio de Valeria | **Probar** todo | Cama, cómoda y percheros a distintas alturas; el láser aparece y **lleva a un secreto** (calcetín en el clóset): el chiste se vuelve guía. |
-| 12. Atajo | Bucle metroidvania | Desde arriba Felipe empuja la reja para bebés: la escalera queda abierta y lleva de vuelta a la caja de arena. |
-| 13. Baño | **Girar** acción | Rollo de papel higiénico: tirarlo desde arriba aturde a un ratón de abajo. Enseña "tirar cosas sobre enemigos". |
-| 14. Pasillo al balcón: **A.S.P.I. jefa** | **Examen** | A.S.P.I. persigue por el piso. Solo se le puede pegar después de **tirarle algo encima** desde un mueble (macetas, libros): queda aturdida 3 s. Tres ciclos: tirar → bajar → zarpazo. Mientras persigue, Felipe se esconde debajo de la cama (agacharse). |
-| 15. Balcón | Alivio | Atardecer, ciudad de fondo, Felipe salta: **Caer de Pie**. Fin. |
+## La pelea: "La Bestia del Estudio"
 
-**Calcetines (3):** detrás del aparador (se llega por el atajo de la escalera), en el clóset (siguiendo el láser), sobre el ropero (salto difícil con doble salto).
+1. **Entrada** (la misma presentación de todos los jefes): al entrar al estudio, A.S.P.I. despierta en su base; congela, acercamiento a Felipe, «¡BATALLA INICIADA!», barrido, crece en la imaginación de Felipe dentro de la nube de pensamiento, nombre en la franja. **Al terminar la entrada, la imaginación se desvanece** y el estudio vuelve a verse normal.
+2. **Regla de la pelea:** los zarpazos rebotan. A.S.P.I. persigue a Felipe y le quita un corazón al tocarlo. Cuando algo se rompe en el piso (maceta, vaso, rollo), deja una **mancha** y A.S.P.I. **va a limpiarla**: mientras limpia aspira (de pie arrastra a Felipe; agachado se aferra). Si algo le cae encima, queda aturdida unos segundos.
+3. **Desenchufar:** hay 3 enchufes (uno abajo junto al escritorio, otro sobre el escritorio, otro en la repisita alta). Solo se puede tirar del cable **mientras A.S.P.I. limpia o está aturdida**; si no, lo ve y corre hacia Felipe.
+4. **Fases:** cada enchufe sube una fase, con cartel y pista. Fase 2: más rápida y limpia menos tiempo (6, 5 y 4,5 s por fase). Fase 3 (furia): además escupe bolas de pelo que hay que saltar. Con los 3 enchufes, se apaga: «¡DESENCHUFADA!», Felipe se lame la pata y se abre la puerta del balcón (logro "Desenchufada").
+5. Las macetas vuelven a la repisa mientras A.S.P.I. siga encendida, así que nunca se queda sin cómo distraerla.
+
+## Cómo cumple las reglas
+
+- **R1 y R2:** cada mecánica tiene su aviso, en una entrada sin peligro, antes de pedirla (zarpazo en la sala antes de los ratones de la cocina; tirar en la sala antes de la pelea; trepar muebles en el recibidor).
+- **R4:** la meta (el balcón) se ve al empezar.
+- **R5:** cada habitación con peligro tiene un descanso en ella o en una contigua; el cojín está en el pasillo, junto a la puerta del jefe.
+- **R6:** la reja se abre desde la escalera y deja el atajo a la caja de arena.
+- **R7:** dos plantas unidas por la escalera; librero, mesón y refrigerador, ropero y cortina para subir.
+- **R9:** cada habitación tiene su pared (tapiz, tapiz verde, azulejos, tapiz azul, rosa, tapiz mostaza y exterior).
+- **R12:** la pelea pide tirar, agacharse, saltar y doble salto; el zarpazo no sirve (y se dice).
+- **R13:** cada habitación tiene con qué jugar.
+- **R16:** entrada reutilizable (`PresentacionJefe`), imaginación solo en la entrada.
 
 ## Encargo de arte a Gemini (imágenes fijas)
 
@@ -60,6 +66,3 @@ Estilo de todas: el de Felipe A (pixel art chibi cel-shaded, dos tonos planos, c
 Estado: las 12 imágenes llegaron y están en el juego (ver `memoria/03-arte-y-herramientas.md`). El ropero quedó de 1,53 m y 1 m de ancho para que su imagen no se deforme. Prioridad que se usó: 5 (paredes), 8, 9, 10, 11, 12 y después los muebles.
 
 
-## Pelea con A.S.P.I.: "La Bestia del Pasillo"
-
-Desde la cabeza de Felipe (R16). Entrada tipo Broforce de 4,5 s: congela, acercamiento a Felipe con «¡BATALLA INICIADA!», barrido a la jefa, que crece hasta gigante dentro de una nube de pensamiento, y su nombre en una franja. El pasillo se vuelve el fin del mundo. Fases: succión (agacharse para aferrarse; 3 succiones rompen el escudo), aturdir (maceta y 2 zarpazos), furia (bolas de pelo que se saltan; 2 zarpazos más). Al apagarla, todo vuelve de golpe al pasillo y Felipe se acicala. Código en `siete-vidas/juego/scripts/batalla_aspi.gd`; prueba en `prueba_jefe.gd`.

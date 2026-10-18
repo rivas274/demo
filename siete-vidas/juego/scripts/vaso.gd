@@ -5,6 +5,9 @@ extends Node2D
 ## Las macetas vuelven a su lugar mientras A.S.P.I. siga encendida, para no quedarse sin munición.
 ## Medidas reales: vaso 12 cm (15 px), rollo 11 cm, maceta 15 cm. Arte provisional.
 
+## Se rompió en el piso (en la pelea deja una mancha que A.S.P.I. va a limpiar).
+signal caido(posicion: Vector2)
+
 const LOGRO := "La Gravedad Funciona"
 ## Segundos que queda aturdido el enemigo al que le cae encima.
 const ATURDIR := 3.0
@@ -52,6 +55,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _al_caer() -> void:
+	caido.emit(global_position)
 	var sala := get_parent()
 	if sala.has_method("sonar"):
 		sala.sonar("vidrio" if tipo != "rollo" else "caja")

@@ -1,5 +1,6 @@
 extends SceneTree
-## Prueba de la pelea con A.S.P.I. (entrada tipo Broforce, imaginación gigante y tres fases). Sin ventana:
+## Prueba de la pelea con A.S.P.I. en el estudio: entrada tipo Broforce con la imaginación de Felipe (solo en la entrada),
+## ensuciar para distraerla, aspirar, desenchufar los tres enchufes y el final. Sin ventana:
 ##   godot --headless --path siete-vidas/juego --script res://pruebas/prueba_jefe.gd
 ## Termina con código 0 si todo pasa y 1 si algo falla.
 
@@ -15,17 +16,15 @@ func _correr() -> void:
 	sala.mostrar_titulo = false
 	root.add_child(sala)
 	var felipe: Felipe = sala.get_node("Felipe")
-	var aspi: Aspi = sala.get_node("ASPI")
+	var aspi: Aspi = sala.aspi
 	var batalla: BatallaAspi = sala.batalla
 	await _esperar(30)
-	_comprobar(batalla != null and batalla.fase == BatallaAspi.Fase.ESPERANDO, "La pelea espera a que Felipe se cruce con A.S.P.I.")
+	_comprobar(batalla != null and batalla.fase == BatallaAspi.Fase.ESPERANDO and aspi.quieta, "A.S.P.I. duerme en su base hasta que Felipe entra al estudio")
 
-	# Entrada: al cruzarse, todo se congela y empieza la presentación.
-	aspi.velocidad_patrulla = 0.0
-	aspi.vision = 0.0
-	aspi.global_position = Vector2(2780, Sala.PISO_ALTO)
-	await _poner_en(felipe, Vector2(2660, Sala.PISO_ALTO))
-	_comprobar(batalla.fase == BatallaAspi.Fase.ENTRADA and paused, "Cruzarse con A.S.P.I. congela el juego y empieza la entrada")
+	# Entrada: al entrar al estudio, todo se congela y empieza la presentación.
+	felipe._tiempo_invulnerable = 999.0
+	await _poner_en(felipe, Vector2(5300, Sala.SUELO))
+	_comprobar(batalla.fase == BatallaAspi.Fase.ENTRADA and paused, "Entrar al estudio congela el juego y empieza la entrada")
 	var textos := {}
 	var oculta := false
 	var gigante_maximo := 0.0
@@ -37,94 +36,96 @@ func _correr() -> void:
 		if batalla.fase != BatallaAspi.Fase.ENTRADA:
 			break
 	_comprobar(textos.has(PresentacionJefe.TEXTO_INICIO), "La entrada muestra «¡BATALLA INICIADA!»")
-	_comprobar(batalla.presentacion.t < 5.0, "La entrada dura menos de 5 s (%.1f s)" % batalla.presentacion.t)
 	_comprobar(textos.has(BatallaAspi.NOMBRE), "La entrada presenta a la jefa por su nombre")
+	_comprobar(batalla.presentacion.t < 5.0, "La entrada dura menos de 5 s (%.1f s)" % batalla.presentacion.t)
 	_comprobar(batalla.presentacion.zoom_maximo >= 2.5, "La cámara se acerca como en Broforce (zoom %.1f)" % batalla.presentacion.zoom_maximo)
 	_comprobar(oculta and gigante_maximo >= 1.0, "En la imaginación de Felipe, A.S.P.I. se vuelve gigante")
-	_comprobar(batalla.fase == BatallaAspi.Fase.SUCCION and not paused, "Tras la entrada sigue el juego en la fase 1")
-	_comprobar(aspi.visible and felipe.get_node("Camara").is_current(), "Vuelven la A.S.P.I. real y la cámara de Felipe")
-	_comprobar(batalla.transformacion >= 1.0, "El pasillo se vuelve el fin del mundo")
-	_comprobar(absf(aspi.global_position.x - felipe.global_position.x) >= 100.0, "La pelea empieza con la jefa lejos de Felipe (%.0f px)" % absf(aspi.global_position.x - felipe.global_position.x))
-	_comprobar(batalla.presentacion.vida == 1.0 and batalla.presentacion.escudo == 1.0, "La barra de la jefa aparece llena y con escudo")
-	_comprobar("agacharse" in sala.pantallas.aviso_fijo, "La pista de la fase 1 dice que hay que agacharse")
+	_comprobar(batalla.fase == BatallaAspi.Fase.PELEA and not paused and aspi.visible, "Tras la entrada sigue el juego con la A.S.P.I. real")
+	await _esperar(70)
+	_comprobar(batalla.gigante == 0.0 and batalla.transformacion == 0.0, "La imaginación se desvanece: el resto de la pelea se ve el estudio normal")
+	_comprobar("desenchúfala" in sala.pantallas.aviso_fijo, "La pista de la fase 1 dice qué hacer")
+	_comprobar(batalla.presentacion.vida == 1.0, "La barra de la jefa aparece llena")
 
-	# Fase 1, succión: con escudo, de pie lo arrastra y agachado se aferra.
-	felipe._tiempo_invulnerable = 999.0
-	aspi.aturdir(2.0)
+	# Los zarpazos rebotan en la carcasa.
+	aspi.global_position = Vector2(5600, Sala.SUELO)
 	await _zarpazo_a(felipe, aspi)
-	_comprobar(aspi.golpes == 0, "Con escudo, el zarpazo rebota aunque esté aturdida")
-	aspi._tiempo_aturdida = 0.0
-	await _poner_en(felipe, aspi.global_position + Vector2(-130, 0))
-	await _esperar_que(func() -> bool: return batalla.succionando, 400)
+	_comprobar(aspi.golpes == 0 and not aspi.apagada, "El zarpazo rebota en la carcasa")
+
+	# Sin distraerla, no se puede desenchufar.
+	await _poner_en(felipe, Sala.ENCHUFES[0])
+	await _tocar("interactuar")
+	_comprobar(batalla.tirados == 0, "Sin distraerla, A.S.P.I. no deja desenchufar")
+
+	# Ensuciar: una maceta rota deja una mancha y A.S.P.I. va a limpiarla.
+	aspi.global_position = Vector2(5320, Sala.SUELO)
+	await _poner_en(felipe, Vector2(5634, Sala.SUELO - 160))
+	felipe.mirando = 1.0
+	await _tocar("interactuar")
+	await _esperar_que(func() -> bool: return not batalla.manchas.is_empty(), 90)
+	_comprobar(batalla.manchas.size() == 1, "La maceta rota deja una mancha en el piso")
+	await _esperar_que(func() -> bool: return batalla.limpiando, 400)
+	_comprobar(batalla.limpiando and absf(aspi.global_position.x - batalla.manchas[0]) < 8.0, "A.S.P.I. va a limpiar la mancha")
+
+	# Mientras limpia aspira: de pie arrastra, agachado se aferra.
+	await _poner_en(felipe, aspi.global_position + Vector2(-150, 0))
 	var antes := felipe.global_position.x
-	await _esperar(40)
-	_comprobar(felipe.global_position.x - antes > 20.0, "De pie, la succión arrastra a Felipe (%.0f px)" % (felipe.global_position.x - antes))
-	felipe.global_position = aspi.global_position + Vector2(-130, 0)
+	await _esperar(20)
+	_comprobar(felipe.global_position.x - antes > 15.0, "De pie, la succión arrastra a Felipe (%.0f px)" % (felipe.global_position.x - antes))
+	felipe.global_position = aspi.global_position + Vector2(-150, 0)
 	Input.action_press("agacharse")
 	await _esperar(5)
 	antes = felipe.global_position.x
-	await _esperar(30)
-	_comprobar(not batalla.succionando or absf(felipe.global_position.x - antes) < 3.0, "Agachado se aferra y no lo arrastra")
-	await _esperar_que(func() -> bool: return batalla.fase != BatallaAspi.Fase.SUCCION, 1200)
+	await _esperar(20)
 	Input.action_release("agacharse")
-	_comprobar(batalla.fase == BatallaAspi.Fase.ATURDIR and batalla.succiones == BatallaAspi.SUCCIONES, "Aguantar %d succiones rompe el escudo (fase 2)" % BatallaAspi.SUCCIONES)
-	_comprobar("maceta" in sala.pantallas.aviso_fijo, "La pista de la fase 2 habla de la maceta")
+	_comprobar(absf(felipe.global_position.x - antes) < 3.0, "Agachado se aferra y no lo arrastra")
 
-	# Fase 2: una maceta la aturde y los zarpazos le hacen daño.
-	aspi.global_position = Vector2(2705, Sala.PISO_ALTO)
-	await _poner_en(felipe, Vector2(2625, Sala.PISO_ALTO - 160))
-	felipe.mirando = 1.0
+	# Mientras limpia, el enchufe de la repisita sale.
+	await _poner_en(felipe, Sala.ENCHUFES[2])
+	_comprobar(batalla.limpiando, "Sigue limpiando mientras Felipe va al enchufe")
 	await _tocar("interactuar")
-	await _esperar(60)
-	_comprobar(aspi.esta_aturdida(), "Una maceta la aturde")
-	await _zarpazo_a(felipe, aspi)
-	_comprobar(aspi.golpes == 1, "Aturdida, el zarpazo le hace daño")
-	aspi.aturdir(3.0)
-	await _zarpazo_a(felipe, aspi)
-	_comprobar(batalla.fase == BatallaAspi.Fase.FURIA, "Con %d golpes entra en furia (fase 3)" % BatallaAspi.GOLPES_FASE_ATURDIR)
-	_comprobar(aspi.velocidad_patrulla > 40.0, "En furia es más rápida")
+	_comprobar(batalla.tirados == 1 and not batalla.limpiando, "Distraída, el enchufe sale y A.S.P.I. deja de limpiar (fase 2)")
+	_comprobar(aspi.velocidad_persecucion > BatallaAspi.VELOCIDAD[0], "En la fase 2 es más rápida")
 
-	# Fase 3: escupe bolas de pelo por el piso; pegan si no salta.
+	# Aturdida también sirve: segundo enchufe, sobre el escritorio.
+	await _poner_en(felipe, Sala.ENCHUFES[1])
+	aspi.aturdir(3.0)
+	await _tocar("interactuar")
+	_comprobar(batalla.tirados == 2, "Aturdida también deja desenchufar (fase 3)")
+
+	# Fase 3: escupe bolas de pelo; pegan si no salta.
+	aspi.aturdir(0.0)
+	aspi._tiempo_aturdida = 0.0
 	aspi.velocidad_patrulla = 0.0
 	aspi.velocidad_persecucion = 0.0
-	aspi._tiempo_aturdida = 0.0
-	await _poner_en(felipe, aspi.global_position + Vector2(-110, 0))
+	aspi.global_position = Vector2(5700, Sala.SUELO)
+	await _poner_en(felipe, Vector2(5580, Sala.SUELO))
 	felipe._tiempo_invulnerable = 0.0
 	var corazones := felipe.corazones
 	await _esperar_que(func() -> bool: return felipe.corazones < corazones, 300)
-	_comprobar(felipe.corazones < corazones, "Una bola de pelo quita un corazón")
-	felipe._tiempo_invulnerable = 0.0
-	felipe.corazones = Felipe.CORAZONES_MAX
-	await _poner_en(felipe, aspi.global_position + Vector2(-110, 0))
-	felipe._tiempo_invulnerable = 0.0
-	await _esperar_que(func() -> bool: return batalla.bolas.size() > 0 and absf(batalla.bolas[0].global_position.x - felipe.global_position.x) < 40.0, 300)
-	Input.action_press("saltar")
-	await _esperar(12)
-	Input.action_release("saltar")
-	await _esperar(40)
-	_comprobar(felipe.corazones == Felipe.CORAZONES_MAX, "Saltando, la bola de pelo pasa por debajo")
+	_comprobar(felipe.corazones < corazones, "En furia, una bola de pelo quita un corazón")
+	felipe._tiempo_invulnerable = 999.0
 
-	# Final: aturdida y con dos zarpazos más se apaga; todo vuelve a ser un pasillo.
-	for i in BatallaAspi.GOLPES_TOTALES - BatallaAspi.GOLPES_FASE_ATURDIR:
-		aspi.aturdir(3.0)
-		await _zarpazo_a(felipe, aspi)
-	_comprobar(aspi.apagada and batalla.fase == BatallaAspi.Fase.FIN, "Con %d golpes en total se apaga" % BatallaAspi.GOLPES_TOTALES)
-	_comprobar(batalla.transformacion == 0.0 and sala.pantallas.aviso_fijo == "", "El fin del mundo desaparece de golpe")
+	# Tercer enchufe, abajo junto al escritorio: se apaga.
+	await _poner_en(felipe, Sala.ENCHUFES[0])
+	aspi.aturdir(3.0)
+	await _tocar("interactuar")
+	_comprobar(aspi.apagada and batalla.fase == BatallaAspi.Fase.FIN, "Con los 3 enchufes, A.S.P.I. se apaga")
+	_comprobar(not sala.puertas[Sala.PUERTA_BALCON].cerrada and "Desenchufada" in sala.logros, "Se abre la puerta del balcón (logro Desenchufada)")
+	await _poner_en(felipe, Vector2(5560, Sala.SUELO))
 	await _esperar(70)
-	_comprobar(batalla.gigante == 0.0 and batalla.bolas.is_empty(), "La bestia imaginaria se desinfla y no quedan bolas")
+	_comprobar(batalla.bolas.is_empty() and sala.pantallas.aviso_fijo == "", "No quedan bolas ni pistas")
 	_comprobar(felipe.estado == Felipe.Estado.OCIO and felipe.sprite.animation == "acicalarse", "Felipe se lame la pata como si nada")
-	_comprobar(sala.get_node_or_null("Puerta del balcón") == null and "Desenchufada" in sala.logros, "Se abre el balcón (logro Desenchufada)")
 
 	# La presentación es reutilizable: sirve igual para otro jefe cualquiera.
 	var otro := Node2D.new()
-	otro.position = Vector2(400, Sala.SUELO)
+	otro.position = Vector2(5400, Sala.SUELO)
 	sala.add_child(otro)
 	var presentacion := PresentacionJefe.new("EL CARTERO", "Timbre del Terror · Nivel 12")
 	presentacion.imaginacion = false
 	presentacion.pantallas = sala.pantallas
 	sala.add_child(presentacion)
 	await physics_frame
-	presentacion.presentar(felipe, otro, Rect2(0, 0, Sala.ANCHO, Sala.ALTO))
+	presentacion.presentar(felipe, otro, Rect2(5200, 0, 640, Sala.ALTO))
 	var vio_nombre := false
 	for i in 600:
 		await physics_frame
@@ -140,21 +141,19 @@ func _correr() -> void:
 
 
 func _zarpazo_a(felipe: Felipe, objetivo: Node2D) -> void:
-	var invulnerable := felipe._tiempo_invulnerable
-	felipe._tiempo_invulnerable = 99.0
 	await _poner_en(felipe, objetivo.global_position + Vector2(-30, 0))
 	felipe.global_position = objetivo.global_position + Vector2(-30, 0)
 	felipe.mirando = 1.0
 	felipe.estado = Felipe.Estado.SUELO
 	await _tocar("zarpazo")
 	await _esperar(30)
-	felipe._tiempo_invulnerable = invulnerable
 
 
+## Lo pone en un lugar y espera a que termine cualquier manotazo anterior (la animación dura 0,67 s).
 func _poner_en(felipe: Felipe, posicion: Vector2) -> void:
 	felipe.global_position = posicion
 	felipe.velocity = Vector2.ZERO
-	await _esperar(20)
+	await _esperar(45)
 
 
 func _tocar(accion: String) -> void:

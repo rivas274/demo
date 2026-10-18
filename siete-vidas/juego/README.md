@@ -13,6 +13,7 @@ Demo jugable de **Felipe: Siete Vidas, Cero Disculpas**: el primer nivel, **"La 
 | Moverse | A / D o flechas | Palanca izquierda o cruceta |
 | Trepar (en la cortina) | W o ↑ | Palanca arriba o cruceta arriba |
 | Aferrarse (cuando A.S.P.I. aspira) | Mantener S o ↓ | Palanca abajo o cruceta abajo |
+| Entrar por una puerta | E o W/↑ junto a la puerta | Y o arriba |
 | Pausa | Esc | Start |
 | Agacharse y gatear (agachado + saltar = bajar de una repisa) | S o ↓ | Palanca abajo o cruceta abajo |
 | Saltar (dos veces = Doble Salto) | Espacio | A |

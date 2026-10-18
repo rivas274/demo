@@ -24,16 +24,17 @@ const MADERA_OSCURA := Color("6e3a26")
 const CORTINA := Color("c46a5a")
 const SILUETA := Color(0.17, 0.1, 0.13, 0.94)
 const LUZ := Color(1.0, 0.85, 0.55, 0.09)
-## Mosaico de Gemini por habitación (assets/nivel1/).
-const MOSAICO_PARED := {"sala": "pared_tapiz", "escalera": "pared_tapiz", "pasillo": "pared_tapiz", "cocina": "pared_azulejo", "dormitorio": "pared_rosa"}
-## estilo de pared -> [color base, color del dibujo]
+## Estilo de pared -> [mosaico de Gemini (assets/nivel1/), tinte]. Cada habitación tiene el suyo (hito, regla R9).
 const PAREDES := {
-	"sala": [Color("e8d6c3"), Color("dfc9b2")],
-	"escalera": [Color("e6d2b8"), Color("dcc4a6")],
-	"cocina": [Color("dfe7e2"), Color("c9d6cf")],
-	"dormitorio": [Color("c9d3b6"), Color("b8c4a2")],
-	"pasillo": [Color("e8d6c3"), Color("d9c3aa")],
+	"tapiz": ["pared_tapiz", Color.WHITE],
+	"tapiz_verde": ["pared_tapiz", Color(0.86, 1.0, 0.86)],
+	"azulejo": ["pared_azulejo", Color.WHITE],
+	"tapiz_azul": ["pared_tapiz", Color(0.84, 0.92, 1.06)],
+	"rosa": ["pared_rosa", Color.WHITE],
+	"tapiz_mostaza": ["pared_tapiz", Color(1.06, 0.95, 0.72)],
 }
+## Entre habitaciones: muro (no se ve, la cámara queda dentro de cada cuarto).
+const MURO := Color("2a1d1a")
 
 var ancho: float
 var alto: float
@@ -97,42 +98,33 @@ func _repetir(destino: Image, mosaico: Image, rect: Rect2i) -> void:
 		y += mosaico.get_height()
 
 
-## Pinta cada habitación con su estilo y deja transparentes las ventanas.
+## Pinta cada habitación con su estilo y deja transparentes las ventanas y el exterior (balcón).
 func _crear_pared() -> Image:
 	var imagen := Image.create(int(ancho), int(alto), false, Image.FORMAT_RGBA8)
+	imagen.fill(MURO)
+	var moldura := _imagen("moldura")
 	for habitacion: Array in Sala.HABITACIONES:
 		var rect: Rect2i = Rect2i(habitacion[0])
-		var colores: Array = PAREDES[habitacion[1]]
-		imagen.fill_rect(rect, colores[0])
-		var mosaico := _imagen(MOSAICO_PARED.get(habitacion[1], ""))
-		if mosaico:
-			_repetir(imagen, mosaico, rect)
-			var moldura := _imagen("moldura")
-			if moldura:
-				_repetir(imagen, moldura, Rect2i(rect.position.x, rect.position.y, rect.size.x, moldura.get_height()))
-				_repetir(imagen, moldura, Rect2i(rect.position.x, rect.end.y - moldura.get_height(), rect.size.x, moldura.get_height()))
+		if habitacion[2] == "exterior":
+			imagen.fill_rect(Rect2i(rect.position.x, 0, rect.size.x, int(Sala.SUELO)), Color(0, 0, 0, 0))
 			continue
-		match habitacion[1]:
-			"cocina":
-				# Azulejos.
-				for y in range(rect.position.y + 150, rect.end.y, 16):
-					imagen.fill_rect(Rect2i(rect.position.x, y, rect.size.x, 1), colores[1])
-				for x in range(rect.position.x, rect.end.x, 16):
-					imagen.fill_rect(Rect2i(x, rect.position.y + 150, 1, rect.size.y - 150), colores[1])
-			"dormitorio":
-				# Florecitas.
-				for y in range(rect.position.y + 30, rect.end.y - 20, 36):
-					for x in range(rect.position.x + 10 + (y / 36 % 2) * 18, rect.end.x, 36):
-						imagen.fill_rect(Rect2i(x, y, 3, 3), colores[1])
-			_:
-				for x in range(rect.position.x, rect.end.x, 24):
-					imagen.fill_rect(Rect2i(x, rect.position.y, 10, rect.size.y), colores[1])
-		# Moldura del techo y zócalo.
-		imagen.fill_rect(Rect2i(rect.position.x, rect.position.y, rect.size.x, 10), MOLDURA)
-		imagen.fill_rect(Rect2i(rect.position.x, rect.end.y - 12, rect.size.x, 12), MOLDURA)
+		var estilo: Array = PAREDES[habitacion[2]]
+		var mosaico := _imagen(estilo[0])
+		if estilo[1] != Color.WHITE:
+			_tenir(mosaico, estilo[1])
+		_repetir(imagen, mosaico, rect)
+		_repetir(imagen, moldura, Rect2i(rect.position.x, rect.position.y, rect.size.x, moldura.get_height()))
+		_repetir(imagen, moldura, Rect2i(rect.position.x, rect.end.y - moldura.get_height(), rect.size.x, moldura.get_height()))
 	for ventana: Rect2 in Sala.VENTANAS:
 		imagen.fill_rect(Rect2i(ventana), Color(0, 0, 0, 0))
 	return imagen
+
+
+func _tenir(imagen: Image, tinte: Color) -> void:
+	for y in imagen.get_height():
+		for x in imagen.get_width():
+			var color := imagen.get_pixel(x, y)
+			imagen.set_pixel(x, y, Color(minf(color.r * tinte.r, 1.0), minf(color.g * tinte.g, 1.0), minf(color.b * tinte.b, 1.0), color.a))
 
 
 func _degradado(c: CanvasItem, rect: Rect2, arriba: Color, abajo: Color) -> void:
@@ -160,7 +152,7 @@ func _dibujar_cielo(c: Node2D) -> void:
 
 
 func _dibujar_ciudad_lejana(c: Node2D) -> void:
-	if _dibujar_ciudad(c, "ciudad_lejana", 150.0, Color("a0626e")):
+	if _dibujar_ciudad(c, "ciudad_lejana", 40.0, Color("a0626e")):
 		return
 	var azar := RandomNumberGenerator.new()
 	azar.seed = 7
@@ -176,7 +168,7 @@ func _dibujar_ciudad_lejana(c: Node2D) -> void:
 
 
 func _dibujar_ciudad_cercana(c: Node2D) -> void:
-	if _dibujar_ciudad(c, "ciudad_cercana", 290.0, Color("8a7a76")):
+	if _dibujar_ciudad(c, "ciudad_cercana", 110.0, Color("8a7a76")):
 		return
 	var azar := RandomNumberGenerator.new()
 	azar.seed = 11
@@ -205,8 +197,8 @@ func _dibujar_ciudad(c: Node2D, nombre: String, arriba: float, base: Color) -> b
 	if ciudad == null:
 		return false
 	var tam := ciudad.get_size()
-	c.draw_texture_rect(ciudad, Rect2(-200, arriba, 3400, tam.y), true)
-	c.draw_rect(Rect2(-200, arriba + tam.y - 2, 3400, 900), base)
+	c.draw_texture_rect(ciudad, Rect2(-200, arriba, 5000, tam.y), true)
+	c.draw_rect(Rect2(-200, arriba + tam.y - 2, 5000, 900), base)
 	return true
 
 
@@ -218,28 +210,21 @@ func _dibujar_pared(c: Node2D) -> void:
 		c.draw_line(Vector2(ventana.position.x, ventana.get_center().y), Vector2(ventana.end.x, ventana.get_center().y), MADERA_OSCURA, 4)
 		c.draw_rect(Rect2(ventana.position.x - 30, ventana.position.y - 18, ventana.size.x + 60, 5), MADERA_OSCURA)
 	# Cuadros: el retrato oficial de Su Majestad (sala) y una foto de Valeria (dormitorio).
-	c.draw_rect(Rect2(640, Sala.TECHO_BAJO + 90, 70, 84), MADERA_OSCURA)
-	c.draw_rect(Rect2(646, Sala.TECHO_BAJO + 96, 58, 72), Color("d9a65b"))
-	c.draw_circle(Vector2(675, Sala.TECHO_BAJO + 128), 18, Color("8b7864"))
-	c.draw_rect(Rect2(2050, 160, 60, 50), MADERA_OSCURA)
-	c.draw_rect(Rect2(2055, 165, 50, 40), Color("6f8f8a"))
-	# Pisos de madera de las dos plantas.
+	c.draw_rect(Rect2(600, 140, 70, 84), MADERA_OSCURA)
+	c.draw_rect(Rect2(606, 146, 58, 72), Color("d9a65b"))
+	c.draw_circle(Vector2(635, 178), 18, Color("8b7864"))
+	c.draw_rect(Rect2(4860, 170, 60, 50), MADERA_OSCURA)
+	c.draw_rect(Rect2(4865, 175, 50, 40), Color("6f8f8a"))
+	# Piso de madera de cada habitación.
 	var madera := ArteNivel.textura("piso")
-	for piso: Array in [[0.0, Sala.SUELO, ancho], [1886.0, Sala.PISO_ALTO, ancho]]:
-		if madera:
-			c.draw_texture_rect(madera, Rect2(piso[0], piso[1], piso[2] - piso[0], madera.get_height()), true)
-			continue
-		c.draw_rect(Rect2(piso[0], piso[1], piso[2] - piso[0], 30), MADERA)
-		var tabla: float = piso[0]
-		while tabla < piso[2]:
-			c.draw_line(Vector2(tabla, piso[1]), Vector2(tabla, piso[1] + 24), MADERA_OSCURA, 2)
-			tabla += 64
-		c.draw_line(Vector2(piso[0], piso[1] + 12), Vector2(piso[2], piso[1] + 12), MADERA_OSCURA, 1)
+	for habitacion: Array in Sala.HABITACIONES:
+		var rect: Rect2 = habitacion[0]
+		c.draw_texture_rect(madera, Rect2(rect.position.x, Sala.SUELO, rect.size.x, madera.get_height()), true)
 
 
 func _dibujar_luz(c: Node2D) -> void:
 	for ventana: Rect2 in Sala.VENTANAS:
-		var piso := Sala.piso_bajo(ventana.end.y)
+		var piso := Sala.SUELO
 		var rayo := PackedVector2Array([
 			ventana.position, Vector2(ventana.end.x, ventana.position.y),
 			Vector2(ventana.end.x + 140, piso), Vector2(ventana.position.x + 90, piso),
@@ -249,12 +234,8 @@ func _dibujar_luz(c: Node2D) -> void:
 
 func _dibujar_primer_plano(c: Node2D) -> void:
 	# Siluetas oscuras delante de Felipe, a la altura de la planta baja: dan profundidad y enmarcan.
-	_planta(c, Vector2(380, 1150), 0.6)
-	_planta(c, Vector2(2650, 1150), 0.7)
-	for x: float in [1700.0, 1780.0]:
-		c.draw_rect(Rect2(x, 1020, 12, 160), SILUETA)
-	c.draw_rect(Rect2(1694, 1020, 100, 14), SILUETA)
-	c.draw_rect(Rect2(1694, 1060, 100, 8), SILUETA)
+	for planta: Vector3 in [Vector3(380, 560, 0.6), Vector3(3700, 560, 0.7), Vector3(6400, 560, 0.6)]:
+		_planta(c, Vector2(planta.x, planta.y), planta.z)
 
 
 func _planta(c: CanvasItem, base: Vector2, tamano: float) -> void:

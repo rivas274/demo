@@ -1,140 +1,185 @@
 class_name Sala
 extends Node2D
-## Primer nivel y demo: "La Gran Fuga", el dúplex de Valeria como tutorial (diseño en siete-vidas/diseno/nivel-01-gran-fuga.md).
-## Cada mecánica se enseña sin peligro, se pone a prueba y luego se usa de otra forma; la meta (el balcón) se muestra
-## al empezar; la escalera es un atajo que se abre desde arriba; A.S.P.I. es un examen de todo lo aprendido.
-## Todo se arma desde datos; el dibujo es provisional y el fondo con parallax está en FondoApartamento.
+## Primer nivel y demo: "La Gran Fuga", la casa de Valeria como tutorial (diseño en siete-vidas/diseno/nivel-01-gran-fuga.md).
+## Cada habitación es un espacio aparte y se pasa de una a otra por puertas (fundido a negro; la cámara queda dentro
+## del cuarto). Se sube por la escalera, bloqueada por dos rejas para bebés: se cruzan trepando el librero y se abren
+## desde arriba (atajo). Cada mecánica se enseña sin peligro antes de pedirla; la meta (el balcón) se muestra al empezar;
+## A.S.P.I. espera en el estudio y se vence ensuciando el piso para distraerla y desenchufándola.
+## Todo se arma desde datos; el arte es de Gemini (ArteNivel) y el fondo con parallax está en FondoApartamento.
 
 ## Escala del mundo: 1,21 px por cm (Felipe mide unos 55 cm de alto contando la cabeza; Valeria = 3 Felipes).
-## Casa antigua del Barrio Viejo: dos pisos de 3,5 m (424 px) con un entrepiso de 24 px.
-const ANCHO := 3080.0
-const PISO_ALTO := 424.0
-const TECHO_BAJO := PISO_ALTO + 24.0
-const SUELO := TECHO_BAJO + 424.0
+## Casa antigua del Barrio Viejo: cuartos de 3,5 m (424 px) de alto, todos con el piso a la misma altura.
+const TECHO := 24.0
+const SUELO := 448.0
 const ALTO := SUELO + 30.0
-const TELA := Color("4f6d7a")
+const ANCHO := 6640.0
 const MADERA := Color("b0613f")
 const MADERA_OSCURA := Color("6e3a26")
-const LOMOS := [Color("c8576b"), Color("6f8f8a"), Color("d9a65b"), Color("5b4d7a")]
-const LADRILLO := Color("8f4a3c")
 
-## Habitaciones (para el fondo): [rectángulo, estilo de pared]. Lo que queda fuera es muro o exterior.
+## Habitaciones en orden de ruta: [rectángulo, nombre, estilo de pared]. Entre una y otra hay muro.
+## Ninguna es más angosta que la pantalla (640 px), para que la cámara quede dentro.
 const HABITACIONES := [
-	[Rect2(0, TECHO_BAJO, 1540, SUELO - TECHO_BAJO), "sala"],
-	[Rect2(1540, 0, 346, SUELO), "escalera"],
-	[Rect2(1886, TECHO_BAJO, 594, SUELO - TECHO_BAJO), "cocina"],
-	[Rect2(1886, 0, 594, PISO_ALTO), "dormitorio"],
-	[Rect2(2480, 0, 416, PISO_ALTO), "pasillo"],
+	[Rect2(0, TECHO, 1400, SUELO - TECHO), "sala", "tapiz"],
+	[Rect2(1560, TECHO, 800, SUELO - TECHO), "recibidor", "tapiz_verde"],
+	[Rect2(2520, TECHO, 800, SUELO - TECHO), "cocina", "azulejo"],
+	[Rect2(3480, TECHO, 700, SUELO - TECHO), "pasillo", "tapiz_azul"],
+	[Rect2(4340, TECHO, 700, SUELO - TECHO), "dormitorio", "rosa"],
+	[Rect2(5200, TECHO, 640, SUELO - TECHO), "estudio", "tapiz_mostaza"],
+	[Rect2(6000, TECHO, 640, SUELO - TECHO), "balcon", "exterior"],
 ]
+## Orden de la ruta (las reglas de diseño lo usan para comprobar que se enseña antes de pedir).
+const RUTA := ["sala", "recibidor", "cocina", "pasillo", "dormitorio", "estudio", "balcon"]
 ## Ventanas: huecos de la pared por donde se ve la ciudad.
-const VENTANAS := [Rect2(290, 600, 180, 145), Rect2(2205, 540, 90, 150), Rect2(2560, 90, 150, 120)]
+const VENTANAS := [Rect2(260, 140, 180, 145), Rect2(3070, 130, 150, 150), Rect2(3700, 140, 120, 120), Rect2(4620, 110, 150, 120), Rect2(5400, 90, 150, 100)]
 
-## Arte de Gemini por mueble: nombre -> [imagen en assets/nivel1/ ("" = lo dibuja otra pieza), corrimiento en x].
+## Puertas: [nombre, posición (al pie), puerta a la que lleva]. Van de a pares.
+const PUERTAS := [
+	["sala>recibidor", Vector2(1350, SUELO), "recibidor<sala"],
+	["recibidor<sala", Vector2(1605, SUELO), "sala>recibidor"],
+	["recibidor>cocina", Vector2(1810, SUELO), "cocina<recibidor"],
+	["cocina<recibidor", Vector2(2570, SUELO), "recibidor>cocina"],
+	["recibidor>pasillo", Vector2(2320, SUELO - 288), "pasillo<recibidor"],  # arriba de la escalera
+	["pasillo<recibidor", Vector2(3530, SUELO), "recibidor>pasillo"],
+	["pasillo>dormitorio", Vector2(3830, SUELO), "dormitorio<pasillo"],
+	["dormitorio<pasillo", Vector2(4390, SUELO), "pasillo>dormitorio"],
+	["pasillo>estudio", Vector2(4130, SUELO), "estudio<pasillo"],
+	["estudio<pasillo", Vector2(5250, SUELO), "pasillo>estudio"],
+	["estudio>balcon", Vector2(5800, SUELO), "balcon<estudio"],  # cerrada hasta desenchufar a A.S.P.I.
+	["balcon<estudio", Vector2(6040, SUELO), "estudio>balcon"],
+]
+const PUERTA_BALCON := "estudio>balcon"
+
+## Arte de Gemini por mueble: nombre -> [imagen en assets/nivel1/ ("" = va dentro de otra imagen), corrimiento en x].
 const ARTE_MUEBLES := {
-	"Sofá": ["sofa", 0.0], "Mesa": ["comedor", 0.0], "Silla": ["", 0.0], "Silla 2": ["", 0.0],
-	"Banco": ["banco", 0.0], "Aparador": ["aparador", 0.0], "Mesón": ["meson", 0.0], "Refrigerador": ["refrigerador", 0.0],
-	"Cama": ["cama", 0.0], "Cabecera": ["", 0.0], "Cómoda": ["comoda", 0.0], "Ropero": ["ropero", 0.0],
-	"Baranda": ["baranda", -87.0],
+	"Sofá": ["sofa", 0.0], "Mesa": ["comedor", 0.0], "Silla": ["", 0.0], "Silla 2": ["", 0.0], "Banco": ["banco", 0.0],
+	"Aparador": ["aparador", 0.0], "Librero": ["librero", 0.0], "Repisa del librero 1": ["", 0.0],
+	"Repisa del librero 2": ["", 0.0], "Repisa del librero 3": ["", 0.0], "Mesón": ["meson", 0.0],
+	"Refrigerador": ["refrigerador", 0.0], "Consola": ["aparador", 0.0], "Cama": ["cama", 0.0], "Cabecera": ["", 0.0],
+	"Cómoda": ["comoda", 0.0], "Ropero": ["ropero", 0.0], "Escritorio": ["aparador", 0.0], "Taburete": ["banco", 0.0],
+	"Baranda": ["baranda", -92.0],
 }
 
 ## [rectángulo, se atraviesa desde abajo, nombre, estilo de dibujo]. Entre paréntesis, la altura real.
 const PIEZAS := [
 	[Rect2(0, SUELO, ANCHO, 30), false, "Piso", "invisible"],
-	[Rect2(-20, 0, 20, ALTO), false, "Pared izquierda", "invisible"],
-	[Rect2(ANCHO, 0, 20, ALTO), false, "Pared derecha", "invisible"],
-	[Rect2(0, -20, ANCHO, 20), false, "Techo", "invisible"],
-	[Rect2(0, 0, 1540, TECHO_BAJO), false, "Muro sobre la sala", "muro"],
-	[Rect2(2480, TECHO_BAJO, 600, SUELO - TECHO_BAJO), false, "Muro bajo el balcón", "muro"],
-	[Rect2(1886, PISO_ALTO, 334, 24), false, "Entrepiso del dormitorio", "entrepiso"],
-	[Rect2(2270, PISO_ALTO, 810, 24), false, "Entrepiso del pasillo", "entrepiso"],
-	# Planta baja: sala.
-	[Rect2(260, SUELO - 54, 230, 10), true, "Sofá", "sofa"],  # asiento a 45 cm
-	[Rect2(560, SUELO - 55, 40, 8), true, "Silla", "silla"],  # 45 cm
-	[Rect2(610, SUELO - 91, 133, 8), true, "Mesa", "mesa"],  # 75 cm
-	[Rect2(755, SUELO - 55, 40, 8), true, "Silla 2", "silla"],
-	[Rect2(880, SUELO - 79, 50, 8), true, "Banco", "mesa"],  # 65 cm, sobre los juguetes
-	[Rect2(1010, SUELO - 98, 150, 62), false, "Aparador", "aparador"],  # 81 cm, con 30 cm libres debajo
-	[Rect2(1400, SUELO - 24, 100, 24), false, "Caja de arena", "caja"],  # 20 cm
-	[Rect2(1560, SUELO - 260, 50, 8), true, "Repisa de la escalera", "repisa"],  # 2,15 m; se alcanza desde la escalera
-	# Planta baja: cocina.
-	[Rect2(1960, SUELO - 109, 200, 109), false, "Mesón", "meson"],  # 90 cm
-	[Rect2(2400, SUELO - 218, 80, 218), false, "Refrigerador", "refri"],  # 1,80 m
-	# Planta alta: dormitorio de Valeria.
-	[Rect2(1970, PISO_ALTO - 66, 240, 30), false, "Cama", "cama"],  # 55 cm, con 30 cm libres debajo
-	[Rect2(1970, PISO_ALTO - 120, 30, 8), true, "Cabecera", "repisa"],  # 1 m
-	[Rect2(2280, PISO_ALTO - 97, 80, 97), false, "Cómoda", "comoda"],  # 80 cm
-	[Rect2(2370, PISO_ALTO - 185, 100, 185), false, "Ropero", "ropero"],  # 1,53 m
-	# Planta alta: pasillo de A.S.P.I. y balcón.
-	[Rect2(2530, PISO_ALTO - 55, 40, 8), true, "Silla del pasillo", "silla"],
-	[Rect2(2600, PISO_ALTO - 160, 200, 8), true, "Repisa de las macetas", "repisa"],  # 1,30 m
-	[Rect2(2880, PISO_ALTO - 248, 16, 248), false, "Puerta del balcón", "puerta"],  # 2,05 m; se abre al apagar a A.S.P.I.
-	[Rect2(3070, PISO_ALTO - 94, 10, 94), false, "Baranda", "baranda"],  # 78 cm
+	[Rect2(0, TECHO - 20, ANCHO, 20), false, "Techo", "invisible"],
+	# Sala.
+	[Rect2(220, SUELO - 54, 230, 10), true, "Sofá", "arte"],  # asiento a 45 cm
+	[Rect2(520, SUELO - 55, 40, 8), true, "Silla", "arte"],  # 45 cm
+	[Rect2(570, SUELO - 91, 133, 8), true, "Mesa", "arte"],  # 75 cm
+	[Rect2(715, SUELO - 55, 40, 8), true, "Silla 2", "arte"],
+	[Rect2(808, SUELO - 79, 52, 8), true, "Banco", "arte"],  # 65 cm, sobre los juguetes
+	[Rect2(970, SUELO - 98, 156, 62), false, "Aparador", "arte"],  # 81 cm, con 30 cm libres debajo
+	# Recibidor.
+	[Rect2(1660, SUELO - 24, 100, 24), false, "Caja de arena", "caja"],  # 20 cm
+	[Rect2(1880, SUELO - 55, 92, 6), true, "Repisa del librero 1", "arte"],  # repisas cada 45 cm
+	[Rect2(1880, SUELO - 109, 92, 6), true, "Repisa del librero 2", "arte"],
+	[Rect2(1880, SUELO - 163, 92, 6), true, "Repisa del librero 3", "arte"],
+	[Rect2(1880, SUELO - 218, 92, 8), true, "Librero", "arte"],  # 1,80 m
+	[Rect2(2246, SUELO - 288, 114, 8), true, "Descanso de la escalera", "escalon"],
+	# Cocina.
+	[Rect2(2700, SUELO - 109, 204, 109), false, "Mesón", "arte"],  # 90 cm
+	[Rect2(2940, SUELO - 218, 84, 218), false, "Refrigerador", "arte"],  # 1,80 m
+	# Pasillo de arriba.
+	[Rect2(3640, SUELO - 98, 156, 62), false, "Consola", "arte"],  # 81 cm
+	# Dormitorio.
+	[Rect2(4490, SUELO - 280, 60, 8), true, "Repisa alta", "repisa"],  # 2,30 m; se llega trepando la cortina
+	[Rect2(4580, SUELO - 66, 244, 30), false, "Cama", "arte"],  # colchón a 55 cm, con 30 cm libres debajo
+	[Rect2(4580, SUELO - 120, 30, 8), true, "Cabecera", "arte"],  # 1 m
+	[Rect2(4848, SUELO - 97, 84, 97), false, "Cómoda", "arte"],  # 80 cm
+	[Rect2(4936, SUELO - 185, 104, 185), false, "Ropero", "arte"],  # 1,53 m
+	# Estudio de Valeria (la pelea).
+	[Rect2(5360, SUELO - 98, 156, 62), false, "Escritorio", "arte"],  # 81 cm
+	[Rect2(5556, SUELO - 79, 52, 8), true, "Taburete", "arte"],  # 65 cm
+	[Rect2(5620, SUELO - 160, 160, 8), true, "Repisa de las macetas", "repisa"],  # 1,30 m
+	[Rect2(5772, SUELO - 250, 60, 8), true, "Repisita del enchufe", "repisa"],  # 2,05 m
+	# Balcón.
+	[Rect2(6630, SUELO - 94, 10, 94), false, "Baranda", "arte"],  # 78 cm
 ]
-## Escalera: escalones que se atraviesan desde abajo, de la sala al dormitorio.
-const ESCALERA_X := 1550.0
-const ESCALONES := 14
+## Escalera del recibidor: escalones que se atraviesan desde abajo.
+const ESCALERA_X := 2030.0
+const ESCALONES := 9
 const ANCHO_ESCALON := 24.0
-## Puerta del dormitorio, arriba de la escalera: se abre desde el dormitorio (atajo de vuelta).
-const PUERTA_DORMITORIO := Rect2(1886, PISO_ALTO - 248, 16, 248)
+const SUBIDA_ESCALON := 32.0
+## Dos rejas para bebés apiladas (1,5 m) al pie de la escalera.
+const REJA := Rect2(1990, SUELO - 182, 40, 182)
 ## Piezas de juguete en la alfombra: quitan un corazón.
-const PELIGROS := [Rect2(805, SUELO - 6, 180, 6)]
-## Zonas para trepar: la cortina de la cocina sube por el hueco del entrepiso hasta el dormitorio.
-const TREPABLES := [Rect2(2227, PISO_ALTO - 40, 36, SUELO - PISO_ALTO + 40)]
+const PELIGROS := [Rect2(760, SUELO - 6, 180, 6)]
+## Cortina del dormitorio: se trepa hasta la repisa alta (calcetín secreto).
+const TREPABLES := [Rect2(4450, SUELO - 290, 36, 290)]
 
 ## Avisos del tutorial: [rectángulo donde aparece, texto]. Solo la primera vez; {acción} es la tecla o el botón en uso.
 const AVISOS := [
-	[Rect2(0, TECHO_BAJO, 250, 424), "{mover_izquierda} {mover_derecha} caminar · {saltar} saltar"],
-	[Rect2(540, TECHO_BAJO, 220, 424), "{interactuar} para tirar cosas"],
-	[Rect2(990, TECHO_BAJO, 190, 424), "Mantén {agacharse} para pasar por debajo"],
-	[Rect2(1180, TECHO_BAJO, 200, 424), "{zarpazo} zarpazo"],
-	[Rect2(1400, TECHO_BAJO, 140, 424), "Caja de arena: aquí reapareces"],
-	[Rect2(2180, TECHO_BAJO, 120, 424), "Mantén {mover_arriba} para trepar"],
-	[Rect2(1886, 0, 84, PISO_ALTO), "Cojín: aquí reapareces"],
-	[Rect2(2480, 0, 140, PISO_ALTO), "A.S.P.I. solo se aturde si le cae algo encima"],
+	[Rect2(0, TECHO, 250, SUELO - TECHO), "{mover_izquierda} {mover_derecha} caminar · {saltar} saltar"],
+	[Rect2(470, TECHO, 200, SUELO - TECHO), "{interactuar} para tirar cosas"],
+	[Rect2(945, TECHO, 180, SUELO - TECHO), "Mantén {agacharse} para pasar por debajo"],
+	[Rect2(1140, TECHO, 170, SUELO - TECHO), "{zarpazo} zarpazo"],
+	[Rect2(1620, TECHO, 150, SUELO - TECHO), "Caja de arena: aquí reapareces"],
+	[Rect2(1840, TECHO, 140, SUELO - TECHO), "Trepa el librero: {saltar} dos veces"],
+	[Rect2(2040, TECHO, 150, SUELO - TECHO), "De este lado, {interactuar} abre la reja"],
+	[Rect2(2600, TECHO, 100, SUELO - TECHO), "{interactuar} para comer"],
+	[Rect2(3960, TECHO, 120, SUELO - TECHO), "Cojín: aquí reapareces"],
+	[Rect2(4350, TECHO, 140, SUELO - TECHO), "Mantén {mover_arriba} para trepar"],
 ]
-## Calcetines: sobre la repisa de la escalera, en el clóset (el láser lleva ahí) y sobre el ropero.
-const CALCETINES := [Vector2(1585, SUELO - 260), Vector2(1925, PISO_ALTO), Vector2(2420, PISO_ALTO - 185)]
-const CAJA_CARTON := Vector2(2330, SUELO)
+## Calcetines: arriba del refrigerador, en la repisa alta del dormitorio (cortina) y arriba del ropero.
+const CALCETINES := [Vector2(2982, SUELO - 218), Vector2(4520, SUELO - 280), Vector2(4988, SUELO - 185)]
+const TOTAL_CALCETINES := 3
+const CAJA_CARTON := Vector2(3150, SUELO)
 ## Ratones de cuerda: [posición, límite izquierdo, límite derecho].
 const RATONES := [
-	[Vector2(1300, SUELO), 1260.0, 1390.0],
-	[Vector2(2000, SUELO - 109), 1965.0, 2060.0],
-	[Vector2(2110, SUELO - 109), 2065.0, 2155.0],
-	[Vector2(2100, PISO_ALTO), 2020.0, 2270.0],
+	[Vector2(1260, SUELO), 1220.0, 1330.0],
+	[Vector2(2760, SUELO - 109), 2730.0, 2800.0],
+	[Vector2(2860, SUELO - 109), 2820.0, 2895.0],
 ]
-const LASER := [Vector2(2100, PISO_ALTO), 1905.0, 2000.0]
-## Objetos que se tiran con el botón de acción: [posición, tipo, piso donde caen].
+const LASER := [Vector2(3900, SUELO), 3860.0, 3960.0]
+## Objetos que se tiran con el botón de acción: [posición, tipo].
 const TIRABLES := [
-	[Vector2(680, SUELO - 91), "vaso", SUELO],
-	[Vector2(2300, PISO_ALTO - 97), "rollo", PISO_ALTO],
-	[Vector2(2640, PISO_ALTO - 160), "maceta", PISO_ALTO],
-	[Vector2(2700, PISO_ALTO - 160), "maceta", PISO_ALTO],
-	[Vector2(2760, PISO_ALTO - 160), "maceta", PISO_ALTO],
+	[Vector2(640, SUELO - 91), "vaso"],
+	[Vector2(3720, SUELO - 98), "vaso"],
+	[Vector2(5480, SUELO - 98), "rollo"],
+	[Vector2(5650, SUELO - 160), "maceta"],
+	[Vector2(5700, SUELO - 160), "maceta"],
+	[Vector2(5750, SUELO - 160), "maceta"],
 ]
 ## Comida: [posición, tipo]. El plato sale de la caja de cartón.
-const COMIDA := [[Vector2(2340, PISO_ALTO - 97), "lata"]]
-const ASPI := [Vector2(2700, PISO_ALTO), 2560.0, 2860.0]
-## Puntos de descanso: la caja de arena y el cojín del dormitorio (al final del atajo, antes de A.S.P.I.).
-const DESCANSOS := [Rect2(1400, SUELO - 40, 100, 50), Rect2(1906, PISO_ALTO - 40, 60, 50)]
-## Orden en que se recorren las habitaciones (las reglas de diseño lo usan para comprobar que se enseña antes de probar).
-const RUTA := ["sala", "escalera", "cocina", "dormitorio", "pasillo"]
+const COMIDA := [[Vector2(2885, SUELO - 109), "lata"]]
+## A.S.P.I.: [base de carga, límite izquierdo, límite derecho] dentro del estudio.
+const ASPI := [Vector2(5700, SUELO), 5290.0, 5790.0]
+## Enchufes de la base de carga: abajo junto al escritorio, sobre el escritorio y en la repisita alta.
+const ENCHUFES := [Vector2(5532, SUELO), Vector2(5420, SUELO - 98), Vector2(5802, SUELO - 250)]
+## Puntos de descanso: la caja de arena (recibidor) y el cojín (pasillo, junto a la puerta del jefe).
+const DESCANSOS := [Rect2(1660, SUELO - 40, 100, 50), Rect2(3990, SUELO - 40, 60, 50)]
 ## Pasar esta x en el balcón termina la demo.
-const SALIDA := 2930.0
-const TOTAL_CALCETINES := 3
+const SALIDA := 6500.0
 
 signal logro_desbloqueado(titulo: String)
+signal habitacion_cambiada(nombre: String)
 
-## Índice en RUTA de la habitación que contiene el punto, mirando un píxel arriba para que el piso cuente (-1 si está fuera).
-static func orden_en_ruta(punto: Vector2) -> int:
+
+## Nombre de la habitación que contiene el punto, mirando un píxel arriba para que el piso cuente ("" si está fuera).
+static func habitacion_de(punto: Vector2) -> String:
 	for habitacion: Array in HABITACIONES:
 		if (habitacion[0] as Rect2).has_point(punto - Vector2(0, 1)):
-			return RUTA.find(habitacion[1])
-	return -1
+			return habitacion[1]
+	return ""
+
+
+## Rectángulo de la habitación con ese nombre.
+static func rect_de(nombre: String) -> Rect2:
+	for habitacion: Array in HABITACIONES:
+		if habitacion[1] == nombre:
+			return habitacion[0]
+	return Rect2()
+
+
+## Índice en RUTA de la habitación que contiene el punto (-1 si está fuera).
+static func orden_en_ruta(punto: Vector2) -> int:
+	return RUTA.find(habitacion_de(punto))
 
 
 ## Muestra la pantalla de título al empezar (las pruebas la apagan).
 @export var mostrar_titulo := true
-## Cruzarse con A.S.P.I. arranca la pelea de jefe (la prueba de mecánicas la apaga para probar a A.S.P.I. sola).
+## Entrar al estudio arranca la pelea de jefe (la prueba de mecánicas la apaga para probar a A.S.P.I. sola).
 @export var batalla_con_jefe := true
 ## Las piezas de juguete hacen daño (la prueba de movimiento las apaga).
 @export var peligros_activos := true
@@ -145,10 +190,14 @@ var tiempo := 0.0
 var terminado := false
 var pantallas: Pantallas
 var batalla: BatallaAspi
+var aspi: Aspi
+var habitacion := ""
+var puertas := {}
 var _piezas := {}
 var _sonidos: Array[AudioStreamPlayer] = []
 var _avisos_vistos := {}
-var _tiempo_peligro := 0.0
+var _fundido: ColorRect
+var _cruzando := false
 
 @onready var felipe: Felipe = $Felipe
 
@@ -157,28 +206,48 @@ func _ready() -> void:
 	add_child(FondoApartamento.new(ANCHO, ALTO))
 	for pieza: Array in PIEZAS:
 		_crear_pieza(pieza[0], pieza[1], pieza[2], pieza[3])
+	# Paredes de cada habitación: no se sale de un cuarto si no es por una puerta.
+	for datos: Array in HABITACIONES:
+		var cuarto: Rect2 = datos[0]
+		_crear_pieza(Rect2(cuarto.position.x - 20, 0, 20, ALTO), false, "Pared izquierda de %s" % datos[1], "invisible")
+		_crear_pieza(Rect2(cuarto.end.x, 0, 20, ALTO), false, "Pared derecha de %s" % datos[1], "invisible")
 	for i in ESCALONES:
-		var escalon := Rect2(ESCALERA_X + i * ANCHO_ESCALON, SUELO - 32.0 * (i + 1), ANCHO_ESCALON, 8)
+		var escalon := Rect2(ESCALERA_X + i * ANCHO_ESCALON, SUELO - SUBIDA_ESCALON * (i + 1), ANCHO_ESCALON, 8)
 		_crear_pieza(escalon, true, "Escalón %d" % (i + 1), "escalon")
-	var puerta := PuertaDormitorio.new(PUERTA_DORMITORIO)
-	puerta.abierta.connect(func() -> void: desbloquear_logro("Atajo de Gato"))
-	add_child(puerta)
+	var reja := Reja.new(REJA)
+	reja.abierta.connect(func() -> void: desbloquear_logro("Atajo de Gato"))
+	add_child(reja)
+	for datos: Array in PUERTAS:
+		var puerta := Puerta.new(datos[0], datos[1], datos[2], datos[1].y - TECHO)
+		puerta.cerrada = datos[0] == PUERTA_BALCON
+		puerta.cruzada.connect(cruzar)
+		add_child(puerta)
+		puertas[datos[0]] = puerta
 	for comida: Array in COMIDA:
 		var objeto := Comida.new(comida[1])
 		objeto.position = comida[0]
 		add_child(objeto)
-	for tirable: Array in TIRABLES:
-		var objeto := Vaso.new(tirable[2], tirable[1])
-		objeto.position = tirable[0]
-		add_child(objeto)
-	var aspi := Aspi.new(ASPI[1], ASPI[2])
+	aspi = Aspi.new(ASPI[1], ASPI[2])
 	aspi.position = ASPI[0]
 	aspi.necesita_aturdir = true
 	aspi.apagado.connect(_abrir_balcon)
 	add_child(aspi)
+	var enchufes: Array[Enchufe] = []
+	for posicion: Vector2 in ENCHUFES:
+		var enchufe := Enchufe.new(posicion)
+		add_child(enchufe)
+		enchufes.append(enchufe)
+	var tirables: Array[Vaso] = []
+	for tirable: Array in TIRABLES:
+		var objeto := Vaso.new(SUELO, tirable[1])
+		objeto.position = tirable[0]
+		add_child(objeto)
+		tirables.append(objeto)
 	if batalla_con_jefe:
-		batalla = BatallaAspi.new(aspi, felipe, self)
+		batalla = BatallaAspi.new(aspi, felipe, self, enchufes)
 		add_child(batalla)
+		for objeto in tirables:
+			objeto.caido.connect(batalla.agregar_mancha)
 	for datos: Array in RATONES:
 		var raton := Raton.new(datos[1], datos[2])
 		raton.position = datos[0]
@@ -203,11 +272,6 @@ func _ready() -> void:
 	decorado.z_index = -1
 	decorado.draw.connect(_dibujar_decorado.bind(decorado))
 	add_child(decorado)
-	var ropa := Node2D.new()
-	ropa.name = "Ropa del closet"
-	ropa.z_index = 5
-	ropa.draw.connect(_dibujar_ropa.bind(ropa))
-	add_child(ropa)
 	felipe.zonas_trepables.assign(TREPABLES)
 	felipe.sonido.connect(sonar)
 	for i in 4:
@@ -223,19 +287,23 @@ func _ready() -> void:
 	logro_desbloqueado.connect(medidores.mostrar_logro)
 	$Interfaz.add_child(medidores)
 	medidores.pantallas = pantallas
+	_fundido = ColorRect.new()
+	_fundido.name = "Fundido"
+	_fundido.color = Color.BLACK
+	_fundido.modulate.a = 0.0
+	_fundido.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_fundido.set_anchors_preset(Control.PRESET_FULL_RECT)
+	$Interfaz.add_child(_fundido)
 	if mostrar_titulo:
 		pantallas.mostrar_titulo()
-	var camara: Camera2D = felipe.get_node("Camara")
-	camara.limit_left = 0
-	camara.limit_top = 0
-	camara.limit_right = int(ANCHO)
-	camara.limit_bottom = int(ALTO)
+	_actualizar_camara()
 
 
 func _physics_process(delta: float) -> void:
 	if terminado:
 		return
 	tiempo += delta
+	_actualizar_camara()
 	# Puntos de descanso: la caja de arena y el cojín.
 	for descanso: Rect2 in DESCANSOS:
 		if descanso.has_point(felipe.global_position) and felipe.is_on_floor():
@@ -244,13 +312,64 @@ func _physics_process(delta: float) -> void:
 				felipe.punto_reaparicion = punto
 				sonar("logro")
 	# Piezas de juguete: duelen al pisarlas.
-	_tiempo_peligro = maxf(0.0, _tiempo_peligro - delta)
 	for peligro: Rect2 in PELIGROS if peligros_activos else []:
 		if peligro.grow(2).has_point(felipe.global_position) and felipe.is_on_floor():
 			felipe.recibir_dano(1, felipe.global_position.x - felipe.mirando * 10.0)
 	_actualizar_aviso()
-	if felipe.global_position.x > SALIDA and felipe.global_position.y < TECHO_BAJO:
+	if felipe.global_position.x > SALIDA and habitacion == "balcon":
 		_terminar_demo()
+
+
+## La cámara queda dentro de la habitación donde está Felipe (también después de una puerta o de reaparecer).
+func _actualizar_camara() -> void:
+	var actual := habitacion_de(felipe.global_position)
+	if actual == "" or actual == habitacion:
+		return
+	habitacion = actual
+	var cuarto := rect_de(actual)
+	var camara: Camera2D = felipe.get_node("Camara")
+	camara.limit_left = int(cuarto.position.x)
+	camara.limit_right = int(cuarto.end.x)
+	camara.limit_top = 0
+	camara.limit_bottom = int(ALTO)
+	camara.reset_smoothing()
+	# El salto de cámara se completa en el cuadro siguiente, ya con los límites nuevos.
+	camara.reset_smoothing.call_deferred()
+	habitacion_cambiada.emit(actual)
+
+
+## Cruza una puerta: funde a negro, lleva a Felipe a la puerta del otro lado y vuelve a mostrar.
+func cruzar(puerta: Puerta) -> void:
+	if _cruzando or terminado:
+		return
+	if puerta.cerrada:
+		_aviso_breve("Cerrada. A.S.P.I. tiene el control de esta puerta.")
+		return
+	var otra: Puerta = puertas.get(puerta.destino)
+	if otra == null:
+		return
+	_cruzando = true
+	sonar("salto")
+	felipe.set_physics_process(false)
+	var fundido := create_tween()
+	fundido.tween_property(_fundido, "modulate:a", 1.0, 0.15)
+	await fundido.finished
+	felipe.global_position = otra.global_position
+	felipe.velocity = Vector2.ZERO
+	felipe.mirando = 1.0 if otra.global_position.x < rect_de(habitacion_de(otra.global_position)).get_center().x else -1.0
+	_actualizar_camara()
+	felipe.set_physics_process(true)
+	var vuelta := create_tween()
+	vuelta.tween_property(_fundido, "modulate:a", 0.0, 0.2)
+	await vuelta.finished
+	_cruzando = false
+
+
+func _aviso_breve(texto: String) -> void:
+	pantallas.aviso_fijo = texto
+	await get_tree().create_timer(2.0).timeout
+	if pantallas.aviso_fijo == texto:
+		pantallas.aviso_fijo = ""
 
 
 ## Cada aviso se muestra solo la primera vez que Felipe entra en su zona.
@@ -268,12 +387,13 @@ func _actualizar_aviso() -> void:
 
 ## Al empezar, la cámara muestra un momento el balcón abierto: la meta.
 func _mostrar_meta() -> void:
+	var balcon := rect_de("balcon")
 	var camara_meta := Camera2D.new()
 	camara_meta.name = "Camara de la meta"
-	camara_meta.position = Vector2(SALIDA, PISO_ALTO - 120)
-	camara_meta.limit_left = 0
+	camara_meta.position = Vector2(balcon.get_center().x, SUELO - 120)
+	camara_meta.limit_left = int(balcon.position.x)
+	camara_meta.limit_right = int(balcon.end.x)
 	camara_meta.limit_top = 0
-	camara_meta.limit_right = int(ANCHO)
 	camara_meta.limit_bottom = int(ALTO)
 	add_child(camara_meta)
 	camara_meta.make_current()
@@ -325,10 +445,10 @@ func _romper_caja() -> void:
 
 
 func _abrir_balcon() -> void:
-	var puerta: Node = _piezas.get("Puerta del balcón")
+	var puerta: Puerta = puertas.get(PUERTA_BALCON)
 	if puerta:
-		puerta.queue_free()
-		_piezas.erase("Puerta del balcón")
+		puerta.cerrada = false
+		puerta.queue_redraw()
 	desbloquear_logro("Desenchufada")
 
 
@@ -369,38 +489,15 @@ func _crear_pieza(rect: Rect2, atravesable: bool, nombre: String, estilo: String
 	add_child(cuerpo)
 
 
-## Piso sobre el que está apoyado un mueble (planta alta o baja).
-static func piso_bajo(y: float) -> float:
-	return PISO_ALTO if y < PISO_ALTO else SUELO
-
-
-## Dibuja el mueble provisional. (0, 0) es la esquina de arriba a la izquierda de la parte donde se para Felipe.
+## Dibuja el mueble. (0, 0) es la esquina de arriba a la izquierda de la parte donde se para Felipe.
+## Los muebles con arte de Gemini se apoyan en el piso; los demás (repisas, escalones, caja de arena) son dibujo.
 func _dibujar_mueble(c: Node2D, tamano: Vector2, estilo: String, nombre: String) -> void:
-	var y := (c.get_parent() as Node2D).position.y
-	var hasta_suelo := piso_bajo(y) - y
-	if ARTE_MUEBLES.has(nombre):
-		var arte: Array = ARTE_MUEBLES[nombre]
-		# Sin imagen propia (sillas y cabecera van dentro del comedor y de la cama): no se dibuja nada.
-		if arte[0] == "" and ArteNivel.textura("comedor") != null:
-			return
-		if ArteNivel.dibujar(c, arte[0], tamano.x / 2.0 + arte[1], hasta_suelo):
-			return
+	var hasta_suelo := SUELO - (c.get_parent() as Node2D).position.y
 	match estilo:
-		"sofa":
-			c.draw_rect(Rect2(0, -48, tamano.x, 54), TELA.darkened(0.2))
-			c.draw_rect(Rect2(0, 0, tamano.x, hasta_suelo - 6), TELA)
-			c.draw_rect(Rect2(tamano.x / 2 - 1, 0, 2, 14), TELA.darkened(0.3))
-			c.draw_rect(Rect2(-10, -10, 14, hasta_suelo + 4), TELA.darkened(0.1))
-			c.draw_rect(Rect2(tamano.x - 4, -10, 14, hasta_suelo + 4), TELA.darkened(0.1))
-		"mesa":
-			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), MADERA)
-			c.draw_rect(Rect2(6, tamano.y, 6, hasta_suelo - tamano.y), MADERA_OSCURA)
-			c.draw_rect(Rect2(tamano.x - 12, tamano.y, 6, hasta_suelo - tamano.y), MADERA_OSCURA)
-		"silla":
-			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), MADERA)
-			c.draw_rect(Rect2(0, -50, 6, 50), MADERA_OSCURA)
-			c.draw_rect(Rect2(2, tamano.y, 4, hasta_suelo - tamano.y), MADERA_OSCURA)
-			c.draw_rect(Rect2(tamano.x - 6, tamano.y, 4, hasta_suelo - tamano.y), MADERA_OSCURA)
+		"arte":
+			var arte: Array = ARTE_MUEBLES[nombre]
+			if arte[0] != "":
+				ArteNivel.dibujar(c, arte[0], tamano.x / 2.0 + arte[1], hasta_suelo)
 		"repisa", "escalon":
 			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), MADERA)
 			if estilo == "escalon":
@@ -408,79 +505,12 @@ func _dibujar_mueble(c: Node2D, tamano: Vector2, estilo: String, nombre: String)
 			else:
 				for x: float in [4.0, tamano.x - 16.0]:
 					c.draw_colored_polygon(PackedVector2Array([Vector2(x, tamano.y), Vector2(x + 12, tamano.y), Vector2(x, tamano.y + 14)]), MADERA_OSCURA)
-		"aparador":
-			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), MADERA)
-			c.draw_rect(Rect2(-3, 0, tamano.x + 6, 6), MADERA_OSCURA)
-			for cajon: float in [8.0, tamano.x / 2 + 4]:
-				c.draw_rect(Rect2(cajon, 14, tamano.x / 2 - 12, tamano.y - 22), MADERA.lightened(0.1))
-				c.draw_rect(Rect2(cajon + tamano.x / 4 - 10, 28, 8, 3), MADERA_OSCURA)
-			for pata: float in [6.0, tamano.x - 12.0]:
-				c.draw_rect(Rect2(pata, tamano.y, 6, hasta_suelo - tamano.y), MADERA_OSCURA)
-		"meson":
-			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), Color("d8cbb8"))
-			c.draw_rect(Rect2(-4, 0, tamano.x + 8, 8), Color("8a8f96"))
-			var cajon := 8.0
-			while cajon < tamano.x - 10:
-				c.draw_rect(Rect2(cajon, 16, 60, 56), Color("c4b6a2"))
-				cajon += 68
-			# Alacenas altas.
-			c.draw_rect(Rect2(0, -230, tamano.x, 80), MADERA)
-			var puerta := 6.0
-			while puerta < tamano.x - 10:
-				c.draw_rect(Rect2(puerta, -222, 58, 64), MADERA.lightened(0.1))
-				puerta += 66
-		"refri":
-			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), Color("e9eef0"))
-			c.draw_rect(Rect2(0, 70, tamano.x, 3), Color("aab3b8"))
-			c.draw_rect(Rect2(tamano.x - 14, 30, 5, 30), Color("aab3b8"))
-			c.draw_rect(Rect2(tamano.x - 14, 90, 5, 40), Color("aab3b8"))
-			c.draw_rect(Rect2(14, 100, 20, 26), Color("f2d36b"))
-		"cama":
-			c.draw_rect(Rect2(0, -6, tamano.x, 12), Color("f3efe8"))
-			c.draw_rect(Rect2(0, 6, tamano.x, tamano.y - 6), Color("8f6aa8"))
-			c.draw_rect(Rect2(tamano.x - 50, -14, 40, 12), Color("f3efe8"))
-			for pata: float in [4.0, tamano.x - 10.0]:
-				c.draw_rect(Rect2(pata, tamano.y, 6, hasta_suelo - tamano.y), MADERA_OSCURA)
-		"comoda":
-			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), MADERA)
-			for fila in 3:
-				c.draw_rect(Rect2(5, 8 + fila * 29, tamano.x - 10, 24), MADERA.lightened(0.1))
-				c.draw_rect(Rect2(tamano.x / 2 - 4, 18 + fila * 29, 8, 3), MADERA_OSCURA)
-		"ropero":
-			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), MADERA_OSCURA)
-			c.draw_rect(Rect2(4, 6, tamano.x / 2 - 6, tamano.y - 12), MADERA)
-			c.draw_rect(Rect2(tamano.x / 2 + 2, 6, tamano.x / 2 - 6, tamano.y - 12), MADERA)
-		"entrepiso":
-			c.draw_rect(Rect2(0, 0, tamano.x, 6), Color("9a5b3c"))
-			c.draw_rect(Rect2(0, 6, tamano.x, tamano.y - 6), Color("5a3a2c"))
-		"muro":
-			c.draw_rect(Rect2(Vector2.ZERO, tamano), LADRILLO.darkened(0.35))
-			var fila_l := 0.0
-			while fila_l < tamano.y:
-				var desfase := 0.0 if int(fila_l / 14.0) % 2 == 0 else 14.0
-				var col := -desfase
-				while col < tamano.x:
-					c.draw_rect(Rect2(maxf(col + 1, 0), fila_l + 1, minf(26, tamano.x - col - 1), 12), LADRILLO.darkened(0.15))
-					col += 28.0
-				fila_l += 14.0
-		"puerta":
-			c.draw_rect(Rect2(-4, -4, tamano.x + 8, tamano.y + 4), MADERA_OSCURA)
-			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), Color("8fb3c4"))
-			c.draw_rect(Rect2(2, 20, tamano.x - 4, tamano.y - 40), Color(0.85, 0.93, 1.0, 0.6))
-		"baranda":
-			c.draw_rect(Rect2(-180, 0, 190, 6), Color("2b2421"))
-			var barrote := -174.0
-			while barrote < 10.0:
-				c.draw_rect(Rect2(barrote, 6, 3, tamano.y - 6), Color("2b2421"))
-				barrote += 14.0
 		"caja":
 			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), Color("5f8fa8"))
 			c.draw_rect(Rect2(4, 0, tamano.x - 8, 6), Color("d9c7a0"))
-		_:
-			c.draw_rect(Rect2(Vector2.ZERO, tamano), MADERA)
 
 
-## Decorado sin colisión: piezas de juguete, lámpara de pie (hito del descanso) y macetas del balcón.
+## Decorado sin colisión: juguetes, escalera, lámpara (hito del descanso), alacenas, cojín, perchero y base de carga.
 func _dibujar_decorado(c: Node2D) -> void:
 	var colores := [Color("e0483b"), Color("5fa8d3"), Color("f2d36b"), Color("5fd18a")]
 	for peligro: Rect2 in PELIGROS:
@@ -493,30 +523,26 @@ func _dibujar_decorado(c: Node2D) -> void:
 			i += 1
 	# Zanca y pasamanos de la escalera: los escalones se leen como una sola pieza.
 	var pie := Vector2(ESCALERA_X, SUELO)
-	var cima := Vector2(ESCALERA_X + ESCALONES * ANCHO_ESCALON, SUELO - 32.0 * ESCALONES)
+	var cima := Vector2(ESCALERA_X + ESCALONES * ANCHO_ESCALON, SUELO - SUBIDA_ESCALON * ESCALONES)
 	c.draw_colored_polygon(PackedVector2Array([pie, cima + Vector2(0, 8), cima + Vector2(0, 40), pie + Vector2(40, 0)]), MADERA_OSCURA.darkened(0.2))
 	c.draw_line(pie + Vector2(0, -60), cima + Vector2(0, -60), MADERA_OSCURA, 4)
 	for i in range(0, ESCALONES, 2):
 		var x := ESCALERA_X + i * ANCHO_ESCALON + ANCHO_ESCALON / 2
-		var y := SUELO - 32.0 * (i + 1)
-		c.draw_line(Vector2(x, y), Vector2(x, y - 60 + 16), MADERA_OSCURA, 2)
-	# Cojín del dormitorio: segundo punto de descanso.
+		var y := SUELO - SUBIDA_ESCALON * (i + 1)
+		c.draw_line(Vector2(x, y), Vector2(x, y - 44), MADERA_OSCURA, 2)
+	ArteNivel.dibujar(c, "lampara", 1790.0, SUELO)
+	c.draw_circle(Vector2(1790, SUELO - 140), 30.0, Color(1.0, 0.9, 0.5, 0.15))
+	# Alacenas sobre el mesón (a 1,50 m, Felipe no llega).
+	ArteNivel.dibujar(c, "alacenas", 2802.0, SUELO - 182.0)
+	ArteNivel.dibujar(c, "perchero", 3590.0, SUELO)
+	# Cojín del pasillo: segundo punto de descanso.
 	var cojin: Rect2 = DESCANSOS[1]
-	c.draw_rect(Rect2(cojin.position.x + 4, PISO_ALTO - 10, cojin.size.x - 8, 10), Color("c8576b"))
-	c.draw_rect(Rect2(cojin.position.x + 8, PISO_ALTO - 13, cojin.size.x - 16, 4), Color("e07a85"))
-	# Alacenas sobre el mesón (decorado: a 1,50 m, Felipe no llega).
-	ArteNivel.dibujar(c, "alacenas", 2060.0, SUELO - 182.0)
-	# Lámpara de pie encendida junto a la caja de arena.
-	ArteNivel.dibujar(c, "lampara", 1514.0, SUELO)
-	c.draw_circle(Vector2(1514, SUELO - 140), 30.0, Color(1.0, 0.9, 0.5, 0.15))
-
-
-## Ropa colgada del clóset, delante de Felipe: esconde el calcetín secreto.
-func _dibujar_ropa(c: Node2D) -> void:
-	c.draw_rect(Rect2(1902, PISO_ALTO - 200, 60, 4), MADERA_OSCURA)
-	var colores := [Color("c46a5a"), Color("5f8fa8"), Color("d9a65b")]
-	for i in 3:
-		c.draw_rect(Rect2(1906 + i * 18, PISO_ALTO - 196, 16, 150 - i * 20), Color(colores[i], 0.92))
+	c.draw_rect(Rect2(cojin.position.x + 4, SUELO - 10, cojin.size.x - 8, 10), Color("c8576b"))
+	c.draw_rect(Rect2(cojin.position.x + 8, SUELO - 13, cojin.size.x - 16, 4), Color("e07a85"))
+	# Base de carga de A.S.P.I.
+	var base: Vector2 = ASPI[0]
+	c.draw_rect(Rect2(base.x - 30, SUELO - 22, 60, 22), Color("4a4d55"))
+	c.draw_rect(Rect2(base.x - 24, SUELO - 18, 48, 4), Color("5fd18a"))
 
 
 func _dibujar_cortina(c: Node2D, zona: Rect2) -> void:

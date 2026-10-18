@@ -76,6 +76,7 @@ Lista oficial (la misma de la ficha de concepto). Toda acción nueva se agrega a
 | Ronronear | — | — | Con humanos, sube el afecto | `ronronear` | Animación lista; falta la mecánica |
 | Recibir daño | — | — | Parpadeo blanco y sacudida | Efecto de código | Falta en el juego |
 | Perder una vida | — | — | Desmayo y una de sus 7 vidas sube como fantasma | `desmayo` + código | Animación lista; falta la mecánica |
+| Peso | — | — | Comer sube el peso; no cambia el dibujo, se ve en un indicador arriba junto a la vida | — | Decidido; falta en el juego |
 | Ocio | Nada durante 8 s (`espera_ocio`) | — | Elige al azar: sentarse y acicalarse, jugar con estambre o perseguirse la cola; repite el ciclo 2 o 3 veces y vuelve a quieto; cualquier botón lo interrumpe | `acicalarse` (escala 0.9), `jugar` (0.6), `vueltas` (0.72) | En el juego |
 
 ## Consistencia
@@ -92,11 +93,6 @@ Felipe es siempre el mismo gato: vista 3/4 como Felipe A, cabeza cerca del 40 % 
 
 Todos en `siete-vidas/arte/felipe/` y en la ficha de concepto (`siete-vidas/concepto/felipe-concepto.html`). La lista de archivos, ids de SpriteCook y costos está en `03-arte-y-herramientas.md` (Assets de Felipe).
 
-## Formas de peso
+## Peso
 
-| Forma | Silueta |
-| --- | --- |
-| Flaco | Cuerpo más alargado, patas un poco más largas |
-| Normal | Silueta base |
-| Gordito | Cuerpo más ancho, panza que cuelga |
-| Modo Buda | Casi una esfera; patas apenas visibles |
+El peso **no cambia el dibujo de Felipe** (decisión del 2026-10-18): con 8 cuadros por animación no se pueden hacer todas las animaciones en varias formas. Se muestra como un indicador arriba, junto a la barra de vida. Las formas Flaco, Gordito y Modo Buda dibujadas se descartaron.

@@ -37,8 +37,8 @@
 
 - **Consistencia primero (regla del creador, 2026-10-18):** toda animación se genera con `animate_game_art` (20 créditos, 8 cuadros) **directamente desde Felipe A**, describiendo el movimiento completo, con `auto_enhance_prompt` apagado y "cat stays in place". No se usan poses editadas como paso intermedio: se comprobó que cambian la vista a perfil, las proporciones y la expresión (pasó con caída, gatear, acicalarse y estambre). Los objetos (estambre, comida) van aparte, por código.
 - **Revisión antes de usar:** `python3 siete-vidas/herramientas/comparar_felipe.py <salida.png>` pone a Felipe A junto a un cuadro de cada animación al tamaño del juego. Se muestra al creador antes de integrar.
-- **Efectos de código (gratis, en Godot y en la ficha):** estirar y aplastar, estela de imágenes fantasma, polvo, inclinación del Doble Salto, parpadeo de daño, vida fantasma, transición de agacharse, respiración del Modo Buda.
-- **Formas de peso:** Flaco (0.84) y Gordito (1.22) con `siete-vidas/herramientas/pesos_felipe.py`, que ensancha solo el cuerpo, del cuello a la panza (resultados en `siete-vidas/arte/felipe/pesos/`). Modo Buda es una pose propia de SpriteCook con respiración por código.
+- **Efectos de código (gratis, en Godot y en la ficha):** estirar y aplastar, estela de imágenes fantasma, polvo, inclinación del Doble Salto, parpadeo de daño, vida fantasma, transición de agacharse.
+- **Peso:** no tiene arte de Felipe; es un indicador de la interfaz (ver `02-guia-felipe.md`, sección Peso).
 - **Tamaños de hoja:** SpriteCook entrega cada hoja en la resolución de su pose (106, 92, 184 o 256 px por cuadro). Casi todas son de 106×106 y se dibujan a 0.72. Las demás llevan su propia escala para que la cabeza mida lo mismo que la de Felipe de pie: gatear 0.4, acicalarse 0.9, jugar 0.6 (`Felipe.ESCALA_AGACHADO` y `Felipe.OCIO`). Cada hoja nueva se compara con "quieto" sobre el mismo piso antes de usarla, y la prueba de movimiento comprueba su altura.
 - **Salto (tiempos de la ficha, iguales en Godot):** se agacha (cuadro 1 de `saltar`), sale estirado (2), recoge las patas arriba (3), Doble Salto con ~20° de inclinación, cae en picada (`caer` 0), toca con las delanteras (`caer` 1), baja la parte de atrás (5) y se asienta (6). No usar el cuadro 4 de `saltar` (viene en diagonal).
 
@@ -51,7 +51,7 @@
 
 ### Assets de Felipe (vigentes)
 
-Solo lo que se usa. ⚠ = hecho desde una pose editada; no es consistente con Felipe A y se rehace desde Felipe A (ver pendientes). Se usa mientras tanto.
+Solo lo que se usa (las formas de peso dibujadas y el Modo Buda se descartaron el 2026-10-18). ⚠ = hecho desde una pose editada; no es consistente con Felipe A y se rehace desde Felipe A (ver pendientes). Se usa mientras tanto.
 
 | Asset | Godot | Id SpriteCook | Archivo en `siete-vidas/arte/felipe/` |
 | --- | --- | --- | --- |
@@ -67,7 +67,6 @@ Solo lo que se usa. ⚠ = hecho desde una pose editada; no es consistente con Fe
 | Comer | `comer` | `df2345fe-8e80-42c8-ba44-304490802633` | `felipe-eat-sheet.png` |
 | Ronronear | `ronronear` | `4dbc1380-5c45-4066-858c-f1c03a87fb67` | `felipe-purr-sheet.png` |
 | Desmayo (cae boca abajo) | `desmayo` | `0e90281b-f940-4f03-ae52-85e6b9d5254b` | `felipe-faint-sheet.png` |
-| Modo Buda (pose) | — | `a9b8fd39-5976-492e-8b81-235ed49635cd` | `felipe-buda-base.png`; respiración en `felipe-buda-quieto-sheet.png` |
 | Collar de la Vergüenza | — | `1893e4a4-4b92-46b1-8b45-efbd5dbcf7e2` | `felipe-cono.png` |
 | 9 retratos para diálogos (3×3, 200×200) | — | `7657f269-815f-451f-a58a-17f2d6b2f014` | `felipe-retratos.png` |
 | ⚠ Pose sentado | — | `0fb977b7-3346-40d5-8a18-e669607b29f4` | `felipe-sentado-base.png` |
@@ -75,7 +74,6 @@ Solo lo que se usa. ⚠ = hecho desde una pose editada; no es consistente con Fe
 | ⚠ Pose jugando con estambre | — | `d9da7997-8421-4fd3-b9c4-f0dfed24cee5` | `felipe-estambre-base.png` |
 | ⚠ Ocio: jugar con estambre (8 cuadros de 184×184, escala 0.6) | `jugar` | `de07b8c8-317f-4c65-b476-700d96c77875` | `felipe-estambre-sheet.png` |
 | Ocio: perseguirse la cola (8 cuadros de 106×106, escala 0.72) | `vueltas` | `bc3dbbc7-7d04-446f-ae5c-e05f6b7cfb73` | `felipe-vueltas-sheet.png` |
-| Flaco, Normal, Gordito | — | Código (`pesos_felipe.py`) | `pesos/` |
 
 Referencias de diseño (no se usan en el juego): foto real de Felipe (`a0fbe97b-61b6-4d6d-8cb3-c5b4afaa6a74`, no está en el repositorio), prueba de 4 estilos v1 (`8868e7a2-…`, `../referencias/felipe-prueba-estilos-v1.png`), híbrido v2 A y B (`22529bf7-…`, `../referencias/felipe-hibrido-v2.png`) y comparación de proporciones (`../referencias/proporciones-felipe.png`).
 

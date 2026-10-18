@@ -78,9 +78,6 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .demos { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
 .demos .card.wide { grid-column: 1 / -1; }
-.weights { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center; font-size: 13px; }
-.weights canvas { width: 100%; height: auto; max-width: 260px; }
-.weights .stage { min-height: 120px; }
 .hit { font: inherit; font-size: 13px; background: var(--accent); color: var(--surface); border: 0; border-radius: 8px; padding: 6px 12px; cursor: pointer; justify-self: start; }
 
 table { border-collapse: collapse; width: 100%; font-size: 14px; }
@@ -96,7 +93,6 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
 @media (max-width: 640px) {
   .hero { grid-template-columns: 1fr; }
   .hero-art { justify-self: start; }
-  .weights { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 
@@ -141,6 +137,7 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
           <tr><td>Zarpazo</td><td>J</td><td>X</td><td>Ataque con la pata.</td><td><code>zarpazo</code></td><td>En el juego (todavía sin enemigos)</td></tr>
           <tr><td>Acción</td><td>E</td><td>Y</td><td>Usa el objeto más cercano (hasta 48 px de lado). Si es comida, se la come. Sin nada cerca, no hace nada.</td><td><code>comer</code> (con comida)</td><td>En el juego</td></tr>
           <tr><td>Ronronear</td><td>—</td><td>—</td><td>Con los humanos, para subir el afecto.</td><td><code>ronronear</code></td><td>Animación lista; falta la mecánica</td></tr>
+          <tr><td>Peso</td><td>—</td><td>—</td><td>Comer sube el peso. No cambia el dibujo de Felipe: se muestra como un indicador arriba, junto a la vida.</td><td>— (indicador en pantalla)</td><td>Decidido; falta en el juego</td></tr>
           <tr><td>Recibir daño</td><td>—</td><td>—</td><td>Parpadeo blanco y sacudida.</td><td>Efecto de código</td><td>Falta en el juego</td></tr>
           <tr><td>Perder una vida</td><td>—</td><td>—</td><td>Desmayo y una de sus 7 vidas sube como fantasma.</td><td><code>desmayo</code> + código</td><td>Animación lista; falta la mecánica</td></tr>
           <tr><td>Ocio</td><td>Nada durante unos 8 s</td><td>—</td><td>Elige al azar: sentarse y acicalarse, jugar con estambre o perseguirse la cola. Repite el ciclo 2 o 3 veces y vuelve a quedarse quieto. Cualquier botón lo interrumpe.</td><td><code>acicalarse</code>, <code>jugar</code>, <code>vueltas</code></td><td>En el juego</td></tr>
@@ -183,11 +180,6 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
       </div>
     </div>
     <div class="demos">
-      <div class="card wide">
-        <h3>Formas de peso</h3>
-        <div class="weights" id="weights"></div>
-        <p class="muted" style="font-size:12.5px">Flaco y Gordito: código que ensancha solo el cuerpo, del cuello a la panza. Modo Buda: pose propia de SpriteCook con respiración por código.</p>
-      </div>
       <div class="card">
         <h3>Salto, Doble Salto y caída</h3>
         <div class="stage" style="min-height:270px"><canvas id="jump" width="300" height="270" role="img" aria-label="Felipe haciendo un doble salto y cayendo con las patas delanteras primero"></canvas></div>
@@ -281,10 +273,9 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
             <tr><td>Pose sentado + acicalarse</td><td><code>acicalarse</code></td><td>felipe-sentado-base.png, felipe-acicalarse-sheet.png</td><td>28</td></tr>
             <tr><td>Pose con estambre + jugar</td><td><code>jugar</code></td><td>felipe-estambre-base.png, felipe-estambre-sheet.png</td><td>28</td></tr>
             <tr><td>Perseguirse la cola</td><td><code>vueltas</code></td><td>felipe-vueltas-sheet.png</td><td>20</td></tr>
-            <tr><td>Modo Buda</td><td>—</td><td>felipe-buda-base.png</td><td>8</td></tr>
             <tr><td>Collar de la Vergüenza</td><td>—</td><td>felipe-cono.png</td><td>8</td></tr>
             <tr><td>9 retratos</td><td>—</td><td>felipe-retratos.png</td><td>12</td></tr>
-            <tr><td>Flaco, Gordito, daño, vida fantasma</td><td>—</td><td>Código</td><td>0</td></tr>
+            <tr><td>Daño, vida fantasma</td><td>—</td><td>Código</td><td>0</td></tr>
           </tbody>
         </table>
       </div>
@@ -303,7 +294,6 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
 
 <script>
 const ANIMS = __ANIMS__;
-const PESOS = __PESOS__;
 const EXTRAS = __EXTRAS__;
 const BASE_SRC = "__BASE__";
 const state = { speed: 1, scale: 2, bg: "plain" };
@@ -383,22 +373,6 @@ function card(anim, img) {
 
   const idle = ANIMS.find(a => a.id === "sc-idle");
   const idleImg = imgs["sc-idle"];
-  const weightsEl = document.getElementById("weights");
-  const pesoImgs = await Promise.all(PESOS.map(p => load(p.src)));
-  const weightCanvases = PESOS.map((p, i) => {
-    const d = document.createElement("div");
-    d.innerHTML = '<div class="stage"></div>' + p.nombre;
-    const c = document.createElement("canvas");
-    c.width = p.fw * 2; c.height = p.fh * 2;
-    const maxFw = Math.max(...PESOS.map(q => q.fw));
-    c.style.width = (p.fw / maxFw * 100) + "%";
-    c.setAttribute("role", "img"); c.setAttribute("aria-label", "Felipe en forma " + p.nombre);
-    d.querySelector(".stage").appendChild(c);
-    weightsEl.appendChild(d);
-    const ctx = c.getContext("2d"); ctx.imageSmoothingEnabled = false;
-    return { c, ctx, p, img: pesoImgs[i] };
-  });
-
   for (const [id, key, scale] of [["cone", "cono", 2], ["portraits", "retratos", 1]]) {
     const c = document.getElementById(id), e = EXTRAS[key];
     if (!e) { c.replaceWith(Object.assign(document.createElement("p"), { className: "empty", textContent: "Aún no generado" })); continue; }
@@ -568,12 +542,6 @@ function card(anim, img) {
       while (idleAcc >= 1) { idleAcc -= 1; idleFrame = (idleFrame + 1) % idle.frames; }
       t += dt * state.speed;
     }
-    weightCanvases.forEach(w => {
-      w.ctx.clearRect(0, 0, w.c.width, w.c.height);
-      w.ctx.imageSmoothingEnabled = false;
-      w.ctx.drawImage(w.img, idleFrame * w.p.fw, 0, w.p.fw, w.p.fh, 0, 0, w.c.width, w.c.height);
-    });
-
     jump.clearRect(0, 0, 300, 270);
     drawJump(jump, t, dt);
     drawFaint(t);

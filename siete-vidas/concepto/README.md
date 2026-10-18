@@ -2,7 +2,7 @@
 
 | Archivo | Qué es |
 | --- | --- |
-| `felipe-concepto.html` | Ficha de concepto de Felipe: sprite base, todas sus animaciones en movimiento (SpriteCook y código), formas de peso, salto, daño, rasgos, paleta y plan de animación. Ábrelo en cualquier navegador; no necesita internet salvo para las fuentes. |
+| `felipe-concepto.html` | Ficha de concepto de Felipe: sprite base, acciones, animaciones aprobadas en movimiento, estados, rasgos, proporciones y assets |
 
 Versión en línea (la misma ficha): https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe
 

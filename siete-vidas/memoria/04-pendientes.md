@@ -5,7 +5,7 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 ## En curso
 
 - [x] **Diseño final de Felipe:** versión A del híbrido v2.
-- [x] **Animaciones base de Felipe:** quieto, caminar, correr, zarpazo, comer, saltar (SpriteCook) + Flaco/Gordito, Modo Buda, daño y efectos de salto (código). Ficha: https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe
+- [x] **Animaciones base de Felipe:** quieto, caminar, correr, zarpazo, comer, saltar, ronronear, desmayo (SpriteCook) + daño y efectos de salto (código). Ficha: https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe
 - [x] Pendientes de Felipe: ronronear, desmayo (+ vida fantasma por código), Collar de la Vergüenza, 9 retratos para diálogos.
 - [x] Animación de agacharse y gatear (SpriteCook, 28 créditos, 2026-10-18).
 - [x] Animaciones de ocio (2026-10-18, 76 créditos): acicalarse, jugar con estambre y perseguirse la cola, en el juego tras 8 s sin tocar nada.
@@ -28,5 +28,7 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [ ] Lanzamiento: redes de Felipe, página de Steam, demo, lista legal.
 
 ## Preguntas abiertas
+
+- Peso como indicador: ¿afecta el movimiento (salto, velocidad, vida) o es solo informativo? ¿Vuelve el medidor de hambre? ¿Cómo queda el Final Buda?
 
 - ¿Valeria está basada en una persona real?

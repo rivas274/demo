@@ -18,7 +18,7 @@ ESCALAS = {
     "felipe-walk-sheet.png": [8, 0.72],
     "felipe-run-sheet.png": [8, 0.72],
     "felipe-jump-sheet.png": [8, 0.72],
-    "felipe-caida-sheet.png": [2, 0.72],
+    "felipe-caida-sheet.png": [8, 0.72],
     "felipe-gatear-sheet.png": [8, 0.72],
     "felipe-attack-sheet.png": [8, 0.72],
     "felipe-eat-sheet.png": [8, 0.72],

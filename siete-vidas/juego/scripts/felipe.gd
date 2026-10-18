@@ -18,17 +18,17 @@ const CUADRO_ARRIBA := 3
 const CUADRO_ATERRIZAJE := 5
 const CUADRO_ASENTARSE := 6
 ## Cuadros de la hoja "caer": un gato cae con las patas delanteras primero.
-const CUADRO_CAYENDO := 0
-const CUADRO_CONTACTO := 1
+const CUADRO_CAYENDO := 3
+const CUADRO_CONTACTO := 5
 const INCLINACION_DOBLE_SALTO := -0.35
 ## Estirar y aplastar deforman la cabeza junto con el cuerpo: nunca más de ±8 % para que Felipe
 ## conserve sus proporciones (regla del creador).
 const DEFORMACION_MAXIMA := 0.08
 ## Alto de la caja de colisión de pie y agachado.
-## De pie mide 58 px de las orejas a las patas; agachado, unos 52 px (la cabeza no se aplasta).
-## Pasa agachado bajo muebles con 45 cm libres (54 px).
+## De pie mide 58 px de las orejas a las patas; agachado, unos 33 px.
+## Pasa agachado bajo muebles con 30 cm libres (36 px).
 const ALTO_DE_PIE := 58.0
-const ALTO_AGACHADO := 50.0
+const ALTO_AGACHADO := 32.0
 ## Capa de los muebles que se atraviesan desde abajo (agachado + saltar baja a través de ellos).
 const CAPA_ATRAVESABLE := 2
 ## Animaciones de ocio: nombre -> vueltas del ciclo antes de volver a quieto.
@@ -43,8 +43,8 @@ const BOLA_ESTAMBRE := preload("res://assets/felipe/estambre-bola.png")
 const DISTANCIA_ESTAMBRE := 28.0
 ## Acciones que, presionadas, cuentan como "estar jugando" (cortan el ocio y reinician la espera).
 const ACCIONES := ["mover_izquierda", "mover_derecha", "saltar", "zoomies", "zarpazo", "interactuar", "agacharse"]
-## Duración de la transición "agacharse" (3 cuadros a 12 fps), también al pararse.
-const DURACION_TRANSICION := 0.25
+## Duración de la transición "agacharse" (4 cuadros a 12 fps), también al pararse.
+const DURACION_TRANSICION := 0.33
 ## Distancia (horizontal, vertical) a la que el botón de acción alcanza un objeto.
 const ALCANCE := Vector2(48, 40)
 

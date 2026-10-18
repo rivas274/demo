@@ -16,11 +16,11 @@ const HOJAS := {
 	"saltar": ["felipe-jump-sheet.png", 0.0, false],
 	"ronronear": ["felipe-purr-sheet.png", 8.0, true],
 	"desmayo": ["felipe-faint-sheet.png", 8.0, false],
-	## Poses propias de la caída: 0 = cayendo con las delanteras estiradas, 1 = contacto con las delanteras.
-	"caer": ["felipe-caida-sheet.png", 0.0, false, 2],
-	## Una sola hoja: 0 a 2 = transición de pie a agachado (al pararse se reproduce al revés), 3 a 7 = gateo.
-	"agacharse": ["felipe-gatear-sheet.png", 12.0, false, 8, [0, 2]],
-	"gatear": ["felipe-gatear-sheet.png", 10.0, true, 8, [3, 7]],
+	## Caída desde Felipe A: se usan cuadros sueltos (Felipe.CUADRO_CAYENDO y CUADRO_CONTACTO).
+	"caer": ["felipe-caida-sheet.png", 0.0, false],
+	## Una sola hoja: 0 a 3 = transición de pie a agachado (al revés para pararse), 4 a 7 = gateo.
+	"agacharse": ["felipe-gatear-sheet.png", 12.0, false, 8, [0, 3]],
+	"gatear": ["felipe-gatear-sheet.png", 10.0, true, 8, [4, 7]],
 	## Ocio (sin tocar nada unos segundos); ver Felipe.OCIO.
 	"acicalarse": ["felipe-acicalarse-sheet.png", 8.0, true],
 	"jugar": ["felipe-jugar-sheet.png", 10.0, true],

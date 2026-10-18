@@ -4,7 +4,7 @@ extends SceneTree
 ## Termina con código 0 si todo pasa y 1 si algo falla.
 
 ## Animaciones hechas desde poses editadas, que no tienen las proporciones de Felipe A (ver pendientes).
-const PENDIENTES_DE_REHACER := ["caer"]
+const PENDIENTES_DE_REHACER := []
 
 var _fallos: Array[String] = []
 

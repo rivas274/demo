@@ -131,8 +131,8 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
           <tr><td>Zoomies</td><td>Tocar Shift</td><td>Tocar RB</td><td>Impulso de 380 px/s durante 0,18 s, con estela; espera de 0,45 s entre usos.</td><td><code>correr</code> + estirón</td><td>En el juego</td></tr>
           <tr><td>Saltar</td><td>Espacio</td><td>A</td><td>Unos 79 px. Soltar antes corta el salto. Margen de 0,1 s al salir de un borde y salto recordado de 0,12 s.</td><td><code>saltar</code> (agachado, subiendo, arriba)</td><td>En el juego</td></tr>
           <tr><td>Doble Salto</td><td>Espacio en el aire</td><td>A en el aire</td><td>Unos 140 px en total, con una inclinación leve (~20°). Se recupera al tocar el piso.</td><td><code>saltar</code> (arriba)</td><td>En el juego</td></tr>
-          <tr><td>Caer y aterrizar</td><td>—</td><td>—</td><td>Siempre con las patas delanteras primero: cae en picada, toca con las delanteras, baja la parte de atrás y se aplasta, con polvo.</td><td><code>caer</code> 0 y 1, <code>saltar</code> 5 y 6</td><td>En el juego</td></tr>
-          <tr><td>Agacharse y gatear</td><td>S o ↓</td><td>Palanca abajo o cruceta abajo</td><td>Transición al bajar y al pararse; gatea a 55 px/s con patas alternadas y cabe bajo muebles con 45 cm libres (agachado mide 52 px). Bajo un mueble no se para aunque se suelte el botón.</td><td><code>agacharse</code> (transición), <code>gatear</code></td><td>En el juego</td></tr>
+          <tr><td>Caer y aterrizar</td><td>—</td><td>—</td><td>Siempre con las patas delanteras primero: cae en picada, toca con las delanteras, baja la parte de atrás y se aplasta, con polvo.</td><td><code>caer</code> 3 y 5, <code>saltar</code> 5 y 6</td><td>En el juego</td></tr>
+          <tr><td>Agacharse y gatear</td><td>S o ↓</td><td>Palanca abajo o cruceta abajo</td><td>Transición al bajar y al pararse; gatea a 55 px/s con patas alternadas y cabe bajo muebles con 30 cm libres (agachado mide 33 px, con la cabeza al ras del piso). Bajo un mueble no se para aunque se suelte el botón.</td><td><code>agacharse</code> (transición), <code>gatear</code></td><td>En el juego</td></tr>
           <tr><td>Bajar de una repisa</td><td>S + Espacio</td><td>Abajo + A</td><td>Atraviesa hacia abajo repisas, mesas y estantes.</td><td>—</td><td>En el juego</td></tr>
           <tr><td>Zarpazo</td><td>J</td><td>X</td><td>Ataque con la pata.</td><td><code>zarpazo</code></td><td>En el juego (todavía sin enemigos)</td></tr>
           <tr><td>Acción</td><td>E</td><td>Y</td><td>Usa el objeto más cercano (hasta 48 px de lado). Si es comida, se la come. Sin nada cerca, no hace nada.</td><td><code>comer</code> (con comida)</td><td>En el juego</td></tr>
@@ -150,7 +150,7 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
     <div class="section-head">
       <div style="display:grid;gap:6px">
         <h2>Animaciones</h2>
-        <p class="muted">Solo las aprobadas y en uso, con su nombre en Godot. Hechas con SpriteCook directamente desde Felipe A. Pendiente: la caída del salto salió de una pose editada (la cabeza cambia de tamaño) y se va a rehacer desde Felipe A.</p>
+        <p class="muted">Solo las aprobadas y en uso, con su nombre en Godot. Hechas con SpriteCook directamente desde Felipe A. Todas salen de Felipe A con la misma escala.</p>
       </div>
       <div class="controls">
         <button class="hit" id="playBtn" type="button" aria-pressed="true">Pausar</button>
@@ -188,7 +188,7 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
       <div class="card">
         <h3>Agacharse y gatear</h3>
         <div class="stage" style="min-height:210px"><canvas id="crouch" width="360" height="200" role="img" aria-label="Felipe se agacha y gatea por debajo de un aparador"></canvas></div>
-        <p class="muted" style="font-size:12.5px">Se agacha con una transición dibujada (3 cuadros), gatea con la panza al piso y las patas alternadas, y se para con la misma transición al revés. Cabe bajo muebles con 45 cm libres.</p>
+        <p class="muted" style="font-size:12.5px">Se agacha con una transición dibujada (3 cuadros), gatea con la panza al piso y las patas alternadas, y se para con la misma transición al revés. Cabe bajo muebles con 30 cm libres.</p>
       </div>
       <div class="card">
         <h3>Recibir daño</h3>
@@ -247,7 +247,7 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
       <div class="table-wrap">
         <table>
           <tbody>
-            <tr><td>Felipe en el juego</td><td>67 px de alto con la cola (58 px de las orejas a las patas; agachado, 52 px) en 640×360. Todas las hojas son de 106 px y se dibujan a la misma escala (72 %)</td></tr>
+            <tr><td>Felipe en el juego</td><td>67 px de alto con la cola (58 px de las orejas a las patas; agachado, 33 px) en 640×360. Todas las hojas son de 106 px y se dibujan a la misma escala (72 %)</td></tr>
             <tr><td>Cabeza</td><td>56 % de la altura de las orejas a las patas: en el cuadro de 106 px va de la fila 25 a la 70 (45 × 55 px); en el juego, 32 × 40 px. Debe medir lo mismo en todas las animaciones</td></tr>
             <tr><td>Estirar y aplastar</td><td>Como mucho ±8 %: más deforma la cabeza y se ve antinatural</td></tr>
             <tr><td>Escala del mundo</td><td>1,21 px por cm, muebles con medidas reales</td></tr>
@@ -265,7 +265,7 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
             <tr><td>Caminar</td><td><code>caminar</code></td><td>felipe-walk-sheet.png</td><td>20</td></tr>
             <tr><td>Correr / Zoomies</td><td><code>correr</code></td><td>felipe-run-sheet.png</td><td>20</td></tr>
             <tr><td>Saltar</td><td><code>saltar</code></td><td>felipe-jump-sheet.png</td><td>20</td></tr>
-            <tr><td>Caer y contacto</td><td><code>caer</code></td><td>felipe-caida-sheet.png</td><td>8</td></tr>
+            <tr><td>Caer (cuadros 3 y 5)</td><td><code>caer</code></td><td>felipe-caida-sheet.png</td><td>26</td></tr>
             <tr><td>Agacharse + gatear (una hoja)</td><td><code>agacharse</code>, <code>gatear</code></td><td>felipe-gatear-sheet.png</td><td>26</td></tr>
             <tr><td>Zarpazo</td><td><code>zarpazo</code></td><td>felipe-attack-sheet.png</td><td>20</td></tr>
             <tr><td>Comer</td><td><code>comer</code></td><td>felipe-eat-sheet.png</td><td>20</td></tr>
@@ -453,7 +453,7 @@ function card(anim, img) {
   const caidaImg = EXTRAS.caida ? await load(EXTRAS.caida.src) : null;
   function felipeAt(ctx, frame, cx, bottom, sx, sy, ang, alpha, phase) {
     let img = idleImg;
-    if (caidaImg && (phase === 4 || phase === 8)) { img = caidaImg; frame = phase === 4 ? 0 : 1; }
+    if (caidaImg && (phase === 4 || phase === 8)) { img = caidaImg; frame = phase === 4 ? 3 : 5; }
     else if (jumpImg && phase !== undefined && JUMP_FRAME[phase] >= 0) { img = jumpImg; frame = JUMP_FRAME[phase]; }
     const w = idle.fw * sx, h = idle.fh * sy;
     ctx.save();
@@ -510,21 +510,21 @@ function card(anim, img) {
   }
 
   // Agacharse: escala de la ficha = juego / 0,72 (1,69 px por cm). El aparador deja 45 cm (75 px) libres.
-  // Hoja de gatear: cuadros 0 a 2 = transición de pie a agachado (al revés para pararse), 3 a 7 = gateo.
+  // Hoja de gatear: cuadros 0 a 3 = transición de pie a agachado (al revés para pararse), 4 a 7 = gateo.
   const crouch = document.getElementById("crouch").getContext("2d");
   const walkImg = imgs["sc-walk"] || idleImg;
   const gatearImg = imgs["sc-gatear"] || null;
   function drawCrouch(ctx, time) {
-    const G = 192, A0 = 150, A1 = 270, LIBRE = 75, ALTO = 137, F = idle.fw;
+    const G = 192, A0 = 150, A1 = 270, LIBRE = 50, ALTO = 137, F = idle.fw;
     const c = time % 5;
     const x = lerp(-20, 390, c / 5);
-    const bajaEn = A0 - 70, subeEn = A1 + 40, T = 0.25 * 410 / 5;
+    const bajaEn = A0 - 70, subeEn = A1 + 40, T = 0.33 * 410 / 5;
     let img = walkImg, f = Math.floor(time * 10) % 8;
     if (gatearImg && x > bajaEn && x < subeEn + T) {
       img = gatearImg;
-      if (x < bajaEn + T) f = Math.min(2, Math.floor((x - bajaEn) / T * 3));
-      else if (x > subeEn) f = 2 - Math.min(2, Math.floor((x - subeEn) / T * 3));
-      else f = 3 + Math.floor(time * 10) % 5;
+      if (x < bajaEn + T) f = Math.min(3, Math.floor((x - bajaEn) / T * 4));
+      else if (x > subeEn) f = 3 - Math.min(3, Math.floor((x - subeEn) / T * 4));
+      else f = 4 + Math.floor(time * 10) % 4;
     }
     shadow(ctx, x, G, 28);
     ctx.imageSmoothingEnabled = false;

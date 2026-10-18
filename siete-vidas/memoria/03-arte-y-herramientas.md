@@ -17,7 +17,7 @@
 - **Subir imágenes locales:** `create_asset_upload`, luego PUT con curl a la URL devuelta, luego `finalize_asset_upload`.
 - **Red del entorno:** deben estar permitidos `mcp.spritecook.ai` y `api.spritecook.ai`; sin el segundo no se pueden descargar ni ver las imágenes.
 - **Proyecto en SpriteCook:** "Siete Vidas, Cero Disculpas", id `126fcb42-c3f6-40b5-9f75-42715fbdce40`. Pasar siempre `project_id`.
-- **Créditos:** 800 del plan de pago; quedan **414** (2026-10-18). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
+- **Créditos:** 800 del plan de pago; quedan **362** (2026-10-18). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
 - **Regla de oro:** mostrar al creador el prompt, el modelo, los ajustes y el costo, y esperar aprobación antes de cada llamada que gaste créditos.
 
 ### Modelos y costos útiles (consultados el 2026-10-17)
@@ -41,7 +41,7 @@
 - **Efectos de código (gratis, en Godot y en la ficha):** estirar y aplastar, estela de imágenes fantasma, polvo, inclinación del Doble Salto, parpadeo de daño, vida fantasma, transición de agacharse.
 - **Peso:** no tiene arte de Felipe; es un indicador de la interfaz (ver `02-guia-felipe.md`, sección Peso).
 - **Tamaños de hoja:** animando Felipe A salen cuadros de 106×106, que se dibujan todos a 0.72. Las poses editadas salen de otros tamaños (80, 164, 234 px) y obligaban a usar otra escala, por eso la cabeza cambiaba de tamaño: no se usan. La prueba de movimiento comprueba que cada animación tenga cuadros de 106 px.
-- **Movimientos difíciles (pegarse al piso, poses poco comunes):** el modelo por defecto no los logra desde Felipe A (gatear salió de pie, 20 créditos perdidos). Con `model="pixel-engine-v1.5"` (26 créditos) sí: gatear salió consistente y con la transición incluida en los primeros cuadros.
+- **Movimientos difíciles (pegarse al piso, poses poco comunes):** el modelo por defecto no los logra desde Felipe A (gatear salió de pie, 20 créditos perdidos). Con `model="pixel-engine-v1.5"` (26 créditos) sí, si el prompt dice cuadro por cuadro qué pasa ("frames 1-3: la cabeza baja hasta los hombros..."): así salieron agacharse/gatear y la caída.
 - **Salto (tiempos de la ficha, iguales en Godot):** se agacha (cuadro 1 de `saltar`), sale estirado (2), recoge las patas arriba (3), Doble Salto con ~20° de inclinación, cae en picada (`caer` 0), toca con las delanteras (`caer` 1), baja la parte de atrás (5) y se asienta (6). No usar el cuadro 4 de `saltar` (viene en diagonal).
 
 ### Trucos para ahorrar créditos
@@ -53,7 +53,7 @@
 
 ### Assets de Felipe (vigentes)
 
-Solo lo que se usa (las formas de peso dibujadas, el Modo Buda, la pose sentado, la pose con estambre y la pose agachada se descartaron el 2026-10-18). ⚠ = hecho desde una pose editada; no es consistente con Felipe A y se rehace desde Felipe A (ver pendientes). Se usa mientras tanto.
+Solo lo que se usa (las formas de peso dibujadas, el Modo Buda, la pose sentado, la pose con estambre y la pose agachada se descartaron el 2026-10-18). Todas salen de Felipe A.
 
 | Asset | Godot | Id SpriteCook | Archivo en `siete-vidas/arte/felipe/` |
 | --- | --- | --- | --- |
@@ -62,8 +62,8 @@ Solo lo que se usa (las formas de peso dibujadas, el Modo Buda, la pose sentado,
 | Caminar | `caminar` | `5890d9bd-c737-471c-ad0d-30169320104e` | `felipe-walk-sheet.png` |
 | Correr / Zoomies | `correr` | `9de2013a-ffd6-4cb6-a338-63f80c2d5e78` | `felipe-run-sheet.png` |
 | Saltar | `saltar` | `2113c9a5-5acc-4289-8fcb-1f167c20d1ea` | `felipe-jump-sheet.png` |
-| ⚠ Caer y contacto (2 cuadros) | `caer` | `6519b507-8c18-4582-b6fd-995ca133a7ea` | `felipe-caida-sheet.png` (original: `felipe-caida-poses.png`) |
-| Agacharse + gatear (una hoja: 0 a 2 transición, 3 a 7 gateo; `pixel-engine-v1.5`) | `agacharse`, `gatear` | `9e26566c-e8ab-4a4b-8ef0-d1cb2c4ee70b` | `felipe-gatear-sheet.png` |
+| Caer (8 cuadros desde Felipe A; se usan 3 = cayendo y 5 = contacto; `pixel-engine-v1.5`) | `caer` | `5c509ac4-58f9-4b3f-8dfe-7bb31529e754` | `felipe-caida-sheet.png` |
+| Agacharse + gatear (0 a 3 transición, 4 a 7 gateo; `pixel-engine-v1.5`) | `agacharse`, `gatear` | `6ba3fb59-a7ef-441f-bfab-d269ebc5957e` | `felipe-gatear-sheet.png` |
 | Zarpazo | `zarpazo` | `86da320a-f4cb-4269-ab76-b66648db1e20` | `felipe-attack-sheet.png` |
 | Comer | `comer` | `df2345fe-8e80-42c8-ba44-304490802633` | `felipe-eat-sheet.png` |
 | Ronronear | `ronronear` | `4dbc1380-5c45-4066-858c-f1c03a87fb67` | `felipe-purr-sheet.png` |

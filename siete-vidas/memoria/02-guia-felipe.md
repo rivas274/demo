@@ -68,8 +68,8 @@ Lista oficial (la misma de la ficha de concepto). Toda acción nueva se agrega a
 | Zoomies | Tocar Shift | Tocar RB | Impulso de 380 px/s durante 0,18 s con estela; espera de 0,45 s | `correr` + estirón | En el juego |
 | Saltar | Espacio | A | ~79 px; soltar corta el salto; margen de 0,1 s al salir de un borde; salto recordado de 0,12 s | `saltar` (cuadros 1, 2, 3) | En el juego |
 | Doble Salto | Espacio en el aire | A en el aire | ~140 px en total; inclinación leve (~20°); se recupera al tocar el piso | `saltar` (cuadro 3) | En el juego |
-| Caer y aterrizar | — | — | Delanteras primero: cae en picada, toca con las delanteras, baja la parte de atrás y se aplasta, con polvo | `caer` 0 y 1, `saltar` 5 y 6 | En el juego |
-| Agacharse y gatear | S o ↓ | Palanca abajo o cruceta abajo | Transición dibujada al bajar y al pararse (al revés); gatea a 55 px/s con la panza al piso y patas alternadas; colisión de 50 px (de pie, 58); cabe bajo muebles con 45 cm libres (54 px); bajo un mueble no se para aunque se suelte el botón | `agacharse` (cuadros 0 a 2 de la hoja), `gatear` (3 a 7) | En el juego |
+| Caer y aterrizar | — | — | Delanteras primero: cae en picada, toca con las delanteras, baja la parte de atrás y se aplasta, con polvo | `caer` 3 (cayendo) y 5 (contacto), `saltar` 5 y 6 | En el juego |
+| Agacharse y gatear | S o ↓ | Palanca abajo o cruceta abajo | Transición dibujada al bajar y al pararse (al revés); gatea a 55 px/s con la panza al piso y patas alternadas; colisión de 32 px (de pie, 58); cabe bajo muebles con 30 cm libres (36 px); bajo un mueble no se para aunque se suelte el botón | `agacharse` (cuadros 0 a 3 de la hoja), `gatear` (4 a 7) | En el juego |
 | Bajar de una repisa | S + Espacio | Abajo + A | Atraviesa hacia abajo los muebles que se atraviesan desde abajo (repisas, mesa, estantes) | — | En el juego |
 | Zarpazo | J | X | Ataque con la pata | `zarpazo` | En el juego (sin enemigos aún) |
 | Acción | E | Y | Usa el objeto más cercano (hasta 48 px de lado y 40 px de alto); si es comida, se la come; sin objeto no hace nada. No hay botón de comer suelto | `comer` (con comida) | En el juego |
@@ -87,18 +87,18 @@ Lista oficial (la misma de la ficha de concepto). Toda acción nueva se agrega a
 | Cabeza (orejas a barbilla) | filas 25 a 70: 45 px de alto, 55 de ancho | 32 × 40 px |
 | Orejas a patas | filas 25 a 105: 80 px | 58 px |
 | Con la cola | 93 px | 67 px |
-| Agachado (orejas a patas) | 73 px | 52 px |
+| Agachado (orejas a patas) | 46 px | 33 px |
 | Cabeza / altura | 56 % | 56 % |
 
 Todas las animaciones deben respetar estas medidas: misma hoja de 106 px, misma escala, deformación máxima ±8 %.
 
 ## Consistencia
 
-Felipe es siempre el mismo gato: vista 3/4 como Felipe A, cabeza cerca del 40 % de la altura, rasgos de la tabla de arriba y reojo por defecto. Las animaciones se generan directamente desde Felipe A (ver `CLAUDE.md`). Hoy solo la caída del salto salió de una pose editada y no cumple (la cabeza cambia de tamaño): está marcada para rehacer.
+Felipe es siempre el mismo gato: vista 3/4 como Felipe A, cabeza cerca del 40 % de la altura, rasgos de la tabla de arriba y reojo por defecto. Las animaciones se generan directamente desde Felipe A (ver `CLAUDE.md`). Desde el 2026-10-18 todas las animaciones salen de Felipe A y cumplen (lo comprueba la prueba de movimiento).
 
 ## Reglas de movimiento
 
-- **Al bajar, las patas delanteras van primero y tocan el piso primero.** Inclinar una pose de pie no basta: se usan las poses propias "caer" 0 (en picada, delanteras estiradas) y 1 (contacto). La prueba del juego mide que el punto más bajo del dibujo esté del lado al que mira Felipe.
+- **Al bajar, las patas delanteras van primero y tocan el piso primero.** Inclinar una pose de pie no basta: se usan los cuadros 3 (inclinado con la nariz hacia abajo) y 5 (contacto) de la animación "caer", hecha desde Felipe A. La prueba del juego mide que el punto más bajo del dibujo esté del lado al que mira Felipe.
 - El Doble Salto lleva solo una inclinación leve (~20°).
 - Toda corrección de animación aprobada en la ficha se aplica también en el juego y queda cubierta por una prueba.
 

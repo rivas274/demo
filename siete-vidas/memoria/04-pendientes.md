@@ -11,7 +11,7 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [x] Animaciones de ocio (2026-10-18, 76 créditos): acicalarse, jugar con estambre y perseguirse la cola, en el juego tras 8 s sin tocar nada.
 - [x] Acicalarse y jugar rehechos desde Felipe A (40 créditos); estambre como objeto por código; una sola escala; deformación máxima ±8 %.
 - [x] Gatear desde Felipe A con `pixel-engine-v1.5` (26 créditos): consistente, con transición al bajar y al pararse; huecos para pasar agachado de 45 cm.
-- [ ] Caída del salto desde Felipe A (la cabeza cambia de tamaño al caer). Probar con `pixel-engine-v1.5` (26 créditos), con aprobación.
+- [x] Agacharse (baja la cabeza al piso) y caída rehechos desde Felipe A con `v1.5` (52 créditos). Todas las animaciones son consistentes.
 - [ ] Decidir si Felipe sigue cargando 3 snacks para curarse o si toda la comida se toma del mundo con el botón de acción.
 - [ ] Opcional de Felipe: daño con pose propia; desmayo patas arriba con ojos en X (el actual cae boca abajo).
 
@@ -30,6 +30,8 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [ ] Lanzamiento: redes de Felipe, página de Steam, demo, lista legal.
 
 ## Preguntas abiertas
+
+- Gemini (Nano Banana) directo: falta que el creador agregue `GEMINI_API_KEY` al entorno (se lee en una sesión nueva). Sirve para imágenes fijas, no animaciones.
 
 - Peso como indicador: ¿afecta el movimiento (salto, velocidad, vida) o es solo informativo? ¿Vuelve el medidor de hambre? ¿Cómo queda el Final Buda?
 

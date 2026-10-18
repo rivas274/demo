@@ -24,8 +24,8 @@ ESCALAS = {
     "felipe-eat-sheet.png": [8, 0.72],
     "felipe-purr-sheet.png": [8, 0.72],
     "felipe-faint-sheet.png": [8, 0.72],
-    "felipe-acicalarse-sheet.png": [8, 0.9],
-    "felipe-estambre-sheet.png": [8, 0.6],
+    "felipe-acicalarse-sheet.png": [8, 0.72],
+    "felipe-jugar-sheet.png": [8, 0.72],
     "felipe-vueltas-sheet.png": [8, 0.72],
 }
 ANCHO_CELDA, PISO = 130, 118

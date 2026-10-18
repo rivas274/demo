@@ -23,11 +23,11 @@ ANIMS = [
     {"id": "sc-eat", "nombre": "Comer", "godot": "comer", "archivo": "felipe-eat-sheet.png", "frames": 8, "fps": 8},
     {"id": "sc-purr", "nombre": "Ronronear", "godot": "ronronear", "archivo": "felipe-purr-sheet.png", "frames": 8, "fps": 8},
     {"id": "sc-faint", "nombre": "Desmayo", "godot": "desmayo", "archivo": "felipe-faint-sheet.png", "frames": 8, "fps": 8},
-    # Ocio: "escala" = escala en el juego / 0.72, para verlas del mismo tamaño que las hojas de 106 px.
-    {"id": "sc-acicalarse", "nombre": "Ocio: acicalarse", "godot": "acicalarse", "rehacer": True, "archivo": "felipe-acicalarse-sheet.png",
-     "frames": 8, "fps": 8, "escala": 0.9 / 0.72},
-    {"id": "sc-jugar", "nombre": "Ocio: jugar con estambre", "godot": "jugar", "rehacer": True, "archivo": "felipe-estambre-sheet.png",
-     "frames": 8, "fps": 10, "escala": 0.6 / 0.72},
+    # Ocio: desde Felipe A, mismos cuadros de 106 px.
+    {"id": "sc-acicalarse", "nombre": "Ocio: acicalarse", "godot": "acicalarse", "archivo": "felipe-acicalarse-sheet.png",
+     "frames": 8, "fps": 8},
+    {"id": "sc-jugar", "nombre": "Ocio: jugar con estambre", "godot": "jugar", "archivo": "felipe-jugar-sheet.png",
+     "frames": 8, "fps": 10},
     {"id": "sc-vueltas", "nombre": "Ocio: perseguirse la cola", "godot": "vueltas", "archivo": "felipe-vueltas-sheet.png",
      "frames": 8, "fps": 10},
 ]

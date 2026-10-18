@@ -17,7 +17,7 @@
 - **Subir imágenes locales:** `create_asset_upload`, luego PUT con curl a la URL devuelta, luego `finalize_asset_upload`.
 - **Red del entorno:** deben estar permitidos `mcp.spritecook.ai` y `api.spritecook.ai`; sin el segundo no se pueden descargar ni ver las imágenes.
 - **Proyecto en SpriteCook:** "Siete Vidas, Cero Disculpas", id `126fcb42-c3f6-40b5-9f75-42715fbdce40`. Pasar siempre `project_id`.
-- **Créditos:** 800 del plan de pago; quedan **500** (2026-10-18). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
+- **Créditos:** 800 del plan de pago; quedan **440** (2026-10-18). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
 - **Regla de oro:** mostrar al creador el prompt, el modelo, los ajustes y el costo, y esperar aprobación antes de cada llamada que gaste créditos.
 
 ### Modelos y costos útiles (consultados el 2026-10-17)
@@ -39,7 +39,8 @@
 - **Revisión antes de usar:** `python3 siete-vidas/herramientas/comparar_felipe.py <salida.png>` pone a Felipe A junto a un cuadro de cada animación al tamaño del juego. Se muestra al creador antes de integrar.
 - **Efectos de código (gratis, en Godot y en la ficha):** estirar y aplastar, estela de imágenes fantasma, polvo, inclinación del Doble Salto, parpadeo de daño, vida fantasma, transición de agacharse.
 - **Peso:** no tiene arte de Felipe; es un indicador de la interfaz (ver `02-guia-felipe.md`, sección Peso).
-- **Tamaños de hoja:** SpriteCook entrega cada hoja en la resolución de su pose (106, 92, 184 o 256 px por cuadro). Casi todas son de 106×106 y se dibujan a 0.72. Las demás llevan su propia escala para que la cabeza mida lo mismo que la de Felipe de pie: gatear 0.4, acicalarse 0.9, jugar 0.6 (`Felipe.ESCALA_AGACHADO` y `Felipe.OCIO`). Cada hoja nueva se compara con "quieto" sobre el mismo piso antes de usarla, y la prueba de movimiento comprueba su altura.
+- **Tamaños de hoja:** animando Felipe A salen cuadros de 106×106, que se dibujan todos a 0.72. Las poses editadas salen de otros tamaños (80, 164, 234 px) y obligaban a usar otra escala, por eso la cabeza cambiaba de tamaño: no se usan. La prueba de movimiento comprueba que cada animación tenga cuadros de 106 px.
+- **Gatear desde Felipe A (2026-10-18, 20 créditos, `ace113a8-…`):** no sirvió: solo baja la cabeza, no se pega al piso y la cola queda arriba. No se integró.
 - **Salto (tiempos de la ficha, iguales en Godot):** se agacha (cuadro 1 de `saltar`), sale estirado (2), recoge las patas arriba (3), Doble Salto con ~20° de inclinación, cae en picada (`caer` 0), toca con las delanteras (`caer` 1), baja la parte de atrás (5) y se asienta (6). No usar el cuadro 4 de `saltar` (viene en diagonal).
 
 ### Trucos para ahorrar créditos
@@ -51,7 +52,7 @@
 
 ### Assets de Felipe (vigentes)
 
-Solo lo que se usa (las formas de peso dibujadas y el Modo Buda se descartaron el 2026-10-18). ⚠ = hecho desde una pose editada; no es consistente con Felipe A y se rehace desde Felipe A (ver pendientes). Se usa mientras tanto.
+Solo lo que se usa (las formas de peso dibujadas, el Modo Buda, la pose sentado y la pose con estambre se descartaron el 2026-10-18). ⚠ = hecho desde una pose editada; no es consistente con Felipe A y se rehace desde Felipe A (ver pendientes). Se usa mientras tanto.
 
 | Asset | Godot | Id SpriteCook | Archivo en `siete-vidas/arte/felipe/` |
 | --- | --- | --- | --- |
@@ -69,11 +70,10 @@ Solo lo que se usa (las formas de peso dibujadas y el Modo Buda se descartaron e
 | Desmayo (cae boca abajo) | `desmayo` | `0e90281b-f940-4f03-ae52-85e6b9d5254b` | `felipe-faint-sheet.png` |
 | Collar de la Vergüenza | — | `1893e4a4-4b92-46b1-8b45-efbd5dbcf7e2` | `felipe-cono.png` |
 | 9 retratos para diálogos (3×3, 200×200) | — | `7657f269-815f-451f-a58a-17f2d6b2f014` | `felipe-retratos.png` |
-| ⚠ Pose sentado | — | `0fb977b7-3346-40d5-8a18-e669607b29f4` | `felipe-sentado-base.png` |
-| ⚠ Ocio: acicalarse (8 cuadros de 92×92, escala 0.9) | `acicalarse` | `6dfd5a1f-52c2-4498-89ab-adee29d78744` | `felipe-acicalarse-sheet.png` |
-| ⚠ Pose jugando con estambre | — | `d9da7997-8421-4fd3-b9c4-f0dfed24cee5` | `felipe-estambre-base.png` |
-| ⚠ Ocio: jugar con estambre (8 cuadros de 184×184, escala 0.6) | `jugar` | `de07b8c8-317f-4c65-b476-700d96c77875` | `felipe-estambre-sheet.png` |
-| Ocio: perseguirse la cola (8 cuadros de 106×106, escala 0.72) | `vueltas` | `bc3dbbc7-7d04-446f-ae5c-e05f6b7cfb73` | `felipe-vueltas-sheet.png` |
+| Ocio: acicalarse (de pie, desde Felipe A) | `acicalarse` | `29d8f43c-5f45-46f4-ab18-0c9d70490343` | `felipe-acicalarse-sheet.png` |
+| Ocio: jugar (desde Felipe A) | `jugar` | `b8caf6cf-7c3f-4e9c-bb34-a38833bb4c63` | `felipe-jugar-sheet.png` |
+| Bola de estambre (recortada de una pose descartada, se mueve por código) | — | — | `estambre-bola.png` |
+| Ocio: perseguirse la cola (desde Felipe A) | `vueltas` | `bc3dbbc7-7d04-446f-ae5c-e05f6b7cfb73` | `felipe-vueltas-sheet.png` |
 
 Referencias de diseño (no se usan en el juego): foto real de Felipe (`a0fbe97b-61b6-4d6d-8cb3-c5b4afaa6a74`, no está en el repositorio), prueba de 4 estilos v1 (`8868e7a2-…`, `../referencias/felipe-prueba-estilos-v1.png`), híbrido v2 A y B (`22529bf7-…`, `../referencias/felipe-hibrido-v2.png`) y comparación de proporciones (`../referencias/proporciones-felipe.png`).
 

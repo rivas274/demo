@@ -9,7 +9,8 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [x] Pendientes de Felipe: ronronear, desmayo (+ vida fantasma por código), Collar de la Vergüenza, 9 retratos para diálogos.
 - [x] Animación de agacharse y gatear (SpriteCook, 28 créditos, 2026-10-18).
 - [x] Animaciones de ocio (2026-10-18, 76 créditos): acicalarse, jugar con estambre y perseguirse la cola, en el juego tras 8 s sin tocar nada.
-- [ ] **Consistencia:** rehacer desde Felipe A las animaciones que salieron de poses editadas (gatear, acicalarse, jugar con estambre; la caída queda a decisión del creador). El estambre pasa a ser un objeto aparte movido por código.
+- [x] Acicalarse y jugar rehechos desde Felipe A (40 créditos); estambre como objeto por código; una sola escala; deformación máxima ±8 %.
+- [ ] **Consistencia y transiciones (feedback del creador al probar):** al agacharse la cabeza cambia de tamaño, falta transición y las delanteras se mueven juntas; al saltar la cabeza cambia mucho. Falta: gatear bajo desde Felipe A (el intento con el modelo por defecto no se pega al piso), transición de pie → agachado y caída desde Felipe A.
 - [ ] Decidir si Felipe sigue cargando 3 snacks para curarse o si toda la comida se toma del mundo con el botón de acción.
 - [ ] Opcional de Felipe: daño con pose propia; desmayo patas arriba con ojos en X (el actual cae boca abajo).
 

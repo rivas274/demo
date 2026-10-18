@@ -77,11 +77,23 @@ Lista oficial (la misma de la ficha de concepto). Toda acción nueva se agrega a
 | Recibir daño | — | — | Parpadeo blanco y sacudida | Efecto de código | Falta en el juego |
 | Perder una vida | — | — | Desmayo y una de sus 7 vidas sube como fantasma | `desmayo` + código | Animación lista; falta la mecánica |
 | Peso | — | — | Comer sube el peso; no cambia el dibujo, se ve en un indicador arriba junto a la vida | — | Decidido; falta en el juego |
-| Ocio | Nada durante 8 s (`espera_ocio`) | — | Elige al azar: sentarse y acicalarse, jugar con estambre o perseguirse la cola; repite el ciclo 2 o 3 veces y vuelve a quieto; cualquier botón lo interrumpe | `acicalarse` (escala 0.9), `jugar` (0.6), `vueltas` (0.72) | En el juego |
+| Ocio | Nada durante 8 s (`espera_ocio`) | — | Elige al azar: sentarse y acicalarse, jugar con estambre o perseguirse la cola; repite el ciclo 2 o 3 veces y vuelve a quieto; cualquier botón lo interrumpe | `acicalarse` (de pie), `jugar` (+ bola de estambre por código), `vueltas` | En el juego |
+
+## Proporciones medidas (Felipe A, cuadro de 106 px)
+
+| Medida | En la hoja (106 px) | En el juego (×0.72) |
+| --- | --- | --- |
+| Punta de la cola | fila 12 | — |
+| Cabeza (orejas a barbilla) | filas 25 a 70: 45 px de alto, 55 de ancho | 32 × 40 px |
+| Orejas a patas | filas 25 a 105: 80 px | 58 px |
+| Con la cola | 93 px | 67 px |
+| Cabeza / altura | 56 % | 56 % |
+
+Todas las animaciones deben respetar estas medidas: misma hoja de 106 px, misma escala, deformación máxima ±8 %.
 
 ## Consistencia
 
-Felipe es siempre el mismo gato: vista 3/4 como Felipe A, cabeza cerca del 40 % de la altura, rasgos de la tabla de arriba y reojo por defecto. Las animaciones se generan directamente desde Felipe A (ver `CLAUDE.md`). Hoy gatear, acicalarse, jugar con estambre y la caída salieron de poses editadas y no cumplen: están marcadas para rehacer.
+Felipe es siempre el mismo gato: vista 3/4 como Felipe A, cabeza cerca del 40 % de la altura, rasgos de la tabla de arriba y reojo por defecto. Las animaciones se generan directamente desde Felipe A (ver `CLAUDE.md`). Hoy gatear y la caída salieron de poses editadas y no cumplen (la cabeza cambia de tamaño y la vista pasa a perfil): están marcadas para rehacer, con una transición de pie → agachado.
 
 ## Reglas de movimiento
 

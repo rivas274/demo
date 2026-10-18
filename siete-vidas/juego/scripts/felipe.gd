@@ -21,6 +21,9 @@ const CUADRO_ASENTARSE := 6
 const CUADRO_CAYENDO := 0
 const CUADRO_CONTACTO := 1
 const INCLINACION_DOBLE_SALTO := -0.35
+## Estirar y aplastar deforman la cabeza junto con el cuerpo: nunca más de ±8 % para que Felipe
+## conserve sus proporciones (regla del creador).
+const DEFORMACION_MAXIMA := 0.08
 ## Alto de la caja de colisión de pie y agachado: agachado cabe bajo muebles de 30 cm (36 px).
 const ALTO_DE_PIE := 52.0
 const ALTO_AGACHADO := 28.0
@@ -30,13 +33,12 @@ const ESCALA_AGACHADO := 0.4
 const POSICION_AGACHADO := Vector2(0, -51)
 ## Capa de los muebles que se atraviesan desde abajo (agachado + saltar baja a través de ellos).
 const CAPA_ATRAVESABLE := 2
-## Animaciones de ocio: nombre -> [escala, posición del sprite, vueltas del ciclo antes de volver a quieto].
-## Las hojas vienen de resoluciones distintas: la escala iguala el tamaño de la cabeza con Felipe de pie
-## y la posición deja las patas sobre el piso.
+## Animaciones de ocio: nombre -> vueltas del ciclo antes de volver a quieto.
+## Todas salen de Felipe A en cuadros de 106 px y se dibujan con ESCALA_SPRITE, como las demás.
 const OCIO := {
-	"acicalarse": [0.9, Vector2(0, -41), 3],
-	"jugar": [0.6, Vector2(0, -55), 3],
-	"vueltas": [0.72, Vector2(0, -38), 2],
+	"acicalarse": 3,
+	"jugar": 3,
+	"vueltas": 2,
 }
 ## Bola de estambre del ocio "jugar": objeto aparte (la animación es solo Felipe) que rueda frente a él.
 const BOLA_ESTAMBRE := preload("res://assets/felipe/estambre-bola.png")
@@ -182,7 +184,7 @@ func _intentar_saltar() -> void:
 		_saltar(velocidad_salto)
 		_soltar_polvo(10)
 		# Despegue: se ve agachado un instante y sale estirado (sin retrasar el salto).
-		_estirar(Vector2(0.8, 1.25), 0.2)
+		_estirar(Vector2(0.94, 1.06), 0.2)
 	elif tiene_doble_salto:
 		tiene_doble_salto = false
 		_saltar(velocidad_doble_salto)
@@ -209,7 +211,7 @@ func _intentar_acciones(direccion: float) -> void:
 		if direccion != 0.0:
 			mirando = signf(direccion)
 		velocity = Vector2(mirando * velocidad_zoomies, 0.0)
-		_estirar(Vector2(1.3, 0.8), duracion_zoomies)
+		_estirar(Vector2(1.06, 0.95), duracion_zoomies)
 	elif Input.is_action_just_pressed("zarpazo"):
 		estado = Estado.ZARPAZO
 		sprite.play("zarpazo")
@@ -273,7 +275,7 @@ func _aterrizar() -> void:
 	_efecto = create_tween()
 	_efecto.tween_property(sprite, "rotation", 0.0, 0.08).from(sprite.rotation)
 	var base := _escala_base()
-	_efecto.tween_property(sprite, "scale", base * Vector2(1.0 + 0.3 * fuerza, 1.0 - 0.3 * fuerza), 0.05)
+	_efecto.tween_property(sprite, "scale", base * Vector2(1.0 + DEFORMACION_MAXIMA * fuerza, 1.0 - DEFORMACION_MAXIMA * fuerza), 0.05)
 	_efecto.tween_property(sprite, "scale", base, 0.14).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
@@ -375,6 +377,7 @@ func _estirar(forma: Vector2, duracion: float) -> void:
 		_efecto.kill()
 	var base := _escala_base()
 	_efecto = create_tween()
+	forma = forma.clamp(Vector2.ONE * (1.0 - DEFORMACION_MAXIMA), Vector2.ONE * (1.0 + DEFORMACION_MAXIMA))
 	_efecto.tween_property(sprite, "scale", base * forma, duracion * 0.3)
 	_efecto.tween_property(sprite, "scale", base, duracion * 0.7)
 
@@ -410,7 +413,7 @@ func _poner_agachado(valor: bool) -> void:
 		sprite.play("gatear")
 		sprite.stop()
 	# Transición rápida: un aplastón al bajar y un estirón al pararse.
-	sprite.scale = _escala_base() * (Vector2(1.12, 0.85) if valor else Vector2(0.9, 1.1))
+	sprite.scale = _escala_base() * (Vector2(1.04, 0.96) if valor else Vector2(0.96, 1.04))
 	_efecto = create_tween()
 	_efecto.tween_property(sprite, "scale", _escala_base(), 0.1)
 
@@ -468,23 +471,22 @@ func _actualizar_ocio(delta: float) -> void:
 
 
 func _empezar_ocio(nombre: String) -> void:
-	var datos: Array = OCIO[nombre]
 	estado = Estado.OCIO
 	if _efecto:
 		_efecto.kill()
 	sprite.rotation = 0.0
-	sprite.scale = Vector2.ONE * datos[0]
-	sprite.position = datos[1]
+	sprite.scale = _escala_base()
+	sprite.position = _posicion_sprite
 	sprite.play(nombre)
 	if nombre == "jugar":
 		_estambre = Sprite2D.new()
 		_estambre.name = "Estambre"
 		_estambre.texture = BOLA_ESTAMBRE
-		_estambre.scale = Vector2.ONE * 0.6
+		_estambre.scale = Vector2.ONE * 0.5
 		add_child(_estambre)
 		_rodar_estambre()
 	var frames := sprite.sprite_frames
-	_tiempo_ocio = frames.get_frame_count(nombre) / frames.get_animation_speed(nombre) * datos[2]
+	_tiempo_ocio = frames.get_frame_count(nombre) / frames.get_animation_speed(nombre) * OCIO[nombre]
 
 
 func _terminar_ocio() -> void:

@@ -140,7 +140,7 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
           <tr><td>Peso</td><td>—</td><td>—</td><td>Comer sube el peso. No cambia el dibujo de Felipe: se muestra como un indicador arriba, junto a la vida.</td><td>— (indicador en pantalla)</td><td>Decidido; falta en el juego</td></tr>
           <tr><td>Recibir daño</td><td>—</td><td>—</td><td>Parpadeo blanco y sacudida.</td><td>Efecto de código</td><td>Falta en el juego</td></tr>
           <tr><td>Perder una vida</td><td>—</td><td>—</td><td>Desmayo y una de sus 7 vidas sube como fantasma.</td><td><code>desmayo</code> + código</td><td>Animación lista; falta la mecánica</td></tr>
-          <tr><td>Ocio</td><td>Nada durante unos 8 s</td><td>—</td><td>Elige al azar: sentarse y acicalarse, jugar con estambre o perseguirse la cola. Repite el ciclo 2 o 3 veces y vuelve a quedarse quieto. Cualquier botón lo interrumpe.</td><td><code>acicalarse</code>, <code>jugar</code>, <code>vueltas</code></td><td>En el juego</td></tr>
+          <tr><td>Ocio</td><td>Nada durante unos 8 s</td><td>—</td><td>Elige al azar: acicalarse (se lame la pata de pie), jugar con una bola de estambre que rueda frente a él (objeto aparte) o perseguirse la cola. Repite el ciclo 2 o 3 veces y vuelve a quedarse quieto. Cualquier botón lo interrumpe.</td><td><code>acicalarse</code>, <code>jugar</code>, <code>vueltas</code></td><td>En el juego</td></tr>
         </tbody>
       </table>
     </div>
@@ -150,7 +150,7 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
     <div class="section-head">
       <div style="display:grid;gap:6px">
         <h2>Animaciones</h2>
-        <p class="muted">Solo las aprobadas y en uso, con su nombre en Godot. Hechas con SpriteCook directamente desde Felipe A. Las marcadas "Rehacer" salieron de una pose editada y no son consistentes con Felipe (vista de perfil, otras proporciones); se usan mientras se rehacen.</p>
+        <p class="muted">Solo las aprobadas y en uso, con su nombre en Godot. Hechas con SpriteCook directamente desde Felipe A. Las marcadas "Rehacer" salieron de una pose editada y no son consistentes con Felipe (vista de perfil, la cabeza cambia de tamaño); se usan mientras se rehacen. La caída del salto también está pendiente.</p>
       </div>
       <div class="controls">
         <button class="hit" id="playBtn" type="button" aria-pressed="true">Pausar</button>
@@ -247,7 +247,9 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
       <div class="table-wrap">
         <table>
           <tbody>
-            <tr><td>Felipe en el juego</td><td>67 px de alto en 640×360 (hojas de 106 px al 72 %); gateando, unos 35 px. Cada hoja de otro tamaño lleva su propia escala para que la cabeza mida lo mismo (gatear 0.4, acicalarse 0.9, jugar 0.6)</td></tr>
+            <tr><td>Felipe en el juego</td><td>67 px de alto con la cola (58 px de las orejas a las patas) en 640×360. Todas las hojas son de 106 px y se dibujan a la misma escala (72 %)</td></tr>
+            <tr><td>Cabeza</td><td>56 % de la altura de las orejas a las patas: en el cuadro de 106 px va de la fila 25 a la 70 (45 × 55 px); en el juego, 32 × 40 px. Debe medir lo mismo en todas las animaciones</td></tr>
+            <tr><td>Estirar y aplastar</td><td>Como mucho ±8 %: más deforma la cabeza y se ve antinatural</td></tr>
             <tr><td>Escala del mundo</td><td>1,21 px por cm, muebles con medidas reales</td></tr>
             <tr><td>Humanos</td><td>3 Felipes (Valeria, 1,65 m ≈ 200 px), proporciones normales</td></tr>
             <tr><td>Sensación</td><td>Persa grande de 8 kilos, grande y no obeso: llega casi a la altura de una mesa</td></tr>
@@ -270,8 +272,8 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
             <tr><td>Comer</td><td><code>comer</code></td><td>felipe-eat-sheet.png</td><td>20</td></tr>
             <tr><td>Ronronear</td><td><code>ronronear</code></td><td>felipe-purr-sheet.png</td><td>20</td></tr>
             <tr><td>Desmayo</td><td><code>desmayo</code></td><td>felipe-faint-sheet.png</td><td>20</td></tr>
-            <tr><td>Pose sentado + acicalarse</td><td><code>acicalarse</code></td><td>felipe-sentado-base.png, felipe-acicalarse-sheet.png</td><td>28</td></tr>
-            <tr><td>Pose con estambre + jugar</td><td><code>jugar</code></td><td>felipe-estambre-base.png, felipe-estambre-sheet.png</td><td>28</td></tr>
+            <tr><td>Acicalarse</td><td><code>acicalarse</code></td><td>felipe-acicalarse-sheet.png</td><td>20</td></tr>
+            <tr><td>Jugar + bola de estambre</td><td><code>jugar</code></td><td>felipe-jugar-sheet.png, estambre-bola.png</td><td>20</td></tr>
             <tr><td>Perseguirse la cola</td><td><code>vueltas</code></td><td>felipe-vueltas-sheet.png</td><td>20</td></tr>
             <tr><td>Collar de la Vergüenza</td><td>—</td><td>felipe-cono.png</td><td>8</td></tr>
             <tr><td>9 retratos</td><td>—</td><td>felipe-retratos.png</td><td>12</td></tr>
@@ -503,7 +505,8 @@ function card(anim, img) {
       const sz = Math.round(d.size * (0.6 + d.life));
       ctx.fillRect(Math.round(d.x - sz / 2), Math.round(d.y - sz / 2), sz, sz);
     }
-    const soft = jumpImg ? 0.5 : 1;
+    // Estirar y aplastar: como mucho ±8 % (regla de proporciones; la cabeza se deforma con el cuerpo).
+    const soft = 0.28;
     felipeAt(ctx, idleFrame, JX, JG - y, 1 + (sx - 1) * soft, 1 + (sy - 1) * soft, ang, 1, phase);
   }
 

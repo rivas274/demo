@@ -245,6 +245,8 @@ func _llenar() -> void:
 	aspi.destino = INF
 	aspi.quieta = true
 	aspi.inofensiva = true
+	aspi.arte = "aspi_llena"
+	aspi.queue_redraw()
 	sala.sonar("logro")
 	presentacion.cartel("¡DEPÓSITO LLENO!", 1.0)
 	if sala.pantallas:
@@ -266,6 +268,7 @@ func _actualizar_llena(delta: float) -> void:
 		llena = false
 		aspi.quieta = false
 		aspi.inofensiva = false
+		aspi.arte = "aspi"
 		presentacion.cartel("¡LO VACIÓ!", 1.0)
 		if sala.pantallas:
 			sala.pantallas.aviso_fijo = PISTAS[apagados]
@@ -273,6 +276,7 @@ func _actualizar_llena(delta: float) -> void:
 
 func _apagar() -> void:
 	apagados += 1
+	aspi.arte = "aspi"
 	sala.sonar("golpe")
 	manchas.clear()
 	limpiando = false
@@ -296,7 +300,7 @@ func _escupir_bola() -> void:
 	bola.z_index = 30
 	var hacia := signf(felipe.global_position.x - aspi.global_position.x)
 	bola.set_meta("velocidad", (hacia if hacia != 0.0 else 1.0) * VELOCIDAD_BOLA)
-	bola.global_position = aspi.global_position + Vector2(hacia * 36.0, -6.0)
+	bola.global_position = aspi.global_position + Vector2(hacia * 36.0, -12.0)
 	bola.draw.connect(_dibujar_bola.bind(bola))
 	add_child(bola)
 	bolas.append(bola)
@@ -344,11 +348,9 @@ func _terminar() -> void:
 
 
 func _dibujar_bola(bola: Node2D) -> void:
-	# Escala de gato: bolas de pelo grandes y legibles.
-	bola.draw_circle(Vector2.ZERO, 9.0, Color("8a7a6a"))
-	for i in 7:
-		var angulo := i * TAU / 7.0
-		bola.draw_line(Vector2.from_angle(angulo) * 4.0, Vector2.from_angle(angulo + 0.4) * 12.0, Color("b8a894"), 1.5)
+	# Escala de gato: bolas de pelo grandes y legibles (rueda: el dibujo gira con el nodo).
+	var arte := ArteNivel.textura("bola_pelo")
+	bola.draw_texture(arte, -arte.get_size() / 2.0)
 
 
 ## La imaginación de Felipe en la entrada: el estudio en llamas y la bestia gigante (detrás de los muebles).
@@ -378,9 +380,7 @@ func _draw() -> void:
 func _dibujar_manchas() -> void:
 	var c := _manchas_dibujo
 	for x in manchas:
-		c.draw_rect(Rect2(x - 22, Sala.SUELO - 4, 44, 4), Color("6e4a2c"))
-		c.draw_circle(Vector2(x - 10, Sala.SUELO - 4), 5.0, Color("7d5634"))
-		c.draw_circle(Vector2(x + 9, Sala.SUELO - 3), 4.0, Color("7d5634"))
+		ArteNivel.dibujar(c, "mancha", x, Sala.SUELO + 2.0)
 
 
 ## Delante de todo: el viento de la succión y el aviso del depósito lleno sobre A.S.P.I.

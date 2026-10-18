@@ -59,7 +59,7 @@ const ARTE_MUEBLES := {
 	"Aparador": ["aparador", 0.0], "Librero": ["librero", 0.0], "Repisa del librero 1": ["", 0.0],
 	"Repisa del librero 2": ["", 0.0], "Repisa del librero 3": ["", 0.0], "Mesón": ["meson", 0.0],
 	"Refrigerador": ["refrigerador", 0.0], "Consola": ["aparador", 0.0], "Cama": ["cama", 0.0], "Cabecera": ["", 0.0],
-	"Cómoda": ["comoda", 0.0], "Ropero": ["ropero", 0.0], "Escritorio": ["aparador", 0.0], "Taburete": ["banco", 0.0],
+	"Cómoda": ["comoda", 0.0], "Ropero": ["ropero", 0.0], "Escritorio": ["escritorio", 0.0], "Caja de arena": ["caja_arena", 0.0], "Taburete": ["banco", 0.0],
 	"Baranda": ["baranda", -92.0],
 }
 
@@ -75,7 +75,7 @@ const PIEZAS := [
 	[Rect2(808, SUELO - 79, 52, 8), true, "Banco", "arte"],  # 65 cm, sobre los juguetes
 	[Rect2(970, SUELO - 98, 156, 62), false, "Aparador", "arte"],  # 81 cm, con 30 cm libres debajo
 	# Recibidor.
-	[Rect2(1660, SUELO - 24, 100, 24), false, "Caja de arena", "caja"],  # 20 cm
+	[Rect2(1660, SUELO - 40, 100, 40), false, "Caja de arena", "arte"],  # escala de gato
 	[Rect2(1880, SUELO - 55, 92, 6), true, "Repisa del librero 1", "arte"],  # repisas cada 45 cm
 	[Rect2(1880, SUELO - 109, 92, 6), true, "Repisa del librero 2", "arte"],
 	[Rect2(1880, SUELO - 163, 92, 6), true, "Repisa del librero 3", "arte"],
@@ -143,7 +143,7 @@ const COMIDA := [[Vector2(2885, SUELO - 109), "lata"]]
 ## A.S.P.I.: [base de carga, límite izquierdo, límite derecho] dentro del estudio.
 const ASPI := [Vector2(5700, SUELO), 5290.0, 5790.0]
 ## Puntos de descanso: la caja de arena (recibidor) y el cojín (pasillo, junto a la puerta del jefe).
-const DESCANSOS := [Rect2(1660, SUELO - 40, 100, 50), Rect2(3990, SUELO - 40, 60, 50)]
+const DESCANSOS := [Rect2(1660, SUELO - 56, 100, 66), Rect2(3990, SUELO - 40, 60, 50)]
 ## Pasar esta x en el balcón termina la demo.
 const SALIDA := 6500.0
 
@@ -213,6 +213,8 @@ func _ready() -> void:
 		var puerta := Puerta.new(datos[0], datos[1], datos[2], datos[1].y - TECHO)
 		puerta.cerrada = datos[0] == PUERTA_BALCON
 		puerta.escalera = datos[0] == PUERTA_ESCALERA
+		# Arte: el balcón tiene puerta-ventana; arriba de la escalera se llega por un vano.
+		puerta.estilo = "balcon" if "balcon" in datos[0] else ("vano" if datos[0] == "pasillo<recibidor" else "")
 		puerta.cruzada.connect(cruzar)
 		add_child(puerta)
 		puertas[datos[0]] = puerta
@@ -486,7 +488,7 @@ func _crear_pieza(rect: Rect2, atravesable: bool, nombre: String, estilo: String
 
 
 ## Dibuja el mueble. (0, 0) es la esquina de arriba a la izquierda de la parte donde se para Felipe.
-## Los muebles con arte de Gemini se apoyan en el piso; los demás (repisas, caja de arena) son dibujo.
+## Todos usan arte de Gemini apoyado en el piso; las repisas estiran la suya al ancho de la pieza.
 func _dibujar_mueble(c: Node2D, tamano: Vector2, estilo: String, nombre: String) -> void:
 	var hasta_suelo := SUELO - (c.get_parent() as Node2D).position.y
 	match estilo:
@@ -495,12 +497,10 @@ func _dibujar_mueble(c: Node2D, tamano: Vector2, estilo: String, nombre: String)
 			if arte[0] != "":
 				ArteNivel.dibujar(c, arte[0], tamano.x / 2.0 + arte[1], hasta_suelo)
 		"repisa":
-			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), MADERA)
-			for x: float in [4.0, tamano.x - 16.0]:
-				c.draw_colored_polygon(PackedVector2Array([Vector2(x, tamano.y), Vector2(x + 12, tamano.y), Vector2(x, tamano.y + 14)]), MADERA_OSCURA)
-		"caja":
-			c.draw_rect(Rect2(0, 0, tamano.x, tamano.y), Color("5f8fa8"))
-			c.draw_rect(Rect2(4, 0, tamano.x - 8, 6), Color("d9c7a0"))
+			# La repisa con ménsulas de Gemini, estirada al ancho de la pieza.
+			var arte := ArteNivel.textura("repisa")
+			var ancho := tamano.x + 8.0
+			c.draw_texture_rect(arte, Rect2(-4, -4, ancho, ancho * arte.get_size().y / arte.get_size().x), false)
 
 
 ## Decorado sin colisión: juguetes, escalera de fondo, lámpara (hito del descanso), alacenas, cojín, perchero y base de carga.
@@ -515,25 +515,23 @@ func _dibujar_decorado(c: Node2D) -> void:
 			x += 13.0
 			i += 1
 	# Escalera de fondo (no se pisa: al pie se sube como por una puerta), un poco más apagada que los muebles.
-	ArteNivel.dibujar(c, "escalera", (ESCALERA_PIE.x + ESCALERA_CIMA.x) / 2.0, SUELO, true, Color(0.78, 0.74, 0.72))
+	ArteNivel.dibujar(c, "escalera", (ESCALERA_PIE.x + ESCALERA_CIMA.x) / 2.0, SUELO, false, Color(0.82, 0.78, 0.76))
 	ArteNivel.dibujar(c, "lampara", 1790.0, SUELO)
 	c.draw_circle(Vector2(1790, SUELO - 140), 30.0, Color(1.0, 0.9, 0.5, 0.15))
 	# Alacenas sobre el mesón (a 1,50 m, Felipe no llega).
 	ArteNivel.dibujar(c, "alacenas", 2802.0, SUELO - 182.0)
 	ArteNivel.dibujar(c, "perchero", 3590.0, SUELO)
 	# Cojín del pasillo: segundo punto de descanso.
-	var cojin: Rect2 = DESCANSOS[1]
-	c.draw_rect(Rect2(cojin.position.x + 4, SUELO - 10, cojin.size.x - 8, 10), Color("c8576b"))
-	c.draw_rect(Rect2(cojin.position.x + 8, SUELO - 13, cojin.size.x - 16, 4), Color("e07a85"))
+	ArteNivel.dibujar(c, "cojin", DESCANSOS[1].get_center().x, SUELO)
 	# Base de carga de A.S.P.I.
 	var base: Vector2 = ASPI[0]
-	c.draw_rect(Rect2(base.x - 30, SUELO - 22, 60, 22), Color("4a4d55"))
-	c.draw_rect(Rect2(base.x - 24, SUELO - 18, 48, 4), Color("5fd18a"))
+	ArteNivel.dibujar(c, "base_carga", base.x + 40.0, SUELO)
+	# Cuadros: el retrato oficial de Su Majestad (sala), el reloj (cocina) y paisajes del Barrio Viejo.
+	ArteNivel.dibujar(c, "retrato", 640.0, 250.0)
+	ArteNivel.dibujar(c, "reloj", 2640.0, 180.0)
+	ArteNivel.dibujar(c, "paisaje", 3930.0, 230.0)
+	ArteNivel.dibujar(c, "paisaje", 4890.0, 230.0)
 
 
 func _dibujar_cortina(c: Node2D, zona: Rect2) -> void:
-	c.draw_rect(Rect2(zona.position.x - 6, zona.position.y, zona.size.x + 12, 5), MADERA_OSCURA)
-	var pliegue := 0.0
-	while pliegue < zona.size.x:
-		c.draw_rect(Rect2(zona.position.x + pliegue, zona.position.y + 4, 6, zona.size.y - 8), Color("c46a5a") if int(pliegue / 6.0) % 2 == 0 else Color("a8564a"))
-		pliegue += 6.0
+	ArteNivel.dibujar(c, "cortina", zona.get_center().x, zona.end.y)

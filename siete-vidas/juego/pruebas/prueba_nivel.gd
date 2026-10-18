@@ -67,7 +67,7 @@ func _correr() -> void:
 	_comprobar(sala.habitacion == "sala", "Arriba en una puerta también la cruza (vuelve a la sala)")
 
 	# Caja de arena: punto de descanso.
-	await _poner_en(felipe, Vector2(Sala.DESCANSOS[0].get_center().x, Sala.SUELO - 24))
+	await _poner_en(felipe, Vector2(Sala.DESCANSOS[0].get_center().x, Sala.SUELO - 40))
 	await _esperar(10)
 	_comprobar(Sala.DESCANSOS[0].has_point(felipe.punto_reaparicion), "La caja de arena es punto de descanso")
 

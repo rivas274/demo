@@ -16,6 +16,8 @@ var alto := ALTO_MAXIMO
 var cerrada := false
 ## Pie de la escalera de fondo: no se dibuja marco, solo la flecha (la sala anima la subida).
 var escalera := false
+## Arte: "" puerta de madera, "balcon" puerta-ventana, "vano" arco sin hoja.
+var estilo := ""
 var _felipe: Felipe
 var _cerca := false
 
@@ -54,18 +56,10 @@ func _draw() -> void:
 		if _cerca:
 			_flecha(-90.0)
 		return
-	var marco := Color("6e3a26")
-	draw_rect(Rect2(-ANCHO / 2.0 - 6.0, -alto - 6.0, ANCHO + 12.0, alto + 6.0), marco)
-	draw_rect(Rect2(-ANCHO / 2.0, -alto, ANCHO, alto), Color("2a1d1a"))
-	if cerrada:
-		draw_rect(Rect2(-ANCHO / 2.0 + 2.0, -alto + 2.0, ANCHO - 4.0, alto - 2.0), Color("b0613f"))
-		draw_rect(Rect2(-ANCHO / 2.0 + 8.0, -alto + 12.0, ANCHO - 16.0, alto * 0.4), Color("c47a55"))
-		draw_circle(Vector2(ANCHO / 2.0 - 10.0, -alto * 0.45), 3.0, Color("f2d36b"))
-	else:
-		# Luz que sale del otro cuarto.
-		draw_rect(Rect2(-ANCHO / 2.0 + 6.0, -alto + 6.0, ANCHO - 12.0, alto - 6.0), Color(1.0, 0.85, 0.6, 0.12))
+	var arte := "vano" if estilo == "vano" else ("puerta_balcon" if estilo == "balcon" and cerrada else ("puerta_cerrada" if cerrada else "puerta_abierta"))
+	ArteNivel.dibujar(self, arte, 0.0, 0.0)
 	if _cerca:
-		_flecha(-alto - 18.0)
+		_flecha(-ArteNivel.textura("puerta_abierta").get_size().y - 14.0 if estilo != "vano" else -ArteNivel.textura("vano").get_size().y - 14.0)
 
 
 ## Flecha que invita a entrar.

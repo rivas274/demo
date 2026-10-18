@@ -54,7 +54,7 @@ func _correr() -> void:
 	await _entrar("sala>recibidor")
 
 	# Recibidor: caja de arena; la cocina (calcetín) y de vuelta.
-	await _subir_a(1710, Sala.SUELO - 24, false)
+	await _subir_a(1710, Sala.SUELO - 40, false)
 	await _esperar(30)
 	_paso("Caja de arena")
 	await _ir_a(1810)

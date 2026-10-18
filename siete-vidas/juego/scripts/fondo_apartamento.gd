@@ -209,12 +209,6 @@ func _dibujar_pared(c: Node2D) -> void:
 		c.draw_line(Vector2(ventana.get_center().x, ventana.position.y), Vector2(ventana.get_center().x, ventana.end.y), MADERA_OSCURA, 4)
 		c.draw_line(Vector2(ventana.position.x, ventana.get_center().y), Vector2(ventana.end.x, ventana.get_center().y), MADERA_OSCURA, 4)
 		c.draw_rect(Rect2(ventana.position.x - 30, ventana.position.y - 18, ventana.size.x + 60, 5), MADERA_OSCURA)
-	# Cuadros: el retrato oficial de Su Majestad (sala) y una foto de Valeria (dormitorio).
-	c.draw_rect(Rect2(600, 140, 70, 84), MADERA_OSCURA)
-	c.draw_rect(Rect2(606, 146, 58, 72), Color("d9a65b"))
-	c.draw_circle(Vector2(635, 178), 18, Color("8b7864"))
-	c.draw_rect(Rect2(4860, 170, 60, 50), MADERA_OSCURA)
-	c.draw_rect(Rect2(4865, 175, 50, 40), Color("6f8f8a"))
 	# Piso de madera de cada habitación.
 	var madera := ArteNivel.textura("piso")
 	for habitacion: Array in Sala.HABITACIONES:

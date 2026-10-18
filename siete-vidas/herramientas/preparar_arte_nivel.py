@@ -35,7 +35,7 @@ PIEZAS = {
     "ropero": ("muebles-dormitorio", 1, (104, 185), None),  # 1,53 m
     "cama": ("muebles-dormitorio", 2, (244, 110), None),  # colchón a 55 cm
     "perchero": ("muebles-dormitorio", 4, (40, 160), None),
-    "escalera": ("escalera-y-baranda", 0, (300, 288), None),  # de fondo: se dibuja en la pared
+    "escalera": ("escalera-fondo", 0, (300, 292), None),  # de fondo: se dibuja en la pared
     # Recibidor y balcón.
     "reja": ("escalera-y-baranda", 1, (64, 91), None),  # una reja para bebés de 75 cm; van dos apiladas
     "baranda": ("escalera-y-baranda", 2, (184, 128), None),
@@ -49,13 +49,30 @@ PIEZAS = {
     "juguetes": ("objetos", 7, (26, 18), None),
     "caja": ("objetos", 8, (64, 54), None),
     "raton": ("objetos", 9, (62, 54), None),  # escala de gato: la mitad de Felipe
+    # Tanda 2.
+    "escritorio": ("muebles-extra", 0, (160, 98), None),  # 81 cm, con 30 cm libres debajo
+    "caja_arena": ("muebles-extra", 1, (104, 46), None),
+    "cojin": ("muebles-extra", 2, (70, 42), None),
+    "base_carga": ("muebles-extra", 4, (74, 38), None),
+    "repisa": ("muebles-extra", 5, (160, 47), None),
+    "puerta_cerrada": ("puertas", 0, (144, 248), None),
+    "puerta_abierta": ("puertas", 1, (176, 248), None),
+    "puerta_balcon": ("puertas", 2, (176, 212), None),
+    "vano": ("puertas", 3, (134, 150), None),
+    "cortina": ("detalles", 0, (60, 290), None),
+    "bola_pelo": ("detalles", 1, (24, 24), None),
+    "aspi_llena": ("detalles", 2, (76, 87), None),  # tapa del depósito abierta
+    "mancha": ("detalles", 8, (60, 20), None),
+    "retrato": ("cuadros", 0, (84, 100), None),  # retrato oficial de Su Majestad
+    "paisaje": ("cuadros", 1, (64, 66), None),
+    "reloj": ("cuadros", 2, (46, 48), None),
     # A.S.P.I. (escala de gato: más grande que una real); la gigante es imaginación de Felipe.
     "aspi": ("aspi-gemini-1", 0, (76, 47), None),
     "aspi_gigante": ("aspi-gigante", 0, (330, 270), None),
 }
 
 # Piezas con huecos (entre patas, barrotes, respaldos): el blanco encerrado también es fondo.
-HUECOS = {"comedor", "aparador", "banco", "baranda", "librero", "perchero", "reja", "lampara"}
+HUECOS = {"comedor", "aparador", "banco", "baranda", "librero", "perchero", "reja", "lampara", "escritorio", "repisa", "escalera", "puerta_balcon"}
 
 # Texturas que se repiten: nombre -> (hoja, índice, tamaño del mosaico, suavizado).
 # El suavizado (0 a 1) acerca cada pixel al color promedio: las paredes no deben competir con Felipe (regla R14).

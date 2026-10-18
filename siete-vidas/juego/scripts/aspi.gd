@@ -28,6 +28,8 @@ var necesita_aturdir := false
 var invulnerable := false
 ## No hace daño al tocarla (por ejemplo, detenida con el depósito lleno).
 var inofensiva := false
+## Imagen que se dibuja (con el depósito lleno, "aspi_llena": la tapa abierta).
+var arte := "aspi"
 ## Se queda quieta (por ejemplo, mientras aspira).
 var quieta := false
 ## Si no es INF, va hasta esa x sin perseguir a nadie (por ejemplo, a limpiar una mancha).
@@ -126,7 +128,7 @@ func recibir_zarpazo(felipe: Felipe) -> void:
 
 func _draw() -> void:
 	# El ratón de cuerda hereda de A.S.P.I. pero tiene su propio dibujo.
-	if not ArteNivel.dibujar(self, "aspi", 0.0, 1.0, false, Color(0.6, 0.6, 0.62) if apagada else Color.WHITE):
+	if not ArteNivel.dibujar(self, arte, 0.0, 1.0, false, Color(0.6, 0.6, 0.62) if apagada else Color.WHITE):
 		var cuerpo := Color("3a3d44") if not apagada else Color("6a6d72")
 		draw_rect(Rect2(-ancho / 2.0 + 3.0, -alto, ancho - 6.0, alto), cuerpo)
 		draw_circle(Vector2(-ANCHO / 2.0 + 4.0, -ALTO / 2.0), ALTO / 2.0, cuerpo)

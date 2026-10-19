@@ -53,7 +53,6 @@ PIEZAS = {
     "base_carga": ("muebles-extra", 4, (74, 38), None),
     "repisa": ("muebles-extra", 5, (160, 47), None),
     "vano": ("puertas", 3, (134, 150), None),
-    "cortina": ("detalles", 0, (60, 290), None),
     "bola_pelo": ("detalles", 1, (24, 24), None),
     "aspi_llena": ("detalles", 2, (76, 87), None),  # tapa del depósito abierta
     "mancha": ("detalles", 8, (60, 20), None),
@@ -111,7 +110,18 @@ PATAS = {"zapatero": (0.80, 38)}
 
 # Rectángulos a borrar después de escalar (x0, y0, x1, y1 en la imagen final): el pasamanos trae dibujado el contorno
 # de la escalera (una línea vertical y la del piso) que en el juego no calza con los peldaños de atrás.
-BORRAR = {"escalera_baranda": [(0, 80, 4, 217), (0, 202, 186, 217)]}
+# La baranda trae tres macetas encima: se borra la del medio para que Felipe se siente en la baranda sin meterse en
+# ella (M6 de la revisión 2); RELLENOS repone la baranda que tapaba la maceta.
+BORRAR = {"escalera_baranda": [(0, 80, 4, 217), (0, 202, 186, 217)], "baranda": [(70, 0, 121, 36)]}
+
+# Rellenos después de escalar: (x0, y0, x1, y1, desde, periodo) repite en ese rectángulo las columnas que van de
+# `desde` a `desde + periodo` (un tramo limpio del mismo dibujo).
+RELLENOS = {"baranda": [(70, 36, 121, 62, 58, 18)]}
+
+# Parches después de escalar: (x0, y0, x1, y1, dx) copia en ese rectángulo los pixeles que están dx a la izquierda
+# en la imagen original. La ventana del pasillo traía la caja de pizza sobre el alféizar (adentro, al alcance):
+# se tapa con el marco y el alféizar de al lado, y la caja se dibuja por código afuera, tras el vidrio (G3).
+PARCHES = {"ventana_pasillo": [(114, 28, 153, 33, 32), (104, 33, 163, 54, 56)]}
 
 # Valeria (tanda 3B): poses y caminar, a una sola escala (de pie mide 200 px, 3 Felipes).
 VALERIA_POSES = ("valeria-poses", ["neutra", "enojada", "perdonando", "grabando", "serie"])
@@ -277,6 +287,19 @@ def main():
             for x0, y0, x1, y1 in BORRAR[nombre]:
                 a[y0:y1, x0:x1, 3] = 0
             final = recortar_opaco(Image.fromarray(a, "RGBA"))
+        if nombre in RELLENOS:
+            original = np.asarray(final).copy()
+            a = original.copy()
+            for x0, y0, x1, y1, desde, periodo in RELLENOS[nombre]:
+                for x in range(x0, x1):
+                    a[y0:y1, x] = original[y0:y1, desde + (x - desde) % periodo]
+            final = Image.fromarray(a, "RGBA")
+        if nombre in PARCHES:
+            original = np.asarray(final).copy()
+            a = original.copy()
+            for x0, y0, x1, y1, dx in PARCHES[nombre]:
+                a[y0:y1, x0:x1] = original[y0:y1, x0 - dx:x1 - dx]
+            final = Image.fromarray(a, "RGBA")
         final.save(DESTINO / f"{nombre}.png")
     for nombre, (hoja, indice, tamano, suavizado) in MOSAICOS.items():
         if hoja not in hojas:

@@ -38,6 +38,9 @@ func _correr() -> void:
 	var gigante_maximo := 0.0
 	var negro_maximo := 0.0
 	var empezo_en_negro := false
+	var subtitulos := {}
+	var dialogo_a_la_vista := false
+	var indicador_a_la_vista := false
 	for i in 900:
 		await physics_frame
 		if batalla.fase == BatallaAspi.Fase.ENTRADA:
@@ -49,6 +52,10 @@ func _correr() -> void:
 			if not batalla.presentacion.paso_actual in pasos and batalla.presentacion.paso_actual != "":
 				pasos.append(batalla.presentacion.paso_actual)
 			oculta = oculta or not aspi.visible
+			if batalla.presentacion.presentando:
+				subtitulos[batalla.presentacion.subtitulo_en_pantalla] = true
+				dialogo_a_la_vista = dialogo_a_la_vista or sala.travesuras.dialogo.ocupado()
+				indicador_a_la_vista = indicador_a_la_vista or sala.travesuras.indicador.is_visible_in_tree()
 			gigante_maximo = maxf(gigante_maximo, batalla.gigante)
 		if batalla.fase == BatallaAspi.Fase.PELEA:
 			break
@@ -63,7 +70,9 @@ func _correr() -> void:
 	_comprobar(batalla.presentacion.t < 5.0, "La entrada dura menos de 5 s (%.1f s)" % batalla.presentacion.t)
 	_comprobar(batalla.presentacion.zoom_maximo >= 2.5, "La cámara se acerca como en Broforce (zoom %.1f)" % batalla.presentacion.zoom_maximo)
 	_comprobar(oculta and gigante_maximo >= 1.0, "En la imaginación de Felipe, A.S.P.I. se vuelve gigante")
-	_comprobar(sala.puertas["estudio<pasillo"].cerrada and _dijo("felipe", "Quién cerró"), "Sin vuelta atrás: la puerta se cierra sola («…¿Quién cerró?»)")
+	_comprobar(sala.puertas["estudio<pasillo"].cerrada and subtitulos.has("…¿Quién cerró?"), "Sin vuelta atrás: la puerta se cierra sola («…¿Quién cerró?», como subtítulo de la presentación)")
+	_comprobar(not dialogo_a_la_vista and not indicador_a_la_vista, "M4 Durante la presentación no se ven el cuadro de diálogo ni el Indicador")
+	_comprobar(sala.travesuras.indicador.visible, "M4 Al terminar la presentación vuelve el Indicador")
 	_comprobar(batalla.fase == BatallaAspi.Fase.PELEA and not paused and aspi.visible, "Tras la entrada sigue el juego con la A.S.P.I. real")
 	await _esperar(70)
 	_comprobar(batalla.gigante == 0.0 and batalla.transformacion == 0.0, "La imaginación se desvanece: el resto de la pelea se ve el estudio normal")

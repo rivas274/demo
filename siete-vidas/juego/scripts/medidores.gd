@@ -11,8 +11,15 @@ const FONDO := Color(1, 0.98, 0.95, 0.85)
 var felipe: Felipe
 ## Si hay pantallas (título, pausa, final), los medidores solo se ven mientras se juega.
 var pantallas: Pantallas
+## El cuadro de diálogo (si hay): el aviso de logro nunca queda debajo ni encima de él (M3).
+var dialogo: Dialogo
 var _notificacion := ""
 var _tiempo_notificacion := 0.0
+var _aviso: Control
+
+## Capa del aviso de logro: por encima del diálogo (capa 7) y del HUD (capa 6).
+const CAPA_AVISO := 8
+const TAM_AVISO := Vector2(208, 34)
 
 
 func _ready() -> void:
@@ -20,6 +27,16 @@ func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	var capa := CanvasLayer.new()
+	capa.name = "Avisos de logros"
+	capa.layer = CAPA_AVISO
+	add_child(capa)
+	_aviso = Control.new()
+	_aviso.name = "Aviso de logro"
+	_aviso.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_aviso.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_aviso.draw.connect(_dibujar_aviso)
+	capa.add_child(_aviso)
 
 
 func mostrar_logro(titulo: String) -> void:
@@ -30,6 +47,24 @@ func mostrar_logro(titulo: String) -> void:
 func _process(delta: float) -> void:
 	_tiempo_notificacion = maxf(0.0, _tiempo_notificacion - delta)
 	queue_redraw()
+	_aviso.queue_redraw()
+
+
+## Hay un aviso de logro en pantalla.
+func mostrando_logro() -> bool:
+	return _tiempo_notificacion > 0.0 and felipe != null and (pantallas == null or pantallas.modo == Pantallas.Modo.JUGANDO)
+
+
+## Dónde va el aviso: arriba a la derecha, bajo la barra del jefe (M4 de la revisión 1); si el diálogo está arriba,
+## justo debajo de él (M3).
+func rect_logro() -> Rect2:
+	var ancho_pantalla := get_viewport_rect().size.x
+	var caja := Rect2(Vector2(ancho_pantalla - TAM_AVISO.x - 8, 44), TAM_AVISO)
+	if dialogo and is_instance_valid(dialogo):
+		var ocupa := dialogo.rect_en_pantalla()
+		if ocupa.has_area() and ocupa.intersects(caja):
+			caja.position.y = ocupa.end.y + 4.0
+	return caja
 
 
 func _draw() -> void:
@@ -42,13 +77,17 @@ func _draw() -> void:
 	draw_string(fuente, Vector2(12, 36), "%d vidas" % felipe.vidas, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, TEXTO)
 	if felipe.tiene_collar:
 		draw_string(fuente, Vector2(104, 20), "Collar de la Vergüenza", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, ROJO)
-	if _tiempo_notificacion > 0.0:
-		# Debajo de la barra del jefe (arriba a la derecha), para no taparla (M4).
-		var caja := Rect2(get_viewport_rect().size.x - 216, 44, 208, 34)
-		draw_rect(caja, FONDO)
-		draw_rect(caja, ROJO, false, 1.0)
-		draw_string(fuente, caja.position + Vector2(8, 13), "Nuevo logro desbloqueado", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("6f625b"))
-		draw_string(fuente, caja.position + Vector2(8, 27), _notificacion, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, TEXTO)
+
+
+func _dibujar_aviso() -> void:
+	if not mostrando_logro():
+		return
+	var fuente := ThemeDB.fallback_font
+	var caja := rect_logro()
+	_aviso.draw_rect(caja, Color(FONDO, 1.0))
+	_aviso.draw_rect(caja, ROJO, false, 1.0)
+	_aviso.draw_string(fuente, caja.position + Vector2(8, 13), "Nuevo logro desbloqueado", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("6f625b"))
+	_aviso.draw_string(fuente, caja.position + Vector2(8, 27), _notificacion, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, TEXTO)
 
 
 ## Peso con personalidad: el humor de Felipe según los kilos (no cambia su dibujo ni su movimiento).

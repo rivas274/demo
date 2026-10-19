@@ -396,6 +396,18 @@ func _probar_dialogo() -> void:
 		repetida = repetida or texto == anterior
 		anterior = texto
 	_comprobar(not repetida, "Frases.elegir no repite la misma frase seguida")
+	# M3: el aviso de logro va por encima del diálogo (capa más alta) y nunca debajo de su cuadro.
+	var medidores := sala.get_node("Interfaz/Medidores") as Medidores
+	dialogo.limpiar()
+	await _esperar(2)
+	sala.felipe.global_position = Vector2(120, Sala.SUELO)
+	dialogo.decir("felipe", "Una frase arriba.", 0, true)
+	sala.desbloquear_logro("Logro de prueba")
+	await _esperar(2)
+	var cuadro := dialogo.rect_en_pantalla()
+	_comprobar(medidores.mostrando_logro() and cuadro.has_area() and not medidores.rect_logro().intersects(cuadro), "M3 Con el diálogo en pantalla, el aviso de logro sale fuera de su cuadro")
+	_comprobar(Medidores.CAPA_AVISO > dialogo.layer, "M3 El aviso de logro va en una capa por encima del diálogo")
+	dialogo.limpiar()
 
 
 ## Frotarse contra alguien enojado (Valeria): un ciclo de "ronronear" y después perdonar(felipe, "frotarse").
@@ -430,6 +442,14 @@ func _probar_indicador() -> void:
 	await _poner_en(Vector2(120, Sala.SUELO))
 	await _esperar(3)
 	_comprobar(indicador.objeto == null and indicador.verbo == "", "Lejos de todo, el indicador se va")
+	# M7: un verbo por acción (sofá «Firmar», ropa «Desordenar», puerta entornada «Arañar»).
+	var verbos := {}
+	for nombre: String in ["Sofa arañable", "Ropa doblada", "Puerta entornada"]:
+		var cosa := sala.get_node(nombre)
+		verbos[String(cosa.call("verbo", felipe))] = nombre
+	_comprobar(verbos.size() == 3 and verbos.has("Firmar") and verbos.has("Desordenar") and verbos.has("Arañar"), "M7 Sofá, ropa y puerta entornada tienen verbos distintos (%s)" % ", ".join(verbos.keys()))
+	# M5: el punto del láser mide 8 px o más.
+	_comprobar(Laser.RADIO_PUNTO * 2.0 >= 8.0, "M5 El punto del láser mide %.0f px (con halo que late)" % (Laser.RADIO_PUNTO * 2.0))
 	var vaso2: Vaso = null
 	for hijo in sala.get_children():
 		if hijo is Vaso and not hijo.roto and hijo.tipo == "vaso":

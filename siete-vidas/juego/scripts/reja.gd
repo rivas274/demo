@@ -2,7 +2,7 @@ class_name Reja
 extends StaticBody2D
 ## Reja anti-fuga para mascotas (decisión del creador, 2026-10-19): Valeria la atornilló entre el librero y la
 ## escalera después del video viral. Mide 1,5 m (182 px), se dibuja de 48 px con colisión fina (12 px), lleva el
-## cartel "PIPE: NO. Con amor, mamá" (texto por código) y el pestillo del lado de adentro ("a prueba de Pipe").
+## cartel "PIPE: NO" (texto por código, centrado en la reja sin pisar el librero, M2) y el pestillo del lado de adentro ("a prueba de Pipe").
 ## Desde el recibidor Felipe solo la empuja ("Qué tierno."); se pasa trepando el librero y saltándola. Desde la
 ## escalera, un manotazo al pestillo la abre para siempre: es el atajo de vuelta (R6).
 
@@ -11,7 +11,8 @@ signal abierta
 signal empujada
 
 const ANCHO_DIBUJO := 48.0
-const CARTEL := Rect2(-30, -168, 60, 30)
+## Cartel de cartón dentro del ancho de la reja (48 px): no se monta sobre el librero (M2).
+const CARTEL := Rect2(-22, -164, 44, 20)
 
 var rect: Rect2
 var abierta_ya := false
@@ -100,11 +101,11 @@ func _draw() -> void:
 	var fuente := ThemeDB.fallback_font
 	draw_rect(CARTEL.grow(1), Color(0.35, 0.22, 0.15))
 	draw_rect(CARTEL, Color(0.86, 0.74, 0.55))
-	draw_rect(Rect2(CARTEL.position + Vector2(-3, -2), Vector2(10, 5)), Color(0.95, 0.93, 0.8, 0.9))
-	draw_rect(Rect2(CARTEL.end - Vector2(7, CARTEL.size.y + 2), Vector2(10, 5)), Color(0.95, 0.93, 0.8, 0.9))
+	# Cinta adhesiva en las esquinas de arriba, sin salirse del cartel.
+	draw_rect(Rect2(CARTEL.position + Vector2(1, -1), Vector2(7, 3)), Color(0.95, 0.93, 0.8, 0.9))
+	draw_rect(Rect2(Vector2(CARTEL.end.x - 8, CARTEL.position.y - 1), Vector2(7, 3)), Color(0.95, 0.93, 0.8, 0.9))
+	# Una sola línea legible (el chiste está en "PIPE: NO"): la firma de 6 px no se leía (M2).
 	var titulo := "PIPE: NO"
-	var ancho_titulo := fuente.get_string_size(titulo, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
-	draw_string(fuente, Vector2(-ancho_titulo / 2.0, CARTEL.position.y + 14), titulo, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0.7, 0.08, 0.1))
-	var firma := "Con amor, mamá"
-	var ancho_firma := fuente.get_string_size(firma, HORIZONTAL_ALIGNMENT_LEFT, -1, 8).x
-	draw_string(fuente, Vector2(-ancho_firma / 2.0, CARTEL.position.y + 26), firma, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0.25, 0.15, 0.12))
+	var tamano := 11
+	var ancho_titulo := fuente.get_string_size(titulo, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano).x
+	draw_string(fuente, Vector2(-ancho_titulo / 2.0, CARTEL.position.y + 14), titulo, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano, Color(0.7, 0.08, 0.1))

@@ -244,6 +244,7 @@ func empezar() -> void:
 	_origen_gigante = aspi.global_position + Vector2(0, -Aspi.ALTO / 2.0)
 	presentacion.divisiones = APAGADOS_TOTALES
 	presentacion.pantallas = sala.pantallas
+	presentacion.frase_sin_vuelta = ["Felipe", Frases.FELIPE["quien_cerro"][0][0]]
 	presentacion.presentar(felipe, aspi, Rect2(arena.position.x, 0, arena.size.x, Sala.ALTO))
 	empezada.emit()
 
@@ -275,8 +276,7 @@ func _al_paso(paso: String) -> void:
 			_polvo.global_position = puerta.global_position if puerta else felipe.global_position
 			_polvo.restart()
 			_polvo.emitting = true
-			if presentacion.pasos == PresentacionJefe.PASOS:
-				sala.travesuras.decir_felipe("quien_cerro", true)
+			# La frase la muestra la presentación como subtítulo (el diálogo se esconde durante la entrada, M4).
 		"espera":
 			aspi.luz_aviso = Color("e0483b")
 		"musica":

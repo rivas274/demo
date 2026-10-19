@@ -8,6 +8,8 @@ var sala: Sala
 var felipe: Felipe
 ## Valeria nunca se para en una puerta (se revisa en cada cuadro de la prueba).
 var _valeria_en_puerta := ""
+## De pie, Valeria siempre pisa el piso (G2): aquí queda dónde se paró sobre un mueble, si pasó.
+var _valeria_sobre_mueble := ""
 
 
 func _initialize() -> void:
@@ -45,7 +47,9 @@ func _correr() -> void:
 	# Arañar el sofá delante de Valeria: a los dos arañazos lo deja frente al rascador y el plástico aguanta.
 	await _poner_en(Vector2(330, Sala.SUELO))
 	await _tocar("interactuar")
-	await _esperar(70)
+	await _esperar_que(func() -> bool: return sala.valeria.actividad == Valeria.Actividad.REGANANDO, 70)
+	_comprobar(sala.valeria.actividad == Valeria.Actividad.REGANANDO and absf(sala.valeria.global_position.y - Sala.SUELO) < 0.5, "G2 Al pararse del sofá para regañar, Valeria baja al piso (no queda encima del sofá)")
+	await _esperar(50)
 	_comprobar(not sala.sofa.esta_roto and absf(felipe.global_position.x - (Sala.RASCADOR_X - 46.0)) < 6.0, "Valeria lo pilla arañando el sofá y lo deja frente al rascador")
 	_comprobar(_dijo("valeria", "AQUÍ"), "Valeria: «¡Ahí no, bebito, AQUÍ!»")
 	await _esperar(80)
@@ -126,7 +130,12 @@ func _correr() -> void:
 	_comprobar(t.agenda.esta_cumplida("popo") and "CONTENIDO SENSIBLE" in t.jugo.palabras, "Agachado en la arena: popo táctico con censura irónica")
 	await _esperar(20)
 	_comprobar(sala.valeria.mascarilla and sala.valeria.cuarto == "recibidor", "Valeria sale con mascarilla: «¡ACABO DE LIMPIARLA!»")
+	_comprobar(t.agenda.texto_recompensa("popo") == "Foto vergonzosa" and _foto_suelta("recibidor") != null, "G6 El popo táctico da una foto vergonzosa (no un camino ya abierto)")
+	var fotos_antes := t.recompensas.fotos
+	await _poner_en(_foto_suelta("recibidor").global_position + Vector2(0, -2), 60)
+	_comprobar(t.recompensas.fotos == fotos_antes + 1, "G6 La foto del popo se recoge y va a la galería")
 	await _esperar_que(func() -> bool: return sala.valeria.cuarto == "cocina", 900)
+	_comprobar(not sala.puertas[Sala.PUERTA_COCINA].cerrada, "Al volver por bolsas, Valeria deja abierta la puerta de la cocina")
 
 	# Cocina: tazón, ratón, caja, pollo en la cara de Valeria y calcetín del refrigerador.
 	await _poner_en(sala.puertas[Sala.PUERTA_COCINA].global_position)
@@ -153,7 +162,7 @@ func _correr() -> void:
 	var raton_meson := _raton_en("cocina", Sala.SUELO - 108)
 	raton_meson.queue_free()
 	sala.valeria.mirando = 1.0
-	await _poner_en(Vector2(3540, Sala.SUELO - 108))
+	await _poner_en(Sala.POLLO + Vector2(30, 0))
 	await _tocar("interactuar")
 	await _esperar(60)
 	_comprobar(t.agenda.esta_cumplida("almuerzo") and "¡EN SU CARA!" in t.jugo.palabras, "Robar el pollo delante de Valeria: «¡EN SU CARA!» (travesura «almuerzo»)")
@@ -203,11 +212,37 @@ func _correr() -> void:
 	await _esperar(30)
 	_comprobar(sala.habitacion == "pasillo" and _dijo("valeria", "Audífonos"), "La escalera lleva al pasillo; abajo, Valeria se pone audífonos")
 
-	# Bajar: por el vano vuelve al pie de la escalera (adentro de la reja) y el pestillo es el atajo.
+	# Bajar: por el vano vuelve al pie de la escalera (adentro de la reja), escalón por escalón, y el pestillo es el atajo.
 	await _poner_en(sala.puertas["pasillo<recibidor"].global_position, 10)
 	await _tocar("interactuar")
-	await _esperar_que(func() -> bool: return sala.habitacion == "recibidor" and not sala.cruzando(), 300)
+	var peldanos_pisados := {}
+	var bajo_a_saltos := false
+	var siempre_adentro := true
+	var alto_anterior := -INF
+	var subio := false
+	for i in 400:
+		await physics_frame
+		_vigilar_valeria()
+		if sala.habitacion != "recibidor":
+			continue
+		var pies := felipe.global_position
+		siempre_adentro = siempre_adentro and pies.x > Sala.REJA.end.x
+		for j in Sala.PELDANOS.size():
+			if pies.distance_to(Sala.PELDANOS[j]) < 3.0:
+				peldanos_pisados[j] = true
+		bajo_a_saltos = bajo_a_saltos or felipe.estado == Felipe.Estado.SUBIENDO_ESCALON
+		# Baja: cuadro a cuadro la altura de los pies no vuelve a subir más que el saltito de un escalón.
+		subio = subio or (alto_anterior != -INF and pies.y < alto_anterior - 24.0)
+		alto_anterior = pies.y
+		if not sala.cruzando() and felipe.is_on_floor():
+			break
 	_comprobar(absf(felipe.global_position.x - Sala.ESCALERA_PIE.x) < 6.0 and felipe.global_position.y > Sala.SUELO - 2.0, "Por el vano baja la escalera hasta el pie")
+	_comprobar(peldanos_pisados.size() == Sala.PELDANOS.size() and bajo_a_saltos and not subio, "Baja escalón por escalón: pisa los %d peldaños (%d), un saltito por escalón y sin volver a subir" % [Sala.PELDANOS.size(), peldanos_pisados.size()])
+	_comprobar(siempre_adentro and felipe.is_on_floor() and felipe.estado == Felipe.Estado.SUELO, "Al bajar queda del lado de adentro de la reja, en el piso y con el control de vuelta")
+	Input.action_press("mover_derecha")
+	await _esperar(20)
+	Input.action_release("mover_derecha")
+	_comprobar(felipe.global_position.x > Sala.ESCALERA_PIE.x + 10.0, "Después de bajar se puede caminar")
 	await _poner_en(Vector2(Sala.REJA.end.x + 16.0, Sala.SUELO), 20)
 	_comprobar(felipe.objeto_cercano() == sala.reja and sala.reja.verbo(felipe) == "Abrir", "Junto a la reja, desde adentro, el botón es «Abrir»")
 	await _tocar("interactuar")
@@ -319,13 +354,31 @@ func _correr() -> void:
 	await _poner_en(Vector2(Sala.SALIDA, Sala.SUELO - 89))
 	await _esperar(40)
 	_comprobar(sala.sentado_en_baranda and _dijo("felipe", "gato de interior"), "En la baranda se sienta y suspira")
+	_comprobar(not _maceta_en(felipe.global_position.x), "M6 Felipe se queda en un tramo de la baranda sin maceta")
 	Input.action_press("saltar")
 	Input.action_press("mover_derecha")
 	await _esperar(14)
 	Input.action_release("saltar")
-	await _esperar(30)
+	var siempre_a_la_vista := true
+	var cartel_antes_de_aterrizar := false
+	var aterrizo := false
+	for i in 400:
+		await physics_frame
+		siempre_a_la_vista = siempre_a_la_vista and _se_ve(felipe)
+		cartel_antes_de_aterrizar = cartel_antes_de_aterrizar or (not aterrizo and _cartel_de("PODER NUEVO") != null)
+		if felipe.is_on_floor() and felipe.global_position.y > Sala.SUELO + 100.0:
+			aterrizo = true
+			break
 	Input.action_release("mover_derecha")
-	_comprobar(sala.salto_final and felipe.tiene_caer_de_pie and "Caer de Pie" in sala.logros, "El salto real da «PODER: CAER DE PIE»")
+	_comprobar(sala.salto_final and felipe.tiene_caer_de_pie, "El salto real desde la baranda da Caer de Pie")
+	_comprobar(aterrizo and absf(felipe.global_position.y - Sala.TOLDO.position.y) < 2.0, "G1 Aterriza en el toldo de la panadería de abajo")
+	_comprobar(siempre_a_la_vista, "G1 La cámara lo sigue: Felipe se ve en todo el salto")
+	_comprobar(not cartel_antes_de_aterrizar, "G1 El cartel «PODER NUEVO» sale recién después de aterrizar")
+	await _esperar(75)
+	var cartel := _cartel_de("PODER NUEVO")
+	var pies_en_pantalla := (sala.get_viewport().get_canvas_transform() * felipe.global_position).y
+	_comprobar(cartel != null and "Caer de Pie" in sala.logros and _se_ve(felipe), "G1 Tras aterrizar, el cartel «PODER NUEVO · CAER DE PIE» y el logro, con Felipe a la vista")
+	_comprobar(cartel != null and (cartel.position.y + Hud.ALTO_CARTEL <= pies_en_pantalla - 72.0 or cartel.position.y >= pies_en_pantalla), "G1 El cartel no tapa a Felipe aterrizado")
 	await create_timer(4.0).timeout
 	var resumen: ResumenDia = null
 	for hijo in t.get_children():
@@ -334,6 +387,7 @@ func _correr() -> void:
 	_comprobar(sala.terminado and resumen != null and paused, "Sale el resumen del día (en lugar de la pantalla final)")
 	_comprobar(t.agenda.cumplidas() == Agenda.NIVEL_1.size(), "La agenda queda completa (%d de %d)" % [t.agenda.cumplidas(), Agenda.NIVEL_1.size()])
 	_comprobar(_valeria_en_puerta == "", "Valeria nunca se paró en una puerta %s" % _valeria_en_puerta)
+	_comprobar(_valeria_sobre_mueble == "", "G2 De pie, Valeria siempre pisa el piso %s" % _valeria_sobre_mueble)
 	paused = false
 	Engine.time_scale = 1.0
 	sala.queue_free()
@@ -416,11 +470,50 @@ func _vigilar_valeria() -> void:
 	if sala == null or not is_instance_valid(sala) or sala.valeria == null:
 		return
 	var v := sala.valeria
+	if v.actividad != Valeria.Actividad.SENTADA and v.actividad != Valeria.Actividad.FUERA and absf(v.global_position.y - Sala.SUELO) > 0.5:
+		_valeria_sobre_mueble = "(%s, x %.0f, y %.0f)" % [Valeria.Actividad.keys()[v.actividad], v.global_position.x, v.global_position.y]
 	if v.actividad in [Valeria.Actividad.CAMINANDO, Valeria.Actividad.FUERA]:
 		return
 	for datos: Array in Sala.PUERTAS:
 		if datos[0] != Sala.PUERTA_ESCALERA and Sala.rect_sagrado(datos[1]).grow(-30).has_point(v.global_position - Vector2(0, 1)):
 			_valeria_en_puerta = "(%s, x %.0f)" % [datos[0], v.global_position.x]
+
+
+## Una foto vergonzosa suelta (sin recoger) en ese cuarto, o null.
+func _foto_suelta(cuarto: String) -> Recogible:
+	for hijo in sala.get_children():
+		if hijo is Recogible and hijo.tipo == "foto" and Sala.habitacion_de(hijo.global_position) == cuarto:
+			return hijo
+	return null
+
+
+## ¿Hay una maceta de la baranda donde se para Felipe? (la del medio se borró del arte: M6).
+func _maceta_en(x: float) -> bool:
+	var imagen: Image = ArteNivel.textura("baranda").get_image()
+	var columna := int(x - 7400.0)
+	for dx in range(-12, 13):
+		var cx := clampi(columna + dx, 0, imagen.get_width() - 1)
+		for y in range(0, 36):
+			if imagen.get_pixel(cx, y).a > 0.5:
+				return true
+	return false
+
+
+## ¿Felipe (su cuerpo) está dentro de lo que muestra la cámara?
+func _se_ve(quien: Node2D) -> bool:
+	var vista := Rect2(Vector2.ZERO, Vector2(640, 360))
+	var en_pantalla := sala.get_viewport().get_canvas_transform() * (quien.global_position + Vector2(0, -30))
+	return vista.has_point(en_pantalla)
+
+
+## El cartel del HUD cuyo título es ese (null si no está en pantalla).
+func _cartel_de(titulo: String) -> Control:
+	for hijo in sala.travesuras.hud.get_children():
+		if hijo is Control and String(hijo.name).begins_with("Cartel"):
+			for etiqueta in hijo.get_children():
+				if etiqueta is Label and etiqueta.text == titulo:
+					return hijo
+	return null
 
 
 func _comprobar(condicion: bool, descripcion: String) -> void:

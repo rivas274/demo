@@ -34,7 +34,12 @@ const HABITACIONES := [
 ## Orden de la ruta (las reglas de diseño lo usan para comprobar que se enseña antes de pedir).
 const RUTA := ["sala", "recibidor", "cocina", "pasillo", "dormitorio", "estudio", "balcon"]
 ## Ventanas recortadas en la pared (se ve la ciudad). La de la sala y la del pasillo son arte con su propia vista.
-const VENTANAS := [Rect2(3160, 130, 140, 120), Rect2(5500, 230, 120, 100), Rect2(6440, 90, 140, 100)]
+## La del dormitorio está entre la cómoda y el ropero: su alféizar es la repisa (1,20 m) y la cortina cuelga a sus
+## lados desde la barra (G4; dibujada por código hasta que llegue el arte nuevo de Gemini).
+const VENTANAS := [Rect2(3160, 130, 140, 120), VENTANA_DORMITORIO, Rect2(6440, 90, 140, 100)]
+const VENTANA_DORMITORIO := Rect2(5748, 190, 56, 108)
+## Vidrio de la ventana del pasillo (en el mundo): la caja de pizza del lugar visto queda detrás, sobre el toldo (G3).
+const VIDRIO_PASILLO := Rect2(4337, SUELO - 188, 86, 29)
 
 ## Puertas: [nombre, posición (al pie, al centro), puerta a la que lleva]. Van de a pares.
 const PUERTAS := [
@@ -95,7 +100,6 @@ const ARTE := [
 	["cama", Vector2(5444, SUELO), false, "mueble"],
 	["comoda", Vector2(5650, SUELO), false, "mueble"],
 	["ropero", Vector2(5816, SUELO), false, "mueble"],
-	["cortina", Vector2(5745, SUELO), false, "mueble"],
 	["cesta_vacia", Vector2(5747, SUELO), false, "mueble"],
 	["silla_v2", Vector2(6424, SUELO), false, "mueble"],
 	["escritorio", Vector2(6488, SUELO), false, "mueble"],
@@ -169,9 +173,10 @@ const CALCETIN_REFRIGERADOR := Vector2(3716, SUELO - 216)
 const TOTAL_CALCETINES := 3
 const CAJA_CARTON := Vector2(3360, SUELO)
 ## Ratones de cuerda: [posición, límite izquierdo, límite derecho]. Uno enseña el zarpazo y otro cuida el pollo.
+## El del mesón patrulla entre el borde y el microondas, sin pasar por el pollo (que está sobre el microondas, G5).
 const RATONES := [
 	[Vector2(3240, SUELO), 3200.0, 3290.0],
-	[Vector2(3520, SUELO - 108), 3496.0, 3546.0],
+	[Vector2(3518, SUELO - 108), 3500.0, 3536.0],
 ]
 const LASER := [Vector2(4700, SUELO), 4640.0, 4780.0]
 ## Objetos que se tiran con el botón de acción: [posición, tipo].
@@ -184,26 +189,45 @@ const TIRABLES := [
 	[Vector2(6650, SUELO - 151), "maceta"],
 	[Vector2(6682, SUELO - 151), "maceta"],
 ]
-## Comida: [posición, tipo]. El pollo es el almuerzo de Valeria (travesura "almuerzo").
-const COMIDA := [[Vector2(3010, SUELO), "tazon"], [Vector2(3510, SUELO - 108), "pollo"]]
+## Comida: [posición, tipo]. El pollo es el almuerzo de Valeria (travesura "almuerzo"): espera sobre el microondas,
+## fuera de la patrulla del ratón del mesón (G5).
+const POLLO := Vector2(3612, SUELO - 162)
+const COMIDA := [[Vector2(3010, SUELO), "tazon"], [POLLO, "pollo"]]
 ## A.S.P.I.: [base de carga, límite izquierdo, límite derecho] dentro del estudio.
 const ASPI := [Vector2(6637, SUELO), 6290.0, 6830.0]
 ## Puntos de descanso: la caja de arena (recibidor) y el cojín (pasillo, a 2 px del rectángulo de la puerta del jefe).
 const DESCANSOS := [Rect2(1852, SUELO - 60, 71, 70), Rect2(4784, SUELO - 40, 70, 50)]
-## La meta: la baranda del balcón (sentarse y saltar da Caer de Pie).
+## La meta: la baranda del balcón (sentarse y saltar da Caer de Pie), en el tramo sin maceta (M6).
 const SALIDA := 7490.0
+## Lo que se ve al saltar del balcón (G1): la cámara baja CAIDA_BALCON px y Felipe aterriza en el toldo de la
+## panadería de abajo (solo existe durante el salto final).
+const CAIDA_BALCON := 230.0
+const TOLDO := Rect2(7380, SUELO + 196, 300, 8)
 ## Sofá arañable (con el plástico nuevo): [centro de la base, ancho, alto]. Línea "sofa" de la agenda.
 const SOFA_ARANABLE := [Vector2(360, SUELO), 240.0, 100.0]
 const RASCADOR_X := 570.0
 ## Valeria: sentada en el sofá viendo la serie, y su lugar en la cocina (preparando café).
 const VALERIA_SOFA := Vector2(410, SUELO - 49)
 const VALERIA_COCINA := Vector2(3080, SUELO)
-## Cajón de los calcetines (en la cómoda), ropa doblada (en la cama) y teclado del escritorio.
+## Cajón de los calcetines (en la cómoda), ropa doblada (en la cama) y teclado del escritorio. Lo interactuable
+## dibujado por código declara su tamaño (lado menor ≥ 24 px, R8 y G7; prueba_reglas_nivel lo mide).
 const CAJON := Vector2(5662, SUELO - 75)
+const RECT_CAJON := Rect2(-14, -12, 60, 24)
 const ROPA := Vector2(5540, SUELO - 65)
-const TECLADO := Rect2(6545, SUELO - 104, 42, 8)
+const RECT_ROPA := Rect2(-26, -26, 52, 26)
+const TECLADO := Rect2(6540, SUELO - 122, 52, 24)
+## Lo interactuable que se dibuja por código: [nombre, rectángulo en el mundo] (G7).
+const DIBUJADOS_INTERACTUABLES := [
+	["Cajón de los calcetines", Rect2(CAJON + RECT_CAJON.position, RECT_CAJON.size)],
+	["Ropa doblada", Rect2(ROPA + RECT_ROPA.position, RECT_ROPA.size)],
+	["Teclado de Valeria", TECLADO],
+]
 ## Segundos agachado sobre la caja de arena para el popo táctico, y quieto frente al láser para ignorarlo.
 const TIEMPO_POPO := 1.2
+## Donde sale la foto vergonzosa del popo táctico (cae flotando al piso, junto a la lámpara).
+const FOTO_POPO := Vector2(1962, SUELO - 40)
+## Fotos vergonzosas del nivel (las tres secretas): juntarlas todas da «Galería Viral».
+const TOTAL_FOTOS := 3
 const TIEMPO_IGNORAR_LASER := 5.0
 
 ## Primeras frases de Felipe (reemplazan los avisos de abajo, M2): [zona, línea con {acción}, ánimo del retrato].
@@ -229,8 +253,8 @@ const LECCIONES := [
 const AGENDA_SITIOS := {
 	"perdon": [Vector2(905, SUELO - 91), "«¡GRAVEDAD: 1 · VASO: 0!», Valeria: «¡PIPE!» y después «¿Quién es el bebito más gordito?»"],
 	"sofa": [Vector2(370, SUELO - 49), "«¡PLÁSTICO: 0!» y Valeria: «¡Lo estoy pagando en 12 cuotas!»"],
-	"popo": [Vector2(1888, SUELO - 45), "Censura irónica y Valeria con mascarilla: «¡ACABO DE LIMPIARLA!»"],
-	"almuerzo": [Vector2(3510, SUELO - 108), "«¡EN SU CARA!» y Valeria: «¡ESE ERA MI ALMUERZO!»"],
+	"popo": [Vector2(1888, SUELO - 45), "Censura irónica, Valeria con mascarilla: «¡ACABO DE LIMPIARLA!» y se le cae una foto"],
+	"almuerzo": [POLLO, "«¡EN SU CARA!» y Valeria: «¡ESE ERA MI ALMUERZO!»"],
 	"laser": [Vector2(4700, SUELO), "El puntero se apaga de vergüenza"],
 	"cajon": [CAJON, "Calcetines volando por todo el cuarto"],
 	"teclado": [Vector2(6566, SUELO - 98), "La pantalla dice «jjjjjjjjjj» y la impresora escupe papeles"],
@@ -238,9 +262,11 @@ const AGENDA_SITIOS := {
 }
 ## Lugares que se ven antes de poder alcanzarlos (R17): [qué, dónde, con qué maña se vuelve].
 const LUGARES_VISTOS := [
-	["Toldo del vecino con la caja de pizza (por la ventana del pasillo)", Rect2(4370, SUELO - 186, 60, 20), "Caer de Pie"],
+	["Toldo del vecino con la caja de pizza (afuera, tras el vidrio del pasillo)", PIZZA, "Caer de Pie"],
 	["Caja de recuerdos de Valeria (repisa alta del dormitorio)", Rect2(5735, SUELO - 300, 80, 10), "Afilar Garras"],
 ]
+## La caja de pizza, sobre el toldo del vecino, del otro lado del vidrio (dentro de VIDRIO_PASILLO).
+const PIZZA := Rect2(4380, SUELO - 186, 28, 8)
 ## Atajos (R6): [qué, dónde, desde dónde se abre].
 const ATAJOS := [["Pestillo de la reja anti-fuga", REJA, "escalera"]]
 ## Cada maña que el nivel enseña abre un camino y molesta a alguien (R19): maña -> [camino, a quién molesta].
@@ -346,6 +372,9 @@ var _dijo := {}
 var _decorado: Node2D
 var _cesta: Node2D
 var _tiempo_baranda := 0.0
+var _tiempo_cayendo := 0.0
+var _aterrizo_final := false
+var _toldo: StaticBody2D
 
 @onready var felipe: Felipe = $Felipe
 
@@ -382,6 +411,7 @@ func _ready() -> void:
 	medidores.pantallas = pantallas
 	travesuras = Travesuras.new(felipe, Agenda.NIVEL_1)
 	add_child(travesuras)
+	medidores.dialogo = travesuras.dialogo
 	travesuras.recompensas.camino_abierto.connect(_abrir_camino)
 	travesuras.recompensas.cambio.connect(_al_cambiar_recompensas)
 	_crear_puertas()
@@ -472,11 +502,12 @@ func _crear_objetos() -> void:
 	travesuras.conectar_aranable(sofa, "sofa", AGENDA_SITIOS["sofa"][0] + Vector2(0, -20))
 	sofa.roto.connect(_romper_plastico)
 	# Cajón de los calcetines (cómoda) y ropa doblada (cama).
-	var cajon := Interactivo.new("Cajon", "Saquear", Rect2(-14, -12, 60, 24))
+	var cajon := Interactivo.new("Cajon", "Saquear", RECT_CAJON)
 	cajon.position = CAJON
 	cajon.al_usar = func(f: Felipe) -> void: f.dar_manotazo(_abrir_cajon.bind(cajon))
 	add_child(cajon)
-	var ropa := Interactivo.new("Ropa doblada", "Firmar", Rect2(-24, -14, 48, 14))
+	# La ropa se desordena (Felipe se acicala encima): un verbo distinto del sofá («Firmar») y de la puerta («Arañar»), M7.
+	var ropa := Interactivo.new("Ropa doblada", "Desordenar", RECT_ROPA)
 	ropa.position = ROPA
 	ropa.al_usar = func(f: Felipe) -> void:
 		f.acicalarse()
@@ -490,6 +521,12 @@ func _crear_objetos() -> void:
 	oido.position = (puertas[PUERTA_COCINA] as Puerta).position + Vector2(0, -40)
 	oido.oido.connect(_maullido_en_la_puerta_de_la_cocina)
 	add_child(oido)
+	# Bajo el balcón: la fachada y el toldo de la panadería (solo se ven en el salto final, G1).
+	var fachada := Node2D.new()
+	fachada.name = "Fachada"
+	fachada.z_index = -19
+	fachada.draw.connect(_dibujar_fachada.bind(fachada))
+	add_child(fachada)
 	_decorado = Node2D.new()
 	_decorado.name = "Decorado"
 	_decorado.z_index = -1
@@ -557,6 +594,7 @@ func _physics_process(delta: float) -> void:
 	_actualizar_laser(delta)
 	_actualizar_teclado(delta)
 	_actualizar_balcon(delta)
+	_actualizar_frases_de_lugar()
 	var en_escalera := felipe.en_escalera() or (habitacion == "recibidor" and felipe.global_position.x > ESCALERA_RECT.position.x and felipe.global_position.y < SUELO - 4.0)
 	_pasamanos.modulate.a = OPACIDAD_PASAMANOS if en_escalera else 1.0
 	if not _calcetines_volando.is_empty():
@@ -809,7 +847,9 @@ func _actualizar_popo(delta: float) -> void:
 	if _tiempo_popo >= TIEMPO_POPO:
 		_tiempo_popo = 0.0
 		_censura_ironica()
-		travesuras.cumplir("popo")
+		# La recompensa es una foto vergonzosa (G6): la que Valeria tenía lista para subir se le cae del bolsillo
+		# al ver la arena. Las tres secretas dan fotos; la galería completa da «Galería Viral».
+		travesuras.cumplir("popo", FOTO_POPO)
 		if valeria.cuarto == "cocina" and not valeria.audifonos:
 			_valeria_sale_por_bolsas()
 
@@ -848,6 +888,26 @@ func _actualizar_laser(delta: float) -> void:
 		travesuras.jugo.palabra_en_mundo("*se apaga de vergüenza*", _laser.global_position + Vector2(0, -24), Color(1.0, 0.5, 0.5), 11)
 		# La foto vergonzosa se cae del cajón de la consola.
 		travesuras.cumplir("laser", Vector2(4330, SUELO - 97))
+
+
+## Frases que salen una vez al ver algo: la pizza del lugar visto (desde el alféizar) y el láser (la primera vez).
+func _actualizar_frases_de_lugar() -> void:
+	if not felipe.is_on_floor():
+		return
+	var pies := felipe.global_position
+	var alfeizar: Rect2 = _rect_pieza("Alféizar")
+	if absf(pies.y - alfeizar.position.y) < 3.0 and pies.x > alfeizar.position.x and pies.x < alfeizar.end.x:
+		_decir("pizza", true)
+	if habitacion == "pasillo" and _laser and not _laser.apagado and absf(_laser.global_position.x - pies.x) < 200.0 and pies.y > SUELO - 4.0:
+		_decir("laser_visto")
+
+
+## Rectángulo de una pieza de PIEZAS por su nombre (vacío si no está).
+static func _rect_pieza(nombre: String) -> Rect2:
+	for pieza: Array in PIEZAS:
+		if pieza[2] == nombre:
+			return pieza[0]
+	return Rect2()
 
 
 ## Pisar el teclado de Valeria: "jjjjjjjjjj" (secreta). En la pelea, la impresora escupe papeles: manchas extra.
@@ -908,7 +968,8 @@ func _maullido_en_la_puerta_de_la_cocina(_felipe_que_maulla: Felipe) -> void:
 	_abrir_cocina()
 
 
-## Popo táctico: Valeria sale con mascarilla, mira la caja y vuelve a la cocina por bolsas... dejando la puerta abierta.
+## Popo táctico: Valeria sale con mascarilla, mira la caja y vuelve a la cocina por bolsas... dejando la puerta abierta
+## (es un efecto, no la recompensa: la recompensa es la foto, G6).
 func _valeria_sale_por_bolsas() -> void:
 	var puerta: Puerta = puertas[PUERTA_COCINA]
 	puerta.abrir_un_momento()
@@ -920,7 +981,8 @@ func _valeria_sale_por_bolsas() -> void:
 		await get_tree().create_timer(1.2, false).timeout
 		valeria.caminar_a(puerta.position.x, func() -> void:
 			valeria.mascarilla = false
-			valeria.poner(VALERIA_COCINA, "cocina", 1.0, Valeria.Actividad.DE_PIE)))
+			valeria.poner(VALERIA_COCINA, "cocina", 1.0, Valeria.Actividad.DE_PIE)
+			_abrir_cocina()))
 
 
 func _abrir_cocina() -> void:
@@ -931,11 +993,9 @@ func _abrir_cocina() -> void:
 	(puertas["cocina<recibidor"] as Puerta).cerrada = false
 
 
-## Recompensa de camino: la puerta de la cocina (popo) o el balcón (A.S.P.I. desenchufada).
+## Recompensa de camino: el balcón (A.S.P.I. desenchufada).
 func _abrir_camino(id: String) -> void:
 	match id:
-		"puerta_cocina":
-			_abrir_cocina()
 		"balcon":
 			_abrir_balcon()
 
@@ -945,7 +1005,7 @@ func _al_cambiar_recompensas(tipo: String) -> void:
 		_cesta.queue_redraw()
 		if calcetines >= TOTAL_CALCETINES:
 			desbloquear_logro("Coleccionista de Calcetines")
-	elif tipo == "foto" and travesuras.recompensas.fotos >= 2:
+	elif tipo == "foto" and travesuras.recompensas.fotos >= TOTAL_FOTOS:
 		desbloquear_logro("Galería Viral")
 
 
@@ -957,12 +1017,17 @@ func _abrir_balcon() -> void:
 	desbloquear_logro("Desenchufada")
 
 
-# --- Balcón: alivio y final (M5) ----------------------------------------------------------------------------
+# --- Balcón: alivio y final (M5, G1) ------------------------------------------------------------------------
 
-## Felipe sube por la maceta a la baranda, se sienta, la cámara se abre a la ciudad y suspira. Al saltar (salto real):
-## cámara lenta, "PODER: CAER DE PIE" y el resumen del día (en lugar de la pantalla final).
+## Felipe sube por la maceta a la baranda (en el tramo libre de macetas), se queda quieto y se acicala mientras la
+## cámara se abre a la ciudad, y suspira (no hay animación de sentarse todavía: M6). Al saltar (salto real): cámara
+## lenta con la cámara pegada a él, que baja hasta el toldo de la panadería de abajo; aterriza a la vista con el
+## polvo grande y recién ahí sale el cartel "PODER NUEVO · CAER DE PIE", sin taparlo, y el resumen del día.
 func _actualizar_balcon(delta: float) -> void:
 	if habitacion != "balcon":
+		return
+	if salto_final:
+		_actualizar_caida(delta)
 		return
 	var en_baranda := felipe.is_on_floor() and absf(felipe.global_position.y - (SUELO - 89.0)) < 3.0
 	if not sentado_en_baranda:
@@ -970,27 +1035,67 @@ func _actualizar_balcon(delta: float) -> void:
 		if _tiempo_baranda > 0.3:
 			sentado_en_baranda = true
 			_decir("balcon", true)
+			felipe.acicalarse()
 			var camara: Camera2D = felipe.get_node("Camara")
 			var abrir := create_tween()
 			abrir.tween_property(camara, "offset", Vector2(0, -70), 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		return
-	if not salto_final and not felipe.is_on_floor() and felipe.velocity.y < 0.0 and felipe.global_position.y < SUELO - 89.0:
+	if not felipe.is_on_floor() and felipe.velocity.y < 0.0 and felipe.global_position.y < SUELO - 89.0:
 		_saltar_del_balcon()
 
 
 func _saltar_del_balcon() -> void:
 	salto_final = true
-	# Sale por encima de la baranda: ya no lo detiene nada (cae al patio).
+	_tiempo_cayendo = 0.0
+	# Sale por encima de la baranda: no lo detiene nada hasta pasar el piso del balcón.
 	felipe.set_collision_mask_value(1, false)
 	felipe.set_collision_mask_value(Felipe.CAPA_ATRAVESABLE, false)
 	felipe.tiene_caer_de_pie = true
-	Engine.time_scale = 0.35
-	travesuras.hud.cartel("PODER NUEVO", "CAER DE PIE", "Siempre aterrizas con estilo", false, 104.0)
-	desbloquear_logro("Caer de Pie")
-	await get_tree().create_timer(0.6 * 0.35, true, false, false).timeout
+	# El toldo de la panadería de abajo (con paredes a los lados para que nadie se salga del cuadro).
+	_toldo = StaticBody2D.new()
+	_toldo.name = "Toldo de la panaderia"
+	for rect: Rect2 in [TOLDO, Rect2(TOLDO.position.x - 20, ALTO, 20, CAIDA_BALCON + 60), Rect2(TOLDO.end.x, ALTO, 20, CAIDA_BALCON + 60)]:
+		var forma := CollisionShape2D.new()
+		var caja := RectangleShape2D.new()
+		caja.size = rect.size
+		forma.shape = caja
+		forma.position = rect.get_center()
+		_toldo.add_child(forma)
+	add_child(_toldo)
+	# La cámara lo sigue hacia abajo: se abre el límite de abajo del balcón y vuelve a centrarse en él.
+	var camara: Camera2D = felipe.get_node("Camara")
+	camara.limit_bottom = int(ALTO + CAIDA_BALCON)
+	var bajar := create_tween()
+	bajar.tween_property(camara, "offset", Vector2(0, 20), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	Engine.time_scale = 0.4
+	felipe.aterrizo.connect(_aterrizar_en_el_toldo, CONNECT_ONE_SHOT)
+
+
+func _actualizar_caida(delta: float) -> void:
+	if _aterrizo_final:
+		return
+	_tiempo_cayendo += delta
+	# Pasado el piso del balcón, vuelve a chocar (solo queda el toldo abajo).
+	if felipe.global_position.y > ALTO + 62.0 and not felipe.get_collision_mask_value(1):
+		felipe.set_collision_mask_value(1, true)
+	# Seguro: si algo falla, el final llega igual.
+	if _tiempo_cayendo > 2.5:
+		_aterrizar_en_el_toldo(1.0)
+
+
+func _aterrizar_en_el_toldo(_fuerza: float) -> void:
+	if _aterrizo_final:
+		return
+	_aterrizo_final = true
 	Engine.time_scale = 1.0
-	await get_tree().create_timer(1.0).timeout
+	travesuras.jugo.sacudir(0.2, 0.6)
+	sonar("golpe")
+	# El cartel sale después de verlo aterrizar y a una altura que no lo tapa.
+	await get_tree().create_timer(0.35).timeout
+	travesuras.hud.cartel("PODER NUEVO", "CAER DE PIE", "Siempre aterrizas con estilo", false, travesuras.altura_cartel())
+	desbloquear_logro("Caer de Pie")
 	_decir("aterrice", true)
+	await get_tree().create_timer(1.2).timeout
 	terminado = true
 	felipe.set_physics_process(false)
 	await get_tree().create_timer(1.6).timeout
@@ -1041,6 +1146,9 @@ func _crear_arte() -> void:
 
 
 func _dibujar_arte(c: Node2D, capa: String) -> void:
+	if capa == "mueble":
+		# La cortina va detrás de la cómoda, la cesta y el ropero.
+		_dibujar_cortina(c)
 	for datos: Array in ARTE:
 		if datos[3] != capa:
 			continue
@@ -1049,18 +1157,101 @@ func _dibujar_arte(c: Node2D, capa: String) -> void:
 			continue
 		ArteNivel.dibujar(c, datos[0], datos[1].x + textura.get_width() / 2.0, datos[1].y, datos[2])
 	if capa == "escalera":
-		# Descanso de la escalera, bajo el vano (madera, como los peldaños).
-		var y := SUELO - 150.0
-		c.draw_rect(Rect2(2540, y, 100, 8), Color("8a5a3c"))
-		c.draw_rect(Rect2(2540, y, 100, 2), Color("b07a52"))
-		c.draw_rect(Rect2(2540, y + 8, 100, 1), Color("241c1a"))
-		# Viga que sostiene el descanso.
-		c.draw_rect(Rect2(2546, y + 8, 6, 142), Color("6e3a26"))
+		_dibujar_descanso(c)
+	elif capa == "pared":
+		_dibujar_ventana_pasillo(c)
 	elif capa == "mueble":
 		_dibujar_sofa(c)
 		# Imanes del refrigerador.
 		for iman: Array in [["iman_manzana", Vector2(3700, SUELO - 150)], ["iman_foto", Vector2(3722, SUELO - 166)], ["iman_pez", Vector2(3708, SUELO - 128)], ["iman_naranja", Vector2(3730, SUELO - 140)]]:
 			ArteNivel.dibujar(c, iman[0], iman[1].x, iman[1].y)
+
+
+## Descanso de la escalera (M1): un rellano grueso, como un escalón ancho, con el faldón cerrado hasta el piso
+## (un armario bajo la escalera, de tablas como los peldaños). Sin poste suelto.
+func _dibujar_descanso(c: Node2D) -> void:
+	var arriba := SUELO - 150.0
+	var rellano := Rect2(2532, arriba, 108, 14)
+	var faldon := Rect2(2536, arriba + 14, 104, 150 - 14)
+	var oscuro := Color("241c1a")
+	# Faldón: tablas verticales con un marco y una puertita de armario.
+	c.draw_rect(faldon, Color("6e4630"))
+	for i in 7:
+		var x := faldon.position.x + 6.0 + i * 14.0
+		c.draw_rect(Rect2(x, faldon.position.y, 1, faldon.size.y), Color("5a3626"))
+	c.draw_rect(Rect2(faldon.position.x, faldon.position.y, 4, faldon.size.y), Color("8a5a3c"))
+	var puertita := Rect2(2566, SUELO - 96, 44, 96)
+	c.draw_rect(puertita.grow(2), oscuro)
+	c.draw_rect(puertita, Color("7d5038"))
+	c.draw_rect(Rect2(puertita.position + Vector2(4, 4), Vector2(36, 40)), Color("8a5a3c"))
+	c.draw_rect(Rect2(puertita.position + Vector2(4, 50), Vector2(36, 42)), Color("8a5a3c"))
+	c.draw_rect(Rect2(puertita.position.x + 34, puertita.position.y + 46, 4, 4), Color("c9a24a"))
+	c.draw_rect(Rect2(faldon.position.x, SUELO - 8, faldon.size.x, 8), Color("5a3626"))
+	# Rellano: tabla gruesa con canto claro y sombra abajo.
+	c.draw_rect(rellano.grow(1), oscuro)
+	c.draw_rect(rellano, Color("8a5a3c"))
+	c.draw_rect(Rect2(rellano.position, Vector2(rellano.size.x, 3)), Color("b07a52"))
+	c.draw_rect(Rect2(rellano.position.x, rellano.end.y - 3, rellano.size.x, 3), Color("6e3a26"))
+	c.draw_rect(Rect2(faldon.position.x, faldon.position.y, faldon.size.x, 3), Color(0, 0, 0, 0.3))
+
+
+## Ventana del pasillo (G3): la caja de pizza está AFUERA, sobre el toldo del vecino, detrás del vidrio (el arte de
+## Gemini la traía sobre el alféizar; la herramienta la borra). El vidrio con reflejos va encima de la caja.
+func _dibujar_ventana_pasillo(c: Node2D) -> void:
+	var caja := PIZZA
+	var lejos := Color(0.82, 0.86, 0.95)
+	# Caja de pizza cerrada, de cartón, con la tapa en perspectiva (un poco azulada: está lejos y tras el vidrio).
+	c.draw_colored_polygon(PackedVector2Array([caja.position + Vector2(3, 0), caja.position + Vector2(caja.size.x, 0), caja.position + Vector2(caja.size.x - 3, 4), caja.position + Vector2(0, 4)]), Color("e0b878") * lejos)
+	c.draw_rect(Rect2(caja.position + Vector2(0, 4), Vector2(caja.size.x - 3, 4)), Color("b98a50") * lejos)
+	c.draw_rect(Rect2(caja.position + Vector2(9, 1), Vector2(9, 2)), Color("c0392b") * lejos)
+	c.draw_rect(Rect2(caja.position + Vector2(0, 8), Vector2(caja.size.x - 3, 1)), Color(0, 0, 0, 0.35))
+	# Vidrio: tinte frío y dos reflejos en diagonal por encima de la caja y del toldo.
+	var vidrio := VIDRIO_PASILLO
+	c.draw_rect(vidrio, Color(0.75, 0.88, 1.0, 0.16))
+	for desde: float in [10.0, 46.0]:
+		c.draw_colored_polygon(PackedVector2Array([
+			vidrio.position + Vector2(desde, 0), vidrio.position + Vector2(desde + 8, 0),
+			vidrio.position + Vector2(desde - 12, vidrio.size.y), vidrio.position + Vector2(desde - 20, vidrio.size.y),
+		]), Color(1, 1, 1, 0.22))
+
+
+## Cortina del dormitorio (G4, provisional hasta el arte de Gemini): barra con remates, argollas y dos paños con
+## pliegues y borde ondulado a los lados de la ventana. Llega a la repisa alta (lugar visto: se trepa con Afilar
+## Garras) y la cesta queda a su pie.
+func _dibujar_cortina(c: Node2D) -> void:
+	var ventana := VENTANA_DORMITORIO
+	var barra_y := ventana.position.y - 18.0
+	var izquierda := ventana.position.x - 30.0
+	var derecha := ventana.end.x + 30.0
+	var oscuro := Color("241c1a")
+	# Remates de la barra (la barra la dibuja la pared sobre cada ventana).
+	for x: float in [izquierda - 3.0, derecha + 3.0]:
+		c.draw_circle(Vector2(x, barra_y + 2.5), 5.0, oscuro)
+		c.draw_circle(Vector2(x, barra_y + 2.5), 4.0, Color("c9a24a"))
+		c.draw_rect(Rect2(x - 1, barra_y - 1, 2, 2), Color("f0d27a"))
+	var tela := Color("c0603f")
+	var sombra := Color("8f3f2a")
+	var luz := Color("dd8160")
+	for paño: Array in [[ventana.position.x - 12.0, 22.0], [ventana.end.x - 10.0, 22.0]]:
+		var x0: float = paño[0]
+		var ancho: float = paño[1]
+		var arriba := barra_y + 4.0
+		var abajo := SUELO - 2.0
+		# Borde inferior ondulado.
+		var contorno := PackedVector2Array([Vector2(x0, arriba), Vector2(x0 + ancho, arriba)])
+		for i in range(6, -1, -1):
+			var x := x0 + ancho * i / 6.0
+			contorno.append(Vector2(x, abajo - (2.0 if i % 2 == 0 else 0.0)))
+		c.draw_colored_polygon(contorno, tela)
+		# Pliegues: franjas de sombra y de luz.
+		for i in 4:
+			var x := x0 + 2.0 + i * 5.5
+			c.draw_rect(Rect2(x, arriba, 2, abajo - arriba - 2), sombra)
+			c.draw_rect(Rect2(x + 2, arriba, 1, abajo - arriba - 2), luz)
+		c.draw_polyline(contorno + PackedVector2Array([contorno[0]]), oscuro, 1.0)
+		# Argollas en la barra.
+		for i in 4:
+			c.draw_arc(Vector2(x0 + 3.0 + i * 5.5, barra_y + 3.0), 2.5, 0.0, TAU, 8, Color("c9a24a"), 1.0)
 
 
 func _dibujar_sofa(c: Node2D) -> void:
@@ -1120,14 +1311,13 @@ func _dibujar_decorado() -> void:
 		c.draw_texture_rect(gato, Rect2(marco.position + Vector2(10, 6), Vector2(44, 44)), false)
 	# Escritorio de Valeria: pantalla y teclado; la impresora, en el piso bajo el escritorio (dibujados: arriba-extra no llegó).
 	var mesa := SUELO - 98.0
-	c.draw_rect(Rect2(6560, mesa - 30, 28, 22), Color("241c1a"))
-	c.draw_rect(Rect2(6562, mesa - 28, 24, 18), Color("2f6fb0") if not _teclado_pisado else Color("dfe8f2"))
+	# Pantalla detrás del teclado.
+	c.draw_rect(Rect2(6548, mesa - 56, 38, 30), Color("241c1a"))
+	c.draw_rect(Rect2(6550, mesa - 54, 34, 26), Color("2f6fb0") if not _teclado_pisado else Color("dfe8f2"))
 	if _teclado_pisado:
-		c.draw_string(ThemeDB.fallback_font, Vector2(6562, mesa - 15), "jjjj", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color("2f2f6f"))
-	c.draw_rect(Rect2(6571, mesa - 8, 6, 8), Color("241c1a"))
-	c.draw_rect(Rect2(TECLADO.position.x, mesa - 4, TECLADO.size.x, 4), Color("3a3d44"))
-	for i in 6:
-		c.draw_rect(Rect2(TECLADO.position.x + 2 + i * 6.5, mesa - 3, 4, 1), Color("9aa0a8"))
+		c.draw_string(ThemeDB.fallback_font, Vector2(6552, mesa - 38), "jjjjjj", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("2f2f6f"))
+	c.draw_rect(Rect2(6564, mesa - 26, 6, 6), Color("241c1a"))
+	_dibujar_teclado(c)
 	c.draw_rect(Rect2(6500, SUELO - 18, 34, 18), Color("241c1a"))
 	c.draw_rect(Rect2(6501, SUELO - 17, 32, 16), Color("d8d2c4"))
 	c.draw_rect(Rect2(6505, SUELO - 21, 24, 4), Color("f4f1ea"))
@@ -1141,14 +1331,84 @@ func _dibujar_decorado() -> void:
 		c.draw_rect(Rect2(CAJON.x - 6, CAJON.y - 10, 26, 4), Color("e59aa2"))
 
 
+## Teclado de Valeria (G7): en perspectiva, del tamaño declarado en TECLADO (52 × 24), con cuatro filas de teclas.
+func _dibujar_teclado(c: Node2D) -> void:
+	var r := TECLADO
+	var oscuro := Color("241c1a")
+	var tapa := PackedVector2Array([r.position + Vector2(6, 0), r.position + Vector2(r.size.x - 6, 0), r.position + Vector2(r.size.x, r.size.y - 6), r.position + Vector2(0, r.size.y - 6)])
+	c.draw_colored_polygon(tapa, Color("3a3d44"))
+	c.draw_rect(Rect2(r.position + Vector2(0, r.size.y - 6), Vector2(r.size.x, 6)), Color("26282d"))
+	c.draw_polyline(tapa + PackedVector2Array([tapa[0]]), oscuro, 1.0)
+	var tecla := Color("c9ced6") if not _teclado_pisado else Color("8f96a3")
+	for fila in 4:
+		var y := r.position.y + 3.0 + fila * 4.5
+		var margen := 7.0 - fila * 1.3
+		var x := r.position.x + margen
+		while x < r.end.x - margen - 4.0:
+			c.draw_rect(Rect2(x, y, 4, 3), tecla)
+			c.draw_rect(Rect2(x, y + 3, 4, 1), Color(0, 0, 0, 0.4))
+			x += 5.5
+	# Barra espaciadora.
+	c.draw_rect(Rect2(r.position.x + 16, r.end.y - 8, 20, 2), tecla)
+
+
+## Ropa doblada de la cama (G7): una pila con volumen (52 × 26) y una manga que cuelga. Al desordenarla (Felipe se
+## acicala encima) queda revuelta y con pelos.
 func _dibujar_ropa(c: Interactivo) -> void:
+	var oscuro := Color("241c1a")
 	var colores := [Color("5fa8d3"), Color("f2d36b"), Color("e59aa2")]
-	for i in 3:
-		c.draw_rect(Rect2(-22, -4 - i * 4, 44, 4), colores[i])
-		c.draw_rect(Rect2(-22, -4 - i * 4, 44, 1), colores[i].lightened(0.3))
 	if _ropa_firmada:
+		# Revuelta: prendas abiertas y torcidas, con pelos grises encima.
+		c.draw_colored_polygon(PackedVector2Array([Vector2(-26, 0), Vector2(-14, -10), Vector2(4, -6), Vector2(-2, 0)]), colores[0])
+		c.draw_colored_polygon(PackedVector2Array([Vector2(-8, 0), Vector2(2, -14), Vector2(20, -9), Vector2(26, 0)]), colores[1])
+		c.draw_colored_polygon(PackedVector2Array([Vector2(-18, -8), Vector2(-4, -20), Vector2(10, -16), Vector2(0, -6)]), colores[2])
+		c.draw_rect(Rect2(18, -6, 6, 14), colores[1])
 		for i in 9:
-			c.draw_line(Vector2(-18 + i * 4.5, -12 + (i % 3) * 3), Vector2(-15 + i * 4.5, -10 + (i % 3) * 3), Color(0.55, 0.52, 0.5), 1.0)
+			var p := Vector2(-20 + i * 5.0, -10 + (i % 3) * 3)
+			c.draw_line(p, p + Vector2(3, 2), Color(0.55, 0.52, 0.5), 1.0)
+		return
+	for i in 3:
+		var capa := Rect2(-24 + i * 1.5, -8 - i * 8, 46, 8)
+		c.draw_rect(capa.grow(1), oscuro)
+		c.draw_rect(capa, colores[i])
+		c.draw_rect(Rect2(capa.position, Vector2(capa.size.x, 2)), colores[i].lightened(0.35))
+		c.draw_rect(Rect2(capa.position.x, capa.end.y - 2, capa.size.x, 2), colores[i].darkened(0.25))
+		c.draw_rect(Rect2(capa.position.x + capa.size.x / 2.0, capa.position.y + 2, 1, 4), colores[i].darkened(0.35))
+	# Cuello de la camiseta de arriba y una manga que cuelga por el borde de la pila.
+	c.draw_arc(Vector2(-1, -24), 4.0, 0.0, PI, 6, colores[2].darkened(0.4), 1.0)
+	c.draw_rect(Rect2(22, -8, 5, 12), colores[0])
+	c.draw_rect(Rect2(22, -8, 5, 12), oscuro, false, 1.0)
+
+
+## Fachada bajo el balcón y el toldo rayado de la panadería donde aterriza Felipe al saltar (G1).
+func _dibujar_fachada(c: Node2D) -> void:
+	var balcon := rect_de("balcon")
+	var abajo := ALTO + CAIDA_BALCON + 40.0
+	c.draw_rect(Rect2(balcon.position.x, ALTO, balcon.size.x, abajo - ALTO), Color("a65a45"))
+	# Losa del balcón (canto grueso) y su sombra.
+	c.draw_rect(Rect2(balcon.position.x, ALTO, balcon.size.x, 10), Color("7d3f3f"))
+	c.draw_rect(Rect2(balcon.position.x, ALTO + 10, balcon.size.x, 6), Color(0, 0, 0, 0.25))
+	# Ventanas del piso de abajo, con luz.
+	for x: float in [7090.0, 7230.0]:
+		var ventana := Rect2(x, ALTO + 60, 70, 90)
+		c.draw_rect(ventana.grow(4), Color("6e3a26"))
+		c.draw_rect(ventana, Color("ffcf7a"))
+		c.draw_rect(Rect2(ventana.position.x + 34, ventana.position.y, 3, ventana.size.y), Color("6e3a26"))
+	# Letrero y toldo de la panadería (verde y crema, con borde ondulado).
+	var t := TOLDO
+	c.draw_rect(Rect2(t.position.x + 40, t.position.y - 46, 150, 22), Color("3d2a22"))
+	var letrero := "PANADERÍA"
+	var fuente := ThemeDB.fallback_font
+	var ancho := fuente.get_string_size(letrero, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+	c.draw_string(fuente, Vector2(t.position.x + 115 - ancho / 2.0, t.position.y - 30), letrero, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("ffe3a3"))
+	var alto_toldo := 22.0
+	for i in int(t.size.x / 20.0):
+		var x := t.position.x + i * 20.0
+		var color := Color("4f8a5b") if i % 2 == 0 else Color("efe4d0")
+		c.draw_rect(Rect2(x, t.position.y, 20, alto_toldo), color)
+		c.draw_circle(Vector2(x + 10, t.position.y + alto_toldo), 10.0, color)
+	c.draw_rect(Rect2(t.position.x, t.position.y, t.size.x, 3), Color("2e5a38"))
+	c.draw_rect(Rect2(t.position.x, t.position.y + alto_toldo + 10, t.size.x, 2), Color(0, 0, 0, 0.25))
 
 
 ## El nido de Su Majestad (la cesta de la sala): se llena a la vista con los calcetines del día.

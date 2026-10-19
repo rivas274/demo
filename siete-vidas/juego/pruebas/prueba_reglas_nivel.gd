@@ -151,6 +151,10 @@ func _correr() -> void:
 	for recompensa: String in ["calcetin", "snack", "foto"]:
 		var tam := Recogible.tamano_icono(recompensa)
 		_comprobar(minf(tam.x, tam.y) >= LADO_MINIMO, "R8 La recompensa %s se lee (%.0f × %.0f px)" % [recompensa, tam.x, tam.y])
+	# G7. Lo interactuable dibujado por código también se mide (su tamaño declarado): teclado, ropa, cajón.
+	for datos: Array in Sala.DIBUJADOS_INTERACTUABLES:
+		var tam: Vector2 = (datos[1] as Rect2).size
+		_comprobar(minf(tam.x, tam.y) >= LADO_MINIMO, "R8 G7 %s (dibujado por código) se lee (%.0f × %.0f px)" % [datos[0], tam.x, tam.y])
 
 	# B2 y R8. Puertas medidas en la imagen (no en la constante): gruesas y con un vano de 100 px o más.
 	for nombre: String in ["puerta_abierta_v2", "puerta_cerrada_v2", "puerta_entornada", "puerta_balcon_v2", "puerta_balcon_abierta", "vano"]:
@@ -197,6 +201,21 @@ func _correr() -> void:
 			_comprobar(not rect.has_point(lugar - Vector2(0, 1)), "G10 Valeria no se para en %s" % sagrado[1])
 		for descanso: Rect2 in Sala.DESCANSOS:
 			_comprobar(not descanso.intersects(rect), "G10 El descanso no está en %s" % sagrado[1])
+
+	# G5. Ningún ratón patrulla encima de la comida ni de lo que se tira (con su dibujo completo, no solo el centro).
+	var ancho_raton := ArteNivel.textura("raton").get_width()
+	var tapables: Array = []
+	for comida: Array in Sala.COMIDA:
+		tapables.append([comida[0], comida[1]])
+	for tirable: Array in Sala.TIRABLES:
+		tapables.append([tirable[0], tirable[1]])
+	for datos_raton: Array in Sala.RATONES:
+		var y: float = datos_raton[0].y
+		var recorrido := Rect2(datos_raton[1] - ancho_raton / 2.0, y - 54.0, datos_raton[2] - datos_raton[1] + ancho_raton, 54.0)
+		for tapable: Array in tapables:
+			var tam := ArteNivel.textura(tapable[1]).get_size()
+			var dibujo := Rect2(tapable[0] - Vector2(tam.x / 2.0, tam.y), tam)
+			_comprobar(not recorrido.grow(-0.5).intersects(dibujo), "G5 El ratón de %s no tapa %s en %s" % [datos_raton[0], tapable[1], tapable[0]])
 
 	# R9. Hitos: cada habitación tiene su propia pared.
 	var estilos := {}
@@ -259,6 +278,11 @@ func _correr() -> void:
 			se_alcanza = se_alcanza or (superficie.position.x < rect.end.x and superficie.end.x > rect.position.x and absf(superficie.position.y - rect.end.y) < 12.0)
 		_comprobar(not se_alcanza and lugar[2] != "", "R17 «%s» se ve pero no se alcanza todavía (se vuelve con %s)" % [lugar[0], lugar[2]])
 		_comprobar(Sala.habitacion_de(rect.get_center()) != "", "R17 «%s» está dentro de un cuarto" % lugar[0])
+	# G3. La caja de pizza está afuera: dentro del vidrio del pasillo y por encima de su borde de abajo; el alféizar
+	# (que se pisa) queda bajo el vidrio y no la contiene.
+	var alfeizar := _pieza("Alféizar")
+	_comprobar(Sala.VIDRIO_PASILLO.encloses(Sala.PIZZA), "G3 La caja de pizza está detrás del vidrio del pasillo")
+	_comprobar(alfeizar.position.y > Sala.VIDRIO_PASILLO.end.y and Sala.PIZZA.end.y < alfeizar.position.y - 20.0, "G3 El alféizar pisable queda bajo el vidrio y no contiene la caja")
 
 	# R18. Una travesura de la Agenda con reacción por habitación (salvo el alivio).
 	var con_travesura := {}
@@ -276,6 +300,24 @@ func _correr() -> void:
 	for mana: String in Sala.MANAS:
 		var datos: Array = Sala.MANAS[mana]
 		_comprobar(String(datos[0]) != "" and String(datos[1]) != "", "R19 %s abre «%s» y molesta a «%s»" % [mana, datos[0], datos[1]])
+
+	# G7. En el nivel armado, todo lo que responde al botón de acción declara un tamaño de lado menor ≥ 24 px.
+	var sala: Sala = load("res://escenas/apartamento.tscn").instantiate()
+	sala.mostrar_titulo = false
+	root.add_child(sala)
+	await process_frame
+	for nodo in sala.get_tree().get_nodes_in_group(Comida.GRUPO):
+		# Las puertas se miden en su imagen (B2, más arriba).
+		if nodo is Felipe or nodo is Puerta:
+			continue
+		var rect := Rect2()
+		if nodo.has_method("rect_indicador"):
+			rect = nodo.call("rect_indicador")
+		elif nodo.has_method("rect_dibujo"):
+			rect = nodo.call("rect_dibujo")
+		_comprobar(rect.has_area() and minf(rect.size.x, rect.size.y) >= LADO_MINIMO, "R8 G7 %s declara %.0f × %.0f px (lado menor ≥ %d)" % [nodo.name, rect.size.x, rect.size.y, LADO_MINIMO])
+	sala.queue_free()
+	await process_frame
 
 	for fallo in _fallos:
 		printerr("FALLO: " + fallo)

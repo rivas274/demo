@@ -23,7 +23,7 @@ const NIVEL_1 := [
 		"recompensa": {"tipo": "calcetin", "cantidad": 1, "texto": "Calcetín"},
 		"frase": ["Ahora sí parece nuestro.", 4]},
 	{"id": "popo", "nombre": "Popo táctico en la arena recién limpiada", "cuarto": "recibidor", "secreta": true,
-		"recompensa": {"tipo": "camino", "id": "puerta_cocina", "texto": "Camino: la puerta de la cocina"},
+		"recompensa": {"tipo": "foto", "cantidad": 1, "texto": "Foto vergonzosa"},
 		"frase": ["Arte conceptual. Ella no lo entiende.", 7]},
 	{"id": "almuerzo", "nombre": "Robar el almuerzo de Valeria", "cuarto": "cocina", "secreta": false,
 		"recompensa": {"tipo": "snack", "cantidad": 2, "texto": "2 snacks"},

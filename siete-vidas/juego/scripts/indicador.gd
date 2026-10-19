@@ -55,6 +55,7 @@ void fragment() {
 func _ready() -> void:
 	name = "Indicador"
 	z_index = 50
+	add_to_group(PresentacionJefe.GRUPO_OCULTAR)
 	top_level = true
 	global_position = Vector2.ZERO
 	_material = ShaderMaterial.new()
@@ -67,6 +68,11 @@ func _ready() -> void:
 	_contorno.material = _material
 	_contorno.draw.connect(_dibujar_contorno)
 	add_child(_contorno)
+
+
+## La presentación de un jefe lo esconde (M4): ni contorno ni burbuja durante la entrada.
+func al_presentar_jefe(presentando: bool) -> void:
+	visible = not presentando
 
 
 func _input(evento: InputEvent) -> void:

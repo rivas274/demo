@@ -8,7 +8,9 @@ extends Node2D
 ##
 ## Cumple la interfaz de testigo del rascador (grupo Rascador.GRUPO_TESTIGOS: ve(punto), visita, perdonar) y la de
 ## los maullidos (grupo Felipe.GRUPO_OYENTES: oir_maullido). Sus frases van por Travesuras.decir_valeria().
-## La posición son sus pies (al centro). Nunca se para en una puerta (destinos con lugar_seguro()).
+## La posición son sus pies (al centro). Nunca se para en una puerta (destinos con lugar_seguro()). Solo sentada
+## está sobre un mueble (el asiento del sofá): de pie siempre pisa el piso; si Felipe está sobre el sofá, se planta
+## delante (G2).
 
 ## Perdonó a Felipe: `motivo` es lo que lo tenía enojado ("rotura", "almuerzo", ...) o "rascador".
 signal perdono(motivo: String)
@@ -86,6 +88,7 @@ func poner(lugar: Vector2, en_cuarto: String, hacia := 1.0, que := Actividad.DE_
 	mirando = hacia
 	actividad = que
 	visible = que != Actividad.FUERA
+	_pies_en_el_piso()
 	_destino = Vector2.INF
 	_al_llegar = Callable()
 	queue_redraw()
@@ -136,6 +139,7 @@ func lugar_seguro(x: float) -> float:
 
 func _physics_process(delta: float) -> void:
 	_anim += delta
+	_pies_en_el_piso()
 	match actividad:
 		Actividad.CAMINANDO:
 			var falta := _destino.x - global_position.x
@@ -163,6 +167,12 @@ func _physics_process(delta: float) -> void:
 			if _reloj <= 0.0:
 				volver_a_casa()
 	queue_redraw()
+
+
+## De pie (regañando, caminando, grabando...) nunca queda encima de un mueble: los pies van al piso (G2).
+func _pies_en_el_piso() -> void:
+	if actividad != Actividad.SENTADA and actividad != Actividad.FUERA:
+		global_position.y = Sala.SUELO
 
 
 ## ¿Está mirando ese punto? (interfaz de testigo del rascador; también la usa el nivel para el sofá).
@@ -249,6 +259,8 @@ func llevar_al_rascador(felipe: Felipe, x_rascador: float) -> void:
 		travesuras.decir_valeria("sofa_atrapado", true)
 	var antes := actividad
 	actividad = Actividad.REGANANDO
+	# Se para del sofá: baja al piso, delante del sofá, antes de señalar (G2).
+	_pies_en_el_piso()
 	_reloj = 1.2
 	motivo_regano = ""
 	felipe.set_physics_process(false)

@@ -134,6 +134,15 @@ func _recibidor() -> void:
 	Input.action_release("agacharse")
 	_paso("Popo táctico en la arena")
 	await _segundos(2.4)
+	# La foto vergonzosa que se le cayó a Valeria (recompensa del popo) quedó junto a la lámpara.
+	var foto := _recogible_en("foto", "recibidor")
+	if foto:
+		await _ir_a(foto.global_position.x, 3.0)
+		var ref: WeakRef = weakref(foto)
+		await _hasta(func() -> bool: return ref.get_ref() == null, 1.5)
+		await _ir_a(1960, 2.0)
+		await _subir_a(1890, Sala.SUELO - 45)
+	_paso("Recoge la foto del popo (fotos %d)" % sala.travesuras.recompensas.fotos)
 	# Desde el borde de la caja, al zapatero: las llaves.
 	await _ir_a(1846, 2.0)
 	await _subir_a(1770, Sala.SUELO - 97)
@@ -164,13 +173,15 @@ func _cocina() -> void:
 	await _subir_a(3433, Sala.SUELO - 55)
 	await _subir_a(3486, Sala.SUELO - 108)
 	await _cazar_raton(3470, 3570)
-	await _ir_a(3530)
+	# El pollo espera sobre el microondas, fuera de la patrulla del ratón.
+	await _ir_a(3555)
+	await _subir_a(3600, Sala.SUELO - 162)
+	await _ir_a(Sala.POLLO.x + 30.0)
+	felipe.mirando = -1.0
 	await _tocar("interactuar")
 	await _segundos(1.2)
 	_paso("Roba el pollo de Valeria" if sala.travesuras.agenda.esta_cumplida("almuerzo") else "No pudo con el pollo")
 	# Microondas → refrigerador: el calcetín.
-	await _ir_a(3555)
-	await _subir_a(3600, Sala.SUELO - 162)
 	await _ir_a(3655)
 	await _subir_a(3716, Sala.SUELO - 216)
 	await _segundos(0.5)
@@ -252,7 +263,7 @@ func _dormitorio() -> void:
 	await _ir_a(5540)
 	await _tocar("interactuar")
 	await _segundos(1.0)
-	_paso("Firma la ropa doblada")
+	_paso("Desordena la ropa doblada")
 	await _ir_a(5626)
 	felipe.mirando = 1.0
 	await _tocar("interactuar")
@@ -435,11 +446,12 @@ func _apagar_de_un_salto() -> void:
 		await _hasta_que_aspi_se_detenga()
 		var x := sala.aspi.global_position.x
 		var lado := -1.0 if felipe.global_position.x < x else 1.0
-		await _ir_a(x + lado * 34.0, 3.0)
+		# A media carcasa de distancia (ella es sólida: más cerca, Felipe choca y el bot salta solo y pierde tiempo).
+		await _ir_a(x + lado * 44.0, 2.0)
 		# Lado y blanco se miden de nuevo justo antes de saltar; si no quedó a tiro, se acerca otra vez.
 		x = sala.aspi.global_position.x
 		var dx := x - felipe.global_position.x
-		if absf(dx) > 50.0:
+		if absf(dx) > 64.0:
 			continue
 		await _saltar(signf(dx), x)
 		await _hasta(func() -> bool: return batalla.apagados > antes or felipe.is_on_floor(), 1.5)
@@ -574,6 +586,14 @@ func _esquivar_bolas() -> void:
 func _soltar_direcciones() -> void:
 	Input.action_release("mover_derecha")
 	Input.action_release("mover_izquierda")
+
+
+## Una recompensa suelta de ese tipo en ese cuarto (null si no hay).
+func _recogible_en(tipo: String, cuarto: String) -> Recogible:
+	for hijo in sala.get_children():
+		if hijo is Recogible and hijo.tipo == tipo and Sala.habitacion_de(hijo.global_position) == cuarto:
+			return hijo
+	return null
 
 
 func _resumen() -> ResumenDia:

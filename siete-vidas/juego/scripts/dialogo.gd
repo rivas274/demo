@@ -64,10 +64,12 @@ var _espera := 0.0
 var _reloj := 0.0
 var _ultima := ""
 var _hojas := {}
+var _en_presentacion := false
 
 
 func _ready() -> void:
 	layer = 7
+	add_to_group(PresentacionJefe.GRUPO_OCULTAR)
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_caja = Panel.new()
 	var estilo := StyleBoxFlat.new()
@@ -116,7 +118,7 @@ func _ready() -> void:
 ## Pone una frase en la cola. `animo` es el cuadro del retrato (ver PERSONAJES). Urgente: corta lo que se dice.
 ## No repite la misma frase seguida. Devuelve false si se descartó.
 func decir(quien: String, texto: String, animo := 0, urgente := false) -> bool:
-	if texto == "" or texto == _ultima or (_caja.visible and texto == texto_actual):
+	if _en_presentacion or texto == "" or texto == _ultima or (_caja.visible and texto == texto_actual):
 		return false
 	for pendiente: Array in _cola:
 		if pendiente[1] == texto:
@@ -141,6 +143,18 @@ func limpiar() -> void:
 ## Hay una frase en pantalla.
 func ocupado() -> bool:
 	return _caja.visible
+
+
+## La presentación de un jefe esconde el diálogo y lo que estaba en cola (M4); mientras dura, no se habla.
+func al_presentar_jefe(presentando: bool) -> void:
+	_en_presentacion = presentando
+	if presentando:
+		limpiar()
+
+
+## Rectángulo del cuadro en pantalla (vacío si no se ve): para que los avisos no queden debajo (M3).
+func rect_en_pantalla() -> Rect2:
+	return Rect2(_caja.position, _caja.size) if _caja.visible else Rect2()
 
 
 ## Dónde va el cuadro (y en pantalla) para no tapar a Felipe. Se decide al empezar cada frase.

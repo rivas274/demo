@@ -10,6 +10,9 @@ extends Node2D
 ##                       sube de las ruedas a la cara    8 rugido   texto del rugido, ola de polvo; vuelve el control
 ##   4 nombre            nombre y título en una franja
 ## Con el juego congelado. Al reaparecer tras perder una vida, presentar_corta(): portazo y nombre (1 s).
+## Mientras presenta, todo lo del grupo GRUPO_OCULTAR (el diálogo, el Indicador) se esconde: avisa con
+## al_presentar_jefe(true) al empezar y al_presentar_jefe(false) al terminar (M4). La frase del jefe o de Felipe en
+## "sin vuelta atrás" la muestra la presentación como subtítulo (frase_sin_vuelta), no el diálogo.
 ## Después: carteles de fase con su pista de una línea, barra de vida con escudo, destellos y sacudidas.
 
 signal paso_empezado(nombre: String)
@@ -37,11 +40,17 @@ const EMPUJONES := [3.5, 3.75]
 const ZOOM_FELIPE := 2.6
 const ZOOM_JEFE := 3.0
 const TEXTO_INICIO := "¡BATALLA INICIADA!"
+## Lo que se esconde durante la presentación (cada nodo implementa al_presentar_jefe(presentando: bool)).
+const GRUPO_OCULTAR := "ocultar_en_presentacion"
 
 ## Datos del jefe.
 var nombre := ""
 var titulo := ""
 var lema_felipe := "FELIPE · 8 kg de furia"
+## Subtítulo de los pasos 1 y 2 ("…¿Quién cerró?"): [quién, frase]. Vacío = sin subtítulo.
+var frase_sin_vuelta: Array = []
+## Subtítulo que se está mostrando (para las pruebas; "" si no hay).
+var subtitulo_en_pantalla := ""
 var texto_rugido := ""
 var color_inicio := Color("c81e2a")
 var color_nombre := Color("15101a")
@@ -139,6 +148,7 @@ func _empezar(felipe: Felipe, jefe: Node2D, limites: Rect2, lista: Array) -> voi
 	_camara.zoom = Vector2.ONE
 	_camara.make_current()
 	get_tree().paused = true
+	get_tree().call_group(GRUPO_OCULTAR, "al_presentar_jefe", true)
 
 
 ## Duración de la entrada en curso.
@@ -219,6 +229,9 @@ func _avanzar(delta: float) -> void:
 		return
 	var en_jefe := _jefe.global_position + Vector2(0, -alto_jefe * 0.5)
 	texto_en_pantalla = ""
+	subtitulo_en_pantalla = ""
+	if frase_sin_vuelta.size() >= 2 and (_en("sin_vuelta_atras") or _en("espera")) and pasos == PASOS:
+		subtitulo_en_pantalla = String(frase_sin_vuelta[1])
 	if _en("sin_vuelta_atras"):
 		_camara.global_position = _en_felipe()
 		_camara.zoom = Vector2.ONE * lerpf(1.0, 1.3, (t - _rango("sin_vuelta_atras")[0]) / 0.4)
@@ -302,7 +315,9 @@ func _terminar() -> void:
 	penumbra = 0.0
 	_barras = 0.0
 	_camara.offset = Vector2.ZERO
+	subtitulo_en_pantalla = ""
 	_felipe.get_node("Camara").make_current()
+	get_tree().call_group(GRUPO_OCULTAR, "al_presentar_jefe", false)
 	if pantallas == null or pantallas.modo == Pantallas.Modo.JUGANDO:
 		get_tree().paused = false
 	terminada.emit()
@@ -324,11 +339,14 @@ func _dibujar() -> void:
 		c.draw_rect(Rect2(0, 0, tam.x, 44.0 * _barras), Color.BLACK)
 		c.draw_rect(Rect2(0, tam.y - 44.0 * _barras, tam.x, 44.0 * _barras), Color.BLACK)
 	if presentando and imaginacion and momento > 0.0 and momento < 1.0:
-		var tiempo := Time.get_ticks_msec() / 1000.0
-		for i in 22:
-			var angulo := i * TAU / 22.0
-			var p := tam / 2.0 + Vector2(cos(angulo) * tam.x * 0.56, sin(angulo) * tam.y * 0.62)
-			c.draw_circle(p, 38.0 + sin(tiempo * 6.0 + i) * 5.0, Color(Color("f5d0e6"), 0.55))
+		_vineta(c, tam, minf(momento * 4.0, 1.0) * minf((1.0 - momento) * 4.0, 1.0))
+	if subtitulo_en_pantalla != "":
+		var quien := String(frase_sin_vuelta[0]).to_upper()
+		var linea := "%s: %s" % [quien, subtitulo_en_pantalla]
+		var ancho_linea := fuente.get_string_size(linea, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+		var pos := Vector2((tam.x - ancho_linea) / 2.0, tam.y - 16.0)
+		c.draw_string(fuente, pos + Vector2(1, 1), linea, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.BLACK)
+		c.draw_string(fuente, pos, linea, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 0.95, 0.85))
 	if _ola >= 0.0:
 		# Ola de polvo del rugido: cruza la pantalla de un lado al otro.
 		var x := _ola / 1.2 * (tam.x + 200.0) - 100.0
@@ -386,6 +404,31 @@ func _barra_de_vida(c: Node2D, tam: Vector2, fuente: Font, valor: float, azul: f
 		c.draw_line(Vector2(x, caja.position.y), Vector2(x, caja.end.y), Color(0, 0, 0, 0.6), 1.0)
 	if azul > 0.0:
 		c.draw_rect(Rect2(caja.position + Vector2(0, caja.size.y - 3), Vector2(caja.size.x * azul, 3)), Color("7fd0ff"))
+
+
+## Viñeta oscura con polvo (el "momento" es imaginación de Felipe): bordes que se oscurecen hacia afuera y motas
+## que flotan, en vez de discos planos (M4).
+func _vineta(c: Node2D, tam: Vector2, fuerza: float) -> void:
+	if fuerza <= 0.0:
+		return
+	var bandas := 10
+	var ancho_banda := 7.0
+	for i in bandas:
+		var alfa := 0.6 * fuerza * (1.0 - float(i) / bandas)
+		var color := Color(0.06, 0.02, 0.08, alfa)
+		var d := i * ancho_banda
+		c.draw_rect(Rect2(d, d, tam.x - d * 2.0, ancho_banda), color)
+		c.draw_rect(Rect2(d, tam.y - d - ancho_banda, tam.x - d * 2.0, ancho_banda), color)
+		c.draw_rect(Rect2(d, d + ancho_banda, ancho_banda, tam.y - d * 2.0 - ancho_banda * 2.0), color)
+		c.draw_rect(Rect2(tam.x - d - ancho_banda, d + ancho_banda, ancho_banda, tam.y - d * 2.0 - ancho_banda * 2.0), color)
+	var tiempo := Time.get_ticks_msec() / 1000.0
+	for i in 26:
+		var borde := fmod(i * 0.37, 1.0)
+		var p := Vector2(fmod(i * 97.0 + tiempo * 18.0, tam.x), fmod(i * 53.0 - tiempo * 9.0, tam.y))
+		var al_centro := (p - tam / 2.0) / (tam / 2.0)
+		if maxf(absf(al_centro.x), absf(al_centro.y)) < 0.7:
+			continue
+		c.draw_rect(Rect2(p.round(), Vector2(2, 2)), Color(0.95, 0.85, 0.7, 0.5 * fuerza * (0.5 + borde * 0.5)))
 
 
 ## "{agacharse}" -> "[S]" (o el botón del mando) para la pista del cartel.

@@ -43,8 +43,15 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
+## Punto de 8 px con halo que late y centro brillante (M5: para ignorarlo, primero hay que notarlo).
+const RADIO_PUNTO := 4.0
+
+
 func _draw() -> void:
 	if apagado:
 		return
-	draw_circle(Vector2(0, -1), 4.0, Color(1, 0.1, 0.1, 0.25))
-	draw_circle(Vector2(0, -1), 2.0, Color("ff2a2a"))
+	var latido := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 1000.0 * 8.0)
+	draw_circle(Vector2(0, -3), RADIO_PUNTO + 4.0 + latido * 2.0, Color(1, 0.15, 0.15, 0.18 + 0.12 * latido))
+	draw_circle(Vector2(0, -3), RADIO_PUNTO + 1.5, Color(1, 0.2, 0.2, 0.45))
+	draw_circle(Vector2(0, -3), RADIO_PUNTO, Color("ff2a2a"))
+	draw_circle(Vector2(-1, -4), 1.5, Color(1, 0.85, 0.85))

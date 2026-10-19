@@ -201,10 +201,11 @@ Alto de todos los cuartos: 424 px (3,5 m). Piso en y = 448. Muros entre cuartos.
 - **El librero tiene sus repisas a 48, 103 y 155 px** (el arte de Gemini), no a 54, 109 y 163. La reja se salta desde la de 155.
 - **Microondas de 98 × 54** (escala de gato) para que el escalón al refrigerador sea de 54 px.
 - **Dormitorio y cocina más angostos** (720 y 960 px) para no dejar huecos sin salida detrás del ropero y del refrigerador.
-- **La tanda `arriba-extra.png` de Gemini no llegó:** baúl, retrato familiar, caja de recuerdos, pantalla, teclado, impresora, ropa doblada, calcetines del cajón y papeles se dibujan por código; consola = aparador y cómoda = la de siempre.
+- **`arriba-extra.png` llegó en la revisión 3:** baúl (40 cm, 70 × 48), cojín redondo, retrato familiar, ropa doblada limpia y con pelos, caja de recuerdos, monitor e impresora (recortados del escritorio con monitor) y papeles son arte; el teclado y los calcetines que vuelan siguen por código; consola = aparador y cómoda = la de siempre.
 - **Cortina por código** (provisional): la de Gemini se veía como columna y se borró; espera `dormitorio-cortina.png` (tanda 3D). La ventana del dormitorio pasó de encima de la cama al hueco entre la cómoda y el ropero, para que la cortina cuelgue junto a ella.
 - **Retoques de arte en la herramienta** (`preparar_arte_nivel.py`, sin pedir arte nuevo): a la ventana del pasillo se le tapó la caja de pizza que traía sobre el alféizar (PARCHES) y a la baranda se le quitó la maceta del medio (BORRAR + RELLENOS).
-- **El caminar de Valeria de Gemini** se usa (alineado por pies y cabeza en la herramienta); no hizo falta el balanceo de código.
+- **El caminar de Valeria es de SpriteCook** (revisión 3): el de Gemini no alternaba las piernas y se borró. Camina a 110 px/s (9,2 px de pie apoyado por cuadro × 12 cuadros/s, medido en la hoja).
+- **Valeria cruza las puertas a la vista** (revisión 3): cuando Felipe sale al recibidor, ella camina hasta la puerta de la sala y entra al recibidor por la puerta unos 7 s después; maullar a la cocina hace que se asome en el vano. Por eso la cocina se abre ~2 s después del maullido, no al instante.
 
 ## 11. Hallazgos de la revisión 2 (2026-10-19, `revisiones/2026-10-19-nivel1-v4.md`)
 
@@ -228,3 +229,28 @@ Alto de todos los cuartos: 424 px (3,5 m). Piso en y = 448. Muros entre cuartos.
 | M7 | **Arreglado.** Sofá "Firmar", ropa "Desordenar", puerta entornada "Arañar" (`prueba_acciones`) |
 | M8 | **Espera** el retrato familiar nuevo de Gemini |
 | Sospecha: bajar la escalera | **Funciona.** `prueba_nivel` baja desde el vano: pisa los 7 peldaños sin volver a subir, termina adentro de la reja, en el piso, y puede caminar |
+
+## 12. Hallazgos de la revisión 3 (2026-10-19, `revisiones/2026-10-19-nivel1-v4-revision3.md`)
+
+Todo por código y con el arte que mandó el creador (`arriba-extra.png`, caminar de Valeria de SpriteCook); 0 créditos en esta tanda. Detalle y autocrítica en la sección "Arreglos" del informe.
+
+| # | Estado |
+| --- | --- |
+| B1 | **Arreglado.** Tabla única de capas (`Capas`); la imaginación va en la capa 25, por encima de todo el escenario, y Felipe delante (26). La A.S.P.I. real se esconde mientras existe la gigante, que nace y muere en su lugar con un «¡puf!». `prueba_jefe` revisa cada cuadro de la entrada |
+| B2 | **Arreglado.** Caminar de SpriteCook; el cuadro sale de la distancia caminada; pie apoyado ≤ 1,2 px de desliz por cuadro (`prueba_nivel` mide la hoja) |
+| G1 | **Arreglado.** Fundido cruzado de 0,2 s entre poses, decidido al dibujar (la pose anterior queda donde estaba: nunca se dibuja bajo el piso); antes de echar a andar desde otra pose, cambia en su lugar. `prueba_nivel` vigila cada cuadro |
+| G2 | **Arreglado.** Puertas con hoja que gira (0,25 s); Valeria la abre, se desvanece en el vano y la puerta se cierra detrás; la otra cara de la puerta se abre recién cuando ella aparece. Al maullar, se asoma en el vano para decir su frase |
+| G3 | **Arreglado.** Camina hasta la puerta de la sala y entra al recibidor por la puerta; nunca cambia de lugar más de lo que camina, salvo al cruzar (`prueba_nivel`) |
+| G4 | **Arreglado.** El sofá se redibuja sin plástico ni etiqueta y vuelan jirones (`prueba_nivel`) |
+| G5, M3 | **Arreglado.** Una sola cola de anuncios (`Anuncios`): uno a la vez, ubicado al mostrarse sin tapar a Felipe, al diálogo, a Valeria, a A.S.P.I. ni el chiste marcado; espera la reacción de Valeria y, si no hay hueco, sale en chico en una esquina; se corre si alguien entra a cuadro. En la pelea no se ofrece «Probar» en la puerta del balcón y sobre A.S.P.I. hay un rótulo a la vez |
+| G6 | **Arreglado.** Mascarilla sobre nariz y boca, con pliegues y elástico, que sigue la cara en cada cuadro y al girar |
+| G7 | **Arreglado.** Pantallas en la capa 40 y la interfaz se esconde fuera del juego; el fundido de las puertas (capa 12) tapa diálogo, carteles y logros (`prueba_nivel`) |
+| G8 | **Arreglado (código).** A.S.P.I. llena es la misma imagen con la tapa que se levanta en 0,25 s, un saltito y el depósito con pelusas; se borró `aspi_llena.png` |
+| G9 | **Arreglado (código).** El ciclo va al ritmo de la velocidad (tope 34 cuadros/s): desliz ≤ 2 px por cuadro (`prueba_movimiento`). Opcional: un `caminar` nuevo desde Felipe A con pasos largos |
+| M1 | **Arreglado.** Palabras con contorno grueso y sombra, que suben si caerían sobre Felipe; la del vaso va sobre la mesa; el rugido con caja oscura |
+| M2 | **Arreglado.** Las recompensas pegadas a Felipe salen a su lado en arco corto; los snacks del pollo caen en el mesón |
+| M4 | **Arreglado.** Introducción → balcón → sala con fundidos; cartel «EL BALCÓN · ARRIBA, AL FONDO»; las lecciones esperan a que termine |
+| M5 | **Arreglado (código).** Ladrillo, ventanas con marco, cortina y alféizar; el letrero va en el faldón del toldo (Felipe aterriza arriba y no lo tapa) |
+| M6 | **Arreglado.** Respira, mira alrededor cada tanto y gira con transición (no antes de 0,4 s ni con Felipe a menos de 12 px) |
+| M7 | **Arreglado (código).** Ventana con 68 px de vidrio; caja de pizza de 34 × 24, abierta, con grasa y vapor |
+| M8 | **Arreglado.** Causa raíz: en furia la tos dejaba de contar mientras Felipe acampaba y la prueba dependía de dónde lo dejaba el soplido y de papeles al azar del teclado. Ahora la tos cuenta siempre (la bola es justo lo que llega arriba) y la prueba espera el estado. 5 de 5 seguidas |

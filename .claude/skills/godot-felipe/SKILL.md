@@ -98,6 +98,14 @@ Durante la pelea: **anticipación** antes de cada ataque (se echa atrás, vibra,
 - Si una acción pide temblor (un objeto pesado que cae), suma una sacudida corta y pequeña (pocos px, menos de 0,3 s); en pixel art, desplazamientos enteros para no emborronar.
 - Mirar adelante (*look-ahead*): desplazar `offset.x` hacia donde mira Felipe, en `_process`, con un tope pequeño. Proponlo antes; cambia cómo se leen los saltos.
 
+## 6c. Capas, anuncios y transiciones (revisión 3 del nivel 1)
+
+- **Capas:** todo z_index y todo `layer` sale de `Capas` (`scripts/capas.gd`, tabla única; también en la memoria 03). Un hijo que usa una capa de la tabla va con `Capas.usar(nodo, Capas.X)` (z absoluto). La imaginación de un jefe va en `Capas.IMAGINACION` (tapa todo el escenario) y Felipe sube a `FELIPE_IMAGINANDO` mientras dura. `prueba_jefe` comprueba que nada del nivel quede encima.
+- **Anuncios:** carteles, logros y franjas de fase pasan por `Anuncios` (una sola cola): uno a la vez, ubicado al mostrarse sin tapar a Felipe, al diálogo ni a los testigos, y corrido si alguien entra a cuadro. Lo que es el chiste se marca con `anuncios.marcar_chiste(rect, segundos)`.
+- **Todo cambio de pose de un personaje tiene transición** (animación, fundido cruzado o, como mínimo, sin cambiar de tamaño ni de lugar en un cuadro). El fundido se decide al dibujar (el cambio puede llegar por una señal). Un personaje no cambia de cuarto sin cruzar una puerta que se ve abrirse con él adentro.
+- **Un ciclo de caminar es una medida:** el pie apoyado retrocede lo que avanza el personaje por cuadro (`pruebas/medir_pasos.gd`); el ritmo de la animación sale de la velocidad (`AnimacionesFelipe.PASO`, `Valeria.PASO_CUADRO`).
+- **Revisar transiciones, no cuadros:** al cambiar algo que se ve, grabar el bot y mirar el cuadro anterior, el del cambio y el siguiente.
+
 ## 7. En un prototipo
 
 Mismas recetas, pero en `siete-vidas/prototipos/<nombre>/` con archivos copiados, sin tocar el juego y sin pruebas obligatorias. Lo que el veredicto apruebe se reescribe en el juego siguiendo esta guía.

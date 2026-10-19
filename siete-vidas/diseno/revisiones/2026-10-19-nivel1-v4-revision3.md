@@ -101,3 +101,52 @@ Tipo de arreglo: **Código** (sin costo), **Gemini** (imagen fija o tira de cuad
 - **Gemini (escenario):** A.S.P.I. llena en la misma vista que la cerrada, con la tapa a medio abrir (G8); fachada de la panadería con toldo (M5); ventana del pasillo con vista y pizza legible (M7).
 - **SpriteCook (Felipe, desde Felipe A):** `caminar` con pasos visibles (G9), 20 créditos (26 con `pixel-engine-v1.5`). Se suma a los pendientes de la revisión 2 (`entrar_puerta`, `intimidar`, `sentarse`), que siguen esperando la decisión del creador.
 - **Código (sin costo, en este orden):** B1, G4, G7, G2, G3, G1 (redibujo y fundido cruzado), G5, G6, M1 a M4 y M8, y B2 provisional (balanceo de código).
+
+## Arreglos (2026-10-19)
+
+Todos los hallazgos se arreglaron por código y con el arte que mandó el creador (`arriba-extra.png` de Gemini y el caminar de Valeria de SpriteCook, ya pagado); esta tanda no gastó créditos. Después de arreglar grabé el bot dos veces a 30 fps y revisé cuadro por cuadro (anterior, cambio, siguiente; recortes ×2 a ×3) la entrada del jefe completa, cada caminar y cambio de pose de Valeria, las puertas, la escalera, los carteles, las recompensas, la tapa de A.S.P.I., el salto final y el caminar de Felipe. Video final: `nivel1-v4c.mp4`.
+
+| # | Estado | Cómo |
+| --- | --- | --- |
+| B1 | **Arreglado** | Tabla única de capas `Capas` (`scripts/capas.gd`, copiada en la memoria 03 y en `godot-felipe`): todo z y toda capa de pantalla sale de ahí. La imaginación (estudio en llamas y bestia) va en su propio nodo en la capa 25, por encima de todo el escenario; Felipe sube a 26 mientras imagina. La A.S.P.I. real se esconde mientras existe la gigante; la gigante nace y se encoge en el lugar real de A.S.P.I. (después de los empujones) y el cambio se tapa con un «¡puf!» de polvo y un destello. `prueba_jefe` recorre cada cuadro de la entrada: nada del nivel con z igual o mayor que la imaginación, nunca dos A.S.P.I., Felipe delante y la tabla en orden |
+| B2 | **Arreglado** | Caminar de SpriteCook procesado en `preparar_arte_nivel.py` (alineado por los pies, 108 × 204 por cuadro). Pie apoyado medido: 9, 10, 9, 10 y 8 px por cuadro → 9,2 px × 12 cuadros/s = 110 px/s. El cuadro sale de la distancia caminada (no del reloj) y el ciclo empieza en el cuadro 0 al echar a andar. `prueba_nivel` mide la hoja con `pruebas/medir_pasos.gd`: desliz máximo 1,2 px por cuadro. Se borró la hoja de Gemini |
+| G1 | **Arreglado** | Fundido cruzado de 0,2 s entre poses; antes de caminar desde otra pose (sentada, enojada, agachada, grabando) cambia en su lugar. El fundido se decide al dibujar y la pose anterior se dibuja donde estaba: nunca más la pose sentada bajada al piso. `prueba_nivel` vigila cada cuadro: el dibujo nunca baja del piso |
+| G2 | **Arreglado** | Las puertas de madera giran (0,25 s) y tienen dos caras que se abren juntas. Valeria camina a la puerta, la abre un poco antes de llegar, se desvanece en la oscuridad del vano y la puerta se cierra detrás; del otro lado aparece desde la oscuridad mientras la puerta se abre. Al maullar se asoma en el vano para decir «Ya, entra…», deja la puerta abierta y vuelve a su café. `prueba_nivel`: la puerta de la cocina nunca se abre vacía |
+| G3 | **Arreglado** | Al salir Felipe al recibidor, Valeria deja la serie, camina hasta la puerta de la sala, sale y entra al recibidor por la puerta (unos 7 s después) antes de ir a la cocina. Las escenas de Valeria van en una cola (nunca dos a la vez). `prueba_nivel`: nunca cambia de lugar más de lo que camina en un cuadro, salvo al cruzar una puerta, y entra al recibidor una sola vez, por la puerta abierta |
+| G4 | **Arreglado** | `_romper_plastico()` redibuja el lienzo de muebles (sofá arañado, sin «NUEVO») y salen diez jirones de plástico. `prueba_nivel` comprueba que se dibuja `sofa_aranado` |
+| G5 + M3 | **Arreglado** | Una sola cola de anuncios (`scripts/anuncios.gd`) para carteles, logros, franjas de fase y «PODER NUEVO»: uno a la vez, el cartel antes que su logro, la franja de fase pasa adelante. El lugar se elige al mostrar, sin tapar a Felipe, al diálogo, a la barra de arriba, a Valeria, a A.S.P.I. ni el chiste marcado (pantalla con «jjjj», censura, sofá, calcetines). Si Valeria va a salir a reaccionar, el cartel espera; si no hay hueco en 1,5 s, sale una tarjeta chica en una esquina; si alguien entra a cuadro, se corre. En la pelea la puerta cerrada del balcón no se ofrece («Probar» pisaba a A.S.P.I.), «+1 · Glup.» es un solo rótulo y no sale al llenarse, y «REINICIANDO» es una barra hasta que se va el «¡CLIC!» |
+| G6 | **Arreglado** | Mascarilla quirúrgica dibujada dentro de la transformación de la pose: sobre nariz y boca (ojos libres), con pliegues y elástico a la oreja, siguiendo la cabeza en cada cuadro del caminar, el espejo y el giro |
+| G7 | **Arreglado** | Pantallas (título, intro, pausa, final) en la capa 40 y la interfaz (HUD, diálogo, palabras) se esconde fuera del juego; el negro de las puertas va en la capa 12, encima del diálogo, los carteles y los logros. `prueba_nivel` lo comprueba |
+| G8 | **Arreglado (código)** | A.S.P.I. llena es su misma imagen: la tapa se levanta en 0,25 s sobre la bisagra de atrás (con un saltito de 5 px) y se ve el depósito con pelusas; se borró `aspi_llena.png`. «¡LLENO!» sube sobre la tapa |
+| G9 | **Arreglado (código)** | El ciclo de caminar y correr va al ritmo de la velocidad (cuadros/s = v ÷ paso medido, 1,8 px caminando y 3,6 corriendo, tope 34 cuadros/s) y el cuerpo sube 1 px en cada paso. `prueba_movimiento`: desliz 1,7 px caminando y 2,0 corriendo (antes ~10). Tres lugares: guía (`02-guia-felipe.md`), plantilla de la ficha y copia local regenerada (sin publicar) y juego |
+| M1 | **Arreglado** | Palabras con contorno de 8 px y sombra; si caen encima de Felipe suben sobre su cabeza; «¡GRAVEDAD: 1 · VASO: 0!» va sobre la mesa en celeste fuerte; el rugido lleva caja oscura |
+| M2 | **Arreglado** | Las recompensas que nacerían pegadas a Felipe salen a su lado en un arco corto; los snacks del pollo caen en el mesón |
+| M4 | **Arreglado** | Intro → balcón → sala con fundidos (0,4 / 0,3 / 0,35 s), con «EL BALCÓN · ARRIBA, AL FONDO»; las lecciones de Felipe esperan a que termine (antes se pisaban con «La libertad está allá arriba») |
+| M5 | **Arreglado (código)** | Fachada de ladrillo con hiladas suaves, ventanas con marco, cortinas y alféizar, contorno oscuro; «PANADERÍA» en el faldón del toldo, donde Felipe no lo tapa |
+| M6 | **Arreglado** | Respira (1 px), mira para el otro lado cada 6 s y gira con transición (se angosta y se abre), no antes de 0,4 s del giro anterior ni con Felipe a menos de 12 px |
+| M7 | **Arreglado (código)** | La ventana del pasillo se alarga por arriba (68 px de vidrio, con techos lejanos); caja de pizza de 34 × 24, abierta, con grasa, salsa y vapor; reflejos dentro del vidrio |
+| M8 | **Arreglado (causa raíz)** | En furia, la tos dejaba de contar mientras Felipe acampaba; la bola salía o no según dónde lo dejaba el soplido, y pisar el teclado soltaba papeles en lugares al azar que movían a A.S.P.I. Ahora la tos cuenta siempre (la bola en arco es justo lo que llega arriba) y la prueba pone a Felipe fuera del teclado y espera el estado. 5 de 5 seguidas |
+| M8 de la revisión 2 | **Arreglado** | Retrato familiar de `arriba-extra` en el pasillo (Felipe tapa a toda la familia) |
+
+**Arte de `arriba-extra`:** baúl (también es colisión, 70 × 48, ±2 px), cojín redondo, retrato familiar, ropa doblada limpia y con pelos (la sospecha de "libros" queda resuelta), caja de recuerdos, monitor e impresora, papel plano y arrugado. Sin usar: escritorio de un cajón y cómoda abierta con calcetines (son otro dibujo que los muebles en uso).
+
+**Lo que encontré de más en la autocrítica (y arreglé):**
+
+1. El primer arreglo del fundido de Valeria tenía el mismo error de fondo: al pararse del sofá, el primer cuadro mostraba la pose nueva y el siguiente la vieja **bajada al piso** como fantasma (cuadros 307–308 y 374–376 de la primera grabación). Causa: el cambio llegaba por una señal y el fundido se decidía en la física. Ahora se decide al dibujar.
+2. La puerta del estudio se quedaba abierta durante toda la presentación del jefe y se cerraba recién al terminar: con el juego en pausa la hoja no giraba. El portazo ahora es inmediato.
+3. Del lado del recibidor, la puerta de la cocina se abría ~0,5 s antes de que Valeria apareciera (se abría al acercarse ella del otro lado). Ahora cada cara se abre cuando ella está en ese vano.
+4. La lección «Los muebles son mi escalera» salía durante la toma del balcón y la tapaba «La libertad…»; el cartel del balcón quedaba debajo del diálogo.
+5. El cartel de la travesura secreta del popo tapaba la cabeza de Valeria cuando ella aparecía en la puerta (se había ubicado antes de que entrara): ahora espera la reacción y se corre si alguien entra.
+6. El cartel del teclado tapaba la pantalla con «jjjj» (el chiste): ahora los chistes se marcan y no se tapan.
+7. La pila de ropa se dibujaba delante de Felipe mientras se acicalaba "encima"; ahora va detrás.
+8. Sobre A.S.P.I. llena se apilaban «+1», «Glup.» y «¡LLENO!»; y en la tarjeta chica los textos largos se salían de la caja.
+9. El salto de la aspiradora real a la gigante era un corte seco: ahora con «¡puf!» y destello.
+10. El orden al ganar era logro y después la travesura; ahora la travesura y después su logro.
+
+**Lo que queda (no son errores de código):**
+
+- El caminar de Felipe va rápido (34 cuadros/s) porque su hoja adelanta el pie solo 1,8 px por cuadro: el arreglo de fondo es un `caminar` nuevo desde Felipe A con pasos largos (SpriteCook, 20–26 créditos, lo aprueba el creador).
+- Las transiciones de Valeria son fundidos de 0,2 s y su giro se angosta como una carta; con arte (levantarse del sofá, agacharse, girar, tomar café) se vería mejor.
+- La fachada, la ventana alta del pasillo, la cortina, el teclado y la tapa de A.S.P.I. siguen por código.
+- Valeria tarda ~7 s en llegar de la sala al recibidor (camina de verdad); se nota si Felipe la espera.
+- El bot sigue terminando la pelea con pocos corazones (1 a 3): la dificultad de la fase 3 se ajusta con una persona.

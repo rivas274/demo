@@ -8,9 +8,17 @@ Actualizado: 2026-10-19. **Léelo al empezar un chat nuevo** para retomar sin re
 
 ## En curso
 
-- **Nivel 1 v4 construido** (PARTE A y PARTE B, 2026-10-19) y **corregido tras la revisión 2** (hallazgos de código). Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md` (sección 11: estado de cada hallazgo). Sigue: mostrarle al creador el video `nivel1-v4b.mp4` y las capturas; esperar la tanda 3D de Gemini (cortina, retrato familiar) y una tercera revisión con `revisor-niveles`.
+- **Nivel 1 v4 corregido tras la revisión 3** (2026-10-19). Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md` (sección 12) e informe con la sección "Arreglos" (`diseno/revisiones/2026-10-19-nivel1-v4-revision3.md`). Sigue: mostrarle al creador el video `nivel1-v4c.mp4`; decidir si se pide un `caminar` nuevo de Felipe (G9 de fondo) y arte de transiciones de Valeria; cuarta revisión mirando transiciones.
 
 ## Ya cerrado (2026-10-19)
+
+- **Arreglos de la revisión 3 del nivel 1** (0 créditos; todas las pruebas pasan, `prueba_jefe` 5 de 5 seguidas y el bot 5 de 5 con la agenda 8 de 8):
+  - **Capas:** tabla única `Capas` (`scripts/capas.gd`; memoria 03 y `godot-felipe` §6c). La imaginación de A.S.P.I. tapa todo el escenario y nunca hay dos A.S.P.I. (B1). Título, intro y pausa encima de todo; el fundido de las puertas tapa diálogo y carteles (G7).
+  - **Valeria:** caminar de SpriteCook a 110 px/s medido por el pie apoyado (B2), fundidos entre poses decididos al dibujar (G1), cruza las puertas a la vista y no se teletransporta (G2, G3), mascarilla bien puesta (G6), respira y gira con transición (M6).
+  - **Anuncios:** una sola cola para carteles, logros, franjas de fase y «PODER NUEVO» (`scripts/anuncios.gd`), que no tapa a Felipe, al diálogo, a los testigos ni el chiste (G5, M3).
+  - **Arte de `arriba-extra`** en el juego (baúl, cojín, retrato familiar, ropa, caja de recuerdos, monitor, impresora, papeles); se borraron `aspi_llena.png` y el caminar de Valeria de Gemini.
+  - **Felipe (G9):** el ciclo de caminar y correr va al ritmo de la velocidad; desliz ≤ 2 px por cuadro. Tres lugares: memoria (tabla Acciones de Felipe), ficha (plantilla y copia local; **falta publicar**) y juego (`prueba_movimiento`).
+  - **Además:** sofá sin plástico al romperlo (G4), tapa de A.S.P.I. por código (G8), contraste de palabras (M1), recompensas al costado (M2), meta con fundidos (M4), fachada simplificada (M5), pizza legible (M7) y `prueba_jefe` estable por causa raíz (M8).
 
 - **Arreglos de la revisión 2 del nivel 1** (solo código, 0 créditos; todas las pruebas pasan y el bot termina 5 de 5 con la agenda 8 de 8):
   - **Balcón (G1, M6):** la cámara sigue el salto final hasta el toldo de la panadería de abajo y el cartel "PODER NUEVO · CAER DE PIE" sale después de aterrizar, sin tapar a Felipe; la baranda ya no tiene maceta donde se sienta (se acicala mientras no haya animación de sentarse).

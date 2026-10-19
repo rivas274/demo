@@ -25,7 +25,7 @@ const Y_CARTEL := 104.0
 const ALTURAS_CARTEL := [104.0, 180.0, 252.0]
 const FONDO := Color(0.1, 0.07, 0.09, 0.78)
 ## Versión chica del cartel (cuando no hay hueco para la franja sin tapar el chiste): una tarjeta en una esquina.
-const TAM_CHICO := Vector2(260, 44)
+const TAM_CHICO := Vector2(260, 54)
 const DURACION_CARTEL := 2.45
 
 
@@ -140,7 +140,8 @@ func _mostrar_cartel(datos: Array, rect: Rect2, chico: bool) -> float:
 		fondo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		caja.add_child(fondo)
 		caja.add_child(_etiqueta(datos[0], 14, color, Vector2(0, 2), rect.size.x))
-		caja.add_child(_etiqueta(String(datos[1]).to_upper() + "  ·  " + String(datos[2]).to_upper(), 9, Color(0.75, 1.0, 0.75), Vector2(0, 24), rect.size.x))
+		caja.add_child(_etiqueta(String(datos[1]).to_upper(), 9, Color.WHITE, Vector2(6, 22), rect.size.x - 12))
+		caja.add_child(_etiqueta("RECOMPENSA: " + String(datos[2]).to_upper(), 9, Color(0.75, 1.0, 0.75), Vector2(6, 35), rect.size.x - 12))
 	else:
 		var franja := Polygon2D.new()
 		franja.polygon = PackedVector2Array([Vector2(0, 12), Vector2(640, 0), Vector2(640, 84), Vector2(0, 96)])
@@ -196,4 +197,7 @@ func _etiqueta(texto: String, tamano: int, color: Color, pos: Vector2, ancho := 
 	etiqueta.add_theme_color_override("font_outline_color", Color(0.08, 0.03, 0.06))
 	etiqueta.add_theme_constant_override("outline_size", 6)
 	etiqueta.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Nunca se sale de su caja (en la tarjeta chica, los nombres largos terminan en «…»).
+	etiqueta.clip_text = true
+	etiqueta.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	return etiqueta

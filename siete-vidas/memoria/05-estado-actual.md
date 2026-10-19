@@ -8,7 +8,7 @@ Actualizado: 2026-10-18. **Léelo al empezar un chat nuevo** para retomar sin re
 
 ## En curso
 
-- **Nivel 1 v4 aprobado en papel** (`siete-vidas/diseno/nivel-01-propuesta-v4.md`, con las decisiones del creador al final). Ahora: plan de arte y animaciones con costos (director de arte) para aprobar antes de gastar; después se construye.
+- **Nivel 1 v4 aprobado en papel** (`siete-vidas/diseno/nivel-01-propuesta-v4.md`, con las decisiones del creador al final). Plan de arte aprobado (`nivel-01-plan-arte.md`). Ahora: encargo a Gemini tanda 3A (esperando el "sí, adelante" del creador en la sesión gemini) y animación `subir_escalera` (26 créditos, esperando el sí a su ficha). Después Valeria (3B), aranar y maullar, y se construye.
 
 - **Prototipo "travesuras" v2 con la Agenda de Su Majestad** (`siete-vidas/prototipos/travesuras/`, ver su `INFORME.md` y `README.md`). Reemplaza el medidor de CAOS por 6 travesuras con nombre (2 secretas) y recompensas útiles (calcetín, snack por perdón, foto vergonzosa, un camino que se abre) y un resumen tipo Balatro al final. **Lista (2026-10-18):** video enviado; falta que el creador la juegue (Godot 4.3, F5; Tab = agenda, F = terminar el día) y dé el veredicto SEGUIR / CAMBIAR / DESCARTAR. Abierto: para qué sirven los snacks y los calcetines.
 

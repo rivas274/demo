@@ -61,4 +61,3 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - Gemini (Nano Banana) directo: falta que el creador agregue `GEMINI_API_KEY` al entorno (se lee en una sesión nueva). Sirve para imágenes fijas, no animaciones.
 
 
-- ¿Valeria está basada en una persona real?

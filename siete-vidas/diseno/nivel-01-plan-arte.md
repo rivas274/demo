@@ -222,3 +222,11 @@ Una llamada a la vez: si la primera de `pixel-engine-v1.5` sale mal, se corrige 
 - **Valeria:** hoja con sus 5 poses y un cuadro del caminar junto a Felipe A, a escala del juego (200 px contra 67 px). Misma cara, pelo y ropa en todas; si una pose cambia de persona, esa se rehace.
 - **Piezas de Gemini:** hoja de contacto de cada tanda (cada pieza a su tamaño de juego, con Felipe A al lado y la línea de colisión dibujada), más capturas del cuarto con `--debug-collisions`. Comprobar: borde opaco a 0 px del borde de la imagen, sin halo blanco, colisión contra fila opaca a ±2 px, lado menor ≥ 24 px en lo interactuable, ninguna pieza dentro del rectángulo de una puerta.
 - **Al creador se le muestra:** la ficha de cada encargo antes de gastar, la comparación de cada animación, la hoja de Valeria junto a Felipe y la hoja de contacto de cada tanda. Al cerrar, se anotan créditos y assets en `03-arte-y-herramientas.md`.
+
+## Decisiones del creador (2026-10-19) — plan APROBADO
+
+- **Valeria:** ficha visual aprobada (unos 30 años, moño castaño, sudadera verde azulado, buzo gris, pantuflas de gato, 200 px, vista 3/4). **Es un personaje inventado**: no hace falta permiso.
+- **Caminar de Valeria: hoja de Gemini** (gratis; se retocan los cuadros para que sea la misma persona). SpriteCook queda en **72 créditos** (subir_escalera 26, aranar 26, maullar 20) **+ 26 de reserva** solo si una sale mal. Opcionales (empujar, entrar_puerta): no.
+- **Detalles aprobados:** pasamanos con barrotes finos que se aclara al 70 % cuando Felipe sube; reja de 48 px con colisión fina; "viendo la serie" con el portátil en las piernas; orden: 3A + subir_escalera → Valeria → aranar y maullar.
+- Cada animación se muestra con su ficha y se pide solo con el "sí" del creador; al llegar, `comparar_felipe.py`.
+

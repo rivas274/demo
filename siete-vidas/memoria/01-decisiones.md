@@ -43,6 +43,8 @@ Actualizado: 2026-10-18. Detalle completo en la biblia (ver README.md).
 
 - **Nivel 1 v4 aprobado (2026-10-19)** (`siete-vidas/diseno/nivel-01-propuesta-v4.md`): doble salto, Zoomies y trepar apagados en el nivel 1; snacks en bolsillo de 5, calcetines al nido (10 = una ranura de maña), fotos a la galería; animaciones nuevas de arañar y maullar (intimidar, después); Valeria con 4 poses de Gemini y caminar; escalera de fondo con reja y librero, con animación de subir.
 
+- **Plan de arte del nivel 1 aprobado (2026-10-19)** (`siete-vidas/diseno/nivel-01-plan-arte.md`): Valeria inventada (moño castaño, sudadera verde azulado, buzo gris, pantuflas de gato); su caminar con hoja de Gemini; SpriteCook 72 créditos (subir_escalera, aranar, maullar) + 26 de reserva; encargo a Gemini tanda 3 (3A primero).
+
 ## Mecánicas
 
 - **Tres medidores:** afecto humano (por casa), respeto felino, peso. No hay medidor de hambre.

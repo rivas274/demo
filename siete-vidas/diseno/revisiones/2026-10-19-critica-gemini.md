@@ -126,4 +126,8 @@ Aplicado en el nivel 1 el 2026-10-19 (0 créditos: código y `preparar_arte_nive
 2. **La ropa doblada flotaba sobre la cama:** el arte termina en una punta angosta de sombra; se hunde 3 px en el edredón.
 3. **La barra del HUD tapaba el borde de arriba** del retrato oficial, el retrato familiar y el paisaje: se bajaron.
 
-Ya revisado en el video del bot: ver la tabla de abajo.
+### Revisión en el video y pruebas
+
+- **Video del bot** (`nivel1-v4d.mp4`, 30 fps, 7535 cuadros): revisé hojas de cuadros de cada cuarto tocado (sala con Valeria sentada y parándose, recibidor con la lámpara, escalera con la reja, cocina, pasillo con el vaso y el vano, dormitorio con la cortina y la ropa, estudio con el monitor y el LED, balcón) y la entrada del jefe a ×3 (revelar, nombre, rugido con la cartela, vuelta al estudio): la luz de borde se lee en la gigante, la cartela no tapa a Felipe y la mesa y la silla quedan debajo de la imaginación. No encontré errores nuevos.
+- **Pruebas:** movimiento, escenario, mecánicas, nivel, reglas del nivel y acciones en 0 fallos; `prueba_jefe` 0 fallos 3 veces seguidas (más una antes); el bot 5 de 5 con la agenda 8 de 8, 3 secretas, 3 calcetines y 9 vidas (229–233 s). Ninguna regla (R8, R14…) chocó con la crítica.
+- **No se tocó a Felipe:** no aplica la regla de los tres lugares.

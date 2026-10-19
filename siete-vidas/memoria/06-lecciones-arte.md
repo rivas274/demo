@@ -40,6 +40,11 @@ Léelas **antes** de diseñar, construir o revisar cualquier escenario. Cada una
 | 26 | Halo circular de luz pegado en la pared (efecto "filtro") | La luz cae en superficies (mesa, piso) en escalones; nada de círculos suaves sobre el tapiz |
 | 27 | El resalte de un mueble dibujado encima de todo cruzaba a Valeria sentada en él | El resalte va detrás de muebles y personajes: solo se ve donde hay pared o piso detrás (o sobre su apoyo, si está encima de otro mueble) |
 | 28 | El grifo nuevo quedaba tapado por el ratón que patrulla el mesón | Al agregar un detalle, mira qué pasa por delante (patrullas, personajes, carteles) en todo su recorrido y dale su capa |
+| 29 | Vaso, taza y monitor flotando en el borde de atrás del escritorio; un libro diminuto flotando en el taburete | Lo que va sobre un mueble se apoya en el CENTRO de la superficie, con sombra, al doble del tamaño real (escala de gato) y con pocos objetos por mueble |
+| 30 | Una impresora y un ratón de cuerda sobre la mesa que recargan todo | Cada objeto se gana su lugar: si no cuenta nada ni sirve al juego, se quita |
+| 31 | Cocina estrecha con un lavaplatos diminuto, por querer que todo quepa en una pantalla | La cámara se mueve: un cuarto puede ser más ancho que la pantalla para que los muebles tengan su tamaño |
+| 32 | Escoba mal dibujada, por código, junto a arte de Gemini | Ningún objeto de código al lado del arte si se nota; mejor arte de Gemini o quitarlo |
+| 33 | La reja "PIPE: NO" se veía mal y Felipe la atravesaba aunque las pruebas pasaban | Toda barrera bloquea de verdad (una prueba empuja a Felipe contra ella) y se explica sola en el mundo |
 
 ## Antes de dar por terminado un escenario
 

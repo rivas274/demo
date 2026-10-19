@@ -51,6 +51,9 @@ Actualizado: 2026-10-19 (PARTE B del nivel 1 v4). Detalle completo en la biblia 
 
 - **Luz y efectos (2026-10-19, aprobado como prueba):** sí, con poco y con estilo: ambiente por cuarto (CanvasModulate), luces puntuales con textura en escalones (no degradado suave), partículas sutiles (polvo en rayos, vapor, pelusas), brillo solo en lo que emite luz, viñeta y gradación solo en momentos épicos. No: mapas de normales, sombras dinámicas realistas, bloom fuerte, filtros VHS. Primero un prototipo en la sala al atardecer (antes/después + clip); si gusta, receta de luz por cuarto en una pasada.
 
+- **Escalera (2026-10-19):** se quita la reja "PIPE: NO". Cajas de la mudanza y una cesta de ropa apiladas en los primeros escalones bloquean el paso (Valeria está ordenando); Felipe sube trepando el librero hasta el descanso; desde arriba tira la caja de encima de un manotazo y abre el atajo (pilar 2).
+- **Objetos sobre muebles (2026-10-19):** al doble de su tamaño real, apoyados en el centro de la superficie con sombra, pocos por mueble; se quitan la impresora y el ratón de la mesa. La cocina se agranda (la cámara se mueve) con un mesón más grande y fregadero a escala.
+
 ## Mecánicas
 
 - **Tres medidores:** afecto humano (por casa), respeto felino, peso. No hay medidor de hambre.

@@ -35,17 +35,19 @@ const PAREDES := {
 	"rosa": ["pared_rosa", Color.WHITE],
 	"tapiz_mostaza": ["pared_tapiz", Color(1.06, 0.95, 0.72)],
 }
-## Molduras de la casa (G4), iguales en los 6 cuartos interiores: zócalo de 18 px (canto claro, cuerpo de madera y
-## filete oscuro) y cornisa de 14 px en dos tonos con dentículos cada 6 px; bajo la cornisa, 3 franjas de penumbra.
-const ZOCALO := 18
+## Molduras de la casa (G4), iguales en los 6 cuartos interiores: zócalo de 3 px (Gemini, pasada única: 1 px de bisel
+## claro arriba y 2 de madera; en el piso, 1 px de sombra en la unión) y cornisa de 14 px en dos tonos con dentículos
+## cada 6 px; bajo la cornisa, 3 franjas de penumbra.
+const ZOCALO := 3
 const CORNISA := 14
 const CANTO := Color("c98a5e")
 const PENUMBRA := [0.12, 0.08, 0.04]
 ## Cocina (C-1): azulejo solo hasta 1,5 m (182 px) con un listel de 4 px; arriba, pintura lisa crema cálida.
 const AZULEJO_ALTO := 182
 const PINTURA_COCINA := Color("e9d6b4")
-## Piso por estilo de cuarto (G7, C-4, B-2): la cocina y el balcón tienen el suyo (tanda 3E); los demás, parquet.
-const PISOS := {"azulejo": "piso_cocina", "exterior": "piso_balcon"}
+## Piso por estilo de cuarto (franjas de Gemini, pasada única): damero en la cocina, losa en el balcón y parquet en los
+## demás.
+const PISOS := {"azulejo": "piso_damero", "exterior": "piso_losa"}
 ## Rayos de luz (G6): el sol de la tarde entra por el oeste, siempre hacia la derecha. Tono por cuarto.
 const TONO_LUZ := {
 	"sala": Color(1.0, 0.74, 0.42), "cocina": Color(1.0, 0.93, 0.78), "pasillo": Color(0.74, 0.82, 0.95),
@@ -182,13 +184,10 @@ func _molduras(imagen: Image, rect: Rect2i) -> void:
 		imagen.fill_rect(Rect2i(d, arriba + 8, 3, 3), MADERA)
 		d += 6
 	imagen.fill_rect(Rect2i(x, arriba + CORNISA - 1, w, 1), Color("2b1712"))
-	# Zócalo: canto claro, cuerpo de madera y filete oscuro abajo.
+	# Zócalo: bisel claro de 1 px arriba y 2 px de madera.
 	var base := rect.end.y - ZOCALO
-	imagen.fill_rect(Rect2i(x, base, w, ZOCALO), MADERA)
-	imagen.fill_rect(Rect2i(x, base, w, 2), CANTO)
-	imagen.fill_rect(Rect2i(x, base + 2, w, 1), MADERA.lightened(0.08))
-	imagen.fill_rect(Rect2i(x, base + 9, w, 1), MADERA_OSCURA.lightened(0.1))
-	imagen.fill_rect(Rect2i(x, rect.end.y - 1, w, 1), MADERA_OSCURA)
+	imagen.fill_rect(Rect2i(x, base, w, ZOCALO), MADERA_OSCURA)
+	imagen.fill_rect(Rect2i(x, base, w, 1), CANTO)
 
 
 ## Baja el contraste de un mosaico hacia su color promedio (R14).
@@ -300,33 +299,25 @@ func _dibujar_pared(c: Node2D) -> void:
 	c.draw_texture(_textura_pared, Vector2.ZERO)
 	for ventana: Rect2 in Sala.VENTANAS:
 		_dibujar_ventana(c, ventana)
-	# Piso con profundidad: un plano visto un poco desde arriba, desde la unión con la pared hasta el borde de abajo.
+	# Piso: la franja de Gemini, desde la unión con la pared hasta el borde de abajo.
 	if _textura_piso == null:
 		_textura_piso = ImageTexture.create_from_image(_crear_piso())
 	c.draw_texture(_textura_piso, Vector2(0, Sala.PARED_BASE))
 	for habitacion: Array in Sala.HABITACIONES:
 		if habitacion[2] != "exterior":
 			var rect: Rect2 = habitacion[0]
-			# Sombra del zócalo sobre el piso (G4): dos franjas duras de pixel.
-			c.draw_rect(Rect2(rect.position.x, Sala.PARED_BASE, rect.size.x, 2), Color(0.1, 0.04, 0.02, 0.35))
-			c.draw_rect(Rect2(rect.position.x, Sala.PARED_BASE + 2, rect.size.x, 2), Color(0.1, 0.04, 0.02, 0.15))
+			# Sombra de 1 px donde el zócalo choca con el piso (Gemini).
+			c.draw_rect(Rect2(rect.position.x, Sala.PARED_BASE, rect.size.x, 1), Color(0.1, 0.04, 0.02, 0.45))
 
-
-## Filas del piso desde la pared hacia el frente (alto de cada hilera de tablas o baldosas, en px): se achican hacia el
-## fondo. Suman lo que va de la pared (Sala.PARED_BASE) al borde de abajo (Sala.ALTO).
-const HILERAS_PARQUET := [4, 5, 6, 7, 8, 9, 11]
-const HILERAS_BALDOSA := [11, 16, 23]
-## Las juntas que van hacia la pared convergen: al fondo el piso se ve ESCALA_FONDO de ancho (punto de fuga en el
-## centro de cada cuarto). Junto a la pared el piso se oscurece (OSCURO_FONDO) y se aclara hacia el frente.
-const ESCALA_FONDO := 0.8
-const OSCURO_FONDO := 0.32
 
 static var _piso_en_cache: Image
 
 
-## Arma el piso de todo el nivel en perspectiva leve (una sola vez; queda en cache entre escenas): el parquet en hileras
-## que se achican hacia la pared (cada hilera es una tabla del mosaico, con otro corrimiento) y las baldosas de la cocina
-## y el balcón en filas que se achican, con las juntas convergiendo hacia el centro del cuarto.
+## Arma el piso de todo el nivel (una sola vez; queda en cache entre escenas) con las franjas de Gemini (pasada única,
+## 2026-10-19): parquet en los cuartos, damero en la cocina y losa en el balcón, SIN perspectiva (Gemini: en un
+## plataformas lateral las tablas no convergen). Cada franja repite sin costura (`preparar_arte_nivel.pisos_gemini`) y
+## mide lo que va de la unión pared-piso al borde de abajo. Cada cuarto corre el mosaico distinto para que las juntas no
+## queden alineadas de un cuarto a otro.
 func _crear_piso() -> Image:
 	if _piso_en_cache:
 		return _piso_en_cache
@@ -334,40 +325,14 @@ func _crear_piso() -> Image:
 	var imagen := Image.create(int(ancho), alto_piso, false, Image.FORMAT_RGBA8)
 	for i in Sala.HABITACIONES.size():
 		var habitacion: Array = Sala.HABITACIONES[i]
-		var rect: Rect2 = habitacion[0]
-		var mosaico := _imagen(PISOS.get(habitacion[2], "piso"))
-		if mosaico == null:
-			mosaico = _imagen("piso")
-		var baldosa: bool = PISOS.has(habitacion[2])
-		var hileras: Array = HILERAS_BALDOSA if baldosa else HILERAS_PARQUET
+		var rect := Rect2i(habitacion[0])
+		var mosaico := _imagen(PISOS.get(habitacion[2], "piso_parquet"))
 		var mw := mosaico.get_width()
-		var mh := mosaico.get_height()
-		var centro := rect.get_center().x
-		var y := 0
-		for h in hileras.size():
-			var alto_hilera: int = hileras[h]
-			for dy in alto_hilera:
-				var fila := y + dy
-				if fila >= alto_piso:
-					break
-				var t := float(fila) / (alto_piso - 1)
-				var escala := lerpf(ESCALA_FONDO, 1.0, t)
-				var luz := 1.0 - OSCURO_FONDO * pow(1.0 - t, 1.6)
-				# Fila del mosaico: en el parquet cada hilera toma una tabla (6 px) del mosaico; en las baldosas, la fila
-				# entera del mosaico (30 px) se comprime en la hilera.
-				var v: int
-				var corrimiento: float
-				if baldosa:
-					v = mini(int(float(dy) / alto_hilera * mh), mh - 1)
-					corrimiento = 37.0 * i
-				else:
-					v = (h % 5) * 6 + mini(int(float(dy) / alto_hilera * 6.0), 5)
-					corrimiento = 73.0 * (i + 1) + 53.0 * h
-				for x in range(int(rect.position.x), int(rect.end.x)):
-					var u := centro + (x - centro) / escala + corrimiento
-					var pixel := mosaico.get_pixel(posmod(int(floorf(u)), mw), v)
-					imagen.set_pixel(x, fila, Color(pixel.r * luz, pixel.g * luz, pixel.b * luz, 1.0))
-			y += alto_hilera
+		var corrimiento := (37 * (i + 1)) % mw
+		for y in alto_piso:
+			var v := mini(y, mosaico.get_height() - 1)
+			for x in range(rect.position.x, rect.end.x):
+				imagen.set_pixel(x, y, mosaico.get_pixel(posmod(x + corrimiento, mw), v))
 	_piso_en_cache = imagen
 	return imagen
 

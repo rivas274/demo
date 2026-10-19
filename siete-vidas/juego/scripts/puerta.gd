@@ -177,6 +177,24 @@ func _physics_process(delta: float) -> void:
 		cruzada.emit(self)
 
 
+## Grosor del muro en la puerta abierta (pasada única, lección 25: el vano era un rectángulo negro sin hondura): jamba
+## izquierda de 5 px y dintel de 4 px en dos tonos. La luz viene de la izquierda y de arriba, así que las dos caras
+## que se ven (la jamba mira a la derecha y el dintel hacia abajo) quedan en sombra, más oscuras hacia adentro.
+## Vano oscuro del arte `puerta_abierta_v2`: desde la columna 14 y la fila 17; la hoja abierta empieza en la 98.
+const VANO_ARTE := Rect2(14, 17, 84, 228)
+const JAMBA := [Color("5a3a2c"), Color("3b271f")]
+
+
+func _dibujar_grosor_muro(fondo: float, alto_arte: float) -> void:
+	var origen := Vector2(-70.0, fondo - alto_arte) + VANO_ARTE.position
+	draw_rect(Rect2(origen, Vector2(3, VANO_ARTE.size.y)), JAMBA[0])
+	draw_rect(Rect2(origen + Vector2(3, 0), Vector2(2, VANO_ARTE.size.y)), JAMBA[1])
+	draw_rect(Rect2(origen, Vector2(VANO_ARTE.size.x, 2)), JAMBA[0])
+	draw_rect(Rect2(origen + Vector2(3, 2), Vector2(VANO_ARTE.size.x - 3, 2)), JAMBA[1])
+	# Canto del muro: 1 px más claro donde la jamba se encuentra con el marco.
+	draw_rect(Rect2(origen, Vector2(1, VANO_ARTE.size.y)), Color("7a5240"))
+
+
 func _draw() -> void:
 	if escalera:
 		return
@@ -192,6 +210,8 @@ func _draw() -> void:
 		draw_colored_polygon(PackedVector2Array([Vector2(-48, fondo), Vector2(48, fondo), Vector2(60, 6), Vector2(-60, 6)]), Color(1.0, 0.85, 0.55, 0.08))
 	var temblor := (1.0 if int(_temblor * 40.0) % 2 == 0 else -1.0) if _temblor > 0.0 else 0.0
 	ArteNivel.dibujar(self, nombre, temblor, fondo)
+	if apertura >= 1.0 and estilo == "" and not entornada:
+		_dibujar_grosor_muro(fondo, alto_arte)
 	if estilo == "vano":
 		# Arriba de la escalera de fondo: dentro del hueco se ven el remate del pasamanos y los peldaños que bajan (G2).
 		ArteNivel.dibujar(self, "vano_bajada", 0.0, fondo - 4.0)

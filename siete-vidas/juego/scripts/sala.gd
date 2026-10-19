@@ -19,8 +19,9 @@ const SUELO := 448.0
 ## (zócalo, puertas, ventanas, cuadros) termina FONDO_PISO px ARRIBA de la línea de apoyo (SUELO): entre la pared y
 ## SUELO se ve una banda de piso, y bajo SUELO otra hasta el borde de la pantalla (ALTO). Así los pies de Felipe,
 ## Valeria, A.S.P.I. y las patas de los muebles quedan DENTRO del piso, delante de la pared. Solo se movió el dibujo:
-## las colisiones siguen en SUELO.
-const FONDO_PISO := 20.0
+## las colisiones siguen en SUELO. Banda de 14 px (Gemini, pasada única 2026-10-19: de 12 a 16 px de piso detrás de
+## los pies).
+const FONDO_PISO := 14.0
 ## Unión pared-piso (borde de abajo del zócalo): todo lo que cuelga de la pared se mide desde aquí.
 const PARED_BASE := SUELO - FONDO_PISO
 ## Dintel de las puertas (2,05 m): la línea de los cuadros (G8).
@@ -136,7 +137,6 @@ const ARTE := [
 	["silla_v2", Vector2(3400, SUELO), false, "mueble"],
 	["alacenas", Vector2(3461, PARED_BASE - 182), false, "pared"],
 	["meson", Vector2(3464, SUELO), false, "mueble"],
-	["llave_agua", Vector2(3460.0, PARED_BASE - 86.0), true, "pared"],  # C-5: la llave con el trapo, en la pared y en espejo: el caño (columna 25) cae sobre el centro del fregadero y el trapo cuelga a la izquierda
 	["microondas", Vector2(3570, SUELO - 109), false, "mueble"],
 	["refrigerador", Vector2(3674, SUELO), false, "mueble"],
 	["polaroid_1", Vector2(3690, SUELO - 172.0), false, "mueble"],  # C-6: fotos de Felipe entre los imanes
@@ -172,11 +172,14 @@ const ALFOMBRAS := [["alfombra_sala", 232.0], ["alfombra_pasillo", 4370.0], ["al
 ## puerta-ventana.
 const FACHADA_BALCON := Vector2(7177, PARED_BASE)
 ## Objetos de pared que proyectan sombra (G5): 2 px hacia abajo y 1 px a la derecha (la luz entra por el oeste).
-## Fregadero de la cocina, embutido en el mesón bajo la llave (pedido del creador, 2026-10-19: la llave sola se veía
-## rara): cuba metálica con borde, sobre la cubierta de azulejos (filas 4 a 19 del arte del mesón), a la izquierda de
-## la patrulla del ratón.
-const FREGADERO := Rect2(3467, SUELO - 104, 36, 15)
-const SOMBRA_PARED := ["retrato", "marco_foto", "marco_huella", "perchero", "marco_viral", "reloj", "alacenas", "llave_agua", "retrato_familiar", "paisaje", "corcho"]
+## Fregadero de la cocina (pasada única, 2026-10-19: el de antes era una cajita pegada al borde, desproporcionada): cuba
+## de acero embutida en la cubierta de azulejos (filas 3 a 19 del arte del mesón), de un tercio del mesón (62 de 188 px,
+## unos 50 cm a escala de gato) y bien adentro del borde. El grifo es de código: cuello de cisne con el caño
+## (GRIFO, la boca) sobre el centro de la cuba; el ratón del mesón patrulla por detrás de la cuba (sobre el borde de
+## atrás de la cubierta), sin pisarla.
+const FREGADERO := Rect2(3476, SUELO - 106, 62, 16)
+const GRIFO := Vector2(3507, SUELO - 117)
+const SOMBRA_PARED := ["retrato", "marco_foto", "marco_huella", "perchero", "marco_viral", "reloj", "alacenas", "retrato_familiar", "paisaje", "corcho"]
 ## Arte que dibujan sus propios nodos (el sofá cambia de imagen; el rascador tiembla al arañarlo): [imagen, (x izquierda, base)].
 const ARTE_EXTRA := [["sofa_plastico", Vector2(240, SUELO)], ["rascador", Vector2(RASCADOR_X - 50.0, SUELO)]]
 ## El pasamanos de la escalera va delante de Felipe (baja a 70 % de opacidad mientras sube).
@@ -481,6 +484,7 @@ var _goteo_bano := 0.0
 var _goteo_cocina := 0.0
 ## Detalles que se mueven o cuentan quién vive aquí (G9, G10): pelos, arañazos, polvo, cables, segundero, gotas.
 var _ambiente: Node2D
+var _grifo: Node2D
 var _sombras: Node2D
 var _paso_brisa := -1
 ## Bases opacas del arte (sombras de contacto, G5): imagen -> [x0, x1, patas [[x]...]].
@@ -588,6 +592,8 @@ func _crear_puertas() -> void:
 	entornada.position = (puertas[PUERTA_DORMITORIO] as Puerta).position
 	entornada.aranazos_para_romper = 1
 	entornada.verbo_indicador = "Arañar"
+	var cara_dormitorio: Puerta = puertas[PUERTA_DORMITORIO]
+	entornada.arte = cara_dormitorio.arte_indicador
 	entornada.roto.connect(func(_o: Aranable) -> void:
 		for cara: Puerta in [puertas[PUERTA_DORMITORIO], (puertas[PUERTA_DORMITORIO] as Puerta).par]:
 			cara.entornada = false
@@ -637,6 +643,9 @@ func _crear_objetos() -> void:
 	travesuras.conectar_rascador(rascador)
 	sofa = Aranable.new("Sofa arañable", SOFA_ARANABLE[1], SOFA_ARANABLE[2])
 	sofa.position = SOFA_ARANABLE[0]
+	sofa.arte = func() -> Dictionary:
+		var nombre := sofa_dibujado if sofa_dibujado != "" else "sofa_plastico"
+		return ArteNivel.arte_en(self, nombre, ARTE_EXTRA[0][1].x + ArteNivel.textura(nombre).get_width() / 2.0, SUELO)
 	sofa.aranado.connect(_al_aranar_sofa)
 	add_child(sofa)
 	travesuras.conectar_aranable(sofa, "sofa", AGENDA_SITIOS["sofa"][0] + Vector2(0, -20))
@@ -644,6 +653,8 @@ func _crear_objetos() -> void:
 	# Cajón de los calcetines (cómoda) y ropa doblada (cama).
 	var cajon := Interactivo.new("Cajon", "Saquear", RECT_CAJON)
 	cajon.position = CAJON
+	# El contorno sigue la cómoda entera (el cajón es parte de su arte).
+	cajon.arte = func() -> Dictionary: return ArteNivel.arte_en(self, "comoda", 5850.0 + ArteNivel.textura("comoda").get_width() / 2.0, SUELO)
 	cajon.al_usar = func(f: Felipe) -> void: f.dar_manotazo(_abrir_cajon.bind(cajon))
 	add_child(cajon)
 	# La ropa se desordena (Felipe se acicala encima): un verbo distinto del sofá («Firmar») y de la puerta («Arañar»), M7.
@@ -655,6 +666,10 @@ func _crear_objetos() -> void:
 		ropa.queue_redraw()
 		_decir("ropa", true)
 	ropa.dibujo = _dibujar_ropa
+	ropa.arte = func() -> Dictionary:
+		var arte_ropa := ArteNivel.arte_en(ropa, "ropa_pelos" if _ropa_firmada else "ropa_limpia", 0.0, ROPA_HUNDIDA)
+		arte_ropa["z"] = Capas.MARCAS  # sobre la cama (si fuera detrás, la cama lo taparía)
+		return arte_ropa
 	# Detrás de Felipe: se acicala encima de la ropa, no detrás de la pila.
 	ropa.z_index = Capas.MUEBLES
 	add_child(ropa)
@@ -679,6 +694,11 @@ func _crear_objetos() -> void:
 	_ambiente.z_index = Capas.MUEBLES
 	_ambiente.draw.connect(_dibujar_ambiente)
 	add_child(_ambiente)
+	_grifo = Node2D.new()
+	_grifo.name = "Grifo"
+	_grifo.z_index = Capas.MARCAS
+	_grifo.draw.connect(_dibujar_grifo)
+	add_child(_grifo)
 	# Sombras de contacto de lo que se mueve (Felipe, Valeria, A.S.P.I., ratones, caja, comida): debajo de ellos y
 	# encima de los muebles (se apoyan también arriba de un mueble).
 	_sombras = Node2D.new()
@@ -759,6 +779,7 @@ func _physics_process(delta: float) -> void:
 	_actualizar_bano(delta)
 	_actualizar_goteo_cocina(delta)
 	_ambiente.queue_redraw()
+	_grifo.queue_redraw()
 	_sombras.queue_redraw()
 	# La cortina con brisa (D-4) y las plantas de la baranda (B-4) se mecen cada 0,5 s.
 	var paso := int(tiempo * 2.0)
@@ -1154,7 +1175,7 @@ func _actualizar_goteo_cocina(delta: float) -> void:
 	_goteo_cocina += delta
 	if _goteo_cocina >= 3.0:
 		_goteo_cocina = 0.0
-		if habitacion == "cocina" and ArteNivel.textura("llave_agua"):
+		if habitacion == "cocina":
 			sonar("goteo")
 
 
@@ -1529,11 +1550,12 @@ const SIN_SOMBRA := ["escalera_peldanos", "vano"]
 const COLOR_SOMBRA := Color(0.12, 0.05, 0.03)
 
 
-## Sombra elíptica de pixel: 5 filas (2 detrás de la base, la base y 2 delante), más angostas en los extremos.
+## Sombra de contacto de pixel (Gemini, pasada única): 2 px de alto, la fila de la base entera y la de delante 2 px más
+## angosta por lado (bordes redondeados), nada de manchas grandes.
 static func sombra(c: CanvasItem, centro: Vector2, ancho: float, alfa := 0.4) -> void:
-	var filas := [[-2.0, 0.6, 0.6], [-1.0, 0.88, 0.85], [0.0, 1.0, 1.0], [1.0, 0.86, 0.75], [2.0, 0.55, 0.45]]
+	var filas := [[-1.0, 1.0, 1.0], [0.0, 1.0, 0.7]]
 	for f: Array in filas:
-		var w := roundf(ancho * f[1] / 2.0) * 2.0
+		var w := roundf(ancho * f[1] / 2.0) * 2.0 - (4.0 if f[0] == 0.0 else 0.0)
 		c.draw_rect(Rect2(roundf(centro.x - w / 2.0), roundf(centro.y) + f[0], w, 1.0), Color(COLOR_SOMBRA, alfa * f[2]))
 
 
@@ -1554,10 +1576,14 @@ func _dibujar_sombras_de_contacto(c: Node2D) -> void:
 		var espejo: bool = datos.size() > 2 and datos[2]
 		var x0: float = x + (ancho - base[1] if espejo else base[0])
 		var x1: float = x + (ancho - base[0] if espejo else base[1])
-		sombra(c, Vector2((x0 + x1) / 2.0, y), x1 - x0 + 8.0, 0.42)
+		sombra(c, Vector2((x0 + x1) / 2.0, y), x1 - x0 + 4.0, 0.3)
+		# Bajo cada pata, 2 px más oscuros del ancho de la pata.
 		for pata: Array in base[2]:
 			var centro: float = x + (ancho - pata[0] if espejo else pata[0])
 			c.draw_rect(Rect2(roundf(centro) - 2.0, y - 1.0, 4.0, 2.0), Color(0.08, 0.03, 0.02, 0.5))
+		# Oclusión: los muebles grandes tapan la luz en la unión pared-piso detrás de ellos (1 px).
+		if x1 - x0 >= 80.0:
+			c.draw_rect(Rect2(roundf(x0), PARED_BASE + 1.0, roundf(x1 - x0), 1.0), Color(COLOR_SOMBRA, 0.4))
 	# Nido de Su Majestad (cesta de la sala) y armario bajo la escalera.
 	sombra(c, Vector2(70, SUELO), 64.0, 0.4)
 	c.draw_rect(Rect2(2400, SUELO - 2.0, 240, 4), Color(COLOR_SOMBRA, 0.3))
@@ -1582,30 +1608,92 @@ func _dibujar_alfombra(c: Node2D, nombre: String, x: float) -> void:
 	c.draw_polygon(puntos, PackedColorArray([Color(0.82, 0.82, 0.82), Color(0.82, 0.82, 0.82), Color.WHITE, Color.WHITE]), PackedVector2Array([Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 1)]), t)
 
 
-## Fregadero embutido en la cubierta del mesón (bajo la llave): borde de acero con luz arriba, cuba hundida con la pared
-## del fondo iluminada y el frente en sombra, desagüe y una gota de agua en el fondo.
+## Fregadero embutido en la cubierta del mesón (pasada única): borde de acero de 2 px con luz arriba a la izquierda
+## (la ventana de la cocina), cuba hundida (la pared del fondo iluminada, el fondo más oscuro y una franja de sombra
+## bajo el borde de delante), desagüe y agua. Encima, el grifo de cuello de cisne con su manija, y un paño de cocina
+## colgado del canto del mesón.
 func _dibujar_fregadero(c: Node2D) -> void:
 	var f := FREGADERO
 	var oscuro := Color("2b2622")
-	# Contorno con las esquinas recortadas (cuba redondeada) y borde de acero: fino atrás y a los lados, grueso delante.
-	c.draw_rect(Rect2(f.position.x, f.position.y - 1, f.size.x, f.size.y + 2), oscuro)
-	c.draw_rect(Rect2(f.position.x - 1, f.position.y, f.size.x + 2, f.size.y), oscuro)
-	c.draw_rect(Rect2(f.position.x + 1, f.position.y, f.size.x - 2, f.size.y), Color("c3c9cf"))
-	c.draw_rect(Rect2(f.position.x, f.position.y + 1, f.size.x, f.size.y - 2), Color("c3c9cf"))
-	c.draw_rect(Rect2(f.position.x + 1, f.end.y - 3, f.size.x - 2, 2), Color("e1e6ea"))
-	# Hueco de la cuba: hondo y oscuro atrás (la sombra del borde), más claro hacia delante, con el desagüe.
-	var cuba := Rect2(f.position.x + 2, f.position.y + 1, f.size.x - 4, f.size.y - 4)
-	var tonos := [Color("2f3439"), Color("3e444a"), Color("50575e"), Color("626a72"), Color("727a83")]
-	for i in cuba.size.y:
-		var tono: Color = tonos[mini(int(i * tonos.size() / cuba.size.y), tonos.size() - 1)]
-		var recorte := 1.0 if i == 0 or i == cuba.size.y - 1 else 0.0
-		c.draw_rect(Rect2(cuba.position.x + recorte, cuba.position.y + i, cuba.size.x - 2.0 * recorte, 1), tono)
-	var centro := Vector2(roundf(cuba.get_center().x), cuba.end.y - 3.0)
-	c.draw_rect(Rect2(centro.x - 2, centro.y, 4, 2), Color("1b1e21"))
-	c.draw_rect(Rect2(centro.x - 1, centro.y, 2, 1), Color("9aa2aa"))
-	# Agua en el fondo y un brillo en el canto de delante.
-	c.draw_rect(Rect2(centro.x + 4, cuba.end.y - 2, 6, 1), Color(0.6, 0.85, 1.0, 0.55))
-	c.draw_rect(Rect2(f.position.x + 3, f.end.y - 3, 7, 1), Color(1, 1, 1, 0.75))
+	var acero := Color("c3c9cf")
+	var brillo := Color("eef2f5")
+	# Contorno con las esquinas recortadas y borde de acero de 2 px.
+	c.draw_rect(Rect2(f.position.x + 1, f.position.y - 1, f.size.x - 2, f.size.y + 2), oscuro)
+	c.draw_rect(Rect2(f.position.x - 1, f.position.y + 1, f.size.x + 2, f.size.y - 2), oscuro)
+	c.draw_rect(Rect2(f.position.x + 1, f.position.y, f.size.x - 2, f.size.y), acero)
+	c.draw_rect(Rect2(f.position.x, f.position.y + 1, f.size.x, f.size.y - 2), acero)
+	c.draw_rect(Rect2(f.position.x + 1, f.position.y, f.size.x - 2, 1), brillo)
+	c.draw_rect(Rect2(f.position.x, f.position.y + 1, 1, f.size.y - 2), brillo)
+	c.draw_rect(Rect2(f.position.x + 1, f.end.y - 1, f.size.x - 2, 1), Color("8e959c"))
+	# Cuba: pared del fondo (5 filas, iluminada), fondo y sombra del borde de delante.
+	var cuba := Rect2(f.position.x + 2, f.position.y + 2, f.size.x - 4, f.size.y - 4)
+	c.draw_rect(cuba, Color("4a5158"))
+	c.draw_rect(Rect2(cuba.position.x, cuba.position.y, cuba.size.x, 5), Color("7d858d"))
+	c.draw_rect(Rect2(cuba.position.x, cuba.position.y, cuba.size.x, 2), Color("353b41"))
+	c.draw_rect(Rect2(cuba.position.x, cuba.position.y + 5, cuba.size.x, 1), Color("5d656d"))
+	c.draw_rect(Rect2(cuba.end.x - 3, cuba.position.y + 2, 3, cuba.size.y - 2), Color("3a4047"))
+	c.draw_rect(Rect2(cuba.position.x, cuba.end.y - 2, cuba.size.x, 2), Color("2b3036"))
+	var desague := Vector2(roundf(cuba.get_center().x), cuba.end.y - 4.0)
+	c.draw_rect(Rect2(desague.x - 2, desague.y, 5, 2), Color("1b1e21"))
+	c.draw_rect(Rect2(desague.x - 1, desague.y, 3, 1), Color("9aa2aa"))
+	c.draw_rect(Rect2(desague.x + 5, desague.y + 1, 9, 1), Color(0.6, 0.85, 1.0, 0.5))
+	# Paño de cocina (cuadrillé) doblado sobre el canto del mesón, a la izquierda: algo de Valeria en la cocina. Arriba,
+	# la parte que queda sobre la cubierta (más oscura, en sombra del doblez); abajo cuelga sobre el cajón.
+	var pano := Vector2(3484, SUELO - 87)
+	c.draw_rect(Rect2(pano.x - 1, pano.y - 1, 12, 19), oscuro)
+	for py in 17:
+		for px in 10:
+			var cuadro := (int(px / 3.0) + int((py + 1) / 3.0)) % 2 == 0
+			var color := Color("c8463c") if cuadro else Color("efe4d2")
+			if py < 3 or px >= 8:
+				color = color.darkened(0.22)
+			c.draw_rect(Rect2(pano.x + px, pano.y + py, 1, 1), color)
+	c.draw_rect(Rect2(pano.x, pano.y + 3, 10, 1), Color(0.1, 0.04, 0.02, 0.35))
+
+
+## Grifo de cuello de cisne del fregadero y su gota (C-5): va en su propia capa, delante del ratón del mesón (que pasa
+## por detrás, sobre el borde de atrás de la cubierta) para que nunca lo tape.
+func _dibujar_grifo() -> void:
+	var c := _grifo
+	# Grifo de cuello de cisne: base en el borde de atrás, cuello que sube, curva y boca sobre el centro de la cuba.
+	var f := FREGADERO
+	var oscuro := Color("2b2622")
+	var brillo := Color("eef2f5")
+	var g := GRIFO
+	var cromo := Color("b9c1c8")
+	var cromo_oscuro := Color("6d757d")
+	var base := Vector2(g.x - 9.0, f.position.y - 1.0)
+	var arriba := g.y - 11.0
+	# Contorno oscuro: base, cuello de 3 px, arco de 3 px con las esquinas recortadas y caño que baja a la boca.
+	c.draw_rect(Rect2(base.x - 4, base.y - 2, 11, 3), oscuro)
+	c.draw_rect(Rect2(base.x - 1, arriba + 1, 5, base.y - arriba - 1), oscuro)
+	c.draw_rect(Rect2(base.x, arriba, g.x - base.x + 2, 5), oscuro)
+	c.draw_rect(Rect2(g.x - 2, arriba + 1, 5, g.y - arriba + 1), oscuro)
+	# Cromo con brillo a la izquierda y arriba (la ventana de la cocina).
+	c.draw_rect(Rect2(base.x - 3, base.y - 1, 9, 1), cromo)
+	c.draw_rect(Rect2(base.x, arriba + 2, 3, base.y - arriba - 3), cromo)
+	c.draw_rect(Rect2(base.x, arriba + 2, 1, base.y - arriba - 3), brillo)
+	c.draw_rect(Rect2(base.x + 1, arriba + 1, g.x - base.x, 3), cromo)
+	c.draw_rect(Rect2(base.x + 1, arriba + 1, g.x - base.x - 1, 1), brillo)
+	c.draw_rect(Rect2(g.x - 1, arriba + 2, 3, g.y - arriba - 2), cromo)
+	c.draw_rect(Rect2(g.x + 1, arriba + 3, 1, g.y - arriba - 3), cromo_oscuro)
+	c.draw_rect(Rect2(g.x - 1, g.y, 3, 1), cromo_oscuro)
+	# Manija de palanca a la izquierda del cuello.
+	c.draw_rect(Rect2(base.x - 7, base.y - 8, 7, 3), oscuro)
+	c.draw_rect(Rect2(base.x - 6, base.y - 7, 6, 1), cromo)
+	var caida := fmod(tiempo, 3.0)
+	# De la boca del grifo al fondo del fregadero.
+	var gota := GRIFO
+	var caida_total := FREGADERO.end.y - 4.0 - gota.y
+	if caida < 0.8:
+		c.draw_rect(Rect2(gota.x, gota.y + 1.0, 1, 2), Color(0.6, 0.85, 1.0, caida / 0.8))
+	elif caida < 1.0:
+		var t := (caida - 0.8) / 0.2
+		c.draw_rect(Rect2(gota.x, gota.y + 1.0 + t * t * caida_total, 1, 2), Color(0.6, 0.85, 1.0))
+	elif caida < 1.25:
+		# Salpica en la cuba.
+		c.draw_rect(Rect2(gota.x - 2, FREGADERO.end.y - 4.0, 1, 1), Color(0.75, 0.9, 1.0, 0.8))
+		c.draw_rect(Rect2(gota.x + 2, FREGADERO.end.y - 4.0, 1, 1), Color(0.75, 0.9, 1.0, 0.8))
 
 
 ## Base opaca de una imagen: [x0, x1 de las 3 filas de abajo, patas [[centro], ...] de la fila de abajo] (en cache).
@@ -2109,7 +2197,7 @@ func _dibujar_ambiente() -> void:
 	for linea: Vector3 in [Vector3(6018, 6118, SUELO - 186), Vector3(3684, 3748, SUELO - 217), Vector3(2164, 2264, SUELO - 219), Vector3(3463, 3576, PARED_BASE - 249)]:
 		c.draw_rect(Rect2(linea.x, linea.z, linea.y - linea.x, 1), POLVO)
 	_pelo(c, Vector2(3741, SUELO - 217), 2)
-	# Sala (S-4): enchufe en el zócalo y el cable del cargador del portátil, con su luz que late.
+	# Sala (S-4): enchufe en la pared, sobre el zócalo, y el cable del cargador del portátil, con su luz que late.
 	_enchufe(c, Vector2(140, PARED_BASE - 13))
 	_cable(c, Vector2(143, PARED_BASE - 7), Vector2(208, SUELO - 2), 5.0)
 	c.draw_rect(Rect2(210, SUELO - 4, 2, 1), Color(0.4, 1.0, 0.5, 0.35 + 0.35 * sin(tiempo * 3.0)))
@@ -2120,20 +2208,6 @@ func _dibujar_ambiente() -> void:
 	var angulo := floorf(tiempo) / 60.0 * TAU - PI / 2.0
 	var centro := Vector2(3095, DINTEL + 22.0)
 	c.draw_line(centro, centro + Vector2(cos(angulo), sin(angulo)) * 8.0, Color("c0392b"), 1.0)
-	if ArteNivel.textura("llave_agua"):
-		var caida := fmod(tiempo, 3.0)
-		# Del caño de la llave al fondo del fregadero.
-		var gota := Vector2(FREGADERO.get_center().x, PARED_BASE - 102.0)
-		var caida_total := FREGADERO.end.y - 4.0 - gota.y
-		if caida < 0.8:
-			c.draw_rect(Rect2(gota.x, gota.y + 1.0, 1, 2), Color(0.6, 0.85, 1.0, caida / 0.8))
-		elif caida < 1.0:
-			var t := (caida - 0.8) / 0.2
-			c.draw_rect(Rect2(gota.x, gota.y + 1.0 + t * t * caida_total, 1, 2), Color(0.6, 0.85, 1.0))
-		elif caida < 1.25:
-			# Salpica en la cuba.
-			c.draw_rect(Rect2(gota.x - 2, FREGADERO.end.y - 4.0, 1, 1), Color(0.75, 0.9, 1.0, 0.8))
-			c.draw_rect(Rect2(gota.x + 2, FREGADERO.end.y - 4.0, 1, 1), Color(0.75, 0.9, 1.0, 0.8))
 	# Estudio (E-3, E-4): enchufe y cable de la base de carga, regleta bajo el escritorio y post-its en el monitor.
 	_enchufe(c, Vector2(6880, PARED_BASE - 13))
 	_cable(c, Vector2(6868, SUELO - 4), Vector2(6883, PARED_BASE - 7), 6.0)

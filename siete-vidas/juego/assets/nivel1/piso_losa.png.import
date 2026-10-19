@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1gm84kpnq8v6"
-path="res://.godot/imported/piso.png-d6c522108c111887966505237ebd72e8.ctex"
+uid="uid://bn7754ogybydf"
+path="res://.godot/imported/piso_losa.png-3c70f8f5c4827fa3d65619d15612cfe9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/nivel1/piso.png"
-dest_files=["res://.godot/imported/piso.png-d6c522108c111887966505237ebd72e8.ctex"]
+source_file="res://assets/nivel1/piso_losa.png"
+dest_files=["res://.godot/imported/piso_losa.png-3c70f8f5c4827fa3d65619d15612cfe9.ctex"]
 
 [params]
 

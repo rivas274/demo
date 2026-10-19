@@ -55,6 +55,14 @@ func verbo(_felipe: Felipe) -> String:
 	return verbo_indicador
 
 
+## Arte para el contorno del Indicador (lo pone el nivel): devuelve lo mismo que arte_indicador().
+var arte := Callable()
+
+
+func arte_indicador() -> Dictionary:
+	return arte.call() if arte.is_valid() else {}
+
+
 func rect_indicador() -> Rect2:
 	return Rect2(global_position + rect_local.position, rect_local.size)
 

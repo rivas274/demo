@@ -535,6 +535,18 @@ func primera_frase() -> String:
 	return "{interactuar} Cara de bebito. Funciona siempre."
 
 
+## Contorno del Indicador con la silueta de la pose que se ve (el cuadro de la hoja, volteado si mira a la izquierda).
+func arte_indicador() -> Dictionary:
+	if pose_dibujada == "":
+		return {}
+	var datos := _datos_pose(pose_dibujada, _cuadro_actual)
+	if datos.is_empty():
+		return {}
+	var region: Rect2 = datos["region"]
+	var pos := pos_dibujada + Vector2(-region.size.x / 2.0, -region.size.y - float(datos["base"]))
+	return {"textura": datos["textura"], "rect": Rect2(pos, region.size), "region": region, "espejo": mirando < 0.0}
+
+
 func rect_indicador() -> Rect2:
 	return Rect2(global_position + Vector2(-26, -ALTO), Vector2(52, ALTO))
 

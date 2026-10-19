@@ -9,8 +9,10 @@ extends Node2D
 ##   las pantallas van en CanvasLayer (Capas.CAPA_*) y no lo reciben. El Indicador (burbuja y contorno, en el mundo)
 ##   queda sin sombrear.
 ## - Luces puntuales (PointLight2D) con textura EN ESCALONES (assets/luz/, `herramientas/texturas_luz.py`): el rayo de la
-##   ventana (luz principal, desde la izquierda), la lámpara de la mesita, el portátil de Valeria (frío, leve) y el LED
-##   del cargador. Felipe y Valeria las reciben al pasar. Sin normales ni sombras.
+##   ventana (luz principal, desde la izquierda), el portátil de Valeria (frío, leve) y el LED del cargador. Felipe y
+##   Valeria las reciben al pasar. Sin normales ni sombras.
+## - La lámpara de la mesita NO es una luz redonda (pasada única, 2026-10-19, lección 26: el halo circular sobre el tapiz
+##   se veía como un filtro): su luz cae en el tablero de la mesita y en el piso, en escalones de tono plano.
 ## - Brillo solo en lo que emite luz: el vidrio de la ventana, la pantalla de la lámpara y el LED se redibujan sin
 ##   sombrear (con su color de siempre) sobre el cuarto oscurecido.
 ## - Polvo en el rayo: motas de 1 px que suben y titilan dentro del rayo, en posiciones enteras.
@@ -28,13 +30,17 @@ const PANTALLA_LAMPARA := Rect2(5, 0, 35, 23)
 const LED := Vector2(210, Sala.SUELO - 4)
 ## Entre la pantalla del portátil y la cara de Valeria sentada en el sofá, respecto de Sala.VALERIA_SOFA.
 const PORTATIL := Vector2(-6, -80)
+## Luz de la lámpara en escalones: [x izquierda, y, ancho, alto, alfa] en el tablero de la mesita (filas 38 a 57 de
+## su arte, coordenadas de la textura) y en el piso delante de ella (coordenadas del mundo).
+const LAMPARA_TABLERO := [[2, 39, 62, 13, 0.1], [9, 40, 46, 10, 0.1], [16, 41, 30, 7, 0.12]]
+const LAMPARA_PISO := [[140, Sala.SUELO + 1, 124, 8, 0.07], [156, Sala.SUELO + 1, 92, 6, 0.07], [172, Sala.SUELO + 1, 60, 4, 0.08]]
+const COLOR_LAMPARA := Color(1.0, 0.85, 0.55)
 ## Capa de luz propia de Valeria: la luz fría del portátil ilumina solo a ella (no la pared de atrás).
 const MASCARA_VALERIA := 2
 
 ## Luces: [nombre, textura, posición en el mundo, escala de la textura, color, energía].
 const LUCES := [
 	["Sol de la ventana", "luz_rayo", Vector2.INF, 1.0, Color(1.0, 0.72, 0.42), 0.6],
-	["Lámpara de la mesita", "luz_escalones", Vector2(184, Sala.SUELO - 78), 1.1, Color(1.0, 0.8, 0.5), 0.5],
 	["Portátil de Valeria", "luz_escalones", Vector2.INF, 0.4, Color(0.55, 0.75, 1.0), 0.6],
 	["LED del cargador", "luz_escalones", LED + Vector2(1, 0), 0.1, Color(0.4, 1.0, 0.5), 0.5],
 ]
@@ -46,6 +52,7 @@ var _luces := {}
 var _brillo_pared: Node2D
 var _brillo_mueble: Node2D
 var _polvo: Node2D
+var _luz_piso: Node2D
 var _vidrio := Rect2()
 var _t := 0.0
 
@@ -89,6 +96,8 @@ func _ready() -> void:
 	_brillo_pared = _lienzo("Brillo de la ventana", Capas.ARTE_PARED, _dibujar_brillo_pared, sin_sombrear)
 	_brillo_mueble = _lienzo("Brillo de la lámpara", Capas.MUEBLES, _dibujar_brillo_mueble, sin_sombrear)
 	_polvo = _lienzo("Polvo del rayo", Capas.LUZ, _dibujar_polvo, sin_sombrear)
+	# Encima del piso y debajo de los muebles y de Felipe.
+	_luz_piso = _lienzo("Luz de la lámpara en el piso", Capas.ARTE_PARED, _dibujar_luz_piso, sin_sombrear)
 	# El Indicador está en el mundo (burbuja y contorno): no recibe ni el ambiente ni las luces.
 	if sala.travesuras and sala.travesuras.indicador:
 		_sin_sombrear(sala.travesuras.indicador, sin_sombrear)
@@ -130,7 +139,7 @@ func _al_cambiar_cuarto(cuarto: String) -> void:
 	_ambiente.color = AMBIENTE if activa else Color.WHITE
 	for luz: PointLight2D in _luces.values():
 		luz.enabled = activa
-	for lienzo: Node2D in [_brillo_pared, _brillo_mueble, _polvo]:
+	for lienzo: Node2D in [_brillo_pared, _brillo_mueble, _polvo, _luz_piso]:
 		lienzo.visible = activa
 	set_process(activa)
 
@@ -157,11 +166,20 @@ func _dibujar_brillo_mueble() -> void:
 	if mesita:
 		var origen := Vector2(Sala.MESITA_X, Sala.SUELO - mesita.get_height())
 		_brillo_mueble.draw_texture_rect_region(mesita, Rect2(origen + PANTALLA_LAMPARA.position, PANTALLA_LAMPARA.size), PANTALLA_LAMPARA)
+		# La luz de la lámpara cae en el tablero, bajo la pantalla, en tres escalones.
+		for e: Array in LAMPARA_TABLERO:
+			_brillo_mueble.draw_rect(Rect2(origen + Vector2(e[0], e[1]), Vector2(e[2], e[3])), Color(COLOR_LAMPARA, e[4]))
 	# El LED con su color pleno (late como el de Sala) y un halo de 1 px a los lados.
 	var pulso := 0.5 + 0.5 * sin(sala.tiempo * 3.0)
 	_brillo_mueble.draw_rect(Rect2(LED, Vector2(2, 1)), Color(0.55, 1.0, 0.6, 0.55 + 0.45 * pulso))
 	_brillo_mueble.draw_rect(Rect2(LED + Vector2(-1, 0), Vector2(1, 1)), Color(0.4, 1.0, 0.5, 0.3 * pulso))
 	_brillo_mueble.draw_rect(Rect2(LED + Vector2(2, 0), Vector2(1, 1)), Color(0.4, 1.0, 0.5, 0.3 * pulso))
+
+
+## Charco de luz de la lámpara en el piso delante de la mesita: tres franjas planas (no un degradado).
+func _dibujar_luz_piso() -> void:
+	for e: Array in LAMPARA_PISO:
+		_luz_piso.draw_rect(Rect2(e[0], e[1], e[2], e[3]), Color(COLOR_LAMPARA, e[4]))
 
 
 ## Motas de 1 px que suben despacio dentro del rayo de la ventana y titilan en dos escalones (no un degradado).

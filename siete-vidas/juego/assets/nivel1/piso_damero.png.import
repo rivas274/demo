@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cg3d1m1beer5v"
-path="res://.godot/imported/piso_cocina.png-85a4f8c710057b8e111fb7d9fbb36f4a.ctex"
+uid="uid://d26o223dtp1id"
+path="res://.godot/imported/piso_damero.png-e692a08cdb1ca1a1750247bbd64710b7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/nivel1/piso_cocina.png"
-dest_files=["res://.godot/imported/piso_cocina.png-85a4f8c710057b8e111fb7d9fbb36f4a.ctex"]
+source_file="res://assets/nivel1/piso_damero.png"
+dest_files=["res://.godot/imported/piso_damero.png-e692a08cdb1ca1a1750247bbd64710b7.ctex"]
 
 [params]
 

@@ -1,7 +1,8 @@
 class_name Indicador
 extends Node2D
 ## Anuncia la interacción cercana (propuesta v4, sección 5), sin carteles de tutorial:
-## - el objeto que usaría el botón de acción gana un contorno claro de 1 px;
+## - el objeto que usaría el botón de acción gana un contorno cálido de 1 px que sigue la silueta de su arte y late
+##   suave (pasada única, 2026-10-19: nunca un rectángulo; el del sofá parecía un recorte pegado);
 ## - sobre la cabeza de Felipe sale una burbuja con el ícono del botón en uso (teclado o mando) y el verbo de
 ##   Felipe ("Pasar", "Ascender", "Degustar", "Liberar", "Firmar", "Actuar", "Abrir"...);
 ## - manteniendo la acción sin nada cerca, la burbuja muestra cómo se carga "Degustar snack".
@@ -9,14 +10,18 @@ extends Node2D
 ##
 ## Lo que un objeto interactuable puede dar (todo opcional):
 ##   verbo(felipe) -> String              verbo de la burbuja (si no, "Usar")
-##   arte_indicador() -> {textura, rect}  imagen y rectángulo en el mundo: contorno con la forma del dibujo
-##   rect_indicador() -> Rect2            rectángulo en el mundo: contorno rectangular
+##   arte_indicador() -> {textura, rect, region?, espejo?}  imagen y rectángulo en el mundo: contorno con la forma del
+##                                        dibujo (region: parte de la textura, para hojas de animación; espejo: volteado;
+##                                        z: capa del contorno, por defecto detrás de muebles y personajes, así el
+##                                        contorno solo se ve donde hay pared o piso detrás y nunca cruza a Valeria)
+##   rect_indicador() -> Rect2            zona en el mundo (la usan los anuncios y las pruebas; el Indicador no la dibuja)
 ##   primera_frase() -> String            línea de Felipe la primera vez (con {acción} para el ícono)
 
 ## Primera vez que Felipe se acerca a un objeto con primera_frase(): para el diálogo.
 signal primera_vez(objeto: Node2D, frase: String)
 
-const COLOR_CONTORNO := Color(1.0, 0.97, 0.78)
+## Crema cálido y suave (no blanco): late entre 55 % y 100 % de opacidad.
+const COLOR_CONTORNO := Color(1.0, 0.86, 0.56)
 const FONDO := Color(0.13, 0.09, 0.12, 0.9)
 const BORDE := Color(0.95, 0.85, 0.6)
 const TEXTO := Color(1, 0.97, 0.92)
@@ -49,8 +54,10 @@ shader_type canvas_item;
 render_mode unshaded;
 uniform vec4 color : source_color = vec4(1.0, 0.97, 0.78, 1.0);
 uniform vec2 paso = vec2(0.01, 0.01);
+// Parte de la textura que se usa (en UV): en una hoja de animación, el cuadro; así no se cuela el vecino.
+uniform vec4 limites = vec4(0.0, 0.0, 1.0, 1.0);
 float dentro(vec2 uv) {
-	return step(0.0, uv.x) * step(0.0, uv.y) * step(uv.x, 1.0) * step(uv.y, 1.0);
+	return step(limites.x, uv.x) * step(limites.y, uv.y) * step(uv.x, limites.z) * step(uv.y, limites.w);
 }
 void fragment() {
 	vec2 dx = vec2(paso.x, 0.0);
@@ -76,6 +83,8 @@ func _ready() -> void:
 	_material.set_shader_parameter("color", COLOR_CONTORNO)
 	_contorno = Node2D.new()
 	_contorno.name = "Contorno"
+	_contorno.z_as_relative = false
+	_contorno.z_index = Capas.ARTE_PARED
 	_contorno.material = _material
 	_contorno.draw.connect(_dibujar_contorno)
 	add_child(_contorno)
@@ -104,6 +113,8 @@ func _physics_process(delta: float) -> void:
 			var frase := String(objeto.call("primera_frase"))
 			if frase != "":
 				primera_vez.emit(objeto, frase)
+		if objeto and tiene_arte(objeto):
+			_contorno.z_index = int((objeto.call("arte_indicador") as Dictionary).get("z", Capas.ARTE_PARED))
 	verbo = ""
 	if objeto:
 		verbo = String(objeto.call("verbo", felipe)) if objeto.has_method("verbo") else "Usar"
@@ -128,9 +139,17 @@ func _dibujar_contorno() -> void:
 			var textura: Texture2D = arte["textura"]
 			var rect: Rect2 = arte["rect"]
 			var tam := textura.get_size()
+			var region: Rect2 = arte.get("region", Rect2(Vector2.ZERO, tam))
 			_material.set_shader_parameter("paso", Vector2(1.0 / tam.x, 1.0 / tam.y))
+			_material.set_shader_parameter("limites", Vector4(region.position.x / tam.x, region.position.y / tam.y, region.end.x / tam.x, region.end.y / tam.y))
+			# Late suave (no parpadea): de 55 % a 100 %.
+			var pulso := 0.775 + 0.225 * sin(Time.get_ticks_msec() / 1000.0 * 4.0)
+			_material.set_shader_parameter("color", Color(COLOR_CONTORNO, pulso * _aparecer))
+			if arte.get("espejo", false):
+				_contorno.draw_set_transform(Vector2(rect.get_center().x * 2.0, 0.0), 0.0, Vector2(-1, 1))
 			# Un píxel más por lado para que el contorno quepa fuera del dibujo.
-			_contorno.draw_texture_rect_region(textura, rect.grow(1.0), Rect2(Vector2(-1, -1), tam + Vector2(2, 2)))
+			_contorno.draw_texture_rect_region(textura, rect.grow(1.0), Rect2(region.position - Vector2(1, 1), region.size + Vector2(2, 2)))
+			_contorno.draw_set_transform(Vector2.ZERO)
 
 
 func _dibujar_placa(caja: Rect2, punta: Vector2) -> void:
@@ -162,21 +181,12 @@ func _rect_recortado(r: Rect2, color: Color) -> void:
 	draw_rect(Rect2(r.end.x - 1, r.position.y + 1, 1, r.size.y - 2), color)
 
 
-## ¿El objeto da su imagen para un contorno con forma? Si no, el contorno es un rectángulo.
-func _tiene_arte(cosa: Node2D) -> bool:
+## ¿El objeto da su imagen para un contorno con forma? Si no, no hay contorno (solo la burbuja): nunca un rectángulo.
+func tiene_arte(cosa: Node2D) -> bool:
 	return cosa.has_method("arte_indicador") and not (cosa.call("arte_indicador") as Dictionary).is_empty()
 
 
-func _rect_simple(cosa: Node2D) -> Rect2:
-	if cosa.has_method("rect_indicador"):
-		return cosa.call("rect_indicador")
-	return Rect2(cosa.global_position + Vector2(-14, -28), Vector2(28, 28))
-
-
 func _draw() -> void:
-	if is_instance_valid(objeto) and not _tiene_arte(objeto):
-		var marco := _rect_simple(objeto).grow(1.0)
-		draw_rect(Rect2(marco.position.round() + Vector2(0.5, 0.5), marco.size.round()), COLOR_CONTORNO, false, 1.0)
 	if verbo == "" or felipe == null:
 		return
 	var fuente := ThemeDB.fallback_font

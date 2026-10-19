@@ -78,6 +78,15 @@ func primera_frase() -> String:
 	return frase_primera_vez
 
 
+## Arte del mueble para el contorno del Indicador (lo pone el nivel, que es quien lo dibuja): devuelve lo mismo que
+## arte_indicador(). Sin él no hay contorno, solo la burbuja.
+var arte := Callable()
+
+
+func arte_indicador() -> Dictionary:
+	return arte.call() if arte.is_valid() else {}
+
+
 func rect_indicador() -> Rect2:
 	return Rect2(global_position + Vector2(-ancho / 2.0, -alto), Vector2(ancho, alto))
 

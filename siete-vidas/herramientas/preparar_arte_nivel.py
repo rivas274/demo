@@ -147,7 +147,6 @@ MOSAICOS = {
     "pared_tapiz": ("paredes", 0, (64, 64), 0.7),
     "pared_azulejo": ("paredes", 1, (48, 48), 0.6),
     "pared_rosa": ("paredes", 2, (64, 64), 0.3),
-    "piso": ("paredes", 4, (256, 30), 0.0),
 }
 
 # Fondos completos: nombre -> (archivo, tamaño, recorte en fracciones, quitar el blanco).
@@ -566,7 +565,6 @@ PIEZAS_3E = {
     "perchero": ((35, 468, 312, 705), (118, 101)),
     "zapatillas": ((352, 530, 552, 665), (24, 16)),
     "marco_viral": ((597, 472, 762, 695), (44, 59)),
-    "llave_agua": ((795, 478, 962, 692), (30, 38)),  # la llave y el trapo vienen juntos: el trapo cuelga de la llave
     "polaroid_1": ((35, 728, 118, 830), (12, 14)),
     "polaroid_2": ((132, 725, 222, 828), (12, 14)),
     "polaroid_3": ((232, 728, 325, 832), (12, 14)),
@@ -576,8 +574,15 @@ PIEZAS_3E = {
 }
 # Números de Gemini que quedan dentro de una caja: se pintan de blanco antes de recortar.
 NUMEROS_3E = [(796, 930, 838, 964), (362, 282, 384, 310)]
-# Pisos de la tanda 3E: mosaicos opacos (caja, tamaño).
-PISOS_3E = {"piso_cocina": ((597, 28, 963, 142), (256, 30)), "piso_balcon": ((597, 158, 963, 258), (256, 30))}
+# Franjas de piso de Gemini (pisos.png, pasada única 2026-10-19): nombre -> (filas de origen y0..y1 sin el remate de
+# arriba, período horizontal en px de origen). Gemini dibuja cada pixel con ~4 px: se reduce a 1/4 y salen 44 px de
+# alto, lo que va de la unión pared-piso (Sala.PARED_BASE) al borde de abajo (Sala.ALTO). Sin perspectiva. El último
+# número es el contraste (1 = el de Gemini): el damero baja para no competir con Felipe ni con el azulejo (R14).
+FRANJAS_PISO = {
+    "piso_parquet": ((127, 303), 452, 1.0),  # el parquet casi repite cada 452 px: se busca el corte que mejor case
+    "piso_damero": ((447, 623), 512, 0.8),  # damero de 64 px que repite exacto cada 128; sin la hilera sombreada de atrás
+    "piso_losa": ((728, 904), 512, 1.0),  # losas de 128 px con el canto del balcón abajo
+}
 
 
 def recolorear(a, mascara, color, referencia):
@@ -691,12 +696,7 @@ def recoloreos():
     # C-2: alacenas recortadas a dos módulos (la mitad izquierda del mesón); sobre el microondas no queda nada.
     a = abrir("alacenas")
     guardar(np.concatenate([a[:, :116], a[:, -2:]], axis=1), "alacenas")
-    # G7: piso sin costura (la primera y la última columna del mosaico repiten su vecina).
-    f = abrir("piso")
-    f[:, 0] = f[:, 1]
-    f[:, -1] = f[:, -2]
-    guardar(f, "piso")
-    print("Recoloreos: ventana del pasillo, peldaños, zapatero, alacenas y piso")
+    print("Recoloreos: ventana del pasillo, peldaños, zapatero, alacenas")
 
 
 def telas():
@@ -720,6 +720,10 @@ def telas():
     print("Telas: visillo de la cocina y paños del estudio")
 
 
+# Farol de la fachada y su halo (x0, y0, x1, y1 en el arte ya escalado): se borran.
+FAROLES = [(44, 47, 236, 153), (44, 153, 66, 185)]
+
+
 def tanda_3e():
     """Piezas de la tanda 3E (vida de la casa) y la fachada del balcón rehecha (vida-casa-fachada.png)."""
     original = Image.open(ORIGEN / f"{HOJA_3E}.png").convert("RGB")
@@ -730,14 +734,7 @@ def tanda_3e():
     for nombre, (caja, tamano) in PIEZAS_3E.items():
         recorte = sin_huecos(imagen.crop(caja))
         final = np.asarray(escalar(recorte, tamano)).copy()
-        if nombre == "llave_agua":
-            # La gota dibujada se quita: la gota cae por código.
-            rgb = final[:, :, :3].astype(int)
-            final[(rgb[:, :, 2] > rgb[:, :, 0] + 30), 3] = 0
         guardar(final, nombre)
-    for nombre, (caja, tamano) in PISOS_3E.items():
-        recorte = original.crop(caja).resize(tamano, Image.NEAREST).convert("RGBA")
-        recorte.save(DESTINO / f"{nombre}.png")
     # Fachada: el hueco de Gemini es más angosto que la puerta. Se recorta hasta el piso (abajo del hueco), se quitan
     # 80 filas de muro liso bajo la cornisa, se ensancha el hueco repitiendo una columna a la derecha del farol y se
     # escala para que el hueco mida 136 x 244 (la puerta-ventana de 140 x 248 lo tapa por delante).
@@ -748,10 +745,39 @@ def tanda_3e():
     escala = 244 / (985 - 470)
     tam = (round(f.shape[1] * escala), round(f.shape[0] * escala))
     final = np.asarray(Image.fromarray(f, "RGBA").resize(tam, Image.NEAREST)).copy()
+    # Pasada única: el farol de Gemini quedaba cortado por el borde de arriba de la pantalla (lección 23) y con un halo
+    # circular (lección 26). Se borra con el color del muro (la mediana de la franja de al lado).
+    muro = np.median(final[60:150, 230:280].reshape(-1, 4), axis=0).astype(np.uint8)
+    for x0, y0, x1, y1 in FAROLES:
+        final[y0:y1, x0:x1] = muro
     guardar(final, "fachada_balcon")
     hueco = np.nonzero(final[-3, :, 3] == 0)[0]
     hueco = hueco[(hueco > 40) & (hueco < final.shape[1] - 40)]
-    print(f"Tanda 3E: {len(PIEZAS_3E) + len(PISOS_3E) + 1} piezas; fachada {tam[0]} x {tam[1]}, hueco de x {hueco.min()} a {hueco.max()}")
+    print(f"Tanda 3E: {len(PIEZAS_3E) + 1} piezas; fachada {tam[0]} x {tam[1]}, hueco de x {hueco.min()} a {hueco.max()}")
+
+
+def pisos_gemini():
+    """Pasada única: mosaicos de piso desde las franjas de Gemini (parquet, damero, losa), sin perspectiva y sin
+    costura. Se busca el comienzo x0 en que la columna x0 y la x0 + período más se parecen (el corte cae en una junta
+    o en tabla lisa), se reduce a 1/4 con promedio y se vuelve a la paleta de la franja (16 colores) para que no quede
+    borroso."""
+    original = np.asarray(Image.open(ORIGEN / "pisos.png").convert("RGB")).astype(int)
+    for nombre, ((y0, y1), periodo, contraste) in FRANJAS_PISO.items():
+        banda = original[y0:y1]
+        banda = banda.mean(axis=(0, 1)) + (banda - banda.mean(axis=(0, 1))) * contraste
+        ancho = banda.shape[1]
+        costos = [np.abs(banda[:, x] - banda[:, x + periodo]).mean() for x in range(0, ancho - periodo)]
+        x0 = int(np.argmin(costos))
+        recorte = Image.fromarray(banda[:, x0:x0 + periodo].astype(np.uint8), "RGB")
+        chico = recorte.resize((periodo // 4, (y1 - y0) // 4), Image.BOX)
+        paleta = recorte.quantize(16, method=Image.Quantize.MEDIANCUT)
+        final = chico.quantize(palette=paleta, dither=Image.Dither.NONE).convert("RGBA")
+        final.save(DESTINO / f"{nombre}.png")
+        print(f"{nombre}: {final.size[0]} x {final.size[1]} (corte en x {x0}, costura {costos[x0]:.1f})")
+    for viejo in ("piso", "piso_cocina", "piso_balcon"):
+        for ruta in (DESTINO / f"{viejo}.png", DESTINO / f"{viejo}.png.import"):
+            if ruta.exists():
+                ruta.unlink()
 
 
 def ambientes():
@@ -764,6 +790,7 @@ def ambientes():
     recoloreos()
     telas()
     tanda_3e()
+    pisos_gemini()
 
 
 if __name__ == "__main__":

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bjslk05sneux7"
-path="res://.godot/imported/piso_balcon.png-f550127847662eee5acef9475dd969f6.ctex"
+uid="uid://b483jsr2ynr62"
+path="res://.godot/imported/piso_parquet.png-3fcc7ca49400ad920c3db97b71981616.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/nivel1/piso_balcon.png"
-dest_files=["res://.godot/imported/piso_balcon.png-f550127847662eee5acef9475dd969f6.ctex"]
+source_file="res://assets/nivel1/piso_parquet.png"
+dest_files=["res://.godot/imported/piso_parquet.png-3fcc7ca49400ad920c3db97b71981616.ctex"]
 
 [params]
 

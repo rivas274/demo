@@ -340,7 +340,6 @@ func _physics_process(delta: float) -> void:
 	_mezcla = minf(1.0, _mezcla + delta / TRANSICION)
 	_vano = move_toward(_vano, _vano_objetivo, delta / VANO)
 	_pies_en_el_piso()
-	_seguir_pose()
 	queue_redraw()
 	if _espera > 0.0:
 		_espera -= delta
@@ -385,9 +384,10 @@ func _physics_process(delta: float) -> void:
 		_tiempo_quieta = 0.0
 
 
-## Si cambió la pose, empieza el fundido cruzado desde la anterior (que se queda donde estaba).
-func _seguir_pose() -> void:
-	var nueva := pose()
+## Si cambió la pose desde el último dibujo, empieza el fundido cruzado desde la anterior, en el lugar donde SE DIBUJÓ
+## (no donde está ahora: así la pose sentada nunca se dibuja bajada al piso, G1). Se decide al dibujar, porque el
+## cambio puede llegar por una señal en cualquier momento del cuadro.
+func _seguir_pose(nueva: String) -> void:
 	if nueva == _pose_actual:
 		return
 	# Entre estar de pie y caminar no hay fundido: es la misma figura, el ciclo empieza en el cuadro de contacto.
@@ -587,13 +587,15 @@ var pos_dibujada := Vector2.ZERO
 
 
 func _draw() -> void:
-	_ultima_pos = global_position
-	_ultimo_mirando = mirando
 	pose_dibujada = ""
 	pos_dibujada = global_position
 	if actividad == Actividad.FUERA:
+		_pose_actual = ""
 		return
 	var nombre := pose()
+	_seguir_pose(nombre)
+	_ultima_pos = global_position
+	_ultimo_mirando = mirando
 	pose_dibujada = nombre
 	_cuadro_actual = cuadro_caminar()
 	var alfa := _vano

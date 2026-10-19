@@ -205,6 +205,12 @@ func _process(delta: float) -> void:
 	# Nunca dos A.S.P.I. a la vez (B1): la real se esconde mientras exista la gigante y vuelve justo cuando la
 	# gigante, ya encogida hasta su tamaño y su lugar, desaparece (con un «¡puf!» de polvo).
 	var habia_gigante := not aspi.visible
+	if not habia_gigante and gigante > 0.0:
+		# Nace la bestia: «¡puf!» y destello, para que el cambio de la aspiradora a la gigante no sea un corte seco.
+		_polvo.global_position = aspi.global_position + Vector2(0, -20)
+		_polvo.restart()
+		_polvo.emitting = true
+		presentacion.destello(0.45)
 	aspi.visible = gigante <= 0.0
 	if habia_gigante and aspi.visible and fase != Fase.ESPERANDO:
 		_polvo.global_position = aspi.global_position + Vector2(0, -20)
@@ -289,7 +295,9 @@ func _al_paso(paso: String) -> void:
 		"sin_vuelta_atras":
 			# La puerta se cierra sola con un portazo.
 			if puerta:
+				# Portazo: se cierra de golpe (con el juego congelado la hoja no alcanzaría a girar).
 				puerta.cerrada = true
+				puerta.apertura = 0.0
 				puerta.queue_redraw()
 			sala.sonar("golpe")
 			_polvo.global_position = puerta.global_position if puerta else felipe.global_position
@@ -463,10 +471,11 @@ func _limpiar(delta: float) -> void:
 		_aviso_succion = 0.0
 		_reloj = 0.0
 		deposito += 1
-		sala.travesuras.jugo.palabra_en_mundo("+1", aspi.global_position + Vector2(-8, -60), Color(0.5, 0.85, 1.0), 16)
-		sala.travesuras.jugo.palabra_en_mundo("Glup.", aspi.global_position + Vector2(14, -48), Color(1, 1, 1), 11, 0.15)
+		# Un solo rótulo a la vez sobre A.S.P.I. (M3): si con esto se llena, solo «¡LLENO!».
 		if deposito >= CAPACIDAD[apagados]:
 			_llenar()
+		else:
+			sala.travesuras.jugo.palabra_en_mundo("+1 · Glup.", aspi.global_position + Vector2(0, -60), Color(0.5, 0.85, 1.0), 14)
 
 
 func _empezar_ataque(cual: Ataque) -> void:

@@ -100,7 +100,7 @@ func cartel(titulo: String, nombre: String, recompensa: String, secreta: bool, y
 	if anuncios:
 		anuncios.anunciar("cartel", titulo, Vector2(640, ALTO_CARTEL), TAM_CHICO,
 			func(rect: Rect2, chico: bool) -> float: return _mostrar_cartel(datos, rect, chico),
-			_ocultar_cartel, false, retraso_cartel)
+			_ocultar_cartel, false, retraso_cartel, false, _mover_cartel)
 		return
 	_mostrando = true
 	create_tween().tween_callback(func() -> void:
@@ -164,6 +164,14 @@ func _mostrar_cartel(datos: Array, rect: Rect2, chico: bool) -> float:
 	_animacion.tween_property(caja, "position:x", -rect.size.x - 20.0, 0.25).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	_animacion.tween_callback(caja.queue_free)
 	return DURACION_CARTEL
+
+
+## Se corre a otro lugar (alguien entró a cuadro y el cartel lo tapaba).
+func _mover_cartel(rect: Rect2) -> void:
+	if is_instance_valid(_caja_actual):
+		create_tween().tween_property(_caja_actual, "position:y", rect.position.y, 0.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		if rect.size.x < 640.0:
+			_caja_actual.position.x = rect.position.x
 
 
 ## Sale rápido (algo urgente pidió la pantalla).

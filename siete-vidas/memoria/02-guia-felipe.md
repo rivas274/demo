@@ -63,8 +63,8 @@ Lista oficial (la misma de la ficha de concepto). Toda acción nueva se agrega a
 | Acción | Teclado | Mando | Qué hace | Animación | Estado |
 | --- | --- | --- | --- | --- | --- |
 | Quieto | — | — | Respira y mece la cola | `quieto` | En el juego |
-| Caminar | A / D o ← / → | Palanca izquierda o cruceta | 120 px/s | `caminar` | En el juego |
-| Correr | Mantener Shift | Mantener RB | 190 px/s | `correr` | En el juego |
+| Caminar | A / D o ← / → | Palanca izquierda o cruceta | 120 px/s. Las patas no patinan: el ciclo va al ritmo de la velocidad (cuadros/s = velocidad ÷ 1,8 px, el avance medido del pie apoyado; tope 34 cuadros/s) y el cuerpo sube 1 px en cada paso | `caminar` | En el juego |
+| Correr | Mantener Shift | Mantener RB | 190 px/s. Ciclo al ritmo de la velocidad (÷ 3,6 px por cuadro; tope 34 cuadros/s) | `correr` | En el juego |
 | Zoomies | Tocar Shift | Tocar RB | Impulso de 380 px/s durante 0,18 s con estela; espera de 0,45 s | `correr` + estirón | En el juego; **apagado en el nivel 1** (`Felipe.tiene_zoomies`; se gana en Downtown) |
 | Saltar | Espacio | A | ~80 px (la subida no cambió con el ajuste del salto); soltar corta el salto; margen de 0,12 s al salir de un borde; salto recordado de 0,15 s (apretar justo antes de aterrizar cuenta) | `saltar` (cuadros 1, 2, 3) | En el juego |
 | Doble Salto | Espacio en el aire | A en el aire | ~140 px en total; inclinación leve (~20°); se recupera al tocar el piso | `saltar` (cuadro 3) | En el juego; **apagado en el nivel 1** (`Felipe.tiene_doble_salto`; se gana en Neón) |

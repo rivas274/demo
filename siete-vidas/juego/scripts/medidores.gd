@@ -49,7 +49,8 @@ func mostrar_logro(titulo: String) -> void:
 			_notificacion = titulo
 			_rect_aviso = rect
 			_tiempo_notificacion = DURACION_LOGRO
-			return DURACION_LOGRO, func() -> void: _tiempo_notificacion = 0.0, false, 0.0, true)
+			return DURACION_LOGRO, func() -> void: _tiempo_notificacion = 0.0, false, 0.0, true,
+			func(rect: Rect2) -> void: _rect_aviso = rect)
 		return
 	_notificacion = titulo
 	_tiempo_notificacion = 3.5

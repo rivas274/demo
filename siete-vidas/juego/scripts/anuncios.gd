@@ -24,11 +24,16 @@ var felipe: Felipe
 var dialogo: Dialogo
 ## Nodos que reaccionan (testigos): se tapan solo si no queda otra. Cada uno da rect_dibujado() o rect_indicador().
 var testigos: Array[Node2D] = []
+## Mientras devuelva true, hay una reacción en camino (Valeria va a salir a ver): los anuncios esperan (hasta
+## ESPERA_MAXIMA, después salen en chico en una esquina).
+var reaccion_en_curso := Callable()
 ## Lo que se mostró: [tipo, texto, rectángulo en pantalla, chico] (para las pruebas).
 var mostrados: Array = []
 ## Lo que se está viendo ahora (vacío si nada): {"tipo", "texto", "rect", ...}.
 var actual := {}
 
+## Chistes en curso (lo que no se tapa mientras pasa): [rectángulo en el mundo, segundos que quedan].
+var _chistes: Array = []
 var _cola: Array = []
 var _restante := 0.0
 var _pausa := 0.0
@@ -46,13 +51,21 @@ func _ready() -> void:
 ## `mostrar` recibe (rect, chico) y devuelve los segundos que dura; `ocultar` lo saca antes de tiempo.
 ## `urgente` pasa adelante de la cola y apura al que se está viendo. `retraso`: espera antes de poder salir.
 ## `en_esquina`: prueba primero las esquinas (avisos de logro), no el centro.
-func anunciar(tipo: String, texto: String, tamano: Vector2, tamano_chico: Vector2, mostrar: Callable, ocultar := Callable(), urgente := false, retraso := 0.0, en_esquina := false) -> void:
+## `mover` (opcional) recibe un rectángulo nuevo: si lo que se ve empieza a tapar a alguien (Valeria entra por una
+## puerta), el anuncio se corre a un lugar libre.
+func anunciar(tipo: String, texto: String, tamano: Vector2, tamano_chico: Vector2, mostrar: Callable, ocultar := Callable(), urgente := false, retraso := 0.0, en_esquina := false, mover := Callable()) -> void:
 	var anuncio := {"tipo": tipo, "texto": texto, "tamano": tamano, "chico": tamano_chico, "mostrar": mostrar,
-		"ocultar": ocultar, "listo": retraso, "esperando": 0.0, "esquina": en_esquina}
+		"ocultar": ocultar, "listo": retraso, "esperando": 0.0, "esquina": en_esquina, "mover": mover}
 	if urgente:
 		_cola.push_front(anuncio)
 		if not actual.is_empty() and actual.get("tipo", "") != "fase":
 			_terminar_actual()
+	elif tipo != "logro":
+		# Un cartel va antes que los logros que esperan: primero la travesura, después su logro.
+		var i := 0
+		while i < _cola.size() and _cola[i]["tipo"] != "logro":
+			i += 1
+		_cola.insert(i, anuncio)
 	else:
 		_cola.append(anuncio)
 
@@ -64,6 +77,11 @@ func limpiar() -> void:
 	_pausa = 0.0
 
 
+## Lo que pasa en ese rectángulo del mundo es el chiste: ningún anuncio lo tapa durante `segundos`.
+func marcar_chiste(rect_mundo: Rect2, segundos := 2.5) -> void:
+	_chistes.append([rect_mundo, segundos])
+
+
 ## ¿Hay algo en pantalla o esperando?
 func ocupado() -> bool:
 	return not actual.is_empty() or not _cola.is_empty()
@@ -71,10 +89,15 @@ func ocupado() -> bool:
 
 func _process(delta: float) -> void:
 	var real := delta / maxf(Engine.time_scale, 0.001)
+	for chiste: Array in _chistes:
+		chiste[1] -= real
+	_chistes = _chistes.filter(func(c: Array) -> bool: return c[1] > 0.0)
 	if not actual.is_empty():
 		_restante -= real
 		if _restante <= 0.0:
 			_terminar_actual(false)
+		else:
+			_reubicar_actual()
 		return
 	if _pausa > 0.0:
 		_pausa -= real
@@ -86,7 +109,8 @@ func _process(delta: float) -> void:
 	if siguiente["listo"] > 0.0:
 		return
 	siguiente["esperando"] += real
-	var rect := lugar_libre(siguiente["tamano"], siguiente["esquina"])
+	var esperando_reaccion: bool = reaccion_en_curso.is_valid() and reaccion_en_curso.call() and siguiente["tipo"] != "fase"
+	var rect := Rect2() if esperando_reaccion else lugar_libre(siguiente["tamano"], siguiente["esquina"])
 	var chico := false
 	if rect == Rect2() and siguiente["esperando"] >= ESPERA_MAXIMA:
 		chico = true
@@ -101,6 +125,25 @@ func _process(delta: float) -> void:
 	actual["es_chico"] = chico
 	mostrados.append([siguiente["tipo"], siguiente["texto"], rect, chico])
 	_restante = float((siguiente["mostrar"] as Callable).call(rect, chico))
+
+
+## Si lo que se ve ahora tapa a alguien (alguien entró a cuadro), se corre a un lugar libre del mismo tamaño.
+func _reubicar_actual() -> void:
+	var mover: Callable = actual.get("mover", Callable())
+	if not mover.is_valid():
+		return
+	var rect: Rect2 = actual["rect"]
+	var tapa := false
+	for zona in zonas_ocupadas().slice(1):
+		if rect.intersects(zona):
+			tapa = true
+			break
+	if not tapa:
+		return
+	var nuevo := lugar_libre(rect.size, rect.size.x < PANTALLA.x)
+	if nuevo != Rect2() and nuevo != rect:
+		actual["rect"] = nuevo
+		mover.call(nuevo)
 
 
 func _terminar_actual(apurar := true) -> void:
@@ -128,6 +171,9 @@ func zonas_ocupadas() -> Array[Rect2]:
 		var cuadro := dialogo.rect_en_pantalla()
 		if cuadro.has_area():
 			zonas.append(cuadro.grow(MARGEN))
+	for chiste: Array in _chistes:
+		var r: Rect2 = chiste[0]
+		zonas.append(Rect2(lienzo * r.position, r.size * lienzo.get_scale()).grow(MARGEN))
 	for testigo in testigos:
 		if not is_instance_valid(testigo) or not testigo.is_visible_in_tree():
 			continue

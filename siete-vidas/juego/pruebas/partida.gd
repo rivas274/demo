@@ -120,10 +120,13 @@ func _recibidor() -> void:
 	await _segundos(0.4)
 	_paso("Pasa agachado bajo el zapatero")
 	# Maullar a la puerta de la cocina: Valeria abre.
-	await _hasta(func() -> bool: return sala.valeria.cuarto == "cocina", 8.0)
+	# Valeria camina de verdad (sala → puerta → recibidor → puerta de la cocina): se espera a que esté adentro y quieta.
+	await _hasta(func() -> bool: return sala.valeria.cuarto == "cocina" and not sala.valeria_en_escena(), 25.0)
 	await _ir_a(2060)
 	await _tocar("maullar")
-	await _segundos(1.2)
+	# Ella va a la puerta, la abre y se asoma: se espera la puerta abierta.
+	await _hasta(func() -> bool: return not sala.puertas[Sala.PUERTA_COCINA].cerrada, 6.0)
+	await _segundos(0.6)
 	_paso("Maúlla a la puerta de la cocina: %s" % ("abierta" if not sala.puertas[Sala.PUERTA_COCINA].cerrada else "cerrada"))
 	# Caja de arena: descanso y popo táctico (Valeria sale con mascarilla).
 	await _ir_a(1960)
@@ -151,7 +154,7 @@ func _recibidor() -> void:
 	await _tocar("interactuar")
 	await _segundos(1.2)
 	_paso("Tira las llaves")
-	await _hasta(func() -> bool: return sala.valeria.cuarto == "cocina", 10.0)
+	await _hasta(func() -> bool: return sala.valeria.cuarto == "cocina" and not sala.valeria_en_escena(), 20.0)
 	await _entrar(Sala.PUERTA_COCINA)
 
 

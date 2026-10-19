@@ -145,7 +145,7 @@ func _correr() -> void:
 	_comprobar(not batalla.limpiando or absf(felipe.global_position.x - antes) < 3.0, "Agachado se aferra y no lo arrastra")
 	await _poner_en(Vector2(arena.position.x + 60, Sala.SUELO))
 	await _esperar_que(func() -> bool: return batalla.deposito == 1, 300)
-	_comprobar(batalla.deposito == 1 and batalla.presentacion.escudo > 0.0 and "Glup." in sala.travesuras.jugo.palabras, "Limpiar le llena el depósito (barra azul, «+1» y «Glup.»)")
+	_comprobar(batalla.deposito == 1 and batalla.presentacion.escudo > 0.0 and "+1 · Glup." in sala.travesuras.jugo.palabras, "Limpiar le llena el depósito (barra azul, «+1» y «Glup.»)")
 	await _esperar(6 * 60 + 30)
 	_comprobar(maceta.visible and not maceta.roto, "Lo roto vuelve a su lugar de a uno (6 s)")
 

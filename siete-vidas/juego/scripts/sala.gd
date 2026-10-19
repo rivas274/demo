@@ -385,6 +385,8 @@ var _aterrizo_final := false
 var _toldo: StaticBody2D
 ## Lienzos del arte por capa ("pared", "escalera", "mueble"): se redibujan cuando algo cambia de imagen (G4).
 var _lienzos := {}
+## Mientras la cámara muestra la meta, Felipe no dice sus lecciones (se pisaban con «La libertad está allá arriba»).
+var _mostrando_meta := false
 ## Imagen del sofá que se dibujó por última vez (las pruebas ven que cambió al romper el plástico).
 var sofa_dibujado := ""
 ## Jirones de plástico que vuelan al romperlo: [posición, velocidad, giro].
@@ -547,6 +549,8 @@ func _crear_objetos() -> void:
 		ropa.queue_redraw()
 		_decir("ropa", true)
 	ropa.dibujo = _dibujar_ropa
+	# Detrás de Felipe: se acicala encima de la ropa, no detrás de la pila.
+	ropa.z_index = Capas.MUEBLES
 	add_child(ropa)
 	# Quien oye maullidos del otro lado de la puerta de la cocina (Valeria está adentro).
 	var oido := OidoPuerta.new()
@@ -581,6 +585,8 @@ func _crear_valeria() -> void:
 	valeria.fijar_casa()
 	valeria.perdono.connect(_al_perdonar)
 	travesuras.anuncios.testigos.append(valeria)
+	# Si Valeria va a salir a reaccionar en el cuarto de Felipe, el cartel espera a que salga (G5).
+	travesuras.anuncios.reaccion_en_curso = func() -> bool: return _en_escena and habitacion == "recibidor" and _escenas_valeria_actual in ["bolsas", "maullido"] and not (valeria.cuarto == "recibidor" and valeria.visible)
 
 
 func _crear_aspi() -> void:
@@ -776,7 +782,7 @@ func _actualizar_lecciones() -> void:
 		if _lecciones_vistas.has(i):
 			continue
 		var zona: Rect2 = LECCIONES[i][0]
-		if zona.grow_individual(0, 0, 0, 4).has_point(felipe.global_position) and not _cruzando:
+		if zona.grow_individual(0, 0, 0, 4).has_point(felipe.global_position) and not _cruzando and not _mostrando_meta:
 			_lecciones_vistas[i] = true
 			travesuras.dialogo.decir("felipe", LECCIONES[i][1], LECCIONES[i][2])
 
@@ -784,6 +790,7 @@ func _actualizar_lecciones() -> void:
 ## Al empezar, la cámara muestra un momento el balcón: la meta (R4). Felipe lo dice y arranca la dieta. Sin cortes
 ## duros (M4): del negro de la introducción se abre al balcón, y del balcón se funde a la sala.
 func _mostrar_meta() -> void:
+	_mostrando_meta = true
 	_fundido.modulate.a = 1.0
 	var balcon := rect_de("balcon")
 	var camara_meta := Camera2D.new()
@@ -796,13 +803,14 @@ func _mostrar_meta() -> void:
 	add_child(camara_meta)
 	camara_meta.make_current()
 	await _fundir(0.0, 0.4)
-	travesuras.jugo.palabra("EL BALCÓN · ARRIBA, AL FONDO", Vector2(320, 70), Color(1.0, 0.85, 0.45), 14)
+	travesuras.jugo.palabra("EL BALCÓN · ARRIBA, AL FONDO", Vector2(320, 150), Color(1.0, 0.85, 0.45), 14)
 	_decir("meta", true)
 	await get_tree().create_timer(1.6).timeout
 	await _fundir(1.0, 0.3)
 	felipe.get_node("Camara").make_current()
 	camara_meta.queue_free()
 	await _fundir(0.0, 0.35)
+	_mostrando_meta = false
 	_decir("inicio")
 
 
@@ -879,6 +887,7 @@ func _romper_plastico(_objeto: Aranable) -> void:
 		pieza.position.y = SOFA_ARANADO[nombre]
 	if valeria.cuarto == "sala":
 		travesuras.decir_valeria("sofa_roto", true)
+	travesuras.anuncios.marcar_chiste(Rect2(240, SUELO - 130, 240, 130), 1.5)
 	# El sofá se redibuja sin plástico ni etiqueta (G4) y los jirones del plástico salen volando.
 	(_lienzos["mueble"] as Node2D).queue_redraw()
 	for i in 10:
@@ -924,6 +933,7 @@ func _actualizar_popo(delta: float) -> void:
 
 
 func _censura_ironica() -> void:
+	travesuras.anuncios.marcar_chiste(Rect2(felipe.global_position + Vector2(-40, -110), Vector2(80, 110)), 2.0)
 	travesuras.jugo.palabra_en_mundo("CONTENIDO SENSIBLE", felipe.global_position + Vector2(0, -70), Color(1.0, 1.0, 1.0), 14)
 	var pegatina := Node2D.new()
 	pegatina.name = "Censura"
@@ -989,6 +999,8 @@ func _actualizar_teclado(delta: float) -> void:
 		_teclado_pisado = true
 		_decorado.queue_redraw()
 		travesuras.jugo.palabra_en_mundo("jjjjjjjjjj", Vector2(6610, SUELO - 150), Color(0.7, 0.9, 1.0), 14)
+		# La pantalla con «jjjjjj» es el chiste: el cartel no la tapa (G5).
+		travesuras.anuncios.marcar_chiste(Rect2(6530, SUELO - 160, 110, 70), 3.0)
 		travesuras.cumplir("teclado", Vector2(6566, SUELO - 120))
 	if batalla and batalla.fase == BatallaAspi.Fase.PELEA and _espera_papel <= 0.0:
 		_espera_papel = 4.0
@@ -999,6 +1011,7 @@ func _actualizar_teclado(delta: float) -> void:
 
 func _abrir_cajon(cajon: Interactivo) -> void:
 	_cajon_abierto = true
+	travesuras.anuncios.marcar_chiste(Rect2(CAJON.x - 60, CAJON.y - 110, 160, 120), 1.8)
 	cajon.marcar_usado()
 	sonar("caja")
 	for i in 7:
@@ -1018,6 +1031,7 @@ func _abrir_cajon(cajon: Interactivo) -> void:
 ## abre cada puerta antes de pasar y no cambia de cuarto sin cruzar una (G2, G3 de la revisión 3).
 var _escenas_valeria: Array[String] = []
 var _en_escena := false
+var _escenas_valeria_actual := ""
 
 
 func _escena_valeria(nombre: String) -> void:
@@ -1029,6 +1043,7 @@ func _escena_valeria(nombre: String) -> void:
 	_en_escena = true
 	while not _escenas_valeria.is_empty():
 		var escena: String = _escenas_valeria.pop_front()
+		_escenas_valeria_actual = escena
 		match escena:
 			"a_la_cocina":
 				await _valeria_a_la_cocina()
@@ -1037,6 +1052,7 @@ func _escena_valeria(nombre: String) -> void:
 			"bolsas":
 				await _valeria_sale_por_bolsas()
 	_en_escena = false
+	_escenas_valeria_actual = ""
 
 
 ## ¿Hay una escena de Valeria en curso o esperando?
@@ -1388,10 +1404,11 @@ func _dibujar_ventana_pasillo(c: Node2D) -> void:
 	# Vidrio: tinte frío y dos reflejos en diagonal por encima de la caja y del toldo.
 	var vidrio := VIDRIO_PASILLO
 	c.draw_rect(vidrio, Color(0.75, 0.88, 1.0, 0.14))
-	for desde: float in [10.0, 46.0]:
+	# Los reflejos quedan dentro del vidrio (no cruzan al panel de la izquierda).
+	for desde: float in [34.0, 76.0]:
 		c.draw_colored_polygon(PackedVector2Array([
 			vidrio.position + Vector2(desde, 0), vidrio.position + Vector2(desde + 8, 0),
-			vidrio.position + Vector2(desde - 24, vidrio.size.y), vidrio.position + Vector2(desde - 32, vidrio.size.y),
+			vidrio.position + Vector2(desde - 22, vidrio.size.y), vidrio.position + Vector2(desde - 30, vidrio.size.y),
 		]), Color(1, 1, 1, 0.16))
 
 

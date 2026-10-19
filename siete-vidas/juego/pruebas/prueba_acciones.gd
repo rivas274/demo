@@ -24,6 +24,8 @@ func _correr() -> void:
 	felipe = sala.get_node("Felipe")
 	for enemigo in root.get_tree().get_nodes_in_group("enemigos"):
 		enemigo.queue_free()
+	# Valeria (la del nivel) se va a la cocina: aquí los testigos son de prueba (su escena tiene prueba_nivel).
+	sala.valeria.poner(Sala.VALERIA_COCINA, "cocina", -1.0, Valeria.Actividad.DE_PIE)
 	await _esperar(30)
 
 	await _probar_habilidades()
@@ -33,6 +35,7 @@ func _correr() -> void:
 	await _probar_snacks()
 	await _probar_escalera()
 	await _probar_rascador()
+	await _probar_frotarse()
 	await _probar_agenda()
 	await _probar_dialogo()
 	await _probar_indicador()
@@ -67,8 +70,8 @@ func _probar_habilidades() -> void:
 	await _tocar("zoomies")
 	await _esperar(6)
 	_comprobar(felipe.estado != Felipe.Estado.ZOOMIES and absf(felipe.global_position.x - x_antes) < 10.0, "Sin Zoomies, tocar Shift no da el impulso")
-	var cortina: Rect2 = Sala.TREPABLES[0]
-	await _poner_en(Vector2(cortina.get_center().x, Sala.SUELO))
+	# La cortina del dormitorio es un lugar visto: sin Afilar Garras no se trepa.
+	await _poner_en(Vector2(5990, Sala.SUELO))
 	Input.action_press("mover_arriba")
 	await _esperar(30)
 	Input.action_release("mover_arriba")
@@ -272,12 +275,12 @@ func _probar_escalera() -> void:
 ## Rascador: con público, perdón + snack una vez por visita; sin público, queja; siempre afila las garras.
 func _probar_rascador() -> void:
 	var rascador := Rascador.new()
-	rascador.position = Vector2(1250, Sala.SUELO)
+	rascador.position = Vector2(1010, Sala.SUELO)
 	sala.add_child(rascador)
 	sala.travesuras.conectar_rascador(rascador)
 	var funciones: Array = []
 	rascador.funcion.connect(func(_r: Rascador, publico: bool, premio: bool, _t: Node) -> void: funciones.append([publico, premio]))
-	await _poner_en(Vector2(1215, Sala.SUELO))
+	await _poner_en(Vector2(1040, Sala.SUELO))
 	felipe.snacks = 2
 	_comprobar(felipe.objeto_cercano() == rascador, "Junto al rascador, el botón de acción lo usa (verbo «%s»)" % rascador.verbo(felipe))
 	await _usar_rascador()
@@ -286,7 +289,7 @@ func _probar_rascador() -> void:
 	_comprobar(_dijo("felipe", Frases.FELIPE["rascador_solo"]), "Sin público Felipe se queja («¿Para quién actúo?»)")
 	var testigo := _testigo()
 	sala.add_child(testigo)
-	testigo.global_position = Vector2(1400, Sala.SUELO)
+	testigo.global_position = Vector2(1100, Sala.SUELO)
 	await _usar_rascador()
 	_comprobar(funciones.size() == 2 and funciones[1] == [true, true], "Con un testigo mirando: perdón y premio")
 	_comprobar(felipe.snacks == 3 and int(testigo.get("perdones")) == 1, "El premio es un snack al bolsillo y el testigo lo perdona")
@@ -393,6 +396,23 @@ func _probar_dialogo() -> void:
 		repetida = repetida or texto == anterior
 		anterior = texto
 	_comprobar(not repetida, "Frases.elegir no repite la misma frase seguida")
+
+
+## Frotarse contra alguien enojado (Valeria): un ciclo de "ronronear" y después perdonar(felipe, "frotarse").
+func _probar_frotarse() -> void:
+	var testigo := _testigo()
+	sala.add_child(testigo)
+	testigo.global_position = Vector2(160, Sala.SUELO)
+	await _poner_en(Vector2(130, Sala.SUELO))
+	var terminados: Array[Node2D] = []
+	felipe.ronroneo_terminado.connect(func(o: Node2D) -> void: terminados.append(o))
+	felipe.frotarse(testigo)
+	_comprobar(felipe.estado == Felipe.Estado.RONRONEANDO and felipe.sprite.animation == "ronronear" and felipe.mirando > 0.0, "Frotarse: ronronea mirando a quien se frota")
+	await _esperar(30)
+	_comprobar(int(testigo.get("perdones")) == 0, "El perdón no llega antes de terminar el ronroneo")
+	await _esperar(40)
+	_comprobar(int(testigo.get("perdones")) == 1 and terminados.size() == 1 and felipe.estado == Felipe.Estado.SUELO, "Al terminar (1 s), lo perdonan y Felipe queda libre")
+	testigo.queue_free()
 
 
 ## Indicador: contorno y burbuja con el ícono y el verbo cuando hay algo cerca; nada cuando está lejos.

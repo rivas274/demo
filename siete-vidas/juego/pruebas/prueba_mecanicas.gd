@@ -16,7 +16,7 @@ func _correr() -> void:
 	root.add_child(sala)
 	var felipe: Felipe = sala.get_node("Felipe")
 	var aspi: Aspi = sala.get_node("ASPI")
-	# Los ratones de cuerda tienen su propia prueba (prueba_nivel); aquí estorbarían junto a la lata del mesón.
+	# Los ratones de cuerda tienen su propia prueba (prueba_nivel); aquí estorbarían.
 	for hijo in sala.get_children():
 		if hijo is Raton:
 			hijo.queue_free()
@@ -36,7 +36,7 @@ func _correr() -> void:
 
 	# Comer cura y suma peso.
 	var peso_antes := felipe.peso
-	await _poner_en(felipe, Vector2(2870, Sala.SUELO - 109))
+	await _poner_en(felipe, Vector2(2990, Sala.SUELO))
 	await _tocar("interactuar")
 	# Cura cuando la boca llega a la comida (cuadro de impacto de "comer").
 	await _esperar(30)
@@ -64,8 +64,8 @@ func _correr() -> void:
 
 	# A.S.P.I.: persigue y hace daño al tocar.
 	await _esperar(90)
-	aspi.global_position = Vector2(5700, Sala.SUELO)
-	await _poner_en(felipe, Vector2(5580, Sala.SUELO))
+	aspi.global_position = Vector2(6560, Sala.SUELO)
+	await _poner_en(felipe, Vector2(6440, Sala.SUELO))
 	var corazones_antes := felipe.corazones
 	for i in 180:
 		await physics_frame

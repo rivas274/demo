@@ -201,14 +201,14 @@ func _correr() -> void:
 	# Tercer apagado: se apaga del todo.
 	await _llenar(batalla, aspi)
 	await _caerle_encima(aspi)
-	await _esperar(90)
+	await _esperar_que(func() -> bool: return felipe.estado == Felipe.Estado.OCIO, 200)
+	_comprobar(felipe.estado == Felipe.Estado.OCIO and felipe.sprite.animation == "acicalarse", "Felipe se lame la pata como si nada")
 	_comprobar(aspi.apagada and batalla.fase == BatallaAspi.Fase.FIN, "Al tercer apagado, A.S.P.I. se apaga del todo")
 	_comprobar(not sala.puertas[Sala.PUERTA_BALCON].cerrada and "Desenchufada" in sala.logros and sala.travesuras.agenda.esta_cumplida("desenchufar"), "Se abre la puerta del balcón (travesura «desenchufar» y logro)")
 	_comprobar(Engine.time_scale == 1.0 and not sala.puertas["estudio<pasillo"].cerrada, "Todo vuelve de golpe a la normalidad")
 	await _poner_en(Vector2(arena.position.x + 330, Sala.SUELO))
 	await _esperar(70)
 	_comprobar(batalla.bolas.is_empty() and batalla.presentacion.pista_actual() == "", "No quedan bolas ni pistas")
-	_comprobar(felipe.estado == Felipe.Estado.OCIO and felipe.sprite.animation == "acicalarse", "Felipe se lame la pata como si nada")
 
 	# La presentación es reutilizable: sirve igual para otro jefe cualquiera (cada uno solo da sus datos).
 	var otro := Node2D.new()

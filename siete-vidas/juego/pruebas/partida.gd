@@ -450,7 +450,12 @@ func _apagar_de_un_salto() -> void:
 		var x := sala.aspi.global_position.x
 		var lado := -1.0 if felipe.global_position.x < x else 1.0
 		# A media carcasa de distancia (ella es sólida: más cerca, Felipe choca y el bot salta solo y pierde tiempo).
-		await _ir_a(x + lado * 44.0, 2.0)
+		# Si está lejos (se alejó para comer un snack), corre (Shift): llena espera solo 3 a 4 s.
+		var lejos := absf(x + lado * 44.0 - felipe.global_position.x) > 150.0
+		if lejos:
+			Input.action_press("zoomies")
+		await _ir_a(x + lado * 44.0, 3.0)
+		Input.action_release("zoomies")
 		# Lado y blanco se miden de nuevo justo antes de saltar; si no quedó a tiro, se acerca otra vez.
 		x = sala.aspi.global_position.x
 		var dx := x - felipe.global_position.x

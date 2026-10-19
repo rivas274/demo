@@ -33,20 +33,28 @@ const HABITACIONES := [
 ]
 ## Orden de la ruta (las reglas de diseño lo usan para comprobar que se enseña antes de pedir).
 const RUTA := ["sala", "recibidor", "cocina", "pasillo", "dormitorio", "estudio", "balcon"]
-## Ventanas recortadas en la pared (se ve la ciudad). La de la sala y la del pasillo son arte con su propia vista.
-## La del dormitorio está entre la cómoda y el ropero: su alféizar es la repisa (1,20 m) y la cortina cuelga a sus
-## lados desde la barra (arte de Gemini, `cortina.png`).
-const VENTANAS := [Rect2(3160, 130, 140, 120), VENTANA_DORMITORIO, Rect2(6440, 90, 140, 100)]
-const VENTANA_DORMITORIO := Rect2(5748, 190, 56, 108)
+## Ventanas (las cinco de la casa con la misma medida, pedido del creador 2026-10-19): alféizar a 90 cm del piso
+## (ALFEIZAR, 109 px), vidrio de unos 150 × 120 px y arriba a 1,90 m: nada bajo la barra del HUD ni pegado al techo.
+## La de la sala y la del pasillo son arte con su propia vista; las de la cocina, el dormitorio y el estudio se
+## recortan en la pared (se ve la ciudad) y llevan marco, alféizar y tela por código (FondoApartamento).
+const ALFEIZAR := SUELO - 109.0
+const VENTANA_COCINA := Rect2(3150, ALFEIZAR - 120, 150, 120)
+## La del dormitorio va sobre la cama, con la cortina de Gemini a los lados (dos paños desde una barra, hasta el piso).
+const VENTANA_DORMITORIO := Rect2(5469, ALFEIZAR - 120, 150, 120)
+## La del estudio va sobre el escritorio (el monitor queda delante del vidrio).
+const VENTANA_ESTUDIO := Rect2(6455, ALFEIZAR - 120, 150, 120)
+const VENTANAS := [VENTANA_COCINA, VENTANA_DORMITORIO, VENTANA_ESTUDIO]
 ## Cortina del dormitorio: cuánto tapa cada paño de la ventana y dónde termina la tela en el arte (45 px: remate de
-## 8 px, tela de 34 y 3 px de barra).
+## 8 px, tela de 34 y 3 px de barra). La barra queda CORTINA_SOBRE_VENTANA px sobre el marco; lo que sobra de tela
+## abajo queda tras el piso (no se dibuja).
 const CORTINA_ADENTRO := 9.0
 const CORTINA_FIN_TELA := 42.0
+const CORTINA_SOBRE_VENTANA := 18.0
 ## Vidrio de la ventana del pasillo (en el mundo): la caja de pizza del lugar visto queda detrás, sobre el toldo (G3).
-## La ventana se alarga por arriba con código (M7): vidrio de 68 px de alto, no una franja de 29.
-const VIDRIO_PASILLO := Rect2(4337, SUELO - 227, 86, 68)
+## El arte trae el alféizar y el toldo; la ventana se alarga por arriba con código (M7) hasta la altura de las demás.
+const VIDRIO_PASILLO := Rect2(4337, SUELO - 224, 86, 106)
 ## Lo que se agrega arriba del arte de la ventana (marco, panel y vidrio), hasta la fila de arriba del arte.
-const VENTANA_PASILLO_ARRIBA := Rect2(4260, SUELO - 232, 180, 42)
+const VENTANA_PASILLO_ARRIBA := Rect2(4260, SUELO - 229, 180, 80)
 
 ## Puertas: [nombre, posición (al pie, al centro), puerta a la que lleva]. Van de a pares.
 const PUERTAS := [
@@ -82,7 +90,7 @@ const ESCALERA_RECT := Rect2(2322, SUELO - 300, 318, 300)
 ## Arte que se dibuja: [imagen de assets/nivel1/, (x izquierda, base), espejo, capa]. Capas: "pared" (detrás de todo),
 ## "mueble" (detrás de Felipe) y "escalera" (peldaños y vano, detrás de Felipe).
 const ARTE := [
-	["ventana_sala", Vector2(170, 298), false, "pared"],
+	["ventana_sala", Vector2(170, ALFEIZAR + 14.0), false, "pared"],  # el borde del alféizar del arte está 14 px sobre su base
 	["retrato", Vector2(792, 246), false, "pared"],  # bajado 16 px: la barra del HUD le tapaba el marco (autocrítica)
 	["silla_v2", Vector2(680, SUELO), false, "mueble"],
 	["mesa_v2", Vector2(745, SUELO), false, "mueble"],
@@ -102,9 +110,9 @@ const ARTE := [
 	["baul", Vector2(4186, SUELO), false, "mueble"],
 	["aparador", Vector2(4256, SUELO), false, "mueble"],
 	["retrato_familiar", Vector2(4642, 226), false, "pared"],  # bajado 14 px (HUD)
-	["ventana_pasillo", Vector2(4260, SUELO - 138), false, "pared"],
+	["ventana_pasillo", Vector2(4260, ALFEIZAR + 12.0), false, "pared"],  # apoyada en la consola; alféizar 12 px sobre su base
 	["cojin", Vector2(4784, SUELO), false, "mueble"],
-	["paisaje", Vector2(5480, 214), false, "pared"],  # bajado 14 px (HUD)
+	["paisaje", Vector2(5743, SUELO - 155), false, "pared"],  # sobre la repisa, entre la cómoda y el ropero (la ventana va sobre la cama)
 	["banquito", Vector2(5386, SUELO), false, "mueble"],
 	["cama", Vector2(5444, SUELO), false, "mueble"],
 	["comoda", Vector2(5650, SUELO), false, "mueble"],
@@ -153,12 +161,12 @@ const PIEZAS := [
 	# Pasillo de arriba.
 	[Rect2(4186, SUELO - 47, 70, 47), true, "Baúl", "arte", "baul"],  # 40 cm (arriba-extra); se pasa por delante
 	[Rect2(4258, SUELO - 97, 152, 50), false, "Consola", "arte", "aparador"],  # 80 cm, 47 px libres debajo
-	[Rect2(4264, SUELO - 150, 172, 6), true, "Alféizar", "arte", "ventana_pasillo"],  # 1,24 m
+	[Rect2(4264, ALFEIZAR, 172, 6), true, "Alféizar", "arte", "ventana_pasillo"],  # 90 cm, sobre la consola
 	# Dormitorio.
 	[Rect2(5391, SUELO - 53, 42, 6), true, "Banquito", "arte", "banquito"],
 	[Rect2(5444, SUELO - 65, 197, 65), false, "Cama", "arte", "cama"],  # colchón a 54 cm
 	[Rect2(5655, SUELO - 96, 74, 96), false, "Cómoda", "arte", "comoda"],  # 80 cm
-	[Rect2(5740, SUELO - 145, 70, 6), true, "Repisa", "repisa", ""],  # 1,20 m
+	[Rect2(5740, SUELO - 145, 70, 6), true, "Repisa", "repisa", ""],  # 1,20 m, repisa de pared entre la cómoda y el ropero
 	[Rect2(5816, SUELO - 185, 104, 185), false, "Ropero", "arte", "ropero"],  # 1,53 m
 	[Rect2(5735, SUELO - 290, 80, 6), true, "Repisa alta", "lugar_visto", ""],  # 2,40 m: se vuelve con Afilar Garras
 	[Rect2(5754, SUELO - 35, 46, 6), true, "Cesta de ropa", "arte", "cesta_vacia"],  # para salir del hueco entre la cómoda y el ropero
@@ -196,7 +204,7 @@ const TIRABLES := [
 	[Vector2(1766, SUELO - 97), "llaves"],
 	[Vector2(4378, SUELO - 97), "vaso"],  # bien adentro de la consola (Gemini: rozaba el borde)
 	[Vector2(6515, SUELO - 98), "vaso"],
-	[Vector2(6612, SUELO - 98), "rollo"],
+	[Vector2(6614, SUELO - 98), "taza"],  # taza de café de Valeria (reemplazó al rollo de papel higiénico)
 	[Vector2(6650, SUELO - 151), "maceta"],
 	[Vector2(6682, SUELO - 151), "maceta"],
 ]
@@ -278,7 +286,7 @@ const LUGARES_VISTOS := [
 ]
 ## La caja de pizza, sobre el toldo del vecino, del otro lado del vidrio (dentro de VIDRIO_PASILLO).
 ## Escala de gato (M7): 34 × 24 con la tapa abierta, grasa y vapor; se lee desde el pasillo.
-const PIZZA := Rect2(4372, SUELO - 208, 34, 24)
+const PIZZA := Rect2(4372, SUELO - 167, 34, 24)
 ## Atajos (R6): [qué, dónde, desde dónde se abre].
 const ATAJOS := [["Pestillo de la reja anti-fuga", REJA, "escalera"]]
 ## Cada maña que el nivel enseña abre un camino y molesta a alguien (R19): maña -> [camino, a quién molesta].

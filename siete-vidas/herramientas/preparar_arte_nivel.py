@@ -66,13 +66,29 @@ PIEZAS = {
     "retrato": ("cuadros", 0, (84, 100), None),  # retrato oficial de Su Majestad
     "paisaje": ("cuadros", 1, (64, 66), None),
     "reloj": ("cuadros", 2, (46, 48), None),
+    # Tanda 3A (nivel 1 v4): piezas rehechas que calzan con las colisiones.
+    "puerta_abierta_v2": ("puertas-v2", 0, (140, 248), None),
+    "puerta_cerrada_v2": ("puertas-v2", 1, (128, 248), None),
+    "puerta_entornada": ("puertas-v2", 2, (106, 248), None),
+    "puerta_balcon_v2": ("puertas-v2", 3, (122, 248), None),
+    "puerta_balcon_abierta": ("puertas-v2", 5, (156, 248), None),
+    "mesa_v2": ("comedor-piezas", 0, (178, 91), None),  # 75 cm, tablero en la fila de arriba
+    "silla_v2": ("comedor-piezas", 1, (59, 109), None),  # de perfil, derecha
+    "librero_v2": ("librero-gato", 0, (104, 218), None),  # 1,80 m, 3 repisas
+    "escalera_peldanos": ("escalera-dos-capas", 19, (195, 150), None),  # detrás de Felipe
+    "escalera_baranda": ("escalera-dos-capas", 18, (186, 217), None),  # delante de Felipe
+    "reja_v2": ("reja-antifuga", 0, (105, 182), None),  # 1,5 m, en 3/4
+    "tazon": ("comida-grande", 0, (48, 35), None),
+    "lata_v2": ("comida-grande", 1, (32, 36), None),
+    "pollo": ("comida-grande", 2, (64, 50), None),
+    "bolsita": ("comida-grande", 3, (28, 32), None),
     # A.S.P.I. (escala de gato: más grande que una real); la gigante es imaginación de Felipe.
     "aspi": ("aspi-gemini-1", 0, (76, 47), None),
     "aspi_gigante": ("aspi-gigante", 0, (330, 270), None),
 }
 
 # Piezas con huecos (entre patas, barrotes, respaldos): el blanco encerrado también es fondo.
-HUECOS = {"comedor", "aparador", "banco", "baranda", "librero", "perchero", "reja", "lampara", "escritorio", "repisa", "escalera", "puerta_balcon"}
+HUECOS = {"comedor", "aparador", "banco", "baranda", "librero", "perchero", "reja", "lampara", "escritorio", "repisa", "escalera", "puerta_balcon", "mesa_v2", "silla_v2", "librero_v2", "escalera_baranda", "reja_v2"}
 
 # Texturas que se repiten: nombre -> (hoja, índice, tamaño del mosaico, suavizado).
 # El suavizado (0 a 1) acerca cada pixel al color promedio: las paredes no deben competir con Felipe (regla R14).

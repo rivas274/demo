@@ -1,8 +1,13 @@
 extends SceneTree
-## Prueba del primer nivel (tutorial "La Gran Fuga": habitaciones con puertas) de principio a fin.
+## Prueba del primer nivel (v4, "La Gran Fuga": siete cuartos con puertas, Valeria, escalera con reja, Agenda y
+## balcón) de principio a fin, con los botones de una persona donde importa.
 ##   godot --headless --path siete-vidas/juego --script res://pruebas/prueba_nivel.gd
 
 var _fallos: Array[String] = []
+var sala: Sala
+var felipe: Felipe
+## Valeria nunca se para en una puerta (se revisa en cada cuadro de la prueba).
+var _valeria_en_puerta := ""
 
 
 func _initialize() -> void:
@@ -10,158 +15,289 @@ func _initialize() -> void:
 
 
 func _correr() -> void:
-	var sala: Sala = load("res://escenas/apartamento.tscn").instantiate()
+	sala = load("res://escenas/apartamento.tscn").instantiate()
 	sala.mostrar_titulo = false
 	root.add_child(sala)
-	var felipe: Felipe = sala.get_node("Felipe")
+	felipe = sala.get_node("Felipe")
+	var t := sala.travesuras
 	await _esperar(30)
+	_comprobar(not felipe.tiene_doble_salto and not felipe.tiene_zoomies and not felipe.puede_trepar, "En el nivel 1 no hay doble salto, Zoomies ni trepar")
 
-	# La meta se muestra al empezar (la cámara pasa por el balcón).
+	# La meta se muestra al empezar (la cámara pasa por el balcón) y Felipe lo dice.
 	sala.pantallas.empezar.emit()
 	await _esperar(10)
 	var camara_meta: Camera2D = sala.get_node_or_null("Camara de la meta")
 	_comprobar(camara_meta != null and camara_meta.is_current() and Sala.habitacion_de(camara_meta.position) == "balcon", "Al empezar, la cámara muestra el balcón (la meta)")
-	await create_timer(2.5).timeout
+	await create_timer(2.0).timeout
 	_comprobar(felipe.get_node("Camara").is_current(), "Después vuelve a Felipe")
+	_comprobar(_dijo("felipe", "libertad"), "Felipe dice que la libertad está allá arriba")
 
-	# Avisos: con la tecla del dispositivo, y solo la primera vez.
-	await _poner_en(felipe, Vector2(100, Sala.SUELO))
-	_comprobar("{saltar}" in sala.pantallas.aviso, "Al empezar, el aviso enseña a caminar y saltar")
-	_comprobar("[Espacio]" in sala.pantallas.etiquetar(sala.pantallas.aviso), "El aviso muestra la tecla: %s" % sala.pantallas.etiquetar(sala.pantallas.aviso))
-	sala.pantallas.usa_mando = true
-	_comprobar(sala.pantallas.etiquetar("{saltar}") == "[A]", "Con mando muestra el botón del mando")
-	sala.pantallas.usa_mando = false
-	await _poner_en(felipe, Vector2(400, Sala.SUELO))
-	await _poner_en(felipe, Vector2(100, Sala.SUELO))
-	_comprobar(sala.pantallas.aviso == "", "El aviso no se repite al volver")
-	_comprobar(sala.habitacion == "sala", "Felipe empieza en la sala")
+	# Sin avisos de texto ni fila de controles (M2): la primera vez, una línea de Felipe con el botón.
+	await _poner_en(Vector2(100, Sala.SUELO))
+	_comprobar(sala.get_node_or_null("Interfaz/Ayuda") == null and sala.pantallas.aviso == "", "No hay fila de controles ni avisos abajo")
+	_comprobar(_dijo("felipe", "{saltar} Los muebles"), "La primera vez, Felipe enseña a saltar con su frase y el botón")
+	var lineas := t.dialogo.historial.size()
+	await _poner_en(Vector2(130, Sala.SUELO))
+	await _poner_en(Vector2(100, Sala.SUELO))
+	_comprobar(_contar("felipe", "{saltar} Los muebles") == 1, "La frase no se repite al volver")
+	_comprobar(sala.habitacion == "sala" and sala.valeria.actividad == Valeria.Actividad.SENTADA, "Felipe empieza en la sala; Valeria ve su serie en el sofá")
 
-	# Piezas de juguete: duelen.
-	var corazones := felipe.corazones
-	await _poner_en(felipe, Vector2(Sala.PELIGROS[0].get_center().x, Sala.SUELO))
-	_comprobar(felipe.corazones < corazones, "Pisar las piezas de juguete quita un corazón")
-	await _esperar(90)
+	# Arañar el sofá delante de Valeria: a los dos arañazos lo deja frente al rascador y el plástico aguanta.
+	await _poner_en(Vector2(330, Sala.SUELO))
+	await _tocar("interactuar")
+	await _esperar(70)
+	_comprobar(not sala.sofa.esta_roto and absf(felipe.global_position.x - (Sala.RASCADOR_X - 46.0)) < 6.0, "Valeria lo pilla arañando el sofá y lo deja frente al rascador")
+	_comprobar(_dijo("valeria", "AQUÍ"), "Valeria: «¡Ahí no, bebito, AQUÍ!»")
+	await _esperar(80)
 
-	# Vaso de la mesa: logro.
-	await _poner_en(felipe, Vector2(620, Sala.SUELO - 91))
+	# El rascador con público: perdón, snack y Valeria graba 8 s de espaldas al sofá; garras afiladas → sofá CRÍTICO.
+	var snacks := felipe.snacks
+	await _poner_en(Vector2(Sala.RASCADOR_X - 40.0, Sala.SUELO))
+	await _tocar("interactuar")
+	await _esperar_que(func() -> bool: return sala.valeria.actividad == Valeria.Actividad.GRABANDO, 240)
+	_comprobar(sala.valeria.actividad == Valeria.Actividad.GRABANDO and felipe.snacks == snacks + 1, "Con Valeria mirando, el rascador da un snack y ella saca el celular")
+	_comprobar(not sala.valeria.ve(Vector2(300, Sala.SUELO - 20)), "Grabando, Valeria le da la espalda al sofá")
+	felipe.afilar_garras()
+	await _poner_en(Vector2(300, Sala.SUELO))
+	await _tocar("interactuar")
+	await _esperar_que(func() -> bool: return sala.sofa.esta_roto, 90)
+	_comprobar(sala.sofa.esta_roto and t.agenda.esta_cumplida("sofa"), "Con las garras afiladas, el arañazo rompe el plástico: travesura «sofa»")
+	_comprobar("¡PLÁSTICO: 0!" in t.jugo.palabras, "Reacción: «¡PLÁSTICO: 0!»")
+	_comprobar(absf(sala.pieza("Asiento del sofá").position.y - (Sala.SUELO - 45)) < 0.5, "Sin plástico, la colisión del asiento baja a su arte nuevo")
+	await _esperar(120)
+	await _poner_en(Vector2(370, Sala.SUELO - 49))
+	await _esperar(30)
+	_comprobar(sala.calcetines == 1, "El calcetín sale de entre los cojines y va al nido (%d)" % sala.calcetines)
+	await _esperar_que(func() -> bool: return sala.valeria.actividad == Valeria.Actividad.SENTADA, 900)
+
+	# El vaso de la mesa: «¡GRAVEDAD: 1 · VASO: 0!», Valeria regaña; frotarse = perdón (travesura «perdon»).
+	await _poner_en(Vector2(880, Sala.SUELO - 91))
 	felipe.mirando = 1.0
 	await _tocar("interactuar")
-	await _esperar(60)
-	_comprobar("La Gravedad Funciona" in sala.logros, "Tirar el vaso de la mesa da «La Gravedad Funciona»")
-
-	# Ratón de cuerda: un zarpazo.
-	var raton: Raton = _raton_en(sala, "sala")
-	await _zarpazo_a(felipe, raton)
-	_comprobar(raton.apagada, "Un zarpazo apaga al ratón de cuerda")
+	await _esperar(70)
+	_comprobar("La Gravedad Funciona" in sala.logros and "¡GRAVEDAD: 1 · VASO: 0!" in t.jugo.palabras, "Tirar el vaso da «La Gravedad Funciona» y su palabra")
+	Input.action_press("agacharse")
+	await _tocar("saltar")
+	Input.action_release("agacharse")
+	await _esperar_que(func() -> bool: return sala.valeria.actividad == Valeria.Actividad.REGANANDO, 400)
+	_comprobar(sala.valeria.actividad == Valeria.Actividad.REGANANDO and sala.valeria.motivo_regano == "rotura", "Valeria se para y lo regaña (corazón roto)")
+	await _poner_en(Vector2(sala.valeria.global_position.x + 30.0 * signf(felipe.global_position.x - sala.valeria.global_position.x + 0.1), Sala.SUELO), 10)
+	_comprobar(felipe.objeto_cercano() == sala.valeria, "Junto a Valeria enojada, el botón de acción es «Encantar»")
+	await _tocar("interactuar")
+	_comprobar(felipe.estado == Felipe.Estado.RONRONEANDO and felipe.sprite.animation == "ronronear", "Felipe se frota ronroneando")
+	await _esperar(80)
+	_comprobar(t.agenda.esta_cumplida("perdon") and t.perdones >= 2, "Valeria lo perdona: travesura «perdon» (perdones %d)" % t.perdones)
 
 	# Puertas: con el botón de acción o arriba se pasa a la otra habitación, y la cámara queda dentro.
-	await _poner_en(felipe, sala.puertas["sala>recibidor"].global_position)
+	await _poner_en(sala.puertas["sala>recibidor"].global_position)
 	await _tocar("interactuar")
 	await _esperar(30)
 	var recibidor := Sala.rect_de("recibidor")
 	var camara: Camera2D = felipe.get_node("Camara")
 	_comprobar(sala.habitacion == "recibidor" and felipe.global_position.distance_to(sala.puertas["recibidor<sala"].global_position) < 4.0, "La puerta lleva de la sala al recibidor")
 	_comprobar(camara.limit_left == int(recibidor.position.x) and camara.limit_right == int(recibidor.end.x), "La cámara queda dentro del recibidor")
-	await _tocar("mover_arriba")
-	await _esperar(30)
-	_comprobar(sala.habitacion == "sala", "Arriba en una puerta también la cruza (vuelve a la sala)")
+	_comprobar(sala.valeria.cuarto == "recibidor" and _dijo("valeria", "dieta"), "Valeria pasa al recibidor rumbo a la cocina: «Y tú no entras: dieta.»")
+	await _esperar_que(func() -> bool: return sala.valeria.cuarto == "cocina", 900)
+	_comprobar(sala.valeria.cuarto == "cocina" and sala.puertas[Sala.PUERTA_COCINA].cerrada, "Valeria se encierra en la cocina")
 
-	# Caja de arena: punto de descanso.
-	await _poner_en(felipe, Vector2(Sala.DESCANSOS[0].get_center().x, Sala.SUELO - 40))
+	# La puerta cerrada no deja pasar; maullar del otro lado la abre (R19).
+	await _poner_en(sala.puertas[Sala.PUERTA_COCINA].global_position)
+	await _tocar("interactuar")
+	await _esperar(20)
+	_comprobar(sala.habitacion == "recibidor", "La puerta de la cocina está cerrada")
+	await _tocar("maullar")
+	await _esperar(40)
+	_comprobar(not sala.puertas[Sala.PUERTA_COCINA].cerrada and _dijo("valeria", "entra"), "Al maullar, Valeria abre la puerta de la cocina")
+
+	# Las llaves del zapatero: «¡CLINK CRÍTICO!».
+	await _poner_en(Vector2(1745, Sala.SUELO - 97))
+	felipe.mirando = 1.0
+	await _tocar("interactuar")
+	await _esperar(70)
+	_comprobar("¡CLINK CRÍTICO!" in t.jugo.palabras, "Tirar las llaves: «¡CLINK CRÍTICO!»")
+
+	# Caja de arena: descanso; popo táctico (secreta) con censura irónica y Valeria con mascarilla.
+	await _poner_en(Vector2(Sala.DESCANSOS[0].get_center().x, Sala.SUELO - 45))
 	await _esperar(10)
 	_comprobar(Sala.DESCANSOS[0].has_point(felipe.punto_reaparicion), "La caja de arena es punto de descanso")
+	Input.action_press("agacharse")
+	await _esperar(90)
+	Input.action_release("agacharse")
+	_comprobar(t.agenda.esta_cumplida("popo") and "CONTENIDO SENSIBLE" in t.jugo.palabras, "Agachado en la arena: popo táctico con censura irónica")
+	await _esperar(20)
+	_comprobar(sala.valeria.mascarilla and sala.valeria.cuarto == "recibidor", "Valeria sale con mascarilla: «¡ACABO DE LIMPIARLA!»")
+	await _esperar_que(func() -> bool: return sala.valeria.cuarto == "cocina", 900)
 
-	# La reja no se cruza desde el piso; desde el librero sí.
-	await _poner_en(felipe, Vector2(1965, Sala.SUELO))
+	# Cocina: tazón, ratón, caja, pollo en la cara de Valeria y calcetín del refrigerador.
+	await _poner_en(sala.puertas[Sala.PUERTA_COCINA].global_position)
+	await _tocar("interactuar")
+	await _esperar(30)
+	_comprobar(sala.habitacion == "cocina", "Se entra a la cocina")
+	var corazones := felipe.corazones
+	felipe.recibir_dano(1, felipe.global_position.x - 10.0)
+	await _esperar(90)
+	await _poner_en(Vector2(2975, Sala.SUELO))
+	await _tocar("interactuar")
+	await _esperar(40)
+	_comprobar(felipe.corazones == corazones and _dijo("felipe", "croquetas"), "El tazón se come (cura) y Felipe se queja de las tres croquetas")
+	var raton := _raton_en("cocina", Sala.SUELO)
+	await _zarpazo_a(raton)
+	_comprobar(raton.apagada, "Un zarpazo voltea al ratón de cuerda")
+	var snacks_antes := felipe.snacks
+	var caja: CajaCarton = sala.get_node("Caja de carton")
+	await _zarpazo_a(caja)
+	await _esperar(40)
+	await _poner_en(caja.global_position + Vector2(10, 0))
+	await _esperar(40)
+	_comprobar(caja.roto and felipe.snacks > snacks_antes, "La caja de cartón se rompe de un zarpazo y suelta un snack")
+	var raton_meson := _raton_en("cocina", Sala.SUELO - 108)
+	raton_meson.queue_free()
+	sala.valeria.mirando = -1.0
+	await _poner_en(Vector2(3540, Sala.SUELO - 108))
+	await _tocar("interactuar")
+	await _esperar(60)
+	_comprobar(t.agenda.esta_cumplida("almuerzo") and "¡EN SU CARA!" in t.jugo.palabras, "Robar el pollo delante de Valeria: «¡EN SU CARA!» (travesura «almuerzo»)")
+	_comprobar(_dijo("valeria", "ALMUERZO"), "Valeria: «¡ESE ERA MI ALMUERZO!»")
+	await _poner_en(Sala.CALCETIN_REFRIGERADOR + Vector2(0, -1))
+	await _esperar(30)
+	_comprobar(sala.calcetines == 2, "El calcetín de arriba del refrigerador se recoge (%d)" % sala.calcetines)
+
+	# La reja: desde el piso no se pasa (Felipe la empuja); desde el librero se salta.
+	await _poner_en(Vector2(2250, Sala.SUELO))
 	Input.action_press("mover_derecha")
 	await _esperar(40)
 	Input.action_release("mover_derecha")
-	_comprobar(felipe.global_position.x < Sala.REJA.position.x, "Las rejas apiladas cierran el paso a la escalera")
-	await _poner_en(felipe, Vector2(1960, Sala.SUELO - 218))
-	_comprobar(felipe.is_on_floor() and felipe.global_position.y <= Sala.SUELO - 217.0, "Se para arriba del librero")
+	_comprobar(felipe.global_position.x < Sala.REJA.position.x, "La reja anti-fuga cierra el paso a la escalera")
+	await _tocar("interactuar")
+	await _esperar(40)
+	_comprobar(not sala.reja.abierta_ya and _dijo("felipe", "Qué tierno"), "Desde afuera la empuja: «¿Una reja? ¿En MI escalera? Qué tierno.»")
+	await _poner_en(Vector2(2250, Sala.SUELO - 155))
+	_comprobar(felipe.is_on_floor() and absf(felipe.global_position.y - (Sala.SUELO - 155)) < 1.0, "Se para en la repisa de arriba del librero")
 	Input.action_press("mover_derecha")
 	Input.action_press("saltar")
-	await _esperar(12)
+	await _esperar(14)
 	Input.action_release("saltar")
 	await _esperar_que(func() -> bool: return felipe.is_on_floor() and felipe.global_position.x > Sala.REJA.end.x, 120)
 	Input.action_release("mover_derecha")
-	_comprobar(felipe.global_position.x > Sala.REJA.end.x, "Desde el librero salta la reja")
+	_comprobar(felipe.global_position.x > Sala.REJA.end.x, "Desde el librero salta la reja (sin doble salto)")
 
-	# Desde la escalera la reja se abre (atajo); desde el recibidor no.
-	var reja: Reja = sala.get_node("Reja")
-	await _poner_en(felipe, Vector2(Sala.REJA.position.x - 20, Sala.SUELO))
-	reja.interactuar(felipe)
-	_comprobar(not reja.abierta_ya, "Desde el recibidor la reja no se abre")
-	await _poner_en(felipe, Vector2(Sala.REJA.end.x + 12, Sala.SUELO))
+	# La escalera: escalón por escalón, con el pasamanos delante al 70 %.
+	await _poner_en(sala.puertas[Sala.PUERTA_ESCALERA].global_position, 10)
 	await _tocar("interactuar")
-	# El pestillo se abre cuando la pata llega (cuadro de impacto del manotazo).
-	await _esperar(20)
-	_comprobar(reja.abierta_ya and "Atajo de Gato" in sala.logros, "Desde la escalera se abre la reja (logro Atajo de Gato)")
+	var en_escalera := false
+	var siguio_peldanos := true
+	var pasamanos_claro := false
+	var animo := false
+	for i in 200:
+		await physics_frame
+		if felipe.en_escalera():
+			en_escalera = true
+			animo = animo or felipe.sprite.animation == "subir_escalera"
+			pasamanos_claro = pasamanos_claro or is_equal_approx(sala.get_node("Pasamanos").modulate.a, Sala.OPACIDAD_PASAMANOS)
+			var dentro := felipe.global_position.y >= Sala.PELDANOS[-1].y - 8.0 and felipe.global_position.y <= Sala.SUELO + 1.0
+			siguio_peldanos = siguio_peldanos and dentro
+		if sala.habitacion == "pasillo":
+			break
+	_comprobar(en_escalera and animo and siguio_peldanos, "Sube escalón por escalón con la animación subir_escalera")
+	_comprobar(pasamanos_claro, "Mientras sube, el pasamanos de adelante baja al 70 %")
+	await _esperar(30)
+	_comprobar(sala.habitacion == "pasillo" and _dijo("valeria", "Audífonos"), "La escalera lleva al pasillo; abajo, Valeria se pone audífonos")
 
-	# Al pie de la escalera de fondo se sube como por una puerta (Felipe sube en diagonal).
-	await _poner_en(felipe, sala.puertas["recibidor>pasillo"].global_position)
+	# Bajar: por el vano vuelve al pie de la escalera (adentro de la reja) y el pestillo es el atajo.
+	await _poner_en(sala.puertas["pasillo<recibidor"].global_position, 10)
+	await _tocar("interactuar")
+	await _esperar_que(func() -> bool: return sala.habitacion == "recibidor" and not sala.cruzando(), 300)
+	_comprobar(absf(felipe.global_position.x - Sala.ESCALERA_PIE.x) < 6.0 and felipe.global_position.y > Sala.SUELO - 2.0, "Por el vano baja la escalera hasta el pie")
+	await _poner_en(Vector2(Sala.REJA.end.x + 16.0, Sala.SUELO), 20)
+	_comprobar(felipe.objeto_cercano() == sala.reja and sala.reja.verbo(felipe) == "Abrir", "Junto a la reja, desde adentro, el botón es «Abrir»")
 	await _tocar("interactuar")
 	await _esperar(30)
-	_comprobar(felipe.global_position.y < Sala.SUELO - 100.0, "Al pie de la escalera, Felipe la sube en diagonal")
-	await _esperar(70)
-	_comprobar(sala.habitacion == "pasillo", "La escalera lleva al pasillo de arriba")
+	_comprobar(sala.reja.abierta_ya and "Atajo de Gato" in sala.logros, "Desde adentro, un manotazo al pestillo abre la reja (atajo, logro)")
+	await _poner_en(Vector2(2250, Sala.SUELO))
+	Input.action_press("mover_derecha")
+	await _esperar(40)
+	Input.action_release("mover_derecha")
+	_comprobar(felipe.global_position.x > Sala.REJA.end.x, "Con la reja abierta se vuelve caminando")
 
-	# Cojín del pasillo: descanso antes del jefe.
-	await _poner_en(felipe, Vector2(Sala.DESCANSOS[1].get_center().x, Sala.SUELO))
+	# Pasillo: el ensayo de A.S.P.I. (aspira sin hacer daño), el láser (secreta) y la puerta entornada (arañar).
+	await _poner_en(sala.puertas[Sala.PUERTA_ESCALERA].global_position, 10)
+	await _tocar("interactuar")
+	await _esperar_que(func() -> bool: return sala.habitacion == "pasillo" and not sala.cruzando(), 300)
+	await _poner_en(Vector2(4380, Sala.SUELO - 97))
+	felipe.mirando = 1.0
+	await _tocar("interactuar")
+	await _esperar_que(func() -> bool: return sala.ensayo.paso == EnsayoAspi.Paso.LIMPIA, 600)
+	_comprobar(sala.ensayo.paso == EnsayoAspi.Paso.LIMPIA, "Al tirar el vaso de la consola, sale A.S.P.I. del estudio a limpiar")
+	corazones = felipe.corazones
+	felipe.global_position = sala.ensayo.aspi.global_position + Vector2(150, 0)
+	felipe.velocity = Vector2.ZERO
+	await _esperar(5)
+	var antes := felipe.global_position.x
+	await _esperar(15)
+	_comprobar(antes - felipe.global_position.x > 10.0 and felipe.corazones == corazones, "Su succión arrastra a Felipe, sin hacer daño (ensayo)")
+	_comprobar(_dijo("felipe", "Uñas: modo ancla"), "Felipe enseña a aferrarse: «Mantén {agacharse}. Uñas: modo ancla.»")
+	await _esperar_que(func() -> bool: return sala.ensayo.paso == EnsayoAspi.Paso.LISTO, 900)
+	_comprobar(sala.ensayo.paso == EnsayoAspi.Paso.LISTO and _dijo("aspi", "registrado"), "Vuelve a su cuarto: «Suciedad eliminada. Gato… registrado.»")
+	await _poner_en(Vector2(4600, Sala.SUELO))
+	await _esperar(6 * 60)
+	_comprobar(t.agenda.esta_cumplida("laser"), "Quieto 5 s frente al láser: se apaga de vergüenza (secreta)")
+	await _poner_en(Vector2(Sala.DESCANSOS[1].get_center().x, Sala.SUELO))
 	await _esperar(10)
 	_comprobar(Sala.DESCANSOS[1].has_point(felipe.punto_reaparicion), "El cojín del pasillo es punto de descanso")
+	await _poner_en(sala.puertas[Sala.PUERTA_DORMITORIO].global_position + Vector2(-30, 0))
+	await _tocar("interactuar")
+	await _esperar(60)
+	_comprobar(not sala.puertas[Sala.PUERTA_DORMITORIO].entornada, "La puerta entornada se abre arañándola")
+	await _poner_en(sala.puertas[Sala.PUERTA_DORMITORIO].global_position)
+	await _tocar("interactuar")
+	await _esperar(30)
+	_comprobar(sala.habitacion == "dormitorio", "La puerta lleva al dormitorio")
 
-	# Calcetines: arriba del refrigerador, trepando la cortina del dormitorio y arriba del ropero.
-	await _poner_en(felipe, Sala.CALCETINES[0] + Vector2(0, -1))
-	await _esperar(5)
-	_comprobar(sala.calcetines == 1, "El calcetín del refrigerador se recoge")
-	var cortina: Rect2 = Sala.TREPABLES[0]
-	await _poner_en(felipe, Vector2(cortina.get_center().x, Sala.SUELO))
-	# En el nivel 1 trepar viene apagado (se gana con Afilar Garras): la cortina no se trepa.
+	# Dormitorio: el cajón (desde la cama) suelta el calcetín 3; la cortina no se trepa.
+	await _poner_en(Vector2(5625, Sala.SUELO - 65))
+	felipe.mirando = 1.0
+	await _tocar("interactuar")
+	await _esperar(60)
+	_comprobar(t.agenda.esta_cumplida("cajon"), "Un manotazo al cajón: calcetines volando (travesura «cajon»)")
+	await _esperar(60)
+	await _poner_en(Vector2(5692, Sala.SUELO - 96))
+	await _esperar(40)
+	_comprobar(sala.calcetines == 3 and "Coleccionista de Calcetines" in sala.logros, "Los 3 calcetines van al nido: «Coleccionista de Calcetines»")
+	await _poner_en(Vector2(5990, Sala.SUELO))
 	Input.action_press("mover_arriba")
 	await _esperar(40)
 	Input.action_release("mover_arriba")
-	_comprobar(not felipe.trepando and felipe.is_on_floor(), "Sin Afilar Garras la cortina no se trepa (trepar apagado en el nivel 1)")
-	# Nivel viejo (v3): el calcetín de la repisa alta todavía pide trepar; la PARTE B lo rehace como lugar visto.
-	felipe.puede_trepar = true
-	felipe.mirando = 1.0
-	Input.action_press("mover_arriba")
-	var animacion_trepar := false
-	for i in 600:
+	_comprobar(felipe.is_on_floor() and felipe.global_position.y > Sala.SUELO - 2.0, "La cortina no se trepa todavía (lugar visto: Afilar Garras)")
+
+	# Estudio: entrar por la puerta (sin pantalla negra), la puerta del balcón cerrada y el teclado (secreta).
+	await _poner_en(sala.puertas["pasillo>estudio"].global_position)
+	await _tocar("interactuar")
+	var negra := false
+	await _esperar_que(func() -> bool: return sala.batalla.fase == BatallaAspi.Fase.ENTRADA, 200)
+	while sala.batalla.fase == BatallaAspi.Fase.ENTRADA:
+		negra = negra or sala.get_node("Interfaz/Fundido").modulate.a > 0.05
 		await physics_frame
-		animacion_trepar = animacion_trepar or (felipe.trepando and felipe.sprite.animation == "trepar")
-		if sala.calcetines == 2:
-			break
-	Input.action_release("mover_arriba")
-	_comprobar(animacion_trepar, "Trepando usa la animación de trepar")
-	_comprobar(sala.calcetines == 2, "Trepando la cortina llega al calcetín de la repisa alta")
-	await _poner_en(felipe, Sala.CALCETINES[2] + Vector2(0, -1))
-	await _esperar(5)
-	_comprobar(sala.calcetines == 3 and "Coleccionista de Calcetines" in sala.logros, "Los 3 calcetines dan «Coleccionista de Calcetines»")
-
-	# La puerta del balcón está cerrada hasta apagar a A.S.P.I.
-	await _poner_en(felipe, sala.puertas["pasillo>estudio"].global_position)
-	await _tocar("interactuar")
-	await _esperar(30)
-	_comprobar(sala.habitacion == "estudio" and sala.batalla.fase != BatallaAspi.Fase.ESPERANDO, "Entrar al estudio despierta a A.S.P.I.")
-	await _esperar_que(func() -> bool: return sala.batalla.fase == BatallaAspi.Fase.PELEA, 400)
+	_comprobar(not negra, "Entrar al estudio por la puerta: la presentación se ve (sin fundido a negro, B1)")
 	felipe._tiempo_invulnerable = 999.0
-	await _poner_en(felipe, sala.puertas[Sala.PUERTA_BALCON].global_position)
+	await _poner_en(sala.puertas[Sala.PUERTA_BALCON].global_position)
 	await _tocar("interactuar")
 	await _esperar(30)
-	_comprobar(sala.habitacion == "estudio" and "Cerrada" in sala.pantallas.aviso_fijo, "Con A.S.P.I. encendida, la puerta del balcón no abre")
-
-	# Apagarla tres veces con el depósito lleno (la pelea completa está en prueba_jefe) abre el balcón.
+	_comprobar(sala.habitacion == "estudio" and _dijo("felipe", "aspiradora tiene la llave"), "Con A.S.P.I. encendida, la puerta del balcón no abre")
+	await _poner_en(Vector2(Sala.TECLADO.get_center().x, Sala.SUELO - 98))
+	await _esperar(10)
+	_comprobar(t.agenda.esta_cumplida("teclado"), "Pisar el teclado: «jjjjjjjjjj» (secreta)")
 	var batalla := sala.batalla
+	await _poner_en(Vector2(6300, Sala.SUELO))
 	for i in BatallaAspi.APAGADOS_TOTALES:
 		batalla.deposito = BatallaAspi.CAPACIDAD[batalla.apagados] - 1
 		batalla.agregar_mancha(sala.aspi.global_position)
 		await _esperar_que(func() -> bool: return batalla.llena, 400)
 		felipe.global_position = sala.aspi.global_position + Vector2(0, -130)
 		felipe.velocity = Vector2.ZERO
-		await _esperar(60)
-	_comprobar(sala.aspi.apagada and "Desenchufada" in sala.logros, "Apagada tres veces, A.S.P.I. se apaga del todo (logro Desenchufada)")
-	await _poner_en(felipe, sala.puertas[Sala.PUERTA_BALCON].global_position)
+		await _esperar(80)
+	await _esperar(60)
+	_comprobar(sala.aspi.apagada and t.agenda.esta_cumplida("desenchufar") and "Desenchufada" in sala.logros, "Apagada tres veces: «Desenchufar a A.S.P.I.» y el logro")
+	await _poner_en(sala.puertas[Sala.PUERTA_BALCON].global_position)
 	await _tocar("interactuar")
 	await _esperar(30)
 	_comprobar(sala.habitacion == "balcon", "Apagada A.S.P.I., la puerta lleva al balcón")
@@ -172,13 +308,27 @@ func _correr() -> void:
 	await _tocar("pausa")
 	_comprobar(not paused, "Esc otra vez continúa")
 
-	# Balcón: fin de la demo.
-	await _poner_en(felipe, Vector2(Sala.SALIDA + 30, Sala.SUELO))
-	_comprobar(sala.terminado and felipe.tiene_caer_de_pie, "Llegar al final del balcón da Caer de Pie y termina el nivel")
-	await create_timer(2.5).timeout
-	_comprobar(sala.pantallas.modo == Pantallas.Modo.FIN and paused, "Aparece la pantalla de Demo completada")
-	_comprobar(sala.pantallas.datos_fin.get("calcetines", "") == "3 de 3", "El final cuenta los calcetines (%s)" % sala.pantallas.datos_fin.get("calcetines", ""))
+	# Balcón: sentarse en la baranda, la cámara se abre, salto real → Caer de Pie y el resumen del día.
+	await _poner_en(Vector2(Sala.SALIDA, Sala.SUELO - 89))
+	await _esperar(40)
+	_comprobar(sala.sentado_en_baranda and _dijo("felipe", "gato de interior"), "En la baranda se sienta y suspira")
+	Input.action_press("saltar")
+	Input.action_press("mover_derecha")
+	await _esperar(14)
+	Input.action_release("saltar")
+	await _esperar(30)
+	Input.action_release("mover_derecha")
+	_comprobar(sala.salto_final and felipe.tiene_caer_de_pie and "Caer de Pie" in sala.logros, "El salto real da «PODER: CAER DE PIE»")
+	await create_timer(4.0).timeout
+	var resumen: ResumenDia = null
+	for hijo in t.get_children():
+		if hijo is ResumenDia:
+			resumen = hijo
+	_comprobar(sala.terminado and resumen != null and paused, "Sale el resumen del día (en lugar de la pantalla final)")
+	_comprobar(t.agenda.cumplidas() == Agenda.NIVEL_1.size(), "La agenda queda completa (%d de %d)" % [t.agenda.cumplidas(), Agenda.NIVEL_1.size()])
+	_comprobar(_valeria_en_puerta == "", "Valeria nunca se paró en una puerta %s" % _valeria_en_puerta)
 	paused = false
+	Engine.time_scale = 1.0
 	sala.queue_free()
 	await process_frame
 
@@ -195,17 +345,30 @@ func _correr() -> void:
 	quit(1 if _fallos.size() > 0 else 0)
 
 
-func _raton_en(sala: Sala, cuarto: String) -> Raton:
+## ¿Alguien dijo algo que contiene `texto`?
+func _dijo(quien: String, texto: String) -> bool:
+	return _contar(quien, texto) > 0
+
+
+func _contar(quien: String, texto: String) -> int:
+	var n := 0
+	for linea: Array in sala.travesuras.dialogo.historial:
+		if linea[0] == quien and texto in String(linea[1]):
+			n += 1
+	return n
+
+
+func _raton_en(cuarto: String, y: float) -> Raton:
 	for hijo in sala.get_children():
-		if hijo is Raton and Sala.habitacion_de(hijo.global_position) == cuarto:
+		if hijo is Raton and Sala.habitacion_de(hijo.global_position) == cuarto and absf(hijo.global_position.y - y) < 4.0:
 			return hijo
 	return null
 
 
-func _zarpazo_a(felipe: Felipe, objetivo: Node2D) -> void:
+func _zarpazo_a(objetivo: Node2D) -> void:
 	felipe._tiempo_invulnerable = 99.0
-	await _poner_en(felipe, objetivo.global_position + Vector2(-30, 0))
-	felipe.global_position = objetivo.global_position + Vector2(-30, 0)
+	await _poner_en(objetivo.global_position + Vector2(-34, 0))
+	felipe.global_position = objetivo.global_position + Vector2(-34, 0)
 	felipe.mirando = 1.0
 	felipe.estado = Felipe.Estado.SUELO
 	await _tocar("zarpazo")
@@ -213,11 +376,11 @@ func _zarpazo_a(felipe: Felipe, objetivo: Node2D) -> void:
 	felipe._tiempo_invulnerable = 0.0
 
 
-## Lo pone en un lugar y espera a que termine cualquier manotazo anterior (la animación dura 0,67 s).
-func _poner_en(felipe: Felipe, posicion: Vector2) -> void:
+## Lo pone en un lugar y espera a que termine cualquier acción anterior (la animación dura 0,67 s).
+func _poner_en(posicion: Vector2, cuadros := 45) -> void:
 	felipe.global_position = posicion
 	felipe.velocity = Vector2.ZERO
-	await _esperar(45)
+	await _esperar(cuadros)
 
 
 func _tocar(accion: String) -> void:
@@ -233,11 +396,24 @@ func _esperar_que(condicion: Callable, maximo: int) -> void:
 		if condicion.call():
 			return
 		await physics_frame
+		_vigilar_valeria()
 
 
 func _esperar(cuadros: int) -> void:
 	for i in cuadros:
 		await physics_frame
+		_vigilar_valeria()
+
+
+func _vigilar_valeria() -> void:
+	if sala == null or not is_instance_valid(sala) or sala.valeria == null:
+		return
+	var v := sala.valeria
+	if v.actividad in [Valeria.Actividad.CAMINANDO, Valeria.Actividad.FUERA]:
+		return
+	for datos: Array in Sala.PUERTAS:
+		if datos[0] != Sala.PUERTA_ESCALERA and Sala.rect_sagrado(datos[1]).grow(-30).has_point(v.global_position - Vector2(0, 1)):
+			_valeria_en_puerta = "(%s, x %.0f)" % [datos[0], v.global_position.x]
 
 
 func _comprobar(condicion: bool, descripcion: String) -> void:

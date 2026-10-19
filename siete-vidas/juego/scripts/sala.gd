@@ -590,7 +590,7 @@ func _al_entrar_a(cuarto: String) -> void:
 		_valeria_a_la_cocina()
 	elif cuarto == "pasillo" and primera:
 		valeria.audifonos = true
-		travesuras.decir_valeria("audifonos")
+		travesuras.decir_valeria("audifonos", true)
 		_decir("robot")
 	elif cuarto == "cocina" and primera:
 		valeria.visita += 1
@@ -893,7 +893,7 @@ func _valeria_a_la_cocina() -> void:
 		puerta_cocina.abrir_un_momento()
 		valeria.poner(VALERIA_COCINA, "cocina", -1.0, Valeria.Actividad.DE_PIE)
 		valeria.fijar_casa())
-	await get_tree().create_timer(0.4, false).timeout
+	await get_tree().create_timer(0.2, false).timeout
 	travesuras.decir_valeria("cocina_dieta", true)
 
 

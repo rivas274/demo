@@ -9,6 +9,7 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
    - v1 hecha (`siete-vidas/prototipos/travesuras/`): CAMBIAR. Ahora v2 con la Agenda de Su Majestad en lugar del medidor de CAOS.
    - Incluir en el prototipo (pilar 5): cuadro de diálogo con retratos (pensamientos de Felipe) y respuesta jugosa tipo Balatro.
    - Al volver al nivel: **entrada de jefe en 8 pasos** dentro de `PresentacionJefe` (sin vuelta atrás, espera, revelar de abajo arriba, nombre, barra que se llena, música, tamaño, rugido) y jugo en la pelea; lista en `.claude/skills/godot-felipe/SKILL.md` §6b. Recursos gratis CC0 de Kenney (sonidos, partículas, interfaz) como opción, anotando créditos.
+   - Después de la parte B: **ajuste del salto** (video de referencia del creador, 5 pasos ya implementados): caer más rápido (gravedad de caída de 1,38× a ~1,7×), margen 0,12 s, salto recordado 0,15 s, más polvo al aterrizar desde alto; estirar/aplastar sigue en ±8 %. Revisar saltos del nivel, prueba de movimiento y video antes/después.
 3. [ ] **Volver al nivel 1** con lo que el prototipo apruebe (regla de los tres lugares) y seguir hacia el vertical slice. Antes de cada cambio de fase, `/puerta-fase`.
 
 ## Nivel 1 v4 (Fase 3, en construcción)

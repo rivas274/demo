@@ -151,9 +151,11 @@ func _correr() -> void:
 	_comprobar(batalla.soplidos >= 1 and felipe.global_position.y > Sala.SUELO - 2.0 and cuadros <= 240, "Quieto en la repisa, A.S.P.I. lo saca de un soplido en %.1f s (≤ 4 s)" % (cuadros / 60.0))
 	_comprobar(aviso_amarillo, "Antes del soplido avisa 0,6 s: vibra con luz amarilla")
 	_comprobar(felipe.corazones == corazones, "El soplido no hace daño")
+	# Segundo apagado cayendo a la velocidad máxima (~12 px por cuadro): no atraviesa la franja de su tapa.
 	await _llenar(batalla, aspi)
-	await _caerle_encima(aspi)
-	_comprobar(batalla.apagados == 2, "Segundo apagado: fase 3 (furia)")
+	var caida := await _caerle_encima_rapido(aspi)
+	_comprobar(caida >= felipe.caida_maxima - 1.0, "Llega a la tapa cayendo a la velocidad máxima (%.0f px/s)" % caida)
+	_comprobar(batalla.apagados == 2, "Segundo apagado: fase 3 (furia), aunque caiga a la velocidad máxima")
 
 	# Fase 3: tose y escupe bolas de pelo en arco que llegan arriba (al escritorio).
 	await _esperar(100)
@@ -258,6 +260,23 @@ func _caerle_encima(aspi: Aspi) -> void:
 	felipe.global_position = aspi.global_position + Vector2(0, -62)
 	felipe.velocity = Vector2.ZERO
 	await _esperar(60)
+
+
+## Felipe cae sobre A.S.P.I. desde lo alto ya a la velocidad máxima de caída; devuelve la velocidad de caída del
+## último cuadro antes de apagarla.
+func _caerle_encima_rapido(aspi: Aspi) -> float:
+	await _esperar(20)
+	felipe.global_position = aspi.global_position + Vector2(0, -BatallaAspi.ALTO_ARRIBA - 140.0)
+	felipe.velocity = Vector2(0, felipe.caida_maxima)
+	var antes := sala.batalla.apagados
+	var velocidad := 0.0
+	for i in 60:
+		velocidad = felipe.velocity.y
+		await physics_frame
+		if sala.batalla.apagados > antes:
+			break
+	await _esperar(40)
+	return velocidad
 
 
 func _zarpazo_a(objetivo: Node2D) -> void:

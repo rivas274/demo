@@ -411,6 +411,17 @@ func _esperar_en_el_piso() -> void:
 	await _cuadro()
 
 
+## Espera (hasta 1 s) a que A.S.P.I. no se mueva entre dos cuadros seguidos.
+func _hasta_que_aspi_se_detenga() -> void:
+	var anterior := INF
+	for i in int(1.0 * _fps):
+		var x := sala.aspi.global_position.x
+		if absf(x - anterior) < 0.1:
+			return
+		anterior = x
+		await _cuadro()
+
+
 ## Depósito lleno: al piso, junto a ella, y salta para caerle encima.
 func _apagar_de_un_salto() -> void:
 	var batalla := sala.batalla
@@ -419,10 +430,18 @@ func _apagar_de_un_salto() -> void:
 	for intento in 4:
 		if not batalla.llena or batalla.apagados > antes:
 			break
+		# Al llenarse bajo la repisa sale disparada unos 80 px (EMPUJE_LLENA, 0,3 s): hay que esperar a que se quede
+		# quieta antes de elegir el lado. Si no, va adonde estaba, queda del otro lado y salta alejándose de ella.
+		await _hasta_que_aspi_se_detenga()
 		var x := sala.aspi.global_position.x
 		var lado := -1.0 if felipe.global_position.x < x else 1.0
 		await _ir_a(x + lado * 34.0, 3.0)
-		await _saltar(-lado, x)
+		# Lado y blanco se miden de nuevo justo antes de saltar; si no quedó a tiro, se acerca otra vez.
+		x = sala.aspi.global_position.x
+		var dx := x - felipe.global_position.x
+		if absf(dx) > 50.0:
+			continue
+		await _saltar(signf(dx), x)
 		await _hasta(func() -> bool: return batalla.apagados > antes or felipe.is_on_floor(), 1.5)
 	await _hasta(func() -> bool: return felipe.is_on_floor(), 2.0)
 	_paso("Le salta encima: apagados %d" % batalla.apagados)

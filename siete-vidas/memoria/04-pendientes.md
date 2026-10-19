@@ -10,7 +10,7 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
    - Incluir en el prototipo (pilar 5): cuadro de diálogo con retratos (pensamientos de Felipe) y respuesta jugosa tipo Balatro.
    - Al volver al nivel: **entrada de jefe en 8 pasos** dentro de `PresentacionJefe` (sin vuelta atrás, espera, revelar de abajo arriba, nombre, barra que se llena, música, tamaño, rugido) y jugo en la pelea; lista en `.claude/skills/godot-felipe/SKILL.md` §6b. Recursos gratis CC0 de Kenney (sonidos, partículas, interfaz) como opción, anotando créditos.
    - [x] **Ajuste del salto (2026-10-19):** gravedad de caída de 1,38× a 1,7× (2400; tope 740 px/s), margen 0,12 s, salto recordado 0,15 s, polvo según la velocidad de caída (8 a 28 granos); subida y altura sin cambios, estirar/aplastar en ±8 %. Pruebas de movimiento y escenario ampliadas; video antes/después con `pruebas/demo_salto.gd`.
-   - Baño: puerta cerrada en el pasillo de arriba (pasada de ambientes); el cuarto completo cuando exista el doble salto.
+   - Baño: puerta cerrada en el pasillo de arriba (pasada de ambientes); el cuarto completo cuando Felipe aprenda "Abrir puertas" al ver a otro gato colgarse de una manilla.
 3. [ ] **Volver al nivel 1** con lo que el prototipo apruebe (regla de los tres lugares) y seguir hacia el vertical slice. Antes de cada cambio de fase, `/puerta-fase`.
 
 ## Nivel 1 v4 (Fase 3)

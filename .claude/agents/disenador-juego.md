@@ -25,7 +25,7 @@ No programas el juego. Tu entrega es una propuesta de diseño escrita.
 
 ## Temas de Felipe que ya conoces
 
-- **Botón de acción:** uno solo para usar lo cercano; si es comida, se come. Hoy come, tira vasos/rollos/macetas y cruza puertas. Arañar muebles aún no existe.
+- **Botón de acción:** uno solo para usar lo cercano; si es comida, se come. Hoy come, tira vasos/tazas/macetas y cruza puertas. Arañar muebles aún no existe.
 - **Maullar e intimidar** (arquearse y erizarse): aún no existen; la biblia los pide (pedir comida, peleas en los techos).
 - **Peso:** indicador con báscula, no cambia el dibujo. Abierto: si afecta el movimiento y cómo queda el Final Buda.
 - **Vidas:** 9 vidas, 5 corazones; al perderlas, el Collar de la Vergüenza.

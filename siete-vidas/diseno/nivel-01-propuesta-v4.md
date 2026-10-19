@@ -319,3 +319,12 @@ Alto de todos los cuartos: 424 px (3,5 m). Muros de 160 px entre cuartos. Altura
    - **Recomiendo A:** respeta lo ya decidido (escalera de fondo) y arregla G6 y G7 con lógica de gato.
 
 **Para prototipar antes de construir todo:** "¿El rascador como teatro (Valeria graba y no ve el sofá) hace que el jugador planee en vez de arañar al azar?" y "¿El soplido de A.S.P.I. se siente justo o como castigo?".
+
+## Decisiones del creador (2026-10-19) — propuesta APROBADA
+
+1. **Habilidades:** doble salto, Zoomies y trepar quedan **apagadas** en el nivel 1 (se ganan después, como dice la biblia). La cortina del dormitorio queda como lugar visto para volver.
+2. **Recompensas:** snacks en un **bolsillo de 5** (comer = mantener acción 0,6 s; cura y engorda); calcetines al **nido** de la sala (cada 10, una ranura de maña); fotos a la **galería** (logro Galería Viral).
+3. **Acciones con animación propia:** **arañar y maullar** (desde Felipe A). Intimidar queda para los techos del Barrio Viejo.
+4. **Valeria:** **4 poses fijas** de Gemini (enojada, perdonando, grabando con el celular, viendo la serie) **más caminar**.
+5. **Escalera:** **de fondo con reja** anti-fuga y librero; animación `subir_escalera`; el pestillo es el atajo de vuelta.
+

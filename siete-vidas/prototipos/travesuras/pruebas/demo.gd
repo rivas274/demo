@@ -70,7 +70,8 @@ func _correr() -> void:
 	await ir_a(220)
 	await mirar(-1)
 	await tocar("accion")
-	await segundos(3.0)
+	# Como un jugador, mira la reacción completa (Valeria, la frase de Felipe y la foto con flash).
+	await segundos(7.5)
 	await recoger_todo()
 	await hasta(func() -> bool: return not sala.hud.ocupado(), 400)
 	# 4. La persiana subió: saltar al alféizar por el calcetín.

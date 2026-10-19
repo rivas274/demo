@@ -41,6 +41,8 @@ Actualizado: 2026-10-18. Detalle completo en la biblia (ver README.md).
 - **Travesuras v2 (2026-10-19): SEGUIR.** La Agenda de Su Majestad, el rascador (teatro para Valeria) y la voz de Valeria (lo trata de "bebito gordito", vive para sus redes) funcionan. Pasan al nivel 1.
 - **Fase 3 (2026-10-19):** el creador decide pasar al nivel 1 tutorial con calidad final y mejorar el arte. Primero se rediseña el nivel en papel, se aprueba y después se construye.
 
+- **Nivel 1 v4 aprobado (2026-10-19)** (`siete-vidas/diseno/nivel-01-propuesta-v4.md`): doble salto, Zoomies y trepar apagados en el nivel 1; snacks en bolsillo de 5, calcetines al nido (10 = una ranura de maña), fotos a la galería; animaciones nuevas de arañar y maullar (intimidar, después); Valeria con 4 poses de Gemini y caminar; escalera de fondo con reja y librero, con animación de subir.
+
 ## Mecánicas
 
 - **Tres medidores:** afecto humano (por casa), respeto felino, peso. No hay medidor de hambre.

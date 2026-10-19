@@ -54,6 +54,7 @@ func _correr() -> void:
 		_comprobar(absf(proporcion.x - esperado.x) < 0.03 and absf(proporcion.y - esperado.y) < 0.03, "La capa %s se mueve a (%.2f, %.2f) de la cámara (esperado %.2f)" % [capas[i].name, proporcion.x, proporcion.y, esperado.x])
 
 	_comprobar_alcanzables()
+	_comprobar_sin_trampas()
 
 	for fallo in _fallos:
 		printerr("FALLO: " + fallo)
@@ -101,6 +102,71 @@ func _comprobar_alcanzables() -> void:
 			_comprobar(pieza[0] in alcanzadas, "Se puede llegar sin doble salto a: %s" % pieza[2])
 		elif pieza[3] == "lugar_visto":
 			_comprobar(not pieza[0] in alcanzadas, "El lugar visto %s no se alcanza todavía" % pieza[2])
+
+
+## Ningún hueco atrapa a Felipe: desde toda superficie a la que se llega desde una puerta se puede volver a esa puerta
+## (sin doble salto ni trepar). La reja no cuenta como pared: desde adentro se abre (atajo) y desde afuera se salta.
+func _comprobar_sin_trampas() -> void:
+	var superficies: Array[Rect2] = []
+	for habitacion: Array in Sala.HABITACIONES:
+		var cuarto: Rect2 = habitacion[0]
+		var cortes: Array[Vector2] = []
+		for pieza: Array in Sala.PIEZAS:
+			var r: Rect2 = pieza[0]
+			if pieza[1] or pieza[3] == "invisible" or not cuarto.grow(1).intersects(r):
+				continue
+			if Sala.SUELO - r.end.y < 36.0:
+				cortes.append(Vector2(r.position.x, r.end.x))
+		cortes.sort_custom(func(a: Vector2, b: Vector2) -> bool: return a.x < b.x)
+		var x := cuarto.position.x
+		for corte in cortes:
+			if corte.x - x >= 40.0:
+				superficies.append(Rect2(x, Sala.SUELO, corte.x - x, 0))
+			x = maxf(x, corte.y)
+		if cuarto.end.x - x >= 40.0:
+			superficies.append(Rect2(x, Sala.SUELO, cuarto.end.x - x, 0))
+	for pieza: Array in Sala.PIEZAS:
+		if not pieza[3] in SIN_ALCANZAR:
+			superficies.append(Rect2(pieza[0].position, Vector2(pieza[0].size.x, 0)))
+	var vecinos := {}
+	for i in superficies.size():
+		vecinos[i] = []
+		for j in superficies.size():
+			if i == j or Sala.habitacion_de(superficies[i].position + Vector2(1, -1)) != Sala.habitacion_de(superficies[j].position + Vector2(1, -1)):
+				continue
+			var a := superficies[i]
+			var b := superficies[j]
+			var hueco := maxf(0.0, maxf(b.position.x - a.end.x, a.position.x - b.end.x))
+			var subida := a.position.y - b.position.y
+			if (subida <= SUBIDA_MAXIMA and subida > 0.5 and hueco <= HUECO_MAXIMO) or (subida <= 0.5 and hueco <= HUECO_MAXIMO):
+				vecinos[i].append(j)
+	for datos: Array in Sala.PUERTAS:
+		var puerta: Vector2 = datos[1]
+		var inicio := -1
+		for i in superficies.size():
+			var r := superficies[i]
+			if absf(r.position.y - puerta.y) < 1.0 and puerta.x >= r.position.x and puerta.x <= r.end.x:
+				inicio = i
+		_comprobar(inicio >= 0, "La puerta %s está sobre un piso" % datos[0])
+		if inicio < 0:
+			continue
+		var ida := _alcanzables_desde(inicio, vecinos)
+		var atrapado := ""
+		for i: int in ida:
+			if not inicio in _alcanzables_desde(i, vecinos):
+				atrapado = "%s" % superficies[i]
+		_comprobar(atrapado == "", "Desde la puerta %s nada atrapa a Felipe %s" % [datos[0], atrapado])
+
+
+func _alcanzables_desde(inicio: int, vecinos: Dictionary) -> Array:
+	var vistos := {inicio: true}
+	var pendientes := [inicio]
+	while not pendientes.is_empty():
+		for j: int in vecinos[pendientes.pop_back()]:
+			if not vistos.has(j):
+				vistos[j] = true
+				pendientes.append(j)
+	return vistos.keys()
 
 
 func _esperar(cuadros: int) -> void:

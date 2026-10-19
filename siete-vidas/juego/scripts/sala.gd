@@ -25,9 +25,9 @@ const MEDIO_RECT_PUERTA := 92.0
 const HABITACIONES := [
 	[Rect2(0, TECHO, 1280, SUELO - TECHO), "sala", "tapiz"],
 	[Rect2(1440, TECHO, 1200, SUELO - TECHO), "recibidor", "tapiz_verde"],
-	[Rect2(2800, TECHO, 1040, SUELO - TECHO), "cocina", "azulejo"],
+	[Rect2(2800, TECHO, 960, SUELO - TECHO), "cocina", "azulejo"],
 	[Rect2(4000, TECHO, 1040, SUELO - TECHO), "pasillo", "tapiz_azul"],
-	[Rect2(5200, TECHO, 880, SUELO - TECHO), "dormitorio", "rosa"],
+	[Rect2(5200, TECHO, 720, SUELO - TECHO), "dormitorio", "rosa"],
 	[Rect2(6240, TECHO, 640, SUELO - TECHO), "estudio", "tapiz_mostaza"],
 	[Rect2(7040, TECHO, 640, SUELO - TECHO), "balcon", "exterior"],
 ]
@@ -95,7 +95,8 @@ const ARTE := [
 	["cama", Vector2(5444, SUELO), false, "mueble"],
 	["comoda", Vector2(5650, SUELO), false, "mueble"],
 	["ropero", Vector2(5816, SUELO), false, "mueble"],
-	["cortina", Vector2(5960, SUELO), false, "mueble"],
+	["cortina", Vector2(5745, SUELO), false, "mueble"],
+	["cesta_vacia", Vector2(5747, SUELO), false, "mueble"],
 	["silla_v2", Vector2(6424, SUELO), false, "mueble"],
 	["escritorio", Vector2(6488, SUELO), false, "mueble"],
 	["base_carga", Vector2(6600, SUELO), false, "mueble"],
@@ -135,7 +136,7 @@ const PIEZAS := [
 	[Rect2(3570, SUELO - 162, 98, 54), false, "Microondas", "arte", "microondas"],  # escala de gato
 	[Rect2(3682, SUELO - 216, 68, 216), false, "Refrigerador", "arte", "refrigerador"],  # 1,80 m
 	# Pasillo de arriba.
-	[Rect2(4190, SUELO - 54, 60, 54), false, "Baúl", "baul", ""],  # 45 cm (dibujado: arriba-extra no llegó)
+	[Rect2(4190, SUELO - 54, 60, 54), true, "Baúl", "baul", ""],  # 45 cm (dibujado: arriba-extra no llegó); se pasa por delante
 	[Rect2(4258, SUELO - 97, 152, 50), false, "Consola", "arte", "aparador"],  # 80 cm, 47 px libres debajo
 	[Rect2(4264, SUELO - 150, 172, 6), true, "Alféizar", "arte", "ventana_pasillo"],  # 1,24 m
 	# Dormitorio.
@@ -144,7 +145,8 @@ const PIEZAS := [
 	[Rect2(5655, SUELO - 96, 74, 96), false, "Cómoda", "arte", "comoda"],  # 80 cm
 	[Rect2(5740, SUELO - 145, 70, 6), true, "Repisa", "repisa", ""],  # 1,20 m
 	[Rect2(5816, SUELO - 185, 104, 185), false, "Ropero", "arte", "ropero"],  # 1,53 m
-	[Rect2(5950, SUELO - 290, 80, 6), true, "Repisa alta", "lugar_visto", ""],  # 2,40 m: se vuelve con Afilar Garras
+	[Rect2(5735, SUELO - 290, 80, 6), true, "Repisa alta", "lugar_visto", ""],  # 2,40 m: se vuelve con Afilar Garras
+	[Rect2(5754, SUELO - 35, 46, 6), true, "Cesta de ropa", "arte", "cesta_vacia"],  # para salir del hueco entre la cómoda y el ropero
 	# Estudio de Valeria (la pelea).
 	[Rect2(6437, SUELO - 55, 40, 6), true, "Silla del estudio", "arte", "silla_v2"],
 	[Rect2(6505, SUELO - 98, 126, 6), true, "Escritorio", "arte", "escritorio"],  # 81 cm
@@ -195,7 +197,7 @@ const SOFA_ARANABLE := [Vector2(360, SUELO), 240.0, 100.0]
 const RASCADOR_X := 570.0
 ## Valeria: sentada en el sofá viendo la serie, y su lugar en la cocina (preparando café).
 const VALERIA_SOFA := Vector2(410, SUELO - 49)
-const VALERIA_COCINA := Vector2(3800, SUELO)
+const VALERIA_COCINA := Vector2(3080, SUELO)
 ## Cajón de los calcetines (en la cómoda), ropa doblada (en la cama) y teclado del escritorio.
 const CAJON := Vector2(5662, SUELO - 75)
 const ROPA := Vector2(5540, SUELO - 65)
@@ -237,7 +239,7 @@ const AGENDA_SITIOS := {
 ## Lugares que se ven antes de poder alcanzarlos (R17): [qué, dónde, con qué maña se vuelve].
 const LUGARES_VISTOS := [
 	["Toldo del vecino con la caja de pizza (por la ventana del pasillo)", Rect2(4370, SUELO - 186, 60, 20), "Caer de Pie"],
-	["Caja de recuerdos de Valeria (repisa alta del dormitorio)", Rect2(5950, SUELO - 300, 80, 10), "Afilar Garras"],
+	["Caja de recuerdos de Valeria (repisa alta del dormitorio)", Rect2(5735, SUELO - 300, 80, 10), "Afilar Garras"],
 ]
 ## Atajos (R6): [qué, dónde, desde dónde se abre].
 const ATAJOS := [["Pestillo de la reja anti-fuga", REJA, "escalera"]]
@@ -891,7 +893,7 @@ func _valeria_a_la_cocina() -> void:
 	puerta_sala.abrir_un_momento()
 	valeria.caminar_a(puerta_cocina.position.x, func() -> void:
 		puerta_cocina.abrir_un_momento()
-		valeria.poner(VALERIA_COCINA, "cocina", -1.0, Valeria.Actividad.DE_PIE)
+		valeria.poner(VALERIA_COCINA, "cocina", 1.0, Valeria.Actividad.DE_PIE)
 		valeria.fijar_casa())
 	await get_tree().create_timer(0.2, false).timeout
 	travesuras.decir_valeria("cocina_dieta", true)
@@ -918,7 +920,7 @@ func _valeria_sale_por_bolsas() -> void:
 		await get_tree().create_timer(1.2, false).timeout
 		valeria.caminar_a(puerta.position.x, func() -> void:
 			valeria.mascarilla = false
-			valeria.poner(VALERIA_COCINA, "cocina", -1.0, Valeria.Actividad.DE_PIE)))
+			valeria.poner(VALERIA_COCINA, "cocina", 1.0, Valeria.Actividad.DE_PIE)))
 
 
 func _abrir_cocina() -> void:
@@ -993,7 +995,9 @@ func _saltar_del_balcon() -> void:
 	felipe.set_physics_process(false)
 	await get_tree().create_timer(1.6).timeout
 	var resumen := travesuras.mostrar_resumen()
-	resumen.cerrado.connect(func() -> void: get_tree().reload_current_scene())
+	resumen.cerrado.connect(func() -> void:
+		if get_tree().current_scene:
+			get_tree().reload_current_scene())
 
 
 # --- Armado y dibujo ----------------------------------------------------------------------------------------

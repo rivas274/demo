@@ -152,7 +152,7 @@ func _correr() -> void:
 	_comprobar(caja.roto and felipe.snacks > snacks_antes, "La caja de cartón se rompe de un zarpazo y suelta un snack")
 	var raton_meson := _raton_en("cocina", Sala.SUELO - 108)
 	raton_meson.queue_free()
-	sala.valeria.mirando = -1.0
+	sala.valeria.mirando = 1.0
 	await _poner_en(Vector2(3540, Sala.SUELO - 108))
 	await _tocar("interactuar")
 	await _esperar(60)
@@ -263,11 +263,11 @@ func _correr() -> void:
 	await _poner_en(Vector2(5692, Sala.SUELO - 96))
 	await _esperar(40)
 	_comprobar(sala.calcetines == 3 and "Coleccionista de Calcetines" in sala.logros, "Los 3 calcetines van al nido: «Coleccionista de Calcetines»")
-	await _poner_en(Vector2(5990, Sala.SUELO))
+	await _poner_en(Vector2(5775, Sala.SUELO))
 	Input.action_press("mover_arriba")
 	await _esperar(40)
 	Input.action_release("mover_arriba")
-	_comprobar(felipe.is_on_floor() and felipe.global_position.y > Sala.SUELO - 2.0, "La cortina no se trepa todavía (lugar visto: Afilar Garras)")
+	_comprobar(felipe.is_on_floor() and felipe.global_position.y > Sala.SUELO - 40.0, "La cortina no se trepa todavía (lugar visto: Afilar Garras)")
 
 	# Estudio: entrar por la puerta (sin pantalla negra), la puerta del balcón cerrada y el teclado (secreta).
 	await _poner_en(sala.puertas["pasillo>estudio"].global_position)
@@ -291,7 +291,8 @@ func _correr() -> void:
 	for i in BatallaAspi.APAGADOS_TOTALES:
 		batalla.deposito = BatallaAspi.CAPACIDAD[batalla.apagados] - 1
 		batalla.agregar_mancha(sala.aspi.global_position)
-		await _esperar_que(func() -> bool: return batalla.llena, 400)
+		await _esperar_que(func() -> bool: return batalla.llena, 600)
+		await _esperar(25)
 		# Cae sobre ella desde un poco más arriba que su tapa (por debajo del escritorio, que se atraviesa desde abajo).
 		felipe.global_position = sala.aspi.global_position + Vector2(0, -62)
 		felipe.velocity = Vector2.ZERO

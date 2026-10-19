@@ -220,7 +220,7 @@ func _librero_y_escalera() -> void:
 func _pasillo() -> void:
 	# Baúl → consola: el vaso; sale A.S.P.I. a limpiar y Felipe se aferra.
 	await _ir_a(4168)
-	await _subir_a(4220, Sala.SUELO - 54)
+	await _subir_a(4220, Sala.SUELO - 47)
 	await _subir_a(4300, Sala.SUELO - 97)
 	await _ir_a(4382)
 	felipe.mirando = 1.0
@@ -244,7 +244,7 @@ func _pasillo() -> void:
 	Input.action_release("agacharse")
 	await _segundos(0.3)
 	await _ir_a(4168)
-	await _subir_a(4220, Sala.SUELO - 54)
+	await _subir_a(4220, Sala.SUELO - 47)
 	await _subir_a(4300, Sala.SUELO - 97)
 	await _ir_a(4335, 2.0)
 	await _segundos(0.4)

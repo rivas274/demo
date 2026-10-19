@@ -267,10 +267,12 @@ func empezar() -> void:
 	presentacion.pantallas = sala.pantallas
 	presentacion.frase_sin_vuelta = ["Felipe", Frases.FELIPE["quien_cerro"][0][0]]
 	presentacion.presentar(felipe, aspi, Rect2(arena.position.x, 0, arena.size.x, Sala.ALTO))
-	# En la pelea la puerta cerrada del balcón no se ofrece ("Probar" pisaba a A.S.P.I. llena: M3).
-	var balcon: Puerta = sala.puertas.get(Sala.PUERTA_BALCON)
-	if balcon:
-		balcon.ofrecer_cerrada = false
+	# En la pelea las puertas cerradas del estudio no se ofrecen: "Probar" pisaba a A.S.P.I. llena (M3) y, junto a la
+	# puerta de entrada, mantener la acción probaba la puerta en vez de comer un snack del bolsillo.
+	for nombre: String in [Sala.PUERTA_BALCON, "estudio<pasillo"]:
+		var puerta: Puerta = sala.puertas.get(nombre)
+		if puerta:
+			puerta.ofrecer_cerrada = false
 	empezada.emit()
 
 
@@ -709,6 +711,7 @@ func _terminar() -> void:
 	var puerta: Puerta = sala.puertas.get("estudio<pasillo")
 	if puerta:
 		puerta.cerrada = false
+		puerta.ofrecer_cerrada = true
 		puerta.queue_redraw()
 	Engine.time_scale = 0.3
 	presentacion.destello(1.0)

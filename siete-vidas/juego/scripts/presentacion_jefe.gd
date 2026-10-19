@@ -389,7 +389,14 @@ func _dibujar() -> void:
 		c.draw_set_transform(Vector2(tam.x * 0.5, tam.y * 0.3) + temblor, -0.03)
 		# Caja oscura detrás: el rojo no se pierde en el fondo en llamas (M1).
 		var ancho_rugido := fuente.get_string_size(texto_rugido, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
-		c.draw_rect(Rect2(-ancho_rugido / 2.0 - 12, -20, ancho_rugido + 24, 28), Color(0.06, 0.02, 0.05, 0.85))
+		# Cartela de alerta (crítica de Gemini): fondo semitransparente con marco rojo de 1 px y esquinas marcadas,
+		# para que el texto no compita con el contorno del jefe.
+		var cartela := Rect2(-ancho_rugido / 2.0 - 12, -20, ancho_rugido + 24, 28)
+		c.draw_rect(cartela.grow(2), Color(0.06, 0.02, 0.05, 0.5))
+		c.draw_rect(cartela, Color(0.06, 0.02, 0.05, 0.78))
+		c.draw_rect(cartela.grow(-2), Color("ff5a4a"), false, 1.0)
+		for esquina: Vector2 in [cartela.position, Vector2(cartela.end.x - 5, cartela.position.y), Vector2(cartela.position.x, cartela.end.y - 5), cartela.end - Vector2(5, 5)]:
+			c.draw_rect(Rect2(esquina, Vector2(5, 5)), Color("ff5a4a"))
 		c.draw_string_outline(fuente, Vector2(-ancho_rugido / 2.0, 0), texto_rugido, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, 5, Color.BLACK)
 		_texto_con_sombra(c, fuente, texto_rugido, 18, Color("ff7a6a"), Color.BLACK, Vector2(2, 2))
 		c.draw_set_transform(Vector2.ZERO)

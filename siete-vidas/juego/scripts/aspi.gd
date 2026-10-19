@@ -184,7 +184,14 @@ func _draw() -> void:
 	elif luz_aviso.a > 0.0:
 		luz = luz_aviso if Time.get_ticks_msec() % 160 < 80 else Color(1, 1, 1)
 		draw_circle(Vector2(_direccion * 18.0, -40.0), 7.0, Color(luz_aviso, 0.35))
-	draw_circle(Vector2(_direccion * 18.0, -40.0), 3.0, luz)
+	# LED más brillante (crítica de Gemini): halo que late, luz plena y un pixel blanco de brillo.
+	var led := Vector2(_direccion * 18.0, -40.0)
+	if not apagada:
+		draw_circle(led, 6.0, Color(luz, 0.22 + 0.12 * sin(Time.get_ticks_msec() * 0.006)))
+		draw_circle(led, 4.0, Color(luz, 0.45))
+	draw_circle(led, 3.0, luz.lightened(0.15) if not apagada else luz)
+	if not apagada:
+		draw_rect(Rect2(led + Vector2(-2, -2), Vector2(1, 1)), Color(1, 1, 1, 0.9))
 	if tapa > 0.0:
 		_dibujar_deposito_abierto()
 	draw_set_transform(Vector2.ZERO)

@@ -20,6 +20,15 @@ const COLOR_CONTORNO := Color(1.0, 0.97, 0.78)
 const FONDO := Color(0.13, 0.09, 0.12, 0.9)
 const BORDE := Color(0.95, 0.85, 0.6)
 const TEXTO := Color(1, 0.97, 0.92)
+## Placa del rótulo (crítica de Gemini: la caja se veía genérica): marco de madera de 2 px con canto claro arriba y
+## oscuro abajo, contorno casi negro, esquinas recortadas de pixel, filete crema por dentro (el borde del diálogo) y
+## sombra dura de 2 px. El interior es el del diálogo, para que todo el texto del juego se lea igual.
+const MADERA := Color("8a5a3c")
+const MADERA_CLARA := Color("c08a5a")
+const MADERA_OSCURA := Color("5a3626")
+const CONTORNO := Color("1e1214")
+const SOMBRA := Color(0.05, 0.02, 0.03, 0.45)
+const SOMBRA_TEXTO := Color(0.05, 0.02, 0.03, 0.9)
 ## Altura de la burbuja sobre los pies de Felipe (mide 67 px con la cola).
 const ALTURA_BURBUJA := 84.0
 const TAM_LETRA := 10
@@ -122,6 +131,35 @@ func _dibujar_contorno() -> void:
 			_contorno.draw_texture_rect_region(textura, rect.grow(1.0), Rect2(Vector2(-1, -1), tam + Vector2(2, 2)))
 
 
+func _dibujar_placa(caja: Rect2, punta: Vector2) -> void:
+	var marco := caja.grow(2.0)
+	var fuera := marco.grow(1.0)
+	# Sombra dura (abajo a la derecha), con el piquito.
+	_rect_recortado(Rect2(fuera.position + Vector2(2, 2), fuera.size), SOMBRA)
+	draw_colored_polygon(PackedVector2Array([punta + Vector2(-3, 4), punta + Vector2(7, 4), punta + Vector2(2, 9)]), SOMBRA)
+	# Contorno y marco de madera con esquinas recortadas.
+	_rect_recortado(fuera, CONTORNO)
+	draw_rect(marco, MADERA)
+	draw_rect(Rect2(marco.position, Vector2(marco.size.x, 1)), MADERA_CLARA)
+	draw_rect(Rect2(marco.position.x, marco.end.y - 1, marco.size.x, 1), MADERA_OSCURA)
+	# Piquito de madera hacia Felipe, con su contorno.
+	draw_colored_polygon(PackedVector2Array([punta + Vector2(-6, 1), punta + Vector2(6, 1), punta + Vector2(0, 7)]), CONTORNO)
+	draw_colored_polygon(PackedVector2Array([punta + Vector2(-4, 1), punta + Vector2(4, 1), punta + Vector2(0, 5)]), MADERA)
+	# Interior del diálogo y filete crema.
+	draw_rect(caja, Color(FONDO, 1.0))
+	draw_rect(Rect2(caja.position + Vector2(0.5, 0.5), caja.size - Vector2(1, 1)), Color(BORDE, 0.55), false, 1.0)
+	# Clavitos de bronce en las esquinas del marco.
+	for esquina: Vector2 in [marco.position + Vector2(1, 1), Vector2(marco.end.x - 2, marco.position.y + 1)]:
+		draw_rect(Rect2(esquina, Vector2(1, 1)), Color("e6c06a"))
+
+
+## Rectángulo con las cuatro esquinas recortadas un pixel (borde de pixel art, no una caja de interfaz lisa).
+func _rect_recortado(r: Rect2, color: Color) -> void:
+	draw_rect(Rect2(r.position.x + 1, r.position.y, r.size.x - 2, r.size.y), color)
+	draw_rect(Rect2(r.position.x, r.position.y + 1, 1, r.size.y - 2), color)
+	draw_rect(Rect2(r.end.x - 1, r.position.y + 1, 1, r.size.y - 2), color)
+
+
 ## ¿El objeto da su imagen para un contorno con forma? Si no, el contorno es un rectángulo.
 func _tiene_arte(cosa: Node2D) -> bool:
 	return cosa.has_method("arte_indicador") and not (cosa.call("arte_indicador") as Dictionary).is_empty()
@@ -148,12 +186,10 @@ func _draw() -> void:
 	# Aparece con un saltito (entero, para no emborronar los píxeles).
 	centro.y += roundf((1.0 - _aparecer) * 4.0)
 	var caja := Rect2((centro - tam / 2.0).round(), tam)
-	draw_rect(caja.grow(1.0), BORDE)
-	draw_rect(caja, FONDO)
-	# Piquito hacia Felipe.
-	var punta := Vector2(centro.x, caja.end.y)
-	draw_colored_polygon(PackedVector2Array([punta + Vector2(-4, 0), punta + Vector2(4, 0), punta + Vector2(0, 4)]), BORDE)
+	_dibujar_placa(caja, Vector2(centro.x, caja.end.y))
 	IconosBotones.dibujar(self, accion, caja.position + Vector2(4, 3), 14.0)
+	# Texto con sombra dura de 1 px, como el del diálogo y la libreta (misma letra).
+	draw_string(fuente, caja.position + Vector2(ancho_icono + 9.0, 15.0), verbo, HORIZONTAL_ALIGNMENT_LEFT, -1, TAM_LETRA, SOMBRA_TEXTO)
 	draw_string(fuente, caja.position + Vector2(ancho_icono + 8.0, 14.0), verbo, HORIZONTAL_ALIGNMENT_LEFT, -1, TAM_LETRA, TEXTO)
 	var progreso := felipe.progreso_comer_snack()
 	if progreso > 0.0 and objeto == null:

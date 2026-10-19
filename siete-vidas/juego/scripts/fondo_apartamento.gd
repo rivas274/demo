@@ -208,7 +208,9 @@ func _dibujar_pared(c: Node2D) -> void:
 		c.draw_rect(ventana.grow(3), MADERA_OSCURA, false, 6)
 		c.draw_line(Vector2(ventana.get_center().x, ventana.position.y), Vector2(ventana.get_center().x, ventana.end.y), MADERA_OSCURA, 4)
 		c.draw_line(Vector2(ventana.position.x, ventana.get_center().y), Vector2(ventana.end.x, ventana.get_center().y), MADERA_OSCURA, 4)
-		c.draw_rect(Rect2(ventana.position.x - 30, ventana.position.y - 18, ventana.size.x + 60, 5), MADERA_OSCURA)
+		# Barra de cortina (la del dormitorio viene con su cortina, en Sala._dibujar_cortina).
+		if ventana != Sala.VENTANA_DORMITORIO:
+			c.draw_rect(Rect2(ventana.position.x - 30, ventana.position.y - 18, ventana.size.x + 60, 5), MADERA_OSCURA)
 	# Piso de madera de cada habitación.
 	var madera := ArteNivel.textura("piso")
 	for habitacion: Array in Sala.HABITACIONES:

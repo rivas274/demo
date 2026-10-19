@@ -57,8 +57,10 @@ const DE_REOJO := 30.0
 const SIENTE_SOFA := 170.0
 ## Grabando, solo ve lo que tiene enfrente del celular.
 const VISTA_CELULAR := 150.0
-## Fila del arte "serie" que queda sobre el asiento (la cadera).
-const FILA_CADERA := 148
+## Fila del arte "serie" que queda sobre el asiento. Crítica de Gemini (2026-10-19): con 148 se veía flotando sobre
+## el cojín (los muslos 18 px sobre el asiento y los pies 10 px sobre el piso). Con 139 los pies tocan el piso (la
+## última fila del arte cae en SUELO) y el muslo queda sobre el cojín, que se hunde (sombra en _draw).
+const FILA_CADERA := 139
 ## Distancia a la que se para para regañar (no encima de Felipe).
 const DISTANCIA_REGANO := 58.0
 const ALTO := 200.0
@@ -599,6 +601,8 @@ func _draw() -> void:
 	pose_dibujada = nombre
 	_cuadro_actual = cuadro_caminar()
 	var alfa := _vano
+	if nombre == "serie" and _mezcla >= 1.0:
+		_cojin_hundido(alfa)
 	var hay_previa := _mezcla < 1.0 and not _previa.is_empty()
 	if hay_previa:
 		var desplazado: Vector2 = _previa["pos"] - global_position
@@ -669,6 +673,14 @@ func _dibujar_mascarilla(nombre: String, tam: Vector2, cuadro: int, alfa: float)
 	for pliegue in 2:
 		var y := r.position.y + 4.0 + pliegue * 3.0
 		draw_line(Vector2(r.position.x + 3, y), Vector2(r.end.x - 3, y), Color(0.55, 0.68, 0.76, alfa), 1.0)
+
+
+## Sombra del cojín hundido bajo Valeria sentada (crítica de Gemini: que no flote sobre el sofá). En pixeles: dos
+## franjas, la de abajo más oscura, sin degradado suave.
+func _cojin_hundido(alfa: float) -> void:
+	var lado := mirando
+	draw_rect(Rect2(-24.0 + lado * 4.0, -9.0, 50.0, 4.0), Color(0.25, 0.08, 0.06, 0.18 * alfa))
+	draw_rect(Rect2(-20.0 + lado * 4.0, -5.0, 42.0, 5.0), Color(0.25, 0.08, 0.06, 0.30 * alfa))
 
 
 ## Corazón roto sobre la cabeza: lo que se arregla frotándose (propuesta v4, sección 5).

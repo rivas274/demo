@@ -35,9 +35,13 @@ const HABITACIONES := [
 const RUTA := ["sala", "recibidor", "cocina", "pasillo", "dormitorio", "estudio", "balcon"]
 ## Ventanas recortadas en la pared (se ve la ciudad). La de la sala y la del pasillo son arte con su propia vista.
 ## La del dormitorio está entre la cómoda y el ropero: su alféizar es la repisa (1,20 m) y la cortina cuelga a sus
-## lados desde la barra (G4; dibujada por código hasta que llegue el arte nuevo de Gemini).
+## lados desde la barra (arte de Gemini, `cortina.png`).
 const VENTANAS := [Rect2(3160, 130, 140, 120), VENTANA_DORMITORIO, Rect2(6440, 90, 140, 100)]
 const VENTANA_DORMITORIO := Rect2(5748, 190, 56, 108)
+## Cortina del dormitorio: cuánto tapa cada paño de la ventana y dónde termina la tela en el arte (45 px: remate de
+## 8 px, tela de 34 y 3 px de barra).
+const CORTINA_ADENTRO := 9.0
+const CORTINA_FIN_TELA := 42.0
 ## Vidrio de la ventana del pasillo (en el mundo): la caja de pizza del lugar visto queda detrás, sobre el toldo (G3).
 ## La ventana se alarga por arriba con código (M7): vidrio de 68 px de alto, no una franja de 29.
 const VIDRIO_PASILLO := Rect2(4337, SUELO - 227, 86, 68)
@@ -79,7 +83,7 @@ const ESCALERA_RECT := Rect2(2322, SUELO - 300, 318, 300)
 ## "mueble" (detrás de Felipe) y "escalera" (peldaños y vano, detrás de Felipe).
 const ARTE := [
 	["ventana_sala", Vector2(170, 298), false, "pared"],
-	["retrato", Vector2(792, 230), false, "pared"],
+	["retrato", Vector2(792, 246), false, "pared"],  # bajado 16 px: la barra del HUD le tapaba el marco (autocrítica)
 	["silla_v2", Vector2(680, SUELO), false, "mueble"],
 	["mesa_v2", Vector2(745, SUELO), false, "mueble"],
 	["silla_v2", Vector2(929, SUELO), true, "mueble"],
@@ -89,7 +93,7 @@ const ARTE := [
 	["librero_v2", Vector2(2162, SUELO), false, "mueble"],
 	["escalera_peldanos", Vector2(2322, SUELO), true, "escalera"],
 	["vano", Vector2(2500, SUELO - 150), false, "escalera"],
-	["reloj", Vector2(3077, 200), false, "pared"],
+	["reloj", Vector2(3075, 197), false, "pared"],  # 41 × 43: 10 % más chico y más lejos de la ventana (Gemini)
 	["silla_v2", Vector2(3400, SUELO), false, "mueble"],
 	["alacenas", Vector2(3461, SUELO - 182), false, "pared"],
 	["meson", Vector2(3464, SUELO), false, "mueble"],
@@ -97,10 +101,10 @@ const ARTE := [
 	["refrigerador", Vector2(3674, SUELO), false, "mueble"],
 	["baul", Vector2(4186, SUELO), false, "mueble"],
 	["aparador", Vector2(4256, SUELO), false, "mueble"],
-	["retrato_familiar", Vector2(4642, 212), false, "pared"],
+	["retrato_familiar", Vector2(4642, 226), false, "pared"],  # bajado 14 px (HUD)
 	["ventana_pasillo", Vector2(4260, SUELO - 138), false, "pared"],
 	["cojin", Vector2(4784, SUELO), false, "mueble"],
-	["paisaje", Vector2(5480, 200), false, "pared"],
+	["paisaje", Vector2(5480, 214), false, "pared"],  # bajado 14 px (HUD)
 	["banquito", Vector2(5386, SUELO), false, "mueble"],
 	["cama", Vector2(5444, SUELO), false, "mueble"],
 	["comoda", Vector2(5650, SUELO), false, "mueble"],
@@ -190,7 +194,7 @@ const LASER := [Vector2(4700, SUELO), 4640.0, 4780.0]
 const TIRABLES := [
 	[Vector2(905, SUELO - 91), "vaso"],
 	[Vector2(1766, SUELO - 97), "llaves"],
-	[Vector2(4395, SUELO - 97), "vaso"],
+	[Vector2(4378, SUELO - 97), "vaso"],  # bien adentro de la consola (Gemini: rozaba el borde)
 	[Vector2(6515, SUELO - 98), "vaso"],
 	[Vector2(6612, SUELO - 98), "rollo"],
 	[Vector2(6650, SUELO - 151), "maceta"],
@@ -641,7 +645,8 @@ func _physics_process(delta: float) -> void:
 	if habitacion == "pasillo":
 		# El vapor de la pizza se mueve.
 		(_lienzos["pared"] as Node2D).queue_redraw()
-	if not _calcetines_volando.is_empty():
+	if not _calcetines_volando.is_empty() or habitacion == "estudio":
+		# En el estudio la serie del monitor titila.
 		_decorado.queue_redraw()
 	if not _jirones.is_empty():
 		for j: Array in _jirones:
@@ -1319,11 +1324,38 @@ func _dibujar_arte(c: Node2D, capa: String) -> void:
 		_dibujar_descanso(c)
 	elif capa == "pared":
 		_dibujar_ventana_pasillo(c)
+		_dibujar_sombras_de_contacto(c)
 	elif capa == "mueble":
 		_dibujar_sofa(c)
 		# Imanes del refrigerador.
 		for iman: Array in [["iman_manzana", Vector2(3700, SUELO - 150)], ["iman_foto", Vector2(3722, SUELO - 166)], ["iman_pez", Vector2(3708, SUELO - 128)], ["iman_naranja", Vector2(3730, SUELO - 140)]]:
 			ArteNivel.dibujar(c, iman[0], iman[1].x, iman[1].y)
+
+
+## Sombras de contacto (crítica de Gemini): cada mueble que se apoya en el piso deja una sombra dura de pixel en su
+## base (dos franjas, la de abajo más angosta), así no parece pegado sobre la madera. Va en la capa de la pared:
+## debajo de los muebles y de Felipe. La lámpara del recibidor además deja un charco de luz cálida en el piso.
+const SIN_SOMBRA := ["escalera_peldanos", "vano"]
+
+
+func _dibujar_sombras_de_contacto(c: Node2D) -> void:
+	var piezas: Array = []
+	for datos: Array in ARTE:
+		if datos[3] == "mueble" and is_equal_approx(datos[1].y, SUELO) and not datos[0] in SIN_SOMBRA:
+			piezas.append(datos)
+	piezas.append_array(ARTE_EXTRA)
+	for datos: Array in piezas:
+		var textura := ArteNivel.textura(datos[0])
+		if textura == null:
+			continue
+		var x: float = datos[1].x
+		var ancho := float(textura.get_width())
+		c.draw_rect(Rect2(x - 3.0, SUELO - 1.0, ancho + 6.0, 3.0), Color(0.12, 0.05, 0.03, 0.22))
+		c.draw_rect(Rect2(x + 2.0, SUELO + 2.0, ancho - 4.0, 2.0), Color(0.12, 0.05, 0.03, 0.16))
+	# Charco de luz de la lámpara de pie, en franjas (no un degradado suave).
+	var lampara := Vector2(1959, SUELO)
+	for franja: Vector3 in [Vector3(70, 0, 0.07), Vector3(50, 2, 0.08), Vector3(30, 4, 0.1)]:
+		c.draw_rect(Rect2(lampara.x - franja.x / 2.0, lampara.y + franja.y, franja.x, 8.0 - franja.y), Color(1.0, 0.85, 0.5, franja.z))
 
 
 ## Descanso de la escalera (M1): un rellano grueso, como un escalón ancho, con el faldón cerrado hasta el piso
@@ -1412,43 +1444,25 @@ func _dibujar_ventana_pasillo(c: Node2D) -> void:
 		]), Color(1, 1, 1, 0.16))
 
 
-## Cortina del dormitorio (G4, provisional hasta el arte de Gemini): barra con remates, argollas y dos paños con
-## pliegues y borde ondulado a los lados de la ventana. Llega a la repisa alta (lugar visto: se trepa con Afilar
-## Garras) y la cesta queda a su pie.
+## Cortina del dormitorio (arte de Gemini, `dormitorio-cortina-alta`): dos paños, el derecho en espejo, colgados de
+## una sola barra con un remate en cada punta; el tramo de barra entre los paños se estira desde una columna de la
+## misma barra (`cortina_barra`). Va del piso a la barra (277 px, el alto de la cortina por código que reemplazó),
+## detrás de la cómoda, la cesta y el ropero. Llega a la repisa alta (lugar visto: se trepará con Afilar Garras; en
+## el nivel 1 no es trepable ni tiene colisión, igual que la cortina por código).
 func _dibujar_cortina(c: Node2D) -> void:
-	var ventana := VENTANA_DORMITORIO
-	var barra_y := ventana.position.y - 18.0
-	var izquierda := ventana.position.x - 30.0
-	var derecha := ventana.end.x + 30.0
-	var oscuro := Color("241c1a")
-	# Remates de la barra (la barra la dibuja la pared sobre cada ventana).
-	for x: float in [izquierda - 3.0, derecha + 3.0]:
-		c.draw_circle(Vector2(x, barra_y + 2.5), 5.0, oscuro)
-		c.draw_circle(Vector2(x, barra_y + 2.5), 4.0, Color("c9a24a"))
-		c.draw_rect(Rect2(x - 1, barra_y - 1, 2, 2), Color("f0d27a"))
-	var tela := Color("c0603f")
-	var sombra := Color("8f3f2a")
-	var luz := Color("dd8160")
-	for paño: Array in [[ventana.position.x - 12.0, 22.0], [ventana.end.x - 10.0, 22.0]]:
-		var x0: float = paño[0]
-		var ancho: float = paño[1]
-		var arriba := barra_y + 4.0
-		var abajo := SUELO - 2.0
-		# Borde inferior ondulado.
-		var contorno := PackedVector2Array([Vector2(x0, arriba), Vector2(x0 + ancho, arriba)])
-		for i in range(6, -1, -1):
-			var x := x0 + ancho * i / 6.0
-			contorno.append(Vector2(x, abajo - (2.0 if i % 2 == 0 else 0.0)))
-		c.draw_colored_polygon(contorno, tela)
-		# Pliegues: franjas de sombra y de luz.
-		for i in 4:
-			var x := x0 + 2.0 + i * 5.5
-			c.draw_rect(Rect2(x, arriba, 2, abajo - arriba - 2), sombra)
-			c.draw_rect(Rect2(x + 2, arriba, 1, abajo - arriba - 2), luz)
-		c.draw_polyline(contorno + PackedVector2Array([contorno[0]]), oscuro, 1.0)
-		# Argollas en la barra.
-		for i in 4:
-			c.draw_arc(Vector2(x0 + 3.0 + i * 5.5, barra_y + 3.0), 2.5, 0.0, TAU, 8, Color("c9a24a"), 1.0)
+	var textura := ArteNivel.textura("cortina")
+	if textura == null:
+		return
+	var ancho := float(textura.get_width())
+	var arriba := SUELO - 1.0 - textura.get_height()
+	var izquierda := VENTANA_DORMITORIO.position.x + CORTINA_ADENTRO - CORTINA_FIN_TELA
+	var derecha := VENTANA_DORMITORIO.end.x - CORTINA_ADENTRO + CORTINA_FIN_TELA
+	var barra := ArteNivel.textura("cortina_barra")
+	if barra:
+		var desde := izquierda + ancho
+		c.draw_texture_rect(barra, Rect2(desde, arriba + 1.0, derecha - ancho - desde, barra.get_height()), false)
+	ArteNivel.dibujar(c, "cortina", izquierda + ancho / 2.0, SUELO - 1.0)
+	ArteNivel.dibujar(c, "cortina", derecha - ancho / 2.0, SUELO - 1.0, true)
 
 
 func _dibujar_sofa(c: Node2D) -> void:
@@ -1488,6 +1502,8 @@ func _dibujar_decorado() -> void:
 	# Halo de la lámpara junto a la caja de arena (hito del descanso).
 	c.draw_circle(Vector2(1959, SUELO - 140), 30.0, Color(1.0, 0.9, 0.5, 0.15))
 	# Escritorio de Valeria: el monitor y la impresora son arte (arriba-extra); la pantalla cambia al pisar el teclado.
+	if not _teclado_pisado:
+		_dibujar_serie(c)
 	if _teclado_pisado:
 		c.draw_rect(PANTALLA_MONITOR, Color("dfe8f2"))
 		for fila in 3:
@@ -1507,6 +1523,41 @@ func _dibujar_decorado() -> void:
 	if _cajon_abierto:
 		c.draw_rect(Rect2(CAJON.x - 8, CAJON.y - 8, 30, 10), Color("6e3a26"))
 		c.draw_rect(Rect2(CAJON.x - 6, CAJON.y - 10, 26, 4), Color("e59aa2"))
+
+
+## Pantalla del monitor de Valeria (crítica de Gemini: era un rectángulo azul plano). Su serie, en pixeles: noche
+## azul en franjas, una lámpara, dos siluetas que se miran y un corazón que late; brillo que titila como una pantalla
+## de verdad, un reflejo duro arriba a la izquierda y un poco de luz azul sobre el escritorio. El teclado (delante)
+## tapa la mitad de abajo.
+func _dibujar_serie(c: Node2D) -> void:
+	var r := Rect2(PANTALLA_MONITOR.position + Vector2(0, 1), Vector2(PANTALLA_MONITOR.size.x - 1, 17))
+	var bandas := [Color("1d2547"), Color("26355c"), Color("30486e"), Color("3a5a7c")]
+	for i in bandas.size():
+		c.draw_rect(Rect2(r.position.x, r.position.y + i * 4.0, r.size.x, 4.0 if i < bandas.size() - 1 else r.size.y - i * 4.0), bandas[i])
+	# Lámpara de la escena y su halo.
+	c.draw_rect(Rect2(r.position + Vector2(26, 3), Vector2(4, 4)), Color(1.0, 0.85, 0.45, 0.35))
+	c.draw_rect(Rect2(r.position + Vector2(27, 4), Vector2(2, 2)), Color("ffe08a"))
+	# Dos siluetas que se miran (cabeza, cuello y hombros), oscuras contra la noche.
+	var sombra := Color("0d1020")
+	for persona: Vector3 in [Vector3(7, 6, 1), Vector3(17, 5, -1)]:
+		var p := r.position + Vector2(persona.x, persona.y)
+		c.draw_rect(Rect2(p, Vector2(4, 4)), sombra)
+		c.draw_rect(Rect2(p + Vector2(1 + persona.z, 1), Vector2(1, 1)), sombra)
+		c.draw_rect(Rect2(p + Vector2(1, 4), Vector2(2, 1)), sombra)
+		c.draw_rect(Rect2(p + Vector2(-1, 5), Vector2(6, 8)), sombra)
+	# Corazón entre las dos (late con la escena).
+	if int(tiempo * 2.0) % 2 == 0:
+		var h := r.position + Vector2(13, 3)
+		c.draw_rect(Rect2(h, Vector2(1, 1)), Color("ff7a9a"))
+		c.draw_rect(Rect2(h + Vector2(2, 0), Vector2(1, 1)), Color("ff7a9a"))
+		c.draw_rect(Rect2(h + Vector2(0, 1), Vector2(3, 1)), Color("ff7a9a"))
+		c.draw_rect(Rect2(h + Vector2(1, 2), Vector2(1, 1)), Color("ff7a9a"))
+	# Brillo de pantalla que titila y reflejo duro arriba a la izquierda.
+	c.draw_rect(r, Color(0.7, 0.9, 1.0, 0.06 + 0.04 * sin(tiempo * 7.0)))
+	c.draw_rect(Rect2(r.position + Vector2(1, 1), Vector2(6, 1)), Color(1, 1, 1, 0.45))
+	c.draw_rect(Rect2(r.position + Vector2(1, 2), Vector2(2, 1)), Color(1, 1, 1, 0.3))
+	# Luz azul de la pantalla sobre el escritorio, delante del monitor.
+	c.draw_rect(Rect2(r.position.x - 6.0, SUELO - 98.0, r.size.x + 12.0, 2.0), Color(0.6, 0.85, 1.0, 0.12))
 
 
 ## Teclado de Valeria (G7): en perspectiva, del tamaño declarado en TECLADO (52 × 24), con cuatro filas de teclas.
@@ -1531,8 +1582,13 @@ func _dibujar_teclado(c: Node2D) -> void:
 
 
 ## Ropa doblada de la cama (arriba-extra, 52 × 48): limpia y, después de que Felipe se acicala encima, con pelos.
+## Se hunde 3 px en el edredón (autocrítica de la crítica de Gemini): el arte termina en una punta angosta de sombra y,
+## apoyado justo en el colchón, la pila se veía flotando.
+const ROPA_HUNDIDA := 3.0
+
+
 func _dibujar_ropa(c: Interactivo) -> void:
-	ArteNivel.dibujar(c, "ropa_pelos" if _ropa_firmada else "ropa_limpia", 0.0, 0.0)
+	ArteNivel.dibujar(c, "ropa_pelos" if _ropa_firmada else "ropa_limpia", 0.0, ROPA_HUNDIDA)
 
 
 ## Fachada bajo el balcón y el toldo rayado de la panadería donde aterriza Felipe al saltar (G1). Simplificada al

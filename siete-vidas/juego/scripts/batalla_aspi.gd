@@ -761,6 +761,11 @@ func _dibujar_imaginacion() -> void:
 		var mira := 1.0 if felipe.global_position.x >= centro.x else -1.0
 		c.draw_set_transform(centro, sin(tiempo * 1.3) * 0.03 * k, Vector2(escala * mira, escala))
 		c.draw_texture(arte, -tam / 2.0)
+		# Luz de borde cálida del incendio (crítica de Gemini): la silueta oscura no se funde con el fondo. Late con
+		# las llamas y crece con la imaginación (en la A.S.P.I. chica no se nota).
+		var luz := ArteNivel.textura("aspi_gigante_luz")
+		if luz:
+			c.draw_texture(luz, -tam / 2.0, Color(1, 1, 1, k * (0.8 + 0.2 * sin(tiempo * 9.0))))
 		c.draw_set_transform(Vector2.ZERO)
 
 

@@ -56,7 +56,7 @@ PIEZAS = {
     "mancha": ("detalles", 8, (60, 20), None),
     "retrato": ("cuadros", 0, (84, 100), None),  # retrato oficial de Su Majestad
     "paisaje": ("cuadros", 1, (64, 66), None),
-    "reloj": ("cuadros", 2, (46, 48), None),
+    "reloj": ("cuadros", 2, (41, 43), None),  # 10 % más chico que antes: competía con la ventana (crítica de Gemini)
     # Tanda 3A (nivel 1 v4): piezas rehechas que calzan con las colisiones.
     "puerta_abierta_v2": ("puertas-v2", 0, (140, 248), None),
     "puerta_cerrada_v2": ("puertas-v2", 1, (128, 248), None),
@@ -136,6 +136,12 @@ VALERIA_POSES = ("valeria-poses", ["neutra", "enojada", "perdonando", "grabando"
 VALERIA_CAMINAR_SPRITECOOK = RAIZ / "arte" / "valeria" / "valeria-caminar-spritecook.png"
 VALERIA_CUADROS = 8
 VALERIA_ALTO = 200
+
+# Cortina del dormitorio (dormitorio-cortina-alta, crítica de Gemini): un paño con barra y dos remates. Se corta el
+# remate de la derecha (x ≥ 390 del original) para usarlo como paño izquierdo y, en espejo, como el derecho; la barra
+# del medio se estira desde una columna de la misma barra (cortina_barra). Alto en el juego = el de la cortina por
+# código que reemplaza: de la barra (SUELO - 278) al piso.
+CORTINA = ("dormitorio-cortina-alta", (44, 28, 390, 2179), 277)
 
 # Texturas que se repiten: nombre -> (hoja, índice, tamaño del mosaico, suavizado).
 # El suavizado (0 a 1) acerca cada pixel al color promedio: las paredes no deben competir con Felipe (regla R14).
@@ -301,6 +307,125 @@ def preparar_valeria_caminar():
           f"cuadro (pares {[i for i, _ in medidas]}: {[d for _, d in medidas]})")
 
 
+def vaso_en_pixeles(imagen):
+    """Vaso de agua (crítica de Gemini: se veía de vector, con degradados suaves y reflejos que no son de pixel).
+    Deja el contorno oscuro y el dibujo de Gemini, pero el agua (desde la fila 11) pasa a un azul más hondo en dos
+    tonos planos, la superficie es una fila clara de 1 px y los reflejos son duros: una columna blanca en la pared
+    izquierda y un brillo de 2 x 2 arriba a la derecha."""
+    a = np.asarray(imagen).copy()
+    interior = (a[:, :, 3] > 0) & (a[:, :, :3].max(axis=2) > 100)
+    agua_clara, agua_honda, superficie, blanco = (138, 192, 218), (104, 160, 196), (206, 242, 250), (246, 252, 255)
+    for y in range(11, a.shape[0]):
+        for x in np.where(interior[y])[0][2:-2]:
+            a[y, x, :3] = agua_honda if a[y, x, :3].sum() < 520 else agua_clara
+    for x in np.where(interior[11])[0][1:-1]:
+        a[11, x, :3] = superficie
+    for y in range(13, 26):
+        fila = np.where(interior[y])[0]
+        if len(fila) > 4:
+            a[y, fila[0] + 2, :3] = blanco
+    for y, x in [(13, 18), (13, 19), (14, 18), (14, 19), (16, 19)]:
+        if interior[y, x]:
+            a[y, x, :3] = blanco
+    return Image.fromarray(a, "RGBA")
+
+
+def maceta_contrastada(imagen):
+    """Maceta de la repisa del estudio (crítica de Gemini): la terracota se perdía contra la pared mostaza. Oscurece
+    solo la maceta (pixeles rojizos de la mitad de abajo), no las flores ni las hojas."""
+    a = np.asarray(imagen).copy().astype(int)
+    alto = a.shape[0]
+    rojizo = (a[:, :, 0] > a[:, :, 1] + 30) & (a[:, :, 3] > 0)
+    rojizo[: int(alto * 0.45)] = False
+    a[rojizo, :3] = (a[rojizo, :3] * np.array([0.78, 0.72, 0.72])).astype(int)
+    return Image.fromarray(a.astype(np.uint8), "RGBA")
+
+
+def luz_de_borde(nombre, desde=((0, -1), (1, -1)), color=(255, 168, 92)):
+    """Luz de borde (rim light) de una pieza: una franja de 2 px por DENTRO del contorno, del lado de la luz (`desde`),
+    solo sobre el metal (pixeles oscuros del cuerpo principal: no el humo ni las chispas sueltas). Se guarda aparte
+    (<nombre>_luz.png) y se dibuja encima con la misma transformación. Para la A.S.P.I. gigante (crítica de Gemini): su
+    silueta oscura se fundía con el fondo; la luz viene del incendio de arriba (`desde`: direcciones hacia la luz)."""
+    a = np.asarray(Image.open(DESTINO / f"{nombre}.png"))
+    opaco = a[:, :, 3] > 0
+    etiquetas, _ = ndimage.label(opaco)
+    tamanos = ndimage.sum(opaco, etiquetas, range(1, etiquetas.max() + 1))
+    cuerpo = etiquetas == (int(np.argmax(tamanos)) + 1)
+
+    def lleno_hacia_la_luz(pasos, direccion):
+        dx, dy = direccion[0] * pasos, direccion[1] * pasos
+        movido = np.zeros_like(cuerpo)
+        alto, ancho = cuerpo.shape
+        movido[max(0, -dy):alto - max(0, dy), max(0, -dx):ancho - max(0, dx)] = \
+            cuerpo[max(0, dy):alto + min(0, dy) or None, max(0, dx):ancho + min(0, dx) or None]
+        return movido
+
+    # Metal gris: ni el contorno casi negro ni el humo claro.
+    brillo = a[:, :, :3].max(axis=2)
+    metal = (brillo > 60) & (brillo < 170)
+    franja = np.zeros_like(cuerpo)
+    for direccion in desde:
+        franja |= cuerpo & metal & ~lleno_hacia_la_luz(9, direccion)
+    salida = np.zeros_like(a)
+    salida[franja, :3] = color
+    salida[franja, 3] = 210
+    Image.fromarray(salida, "RGBA").save(DESTINO / f"{nombre}_luz.png")
+
+
+def vano_con_hondura(imagen):
+    """Vano del arco (crítica de Gemini, que lo llamó "ratonera"): el negro plano no tenía hondura. Pone un borde
+    interior en sombra, en tres franjas de pixel (marrón oscuro a negro) a lo largo del arco y de los costados; el
+    piso no (el hueco se abre hacia abajo)."""
+    a = np.asarray(imagen).copy()
+    oscuro = (a[:, :, 3] > 0) & (a[:, :, :3].max(axis=2) < 45)
+    etiquetas, _ = ndimage.label(oscuro)
+    tamanos = ndimage.sum(oscuro, etiquetas, range(1, etiquetas.max() + 1))
+    hueco = etiquetas == (int(np.argmax(tamanos)) + 1)
+    # La fila de abajo cuenta como hueco: la distancia se mide solo al arco y a los costados.
+    con_piso = np.vstack([hueco, np.ones((8, hueco.shape[1]), bool) & hueco[-1:]])
+    distancia = ndimage.distance_transform_cdt(con_piso, metric="chessboard")[: hueco.shape[0]]
+    for desde, hasta, color in [(1, 2, (62, 36, 28)), (3, 4, (42, 25, 21)), (5, 7, (27, 15, 16))]:
+        franja = hueco & (distancia >= desde) & (distancia <= hasta)
+        a[franja, :3] = color
+    return Image.fromarray(a, "RGBA")
+
+
+def baranda_con_brillo(imagen):
+    """Baranda del balcón (crítica de Gemini): brillo cálido del atardecer en el borde de arriba del pasamanos de hierro
+    (fila 39, la de la colisión), para que se lea en primer plano frente a la ciudad. Solo el hierro gris, no las
+    macetas."""
+    a = np.asarray(imagen).copy().astype(int)
+    fila = 39
+    hierro = (a[fila, :, 3] > 0) & (a[fila, :, 0] - a[fila, :, 2] < 30)
+    a[fila, hierro, :3] = (238, 182, 130)
+    # Medio tono debajo (fila 41), más tenue.
+    hierro_abajo = (a[fila + 2, :, 3] > 0) & (a[fila + 2, :, 0] - a[fila + 2, :, 2] < 40)
+    a[fila + 2, hierro_abajo, :3] = (a[fila + 2, hierro_abajo, :3] * 0.6 + np.array([238, 182, 130]) * 0.4).astype(int)
+    return Image.fromarray(a.astype(np.uint8), "RGBA")
+
+
+def preparar_cortina():
+    archivo, caja, alto = CORTINA
+    imagen, _ = sin_fondo(Image.open(ORIGEN / f"{archivo}.png"))
+    recorte = sin_huecos(recortar_opaco(imagen.crop(caja)))
+    ancho = round(recorte.width * alto / recorte.height)
+    final = escalar(recorte, (ancho, alto))
+    # Restos claros del blanco entre las argollas (la tela y la barra no tienen ningún color tan claro).
+    a = np.asarray(final).copy()
+    a[a[:, :, :3].min(axis=2) > 180, 3] = 0
+    final = Image.fromarray(a, "RGBA")
+    final.save(DESTINO / "cortina.png")
+    # Barra: la penúltima columna del paño, solo las filas de la barra (opacas arriba, antes de la tela).
+    a = np.asarray(final)
+    columna = a[:, final.width - 2:final.width - 1].copy()
+    filas = np.where(columna[:, 0, 3] > 0)[0]
+    fin = filas[0]
+    while fin + 1 < len(columna) and columna[fin + 1, 0, 3] > 0:
+        fin += 1
+    Image.fromarray(columna[filas[0]:fin + 1], "RGBA").save(DESTINO / "cortina_barra.png")
+    print(f"Cortina: {final.width} x {final.height}; barra de {fin + 1 - filas[0]} px desde la fila {filas[0]}")
+
+
 def recortar(imagen, caja, fraccion):
     if fraccion:
         x0, y0, x1, y1 = caja
@@ -335,6 +460,14 @@ def main():
                 for x in range(x0, x1):
                     a[y0:y1, x] = original[y0:y1, desde + (x - desde) % periodo]
             final = Image.fromarray(a, "RGBA")
+        if nombre == "vaso":
+            final = vaso_en_pixeles(final)
+        if nombre == "baranda":
+            final = baranda_con_brillo(final)
+        if nombre == "vano":
+            final = vano_con_hondura(final)
+        if nombre == "maceta":
+            final = maceta_contrastada(final)
         if nombre in PARCHES:
             original = np.asarray(final).copy()
             a = original.copy()
@@ -349,6 +482,11 @@ def main():
         x0, y0, x1, y1 = cajas[indice]
         # Un margen adentro para no arrastrar el borde de la muestra.
         recorte = imagen.crop((x0 + 6, y0 + 6, x1 - 6, y1 - 6)).resize(tamano, Image.NEAREST)
+        # Un mosaico de pared o piso es opaco entero: el quitado del halo del JPEG dejaba pixeles claros transparentes
+        # en los bordes, y por esas costuras se veía la ciudad de atrás (líneas punteadas en la cocina; autocrítica).
+        a = np.asarray(recorte).copy()
+        a[:, :, 3] = 255
+        recorte = Image.fromarray(a, "RGBA")
         if suavizado:
             a = np.asarray(recorte).astype(float)
             promedio = a[:, :, :3].reshape(-1, 3).mean(axis=0)
@@ -370,7 +508,9 @@ def main():
         if fraccion:
             imagen = recortar(imagen, (0, 0, imagen.width, imagen.height), fraccion)
         imagen.resize(tamano, Image.NEAREST).save(DESTINO / f"{nombre}.png")
-    print(f"{len(PIEZAS) + len(MOSAICOS) + len(FONDOS)} imágenes en {DESTINO}")
+    preparar_cortina()
+    luz_de_borde("aspi_gigante")
+    print(f"{len(PIEZAS) + len(MOSAICOS) + len(FONDOS) + 3} imágenes en {DESTINO}")
     preparar_valeria()
 
 

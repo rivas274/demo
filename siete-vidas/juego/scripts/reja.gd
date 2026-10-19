@@ -88,15 +88,19 @@ func arte_indicador() -> Dictionary:
 	return ArteNivel.arte_en(self, "reja_frente", 0.0, 0.0)
 
 
+## Tinte crema / gris cálido (crítica de Gemini): el blanco puro chocaba con la madera de la escalera.
+const TINTE := Color(0.9, 0.85, 0.76)
+
+
 func _draw() -> void:
 	if abierta_ya:
 		# Abierta: girada contra el librero (se ve angosta, de canto).
 		var arte := ArteNivel.textura("reja_frente")
 		if arte:
 			var ancho := lerpf(ANCHO_DIBUJO, 14.0, _apertura)
-			draw_texture_rect(arte, Rect2(-ANCHO_DIBUJO / 2.0, -arte.get_height(), ancho, arte.get_height()), false, Color(0.92, 0.9, 0.88))
+			draw_texture_rect(arte, Rect2(-ANCHO_DIBUJO / 2.0, -arte.get_height(), ancho, arte.get_height()), false, TINTE * Color(0.92, 0.9, 0.88))
 		return
-	if not ArteNivel.dibujar(self, "reja_frente", 0.0, 0.0):
+	if not ArteNivel.dibujar(self, "reja_frente", 0.0, 0.0, false, TINTE):
 		draw_rect(Rect2(-ANCHO_DIBUJO / 2.0, -rect.size.y, ANCHO_DIBUJO, rect.size.y), Color(0.93, 0.9, 0.84), false, 3.0)
 	# Cartel de cartón de Valeria, pegado con cinta (el texto lo pone el código: Gemini escribe mal).
 	var fuente := ThemeDB.fallback_font

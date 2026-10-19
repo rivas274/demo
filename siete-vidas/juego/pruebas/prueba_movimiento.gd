@@ -94,8 +94,9 @@ func _correr() -> void:
 	Input.action_release("zarpazo")
 	_comprobar(felipe.sprite.animation == "zarpazo", "El zarpazo reproduce su animación")
 
-	# Botón de acción: solo hace algo si hay un objeto cerca.
+	# Botón de acción: solo hace algo si hay un objeto cerca (lejos del sofá arañable).
 	await _esperar(40)
+	await _poner_en(felipe, Vector2(120, Sala.SUELO))
 	await _tocar("interactuar")
 	_comprobar(felipe.estado != Felipe.Estado.COMIENDO, "Sin comida cerca, el botón de acción no hace nada")
 

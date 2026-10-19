@@ -1,0 +1,248 @@
+class_name Dialogo
+extends CanvasLayer
+## Cuadro de diálogo abajo, con retrato (pilar 5): los pensamientos de Felipe (sus 9 caras de
+## felipe-retratos.png) y lo que dicen los otros personajes (Valeria, A.S.P.I.).
+## - Una sola cola para todos: nadie contesta tarde ni se pisan (en el prototipo Felipe respondía a Valeria
+##   cuando ella ya se había ido).
+## - Frases de 1 o 2 líneas; se escriben letra a letra, se cierran solas y se saltan (Enter o LB).
+## - No repite la misma frase seguida y descarta las que esperaron demasiado en la cola.
+## - {acción} dentro del texto se cambia por el ícono del botón en uso (por ejemplo "{maullar} Servidumbre: abran.").
+
+signal dicho(quien: String, texto: String)
+
+const RETRATOS_FELIPE := "res://assets/felipe/felipe-retratos.png"
+## Hoja de Valeria y A.S.P.I. (Gemini, tanda 3B; la recorta herramientas/preparar_retratos.py): 3 x 2 cuadros.
+## Si falta, se usa el retrato provisional dibujado por código (RetratoValeria).
+const RETRATOS_OTROS := "res://assets/personajes/retratos-valeria-aspi.png"
+## Personajes: nombre en pantalla, hoja, columnas y cuadro de la hoja para cada ánimo.
+## Felipe (3 x 3): 0 de reojo, 1 orejas planas, 2 sorprendido, 3 ojos cerrados, 4 sonrisa leve, 5 asqueado,
+## 6 feliz, 7 presumido, 8 bufando. Valeria: 0 neutra, 1 enojada, 2 derretida, 3 grabando. A.S.P.I.: 0 normal, 1 alerta.
+const PERSONAJES := {
+	"felipe": {"nombre": "FELIPE", "hoja": RETRATOS_FELIPE, "columnas": 3, "cuadros": [0, 1, 2, 3, 4, 5, 6, 7, 8]},
+	"valeria": {"nombre": "VALERIA", "hoja": RETRATOS_OTROS, "columnas": 3, "cuadros": [0, 1, 2, 3]},
+	"aspi": {"nombre": "A.S.P.I.", "hoja": RETRATOS_OTROS, "columnas": 3, "cuadros": [4, 5]},
+}
+const VALERIA_NEUTRA := 0
+const VALERIA_ENOJADA := 1
+const VALERIA_DERRETIDA := 2
+const VALERIA_GRABANDO := 3
+## Ancho del texto: con letra de 14 px caben unas 70 letras por línea; más de 2 líneas no se aceptan.
+const ANCHO_TEXTO := 548.0
+const TAM_LETRA := 14
+const MAX_LINEAS := 2
+const MAX_COLA := 3
+
+## Letras por segundo.
+@export var velocidad_texto := 55.0
+## Segundos que queda la frase completa antes de cerrarse sola (más un poco por letra).
+@export var espera_base := 1.3
+@export var espera_por_letra := 0.035
+## Una frase que espera en la cola más que esto se descarta (ya no viene al caso).
+@export var caducidad_cola := 2.0
+
+var hablando := ""
+var texto_actual := ""
+## Frases que se mostraron, en orden: [quien, texto] (para las pruebas y el resumen).
+var historial: Array = []
+var _cola: Array = []
+var _caja: Panel
+var _nombre: Label
+var _texto: RichTextLabel
+var _retrato: TextureRect
+var _retrato_codigo: RetratoValeria
+var _visibles := 0.0
+var _largo := 0
+var _espera := 0.0
+var _reloj := 0.0
+var _ultima := ""
+var _hojas := {}
+
+
+func _ready() -> void:
+	layer = 7
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	_caja = Panel.new()
+	var estilo := StyleBoxFlat.new()
+	estilo.bg_color = Color(0.13, 0.09, 0.12, 0.94)
+	estilo.border_color = Color(0.95, 0.85, 0.6)
+	estilo.set_border_width_all(2)
+	estilo.set_corner_radius_all(3)
+	_caja.add_theme_stylebox_override("panel", estilo)
+	_caja.position = Vector2(8, 300)
+	_caja.size = Vector2(624, 56)
+	_caja.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_caja)
+	var marco := ColorRect.new()
+	marco.color = Color(0.85, 0.75, 0.6)
+	marco.position = Vector2(4, 4)
+	marco.size = Vector2(48, 48)
+	_caja.add_child(marco)
+	_retrato = TextureRect.new()
+	_retrato.position = Vector2(5, 5)
+	_retrato.size = Vector2(46, 46)
+	_retrato.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_retrato.stretch_mode = TextureRect.STRETCH_SCALE
+	_caja.add_child(_retrato)
+	_retrato_codigo = RetratoValeria.new()
+	_retrato_codigo.position = Vector2(5, 5)
+	_retrato_codigo.size = Vector2(46, 46)
+	_caja.add_child(_retrato_codigo)
+	_nombre = Label.new()
+	_nombre.position = Vector2(60, 1)
+	_nombre.add_theme_font_size_override("font_size", 11)
+	_nombre.add_theme_color_override("font_color", Color(1.0, 0.8, 0.4))
+	_caja.add_child(_nombre)
+	_texto = RichTextLabel.new()
+	_texto.position = Vector2(60, 16)
+	_texto.size = Vector2(ANCHO_TEXTO, 38)
+	_texto.scroll_active = false
+	_texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_texto.add_theme_font_size_override("normal_font_size", TAM_LETRA)
+	_texto.add_theme_color_override("default_color", Color(1, 0.97, 0.92))
+	_texto.add_theme_constant_override("line_separation", -3)
+	_texto.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_caja.add_child(_texto)
+	_caja.visible = false
+
+
+## Pone una frase en la cola. `animo` es el cuadro del retrato (ver PERSONAJES). Urgente: corta lo que se dice.
+## No repite la misma frase seguida. Devuelve false si se descartó.
+func decir(quien: String, texto: String, animo := 0, urgente := false) -> bool:
+	if texto == "" or texto == _ultima or (_caja.visible and texto == texto_actual):
+		return false
+	for pendiente: Array in _cola:
+		if pendiente[1] == texto:
+			return false
+	if urgente or not _caja.visible:
+		_mostrar(quien, texto, animo)
+	else:
+		_cola.append([quien, texto, animo, _reloj])
+		if _cola.size() > MAX_COLA:
+			_cola.pop_front()
+	return true
+
+
+## Hay una frase en pantalla.
+func ocupado() -> bool:
+	return _caja.visible
+
+
+## Cuántas líneas ocupa la frase en el cuadro (las frases deben caber en 1 o 2).
+static func lineas_de(texto: String) -> int:
+	var limpio := texto
+	for accion: String in IconosBotones.TEXTO:
+		limpio = limpio.replace("{%s}" % accion, "MM")
+	var parrafo := TextParagraph.new()
+	parrafo.add_string(limpio, ThemeDB.fallback_font, TAM_LETRA)
+	parrafo.width = ANCHO_TEXTO
+	parrafo.break_flags = TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE
+	return parrafo.get_line_count()
+
+
+func _mostrar(quien: String, texto: String, animo: int) -> void:
+	hablando = quien
+	texto_actual = texto
+	_ultima = texto
+	historial.append([quien, texto])
+	_caja.visible = true
+	_escribir(texto)
+	_visibles = 0.0
+	_texto.visible_characters = 0
+	_espera = espera_base + espera_por_letra * texto.length()
+	var datos: Dictionary = PERSONAJES.get(quien, PERSONAJES["felipe"])
+	_nombre.text = String(datos["nombre"])
+	var hoja := _hoja(String(datos["hoja"]))
+	var cuadros: Array = datos["cuadros"]
+	_retrato.visible = hoja != null
+	_retrato_codigo.visible = hoja == null
+	if hoja:
+		var cuadro: int = cuadros[clampi(animo, 0, cuadros.size() - 1)]
+		var columnas: int = datos["columnas"]
+		var lado := hoja.get_width() / float(columnas)
+		var cara := AtlasTexture.new()
+		cara.atlas = hoja
+		cara.region = Rect2((cuadro % columnas) * lado, (cuadro / columnas) * lado, lado, lado)
+		_retrato.texture = cara
+	else:
+		_retrato_codigo.personaje = quien
+		_retrato_codigo.animo = animo
+		_retrato_codigo.queue_redraw()
+	# Pequeño golpe al aparecer.
+	_caja.pivot_offset = Vector2(30, 28)
+	_caja.scale = Vector2(1.0, 0.7)
+	create_tween().tween_property(_caja, "scale", Vector2.ONE, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	dicho.emit(quien, texto)
+
+
+## Escribe el texto cambiando cada {acción} por el ícono de su botón.
+func _escribir(texto: String) -> void:
+	_texto.clear()
+	_largo = 0
+	var resto := texto
+	while resto != "":
+		var inicio := resto.find("{")
+		var fin := resto.find("}", inicio)
+		if inicio < 0 or fin < 0:
+			_texto.add_text(resto)
+			_largo += resto.length()
+			break
+		if inicio > 0:
+			_texto.add_text(resto.substr(0, inicio))
+			_largo += inicio
+		var accion := resto.substr(inicio + 1, fin - inicio - 1)
+		var icono := IconosBotones.textura(accion)
+		if icono:
+			_texto.add_image(icono, int(icono.get_size().x * 14.0 / IconosBotones.LADO), 14)
+			_largo += 1
+		else:
+			var etiqueta := "[%s]" % IconosBotones.texto(accion)
+			_texto.add_text(etiqueta)
+			_largo += etiqueta.length()
+		resto = resto.substr(fin + 1)
+
+
+func _hoja(ruta: String) -> Texture2D:
+	if not _hojas.has(ruta):
+		_hojas[ruta] = load(ruta) if ResourceLoader.exists(ruta) else null
+	return _hojas[ruta]
+
+
+## Enter / LB: primero completa el texto; si ya está completo, pasa a la siguiente frase.
+func saltar() -> void:
+	if not _caja.visible:
+		return
+	if _texto.visible_characters >= 0 and _texto.visible_characters < _largo:
+		_texto.visible_characters = -1
+		_visibles = _largo
+	else:
+		_cerrar()
+
+
+func _cerrar() -> void:
+	_caja.visible = false
+	hablando = ""
+	texto_actual = ""
+	while not _cola.is_empty():
+		var siguiente: Array = _cola.pop_front()
+		if _reloj - float(siguiente[3]) > caducidad_cola:
+			continue
+		_mostrar(siguiente[0], siguiente[1], siguiente[2])
+		return
+
+
+func _process(delta: float) -> void:
+	# Tiempo real (sin el congelado del Jugo).
+	delta = delta / maxf(Engine.time_scale, 0.001)
+	_reloj += delta
+	if InputMap.has_action("saltar_dialogo") and Input.is_action_just_pressed("saltar_dialogo"):
+		saltar()
+	if not _caja.visible:
+		return
+	if _visibles < _largo:
+		_visibles += velocidad_texto * delta
+		_texto.visible_characters = mini(int(_visibles), _largo)
+		return
+	_texto.visible_characters = -1
+	_espera -= delta
+	if _espera <= 0.0:
+		_cerrar()

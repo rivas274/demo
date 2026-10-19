@@ -146,6 +146,8 @@ const ASPI := [Vector2(5700, SUELO), 5290.0, 5790.0]
 const DESCANSOS := [Rect2(1660, SUELO - 56, 100, 66), Rect2(3990, SUELO - 40, 60, 50)]
 ## Pasar esta x en el balcón termina la demo.
 const SALIDA := 6500.0
+## Sofá arañable (con el plástico de nuevo): [centro de la base, ancho, alto]. Línea "sofa" de la agenda.
+const SOFA_ARANABLE := [Vector2(335, SUELO), 230.0, 100.0]
 
 signal logro_desbloqueado(titulo: String)
 signal habitacion_cambiada(nombre: String)
@@ -193,6 +195,8 @@ var _sonidos: Array[AudioStreamPlayer] = []
 var _avisos_vistos := {}
 var _fundido: ColorRect
 var _cruzando := false
+## Sistemas reutilizables del nivel: agenda, libreta, HUD, diálogo, jugo e indicador.
+var travesuras: Travesuras
 
 @onready var felipe: Felipe = $Felipe
 
@@ -277,6 +281,13 @@ func _ready() -> void:
 	logro_desbloqueado.connect(medidores.mostrar_logro)
 	$Interfaz.add_child(medidores)
 	medidores.pantallas = pantallas
+	travesuras = Travesuras.new(felipe, Agenda.NIVEL_1)
+	add_child(travesuras)
+	var sofa := Aranable.new("Sofa arañable", SOFA_ARANABLE[1], SOFA_ARANABLE[2])
+	sofa.position = SOFA_ARANABLE[0]
+	sofa.frase_primera_vez = "{interactuar} Ese sofá tiene plástico. Por ahora."
+	add_child(sofa)
+	travesuras.conectar_aranable(sofa, "sofa", SOFA_ARANABLE[0] + Vector2(0, -60))
 	_fundido = ColorRect.new()
 	_fundido.name = "Fundido"
 	_fundido.color = Color.BLACK

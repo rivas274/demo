@@ -115,14 +115,17 @@ const DURACION_RONRONEO := 1.0
 @export var velocidad_gatear := 55.0
 @export var velocidad_trepar := 140.0
 @export_group("Salto")
+## La subida (gravedad y velocidad_salto) fija la altura, unos 80 px; no se toca al ajustar la caída.
 @export var gravedad := 1410.0
-@export var gravedad_cayendo := 1940.0
+## Cae con más peso que sube (1,7 × gravedad): un gato de 8 kilos, no un globo (ajuste del salto, 2026-10-19).
+@export var gravedad_cayendo := 2400.0
 @export var velocidad_salto := -475.0
 @export var velocidad_doble_salto := -420.0
-@export var caida_maxima := 600.0
+## Tope de la caída: se llega en unos 0,31 s (unos 114 px), igual que antes del ajuste, para que no se sienta un freno.
+@export var caida_maxima := 740.0
 @export var corte_salto := 0.45
-@export var margen_salto := 0.1
-@export var salto_recordado := 0.12
+@export var margen_salto := 0.12
+@export var salto_recordado := 0.15
 @export_group("Zoomies")
 @export var velocidad_zoomies := 380.0
 @export var duracion_zoomies := 0.18
@@ -162,6 +165,11 @@ var empuje := Vector2.ZERO
 var snacks := SNACKS_INICIALES
 ## Segundos de garras afiladas que quedan (rascador).
 var garras_afiladas := 0.0
+## Polvo al aterrizar: los granos y su empuje crecen con la velocidad de caída (al cubo: un saltito levanta poco,
+## una caída desde lo alto levanta una nube). Estirar y aplastar siguen limitados a DEFORMACION_MAXIMA.
+const POLVO_ATERRIZAJE_MIN := 8
+const POLVO_ATERRIZAJE_MAX := 28
+const EMPUJE_POLVO_MAXIMO := 1.8
 ## Último impacto que salió (para las pruebas): {"animacion": String, "cuadro": int}.
 var ultimo_impacto := {}
 
@@ -199,6 +207,9 @@ var _escalones_subidos := 0
 var _chispas: Chispas
 var _tiempo_ronroneo := 0.0
 var _ronroneando_a: Node2D
+## Velocidad y tamaño de los granos de polvo del dibujo (mínimo, máximo), para escalarlos según el golpe.
+var _velocidad_polvo := Vector2.ZERO
+var _tamano_polvo := Vector2.ONE
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 @onready var polvo: CPUParticles2D = $Polvo
@@ -209,6 +220,8 @@ func _ready() -> void:
 	sprite.sprite_frames = AnimacionesFelipe.crear()
 	sprite.scale = Vector2.ONE * ESCALA_SPRITE
 	_posicion_sprite = sprite.position
+	_velocidad_polvo = Vector2(polvo.initial_velocity_min, polvo.initial_velocity_max)
+	_tamano_polvo = Vector2(polvo.scale_amount_min, polvo.scale_amount_max)
 	cuerpo.shape = cuerpo.shape.duplicate()
 	set_collision_mask_value(CAPA_ATRAVESABLE, true)
 	# Felipe va en su propia capa (3): los enemigos no chocan con él; el daño se calcula por distancia.
@@ -696,7 +709,7 @@ func _aterrizar() -> void:
 		estado = Estado.ATERRIZANDO
 		_tiempo_aterrizando = 0.24
 	if fuerza > 0.25:
-		_soltar_polvo(int(8 + 8 * fuerza))
+		_soltar_polvo(polvo_al_aterrizar(fuerza), lerpf(1.0, EMPUJE_POLVO_MAXIMO, pow(fuerza, 3.0)))
 	if _efecto:
 		_efecto.kill()
 	# Las patas delanteras tocan primero: el cuerpo gira sobre ellas hasta enderezarse
@@ -768,8 +781,18 @@ func _poner_cuadro(animacion: String, cuadro: int) -> void:
 	sprite.frame = cuadro
 
 
-func _soltar_polvo(cantidad: int) -> void:
+## Granos de polvo al aterrizar con esta fuerza (0 a 1: velocidad de caída / caida_maxima).
+func polvo_al_aterrizar(fuerza: float) -> int:
+	return int(round(lerpf(POLVO_ATERRIZAJE_MIN, POLVO_ATERRIZAJE_MAX, pow(clampf(fuerza, 0.0, 1.0), 3.0))))
+
+
+func _soltar_polvo(cantidad: int, empuje := 1.0) -> void:
 	polvo.amount = maxi(cantidad, 1)
+	polvo.initial_velocity_min = _velocidad_polvo.x * empuje
+	polvo.initial_velocity_max = _velocidad_polvo.y * empuje
+	# Granos un poco más grandes en los golpes fuertes (hasta 1,34 veces con el empuje máximo).
+	polvo.scale_amount_min = _tamano_polvo.x * sqrt(empuje)
+	polvo.scale_amount_max = _tamano_polvo.y * sqrt(empuje)
 	polvo.restart()
 	polvo.emitting = true
 

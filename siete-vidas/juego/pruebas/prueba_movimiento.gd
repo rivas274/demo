@@ -81,6 +81,7 @@ func _correr() -> void:
 	await _esperar(60)
 	_comprobar(felipe.is_on_floor(), "Vuelve a aterrizar")
 	_comprobar(felipe.doble_salto_disponible, "Al aterrizar recupera el doble salto")
+	await _probar_ajuste_del_salto(felipe)
 
 	var x_antes := felipe.position.x
 	Input.action_press("zoomies")
@@ -191,6 +192,104 @@ func _correr() -> void:
 		printerr("FALLO: " + fallo)
 	print("Resultado: %d fallos" % _fallos.size())
 	quit(1 if _fallos.size() > 0 else 0)
+
+
+## Ajuste del salto (2026-10-19): la subida no cambia (misma altura), cae con más peso (1,7 × la gravedad), margen
+## de 0,12 s al salir de un borde, salto recordado de 0,15 s y más polvo cuanto más fuerte cae (sin pasar del ±8 %).
+func _probar_ajuste_del_salto(felipe: Felipe) -> void:
+	felipe.tiene_doble_salto = false
+	var proporcion := felipe.gravedad_cayendo / felipe.gravedad
+	_comprobar(proporcion > 1.6 and proporcion < 1.8, "Cae con más peso que sube (gravedad de caída %.2f × la de subida)" % proporcion)
+
+	# Salto completo en el piso: altura y tiempos de subida y bajada.
+	await _poner_en(felipe, Vector2(200, Sala.SUELO))
+	var y_suelo := felipe.position.y
+	var y_arriba := y_suelo
+	var cuadros_subida := 0
+	var cuadros_bajada := 0
+	var velocidad_maxima := 0.0
+	Input.action_press("saltar")
+	await physics_frame
+	for i in 120:
+		await physics_frame
+		if felipe.position.y < y_arriba:
+			y_arriba = felipe.position.y
+			cuadros_subida = i + 1
+		velocidad_maxima = maxf(velocidad_maxima, felipe.velocity.y)
+		if felipe.is_on_floor():
+			cuadros_bajada = i + 1 - cuadros_subida
+			break
+	Input.action_release("saltar")
+	var altura := y_suelo - y_arriba
+	_comprobar(altura > 76.0 and altura < 88.0, "La subida no cambió: el salto sigue llegando a unos 80 px (%.0f px)" % altura)
+	_comprobar(cuadros_bajada < cuadros_subida, "Baja más rápido de lo que sube (%d cuadros subiendo, %d bajando)" % [cuadros_subida, cuadros_bajada])
+
+	# Margen al salir de un borde: 7 cuadros (0,117 s) después de dejar la mesa todavía salta.
+	var mesa := _pieza("Mesa")
+	await _poner_en(felipe, Vector2(mesa.end.x - 26.0, mesa.position.y))
+	Input.action_press("mover_derecha")
+	for i in 60:
+		await physics_frame
+		if not felipe.is_on_floor():
+			break
+	# El botón apretado aquí se lee en el cuadro siguiente: 7 cuadros en el aire en total.
+	await _esperar(5)
+	Input.action_press("saltar")
+	await _esperar(2)
+	Input.action_release("mover_derecha")
+	_comprobar(felipe.velocity.y < -300.0, "Margen de %.2f s: salta 0,117 s después de dejar el borde" % felipe.margen_salto)
+	await _esperar(10)
+	Input.action_release("saltar")
+	await _esperar(60)
+
+	# Salto recordado: apretar 8 cuadros antes de tocar el piso (se lee 7 antes: 0,133 s al saltar) salta al llegar.
+	var desde := Vector2(200, Sala.SUELO - 150.0)
+	var cuadros_cayendo := 0
+	felipe.position = desde
+	felipe.velocity = Vector2.ZERO
+	for i in 120:
+		await physics_frame
+		if felipe.is_on_floor():
+			cuadros_cayendo = i
+			break
+	await _esperar(30)
+	felipe.position = desde
+	felipe.velocity = Vector2.ZERO
+	var salto_al_llegar := false
+	for i in cuadros_cayendo + 4:
+		if i == cuadros_cayendo - 8:
+			Input.action_press("saltar")
+		await physics_frame
+		if i > cuadros_cayendo and felipe.velocity.y < -300.0:
+			salto_al_llegar = true
+	Input.action_release("saltar")
+	_comprobar(salto_al_llegar, "Salto recordado de %.2f s: apretar justo antes de aterrizar cuenta" % felipe.salto_recordado)
+	await _esperar(80)
+
+	# Polvo: una caída desde alto (2 m) levanta más que un saltito, y el aplastado sigue en ±8 %.
+	var polvo_de := func(altura_caida: float) -> Array:
+		felipe.position = Vector2(200, Sala.SUELO - altura_caida)
+		felipe.velocity = Vector2.ZERO
+		var deformacion := 0.0
+		var velocidad := 0.0
+		for i in 120:
+			await physics_frame
+			velocidad = maxf(velocidad, felipe.velocity.y)
+			if felipe.is_on_floor():
+				break
+		for i in 20:
+			var escala := felipe.sprite.scale / Felipe.ESCALA_SPRITE
+			deformacion = maxf(deformacion, maxf(absf(escala.x - 1.0), absf(escala.y - 1.0)))
+			await physics_frame
+		var granos := felipe.polvo.amount
+		await _esperar(30)
+		return [granos, deformacion, velocidad]
+	var bajo: Array = await polvo_de.call(30.0)
+	var alto: Array = await polvo_de.call(240.0)
+	_comprobar(alto[0] > bajo[0] + 10, "Al aterrizar desde alto suelta más polvo (%d granos desde 2 m, %d desde 30 px)" % [alto[0], bajo[0]])
+	_comprobar(alto[2] <= felipe.caida_maxima + 0.5, "La caída no pasa del tope (%.0f px/s de %.0f)" % [alto[2], felipe.caida_maxima])
+	_comprobar(alto[1] <= Felipe.DEFORMACION_MAXIMA + 0.001, "Al aterrizar desde alto se aplasta como mucho un 8 %% (%.0f %%)" % (alto[1] * 100.0))
+	felipe.tiene_doble_salto = true
 
 
 ## Mira el cuadro que se está dibujando y compara dónde está su punto más bajo

@@ -12,6 +12,8 @@ Actualizado: 2026-10-19. **Léelo al empezar un chat nuevo** para retomar sin re
 
 ## Ya cerrado (2026-10-19)
 
+- **Ajuste del salto** (video de referencia del creador): cae con más peso (gravedad de caída 2400 = 1,7 × la de subida, antes 1940; tope 740 px/s, antes 600), margen 0,12 s (antes 0,1), salto recordado 0,15 s (antes 0,12) y polvo al aterrizar que crece con la velocidad de caída (8 a 28 granos, más rápidos y grandes). La subida no cambió (altura de unos 80 px); `prueba_escenario` calcula con estos números que todo se sigue alcanzando sin doble salto. Tres lugares: memoria (tabla Acciones de Felipe), ficha local regenerada (**falta publicarla en línea**) y juego (pruebas en `prueba_movimiento` y `prueba_escenario`). Video antes/después con `pruebas/demo_salto.gd` (entrada fija).
+
 - **PARTE B del nivel 1 v4, en el juego** (todas las pruebas pasan; el bot termina con la agenda 8 de 8):
   - **Mapa:** 7 cuartos (sala 1280, recibidor 1200, cocina 960, pasillo 1040, dormitorio 720, estudio 640, balcón 640) con el arte nuevo de Gemini. Cada colisión pisable sale de la fila opaca de su arte (`Sala.PIEZAS`, ±2 px medido por la prueba); puertas de una sola hoja; nada se cruza con una puerta ni con la escalera; ningún hueco sin salida. Sin avisos ni fila de controles: Indicador y primeras frases de Felipe (`Sala.LECCIONES`).
   - **Escalera de fondo con reja anti-fuga** (48 px, colisión fina, cartel "PIPE: NO" por código): librero de 3 repisas, 7 escalones con `subir_escalera`, pasamanos delante al 70 %, pestillo = atajo.

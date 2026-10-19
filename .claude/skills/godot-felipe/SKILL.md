@@ -22,13 +22,13 @@ Antes de tocar nada, lee `siete-vidas/juego/scripts/felipe.gd` en la parte que v
 
 | Idea | En `felipe.gd` | Para qué |
 | --- | --- | --- |
-| Margen al salir del borde (*coyote time*) | `margen_salto` = 0,1 s, `_tiempo_fuera_del_suelo` | Saltar un instante después de dejar el mueble |
-| Salto recordado (*jump buffer*) | `salto_recordado` = 0,12 s, `_tiempo_salto_pedido` | Apretar justo antes de aterrizar cuenta |
+| Margen al salir del borde (*coyote time*) | `margen_salto` = 0,12 s, `_tiempo_fuera_del_suelo` | Saltar un instante después de dejar el mueble |
+| Salto recordado (*jump buffer*) | `salto_recordado` = 0,15 s, `_tiempo_salto_pedido` | Apretar justo antes de aterrizar cuenta |
 | Altura variable | `corte_salto` = 0,45 al soltar | Saltos cortos y largos con un botón |
-| Caída más pesada | `gravedad_cayendo` > `gravedad`, `caida_maxima` | Se siente un gato de 8 kilos, no un globo |
+| Caída más pesada | `gravedad_cayendo` = 1,7 × `gravedad` (2400 contra 1410), `caida_maxima` = 740 | Se siente un gato de 8 kilos, no un globo |
 | Aceleración y frenado | `aceleracion`, `friccion` con `move_toward` | Arranca y frena con peso, sin patinar |
 
-Al cambiar estos números, corre `prueba_movimiento.gd` (mide altura del salto, tamaño de Felipe y reglas de aterrizaje). Si cambia el tamaño de Felipe, escala en la misma proporción colisión, cámara, velocidades y gravedad (`CLAUDE.md`).
+Al cambiar estos números, corre `prueba_movimiento.gd` (mide altura del salto, tamaño de Felipe, margen, salto recordado, polvo y reglas de aterrizaje) y `prueba_escenario.gd` (calcula con estos números si los muebles siguen alcanzándose). Para comparar cómo se siente, graba `pruebas/demo_salto.gd` antes y después (entrada fija). Si cambia el tamaño de Felipe, escala en la misma proporción colisión, cámara, velocidades y gravedad (`CLAUDE.md`).
 
 ## 3. Agregar una acción nueva (por ejemplo, maullar)
 

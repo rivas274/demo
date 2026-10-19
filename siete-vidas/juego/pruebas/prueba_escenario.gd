@@ -53,6 +53,7 @@ func _correr() -> void:
 		var esperado := capas[i].scroll_scale
 		_comprobar(absf(proporcion.x - esperado.x) < 0.03 and absf(proporcion.y - esperado.y) < 0.03, "La capa %s se mueve a (%.2f, %.2f) de la cámara (esperado %.2f)" % [capas[i].name, proporcion.x, proporcion.y, esperado.x])
 
+	_comprobar_alcance_del_salto(felipe)
 	_comprobar_alcanzables()
 	_comprobar_sin_trampas()
 
@@ -60,6 +61,29 @@ func _correr() -> void:
 		printerr("FALLO: " + fallo)
 	print("Resultado: %d fallos" % _fallos.size())
 	quit(1 if _fallos.size() > 0 else 0)
+
+
+## Las medidas de SUBIDA_MAXIMA y HUECO_MAXIMO tienen que salir de los números del salto de Felipe (sin doble salto):
+## altura de la subida y distancia que recorre corriendo hasta volver a esa altura, con el ancho de su colisión.
+## Si se cambia la gravedad, la caída o la velocidad, esta comprobación dice si los muebles siguen alcanzándose.
+func _comprobar_alcance_del_salto(felipe: Felipe) -> void:
+	var subida := -felipe.velocidad_salto
+	var altura := subida * subida / (2.0 * felipe.gravedad)
+	_comprobar(altura >= SUBIDA_MAXIMA, "El salto sube %.0f px: alcanza la subida máxima de %.0f px" % [altura, SUBIDA_MAXIMA])
+	var ancho: float = (felipe.cuerpo.shape as RectangleShape2D).size.x
+	for alto in [SUBIDA_MAXIMA, 0.0, -50.0]:
+		var tiempo := subida / felipe.gravedad + _tiempo_cayendo(felipe, altura - alto)
+		var alcance: float = felipe.velocidad_correr * tiempo + ancho
+		var donde := "a la misma altura" if alto == 0.0 else ("%.0f px más arriba" % alto if alto > 0.0 else "%.0f px más abajo" % -alto)
+		_comprobar(alcance >= HUECO_MAXIMO, "Corriendo, salta %.0f px de distancia a un mueble %s (hacen falta %.0f)" % [alcance, donde, HUECO_MAXIMO])
+
+
+## Segundos que tarda en caer esta distancia desde quieto, con gravedad_cayendo y el tope caida_maxima.
+func _tiempo_cayendo(felipe: Felipe, distancia: float) -> float:
+	var hasta_el_tope := felipe.caida_maxima * felipe.caida_maxima / (2.0 * felipe.gravedad_cayendo)
+	if distancia <= hasta_el_tope:
+		return sqrt(2.0 * distancia / felipe.gravedad_cayendo)
+	return felipe.caida_maxima / felipe.gravedad_cayendo + (distancia - hasta_el_tope) / felipe.caida_maxima
 
 
 ## Posición en pantalla de la sala (capa del juego) y de cada capa de parallax.

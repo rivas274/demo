@@ -75,6 +75,13 @@ func _correr() -> void:
 	await _poner_en(Vector2(100, Sala.SUELO))
 	_comprobar(_contar("felipe", "{saltar} Los muebles") == 1, "La frase no se repite al volver")
 	_comprobar(sala.habitacion == "sala" and sala.valeria.actividad == Valeria.Actividad.SENTADA, "Felipe empieza en la sala; Valeria ve su serie en el sofá")
+	# Prueba de luz (LuzCuarto, Sala.luz_activa): ambiente y luces solo en la sala; la interfaz va en CanvasLayer.
+	var luz: LuzCuarto = sala.get_node_or_null("LuzCuarto")
+	if sala.luz_activa:
+		var ambiente: CanvasModulate = luz.get_node("Ambiente del cuarto") if luz else null
+		_comprobar(ambiente != null and ambiente.color == LuzCuarto.AMBIENTE and t.hud is CanvasLayer and t.dialogo is CanvasLayer and t.jugo is CanvasLayer, "Luz: en la sala hay ambiente de atardecer y el HUD, el diálogo y las palabras van en CanvasLayer (no lo reciben)")
+		var sin_sombra := t.indicador.material as CanvasItemMaterial
+		_comprobar(sin_sombra != null and sin_sombra.light_mode == CanvasItemMaterial.LIGHT_MODE_UNSHADED, "Luz: el Indicador (en el mundo) no recibe el ambiente ni las luces")
 
 	# Arañar el sofá delante de Valeria: a los dos arañazos lo deja frente al rascador y el plástico aguanta.
 	await _poner_en(Vector2(330, Sala.SUELO))
@@ -134,6 +141,8 @@ func _correr() -> void:
 	var recibidor := Sala.rect_de("recibidor")
 	var camara: Camera2D = felipe.get_node("Camara")
 	_comprobar(sala.habitacion == "recibidor" and felipe.global_position.distance_to(sala.puertas["recibidor<sala"].global_position) < 4.0, "La puerta lleva de la sala al recibidor")
+	if luz:
+		_comprobar((luz.get_node("Ambiente del cuarto") as CanvasModulate).color == Color.WHITE and not (luz.get_node("Sol de la ventana") as PointLight2D).enabled, "Luz: fuera de la sala el ambiente vuelve a blanco y las luces se apagan")
 	_comprobar(camara.limit_left == int(recibidor.position.x) and camara.limit_right == int(recibidor.end.x), "La cámara queda dentro del recibidor")
 	# G3: Valeria no se teletransporta: camina hasta la puerta de la sala, sale por ella y recién entonces aparece en
 	# el recibidor (por la puerta, con la puerta abierta).

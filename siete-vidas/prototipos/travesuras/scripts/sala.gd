@@ -138,6 +138,7 @@ func _ready() -> void:
 	dialogo = Dialogo.new()
 	dialogo.sonidos = sonidos
 	add_child(dialogo)
+	dialogo.dicho.connect(_al_decir)
 	hud = Hud.new()
 	hud.preparar(sonidos)
 	hud.total_travesuras = agenda.total()
@@ -792,3 +793,11 @@ func _hay_recompensas_sueltas() -> bool:
 		if n is Recogible and not n.get("_recogido"):
 			return true
 	return false
+
+
+## Cuando Valeria dice "Esto va directo a mis historias", saca el celular en ese momento.
+func _al_decir(quien: String, texto: String) -> void:
+	if quien != "valeria" or not Frases.VALERIA["historias"].any(func(f: Array) -> bool: return f[0] == texto):
+		return
+	valeria.sacar_celular()
+	get_tree().create_timer(0.35).timeout.connect(func() -> void: jugo.destello(0.25, Color.WHITE))

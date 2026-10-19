@@ -117,7 +117,7 @@ func _dibujar() -> void:
 		c.draw_circle(huella + Vector2(-7 + k * 4.6, -9 + absf(k - 1.5) * 2.0), 2.4, Color(0.55, 0.3, 0.3, 0.6))
 	if agenda == null:
 		return
-	var y := hoja.position.y + 62
+	var y := hoja.position.y + 56
 	for t: Dictionary in Agenda.TRAVESURAS:
 		var id: String = t["id"]
 		var hecha := agenda.esta_cumplida(id)
@@ -149,7 +149,7 @@ func _dibujar() -> void:
 			if String(t["nota"]) != "":
 				segunda = "(" + String(t["nota"]) + ")   " + segunda
 		c.draw_string(_letra, Vector2(x0 + 24, y + 29), segunda, HORIZONTAL_ALIGNMENT_LEFT, 330, 10, color_segunda)
-		y += 34.0
+		y += 33.0
 	# Pie.
 	var pie := "Tab: cerrar        F: terminar el día"
 	c.draw_string(ThemeDB.fallback_font, Vector2(x0, hoja.end.y - 10), pie, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.35, 0.3, 0.3))

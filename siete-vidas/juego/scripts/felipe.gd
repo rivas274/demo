@@ -812,7 +812,7 @@ func _actualizar_estela(delta: float) -> void:
 	fantasma.scale = sprite.scale
 	fantasma.flip_h = sprite.flip_h
 	fantasma.modulate.a = 0.28
-	fantasma.z_index = -1
+	fantasma.z_index = Capas.PERSONAJES
 	get_parent().add_child(fantasma)
 	var desvanecer := fantasma.create_tween()
 	desvanecer.tween_property(fantasma, "modulate:a", 0.0, 0.22)
@@ -1039,7 +1039,7 @@ func _desmayarse() -> void:
 	fantasma.scale = Vector2.ONE * ESCALA_SPRITE * 0.6
 	fantasma.global_position = sprite.global_position
 	fantasma.modulate = Color(1, 1, 1, 0.7)
-	fantasma.z_index = 10
+	fantasma.z_index = Capas.ESTELA
 	get_parent().add_child(fantasma)
 	var subir := fantasma.create_tween().set_parallel()
 	subir.tween_property(fantasma, "global_position:y", fantasma.global_position.y - 70.0, 1.4)

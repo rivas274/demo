@@ -28,7 +28,7 @@ func _init(rectangulo: Rect2) -> void:
 
 func _ready() -> void:
 	add_to_group(Comida.GRUPO)
-	z_index = -1
+	z_index = Capas.MUEBLES
 	var forma := CollisionShape2D.new()
 	var caja := RectangleShape2D.new()
 	caja.size = rect.size

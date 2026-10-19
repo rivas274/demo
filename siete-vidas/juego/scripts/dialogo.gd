@@ -68,7 +68,7 @@ var _en_presentacion := false
 
 
 func _ready() -> void:
-	layer = 7
+	layer = Capas.CAPA_DIALOGO
 	add_to_group(PresentacionJefe.GRUPO_OCULTAR)
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_caja = Panel.new()

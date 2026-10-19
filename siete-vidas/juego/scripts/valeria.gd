@@ -74,7 +74,7 @@ func _ready() -> void:
 	add_to_group(Rascador.GRUPO_TESTIGOS)
 	add_to_group(Felipe.GRUPO_OYENTES)
 	add_to_group(Comida.GRUPO)
-	z_index = -1
+	z_index = Capas.PERSONAJES
 	for pose in ["neutra", "enojada", "perdonando", "grabando", "serie", "caminar"]:
 		var ruta := RUTA % pose
 		_texturas[pose] = load(ruta) if ResourceLoader.exists(ruta) else null

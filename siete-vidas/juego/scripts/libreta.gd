@@ -23,7 +23,7 @@ var _letra: FontVariation
 
 
 func _ready() -> void:
-	layer = 9
+	layer = Capas.CAPA_LIBRETA
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_letra = FontVariation.new()
 	_letra.base_font = ThemeDB.fallback_font

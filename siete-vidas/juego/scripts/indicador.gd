@@ -54,7 +54,7 @@ void fragment() {
 
 func _ready() -> void:
 	name = "Indicador"
-	z_index = 50
+	z_index = Capas.INDICADOR
 	add_to_group(PresentacionJefe.GRUPO_OCULTAR)
 	top_level = true
 	global_position = Vector2.ZERO

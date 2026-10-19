@@ -10,7 +10,7 @@ const CAPAS := {
 	"Cielo": [0.05, -40, "_dibujar_cielo"],
 	"CiudadLejana": [0.2, -35, "_dibujar_ciudad_lejana"],
 	"CiudadCercana": [0.45, -30, "_dibujar_ciudad_cercana"],
-	"PrimerPlano": [1.3, 20, "_dibujar_primer_plano"],
+	"PrimerPlano": [1.3, Capas.PRIMER_PLANO_LEJOS, "_dibujar_primer_plano"],
 }
 ## Paleta del Barrio Viejo: terracota y atardecer.
 const CIELO := [Color("3b2a5a"), Color("c8576b"), Color("f2a65a"), Color("ffd58a")]
@@ -61,12 +61,12 @@ func _ready() -> void:
 	_textura_pared = ImageTexture.create_from_image(_crear_pared())
 	var pared := _lienzo("_dibujar_pared")
 	pared.name = "Pared"
-	pared.z_index = -20
+	pared.z_index = Capas.PARED
 	pared.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	add_child(pared)
 	var luz := _lienzo("_dibujar_luz")
 	luz.name = "Luz"
-	luz.z_index = 5
+	luz.z_index = Capas.LUZ
 	add_child(luz)
 
 

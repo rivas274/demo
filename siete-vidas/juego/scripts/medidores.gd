@@ -18,7 +18,7 @@ var _tiempo_notificacion := 0.0
 var _aviso: Control
 
 ## Capa del aviso de logro: por encima del diálogo (capa 7) y del HUD (capa 6).
-const CAPA_AVISO := 8
+const CAPA_AVISO := Capas.CAPA_AVISOS
 const TAM_AVISO := Vector2(208, 34)
 
 

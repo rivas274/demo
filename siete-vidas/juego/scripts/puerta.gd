@@ -36,7 +36,7 @@ func _init(nombre_puerta: String, posicion: Vector2, puerta_destino: String, alt
 	position = posicion
 	destino = puerta_destino
 	alto = minf(ALTO_MAXIMO, alto_disponible)
-	z_index = -2
+	z_index = Capas.PUERTAS
 
 
 func _ready() -> void:

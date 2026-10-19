@@ -492,7 +492,7 @@ func _crear_objetos() -> void:
 	# Rascador (teatro para Valeria) y sofá con plástico.
 	rascador = Rascador.new()
 	rascador.position = Vector2(RASCADOR_X, SUELO)
-	rascador.z_index = -1
+	rascador.z_index = Capas.MUEBLES
 	add_child(rascador)
 	travesuras.conectar_rascador(rascador)
 	sofa = Aranable.new("Sofa arañable", SOFA_ARANABLE[1], SOFA_ARANABLE[2])
@@ -524,17 +524,17 @@ func _crear_objetos() -> void:
 	# Bajo el balcón: la fachada y el toldo de la panadería (solo se ven en el salto final, G1).
 	var fachada := Node2D.new()
 	fachada.name = "Fachada"
-	fachada.z_index = -19
+	fachada.z_index = Capas.FACHADA
 	fachada.draw.connect(_dibujar_fachada.bind(fachada))
 	add_child(fachada)
 	_decorado = Node2D.new()
 	_decorado.name = "Decorado"
-	_decorado.z_index = -1
+	_decorado.z_index = Capas.MUEBLES
 	_decorado.draw.connect(_dibujar_decorado)
 	add_child(_decorado)
 	_cesta = Node2D.new()
 	_cesta.name = "Nido"
-	_cesta.z_index = -1
+	_cesta.z_index = Capas.MUEBLES
 	_cesta.draw.connect(_dibujar_nido)
 	add_child(_cesta)
 
@@ -568,7 +568,7 @@ func _crear_aspi() -> void:
 	# Detrás de la puerta del estudio, el pasamanos y lo demás encima.
 	_pasamanos = Node2D.new()
 	_pasamanos.name = "Pasamanos"
-	_pasamanos.z_index = 2
+	_pasamanos.z_index = Capas.PRIMER_PLANO
 	_pasamanos.draw.connect(func() -> void:
 		var datos: Array = PASAMANOS
 		var textura := ArteNivel.textura(datos[0])
@@ -858,7 +858,7 @@ func _censura_ironica() -> void:
 	travesuras.jugo.palabra_en_mundo("CONTENIDO SENSIBLE", felipe.global_position + Vector2(0, -70), Color(1.0, 1.0, 1.0), 14)
 	var pegatina := Node2D.new()
 	pegatina.name = "Censura"
-	pegatina.z_index = 40
+	pegatina.z_index = Capas.CENSURA
 	pegatina.global_position = felipe.global_position + Vector2(0, -20)
 	pegatina.draw.connect(func() -> void:
 		# Pegatina de pescadito y un aviso que muestra... una papa.
@@ -1124,7 +1124,7 @@ func _crear_pieza(rect: Rect2, atravesable: bool, nombre: String, estilo: String
 	cuerpo.add_child(forma)
 	if estilo in ["repisa", "baul", "lugar_visto"]:
 		var dibujo := Node2D.new()
-		dibujo.z_index = -1
+		dibujo.z_index = Capas.MUEBLES
 		dibujo.draw.connect(_dibujar_pieza.bind(dibujo, rect.size, estilo))
 		cuerpo.add_child(dibujo)
 	add_child(cuerpo)
@@ -1137,7 +1137,7 @@ func pieza(nombre: String) -> StaticBody2D:
 
 ## Dibuja todo el arte de ARTE en tres nodos (pared, escalera y muebles).
 func _crear_arte() -> void:
-	for capa: Array in [["pared", -3], ["escalera", -2], ["mueble", -1]]:
+	for capa: Array in [["pared", Capas.ARTE_PARED], ["escalera", Capas.ESCALERA], ["mueble", Capas.MUEBLES]]:
 		var lienzo := Node2D.new()
 		lienzo.name = "Arte (%s)" % capa[0]
 		lienzo.z_index = capa[1]

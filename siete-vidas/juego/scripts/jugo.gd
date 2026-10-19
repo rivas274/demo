@@ -19,7 +19,7 @@ var _flash: ColorRect
 
 
 func _ready() -> void:
-	layer = 5
+	layer = Capas.CAPA_JUGO
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_flash = ColorRect.new()
 	_flash.color = Color(1, 1, 1, 0)

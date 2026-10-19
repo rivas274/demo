@@ -47,7 +47,7 @@ func mostrar(datos: Array, frase_final: Array) -> void:
 
 func _ready() -> void:
 	name = "ResumenDia"
-	layer = 10
+	layer = Capas.CAPA_RESUMEN
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_lienzo = Control.new()
 	_lienzo.size = Vector2(640, 360)

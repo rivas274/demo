@@ -110,7 +110,7 @@ func _ready() -> void:
 	_camara.name = "Camara del jefe"
 	add_child(_camara)
 	var capa := CanvasLayer.new()
-	capa.layer = 30
+	capa.layer = Capas.CAPA_JEFE
 	add_child(capa)
 	_interfaz = Node2D.new()
 	_interfaz.name = "Interfaz del jefe"

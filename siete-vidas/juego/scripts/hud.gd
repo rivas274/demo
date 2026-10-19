@@ -26,7 +26,7 @@ const FONDO := Color(0.1, 0.07, 0.09, 0.78)
 
 
 func _ready() -> void:
-	layer = 6
+	layer = Capas.CAPA_HUD
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_barra = Control.new()
 	_barra.name = "Barra"

@@ -85,6 +85,9 @@ const FELIPE := {
 	"puerta_abierta": [["Puerta entornada. Invitación aceptada.", 7]],
 	"ropa": [["Doblada era aburrida. Ahora tiene pelo de rey.", 7]],
 	"pizza": [["Esa pizza es mía. Algún día.", 4]],
+	# La puerta del baño (lugar insinuado para la maña futura «Abrir puertas»).
+	"bano": [["El trono de porcelana. Algún día será mío.", 4]],
+	"bano_manija": [["Esa manija me mira raro.", 1]],
 	"laser_visto": [["No. No voy a caer.", 1]],
 	"cojin": [["Tiene mi forma. Obviamente.", 7]],
 	"cortina": [["Mis garras no están a la altura. Todavía.", 2]],

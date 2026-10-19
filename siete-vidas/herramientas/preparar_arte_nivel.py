@@ -370,23 +370,6 @@ def luz_de_borde(nombre, desde=((0, -1), (1, -1)), color=(255, 168, 92)):
     Image.fromarray(salida, "RGBA").save(DESTINO / f"{nombre}_luz.png")
 
 
-def vano_cuadrado():
-    """Vano de la escalera de fondo (el creador, 2026-10-19: "entras por una puerta cuadrada y al otro lado el marco
-    es redondo"): el mismo marco de madera de puerta_abierta_v2, sin la hoja, a la altura del vano bajo del descanso
-    (150 px). Arriba van el dintel y los parantes; abajo, el umbral. Se usa a los dos lados (descanso y pasillo)."""
-    puerta = np.asarray(Image.open(DESTINO / "puerta_abierta_v2.png").convert("RGBA")).copy()
-    alto_puerta, ancho = puerta.shape[:2]
-    # Sin la hoja: entre el parante izquierdo (termina en x 13) y el derecho (empieza en x 126), desde la fila 18 (bajo
-    # el dintel) hasta el umbral, se repite la oscuridad del vano (columna 50).
-    for x in range(40, 126):
-        puerta[18:alto_puerta - 3, x] = puerta[18:alto_puerta - 3, 50]
-    alto = 150
-    umbral = 4
-    final = np.vstack([puerta[: alto - umbral], puerta[alto_puerta - umbral:]])
-    Image.fromarray(final, "RGBA").save(DESTINO / "vano.png")
-    print(f"Vano cuadrado: {ancho} x {alto}")
-
-
 def taza_de_cafe():
     """Taza de café de Valeria en el escritorio (reemplaza al rollo de papel higiénico, que no tenía sentido en un
     estudio; el creador, 2026-10-19). Se tira igual y deja una mancha. Escala de gato: el doble de una real (30 × 26,
@@ -553,10 +536,235 @@ def main():
         imagen.resize(tamano, Image.NEAREST).save(DESTINO / f"{nombre}.png")
     preparar_cortina()
     luz_de_borde("aspi_gigante")
-    vano_cuadrado()
     taza_de_cafe()
+    ambientes()
     print(f"{len(PIEZAS) + len(MOSAICOS) + len(FONDOS) + 5} imágenes en {DESTINO}")
     preparar_valeria()
+
+
+# --- Plan de ambientes del nivel 1 (diseno/revisiones/2026-10-19-ambientes-nivel1.md) -------------------------------
+
+# Arte existente que se empieza a usar: (hoja, índice, tamaño, recorte en fracciones).
+PIEZAS_AMBIENTE = {
+    "aranazo_1": ("sala-extra", 4, (14, 16), None),  # marcas sueltas de la tanda 3C (G9)
+    "aranazo_2": ("sala-extra", 5, (16, 14), None),
+    "aranazo_3": ("sala-extra", 7, (5, 12), None),
+    "lata": ("comida-grande", 1, (24, 27), None),  # lata de atún abierta junto al tazón (C-7)
+    "libro": ("objetos", 6, (28, 8), None),  # libro achatado sobre el banquito (D-3)
+    "maceta_rota": ("detalles", 8, (32, 11), None),  # isla de jardinería del balcón (B-3)
+}
+
+# Tanda 3E (vida-casa.png): cajas explícitas en la hoja (Gemini escribió números junto a las piezas y algunas quedan
+# pegadas: el recorte automático las une). nombre -> (caja x0, y0, x1, y1, tamaño en el juego).
+HOJA_3E = "vida-casa"
+PIEZAS_3E = {
+    "alfombra_sala": ((33, 30, 525, 150), (300, 10)),
+    "alfombra_pasillo": ((33, 163, 515, 265), (260, 8)),
+    "alfombra_dormitorio": ((33, 278, 310, 380), (120, 8)),
+    "mesita_sala": ((366, 282, 560, 495), (88, 96)),  # lámpara, taza y cargador; tablero a 45 cm medido abajo
+    "marco_foto": ((597, 293, 797, 442), (44, 33)),
+    "marco_huella": ((815, 293, 965, 442), (30, 30)),
+    "perchero": ((35, 468, 312, 705), (118, 101)),
+    "zapatillas": ((352, 530, 552, 665), (24, 16)),
+    "marco_viral": ((597, 472, 762, 695), (44, 59)),
+    "llave_agua": ((795, 478, 962, 692), (30, 38)),  # la llave y el trapo vienen juntos: el trapo cuelga de la llave
+    "polaroid_1": ((35, 728, 118, 830), (12, 14)),
+    "polaroid_2": ((132, 725, 222, 828), (12, 14)),
+    "polaroid_3": ((232, 728, 325, 832), (12, 14)),
+    "corcho": ((32, 858, 322, 1065), (64, 46)),
+    "regadera": ((740, 758, 955, 898), (30, 22)),
+    "saco_tierra": ((788, 920, 962, 1068), (26, 22)),
+}
+# Números de Gemini que quedan dentro de una caja: se pintan de blanco antes de recortar.
+NUMEROS_3E = [(796, 930, 838, 964), (362, 282, 384, 310)]
+# Pisos de la tanda 3E: mosaicos opacos (caja, tamaño).
+PISOS_3E = {"piso_cocina": ((597, 28, 963, 142), (256, 30)), "piso_balcon": ((597, 158, 963, 258), (256, 30))}
+
+
+def recolorear(a, mascara, color, referencia):
+    """Lleva los pixeles de la máscara a `color` conservando su luz relativa a `referencia` (luminancia)."""
+    luz = a[:, :, :3].astype(float) @ np.array([0.299, 0.587, 0.114])
+    nuevo = np.clip(np.outer(luz[mascara] / referencia, np.array(color, float)), 0, 255)
+    a[mascara, :3] = nuevo.astype(np.uint8)
+    return a
+
+
+def guardar(a, nombre):
+    Image.fromarray(a.astype(np.uint8), "RGBA").save(DESTINO / f"{nombre}.png")
+
+
+def abrir(nombre):
+    return np.asarray(Image.open(DESTINO / f"{nombre}.png").convert("RGBA")).copy()
+
+
+def ensanchar(a, columnas, ancho):
+    """Repite columnas de la propia imagen (sin escalar) hasta llegar a `ancho`: reparte lo que falta entre ellas."""
+    falta = ancho - a.shape[1]
+    partes, previo = [], 0
+    for i, x in enumerate(sorted(columnas)):
+        n = falta // len(columnas) + (1 if i < falta % len(columnas) else 0)
+        partes += [a[:, previo:x], np.repeat(a[:, x:x + 1], n, axis=1)]
+        previo = x
+    partes.append(a[:, previo:])
+    return np.concatenate(partes, axis=1)
+
+
+def puertas_unificadas():
+    """G1: un solo marco de puerta de 140 x 248 en todos los estados."""
+    abierta = abrir("puerta_abierta_v2")
+    cerrada_original = abrir("puerta_cerrada_v2")
+    # Cerrada (128): se ensancha el panel repitiendo su columna central.
+    guardar(ensanchar(cerrada_original, [64], 140), "puerta_cerrada_v2")
+    # Puerta-ventana cerrada (122): se ensancha cada hoja por su columna del medio (el parante central no cambia).
+    guardar(ensanchar(abrir("puerta_balcon_v2"), [35, 83], 140), "puerta_balcon_v2")
+    # Puerta-ventana abierta (156): se quitan 16 columnas del vano oscuro.
+    b = abrir("puerta_balcon_abierta")
+    guardar(np.concatenate([b[:, :86], b[:, 102:]], axis=1), "puerta_balcon_abierta")
+    # Entornada: el marco de la abierta con la hoja cerrada (la de 128, sin ensanchar) apoyada en la bisagra de la
+    # izquierda; del lado de la manilla queda una franja oscura de 12 px y 2 px de sombra sobre el canto de la hoja.
+    e = abierta.copy()
+    oscuro = abierta[18:245, 50:51]
+    e[18:245, 14:126] = np.repeat(oscuro, 112, axis=1)
+    hoja = cerrada_original[17:241, 14:114]
+    e[17:241, 14:114] = hoja
+    e[17:241, 112:114, :3] = (e[17:241, 112:114, :3] * 0.55).astype(np.uint8)
+    guardar(e, "puerta_entornada")
+    print("Puertas: 140 x 248 en los cinco estados")
+
+
+def vano_alto():
+    """G2: el vano de la escalera a la altura de una puerta (140 x 248), sin hoja. En el pasillo, dentro del hueco
+    oscuro, se ven el remate del pasamanos y los dos primeros peldaños bajando (vano_bajada, al 60 % de valor)."""
+    puerta = abrir("puerta_abierta_v2")
+    for x in range(40, 126):
+        puerta[18:245, x] = puerta[18:245, 50]
+    guardar(puerta, "vano")
+    peldanos = abrir("escalera_peldanos")
+    baranda = abrir("escalera_baranda")
+    lienzo = np.zeros((70, 110, 4), np.uint8)
+
+    def pegar(pieza, x, y):
+        alto, ancho = pieza.shape[:2]
+        sub = lienzo[y:y + alto, x:x + ancho]
+        m = pieza[:, :, 3] > 0
+        sub[m] = pieza[m]
+
+    # Peldaños de arriba (esquina de arriba a la izquierda de la hoja) y el poste con el primer tramo del pasamanos.
+    pegar(peldanos[0:44, 0:70], 30, 26)
+    pegar(baranda[0:60, 0:46], 0, 10)
+    lienzo[:, :, :3] = (lienzo[:, :, :3] * 0.6).astype(np.uint8)
+    guardar(lienzo, "vano_bajada")
+    print("Vano: 140 x 248, con la bajada de la escalera")
+
+
+def ventana_marco():
+    """G3: marco de la ventana de la sala para las ventanas de código, en 9 partes: sin el vidrio, la persiana de
+    adentro ni el alféizar (se recorta la fila 0 a 137 y las columnas 9 a 171; el centro queda transparente)."""
+    v = abrir("ventana_sala")[0:138, 9:171]
+    v[26:138, 18:144, 3] = 0
+    guardar(v, "ventana_marco")
+    print(f"Marco de ventana: {v.shape[1]} x {v.shape[0]} (bordes 18, 18, 26, 8)")
+
+
+def recoloreos():
+    # P-3: la ventana del pasillo deja la madera crema y pasa a la madera de la ventana de la sala (sin tocar el toldo
+    # ni la vista de afuera, que están tras el vidrio: columnas 77 a 163, filas de arriba).
+    v = abrir("ventana_pasillo")
+    rgb = v[:, :, :3].astype(int)
+    crema = (v[:, :, 3] > 0) & (rgb.min(axis=2) > 120) & (rgb.max(axis=2) - rgb.min(axis=2) < 75)
+    crema[0:42, 77:163] = False
+    guardar(recolorear(v, crema, (178, 117, 73), 187.0), "ventana_pasillo")
+    # R-4: peldaños de madera apagada, no gris piedra.
+    p = abrir("escalera_peldanos")
+    rgb = p[:, :, :3].astype(int)
+    gris = (p[:, :, 3] > 0) & (rgb.max(axis=2) > 70)
+    guardar(recolorear(p, gris, (0x8a, 0x6a, 0x55), 190.0), "escalera_peldanos")
+    # R-5: zapatero sin clones: un par verde azulado, otro crema y uno volteado.
+    z = abrir("zapatero")
+    rgb = z[:, :, :3].astype(int)
+    naranja = (z[:, :, 3] > 0) & (rgb[:, :, 0] > 170) & (rgb[:, :, 2] < 120)
+    arriba_izq = naranja.copy(); arriba_izq[:, :72] = False; arriba_izq[:, 88:] = False; arriba_izq[28:] = False
+    abajo = naranja.copy(); abajo[:36] = False; abajo[50:] = False; abajo[:, :89] = False; abajo[:, 100:] = False
+    recolorear(z, arriba_izq, (64, 128, 128), 150.0)
+    recolorear(z, abajo, (226, 210, 180), 150.0)
+    z[17:28, 88:116] = z[17:28, 88:116][:, ::-1]
+    guardar(z, "zapatero")
+    # C-2: alacenas recortadas a dos módulos (la mitad izquierda del mesón); sobre el microondas no queda nada.
+    a = abrir("alacenas")
+    guardar(np.concatenate([a[:, :116], a[:, -2:]], axis=1), "alacenas")
+    # G7: piso sin costura (la primera y la última columna del mosaico repiten su vecina).
+    f = abrir("piso")
+    f[:, 0] = f[:, 1]
+    f[:, -1] = f[:, -2]
+    guardar(f, "piso")
+    print("Recoloreos: ventana del pasillo, peldaños, zapatero, alacenas y piso")
+
+
+def telas():
+    """C-3 y E-1: las cortinas cortas de detalles.png. Visillo de la cocina (crema con franja terracota, el tercio de
+    abajo del vidrio) y paños del estudio (oliva, de la barra al alféizar)."""
+    imagen, cajas = piezas("detalles")
+    corta = recortar_opaco(imagen.crop(cajas[7]))
+    arriba = corta.crop((0, 0, corta.width, int(corta.height * 0.42)))
+    visillo = np.asarray(escalar(arriba, (154, 44))).copy()
+    rgb = visillo[:, :, :3].astype(int)
+    tela = (visillo[:, :, 3] > 0) & (rgb[:, :, 0] > rgb[:, :, 2] + 40) & (rgb.max(axis=2) > 110)
+    recolorear(visillo, tela, (236, 222, 196), 120.0)
+    franja = tela.copy(); franja[:-9] = False; franja[-5:] = False
+    recolorear(visillo, franja, (192, 96, 63), 200.0)
+    guardar(visillo, "visillo_cocina")
+    pano = np.asarray(escalar(recortar_opaco(imagen.crop(cajas[6])), (34, 150))).copy()
+    rgb = pano[:, :, :3].astype(int)
+    tela = (pano[:, :, 3] > 0) & (rgb[:, :, 0] > rgb[:, :, 2] + 40) & (rgb.max(axis=2) > 110)
+    recolorear(pano, tela, (0x6f, 0x7a, 0x4a), 120.0)
+    guardar(pano, "panos_estudio")
+    print("Telas: visillo de la cocina y paños del estudio")
+
+
+def tanda_3e():
+    """Piezas de la tanda 3E (vida de la casa) y la fachada del balcón rehecha (vida-casa-fachada.png)."""
+    original = Image.open(ORIGEN / f"{HOJA_3E}.png").convert("RGB")
+    a = np.asarray(original).copy()
+    for x0, y0, x1, y1 in NUMEROS_3E:
+        a[y0:y1, x0:x1] = 255
+    imagen, _ = sin_fondo(Image.fromarray(a))
+    for nombre, (caja, tamano) in PIEZAS_3E.items():
+        recorte = sin_huecos(imagen.crop(caja))
+        final = np.asarray(escalar(recorte, tamano)).copy()
+        if nombre == "llave_agua":
+            # La gota dibujada se quita: la gota cae por código.
+            rgb = final[:, :, :3].astype(int)
+            final[(rgb[:, :, 2] > rgb[:, :, 0] + 30), 3] = 0
+        guardar(final, nombre)
+    for nombre, (caja, tamano) in PISOS_3E.items():
+        recorte = original.crop(caja).resize(tamano, Image.NEAREST).convert("RGBA")
+        recorte.save(DESTINO / f"{nombre}.png")
+    # Fachada: el hueco de Gemini es más angosto que la puerta. Se recorta hasta el piso (abajo del hueco), se quitan
+    # 80 filas de muro liso bajo la cornisa, se ensancha el hueco repitiendo una columna a la derecha del farol y se
+    # escala para que el hueco mida 136 x 244 (la puerta-ventana de 140 x 248 lo tapa por delante).
+    f, objeto = sin_fondo(Image.open(ORIGEN / "vida-casa-fachada.png"))
+    f = np.asarray(sin_huecos(f.crop((207, 21, 788, 985)))).copy()
+    f = np.concatenate([f[:100], f[180:]], axis=0)
+    f = ensanchar(f, [368], f.shape[1] + 77)
+    escala = 244 / (985 - 470)
+    tam = (round(f.shape[1] * escala), round(f.shape[0] * escala))
+    final = np.asarray(Image.fromarray(f, "RGBA").resize(tam, Image.NEAREST)).copy()
+    guardar(final, "fachada_balcon")
+    hueco = np.nonzero(final[-3, :, 3] == 0)[0]
+    hueco = hueco[(hueco > 40) & (hueco < final.shape[1] - 40)]
+    print(f"Tanda 3E: {len(PIEZAS_3E) + len(PISOS_3E) + 1} piezas; fachada {tam[0]} x {tam[1]}, hueco de x {hueco.min()} a {hueco.max()}")
+
+
+def ambientes():
+    for nombre, (hoja, indice, tamano, fraccion) in PIEZAS_AMBIENTE.items():
+        imagen, cajas = piezas(hoja)
+        escalar(recortar(imagen, cajas[indice], fraccion), tamano).save(DESTINO / f"{nombre}.png")
+    puertas_unificadas()
+    vano_alto()
+    ventana_marco()
+    recoloreos()
+    telas()
+    tanda_3e()
 
 
 if __name__ == "__main__":

@@ -20,6 +20,7 @@ const PUNTOS := [
 	["10-dormitorio-ropero", Vector2(5980, Sala.SUELO)],
 	["11-estudio", Vector2(6600, Sala.SUELO)],
 	["12-balcon", Vector2(7450, Sala.SUELO)],
+	["13-pasillo-bano", Vector2(Sala.BANO.x, Sala.SUELO)],
 ]
 
 

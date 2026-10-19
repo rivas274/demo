@@ -25,6 +25,14 @@ var escalera := false
 var estilo := ""
 ## Alguien se mueve del otro lado (sombra bajo la puerta cerrada).
 var sombra_detras := false
+## Puerta del baño (lugar insinuado): siempre cerrada, con la luz fría de un tubo bajo la puerta que titila cada 5 a
+## 8 s; al probarla la hoja tiembla 1 px y no cede; su manilla puede dar un destello.
+var bano := false
+const LUZ_BANO := Color("dfe8e2")
+## Dónde brilla la manilla de palanca (desde el pie, al centro de la puerta cerrada de 140 px).
+const MANILLA := Vector2(47, -100)
+var _temblor := 0.0
+var _destello := 0.0
 var _felipe: Felipe
 var _cerca := false
 var _tiempo := 0.0
@@ -85,6 +93,23 @@ func arte() -> String:
 	return "puerta_abierta_v2"
 
 
+## Al probarla y no ceder: la hoja tiembla 1 px un momento.
+func temblar() -> void:
+	_temblor = 0.3
+
+
+## La manilla da un destello de 1 px (0,2 s).
+func destellar() -> void:
+	_destello = 0.2
+
+
+## ¿La rendija del baño está apagada en este momento? (titileo de tubo: un parpadeo corto cada 5 a 8 s).
+func _tubo_apagado() -> bool:
+	var ciclo := floorf(_tiempo / 6.5)
+	var parpadeo := ciclo * 6.5 + 3.0 + fmod(ciclo * 2.37, 3.0) - 1.5
+	return absf(_tiempo - parpadeo) < 0.18 and int(_tiempo * 20.0) % 2 == 0
+
+
 ## Se abre un momento (alguien entra o sale) y vuelve a quedar como estaba.
 func abrir_un_momento(segundos := 0.6) -> void:
 	_abierta_un_rato = segundos
@@ -137,6 +162,10 @@ func _physics_process(delta: float) -> void:
 		queue_redraw()
 	if sombra_detras and cerrada:
 		queue_redraw()
+	if bano or _temblor > 0.0 or _destello > 0.0:
+		_temblor = maxf(0.0, _temblor - delta)
+		_destello = maxf(0.0, _destello - delta)
+		queue_redraw()
 	if _felipe == null:
 		return
 	var distancia := _felipe.global_position - global_position
@@ -157,7 +186,15 @@ func _draw() -> void:
 	if apertura > 0.0 and not entornada and estilo != "balcon":
 		# Luz cálida que sale del vano.
 		draw_colored_polygon(PackedVector2Array([Vector2(-40, -alto_arte + 30), Vector2(40, -alto_arte + 30), Vector2(64, 0), Vector2(-64, 0)]), Color(1.0, 0.85, 0.55, 0.10))
-	ArteNivel.dibujar(self, nombre, 0.0, 0.0)
+	var temblor := (1.0 if int(_temblor * 40.0) % 2 == 0 else -1.0) if _temblor > 0.0 else 0.0
+	ArteNivel.dibujar(self, nombre, temblor, 0.0)
+	if estilo == "vano":
+		# Arriba de la escalera de fondo: dentro del hueco se ven el remate del pasamanos y los peldaños que bajan (G2).
+		ArteNivel.dibujar(self, "vano_bajada", 0.0, -4.0)
+	if _destello > 0.0:
+		var brillo := Color("fff3c4")
+		draw_rect(Rect2(MANILLA + Vector2(-2, 0), Vector2(5, 1)), brillo)
+		draw_rect(Rect2(MANILLA + Vector2(0, -2), Vector2(1, 5)), brillo)
 	if apertura > 0.0 and apertura < 1.0 and estilo == "" and not entornada:
 		# La hoja gira sobre la bisagra (borde derecho): la cerrada se angosta hacia allá mientras se abre.
 		var hoja := ArteNivel.textura("puerta_cerrada_v2")
@@ -169,7 +206,10 @@ func _draw() -> void:
 			draw_set_transform(Vector2.ZERO)
 	if apertura <= 0.0 and estilo != "balcon":
 		# Rendija de luz abajo y, si hay alguien adentro, su sombra que va y viene.
-		draw_rect(Rect2(-44, -3, 88, 2), Color(1.0, 0.85, 0.5, 0.8))
+		if bano:
+			draw_rect(Rect2(-44, -3, 88, 2), Color(LUZ_BANO, 0.25 if _tubo_apagado() else 0.8))
+		else:
+			draw_rect(Rect2(-44, -3, 88, 2), Color(1.0, 0.85, 0.5, 0.8))
 		if sombra_detras:
 			var x := sin(_tiempo * 1.3) * 30.0
 			draw_rect(Rect2(x - 9, -3, 18, 2), Color(0.15, 0.08, 0.06, 0.9))

@@ -35,12 +35,32 @@ const PAREDES := {
 	"rosa": ["pared_rosa", Color.WHITE],
 	"tapiz_mostaza": ["pared_tapiz", Color(1.06, 0.95, 0.72)],
 }
+## Molduras de la casa (G4), iguales en los 6 cuartos interiores: zócalo de 18 px (canto claro, cuerpo de madera y
+## filete oscuro) y cornisa de 14 px en dos tonos con dentículos cada 6 px; bajo la cornisa, 3 franjas de penumbra.
+const ZOCALO := 18
+const CORNISA := 14
+const CANTO := Color("c98a5e")
+const PENUMBRA := [0.12, 0.08, 0.04]
+## Cocina (C-1): azulejo solo hasta 1,5 m (182 px) con un listel de 4 px; arriba, pintura lisa crema cálida.
+const AZULEJO_ALTO := 182
+const PINTURA_COCINA := Color(1.12, 1.02, 0.86)
+## Piso por estilo de cuarto (G7, C-4, B-2): la cocina y el balcón tienen el suyo (tanda 3E); los demás, parquet.
+const PISOS := {"azulejo": "piso_cocina", "exterior": "piso_balcon"}
+## Rayos de luz (G6): el sol de la tarde entra por el oeste, siempre hacia la derecha. Tono por cuarto.
+const TONO_LUZ := {
+	"sala": Color(1.0, 0.74, 0.42), "cocina": Color(1.0, 0.93, 0.78), "pasillo": Color(0.74, 0.82, 0.95),
+	"dormitorio": Color(1.0, 0.76, 0.78), "estudio": Color(1.0, 0.84, 0.45),
+}
+## Bordes del marco de ventana (`ventana_marco`, recortado de la ventana de la sala): izquierda, derecha, arriba, abajo.
+const MARCO := [18, 18, 26, 8]
+
 ## Entre habitaciones: muro (no se ve, la cámara queda dentro de cada cuarto).
 const MURO := Color("2a1d1a")
 
 var ancho: float
 var alto: float
 var _textura_pared: ImageTexture
+var _luz: Node2D
 
 
 func _init(ancho_nivel: float, alto_nivel: float) -> void:
@@ -66,10 +86,15 @@ func _ready() -> void:
 	pared.z_index = Capas.PARED
 	pared.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	add_child(pared)
-	var luz := _lienzo("_dibujar_luz")
-	luz.name = "Luz"
-	luz.z_index = Capas.LUZ
-	add_child(luz)
+	_luz = _lienzo("_dibujar_luz")
+	_luz.name = "Luz"
+	_luz.z_index = Capas.LUZ
+	add_child(_luz)
+
+
+## Las motas de polvo de los rayos suben despacio (G6): la luz se redibuja cada cuadro.
+func _process(_delta: float) -> void:
+	_luz.queue_redraw()
 
 
 func _lienzo(funcion: String) -> Node2D:
@@ -100,11 +125,11 @@ func _repetir(destino: Image, mosaico: Image, rect: Rect2i) -> void:
 		y += mosaico.get_height()
 
 
-## Pinta cada habitación con su estilo y deja transparentes las ventanas y el exterior (balcón).
+## Pinta cada habitación con su estilo y deja transparentes las ventanas y el exterior (balcón). Encima van la cornisa
+## con su penumbra y el zócalo (G4); las puertas se dibujan delante y los cortan.
 func _crear_pared() -> Image:
 	var imagen := Image.create(int(ancho), int(alto), false, Image.FORMAT_RGBA8)
 	imagen.fill(MURO)
-	var moldura := _imagen("moldura")
 	for habitacion: Array in Sala.HABITACIONES:
 		var rect: Rect2i = Rect2i(habitacion[0])
 		if habitacion[2] == "exterior":
@@ -114,12 +139,67 @@ func _crear_pared() -> Image:
 		var mosaico := _imagen(estilo[0])
 		if estilo[1] != Color.WHITE:
 			_tenir(mosaico, estilo[1])
-		_repetir(imagen, mosaico, rect)
-		_repetir(imagen, moldura, Rect2i(rect.position.x, rect.position.y, rect.size.x, moldura.get_height()))
-		_repetir(imagen, moldura, Rect2i(rect.position.x, rect.end.y - moldura.get_height(), rect.size.x, moldura.get_height()))
+		if habitacion[2] == "azulejo":
+			# Arriba, pintura lisa; abajo, el azulejo con menos contraste y un listel de remate.
+			var pintura := _imagen("pared_rosa")
+			_tenir(pintura, PINTURA_COCINA)
+			_repetir(imagen, pintura, rect)
+			_contraste(mosaico, 0.85)
+			var corte := rect.end.y - AZULEJO_ALTO
+			_repetir(imagen, mosaico, Rect2i(rect.position.x, corte, rect.size.x, AZULEJO_ALTO))
+			imagen.fill_rect(Rect2i(rect.position.x, corte - 4, rect.size.x, 4), MADERA)
+			imagen.fill_rect(Rect2i(rect.position.x, corte - 4, rect.size.x, 1), CANTO)
+			imagen.fill_rect(Rect2i(rect.position.x, corte - 1, rect.size.x, 1), MADERA_OSCURA)
+		else:
+			_repetir(imagen, mosaico, rect)
+		_molduras(imagen, rect)
 	for ventana: Rect2 in Sala.VENTANAS:
 		imagen.fill_rect(Rect2i(ventana), Color(0, 0, 0, 0))
 	return imagen
+
+
+## Cornisa, penumbra y zócalo de un cuarto (G4).
+func _molduras(imagen: Image, rect: Rect2i) -> void:
+	var x := rect.position.x
+	var w := rect.size.x
+	var arriba := rect.position.y
+	# Penumbra bajo la cornisa: 3 franjas de 6 px que oscurecen la pared.
+	for i in PENUMBRA.size():
+		var franja := Rect2i(x, arriba + CORNISA + i * 6, w, 6)
+		for yy in range(franja.position.y, franja.end.y):
+			for xx in range(franja.position.x, franja.end.x):
+				imagen.set_pixel(xx, yy, imagen.get_pixel(xx, yy).darkened(PENUMBRA[i]))
+	# Cornisa: filete oscuro, cuerpo en dos tonos y una fila de dentículos.
+	imagen.fill_rect(Rect2i(x, arriba, w, CORNISA), MADERA_OSCURA)
+	imagen.fill_rect(Rect2i(x, arriba + 1, w, 5), MADERA)
+	imagen.fill_rect(Rect2i(x, arriba + 1, w, 1), CANTO)
+	imagen.fill_rect(Rect2i(x, arriba + 7, w, 5), MOLDURA)
+	var d := x + 2
+	while d < x + w - 3:
+		imagen.fill_rect(Rect2i(d, arriba + 8, 3, 3), MADERA)
+		d += 6
+	imagen.fill_rect(Rect2i(x, arriba + CORNISA - 1, w, 1), Color("2b1712"))
+	# Zócalo: canto claro, cuerpo de madera y filete oscuro abajo.
+	var base := rect.end.y - ZOCALO
+	imagen.fill_rect(Rect2i(x, base, w, ZOCALO), MADERA)
+	imagen.fill_rect(Rect2i(x, base, w, 2), CANTO)
+	imagen.fill_rect(Rect2i(x, base + 2, w, 1), MADERA.lightened(0.08))
+	imagen.fill_rect(Rect2i(x, base + 9, w, 1), MADERA_OSCURA.lightened(0.1))
+	imagen.fill_rect(Rect2i(x, rect.end.y - 1, w, 1), MADERA_OSCURA)
+
+
+## Baja el contraste de un mosaico hacia su color promedio (R14).
+func _contraste(imagen: Image, factor: float) -> void:
+	var suma := Color(0, 0, 0)
+	var n := imagen.get_width() * imagen.get_height()
+	for y in imagen.get_height():
+		for x in imagen.get_width():
+			var c := imagen.get_pixel(x, y)
+			suma = Color(suma.r + c.r / n, suma.g + c.g / n, suma.b + c.b / n)
+	for y in imagen.get_height():
+		for x in imagen.get_width():
+			var c := imagen.get_pixel(x, y)
+			imagen.set_pixel(x, y, Color(suma.r + (c.r - suma.r) * factor, suma.g + (c.g - suma.g) * factor, suma.b + (c.b - suma.b) * factor, c.a))
 
 
 func _tenir(imagen: Image, tinte: Color) -> void:
@@ -208,67 +288,145 @@ func _dibujar_pared(c: Node2D) -> void:
 	c.draw_texture(_textura_pared, Vector2.ZERO)
 	for ventana: Rect2 in Sala.VENTANAS:
 		_dibujar_ventana(c, ventana)
-	# Piso de madera de cada habitación.
-	var madera := ArteNivel.textura("piso")
-	for habitacion: Array in Sala.HABITACIONES:
+	# Piso de cada cuarto (G7): cada baldosa se voltea de forma alterna y cada cuarto empieza con otro corrimiento, así
+	# no se ve la repetición. La cocina y el balcón tienen su propio piso.
+	for i in Sala.HABITACIONES.size():
+		var habitacion: Array = Sala.HABITACIONES[i]
 		var rect: Rect2 = habitacion[0]
-		c.draw_texture_rect(madera, Rect2(rect.position.x, Sala.SUELO, rect.size.x, madera.get_height()), true)
+		var piso := ArteNivel.textura(PISOS.get(habitacion[2], "piso"))
+		if piso == null:
+			piso = ArteNivel.textura("piso")
+		var w := float(piso.get_width())
+		var x := rect.position.x - fmod(73.0 * (i + 1), w)
+		var k := i
+		while x < rect.end.x:
+			var desde := maxf(x, rect.position.x)
+			var hasta := minf(x + w, rect.end.x)
+			var region := Rect2(desde - x, 0, hasta - desde, piso.get_height())
+			if k % 2 == 1:
+				region.position.x = w - (hasta - x)
+				c.draw_set_transform(Vector2(desde + hasta, 0), 0.0, Vector2(-1, 1))
+				c.draw_texture_rect_region(piso, Rect2(desde, Sala.SUELO, hasta - desde, piso.get_height()), region)
+				c.draw_set_transform(Vector2.ZERO)
+			else:
+				c.draw_texture_rect_region(piso, Rect2(desde, Sala.SUELO, hasta - desde, piso.get_height()), region)
+			x += w
+			k += 1
+		if habitacion[2] != "exterior":
+			# Sombra del zócalo sobre el piso (G4).
+			c.draw_rect(Rect2(rect.position.x, Sala.SUELO, rect.size.x, 2), Color(0.1, 0.04, 0.02, 0.3))
 
 
-## Ventana recortada (cocina, dormitorio, estudio): marco de madera con parantes, alféizar a 90 cm que sobresale y
-## su tela. La cocina lleva una cenefa; el estudio, dos paños cortos hasta el alféizar; el dormitorio, la cortina larga
-## de Gemini (Sala._dibujar_cortina, delante de la pared y detrás de los muebles).
+## Ventana recortada (cocina, dormitorio, estudio), la misma ventana de la casa (G3): el marco de la ventana de la sala
+## en 9 partes (`ventana_marco`), parante en cruz de 4 px con bisel, vidrio con tinte y dos reflejos, y el alféizar a
+## 90 cm. La cocina lleva un visillo (C-3); el estudio, dos paños cortos (E-1); el dormitorio, la cortina larga de
+## Gemini (Sala._dibujar_cortina, delante de la pared y detrás de los muebles).
 func _dibujar_ventana(c: Node2D, ventana: Rect2) -> void:
-	c.draw_rect(ventana.grow(3), MADERA_OSCURA, false, 6)
-	c.draw_rect(ventana.grow(1), MADERA, false, 1)
-	c.draw_line(Vector2(ventana.get_center().x, ventana.position.y), Vector2(ventana.get_center().x, ventana.end.y), MADERA_OSCURA, 4)
-	c.draw_line(Vector2(ventana.position.x, ventana.get_center().y), Vector2(ventana.end.x, ventana.get_center().y), MADERA_OSCURA, 4)
+	# Vidrio: tinte frío del 8 % y dos reflejos diagonales de pixel.
+	c.draw_rect(ventana, Color(0.75, 0.88, 1.0, 0.08))
+	for desde: float in [0.3, 0.72]:
+		var x0 := ventana.position.x + ventana.size.x * desde
+		c.draw_colored_polygon(PackedVector2Array([
+			Vector2(x0, ventana.position.y), Vector2(x0 + 8, ventana.position.y),
+			Vector2(x0 - 28, ventana.end.y), Vector2(x0 - 36, ventana.end.y),
+		]), Color(1, 1, 1, 0.1))
+	# Parante en cruz: 4 px en dos tonos con un bisel claro.
+	var centro := ventana.get_center()
+	c.draw_rect(Rect2(centro.x - 2, ventana.position.y, 4, ventana.size.y), MADERA_OSCURA)
+	c.draw_rect(Rect2(centro.x - 2, ventana.position.y, 2, ventana.size.y), MADERA)
+	c.draw_rect(Rect2(ventana.position.x, centro.y - 2, ventana.size.x, 4), MADERA_OSCURA)
+	c.draw_rect(Rect2(ventana.position.x, centro.y - 2, ventana.size.x, 2), MADERA)
+	c.draw_rect(Rect2(ventana.position.x, centro.y - 2, ventana.size.x, 1), CANTO)
+	_marco_9(c, ventana)
 	# Alféizar: una tabla que sobresale del marco, con la luz arriba y su sombra en la pared.
 	var alfeizar := Rect2(ventana.position.x - 12, ventana.end.y + 3, ventana.size.x + 24, 7)
 	c.draw_rect(Rect2(alfeizar.position.x + 2, alfeizar.end.y + 1, alfeizar.size.x - 4, 4), Color(0, 0, 0, 0.18))
 	c.draw_rect(alfeizar.grow(1), Color("2b1712"))
 	c.draw_rect(alfeizar, MADERA)
-	c.draw_rect(Rect2(alfeizar.position, Vector2(alfeizar.size.x, 2)), Color("c98a5e"))
+	c.draw_rect(Rect2(alfeizar.position, Vector2(alfeizar.size.x, 2)), CANTO)
 	if ventana == Sala.VENTANA_DORMITORIO:
 		return
-	var barra := Rect2(ventana.position.x - 24, ventana.position.y - 3 - Sala.CORTINA_SOBRE_VENTANA, ventana.size.x + 48, 5)
 	if ventana == Sala.VENTANA_COCINA:
-		# Cenefa de cocina: tela corta con borde ondulado que tapa la barra y el marco de arriba.
-		var cenefa := Rect2(barra.position.x + 6, barra.position.y - 2, barra.size.x - 12, 26)
-		c.draw_rect(cenefa.grow(1), Color("2b1712"))
-		c.draw_rect(cenefa, CORTINA)
-		var x := cenefa.position.x
-		while x < cenefa.end.x - 1:
-			c.draw_rect(Rect2(x, cenefa.position.y, 3, cenefa.size.y), CORTINA.lightened(0.15))
-			c.draw_circle(Vector2(x + 6, cenefa.end.y), 6.0, CORTINA)
-			c.draw_rect(Rect2(x + 1, cenefa.end.y + 5, 10, 1), Color(0, 0, 0, 0.2))
-			x += 12.0
-		c.draw_rect(Rect2(cenefa.position.x, cenefa.position.y, cenefa.size.x, 3), CORTINA.darkened(0.25))
+		# Visillo: cortina corta crema con franja terracota, de su propia barra, sobre el tercio de abajo del vidrio.
+		var visillo := ArteNivel.textura("visillo_cocina")
+		if visillo:
+			ArteNivel.dibujar(c, "visillo_cocina", centro.x, ventana.end.y + 2.0)
 		return
-	# Estudio: barra con remates y dos paños cortos que caen hasta el alféizar, corridos a los lados.
+	# Estudio: barra con remates y dos paños cortos oliva (las cortinas cortas de Gemini) a los lados, hasta el alféizar.
+	var barra := Rect2(ventana.position.x - 30, ventana.position.y - 3 - Sala.CORTINA_SOBRE_VENTANA, ventana.size.x + 60, 5)
 	c.draw_rect(barra.grow(1), Color("2b1712"))
 	c.draw_rect(barra, MADERA)
 	for punta: float in [barra.position.x, barra.end.x]:
 		c.draw_circle(Vector2(punta, barra.get_center().y), 4.0, MADERA_OSCURA)
-	for lado: float in [-1.0, 1.0]:
-		var ancho := 28.0
-		var x0 := ventana.position.x - 16.0 if lado < 0.0 else ventana.end.x + 16.0 - ancho
-		var pano := Rect2(x0, barra.end.y, ancho, alfeizar.end.y + 6.0 - barra.end.y)
-		c.draw_rect(pano.grow(1), Color("2b1712"))
-		c.draw_rect(pano, TELA_ESTUDIO)
-		for pliegue in 3:
-			c.draw_rect(Rect2(pano.position.x + 4 + pliegue * 8, pano.position.y, 3, pano.size.y), TELA_ESTUDIO.darkened(0.18))
-		c.draw_rect(Rect2(pano.position.x, pano.end.y - 3, pano.size.x, 3), TELA_ESTUDIO.darkened(0.3))
+	var pano := ArteNivel.textura("panos_estudio")
+	if pano:
+		var base := barra.position.y + pano.get_height()
+		ArteNivel.dibujar(c, "panos_estudio", ventana.position.x - 8.0, base)
+		ArteNivel.dibujar(c, "panos_estudio", ventana.end.x + 8.0, base, true)
 
 
+## Marco de la ventana en 9 partes alrededor del vidrio: esquinas del arte y lados estirados (G3).
+func _marco_9(c: Node2D, ventana: Rect2) -> void:
+	var marco := ArteNivel.textura("ventana_marco")
+	if marco == null:
+		c.draw_rect(ventana.grow(3), MADERA_OSCURA, false, 6)
+		return
+	var l: float = MARCO[0]
+	var r: float = MARCO[1]
+	var t: float = MARCO[2]
+	var b: float = MARCO[3]
+	var tam := marco.get_size()
+	var fuera := Rect2(ventana.position - Vector2(l, t), ventana.size + Vector2(l + r, t + b))
+	var xs_origen := [0.0, l, tam.x - r, tam.x]
+	var ys_origen := [0.0, t, tam.y - b, tam.y]
+	var xs_destino := [fuera.position.x, fuera.position.x + l, fuera.end.x - r, fuera.end.x]
+	var ys_destino := [fuera.position.y, fuera.position.y + t, fuera.end.y - b, fuera.end.y]
+	for i in 3:
+		for j in 3:
+			if i == 1 and j == 1:
+				continue
+			var origen := Rect2(xs_origen[i], ys_origen[j], xs_origen[i + 1] - xs_origen[i], ys_origen[j + 1] - ys_origen[j])
+			var destino := Rect2(xs_destino[i], ys_destino[j], xs_destino[i + 1] - xs_destino[i], ys_destino[j + 1] - ys_destino[j])
+			c.draw_texture_rect_region(marco, destino, origen)
+
+
+## Vidrios de las 5 ventanas: [rectángulo, cuarto].
+static func vidrios() -> Array:
+	var sala := ArteNivel.textura("ventana_sala")
+	var lista: Array = []
+	if sala:
+		var arte: Array = Sala.ARTE[0]
+		var arriba: float = arte[1].y - sala.get_height()
+		lista.append([Rect2(arte[1].x + 27, arriba + 26, 126, 111), "sala"])
+	lista.append([Rect2(Sala.VIDRIO_PASILLO.position.x, Sala.VENTANA_PASILLO_ARRIBA.position.y + 5, Sala.VIDRIO_PASILLO.size.x, Sala.VIDRIO_PASILLO.end.y - Sala.VENTANA_PASILLO_ARRIBA.position.y - 5), "pasillo"])
+	lista.append([Sala.VENTANA_COCINA, "cocina"])
+	lista.append([Sala.VENTANA_DORMITORIO, "dormitorio"])
+	lista.append([Sala.VENTANA_ESTUDIO, "estudio"])
+	return lista
+
+
+## Rayos de luz (G6): uno por ventana, hacia la derecha, en 3 franjas escalonadas con el tono del cuarto, y 5 motas de
+## polvo de 1 px que suben despacio dentro de cada rayo.
 func _dibujar_luz(c: Node2D) -> void:
-	for ventana: Rect2 in Sala.VENTANAS:
-		var piso := Sala.SUELO
-		var rayo := PackedVector2Array([
-			ventana.position, Vector2(ventana.end.x, ventana.position.y),
-			Vector2(ventana.end.x + 140, piso), Vector2(ventana.position.x + 90, piso),
-		])
-		c.draw_colored_polygon(rayo, LUZ)
+	var t := Time.get_ticks_msec() / 1000.0
+	var piso := Sala.SUELO
+	for datos: Array in vidrios():
+		var v: Rect2 = datos[0]
+		var tono: Color = TONO_LUZ[datos[1]]
+		for franja in 3:
+			var adentro := v.size.x * 0.16 * franja
+			c.draw_colored_polygon(PackedVector2Array([
+				Vector2(v.position.x + adentro, v.position.y), Vector2(v.end.x - adentro, v.position.y),
+				Vector2(v.end.x + 140 - adentro, piso), Vector2(v.position.x + 90 + adentro, piso),
+			]), Color(tono, 0.035))
+		for m in 5:
+			var subida := fmod(t * 0.04 + m * 0.21 + v.position.x * 0.001, 1.0)
+			var y := lerpf(piso - 6.0, v.position.y + 6.0, subida)
+			var avance := (y - v.position.y) / (piso - v.position.y)
+			var izquierda := v.position.x + 90.0 * avance
+			var derecha := v.end.x + 140.0 * avance
+			var x := lerpf(izquierda, derecha, fmod(m * 0.37 + 0.15, 0.8) + 0.1) + sin(t * 0.7 + m) * 3.0
+			c.draw_rect(Rect2(roundf(x), roundf(y), 1, 1), Color(1.0, 0.95, 0.8, 0.55 * sin(subida * PI)))
 
 
 func _dibujar_primer_plano(c: Node2D) -> void:

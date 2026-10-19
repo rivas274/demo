@@ -100,7 +100,7 @@ const ARTE := [
 	["lampara", Vector2(1942, SUELO), false, "mueble"],
 	["librero_v2", Vector2(2162, SUELO), false, "mueble"],
 	["escalera_peldanos", Vector2(2322, SUELO), true, "escalera"],
-	["vano", Vector2(2500, SUELO - 150), false, "escalera"],
+	["vano", Vector2(2497, SUELO - 150), false, "escalera"],  # hueco cuadrado con el marco de las puertas (no un arco)
 	["reloj", Vector2(3075, 197), false, "pared"],  # 41 × 43: 10 % más chico y más lejos de la ventana (Gemini)
 	["silla_v2", Vector2(3400, SUELO), false, "mueble"],
 	["alacenas", Vector2(3461, SUELO - 182), false, "pared"],
@@ -232,8 +232,11 @@ const VALERIA_COCINA := Vector2(3080, SUELO)
 ## dibujado por código declara su tamaño (lado menor ≥ 24 px, R8 y G7; prueba_reglas_nivel lo mide).
 const CAJON := Vector2(5662, SUELO - 75)
 const RECT_CAJON := Rect2(-14, -12, 60, 24)
-const ROPA := Vector2(5540, SUELO - 65)
-const RECT_ROPA := Rect2(-26, -48, 52, 48)
+## La ropa va en el medio de la cama, apoyada en el edredón (ROPA_HUNDIDA): ROPA es donde la alcanza Felipe parado
+## en el colchón; el rectángulo cubre la pila tal como se dibuja.
+const ROPA := Vector2(5572, SUELO - 65)
+const ROPA_HUNDIDA := 9.0
+const RECT_ROPA := Rect2(-26, ROPA_HUNDIDA - 48.0, 52, 48)
 const TECLADO := Rect2(6540, SUELO - 122, 52, 24)
 ## Lo interactuable que se dibuja por código: [nombre, rectángulo en el mundo] (G7).
 const DIBUJADOS_INTERACTUABLES := [
@@ -338,6 +341,20 @@ static func rects_de_arte(imagen: String) -> Array[Rect2]:
 		if datos[0] == imagen:
 			lista.append(Rect2(datos[1] - Vector2(0, textura.get_height()), textura.get_size()))
 	return lista
+
+
+## Estilo de marco de una puerta de PUERTAS: "balcon" (puerta-ventana), "vano" (hueco cuadrado sin hoja, arriba de la
+## escalera de fondo) o "" (puerta de madera). Las dos caras de un par usan el mismo (prueba_reglas_nivel lo mide); el
+## pie de la escalera no dibuja puerta: su otra cara es el vano del descanso (ARTE "vano"), con el mismo marco.
+static func estilo_puerta(nombre: String) -> String:
+	for datos: Array in PUERTAS:
+		if datos[0] == nombre:
+			var caras := [datos[0], datos[2]]
+			if PUERTA_BALCON in caras:
+				return "balcon"
+			if PUERTA_ESCALERA in caras:
+				return "vano"
+	return ""
 
 
 ## Rectángulo sagrado de la puerta que está al pie en `pie` (B3, G10): nada se le cruza.
@@ -477,11 +494,13 @@ func _ready() -> void:
 func _crear_puertas() -> void:
 	for datos: Array in PUERTAS:
 		var puerta := Puerta.new(datos[0], datos[1], datos[2], datos[1].y - TECHO)
-		puerta.cerrada = datos[0] in [PUERTA_BALCON, PUERTA_COCINA]
-		puerta.entornada = datos[0] == PUERTA_DORMITORIO
+		# Las dos caras de una puerta se ven igual (el creador, 2026-10-19): mismo estado a cada lado.
+		var caras := [datos[0], datos[2]]
+		puerta.cerrada = PUERTA_BALCON in caras or PUERTA_COCINA in caras
+		puerta.entornada = PUERTA_DORMITORIO in caras
 		puerta.escalera = datos[0] == PUERTA_ESCALERA
 		puerta.sombra_detras = datos[0] == PUERTA_COCINA
-		puerta.estilo = "balcon" if "balcon" in datos[0] else ("vano" if datos[0] == "pasillo<recibidor" else "")
+		puerta.estilo = estilo_puerta(datos[0])
 		puerta.cruzada.connect(cruzar)
 		add_child(puerta)
 		puertas[datos[0]] = puerta
@@ -495,9 +514,9 @@ func _crear_puertas() -> void:
 	entornada.aranazos_para_romper = 1
 	entornada.verbo_indicador = "Arañar"
 	entornada.roto.connect(func(_o: Aranable) -> void:
-		var puerta: Puerta = puertas[PUERTA_DORMITORIO]
-		puerta.entornada = false
-		puerta.queue_redraw()
+		for cara: Puerta in [puertas[PUERTA_DORMITORIO], (puertas[PUERTA_DORMITORIO] as Puerta).par]:
+			cara.entornada = false
+			cara.queue_redraw()
 		_decir("puerta_abierta")
 		sonar("caja"))
 	add_child(entornada)
@@ -1162,6 +1181,7 @@ func _abrir_cocina() -> void:
 	puerta.sombra_detras = false
 	puerta.queue_redraw()
 	(puertas["cocina<recibidor"] as Puerta).cerrada = false
+	(puertas["cocina<recibidor"] as Puerta).queue_redraw()
 
 
 ## Recompensa de camino: el balcón (A.S.P.I. desenchufada).
@@ -1183,8 +1203,9 @@ func _al_cambiar_recompensas(tipo: String) -> void:
 func _abrir_balcon() -> void:
 	var puerta: Puerta = puertas.get(PUERTA_BALCON)
 	if puerta and puerta.cerrada:
-		puerta.cerrada = false
-		puerta.queue_redraw()
+		for cara: Puerta in [puerta, puerta.par]:
+			cara.cerrada = false
+			cara.queue_redraw()
 	desbloquear_logro("Desenchufada")
 
 
@@ -1401,22 +1422,30 @@ const PANTALLA_MONITOR := Rect2(6546 + 6, SUELO - 97 - 48 + 6, 33, 28)
 ## Ventana del pasillo (G3): la caja de pizza está AFUERA, sobre el toldo del vecino, detrás del vidrio (el arte de
 ## Gemini la traía sobre el alféizar; la herramienta la borra). El vidrio con reflejos va encima de la caja.
 func _dibujar_ventana_pasillo(c: Node2D) -> void:
-	# Parte de arriba de la ventana (M7): el panel de la izquierda, el parante y el vidrio siguen hacia arriba.
+	# Parte de arriba de la ventana (M7): sigue las columnas del arte hacia arriba (contorno, marco del muro, marco de
+	# madera, panel de la izquierda, parante y vidrio), así la ventana es una sola y no una caja encima del arte.
 	var arriba := VENTANA_PASILLO_ARRIBA
-	var oscuro := Color8(31, 3, 0)
-	c.draw_rect(arriba, Color8(209, 178, 149))
-	c.draw_rect(Rect2(arriba.position.x + 16, arriba.position.y + 5, 50, arriba.size.y - 5), Color8(213, 181, 152))
-	c.draw_rect(Rect2(arriba.position.x + 66, arriba.position.y + 5, 10, arriba.size.y - 5), Color8(200, 158, 136))
-	var cielo := Rect2(VIDRIO_PASILLO.position.x, arriba.position.y + 5, VIDRIO_PASILLO.size.x, arriba.size.y - 3)
+	var izq := arriba.position.x
+	var oscuro := Color8(31, 8, 4)
+	var columnas := [
+		[4, 10, Color8(210, 179, 150)], [12, 2, Color8(222, 194, 173)], [14, 4, Color8(186, 124, 80)],
+		[18, 48, Color8(212, 181, 152)], [66, 10, Color8(199, 157, 135)], [162, 4, Color8(149, 86, 51)],
+		[167, 9, Color8(210, 179, 150)],
+	]
+	for columna: Array in columnas:
+		c.draw_rect(Rect2(izq + columna[0], arriba.position.y, columna[1], arriba.size.y), columna[2])
+	var cielo := Rect2(VIDRIO_PASILLO.position.x, arriba.position.y + 5, VIDRIO_PASILLO.size.x - 1, arriba.size.y - 3)
 	for i in 6:
 		c.draw_rect(Rect2(cielo.position.x, cielo.position.y + i * cielo.size.y / 6.0, cielo.size.x, cielo.size.y / 6.0 + 1), Color(0.98, 0.86, 0.66).lerp(Color(0.95, 0.72, 0.6), i / 6.0))
 	# Techos lejanos del vecindario, pálidos.
 	for techo: Vector3 in [Vector3(4340, 24, 14), Vector3(4362, 18, 22), Vector3(4392, 30, 10), Vector3(4404, 20, 18)]:
 		c.draw_rect(Rect2(techo.x, arriba.end.y - techo.z, techo.y, techo.z), Color(0.83, 0.6, 0.55))
-	c.draw_rect(Rect2(arriba.position.x, arriba.position.y, arriba.size.x, 5), Color8(185, 122, 81))
-	c.draw_rect(Rect2(arriba.position.x, arriba.position.y, arriba.size.x, 1), oscuro)
-	c.draw_rect(Rect2(arriba.end.x - 4, arriba.position.y, 4, arriba.size.y), oscuro)
-	c.draw_rect(Rect2(arriba.position.x, arriba.position.y, 1, arriba.size.y), oscuro)
+	# Contornos oscuros (afuera, junto al parante y al marco derecho) y el dintel de madera arriba.
+	for x: float in [4.0, 76.0, 166.0, 175.0]:
+		c.draw_rect(Rect2(izq + x, arriba.position.y, 1, arriba.size.y), oscuro)
+	c.draw_rect(Rect2(izq + 4, arriba.position.y, 172, 5), Color8(185, 122, 81))
+	c.draw_rect(Rect2(izq + 4, arriba.position.y + 4, 172, 1), Color8(143, 86, 57))
+	c.draw_rect(Rect2(izq + 4, arriba.position.y, 172, 1), oscuro)
 	# Caja de pizza AFUERA, sobre el toldo del vecino (G3), abierta: tapa levantada con la mancha de grasa, la pizza
 	# adentro y vapor que sube (un poco azulada: está lejos y tras el vidrio).
 	var caja := PIZZA
@@ -1453,24 +1482,30 @@ func _dibujar_ventana_pasillo(c: Node2D) -> void:
 
 
 ## Cortina del dormitorio (arte de Gemini, `dormitorio-cortina-alta`): dos paños, el derecho en espejo, colgados de
-## una sola barra con un remate en cada punta; el tramo de barra entre los paños se estira desde una columna de la
-## misma barra (`cortina_barra`). Va del piso a la barra (277 px, el alto de la cortina por código que reemplazó),
-## detrás de la cómoda, la cesta y el ropero. Llega a la repisa alta (lugar visto: se trepará con Afilar Garras; en
-## el nivel 1 no es trepable ni tiene colisión, igual que la cortina por código).
+## una sola barra con un remate en cada punta, a los lados de la ventana que está sobre la cama; el tramo de barra entre
+## los paños se estira desde una columna de la misma barra (`cortina_barra`). La barra va CORTINA_SOBRE_VENTANA px
+## sobre el marco y la tela baja hasta el piso (lo que sobra del arte no se dibuja), detrás de la cama y la cómoda.
+## Sin colisión: en el nivel 1 no se trepa (con Afilar Garras se subirá por la tela hasta la barra y, de ahí, a la
+## repisa alta con la caja de recuerdos).
 func _dibujar_cortina(c: Node2D) -> void:
 	var textura := ArteNivel.textura("cortina")
 	if textura == null:
 		return
 	var ancho := float(textura.get_width())
-	var arriba := SUELO - 1.0 - textura.get_height()
+	var arriba := VENTANA_DORMITORIO.position.y - 3.0 - CORTINA_SOBRE_VENTANA
+	var alto := minf(SUELO - 1.0 - arriba, float(textura.get_height()))
 	var izquierda := VENTANA_DORMITORIO.position.x + CORTINA_ADENTRO - CORTINA_FIN_TELA
 	var derecha := VENTANA_DORMITORIO.end.x - CORTINA_ADENTRO + CORTINA_FIN_TELA
 	var barra := ArteNivel.textura("cortina_barra")
 	if barra:
 		var desde := izquierda + ancho
 		c.draw_texture_rect(barra, Rect2(desde, arriba + 1.0, derecha - ancho - desde, barra.get_height()), false)
-	ArteNivel.dibujar(c, "cortina", izquierda + ancho / 2.0, SUELO - 1.0)
-	ArteNivel.dibujar(c, "cortina", derecha - ancho / 2.0, SUELO - 1.0, true)
+	var region := Rect2(0, 0, ancho, alto)
+	c.draw_texture_rect_region(textura, Rect2(izquierda, arriba, ancho, alto), region)
+	# Paño derecho en espejo.
+	c.draw_set_transform(Vector2(derecha, 0.0), 0.0, Vector2(-1, 1))
+	c.draw_texture_rect_region(textura, Rect2(0.0, arriba, ancho, alto), region)
+	c.draw_set_transform(Vector2.ZERO)
 
 
 func _dibujar_sofa(c: Node2D) -> void:
@@ -1590,9 +1625,9 @@ func _dibujar_teclado(c: Node2D) -> void:
 
 
 ## Ropa doblada de la cama (arriba-extra, 52 × 48): limpia y, después de que Felipe se acicala encima, con pelos.
-## Se hunde 3 px en el edredón (autocrítica de la crítica de Gemini): el arte termina en una punta angosta de sombra y,
-## apoyado justo en el colchón, la pila se veía flotando.
-const ROPA_HUNDIDA := 3.0
+## El arte está en 3/4 y termina en una punta (la esquina de adelante): apoyada en el borde del colchón se veía
+## flotando (el creador, 2026-10-19). Se hunde ROPA_HUNDIDA px, así la fila ancha de abajo de la pila queda sobre el
+## edredón y la punta, delante.
 
 
 func _dibujar_ropa(c: Interactivo) -> void:

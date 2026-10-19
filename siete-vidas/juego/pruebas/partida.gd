@@ -263,10 +263,10 @@ func _dormitorio() -> void:
 	await _ir_a(5412)
 	await _subir_a(5412, Sala.SUELO - 53)
 	await _subir_a(5470, Sala.SUELO - 65)
-	await _ir_a(5540)
+	await _ir_a(Sala.ROPA.x)
 	await _tocar("interactuar")
 	await _segundos(1.0)
-	_paso("Desordena la ropa doblada")
+	_paso("Desordena la ropa doblada" if sala._ropa_firmada else "No pudo desordenar la ropa")
 	await _ir_a(5626)
 	felipe.mirando = 1.0
 	await _tocar("interactuar")
@@ -285,7 +285,7 @@ func _dormitorio() -> void:
 	await _entrar("pasillo>estudio")
 
 
-## Pelea: ensuciar (vaso, rollo, macetas o los papeles del teclado), bajar cuando se llena y caerle encima desde el
+## Pelea: ensuciar (vaso, taza, macetas o los papeles del teclado), bajar cuando se llena y caerle encima desde el
 ## piso. Esquiva las embestidas saltando y se aferra cuando aspira cerca.
 func _pelea() -> void:
 	var batalla := sala.batalla
@@ -333,7 +333,7 @@ func _balcon() -> void:
 
 # --- Pelea --------------------------------------------------------------------------------------------------
 
-## Tira al piso lo que haga falta para llenarle el depósito: lo del escritorio (vaso, rollo), una maceta de la repisa
+## Tira al piso lo que haga falta para llenarle el depósito: lo del escritorio (vaso, taza de café), una maceta de la repisa
 ## o, si no queda nada, pisa el teclado (la impresora escupe papeles). Después baja atravesando el mueble.
 func _ensuciar() -> void:
 	var batalla := sala.batalla

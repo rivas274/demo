@@ -43,7 +43,6 @@ PIEZAS = {
     "maceta": ("objetos", 3, (28, 37), None),
     "maceta_grande": ("objetos", 3, (45, 60), None),  # balcón: escalón a la baranda
     "calcetin": ("objetos", 4, (24, 33), None),
-    "rollo": ("objetos", 5, (35, 24), None),
     "caja": ("objetos", 8, (64, 54), None),
     "raton": ("objetos", 9, (62, 54), None),  # escala de gato: la mitad de Felipe
     # Tanda 2.
@@ -51,7 +50,6 @@ PIEZAS = {
     "caja_arena": ("muebles-extra", 1, (104, 46), None),
     "base_carga": ("muebles-extra", 4, (74, 38), None),
     "repisa": ("muebles-extra", 5, (160, 47), None),
-    "vano": ("puertas", 3, (134, 150), None),
     "bola_pelo": ("detalles", 1, (24, 24), None),
     "mancha": ("detalles", 8, (60, 20), None),
     "retrato": ("cuadros", 0, (84, 100), None),  # retrato oficial de Su Majestad
@@ -372,22 +370,69 @@ def luz_de_borde(nombre, desde=((0, -1), (1, -1)), color=(255, 168, 92)):
     Image.fromarray(salida, "RGBA").save(DESTINO / f"{nombre}_luz.png")
 
 
-def vano_con_hondura(imagen):
-    """Vano del arco (crítica de Gemini, que lo llamó "ratonera"): el negro plano no tenía hondura. Pone un borde
-    interior en sombra, en tres franjas de pixel (marrón oscuro a negro) a lo largo del arco y de los costados; el
-    piso no (el hueco se abre hacia abajo)."""
-    a = np.asarray(imagen).copy()
-    oscuro = (a[:, :, 3] > 0) & (a[:, :, :3].max(axis=2) < 45)
-    etiquetas, _ = ndimage.label(oscuro)
-    tamanos = ndimage.sum(oscuro, etiquetas, range(1, etiquetas.max() + 1))
-    hueco = etiquetas == (int(np.argmax(tamanos)) + 1)
-    # La fila de abajo cuenta como hueco: la distancia se mide solo al arco y a los costados.
-    con_piso = np.vstack([hueco, np.ones((8, hueco.shape[1]), bool) & hueco[-1:]])
-    distancia = ndimage.distance_transform_cdt(con_piso, metric="chessboard")[: hueco.shape[0]]
-    for desde, hasta, color in [(1, 2, (62, 36, 28)), (3, 4, (42, 25, 21)), (5, 7, (27, 15, 16))]:
-        franja = hueco & (distancia >= desde) & (distancia <= hasta)
-        a[franja, :3] = color
-    return Image.fromarray(a, "RGBA")
+def vano_cuadrado():
+    """Vano de la escalera de fondo (el creador, 2026-10-19: "entras por una puerta cuadrada y al otro lado el marco
+    es redondo"): el mismo marco de madera de puerta_abierta_v2, sin la hoja, a la altura del vano bajo del descanso
+    (150 px). Arriba van el dintel y los parantes; abajo, el umbral. Se usa a los dos lados (descanso y pasillo)."""
+    puerta = np.asarray(Image.open(DESTINO / "puerta_abierta_v2.png").convert("RGBA")).copy()
+    alto_puerta, ancho = puerta.shape[:2]
+    # Sin la hoja: entre el parante izquierdo (termina en x 13) y el derecho (empieza en x 126), desde la fila 18 (bajo
+    # el dintel) hasta el umbral, se repite la oscuridad del vano (columna 50).
+    for x in range(40, 126):
+        puerta[18:alto_puerta - 3, x] = puerta[18:alto_puerta - 3, 50]
+    alto = 150
+    umbral = 4
+    final = np.vstack([puerta[: alto - umbral], puerta[alto_puerta - umbral:]])
+    Image.fromarray(final, "RGBA").save(DESTINO / "vano.png")
+    print(f"Vano cuadrado: {ancho} x {alto}")
+
+
+def taza_de_cafe():
+    """Taza de café de Valeria en el escritorio (reemplaza al rollo de papel higiénico, que no tenía sentido en un
+    estudio; el creador, 2026-10-19). Se tira igual y deja una mancha. Escala de gato: el doble de una real (30 × 26,
+    lado menor ≥ 24, R8), con el contorno oscuro y la luz de arriba a la izquierda del resto del arte."""
+    contorno, loza, sombra, luz = (43, 23, 18), (241, 230, 210), (206, 186, 160), (255, 250, 238)
+    franja, franja_osc, cafe, crema = (192, 96, 63), (150, 70, 45), (74, 42, 26), (140, 92, 58)
+    ancho, alto = 30, 26
+    a = np.zeros((alto, ancho, 4), np.uint8)
+
+    def pintar(x0, y0, x1, y1, color):
+        a[y0:y1, x0:x1, :3] = color
+        a[y0:y1, x0:x1, 3] = 255
+
+    # Asa (a la derecha): un aro de 3 px de grosor.
+    pintar(19, 7, 28, 20, contorno)
+    pintar(20, 8, 27, 19, loza)
+    pintar(20, 8, 27, 9, luz)
+    pintar(23, 11, 25, 16, (0, 0, 0))
+    a[11:16, 23:25, 3] = 0
+    pintar(22, 10, 26, 11, contorno)
+    pintar(22, 16, 26, 17, contorno)
+    pintar(22, 11, 23, 16, contorno)
+    pintar(25, 11, 26, 16, contorno)
+    # Cuerpo: un poco más angosto abajo, con contorno.
+    for y in range(3, 26):
+        recorte = 1 if y >= 23 else 0
+        pintar(0 + recorte, y, 22 - recorte, y + 1, contorno)
+    for y in range(4, 25):
+        recorte = 1 if y >= 22 else 0
+        pintar(1 + recorte, y, 21 - recorte, y + 1, loza)
+    # Sombra a la derecha y brillo a la izquierda.
+    pintar(16, 6, 21, 22, sombra)
+    pintar(3, 7, 5, 20, luz)
+    # Franja terracota (la de la casa) con su sombra.
+    pintar(1, 13, 21, 17, franja)
+    pintar(16, 13, 21, 17, franja_osc)
+    # Borde de arriba y café adentro (se ve desde arriba en 3/4).
+    pintar(0, 1, 22, 3, contorno)
+    pintar(1, 2, 21, 6, contorno)
+    pintar(2, 2, 20, 5, cafe)
+    pintar(4, 3, 11, 4, crema)
+    pintar(1, 6, 21, 7, luz)
+    # Base: sombra dura bajo la taza.
+    pintar(2, 25, 20, 26, contorno)
+    Image.fromarray(a, "RGBA").save(DESTINO / "taza.png")
+    print(f"Taza de café: {ancho} x {alto}")
 
 
 def baranda_con_brillo(imagen):
@@ -464,8 +509,6 @@ def main():
             final = vaso_en_pixeles(final)
         if nombre == "baranda":
             final = baranda_con_brillo(final)
-        if nombre == "vano":
-            final = vano_con_hondura(final)
         if nombre == "maceta":
             final = maceta_contrastada(final)
         if nombre in PARCHES:
@@ -510,7 +553,9 @@ def main():
         imagen.resize(tamano, Image.NEAREST).save(DESTINO / f"{nombre}.png")
     preparar_cortina()
     luz_de_borde("aspi_gigante")
-    print(f"{len(PIEZAS) + len(MOSAICOS) + len(FONDOS) + 3} imágenes en {DESTINO}")
+    vano_cuadrado()
+    taza_de_cafe()
+    print(f"{len(PIEZAS) + len(MOSAICOS) + len(FONDOS) + 5} imágenes en {DESTINO}")
     preparar_valeria()
 
 

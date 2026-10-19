@@ -1,10 +1,10 @@
 class_name Vaso
 extends Node2D
 ## Objeto que Felipe tira de un manotazo con el botón de acción: cae y, según el tipo,
-## se rompe (vaso: logro "La Gravedad Funciona") o aturde al enemigo que esté debajo (rollo, maceta).
+## se rompe (vaso: logro "La Gravedad Funciona") o aturde al enemigo que esté debajo (taza de café, maceta).
 ## Las llaves no se rompen: caen con un "¡CLINK CRÍTICO!". En la pelea, lo que se rompe vuelve a su lugar de a uno
 ## (reponer(), lo decide BatallaAspi); un soplido de A.S.P.I. las tira sin romperlas (caer_sin_romper()).
-## Escala de gato: vaso, rollo, maceta y llaves al doble de su tamaño real (lado menor ≥ 24 px, R8).
+## Escala de gato: vaso, taza, maceta y llaves al doble de su tamaño real (lado menor ≥ 24 px, R8).
 
 ## Se rompió en el piso (en la pelea deja una mancha que A.S.P.I. va a limpiar).
 signal caido(posicion: Vector2)
@@ -114,7 +114,7 @@ func _al_caer() -> void:
 		return
 	caido.emit(global_position)
 	if sala.has_method("sonar"):
-		sala.sonar("caja" if tipo in ["rollo", "llaves"] else "vidrio")
+		sala.sonar("caja" if tipo == "llaves" else "vidrio")
 	if tipo == "vaso":
 		if sala.has_method("desbloquear_logro"):
 			sala.desbloquear_logro(LOGRO)
@@ -128,9 +128,14 @@ func _draw() -> void:
 	if (not roto or tipo == "llaves") and ArteNivel.dibujar(self, tipo, 0.0, 0.0):
 		return
 	match tipo:
-		"rollo":
-			draw_rect(Rect2(-6, -10, 12, 10), Color("f3efe8"))
-			draw_circle(Vector2(0, -5), 2.0, Color("cfc6bb"))
+		"taza":
+			# Rota: el charco de café y los trozos de loza (en la pelea, además, la mancha que A.S.P.I. limpia).
+			draw_rect(Rect2(-15, -2, 30, 2), Color("4a2a1a"))
+			draw_rect(Rect2(-11, -3, 20, 1), Color("6b3e22"))
+			for trozo: Rect2 in [Rect2(-12, -6, 6, 4), Rect2(-2, -5, 5, 3), Rect2(6, -7, 7, 5)]:
+				draw_rect(trozo.grow(1), Color("2b1712"))
+				draw_rect(trozo, Color("f1e6d2"))
+				draw_rect(Rect2(trozo.position, Vector2(trozo.size.x, 1)), Color("c0603f"))
 		"maceta":
 			if roto:
 				draw_rect(Rect2(-10, -3, 20, 3), Color("6e4a2c"))

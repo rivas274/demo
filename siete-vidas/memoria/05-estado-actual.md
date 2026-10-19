@@ -12,6 +12,14 @@ Actualizado: 2026-10-19. **Léelo al empezar un chat nuevo** para retomar sin re
 
 ## Ya cerrado (2026-10-19)
 
+- **Ventanas, objetos y puertas del nivel 1** (lo que vio el creador; 0 créditos; todas las pruebas pasan y el bot 3 de 3 con la agenda 8 de 8). Detalle y tabla antes/ahora en `diseno/nivel-01-gran-fuga.md`, sección 14; hoja `ventanas-antes-despues.png`.
+  - **Ventanas con una sola medida:** alféizar a 90 cm (109 px), unos 150 × 120 px, arriba a 1,90 m (nada bajo el HUD). Sala sobre el respaldo del sofá; cocina con cenefa; pasillo apoyada en la consola (una sola ventana, la pizza sigue afuera tras el vidrio); dormitorio grande sobre la cama con la cortina de Gemini a los lados hasta el piso (el paisaje pasó sobre la repisa); estudio sobre el escritorio con paños cortos.
+  - **Taza de café** de Valeria en el estudio en vez del rollo de papel higiénico (se tira, aturde y mancha igual; `taza.png` dibujada en la herramienta; se borró `rollo.png`). No había otros objetos fuera de lugar.
+  - **Ropa doblada** en el medio de la cama, hundida 9 px en el edredón (no flota); `prueba_nivel` mide que se apoya, que el contorno calza y que «Desordenar» funciona.
+  - **Puertas iguales a los dos lados:** el vano de la escalera es cuadrado con el marco de las puertas (no un arco) y cada par empieza en el mismo estado (cocina y balcón cerradas, dormitorio entornada a los dos lados). `prueba_reglas_nivel` lo comprueba en cada par.
+  - **Falta (archivos que tocaba otro agente):** quitar «rollo» y `vano_con_hondura` de `03-arte-y-herramientas.md` (agregar `taza` y `vano_cuadrado`) y «rollos» de la tabla Acciones de Felipe en `02-guia-felipe.md` y en la ficha (ahora «tazas»).
+  - **No se tocó a Felipe:** no aplica la regla de los tres lugares.
+
 - **Caminar de pasos largos de Felipe en el juego** (aprobado por el creador; SpriteCook `pixel-engine-v1.5` desde Felipe A, asset `1d4f1aaa-84e6-4f77-bf00-9a58168185d6`, 26 créditos; quedan 218):
   - `caminar` usa `felipe-caminar-largo-sheet.png`. Pie apoyado medido con `pruebas/medir_pasos.gd` (banda de 4 filas del piso): cuadros 0-1, 1-2, 2-3, 3-4 y 5-6 adelantan 5, 5, 4, 6 y 5 px de hoja → `AnimacionesFelipe.PASO["caminar"]` = 3,6 px del juego (antes 1,8). A 120 px/s el ciclo va a 33 cuadros/s (bajo el tope de 34) y el desliz medio es 0; en 6-7 el pie casi se queda quieto en la hoja (1 a 3 px), así que ese cuadro patina un poco más (hasta ~2 px). Los pares 4-5, 6-7 y 7-0 no tienen un pie claro.
   - **Se conservan** `felipe-walk-sheet.png` (en reserva, sin usar) y `felipe-run-sheet.png` (Zoomies), por pedido del creador.
@@ -40,7 +48,7 @@ Actualizado: 2026-10-19. **Léelo al empezar un chat nuevo** para retomar sin re
   - **Popo táctico (G6):** da una foto vergonzosa (las tres secretas dan fotos; "Galería Viral" con las tres).
   - **Legibilidad (G7, M1, M2, M5, M7):** teclado 52 × 24 y ropa 52 × 26 dibujados por código (la prueba R8 mide también lo dibujado por código y el tamaño que declara cada interactuable), descanso grueso con faldón, cartel "PIPE: NO" sin pisar el librero, láser de 8 px con halo, verbos distintos (sofá "Firmar", ropa "Desordenar", puerta "Arañar").
   - **Interfaz (M3, M4):** el aviso de logro va sobre el diálogo y fuera de su cuadro; `PresentacionJefe` esconde el diálogo y el Indicador mientras presenta, muestra la frase del portazo como subtítulo y usa una viñeta oscura en vez de discos rosados.
-  - **Cortina (G4):** junto a una ventana nueva entre la cómoda y el ropero (hoy con el arte de Gemini).
+  - **Cortina (G4):** con el arte de Gemini; desde el 2026-10-19 a los lados de la ventana sobre la cama.
   - **Escalera:** bajar funciona (prueba nueva en `prueba_nivel`).
   - **No se tocó a Felipe** (ni sprites ni acciones): no aplica la regla de los tres lugares.
   - **Quedan abiertos:** G8 (`entrar_puerta`, el creador decidió no pedirla aún), G9 (intimidar, para el Barrio Viejo), M8 (retrato familiar de Gemini).

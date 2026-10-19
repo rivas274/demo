@@ -40,14 +40,14 @@ Valeria vive en la planta baja y va donde hay ruido. Empieza sentada en el sofá
 - **Ignorar el láser (secreta):** el punto mide 8 px, con halo que late; la primera vez Felipe dice "No. No voy a caer.". 5 s quieto con el punto rojo cerca: se apaga "de vergüenza" y cae una **foto vergonzosa** del cajón de la consola.
 - **Arañar es llave:** la puerta del dormitorio está entornada; se abre arañándola ("Puerta entornada. Invitación aceptada.").
 - **Descanso:** cojín, a 2 px del rectángulo sagrado de la puerta del estudio.
-- **Lugar visto (R17):** por la ventana se ve el toldo del vecino con una caja de pizza **afuera, detrás del vidrio** (con reflejos encima); el alféizar se pisa pero está vacío y Felipe dice "Esa pizza es mía. Algún día." (se vuelve con Caer de Pie).
+- **Lugar visto (R17):** por la ventana se ve el toldo del vecino con una caja de pizza **afuera, detrás del vidrio** (con reflejos encima); el alféizar (90 cm, sobre la consola) se pisa pero está vacío y Felipe dice "Esa pizza es mía. Algún día." (se vuelve con Caer de Pie).
 - **Hito:** el retrato familiar donde Felipe tapa a todos. Bajo la consola se pasa agachado (47 px libres); el baúl se pasa por delante.
 
 ### 2.5 Dormitorio (opcional, 720 px)
-- **Repasa** subir muebles: banquito → cama → cómoda → repisa → ropero. La repisa es el alféizar de la ventana que está entre la cómoda y el ropero; la cortina cuelga a sus lados desde una barra con remates. Una cesta de ropa al pie de la cortina sirve para salir del hueco entre la cómoda y el ropero.
+- **Repasa** subir muebles: banquito → cama → cómoda → repisa → ropero. La repisa es una repisa de pared entre la cómoda y el ropero (con el paisaje encima); la ventana va sobre la cama, del mismo tamaño que las demás, con la cortina a los lados colgada de una barra y hasta el piso. Una cesta de ropa al pie de la repisa sirve para salir del hueco entre la cómoda y el ropero.
 - **Saquear el cajón de calcetines:** manotazo al cajón (desde la cama): calcetines volando y el **calcetín 3** sobre la cómoda ("Inventario.").
-- **Travesura suelta:** desordenar la ropa doblada de la cama (una pila de 52 × 26 con una manga colgando; se acicala encima y queda revuelta y con pelos: "Doblada era aburrida. Ahora tiene pelo de rey.").
-- **Lugar visto (R17):** la cortina llega hasta la barra, bajo la repisa alta con la caja de recuerdos de Valeria; no se trepa todavía (Afilar Garras). La cortina es **arte de Gemini** (`dormitorio-cortina-alta.png`, procesada por `preparar_arte_nivel.py` a 45 × 277): dos paños (el derecho en espejo) de una sola barra con un remate en cada punta; cada paño tapa 9 px de la ventana. Sin colisión, como antes: si se vuelve trepable con Afilar Garras, el rectángulo trepable es la tela de cada paño.
+- **Travesura suelta:** desordenar la ropa doblada de la cama (la pila de `arriba-extra`, 52 × 48, en el medio del colchón y hundida 9 px en el edredón para que se apoye y no flote; se acicala encima y queda revuelta y con pelos: "Doblada era aburrida. Ahora tiene pelo de rey."). `prueba_nivel` comprueba que se apoya en el colchón, que el contorno del Indicador calza con la pila y que «Desordenar» funciona.
+- **Lugar visto (R17):** la repisa alta con la caja de recuerdos de Valeria, sobre el hueco entre la cómoda y el ropero; no se alcanza todavía (Afilar Garras: se trepará la cortina hasta la barra y de ahí se salta a la repisa alta). La cortina es **arte de Gemini** (`dormitorio-cortina-alta.png`, procesada por `preparar_arte_nivel.py` a 45 × 277): dos paños (el derecho en espejo) de una sola barra con un remate en cada punta, 18 px sobre el marco de la ventana; cada paño tapa 9 px de la ventana y la tela baja hasta el piso (lo que sobra del arte no se dibuja). Sin colisión: si se vuelve trepable con Afilar Garras, el rectángulo trepable es la tela de cada paño.
 
 ### 2.6 Estudio de Valeria (jefe, 640 px, una pantalla)
 - **Examen** (sección 5). **Pisar el teclado (secreta;** teclado dibujado de 52 × 24, con cuatro filas de teclas, delante de la pantalla**):** la pantalla dice "jjjjjjjjjj", **foto vergonzosa 3**, y durante la pelea la impresora (en el piso, bajo el escritorio) escupe un papel cada 4 s que cuenta como mancha.
@@ -108,7 +108,7 @@ La presentación **empieza cuando terminó el fundido de la puerta** (B1); el fu
 Al volver después de perder una vida (reaparece en el cojín), la entrada corta dura 1 s (portazo y nombre) y la pelea **conserva la fase**.
 
 ### Reglas, fases y ataques (no se gana sentado, G12)
-- **Ensuciar:** lo que se rompe en el piso deja una mancha (vaso y rollo del escritorio, 2 macetas de la repisa, papeles del teclado). A.S.P.I. va a limpiarla: **anticipación** (el cepillo gira 0,6 s), aspira (de pie arrastra; agachado se aferra; en la fase 3 alcanza 260 px) y suma "+1" y "Glup.". Lo roto vuelve **de a uno cada 6 s**.
+- **Ensuciar:** lo que se rompe en el piso deja una mancha (vaso y taza de café del escritorio, 2 macetas de la repisa, papeles del teclado). A.S.P.I. va a limpiarla: **anticipación** (el cepillo gira 0,6 s), aspira (de pie arrastra; agachado se aferra; en la fase 3 alcanza 260 px) y suma "+1" y "Glup.". Lo roto vuelve **de a uno cada 6 s**.
 - **Depósito lleno:** 2/3/3 manchas por fase; se detiene inofensiva 4/3,5/3 s pitando «¡DEPÓSITO LLENO!» con la pista "Sáltale encima y aprieta el botón". Si estaba bajo la repisa, sale disparada 80 px. Felipe le cae encima: **congelado de 0,1 s, destello, sacudida, «¡CLIC!», polvo y sonido en capas**.
 - **Embestida (todas las fases):** se echa atrás 10 px y su luz roja parpadea 0,5 s; recién entonces carga, y solo cargando hace daño.
 - **Soplido contra el que acampa (desde la fase 2):** más de 3 s (2 s en la fase 3) arriba de algo de más de 90 px: va debajo, vibra con luz amarilla 0,6 s y sopla: Felipe sale al piso sin daño y las macetas caen sin romperse.
@@ -132,12 +132,12 @@ Alto de todos los cuartos: 424 px (3,5 m). Piso en y = 448. Muros entre cuartos.
 
 | Cuarto | x en el mundo | Ancho | Qué hay (x en el mundo · altura) |
 | --- | --- | --- | --- |
-| Sala | 0–1280 | 1280 | nido 40 · ventana 170–350 · sofá 240–480 (asiento 49, respaldo 102) · rascador 520–620 (69/114/165) · silla 680 (55) · mesa 745–923 (91, vaso en 905) · silla 929 (55) · retrato · puerta 1188 |
-| Recibidor | 1440–2640 | 1200 | puerta 1532 · zapatero 1626–1786 (97; 40 libres debajo; llaves) · caja de arena 1832–1936 (45) · lámpara 1942 · puerta de la cocina 2070 · librero 2162–2266 (48/103/155/218) · reja 2284–2296 (182) · escalera 2322–2548 y vano en el descanso (150) |
-| Cocina | 2800–3760 | 960 | puerta 2892 · tazón 3010 · Valeria 3080 · ratón 3200–3290 · caja de cartón 3360 · silla 3400 (55) · mesón 3464–3668 (108, ratón 3500–3536) · microondas 3570 (162, pollo 3612) · refrigerador 3674–3758 (216, calcetín 2) |
-| Pasillo | 4000–5040 | 1040 | vano de la escalera 4092 · baúl 4190 (54) · consola 4256–4412 (97, vaso; 47 libres) · alféizar 4264–4436 (150; la pizza, afuera tras el vidrio, en 4380) · puerta del dormitorio 4536 · láser 4640–4780 · cojín 4784–4854 · puerta del estudio 4948 |
-| Dormitorio | 5200–5920 | 720 | puerta 5292 · banquito 5386 (53) · cama 5444–5644 (65) · cómoda 5650–5734 (96, cajón) · ventana 5748–5804 con la repisa 5740–5810 (145) de alféizar · cortina 5715–5837 (telas 5723–5757 y 5795–5829, barra a 277) · cesta 5747–5807 (35) · repisa alta 5735–5815 (290, lugar visto) · ropero 5816–5920 (185) |
-| Estudio | 6240–6880 | 640 | puerta 6332 · silla 6424 (55) · escritorio 6488–6648 (98; vaso, teclado, pantalla, rollo) · impresora bajo el escritorio · repisa 6636–6696 (151, 2 macetas) · base de carga 6600–6674 · puerta del balcón 6788 |
+| Sala | 0–1280 | 1280 | nido 40 · ventana 170–350 (alféizar 109) · sofá 240–480 (asiento 49, respaldo 102) · rascador 520–620 (69/114/165) · silla 680 (55) · mesa 745–923 (91, vaso en 905) · silla 929 (55) · retrato · puerta 1188 |
+| Recibidor | 1440–2640 | 1200 | puerta 1532 · zapatero 1626–1786 (97; 40 libres debajo; llaves) · caja de arena 1832–1936 (45) · lámpara 1942 · puerta de la cocina 2070 · librero 2162–2266 (48/103/155/218) · reja 2284–2296 (182) · escalera 2322–2548 y vano cuadrado en el descanso 2497–2637 (150) |
+| Cocina | 2800–3760 | 960 | puerta 2892 · ventana 3150–3300 (alféizar 109, cenefa) · tazón 3010 · Valeria 3080 · ratón 3200–3290 · caja de cartón 3360 · silla 3400 (55) · mesón 3464–3668 (108, ratón 3500–3536) · microondas 3570 (162, pollo 3612) · refrigerador 3674–3758 (216, calcetín 2) |
+| Pasillo | 4000–5040 | 1040 | vano cuadrado de la escalera 4092 · baúl 4190 (54) · consola 4256–4412 (97, vaso; 47 libres) · ventana 4260–4440 apoyada en la consola, alféizar 4264–4436 (109; la pizza, afuera tras el vidrio, en 4389) · puerta del dormitorio 4536 · láser 4640–4780 · cojín 4784–4854 · puerta del estudio 4948 |
+| Dormitorio | 5200–5920 | 720 | puerta 5292 · banquito 5386 (53) · cama 5444–5644 (65) · ventana 5469–5619 sobre la cama (alféizar 109) · cortina 5436–5652 (telas a los lados, barra a 230, hasta el piso) · ropa doblada 5572 (sobre el colchón) · cómoda 5650–5734 (96, cajón) · repisa 5740–5810 (145) con el paisaje encima · cesta 5747–5807 (35) · repisa alta 5735–5815 (290, lugar visto) · ropero 5816–5920 (185) |
+| Estudio | 6240–6880 | 640 | puerta 6332 · silla 6424 (55) · ventana 6455–6605 sobre el escritorio (alféizar 109, paños cortos) · escritorio 6488–6648 (98; vaso, teclado, pantalla, taza de café) · impresora bajo el escritorio · repisa 6636–6696 (151, 2 macetas) · base de carga 6600–6674 · puerta del balcón 6788 |
 | Balcón | 7040–7680 | 640 | puerta 7132 · maceta grande 7330 (32) · baranda 7400–7584 (89; tramo sin maceta 7470–7520) · ciudad · toldo de la panadería 7380–7680, 196 px bajo el piso (solo existe en el salto final) |
 
 Árbol: sala → recibidor → (cocina) y escalera → pasillo → (dormitorio) y estudio → balcón.
@@ -202,7 +202,7 @@ Alto de todos los cuartos: 424 px (3,5 m). Piso en y = 448. Muros entre cuartos.
 - **Microondas de 98 × 54** (escala de gato) para que el escalón al refrigerador sea de 54 px.
 - **Dormitorio y cocina más angostos** (720 y 960 px) para no dejar huecos sin salida detrás del ropero y del refrigerador.
 - **`arriba-extra.png` llegó en la revisión 3:** baúl (40 cm, 70 × 48), cojín redondo, retrato familiar, ropa doblada limpia y con pelos, caja de recuerdos, monitor e impresora (recortados del escritorio con monitor) y papeles son arte; el teclado y los calcetines que vuelan siguen por código; consola = aparador y cómoda = la de siempre.
-- **Cortina de Gemini** (`dormitorio-cortina-alta.png`, 2026-10-19): reemplazó a la de código. La herramienta le corta el remate derecho para usarla como paño izquierdo y, en espejo, como el derecho; el tramo de barra del medio se estira desde una columna de la misma barra. La ventana del dormitorio está en el hueco entre la cómoda y el ropero, para que la cortina cuelgue junto a ella. `dormitorio-cortina.png` (la ancha) no se usa: no cabe en el hueco de 87 px.
+- **Cortina de Gemini** (`dormitorio-cortina-alta.png`, 2026-10-19): reemplazó a la de código. La herramienta le corta el remate derecho para usarla como paño izquierdo y, en espejo, como el derecho; el tramo de barra del medio se estira desde una columna de la misma barra. Desde el 2026-10-19 la ventana del dormitorio va sobre la cama (sección 14) y la cortina cuelga a sus lados. `dormitorio-cortina.png` (la ancha) no se usa.
 - **Retoques de arte en la herramienta** (`preparar_arte_nivel.py`, sin pedir arte nuevo): a la ventana del pasillo se le tapó la caja de pizza que traía sobre el alféizar (PARCHES) y a la baranda se le quitó la maceta del medio (BORRAR + RELLENOS).
 - **El caminar de Valeria es de SpriteCook** (revisión 3): el de Gemini no alternaba las piernas y se borró. Camina a 110 px/s (9,2 px de pie apoyado por cuadro × 12 cuadros/s, medido en la hoja).
 - **Valeria cruza las puertas a la vista** (revisión 3): cuando Felipe sale al recibidor, ella camina hasta la puerta de la sala y entra al recibidor por la puerta unos 7 s después; maullar a la cocina hace que se asome en el vano. Por eso la cocina se abre ~2 s después del maullido, no al instante.
@@ -261,7 +261,7 @@ Cada punto se comprobó contra capturas reales (`pruebas/capturas_nivel.gd`) ant
 
 - **Cortina:** arte de Gemini (sección 2.5).
 - **Sala:** Valeria sentada 9 px más abajo (`Valeria.FILA_CADERA` 139): los muslos sobre el cojín, que se hunde, y los pies en el piso; sombras de contacto duras bajo cada mueble que pisa el piso (rascador, sofá, sillas, librero, refrigerador, ropero…); el retrato oficial bajó 16 px (lo tapaba la barra del HUD).
-- **Recibidor y escalera:** charco de luz cálida bajo la lámpara; reja anti-fuga con tinte crema / gris cálido; el vano tiene un borde interior en sombra (tres franjas de pixel).
+- **Recibidor y escalera:** charco de luz cálida bajo la lámpara; reja anti-fuga con tinte crema / gris cálido; el vano tenía un borde interior en sombra (hoy es un hueco cuadrado con marco de puerta, sección 14).
 - **Cocina:** reloj 10 % más chico (41 × 43) y más lejos de la ventana; el azulejo de la pared es opaco entero (por las costuras se veía la ciudad: líneas punteadas).
 - **Pasillo:** el vaso está 17 px más adentro de la consola (4378); retrato familiar 14 px más abajo.
 - **Dormitorio:** la ropa doblada se hunde 3 px en el edredón (se veía flotando); el paisaje bajó 14 px.
@@ -269,4 +269,22 @@ Cada punto se comprobó contra capturas reales (`pruebas/capturas_nivel.gd`) ant
 - **Balcón:** brillo cálido en el borde de arriba de la baranda.
 - **Rótulos de interacción:** placa con marco de madera, contorno, esquinas recortadas, clavitos y sombra dura; la misma letra e interior que el diálogo y la libreta; el ícono de Kenney se mantiene.
 - **Jefe:** luz de borde cálida en la A.S.P.I. gigante (`aspi_gigante_luz.png`); el «DETECTANDO… GATO.» va en una cartela semitransparente con marco rojo; el primer plano no la tapa (capa 25, ya comprobado en `prueba_jefe`).
+
+## 14. Ventanas, objetos y puertas (el creador, 2026-10-19)
+
+El creador: "Las ventanas están raras. En el estudio está muy alta. ¿Por qué hay papel higiénico en el estudio? La ventana del cuarto se ve pequeña y rara. La ropa debería estar más abajo." y "¿Por qué hay puertas redondas si todas son cuadradas?". 0 créditos: todo por código y en `preparar_arte_nivel.py`. Hoja antes/después de los cinco cuartos y de las dos caras de cada puerta: `ventanas-antes-despues.png` (fuera del repositorio).
+
+- **Ventanas con una sola medida** (`Sala.ALFEIZAR`, `VENTANA_COCINA`, `VENTANA_DORMITORIO`, `VENTANA_ESTUDIO`): alféizar a 90 cm (109 px del piso), vidrio de unos 150 × 120 px y arriba a 1,90 m; nada bajo la barra del HUD ni pegado al techo. Las recortadas llevan marco, alféizar que sobresale con su sombra y su tela (`FondoApartamento._dibujar_ventana`).
+
+| Ventana | Antes | Ahora |
+| --- | --- | --- |
+| Sala (arte con persiana) | alféizar a 150 px, arriba bajo el HUD | alféizar a 109 px, justo sobre el respaldo del sofá; mismo arte (180 × 151) |
+| Cocina | 140 × 120, alféizar a 198 px, sin alféizar dibujado, barra sin tela | 150 × 120, alféizar a 109 px, cenefa de cocina |
+| Pasillo (arte con la pizza) | alféizar a 150 px (1,24 m), 94 px de alto, la parte de arriba se veía como una caja aparte | apoyada en la consola, alféizar a 109 px, 132 px de alto; la parte de arriba sigue las columnas del arte (una sola ventana); vidrio 86 × 106 y la pizza 41 px más abajo, siempre afuera tras el vidrio (G3) |
+| Dormitorio | 56 × 108 en el hueco entre la cómoda y el ropero (se veía chica) | 150 × 120 sobre la cama, cortina de Gemini a los lados desde una barra 18 px sobre el marco, hasta el piso; el paisaje pasó sobre la repisa |
+| Estudio | 140 × 100 con el alféizar a 258 px (arriba quedaba bajo el HUD) | 150 × 120 sobre el escritorio (el monitor delante del vidrio), alféizar a 109 px, dos paños cortos verde oliva |
+
+- **Taza de café en vez del rollo de papel higiénico** (estudio): un rollo heredado del prototipo no tenía sentido en un estudio. La taza de Valeria (`taza.png`, 30 × 26, dibujada en `preparar_arte_nivel.py`: loza crema con la franja terracota de la casa, café adentro y contorno oscuro) se tira igual, aturde a A.S.P.I. si le cae encima y, rota, deja trozos de loza y un charco de café: en la pelea es una mancha como antes. Se borró `rollo.png`. Revisados los demás cuartos: no hay otros objetos fuera de lugar (el vaso de la mesa y de la consola, las llaves del zapatero, las macetas y el vaso del estudio tienen sentido donde están).
+- **Ropa doblada:** en el medio de la cama (5572) y hundida 9 px en el edredón: el arte está en 3/4 y termina en la punta de la esquina de adelante; apoyada en el borde del colchón se veía flotando.
+- **Puertas iguales a los dos lados:** el vano de la escalera era un arco (en el descanso y en el pasillo); ahora es un hueco cuadrado con el mismo marco de madera de las puertas (`vano.png`, 140 × 150, sale de `puerta_abierta_v2` sin la hoja). Además cada par empieza en el mismo estado: la cocina cerrada a los dos lados, la del dormitorio entornada a los dos lados y la del balcón cerrada a los dos lados (se abren juntas). `Sala.estilo_puerta()`; `prueba_reglas_nivel` comprueba en cada par el mismo marco, el mismo estado y el mismo ancho, y que ningún hueco sea un arco.
 

@@ -347,7 +347,20 @@ func _correr() -> void:
 	await _esperar(30)
 	_comprobar(sala.habitacion == "dormitorio", "La puerta lleva al dormitorio")
 
-	# Dormitorio: el cajón (desde la cama) suelta el calcetín 3; la cortina no se trepa.
+	# Dormitorio: la ropa doblada está apoyada en el colchón (no flota) y se desordena desde la cama; el contorno del
+	# Indicador cubre la pila tal como se dibuja.
+	var ropa: Interactivo = sala.get_node("Ropa doblada")
+	var arte_ropa := ArteNivel.textura("ropa_limpia").get_size()
+	var dibujo_ropa := Rect2(Sala.ROPA + Vector2(-arte_ropa.x / 2.0, Sala.ROPA_HUNDIDA - arte_ropa.y), arte_ropa)
+	var contorno_ropa := ropa.rect_indicador()
+	_comprobar(absf(contorno_ropa.position.y - dibujo_ropa.position.y) <= 2.0 and absf(contorno_ropa.end.y - dibujo_ropa.end.y) <= 2.0 and absf(contorno_ropa.get_center().x - dibujo_ropa.get_center().x) <= 2.0, "La ropa doblada: el contorno del Indicador calza con la pila dibujada")
+	var cama := Sala._rect_pieza("Cama")
+	_comprobar(dibujo_ropa.end.y > cama.position.y and dibujo_ropa.end.y <= cama.position.y + 12.0 and dibujo_ropa.position.x > cama.position.x and dibujo_ropa.end.x < cama.end.x, "La ropa doblada se apoya en el colchón, dentro de la cama (no flota sobre el borde)")
+	await _poner_en(Sala.ROPA)
+	await _tocar("interactuar")
+	await _esperar(90)
+	_comprobar(sala._ropa_firmada and _dijo("felipe", "pelo de rey"), "Desordenar la ropa doblada: queda revuelta y con pelos")
+	# El cajón (desde la cama) suelta el calcetín 3; la cortina no se trepa.
 	await _poner_en(Vector2(5625, Sala.SUELO - 65))
 	felipe.mirando = 1.0
 	await _tocar("interactuar")

@@ -22,6 +22,8 @@ const MOLDURA := Color("7f3b30")
 const MADERA := Color("9a5b3c")
 const MADERA_OSCURA := Color("6e3a26")
 const CORTINA := Color("c46a5a")
+## Paños del estudio: verde oliva apagado, contra la pared mostaza.
+const TELA_ESTUDIO := Color("6f7a4a")
 const SILUETA := Color(0.17, 0.1, 0.13, 0.94)
 const LUZ := Color(1.0, 0.85, 0.55, 0.09)
 ## Estilo de pared -> [mosaico de Gemini (assets/nivel1/), tinte]. Cada habitación tiene el suyo (hito, regla R9).
@@ -205,17 +207,58 @@ func _dibujar_ciudad(c: Node2D, nombre: String, arriba: float, base: Color) -> b
 func _dibujar_pared(c: Node2D) -> void:
 	c.draw_texture(_textura_pared, Vector2.ZERO)
 	for ventana: Rect2 in Sala.VENTANAS:
-		c.draw_rect(ventana.grow(3), MADERA_OSCURA, false, 6)
-		c.draw_line(Vector2(ventana.get_center().x, ventana.position.y), Vector2(ventana.get_center().x, ventana.end.y), MADERA_OSCURA, 4)
-		c.draw_line(Vector2(ventana.position.x, ventana.get_center().y), Vector2(ventana.end.x, ventana.get_center().y), MADERA_OSCURA, 4)
-		# Barra de cortina (la del dormitorio viene con su cortina, en Sala._dibujar_cortina).
-		if ventana != Sala.VENTANA_DORMITORIO:
-			c.draw_rect(Rect2(ventana.position.x - 30, ventana.position.y - 18, ventana.size.x + 60, 5), MADERA_OSCURA)
+		_dibujar_ventana(c, ventana)
 	# Piso de madera de cada habitación.
 	var madera := ArteNivel.textura("piso")
 	for habitacion: Array in Sala.HABITACIONES:
 		var rect: Rect2 = habitacion[0]
 		c.draw_texture_rect(madera, Rect2(rect.position.x, Sala.SUELO, rect.size.x, madera.get_height()), true)
+
+
+## Ventana recortada (cocina, dormitorio, estudio): marco de madera con parantes, alféizar a 90 cm que sobresale y
+## su tela. La cocina lleva una cenefa; el estudio, dos paños cortos hasta el alféizar; el dormitorio, la cortina larga
+## de Gemini (Sala._dibujar_cortina, delante de la pared y detrás de los muebles).
+func _dibujar_ventana(c: Node2D, ventana: Rect2) -> void:
+	c.draw_rect(ventana.grow(3), MADERA_OSCURA, false, 6)
+	c.draw_rect(ventana.grow(1), MADERA, false, 1)
+	c.draw_line(Vector2(ventana.get_center().x, ventana.position.y), Vector2(ventana.get_center().x, ventana.end.y), MADERA_OSCURA, 4)
+	c.draw_line(Vector2(ventana.position.x, ventana.get_center().y), Vector2(ventana.end.x, ventana.get_center().y), MADERA_OSCURA, 4)
+	# Alféizar: una tabla que sobresale del marco, con la luz arriba y su sombra en la pared.
+	var alfeizar := Rect2(ventana.position.x - 12, ventana.end.y + 3, ventana.size.x + 24, 7)
+	c.draw_rect(Rect2(alfeizar.position.x + 2, alfeizar.end.y + 1, alfeizar.size.x - 4, 4), Color(0, 0, 0, 0.18))
+	c.draw_rect(alfeizar.grow(1), Color("2b1712"))
+	c.draw_rect(alfeizar, MADERA)
+	c.draw_rect(Rect2(alfeizar.position, Vector2(alfeizar.size.x, 2)), Color("c98a5e"))
+	if ventana == Sala.VENTANA_DORMITORIO:
+		return
+	var barra := Rect2(ventana.position.x - 24, ventana.position.y - 3 - Sala.CORTINA_SOBRE_VENTANA, ventana.size.x + 48, 5)
+	if ventana == Sala.VENTANA_COCINA:
+		# Cenefa de cocina: tela corta con borde ondulado que tapa la barra y el marco de arriba.
+		var cenefa := Rect2(barra.position.x + 6, barra.position.y - 2, barra.size.x - 12, 26)
+		c.draw_rect(cenefa.grow(1), Color("2b1712"))
+		c.draw_rect(cenefa, CORTINA)
+		var x := cenefa.position.x
+		while x < cenefa.end.x - 1:
+			c.draw_rect(Rect2(x, cenefa.position.y, 3, cenefa.size.y), CORTINA.lightened(0.15))
+			c.draw_circle(Vector2(x + 6, cenefa.end.y), 6.0, CORTINA)
+			c.draw_rect(Rect2(x + 1, cenefa.end.y + 5, 10, 1), Color(0, 0, 0, 0.2))
+			x += 12.0
+		c.draw_rect(Rect2(cenefa.position.x, cenefa.position.y, cenefa.size.x, 3), CORTINA.darkened(0.25))
+		return
+	# Estudio: barra con remates y dos paños cortos que caen hasta el alféizar, corridos a los lados.
+	c.draw_rect(barra.grow(1), Color("2b1712"))
+	c.draw_rect(barra, MADERA)
+	for punta: float in [barra.position.x, barra.end.x]:
+		c.draw_circle(Vector2(punta, barra.get_center().y), 4.0, MADERA_OSCURA)
+	for lado: float in [-1.0, 1.0]:
+		var ancho := 28.0
+		var x0 := ventana.position.x - 16.0 if lado < 0.0 else ventana.end.x + 16.0 - ancho
+		var pano := Rect2(x0, barra.end.y, ancho, alfeizar.end.y + 6.0 - barra.end.y)
+		c.draw_rect(pano.grow(1), Color("2b1712"))
+		c.draw_rect(pano, TELA_ESTUDIO)
+		for pliegue in 3:
+			c.draw_rect(Rect2(pano.position.x + 4 + pliegue * 8, pano.position.y, 3, pano.size.y), TELA_ESTUDIO.darkened(0.18))
+		c.draw_rect(Rect2(pano.position.x, pano.end.y - 3, pano.size.x, 3), TELA_ESTUDIO.darkened(0.3))
 
 
 func _dibujar_luz(c: Node2D) -> void:

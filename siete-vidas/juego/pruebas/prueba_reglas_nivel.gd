@@ -138,7 +138,7 @@ func _correr() -> void:
 	# R8 y G8. Escala de gato: ratones a la mitad de Felipe y todo lo interactuable con lado MENOR ≥ 24 px (comida incluida).
 	var raton := ArteNivel.textura("raton").get_size()
 	_comprobar(raton.y >= 30.0, "R8 El ratón de cuerda mide la mitad de Felipe (%.0f px de alto)" % raton.y)
-	var interactuables := ["vaso", "rollo", "maceta", "llaves", "tazon", "pollo", "bolsita", "calcetin", "caja", "raton", "aspi", "rascador", "reja_frente"]
+	var interactuables := ["vaso", "taza", "maceta", "llaves", "tazon", "pollo", "bolsita", "calcetin", "caja", "raton", "aspi", "rascador", "reja_frente"]
 	for tirable: Array in Sala.TIRABLES:
 		if not tirable[1] in interactuables:
 			interactuables.append(tirable[1])
@@ -316,6 +316,24 @@ func _correr() -> void:
 		elif nodo.has_method("rect_dibujo"):
 			rect = nodo.call("rect_dibujo")
 		_comprobar(rect.has_area() and minf(rect.size.x, rect.size.y) >= LADO_MINIMO, "R8 G7 %s declara %.0f × %.0f px (lado menor ≥ %d)" % [nodo.name, rect.size.x, rect.size.y, LADO_MINIMO])
+	# Puertas (el creador, 2026-10-19: "entras por una puerta cuadrada y al otro lado el marco es redondo"): las dos
+	# caras de cada par tienen el mismo marco, el mismo estado y el mismo ancho, y ningún vano es un arco.
+	for nombre: String in sala.puertas:
+		var puerta: Puerta = sala.puertas[nombre]
+		var par: Puerta = puerta.par
+		_comprobar(par != null and par.par == puerta, "Puertas: %s tiene su otra cara" % nombre)
+		if par == null:
+			continue
+		_comprobar(puerta.estilo == par.estilo, "Puertas: %s y %s usan el mismo marco («%s» y «%s»)" % [nombre, par.name, puerta.estilo, par.estilo])
+		_comprobar(puerta.cerrada == par.cerrada and puerta.entornada == par.entornada, "Puertas: %s y %s empiezan en el mismo estado" % [nombre, par.name])
+		var ancho := ArteNivel.textura(puerta.arte()).get_size().x
+		var ancho_par := ArteNivel.textura(par.arte()).get_size().x
+		_comprobar(ancho == ancho_par, "Puertas: %s y %s miden lo mismo de ancho (%.0f y %.0f px)" % [nombre, par.name, ancho, ancho_par])
+	for nombre: String in ["puerta_abierta_v2", "vano"]:
+		var imagen: Image = ArteNivel.textura(nombre).get_image()
+		var arriba := _vano_en_fila(imagen, 22)
+		var abajo := _vano_en_fila(imagen, imagen.get_height() - 10)
+		_comprobar(arriba >= abajo - 2, "Puertas: el hueco de %s es cuadrado, no un arco (%d px arriba, %d abajo)" % [nombre, arriba, abajo])
 	sala.queue_free()
 	await process_frame
 
@@ -401,7 +419,11 @@ func _filas_sin_cuerpo(imagen: Image) -> int:
 ## Vano de una puerta medido en la imagen: de la primera a la última columna oscura (luminancia < 0,15) a media
 ## altura, sin contar los 4 px del contorno de afuera.
 func _vano_de(imagen: Image) -> int:
-	var y := imagen.get_height() / 2
+	return _vano_en_fila(imagen, imagen.get_height() / 2)
+
+
+## Ancho del hueco oscuro en una fila de la imagen (de la primera a la última columna oscura).
+func _vano_en_fila(imagen: Image, y: int) -> int:
 	var primera := -1
 	var ultima := -1
 	for x in range(4, imagen.get_width() - 4):

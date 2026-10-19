@@ -12,7 +12,7 @@ extends Node2D
 ## Ataques, siempre anunciados: embestida (retrocede, luz roja 0,5 s), soplido contra el que acampa (desde la fase 2:
 ## si Felipe pasa más de 3 s arriba de algo de más de 90 px, va debajo, vibra con luz amarilla 0,6 s y lo saca de un
 ## soplido; las macetas caen sin romperse) y, en la fase 3, bolas de pelo en arco (tos mecánica 0,5 s). Lo que se
-## rompe vuelve de a uno cada 6 s: hay que bajar por el rollo, el vaso o los papeles del teclado (G12).
+## rompe vuelve de a uno cada 6 s: hay que bajar por la taza, el vaso o los papeles del teclado (G12).
 ## Si Felipe pierde una vida, reaparece en el cojín y al volver conserva la fase (entrada corta de 1 s).
 
 signal empezada

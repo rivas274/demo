@@ -8,9 +8,16 @@ Actualizado: 2026-10-19. **Léelo al empezar un chat nuevo** para retomar sin re
 
 ## En curso
 
-- **Nivel 1 v4 corregido tras la revisión 3** (2026-10-19). Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md` (sección 12) e informe con la sección "Arreglos" (`diseno/revisiones/2026-10-19-nivel1-v4-revision3.md`). Sigue: mostrarle al creador el video `nivel1-v4c.mp4`; decidir si se pide un `caminar` nuevo de Felipe (G9 de fondo) y arte de transiciones de Valeria; cuarta revisión mirando transiciones.
+- **Nivel 1 v4 con la crítica de Gemini aplicada** (2026-10-19). Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md` (secciones 12 y 13); qué se aplicó y qué se descartó, punto por punto, en `diseno/revisiones/2026-10-19-critica-gemini.md` ("Qué se aplicó"). Sigue: mostrarle al creador el video `nivel1-v4d.mp4` y la hoja `antes-despues-gemini.png`; decidir si se pide un `caminar` nuevo de Felipe (G9 de fondo), arte de transiciones de Valeria y una letra de pixel para toda la interfaz (diálogo, libreta, HUD y rótulos a la vez); cuarta revisión mirando transiciones.
 
 ## Ya cerrado (2026-10-19)
+
+- **Crítica de arte de Gemini aplicada en el nivel 1** (0 créditos; todas las pruebas pasan, `prueba_jefe` 3 de 3 seguidas y el bot 5 de 5 con la agenda 8 de 8):
+  - **Cortina** del dormitorio: arte de Gemini (`dormitorio-cortina-alta.png`), dos paños de una barra, sin colisión (como la de código).
+  - **Aplicado** (verificado con capturas): Valeria sentada sobre el cojín y no flotando, sombras de contacto, charco de luz de la lámpara, reja crema, vano con hondura, vaso adentro de la consola, reloj más chico, LED de A.S.P.I., macetas oscuras, brillo de la baranda, rótulos con placa de madera, monitor con la serie, vaso en pixeles, luz de borde de la A.S.P.I. gigante y cartela del rugido.
+  - **Autocrítica:** costuras transparentes en el azulejo de la cocina, ropa doblada que flotaba sobre la cama y cuadros tapados por el HUD (bajados).
+  - **Descartado** (con el porqué en la crítica): ventana de la sala, mover la caja de arena, contorno del mesón, libros, almohada, marco del cuadro, maceta del balcón más chica, grosor de la baranda y una letra de pixel solo para los rótulos.
+  - **No se tocó a Felipe:** no aplica la regla de los tres lugares.
 
 - **Arreglos de la revisión 3 del nivel 1** (0 créditos; todas las pruebas pasan, `prueba_jefe` 5 de 5 seguidas y el bot 5 de 5 con la agenda 8 de 8):
   - **Capas:** tabla única `Capas` (`scripts/capas.gd`; memoria 03 y `godot-felipe` §6c). La imaginación de A.S.P.I. tapa todo el escenario y nunca hay dos A.S.P.I. (B1). Título, intro y pausa encima de todo; el fundido de las puertas tapa diálogo y carteles (G7).
@@ -28,7 +35,7 @@ Actualizado: 2026-10-19. **Léelo al empezar un chat nuevo** para retomar sin re
   - **Popo táctico (G6):** da una foto vergonzosa (las tres secretas dan fotos; "Galería Viral" con las tres).
   - **Legibilidad (G7, M1, M2, M5, M7):** teclado 52 × 24 y ropa 52 × 26 dibujados por código (la prueba R8 mide también lo dibujado por código y el tamaño que declara cada interactuable), descanso grueso con faldón, cartel "PIPE: NO" sin pisar el librero, láser de 8 px con halo, verbos distintos (sofá "Firmar", ropa "Desordenar", puerta "Arañar").
   - **Interfaz (M3, M4):** el aviso de logro va sobre el diálogo y fuera de su cuadro; `PresentacionJefe` esconde el diálogo y el Indicador mientras presenta, muestra la frase del portazo como subtítulo y usa una viñeta oscura en vez de discos rosados.
-  - **Cortina (G4, provisional):** dibujada por código con barra y pliegues junto a una ventana nueva entre la cómoda y el ropero, hasta que llegue `dormitorio-cortina.png`.
+  - **Cortina (G4):** junto a una ventana nueva entre la cómoda y el ropero (hoy con el arte de Gemini).
   - **Escalera:** bajar funciona (prueba nueva en `prueba_nivel`).
   - **No se tocó a Felipe** (ni sprites ni acciones): no aplica la regla de los tres lugares.
   - **Quedan abiertos:** G8 (`entrar_puerta`, el creador decidió no pedirla aún), G9 (intimidar, para el Barrio Viejo), M8 (retrato familiar de Gemini).

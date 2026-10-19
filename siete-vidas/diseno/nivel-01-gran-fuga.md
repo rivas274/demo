@@ -47,7 +47,7 @@ Valeria vive en la planta baja y va donde hay ruido. Empieza sentada en el sofá
 - **Repasa** subir muebles: banquito → cama → cómoda → repisa → ropero. La repisa es el alféizar de la ventana que está entre la cómoda y el ropero; la cortina cuelga a sus lados desde una barra con remates. Una cesta de ropa al pie de la cortina sirve para salir del hueco entre la cómoda y el ropero.
 - **Saquear el cajón de calcetines:** manotazo al cajón (desde la cama): calcetines volando y el **calcetín 3** sobre la cómoda ("Inventario.").
 - **Travesura suelta:** desordenar la ropa doblada de la cama (una pila de 52 × 26 con una manga colgando; se acicala encima y queda revuelta y con pelos: "Doblada era aburrida. Ahora tiene pelo de rey.").
-- **Lugar visto (R17):** la cortina llega hasta la barra, bajo la repisa alta con la caja de recuerdos de Valeria; no se trepa todavía (Afilar Garras). La cortina va **dibujada por código** (barra, argollas, remates, pliegues y borde ondulado) hasta que llegue `dormitorio-cortina.png` de la tanda 3D de Gemini.
+- **Lugar visto (R17):** la cortina llega hasta la barra, bajo la repisa alta con la caja de recuerdos de Valeria; no se trepa todavía (Afilar Garras). La cortina es **arte de Gemini** (`dormitorio-cortina-alta.png`, procesada por `preparar_arte_nivel.py` a 45 × 277): dos paños (el derecho en espejo) de una sola barra con un remate en cada punta; cada paño tapa 9 px de la ventana. Sin colisión, como antes: si se vuelve trepable con Afilar Garras, el rectángulo trepable es la tela de cada paño.
 
 ### 2.6 Estudio de Valeria (jefe, 640 px, una pantalla)
 - **Examen** (sección 5). **Pisar el teclado (secreta;** teclado dibujado de 52 × 24, con cuatro filas de teclas, delante de la pantalla**):** la pantalla dice "jjjjjjjjjj", **foto vergonzosa 3**, y durante la pelea la impresora (en el piso, bajo el escritorio) escupe un papel cada 4 s que cuenta como mancha.
@@ -136,7 +136,7 @@ Alto de todos los cuartos: 424 px (3,5 m). Piso en y = 448. Muros entre cuartos.
 | Recibidor | 1440–2640 | 1200 | puerta 1532 · zapatero 1626–1786 (97; 40 libres debajo; llaves) · caja de arena 1832–1936 (45) · lámpara 1942 · puerta de la cocina 2070 · librero 2162–2266 (48/103/155/218) · reja 2284–2296 (182) · escalera 2322–2548 y vano en el descanso (150) |
 | Cocina | 2800–3760 | 960 | puerta 2892 · tazón 3010 · Valeria 3080 · ratón 3200–3290 · caja de cartón 3360 · silla 3400 (55) · mesón 3464–3668 (108, ratón 3500–3536) · microondas 3570 (162, pollo 3612) · refrigerador 3674–3758 (216, calcetín 2) |
 | Pasillo | 4000–5040 | 1040 | vano de la escalera 4092 · baúl 4190 (54) · consola 4256–4412 (97, vaso; 47 libres) · alféizar 4264–4436 (150; la pizza, afuera tras el vidrio, en 4380) · puerta del dormitorio 4536 · láser 4640–4780 · cojín 4784–4854 · puerta del estudio 4948 |
-| Dormitorio | 5200–5920 | 720 | puerta 5292 · banquito 5386 (53) · cama 5444–5644 (65) · cómoda 5650–5734 (96, cajón) · ventana 5748–5804 con la repisa 5740–5810 (145) de alféizar · cortina 5736–5816 (barra a 276) · cesta 5747–5807 (35) · repisa alta 5735–5815 (290, lugar visto) · ropero 5816–5920 (185) |
+| Dormitorio | 5200–5920 | 720 | puerta 5292 · banquito 5386 (53) · cama 5444–5644 (65) · cómoda 5650–5734 (96, cajón) · ventana 5748–5804 con la repisa 5740–5810 (145) de alféizar · cortina 5715–5837 (telas 5723–5757 y 5795–5829, barra a 277) · cesta 5747–5807 (35) · repisa alta 5735–5815 (290, lugar visto) · ropero 5816–5920 (185) |
 | Estudio | 6240–6880 | 640 | puerta 6332 · silla 6424 (55) · escritorio 6488–6648 (98; vaso, teclado, pantalla, rollo) · impresora bajo el escritorio · repisa 6636–6696 (151, 2 macetas) · base de carga 6600–6674 · puerta del balcón 6788 |
 | Balcón | 7040–7680 | 640 | puerta 7132 · maceta grande 7330 (32) · baranda 7400–7584 (89; tramo sin maceta 7470–7520) · ciudad · toldo de la panadería 7380–7680, 196 px bajo el piso (solo existe en el salto final) |
 
@@ -202,7 +202,7 @@ Alto de todos los cuartos: 424 px (3,5 m). Piso en y = 448. Muros entre cuartos.
 - **Microondas de 98 × 54** (escala de gato) para que el escalón al refrigerador sea de 54 px.
 - **Dormitorio y cocina más angostos** (720 y 960 px) para no dejar huecos sin salida detrás del ropero y del refrigerador.
 - **`arriba-extra.png` llegó en la revisión 3:** baúl (40 cm, 70 × 48), cojín redondo, retrato familiar, ropa doblada limpia y con pelos, caja de recuerdos, monitor e impresora (recortados del escritorio con monitor) y papeles son arte; el teclado y los calcetines que vuelan siguen por código; consola = aparador y cómoda = la de siempre.
-- **Cortina por código** (provisional): la de Gemini se veía como columna y se borró; espera `dormitorio-cortina.png` (tanda 3D). La ventana del dormitorio pasó de encima de la cama al hueco entre la cómoda y el ropero, para que la cortina cuelgue junto a ella.
+- **Cortina de Gemini** (`dormitorio-cortina-alta.png`, 2026-10-19): reemplazó a la de código. La herramienta le corta el remate derecho para usarla como paño izquierdo y, en espejo, como el derecho; el tramo de barra del medio se estira desde una columna de la misma barra. La ventana del dormitorio está en el hueco entre la cómoda y el ropero, para que la cortina cuelgue junto a ella. `dormitorio-cortina.png` (la ancha) no se usa: no cabe en el hueco de 87 px.
 - **Retoques de arte en la herramienta** (`preparar_arte_nivel.py`, sin pedir arte nuevo): a la ventana del pasillo se le tapó la caja de pizza que traía sobre el alféizar (PARCHES) y a la baranda se le quitó la maceta del medio (BORRAR + RELLENOS).
 - **El caminar de Valeria es de SpriteCook** (revisión 3): el de Gemini no alternaba las piernas y se borró. Camina a 110 px/s (9,2 px de pie apoyado por cuadro × 12 cuadros/s, medido en la hoja).
 - **Valeria cruza las puertas a la vista** (revisión 3): cuando Felipe sale al recibidor, ella camina hasta la puerta de la sala y entra al recibidor por la puerta unos 7 s después; maullar a la cocina hace que se asome en el vano. Por eso la cocina se abre ~2 s después del maullido, no al instante.
@@ -214,7 +214,7 @@ Alto de todos los cuartos: 424 px (3,5 m). Piso en y = 448. Muros entre cuartos.
 | G1 | **Arreglado.** Al saltar, cámara lenta y la cámara baja con Felipe (se abre 230 px bajo el balcón); aterriza a la vista en el toldo de la panadería con el polvo grande y recién ahí sale el cartel, a una altura que no lo tapa. `prueba_nivel` comprueba que se ve en todo el salto, que aterriza en el toldo y que el cartel sale después y sin taparlo |
 | G2 | **Arreglado.** De pie (regañando, caminando, grabando), Valeria siempre tiene los pies en el piso; al pararse del sofá baja delante de él. `prueba_nivel` lo vigila en cada cuadro |
 | G3 | **Arreglado.** La caja de pizza está afuera, sobre el toldo, detrás del vidrio con reflejos; el alféizar quedó vacío (la herramienta tapa la caja del arte) y Felipe dice "Esa pizza es mía. Algún día.". `prueba_reglas_nivel` comprueba que la caja está dentro del vidrio y por encima del alféizar |
-| G4 | **Provisional (código).** Cortina con barra, remates, argollas, pliegues y borde ondulado a los lados de una ventana nueva entre la cómoda y el ropero (la repisa es su alféizar). Falta el arte de Gemini (`dormitorio-cortina.png`, tanda 3D) |
+| G4 | **Arreglado.** Cortina a los lados de una ventana nueva entre la cómoda y el ropero (la repisa es su alféizar); desde el 2026-10-19 es el arte de Gemini (`dormitorio-cortina-alta.png`) |
 | G5 | **Arreglado.** El pollo pasó al microondas y el ratón patrulla entre el borde del mesón y el microondas (3500–3536). `prueba_reglas_nivel`: ningún ratón tapa la comida ni lo que se tira, con su dibujo completo |
 | G6 | **Arreglado.** El popo táctico da una foto vergonzosa (se le cae a Valeria); las tres secretas dan fotos y la galería completa da "Galería Viral". Valeria igual deja la cocina abierta al volver (efecto, no premio) |
 | G7 | **Arreglado (código).** Teclado de 52 × 24 con teclas y ropa de 52 × 26 con volumen; la prueba R8 mide lo dibujado por código y el tamaño que declara cada interactuable del nivel armado. El arte de Gemini (tanda `arriba-extra`) sigue pendiente |
@@ -254,3 +254,19 @@ Todo por código y con el arte que mandó el creador (`arriba-extra.png`, camina
 | M6 | **Arreglado.** Respira, mira alrededor cada tanto y gira con transición (no antes de 0,4 s ni con Felipe a menos de 12 px) |
 | M7 | **Arreglado (código).** Ventana con 68 px de vidrio; caja de pizza de 34 × 24, abierta, con grasa y vapor |
 | M8 | **Arreglado.** Causa raíz: en furia la tos dejaba de contar mientras Felipe acampaba y la prueba dependía de dónde lo dejaba el soplido y de papeles al azar del teclado. Ahora la tos cuenta siempre (la bola es justo lo que llega arriba) y la prueba espera el estado. 5 de 5 seguidas |
+
+## 13. Crítica de arte de Gemini (2026-10-19, `revisiones/2026-10-19-critica-gemini.md`)
+
+Cada punto se comprobó contra capturas reales (`pruebas/capturas_nivel.gd`) antes de aplicarlo; Gemini se equivocó en varios (el sofá no es verde, la "alfombra azul" es la caja de arena, la "ratonera" es el vano de la escalera). 0 créditos: todo por código y en `preparar_arte_nivel.py`. Detalle punto por punto en la sección "Qué se aplicó" de la crítica; hoja antes/después de los 8 cuartos y video `nivel1-v4d.mp4`.
+
+- **Cortina:** arte de Gemini (sección 2.5).
+- **Sala:** Valeria sentada 9 px más abajo (`Valeria.FILA_CADERA` 139): los muslos sobre el cojín, que se hunde, y los pies en el piso; sombras de contacto duras bajo cada mueble que pisa el piso (rascador, sofá, sillas, librero, refrigerador, ropero…); el retrato oficial bajó 16 px (lo tapaba la barra del HUD).
+- **Recibidor y escalera:** charco de luz cálida bajo la lámpara; reja anti-fuga con tinte crema / gris cálido; el vano tiene un borde interior en sombra (tres franjas de pixel).
+- **Cocina:** reloj 10 % más chico (41 × 43) y más lejos de la ventana; el azulejo de la pared es opaco entero (por las costuras se veía la ciudad: líneas punteadas).
+- **Pasillo:** el vaso está 17 px más adentro de la consola (4378); retrato familiar 14 px más abajo.
+- **Dormitorio:** la ropa doblada se hunde 3 px en el edredón (se veía flotando); el paisaje bajó 14 px.
+- **Estudio:** el monitor muestra la serie de Valeria (noche en franjas, lámpara, dos siluetas y un corazón; brillo que titila y reflejo duro); LED de A.S.P.I. con halo y brillo; macetas de la repisa más oscuras contra la pared mostaza; vaso con agua en dos tonos planos y reflejos de pixel.
+- **Balcón:** brillo cálido en el borde de arriba de la baranda.
+- **Rótulos de interacción:** placa con marco de madera, contorno, esquinas recortadas, clavitos y sombra dura; la misma letra e interior que el diálogo y la libreta; el ícono de Kenney se mantiene.
+- **Jefe:** luz de borde cálida en la A.S.P.I. gigante (`aspi_gigante_luz.png`); el «DETECTANDO… GATO.» va en una cartela semitransparente con marco rojo; el primer plano no la tapa (capa 25, ya comprobado en `prueba_jefe`).
+

@@ -54,6 +54,11 @@ var _descanso := 0.0
 var _corazones: Array = []
 var _susto := 0.0
 var _tiempo_tele := 0.0
+## Rascador: ya perdonó por "teatro" en esta visita (una vez por visita; el bis no se cobra).
+var aplaudio_rascador := false
+## Celular arriba para la foto (segundos que quedan) y destello del flash.
+var _celular := 0.0
+var _flash := 0.0
 
 
 func _ready() -> void:
@@ -80,6 +85,36 @@ func cuerpo() -> Rect2:
 	if estado == Estado.VIENDO_TELE:
 		return Rect2(position + Vector2(-20, -150), Vector2(52, 100))
 	return Rect2(position + Vector2(-20, -205), Vector2(40, 115))
+
+
+## Está en la sala y mirando hacia x (para el rascador: ¿hay público?).
+func ve_x(x: float) -> bool:
+	if not visible or estado == Estado.FUERA:
+		return false
+	var dx := x - position.x
+	return absf(dx) < 12.0 or signf(dx) == mirando
+
+
+## Felipe usó el rascador delante de ella: lo perdona al instante (como el ronroneo).
+## Devuelve false si ya lo aplaudió en esta visita.
+func perdonar_por_rascador() -> bool:
+	if aplaudio_rascador:
+		return false
+	aplaudio_rascador = true
+	if estado in [Estado.ENTRANDO, Estado.REGANANDO, Estado.PERSIGUIENDO, Estado.SALIENDO]:
+		estado = Estado.PERDONANDO
+		_tiempo = 0.0
+		_mirar_a_felipe()
+	for i in 6:
+		_corazones.append([Vector2(randf_range(-30, 30), -ALTO + randf_range(10, 60)), -i * 0.08])
+	perdona.emit(self)
+	return true
+
+
+## Saca el celular y saca una foto con flash (solo efecto: "esto va directo a mis historias").
+func sacar_celular() -> void:
+	_celular = 1.4
+	_flash = 0.0
 
 
 ## Le tiraron el control mientras veía la tele: se para y regaña.
@@ -118,6 +153,7 @@ func _physics_process(delta: float) -> void:
 				visible = true
 				position.x = PUERTA_X
 				ronroneo_acumulado = 0.0
+				aplaudio_rascador = false
 		Estado.ENTRANDO:
 			var destino := _destino_junto_a_felipe()
 			if _caminar_hacia(destino, velocidad, delta):
@@ -166,6 +202,9 @@ func _physics_process(delta: float) -> void:
 				se_fue.emit(self)
 	ruido = maxf(0.0, ruido - olvido_ruido * delta)
 	_susto = maxf(0.0, _susto - delta)
+	if _celular > 0.0:
+		_celular = maxf(0.0, _celular - delta)
+		_flash += delta
 	queue_redraw()
 
 
@@ -225,6 +264,7 @@ func _draw() -> void:
 	if estado == Estado.VIENDO_TELE:
 		_dibujar_sentada()
 		_dibujar_susto()
+		_dibujar_celular(Vector2(22, -140))
 		return
 	_dibujar_susto()
 	var enojada := estado in [Estado.REGANANDO, Estado.PERSIGUIENDO, Estado.ENTRANDO]
@@ -282,6 +322,7 @@ func _draw() -> void:
 			draw_rect(Rect2(Vector2(6 * m - 4, -176), Vector2(8, 3)), Color(0.55, 0.15, 0.15))
 		else:
 			draw_line(Vector2(6 * m - 3, -176), Vector2(6 * m + 3, -176), Color(0.55, 0.2, 0.2), 1.5)
+	_dibujar_celular(Vector2(26 * m, -186))
 	# Corazones del perdón.
 	for corazon: Array in _corazones:
 		var vida: float = corazon[1]
@@ -334,3 +375,19 @@ func _dibujar_susto() -> void:
 		draw_rect(Rect2(p - Vector2(2, 2), Vector2(4, 4)), Color(1.0, 0.9, 0.3))
 	draw_circle(Vector2(-14, arriba + 14), 3.0, Color(0.55, 0.8, 1.0))
 	draw_circle(Vector2(16, arriba + 10), 2.5, Color(0.55, 0.8, 1.0))
+
+
+## Celular en alto (pantalla hacia Felipe) y el flash a los 0,35 s.
+func _dibujar_celular(mano: Vector2) -> void:
+	if _celular <= 0.0:
+		return
+	var piel := Color(0.93, 0.76, 0.62)
+	draw_line(Vector2(mano.x * 0.5, mano.y + 30), mano + Vector2(0, 6), Color(0.35, 0.55, 0.62).darkened(0.15), 8.0)
+	draw_circle(mano + Vector2(0, 6), 4.0, piel)
+	draw_rect(Rect2(mano + Vector2(-5, -9), Vector2(10, 16)), Color(0.12, 0.12, 0.16))
+	draw_rect(Rect2(mano + Vector2(-4, -8), Vector2(8, 12)), Color(0.55, 0.8, 1.0))
+	var f := _flash - 0.35
+	if f > 0.0 and f < 0.3:
+		var a := 1.0 - f / 0.3
+		draw_circle(mano + Vector2(0, -4), 6.0 + f * 80.0, Color(1, 1, 1, 0.5 * a))
+		draw_circle(mano + Vector2(0, -4), 4.0, Color(1, 1, 1, a))

@@ -2,8 +2,10 @@
 # Pregunta (v2): si cada travesura es un objetivo con nombre y recompensa útil (la Agenda de Su Majestad), ¿el jugador busca y planea travesuras en vez de romper al azar?
 # Fecha: 2026-10-18
 extends "res://pruebas/comun.gd"
-## Bot de demostración v2: completa la Agenda de Su Majestad (incluidas las 2 secretas) con los botones
-## de una persona, abre la agenda con Tab un par de veces y termina en el resumen.
+## Bot de demostración v2: completa la Agenda de Su Majestad (7, incluidas las 3 secretas) con los botones
+## de una persona, abre la agenda con Tab un par de veces y termina en el resumen. v2b: usa el rascador sin
+## público (queja y garras afiladas), hace el CRÍTICO al sofá, gana un perdón con público y cumple la
+## secreta nueva (arañar el sofá junto al rascador con Valeria mirando).
 ##   xvfb-run -a godot --path . --rendering-driver opengl3 --write-movie c.png --fixed-fps 30 --script res://pruebas/demo.gd
 ## También corre sin pantalla: godot --headless --path . --fixed-fps 60 --script res://pruebas/demo.gd
 
@@ -18,20 +20,29 @@ func _correr() -> void:
 	# 0. Mirar la agenda antes de empezar (como un jugador nuevo).
 	paso("0")
 	await ver_agenda(3.2)
-	# 1. Sofá nuevo: subir al asiento y arañar hasta romper el plástico (3 pulsaciones).
+	# 1. Rascador nuevo, sin público: Felipe se queja, pero las garras quedan afiladas.
 	paso("1")
+	await ir_a(254)
+	await mirar(-1)
+	await tocar("accion")
+	await segundos(1.0)
+	# Con las garras afiladas, al sofá nuevo: el primer arañazo es ¡CRÍTICO! y rompe el plástico.
+	await ir_a(232)
 	await saltar_a(100, true)
 	await ir_a(100)
 	await mirar(-1)
-	for i in 3:
-		await tocar("accion")
-		await segundos(1.2)
-	await segundos(0.6)
+	await tocar("accion")
+	await segundos(1.4)
 	await recoger_todo()
-	# 2. Valeria llegó por el ruido: ronronear para que perdone (perdón 1) y guardar el snack.
+	# 2. Llamar a Valeria con maullidos y ronronear para que perdone (perdón 1, foto con flash).
 	paso("2")
+	for i in 4:
+		if sala.valeria.estado != Valeria.Estado.FUERA:
+			break
+		await tocar("maullar")
+		await segundos(1.4)
 	await hasta(func() -> bool: return sala.valeria.presente(), 600)
-	await segundos(0.8)
+	await segundos(1.6)
 	await ronronear_a_valeria()
 	await recoger_todo()
 	# 3. De buenas, se sienta a ver su serie: tirar el control del brazo del sofá.
@@ -42,12 +53,25 @@ func _correr() -> void:
 	await mirar(1)
 	await tocar("accion")
 	await segundos(1.5)
-	# Se para a regañar: ronronear otra vez (perdón 2) y guardar el snack.
+	# Se para a regañar: en vez de ronronear, función en el rascador delante de ella (perdón 2).
 	await hasta(func() -> bool: return sala.valeria.presente(), 300)
-	await segundos(0.6)
-	await ronronear_a_valeria()
+	await segundos(0.8)
+	await saltar_a(256, false)
+	await ir_a(254)
+	await mirar(-1)
+	await tocar("accion")
+	await segundos(2.5)
 	await recoger_todo()
-	# Como un jugador, mira el cartel antes de seguir.
+	await hasta(func() -> bool: return not sala.hud.ocupado(), 400)
+	# 3b. Secreta nueva: con Valeria mirando hacia el rascador, arañar el sofá pegado a él.
+	paso("3b")
+	await hasta(func() -> bool: return sala.valeria.viendo_tele(), 600)
+	await segundos(1.0)
+	await ir_a(220)
+	await mirar(-1)
+	await tocar("accion")
+	await segundos(3.0)
+	await recoger_todo()
 	await hasta(func() -> bool: return not sala.hud.ocupado(), 400)
 	# 4. La persiana subió: saltar al alféizar por el calcetín.
 	paso("4")

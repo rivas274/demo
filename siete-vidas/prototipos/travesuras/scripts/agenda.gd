@@ -4,7 +4,7 @@
 class_name Agenda
 extends RefCounted
 ## La Agenda de Su Majestad: la lista de travesuras del día (como la lista de Untitled Goose Game).
-## 4 visibles y 2 secretas ("???" hasta cumplirlas). Cada una tiene nombre con la voz de Felipe,
+## 4 visibles y 3 secretas ("???" hasta cumplirlas). Cada una tiene nombre con la voz de Felipe,
 ## una recompensa útil (no puntos) y la frase que dice al cumplirla.
 
 signal cumplida(travesura: Dictionary)
@@ -64,6 +64,15 @@ const TRAVESURAS := [
 		"secreta": true,
 		"recompensa": "Calcetín (se lo había tragado)",
 		"frase": ["Que te sirva de lección, electrodoméstico.", 8],
+		"meta": 1,
+	},
+	{
+		"id": "junto_rascador",
+		"nombre": "Arañar el sofá justo al lado del rascador nuevo",
+		"nota": "",
+		"secreta": true,
+		"recompensa": "Foto vergonzosa (tras el rascador)",
+		"frase": ["El rascador es para mirarlo. El sofá, para arañarlo.", 7],
 		"meta": 1,
 	},
 ]

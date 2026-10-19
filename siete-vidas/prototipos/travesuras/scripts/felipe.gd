@@ -59,6 +59,8 @@ const ALCANCE := Vector2(48, 40)
 ## Distancia a la que Felipe se para antes de tirar algo (si está más cerca, da un pasito atrás
 ## para que la pata llegue al objeto en el cuadro de impacto en vez de taparlo con el pecho).
 @export var distancia_tirar := 34.0
+## Rascador: segundos que las garras quedan afiladas después de usarlo (el siguiente arañazo al sofá es crítico).
+@export var duracion_garras := 6.0
 
 var estado := Estado.SUELO
 var mirando := 1.0
@@ -66,6 +68,10 @@ var tiene_doble_salto := true
 var ronroneando := false
 ## Último cuadro de impacto aplicado (para la prueba): [animación, cuadro].
 var ultimo_impacto: Array = []
+## Golpes de pata ya dados en esta pulsación (0 en el primero).
+var golpe_en_accion := 0
+## Segundos de garras afiladas que quedan (rascador).
+var garras_afiladas := 0.0
 
 var _tiempo_fuera_del_suelo := 0.0
 var _tiempo_salto_pedido := 99.0
@@ -81,6 +87,7 @@ var sprite: AnimatedSprite2D
 var cuerpo: CollisionShape2D
 var polvo: CPUParticles2D
 var erizo: Erizo
+var chispas: Chispas
 
 
 func _ready() -> void:
@@ -117,6 +124,9 @@ func _ready() -> void:
 	erizo.position = POSICION_SPRITE
 	add_child(erizo)
 	erizo.preparar(sprite.sprite_frames.get_frame_texture("quieto", 0), ESCALA_SPRITE)
+	chispas = Chispas.new()
+	chispas.z_index = 2
+	add_child(chispas)
 	floor_snap_length = 4.0
 	sprite.frame_changed.connect(_al_cambiar_cuadro)
 	sprite.animation_finished.connect(_al_terminar_animacion)
@@ -164,6 +174,9 @@ func _physics_process(delta: float) -> void:
 		if estado == Estado.SUELO:
 			estado = Estado.AIRE
 	_actualizar_animacion(direccion)
+	garras_afiladas = maxf(0.0, garras_afiladas - delta)
+	chispas.restante = garras_afiladas
+	chispas.lado = mirando
 
 
 func _mover(direccion: float, delta: float) -> void:
@@ -249,6 +262,7 @@ func _empezar_accion(objeto: Node2D) -> void:
 		mirando = signf(punto.x - global_position.x)
 	_objeto_pendiente = objeto
 	_tipo_pendiente = objeto.call("accion_disponible")
+	golpe_en_accion = 0
 	estado = Estado.ACCION
 	velocity.x = 0.0
 	sprite.flip_h = mirando < 0.0
@@ -258,7 +272,7 @@ func _empezar_accion(objeto: Node2D) -> void:
 		_repeticiones = 0
 		_reiniciar("comer")
 	else:
-		_repeticiones = aranazos_por_accion - 1 if _tipo_pendiente == "arañar" else 0
+		_repeticiones = aranazos_por_accion - 1 if _tipo_pendiente in ["arañar", "afilar"] else 0
 		_reiniciar("zarpazo")
 
 
@@ -279,6 +293,7 @@ func _al_cambiar_cuadro() -> void:
 		ultimo_impacto = [String(sprite.animation), sprite.frame]
 		_objeto_pendiente.call("al_impacto", self)
 		impacto.emit(_objeto_pendiente, _tipo_pendiente)
+		golpe_en_accion += 1
 
 
 func _al_terminar_animacion() -> void:
@@ -413,3 +428,17 @@ func _estirar(forma: Vector2, duracion: float) -> void:
 	_efecto = create_tween()
 	_efecto.tween_property(sprite, "scale", base * _limitar(forma), duracion * 0.3)
 	_efecto.tween_property(sprite, "scale", base, duracion * 0.7).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+## Rascador: deja las garras afiladas unos segundos.
+func afilar_garras() -> void:
+	garras_afiladas = duracion_garras
+	chispas.duracion = duracion_garras
+
+
+## Gasta el filo (el sofá lo pide al arañar). Devuelve true si estaban afiladas.
+func gastar_garras() -> bool:
+	if garras_afiladas <= 0.0:
+		return false
+	garras_afiladas = 0.0
+	return true

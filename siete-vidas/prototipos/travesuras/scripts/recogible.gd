@@ -18,6 +18,8 @@ var velocidad := Vector2.ZERO
 var superficies: Array = []
 var felipe: Node2D
 var quieto := false
+## Foto: 0 = Valeria en pijama de unicornio (florero); 1 = Valeria arañando el rascador (rascador).
+var variante := 0
 var _vida := 0.0
 var _recogido := false
 
@@ -68,7 +70,7 @@ func _draw() -> void:
 	if not _recogido:
 		var brillo := 0.35 + 0.25 * sin(_vida * 6.0)
 		draw_circle(Vector2(0, -12), 18.0, Color(1.0, 0.95, 0.6, brillo * 0.35))
-	Recogible.dibujar_icono(self, tipo, Vector2(0, -12), 1.0)
+	Recogible.dibujar_icono(self, "foto_rascador" if tipo == "foto" and variante == 1 else tipo, Vector2(0, -12), 1.0)
 
 
 ## Dibuja el ícono centrado en "centro" (lo usa también el HUD, a otra escala).
@@ -101,4 +103,13 @@ static func dibujar_icono(lienzo: CanvasItem, que: String, centro: Vector2, esca
 			lienzo.draw_rect(Rect2(centro + Vector2(-6, -2) * e, Vector2(12, 9) * e), Color(0.98, 0.6, 0.8))
 			lienzo.draw_circle(centro + Vector2(0, -5) * e, 4.0 * e, Color(0.93, 0.76, 0.62))
 			lienzo.draw_colored_polygon(PackedVector2Array([centro + Vector2(-2, -8) * e, centro + Vector2(2, -8) * e, centro + Vector2(0, -14) * e]), Color(1.0, 0.85, 0.3))
+			lienzo.draw_rect(Rect2(centro + Vector2(-15, -13) * e, Vector2(30, 26) * e), Color(0.4, 0.35, 0.3), false, 1.0)
+		"foto_rascador":
+			# Foto de Valeria de rodillas arañando el rascador "para enseñarle", 30 x 26 px.
+			lienzo.draw_rect(Rect2(centro + Vector2(-15, -13) * e, Vector2(30, 26) * e), Color(0.98, 0.97, 0.93))
+			lienzo.draw_rect(Rect2(centro + Vector2(-12, -10) * e, Vector2(24, 17) * e), Color(0.9, 0.85, 0.7))
+			lienzo.draw_rect(Rect2(centro + Vector2(4, -10) * e, Vector2(4, 17) * e), Color(0.78, 0.64, 0.4))
+			lienzo.draw_rect(Rect2(centro + Vector2(-8, -1) * e, Vector2(10, 8) * e), Color(0.35, 0.55, 0.62))
+			lienzo.draw_circle(centro + Vector2(-4, -5) * e, 4.0 * e, Color(0.93, 0.76, 0.62))
+			lienzo.draw_line(centro + Vector2(0, -2) * e, centro + Vector2(4, -4) * e, Color(0.93, 0.76, 0.62), 2.0 * e)
 			lienzo.draw_rect(Rect2(centro + Vector2(-15, -13) * e, Vector2(30, 26) * e), Color(0.4, 0.35, 0.3), false, 1.0)

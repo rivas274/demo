@@ -9,6 +9,8 @@ extends Node2D
 signal aranado(sofa: Sofa, punto: Vector2)
 ## v2: el sofá es nuevo y todavía tiene el plástico; con suficientes arañazos se rompe.
 signal plastico_roto(sofa: Sofa)
+## Rascador: arañazo con las garras afiladas (rompe el plástico de un golpe).
+signal critico(sofa: Sofa, punto: Vector2)
 
 ## Rectángulos en coordenadas de la sala (el nodo está en 0,0).
 const RESPALDO := Rect2(20, 193, 190, 50)
@@ -24,6 +26,8 @@ var prioridad := 60.0
 var con_plastico := true
 var aranazos_plastico := 0
 var marcas: Array[Vector2] = []
+## El último arañazo fue crítico (garras afiladas).
+var ultimo_critico := false
 var _pelusa: CPUParticles2D
 
 
@@ -70,9 +74,12 @@ func al_impacto(felipe: Node2D) -> void:
 	_pelusa.restart()
 	_pelusa.emitting = true
 	queue_redraw()
+	ultimo_critico = felipe.has_method("gastar_garras") and bool(felipe.call("gastar_garras"))
+	if ultimo_critico:
+		critico.emit(self, punto)
 	aranado.emit(self, punto)
 	if con_plastico:
-		aranazos_plastico += 1
+		aranazos_plastico = aranazos_para_romper if ultimo_critico else aranazos_plastico + 1
 		if aranazos_plastico >= aranazos_para_romper:
 			con_plastico = false
 			plastico_roto.emit(self)

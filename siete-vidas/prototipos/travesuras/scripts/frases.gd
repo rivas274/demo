@@ -93,6 +93,26 @@ const FELIPE := {
 	"persiana": [
 		["¡La persiana! El control también sirve para algo.", 2],
 	],
+	"rascador_publico": [
+		["Función de gala. Se aceptan aplausos y snacks.", 7],
+		["Ovación de pie. Bueno, de sofá. Igual cuenta.", 6],
+		["Lo uso cuando miran. Eso se llama talento.", 4],
+	],
+	"rascador_solo": [
+		["¿Para quién actúo?", 1],
+		["Sin público no hay función.", 0],
+		["Arte desperdiciado. Nadie miró.", 5],
+		["Esto no cuenta si nadie lo ve.", 0],
+	],
+	"rascador_bis": [
+		["El bis no se cobra. Qué público más tacaño.", 5],
+	],
+	"garras_afiladas": [
+		["Afiladas. El sofá no sabe lo que viene.", 7],
+	],
+	"recoger_foto_rascador": [
+		["Valeria arañando el rascador \"para enseñarme\". Chantaje asegurado.", 6],
+	],
 	"agenda_completa": [
 		["Agenda completa. Hoy fui un genio. Como ayer.", 7],
 	],
@@ -103,42 +123,58 @@ const FELIPE := {
 	],
 }
 
+## Voz de Valeria (biblia): teletrabaja, sube todo a redes, lo ama de verdad y le habla como a un bebé
+## ("Pipe"). El chiste es el contraste: él se cree un dios y ella lo trata de bebito gordito; el enojo
+## se le pasa en cuanto piensa en sus seguidores.
 const VALERIA := {
 	"llega": [
-		["¡FELIPE!", 0],
-		["¡FELIPE! ¿¡Otra vez!?", 0],
-		["¡FELIPE! ¡Te estoy viendo!", 0],
+		["¡PIPE! Estoy en una reunión...", 0],
+		["Felipe Ron con Pasas Primero. Nombre completo. Estás en problemas.", 0],
+		["Dime que no es lo que creo... Es lo que creo.", 2],
 	],
-	"llega_florero": [["¡FELIPE! ¡Mi florero!", 0]],
+	"llega_florero": [["¡El florero de mi abuela! Sobrevivió a dos mudanzas, Pipe. DOS.", 0]],
 	"en_su_cara": [
-		["¡¿Y ENCIMA EN MI CARA?!", 0],
-		["¡FELIPE, NO!", 0],
+		["¿Mirándome a los ojos? ¿EN SERIO?", 0],
+		["Esto es personal. Yo lo sé. Tú lo sabes.", 0],
 	],
 	"perdona": [
-		["Ay... ya, ya. ¿Quién es mi gordito?", 1],
-		["No te puedo odiar. Toma, malcriado.", 1],
+		["Ay, no, esa carita... ¿Quién es el bebito más gordito? ¡TÚ!", 1],
+		["Ya, ya. Te perdono porque tengo que subirte a mis historias.", 1],
+		["No puedo enojarme con esos cachetes. Toma, chantajista.", 1],
 	],
 	"persigue": [
-		["¡Ven acá, bandido!", 0],
-		["¡No te escondas, te vi!", 0],
+		["¡Bájate de ahí, bandido!", 0],
+		["¡Pipe! ¡No me hagas subirme a una silla!", 0],
 	],
 	"tele": [
-		["Ya, ya. Voy a ver mi serie. Pórtate bien.", 2],
-		["Bueno. Un capítulo y me acuesto.", 2],
+		["Me lo merezco. Un capítulo. Uno.", 2],
+		["Si te portas bien, sales en mi próximo post.", 1],
 	],
 	"interrumpida": [
-		["¡FELIPE! ¡MI SERIE!", 0],
-		["¡¿El control?! ¡Estaba en lo mejor!", 0],
+		["¡NO! ¡Justo cuando se iban a besar!", 0],
+		["¡Pipe! ¡Ahora no sé en qué capítulo iba!", 0],
 	],
 	"golpeada": [
-		["¡AY! ¿¡ME TIRASTE ESO ENCIMA!?", 0],
-		["¡FELIPE! ¡Me mojaste entera!", 0],
+		["Acabo de lavarme el pelo. ACABO.", 0],
+		["Respira, Valeria. Es un gato. Es TU gato.", 2],
 	],
-	"persiana": [["¿Y quién subió la persiana?", 2]],
+	"persiana": [["¿Quién subió la...? Pipe, ¿desde cuándo tienes pulgares?", 2]],
 	"se_va": [
-		["Ash. Gato.", 2],
-		["Yo ordeno, tú desordenas. Qué lindo.", 2],
+		["Me voy antes de decir algo de lo que me arrepienta.", 2],
+		["Te voy a hacer un post. Y no te va a gustar.", 2],
+		["Mis seguidores se van a reír. Yo no.", 2],
 	],
+	## Rascador con público: perdón al instante.
+	"rascador": [
+		["¡Mira, sí lo usa! ¡Valió cada centavo!", 1],
+		["¡Lo está usando! ¿Alguien está grabando? Ah, sí, yo.", 1],
+	],
+	## Rascador otra vez en la misma visita (el bis no se cobra).
+	"rascador_bis": [["Sí, mi amor, ya te vi. Muy lindo. Igual no hay más snacks.", 2]],
+	## Secreta: le araña el sofá al lado del rascador, delante de ella.
+	"junto_rascador": [["¡Pipe! ¡El rascador está AHÍ! ¡A diez centímetros!", 0]],
+	## Celular y flash (perdón o algo muy gracioso).
+	"historias": [["Esto va directo a mis historias.", 1]],
 }
 
 var _ultima := {}

@@ -13,7 +13,7 @@ var calcetines := 0
 var snacks := 0
 var fotos := 0
 var travesuras := 0
-var total_travesuras := 6
+var total_travesuras := 7
 ## Carteles que se mostraron (para la prueba): [titulo, nombre].
 var carteles: Array = []
 ## Segundos entre la travesura y el cartel.
@@ -54,7 +54,7 @@ func golpear(clave: String) -> void:
 func _dibujar_barra() -> void:
 	var fuente := ThemeDB.fallback_font
 	var fondo := Color(0.1, 0.07, 0.09, 0.78)
-	# Libreta: "AGENDA 2/6 [Tab]".
+	# Libreta: "AGENDA 2/7 [Tab]".
 	var g: float = _golpe.get("agenda", 0.0)
 	_barra.draw_rect(Rect2(4, 4, 112, 22), fondo)
 	_barra.draw_rect(Rect2(8, 8, 12, 15), Color(0.97, 0.93, 0.8))

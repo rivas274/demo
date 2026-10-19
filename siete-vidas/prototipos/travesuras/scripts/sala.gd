@@ -5,8 +5,11 @@ class_name SalaProto
 extends Node2D
 ## Un solo cuarto de una pantalla (la sala), feo a propósito y dibujado por código, a escala de gato
 ## (muebles casi reales a 1,21 px/cm). Une a Felipe, los objetos, Valeria, la voz y la respuesta épica.
-## v2: sin CAOS ni puntaje. El motivo es la Agenda de Su Majestad (6 travesuras, 2 secretas) y sus
-## recompensas útiles: calcetines, snacks, una foto vergonzosa y un camino (la persiana).
+## v2: sin CAOS ni puntaje. El motivo es la Agenda de Su Majestad (7 travesuras, 3 secretas) y sus
+## recompensas útiles: calcetines, snacks, fotos vergonzosas y un camino (la persiana).
+## v2b: "Teatro para Valeria": un rascador nuevo y caro junto al sofá. Usarlo delante de ella cuenta
+## como perdón; sin público, Felipe se queja. Deja las garras afiladas: el siguiente arañazo al sofá
+## es crítico y rompe el plástico de un golpe.
 
 const SUELO := 296.0
 ## Superficies de pie: [x inicial, x final, y]. Mismos números para colisión, dibujo y caída de objetos.
@@ -34,6 +37,8 @@ const CALCETIN_ALFEIZAR_X := 128.0
 @export var congelado_agenda := 0.12
 ## Segundos después de completar la agenda antes de mostrar el resumen.
 @export var espera_resumen := 1.5
+## Ruido que hace el rascador (es "portarse bien": casi no se oye).
+@export var ruido_rascador := 0.0
 
 var felipe: FelipeProto
 var valeria: Valeria
@@ -41,6 +46,7 @@ var vaso: Tirable
 var florero: Tirable
 var control: Tirable
 var sofa: Sofa
+var rascador: Rascador
 var plato: Plato
 var snack: Recogible
 var aspiradora: Aspiradora
@@ -70,6 +76,9 @@ var tiempo := 0.0
 var _ultimo_aranazo_hablado := -99.0
 var _ultimo_en_su_cara := -99.0
 var _ultima_palabra_aranazo := -99.0
+var _perdon_por_rascador := false
+var _ultimo_critico := -99.0
+var _dijo_persiana := false
 
 
 func _ready() -> void:
@@ -85,6 +94,10 @@ func _ready() -> void:
 	sofa.aranado.connect(_al_aranar)
 	add_child(sofa)
 	sofa.plastico_roto.connect(_al_romper_plastico)
+	sofa.critico.connect(_al_aranar_critico)
+	rascador = Rascador.new()
+	rascador.aranado.connect(_al_usar_rascador)
+	add_child(rascador)
 	var superficies := [[0.0, 640.0, SUELO], [MESA.position.x, MESA.end.x, MESA.position.y], [REPISA.position.x, REPISA.end.x, REPISA.position.y], [Sofa.ASIENTO.position.x, Sofa.ASIENTO.end.x, Sofa.ASIENTO.position.y], [Sofa.BRAZO_DERECHO.position.x, Sofa.BRAZO_DERECHO.end.x, Sofa.BRAZO_DERECHO.position.y], [Sofa.BRAZO_IZQUIERDO.position.x, Sofa.BRAZO_IZQUIERDO.end.x, Sofa.BRAZO_IZQUIERDO.position.y]]
 	_superficies = superficies
 	vaso = _crear_tirable("vaso", Vector2(340, MESA.position.y), true, superficies)
@@ -118,6 +131,7 @@ func _ready() -> void:
 	felipe.intimido.connect(_al_intimidar)
 	felipe.sonido.connect(sonidos.sonar)
 	valeria.felipe = felipe
+	rascador.felipe = felipe
 	jugo = Jugo.new()
 	jugo.camara = camara
 	add_child(jugo)
@@ -218,10 +232,31 @@ func _felipe_dice(evento: String, urgente := false) -> void:
 		dialogo.decir("felipe", frase[0], frase[1], true)
 
 
-func _valeria_dice(evento: String) -> void:
+func _valeria_dice(evento: String) -> Array:
 	var frase := frases.elegir("valeria", evento)
 	if not frase.is_empty():
 		dialogo.decir("valeria", frase[0], frase[1], true)
+	return frase
+
+
+## Felipe contesta cuando Valeria está por terminar su frase (si no, su respuesta caducaría en la cola).
+func _felipe_responde(evento: String, frase_valeria: Array) -> void:
+	var espera := 0.4 + 0.035 * String(frase_valeria[0] if not frase_valeria.is_empty() else "").length()
+	get_tree().create_timer(espera).timeout.connect(func() -> void: _felipe_dice(evento))
+
+
+## Valeria saca el celular y le saca una foto con flash (solo efecto). Frase opcional después.
+func _foto_de_valeria(evento := "") -> void:
+	valeria.sacar_celular()
+	get_tree().create_timer(0.35).timeout.connect(func() -> void:
+		jugo.destello(0.3, Color.WHITE)
+		sonidos.sonar("pop", 1.8)
+		_anotar("Valeria saca una foto con flash"))
+	if evento != "":
+		# Después de la frase de Felipe (en cola: si él sigue hablando, espera su turno).
+		get_tree().create_timer(5.0).timeout.connect(func() -> void:
+			var f := frases.elegir("valeria", evento)
+			dialogo.decir("valeria", f[0], f[1]))
 
 
 ## Respuesta épica de una travesura: congelar, palabra que salta, sacudida, destello y sonido con peso.
@@ -263,7 +298,12 @@ func _al_cumplir(t: Dictionary) -> void:
 	jugo.destello(0.45, Color(1.0, 0.6, 0.95) if secreta else Color(1.0, 0.95, 0.6))
 	jugo.sacudir(0.2, 0.6)
 	var frase: Array = t["frase"]
-	dialogo.decir("felipe", frase[0], frase[1], true)
+	if dialogo.hablando == "valeria":
+		# Si Valeria acaba de reaccionar, Felipe cierra después (no le pisa la frase).
+		var espera := 0.4 + 0.035 * dialogo.texto_actual.length()
+		get_tree().create_timer(espera).timeout.connect(func() -> void: dialogo.decir("felipe", frase[0], frase[1], true))
+	else:
+		dialogo.decir("felipe", frase[0], frase[1], true)
 
 
 func _al_avanzar(t: Dictionary) -> void:
@@ -288,7 +328,7 @@ func terminar_dia() -> void:
 	]
 	var frase := ["Un día flojo. Hasta los reyes descansan.", 3]
 	if agenda.completa():
-		frase = ["Seis de seis. La casa es mía. Como siempre fue.", 7]
+		frase = ["Siete de siete. La casa es mía. Como siempre fue.", 7]
 	elif agenda.cumplidas() >= 3:
 		frase = ["Nada mal. Mañana termino la lista. O no. Soy el rey.", 4]
 	_anotar("RESUMEN: travesuras %d/%d, secretas %d/%d, calcetines %d/3, fotos %d, snacks %d, perdones %d" % [agenda.cumplidas(), agenda.total(), agenda.secretas_cumplidas(), agenda.total_secretas(), hud.calcetines, hud.fotos, hud.snacks, perdones])
@@ -335,8 +375,8 @@ func _al_recoger(r: Recogible) -> void:
 			hud.fotos += 1
 			hud.golpear("foto")
 			jugo.palabra("¡FOTO VERGONZOSA!", r.global_position + Vector2(0, -60), Color(1.0, 0.6, 0.85), 15)
-			_anotar("recoge la foto vergonzosa")
-			_felipe_dice("recoger_foto", true)
+			_anotar("recoge la foto vergonzosa" + (" del rascador" if r.variante == 1 else ""))
+			_felipe_dice("recoger_foto_rascador" if r.variante == 1 else "recoger_foto", true)
 
 
 func _abrir_persiana() -> void:
@@ -434,14 +474,67 @@ func _al_aranar(_sofa: Sofa, punto: Vector2) -> void:
 	jugo.congelar(0.06)
 	jugo.sacudir(0.1, 0.35)
 	# Una palabra por pulsación (los dos arañazos seguidos ya no se pisan las palabras).
-	if tiempo - _ultima_palabra_aranazo > 0.8:
+	if tiempo - _ultima_palabra_aranazo > 0.8 and tiempo - _ultimo_critico > 1.0:
 		_ultima_palabra_aranazo = tiempo
 		var arriba := Vector2(punto.x, minf(punto.y, felipe.global_position.y - 70.0))
 		jugo.palabra(["¡RIIIP!", "¡FIRMA DE AUTOR!", "¡RASS!"].pick_random() if hablar else "¡RIIIP!", arriba + Vector2(0, -12), Color(1.0, 0.92, 0.75), 16)
 	valeria.oir(ruido_aranazo)
-	_anotar("arañar")
-	if hablar and sofa.con_plastico:
+	_anotar("arañar" + (" (junto al rascador)" if punto.x >= Rascador.ZONA_SOFA_X else ""))
+	# Secreta: arañar el sofá justo al lado del rascador nuevo, con Valeria mirando hacia el rascador.
+	if punto.x >= Rascador.ZONA_SOFA_X and valeria.ve_x(Rascador.X) and not agenda.esta_cumplida("junto_rascador"):
+		_cumplir_junto_rascador()
+		return
+	if hablar and sofa.con_plastico and not sofa.ultimo_critico:
 		_felipe_dice("arañar")
+
+
+func _cumplir_junto_rascador() -> void:
+	_anotar("¡araña el sofá al lado del rascador delante de Valeria!")
+	jugo.palabra("¡A DIEZ CENTÍMETROS!", Vector2(rascador.X - 20.0, 150), Color(1.0, 0.45, 0.6), 18, 0.1)
+	_valeria_dice("junto_rascador")
+	_foto_de_valeria("historias")
+	# La foto estaba escondida detrás del rascador: sale volando con el portazo de indignación.
+	var foto := _soltar("foto", Vector2(rascador.X + 6.0, Rascador.PLATAFORMA.position.y - 4.0), Vector2(40.0, -150.0))
+	foto.variante = 1
+	agenda.avanzar("junto_rascador")
+
+
+## Arañazo con las garras afiladas: ¡CRÍTICO! (y el plástico se rompe de un golpe).
+func _al_aranar_critico(_sofa: Sofa, punto: Vector2) -> void:
+	_anotar("¡arañazo CRÍTICO con las garras afiladas!")
+	_ultimo_critico = tiempo
+	jugo.congelar(0.12)
+	jugo.sacudir(0.25, 0.9)
+	jugo.destello(0.35, Color(0.8, 0.95, 1.0))
+	sonidos.sonar("rotura", 1.3)
+	jugo.palabra("¡CRÍTICO!", Vector2(punto.x, minf(punto.y, felipe.global_position.y - 70.0) - 14.0), Color(0.6, 0.95, 1.0), 26)
+
+
+## Rascador: cada golpe suelta fibras; el primero de la pulsación decide si hubo público.
+func _al_usar_rascador(_r: Rascador, punto: Vector2, primero: bool) -> void:
+	sonidos.sonar("arañar", randf_range(1.1, 1.3))
+	jugo.sacudir(0.06, 0.2)
+	valeria.oir(ruido_rascador)
+	if not primero:
+		return
+	felipe.afilar_garras()
+	var publico := valeria.ve_x(Rascador.X)
+	# Con público, la palabra del filo sale después de la ovación (para no pisarse).
+	jugo.palabra("¡GARRAS AFILADAS!", Vector2(punto.x + 20.0, felipe.global_position.y - 92.0), Color(0.7, 0.95, 1.0), 13, 1.1 if publico else 0.25)
+	if publico:
+		_perdon_por_rascador = true
+		if valeria.perdonar_por_rascador():
+			_anotar("usa el rascador CON público")
+			return
+		_perdon_por_rascador = false
+		_anotar("usa el rascador con público (bis, sin premio)")
+		jugo.palabra("¡RASS!", punto + Vector2(0, -20), Color(1.0, 0.92, 0.75), 14)
+		var frase := _valeria_dice("rascador_bis")
+		_felipe_responde("rascador_bis", frase)
+		return
+	_anotar("usa el rascador SIN público")
+	jugo.palabra("¡RASS!", punto + Vector2(0, -20), Color(1.0, 0.92, 0.75), 14)
+	_felipe_dice("rascador_solo", true)
 
 
 func _al_romper_plastico(_sofa: Sofa) -> void:
@@ -515,12 +608,27 @@ func _al_perdonar(_v: Valeria) -> void:
 	jugo.congelar(0.1)
 	jugo.destello(0.4, Color(1.0, 0.75, 0.85))
 	jugo.sacudir(0.15, 0.4)
-	jugo.palabra("¡CARISMA CRÍTICO!", felipe.global_position + Vector2(0, -112), Color(1.0, 0.55, 0.75), 22)
-	jugo.palabra("¡PERDONADO!", felipe.global_position + Vector2(0, -84), Color(1.0, 0.9, 0.5), 14, 0.15)
-	_anotar("Valeria perdona (%d)" % perdones)
-	_valeria_dice("perdona")
-	if agenda.esta_cumplida("perdon") or agenda.avance["perdon"] + 1 < 2:
-		_felipe_dice("perdonado")
+	var teatro := _perdon_por_rascador
+	_perdon_por_rascador = false
+	if teatro:
+		# "Teatro para Valeria": respuesta épica propia, frase de ella y luego la de Felipe.
+		jugo.congelar(0.14)
+		jugo.sacudir(0.25, 0.7)
+		jugo.palabra("¡OVACIÓN!", Vector2(rascador.X + 60.0, 160), Color(1.0, 0.55, 0.75), 26)
+		jugo.palabra("¡PERDONADO SIN RONRONEAR!", felipe.global_position + Vector2(10, -84), Color(1.0, 0.9, 0.5), 13, 0.2)
+		_anotar("Valeria perdona por el rascador (%d)" % perdones)
+		var frase := _valeria_dice("rascador")
+		# Si este perdón cumple la agenda, Felipe contesta con la frase de la travesura.
+		if agenda.esta_cumplida("perdon") or agenda.avance["perdon"] + 1 < 2:
+			_felipe_responde("rascador_publico", frase)
+	else:
+		jugo.palabra("¡CARISMA CRÍTICO!", felipe.global_position + Vector2(0, -112), Color(1.0, 0.55, 0.75), 22)
+		jugo.palabra("¡PERDONADO!", felipe.global_position + Vector2(0, -84), Color(1.0, 0.9, 0.5), 14, 0.15)
+		_anotar("Valeria perdona (%d)" % perdones)
+		var frase := _valeria_dice("perdona")
+		if agenda.esta_cumplida("perdon") or agenda.avance["perdon"] + 1 < 2:
+			_felipe_responde("perdonado", frase)
+	_foto_de_valeria()
 	# Snack que cae de la mano de Valeria, junto a Felipe (no encima del plato).
 	var x := clampf(felipe.global_position.x + felipe.mirando * 30.0, 60.0, 520.0)
 	if absf(x - plato.position.x) < 40.0:
@@ -533,8 +641,12 @@ func _al_sentarse(_v: Valeria) -> void:
 	_anotar("Valeria se sienta a ver su serie")
 	if control.necesita_reponer():
 		_reponer(control)
-	_valeria_dice("tele")
-	_felipe_dice("tele")
+	if persiana_abierta > 0.0 and not _dijo_persiana:
+		_dijo_persiana = true
+		_valeria_dice("persiana")
+	else:
+		_valeria_dice("tele")
+		_felipe_dice("tele")
 
 
 func _al_perseguir(_v: Valeria) -> void:

@@ -15,8 +15,16 @@ extends Node2D
 ## de 3,5 m (424 px) de alto, todos con el piso a la misma altura.
 const TECHO := 24.0
 const SUELO := 448.0
+## Piso con profundidad (pedido del creador, 2026-10-19): el piso es un plano visto un poco desde arriba. La pared
+## (zócalo, puertas, ventanas, cuadros) termina FONDO_PISO px ARRIBA de la línea de apoyo (SUELO): entre la pared y
+## SUELO se ve una banda de piso, y bajo SUELO otra hasta el borde de la pantalla (ALTO). Así los pies de Felipe,
+## Valeria, A.S.P.I. y las patas de los muebles quedan DENTRO del piso, delante de la pared. Solo se movió el dibujo:
+## las colisiones siguen en SUELO.
+const FONDO_PISO := 20.0
+## Unión pared-piso (borde de abajo del zócalo): todo lo que cuelga de la pared se mide desde aquí.
+const PARED_BASE := SUELO - FONDO_PISO
 ## Dintel de las puertas (2,05 m): la línea de los cuadros (G8).
-const DINTEL := SUELO - 248.0
+const DINTEL := PARED_BASE - 248.0
 ## Mesita de la sala (S-2, tanda 3E): tablero a 58 px (48 cm), de la columna 6 a la 76 de su arte.
 const MESITA_X := 162.0
 const ALTO := SUELO + 30.0
@@ -41,7 +49,10 @@ const RUTA := ["sala", "recibidor", "cocina", "pasillo", "dormitorio", "estudio"
 ## (ALFEIZAR, 109 px), vidrio de unos 150 × 120 px y arriba a 1,90 m: nada bajo la barra del HUD ni pegado al techo.
 ## La de la sala y la del pasillo son arte con su propia vista; las de la cocina, el dormitorio y el estudio se
 ## recortan en la pared (se ve la ciudad) y llevan marco, alféizar y tela por código (FondoApartamento).
-const ALFEIZAR := SUELO - 109.0
+const ALFEIZAR := PARED_BASE - 109.0
+## La ventana del pasillo es la excepción: su alféizar es una repisa honda que se pisa desde la consola (colisión), así
+## que queda en el plano de juego.
+const ALFEIZAR_PASILLO := SUELO - 109.0
 const VENTANA_COCINA := Rect2(3150, ALFEIZAR - 120, 150, 120)
 ## La del dormitorio va sobre la cama, con la cortina de Gemini a los lados (dos paños desde una barra, hasta el piso).
 const VENTANA_DORMITORIO := Rect2(5669, ALFEIZAR - 120, 150, 120)
@@ -111,9 +122,9 @@ const ARTE := [
 	["silla_v2", Vector2(680, SUELO), false, "mueble"],
 	["mesa_v2", Vector2(745, SUELO), false, "mueble"],
 	["silla_v2", Vector2(929, SUELO), true, "mueble"],
-	["perchero", Vector2(1646, SUELO - 140.0), false, "pared"],  # R-1: sobre el zapatero, sin tapar el paso agachado
+	["perchero", Vector2(1646, PARED_BASE - 140.0), false, "pared"],  # R-1: sobre el zapatero, sin tapar el paso agachado
 	["zapatero", Vector2(1626, SUELO), false, "mueble"],
-	["zapatillas", Vector2(1794, SUELO), false, "mueble"],  # R-2: tiradas entre el zapatero y la caja de arena
+	["zapatillas", Vector2(1794, SUELO + 8.0), false, "mueble"],  # adelantadas en el piso  # R-2: tiradas entre el zapatero y la caja de arena
 	["marco_viral", Vector2(1866, DINTEL + 59.0), false, "pared"],  # R-3: el video viral, origen de la reja
 	["caja_arena", Vector2(1832, SUELO), false, "mueble"],
 	["lampara", Vector2(1942, SUELO), false, "mueble"],
@@ -121,11 +132,11 @@ const ARTE := [
 	["escalera_peldanos", Vector2(2322, SUELO), true, "escalera"],
 	["vano", Vector2(2497, SUELO - 150), false, "escalera"],  # hueco cuadrado con el marco de las puertas (no un arco)
 	["reloj", Vector2(3075, DINTEL + 43.0), false, "pared"],  # 41 × 43, con segundero (C-8)
-	["lata", Vector2(3044, SUELO), false, "mueble"],  # C-7: la lata de atún abierta, al otro lado del tazón
-	["llave_agua", Vector2(3463, SUELO - 110.0), false, "pared"],  # C-5: la llave con el trapo, fuera de la patrulla
+	["lata", Vector2(3044, SUELO + 6.0), false, "mueble"],  # adelantada en el piso  # C-7: la lata de atún abierta, al otro lado del tazón
 	["silla_v2", Vector2(3400, SUELO), false, "mueble"],
-	["alacenas", Vector2(3461, SUELO - 182), false, "pared"],
+	["alacenas", Vector2(3461, PARED_BASE - 182), false, "pared"],
 	["meson", Vector2(3464, SUELO), false, "mueble"],
+	["llave_agua", Vector2(3460.0, PARED_BASE - 86.0), true, "pared"],  # C-5: la llave con el trapo, en la pared y en espejo: el caño (columna 25) cae sobre el centro del fregadero y el trapo cuelga a la izquierda
 	["microondas", Vector2(3570, SUELO - 109), false, "mueble"],
 	["refrigerador", Vector2(3674, SUELO), false, "mueble"],
 	["polaroid_1", Vector2(3690, SUELO - 172.0), false, "mueble"],  # C-6: fotos de Felipe entre los imanes
@@ -134,9 +145,9 @@ const ARTE := [
 	["baul", Vector2(4186, SUELO), false, "mueble"],
 	["aparador", Vector2(4256, SUELO), false, "mueble"],
 	["retrato_familiar", Vector2(4900, DINTEL + 80.0), false, "pared"],  # P-4: el trono (cojín) con su retrato
-	["ventana_pasillo", Vector2(4260, ALFEIZAR + 12.0), false, "pared"],  # apoyada en la consola; alféizar 12 px sobre su base
+	["ventana_pasillo", Vector2(4260, ALFEIZAR_PASILLO + 12.0), false, "pared"],  # apoyada en la consola; alféizar 12 px sobre su base
 	["cojin", Vector2(4984, SUELO), false, "mueble"],
-	["paisaje", Vector2(5943, SUELO - 145), false, "pared"],  # D-1: apoyado en la repisa, entre la cómoda y el ropero
+	["paisaje", Vector2(5943, SUELO - 145 - FONDO_PISO + 6.0), false, "pared"],  # D-1: apoyado contra la pared, al fondo de la repisa
 	["banquito", Vector2(5586, SUELO), false, "mueble"],
 	["libro", Vector2(5598, SUELO - 53.0), false, "mueble"],  # D-3: libro a medio leer, atrás del banquito
 	["cama", Vector2(5644, SUELO), false, "mueble"],
@@ -148,10 +159,10 @@ const ARTE := [
 	["monitor", Vector2(6746, SUELO - 97), false, "mueble"],
 	["impresora", Vector2(6695, SUELO), false, "mueble"],
 	["base_carga", Vector2(6800, SUELO), false, "mueble"],
-	["corcho", Vector2(6831, SUELO - 202.0), false, "pared"],  # E-2: el tablero de contenido de Valeria (entre el paño y la puerta)
-	["regadera", Vector2(7434, SUELO), false, "mueble"],  # B-3: isla de jardinería
-	["saco_tierra", Vector2(7466, SUELO), false, "mueble"],
-	["maceta_rota", Vector2(7494, SUELO), false, "mueble"],
+	["corcho", Vector2(6831, PARED_BASE - 202.0), false, "pared"],  # E-2: el tablero de contenido de Valeria (entre el paño y la puerta)
+	["regadera", Vector2(7434, SUELO + 8.0), false, "mueble"],  # B-3: isla de jardinería
+	["saco_tierra", Vector2(7466, SUELO + 4.0), false, "mueble"],
+	["maceta_rota", Vector2(7494, SUELO + 11.0), false, "mueble"],
 	["maceta_grande", Vector2(7530, SUELO), false, "mueble"],
 	["baranda", Vector2(7600, SUELO), false, "mueble"],
 ]
@@ -159,8 +170,12 @@ const ARTE := [
 const ALFOMBRAS := [["alfombra_sala", 232.0], ["alfombra_pasillo", 4370.0], ["alfombra_dormitorio", 5598.0]]
 ## Fachada del edificio alrededor de la puerta del balcón (B-1): el hueco (x 89 a 221 del arte) queda detrás de la
 ## puerta-ventana.
-const FACHADA_BALCON := Vector2(7177, SUELO)
+const FACHADA_BALCON := Vector2(7177, PARED_BASE)
 ## Objetos de pared que proyectan sombra (G5): 2 px hacia abajo y 1 px a la derecha (la luz entra por el oeste).
+## Fregadero de la cocina, embutido en el mesón bajo la llave (pedido del creador, 2026-10-19: la llave sola se veía
+## rara): cuba metálica con borde, sobre la cubierta de azulejos (filas 4 a 19 del arte del mesón), a la izquierda de
+## la patrulla del ratón.
+const FREGADERO := Rect2(3467, SUELO - 104, 36, 15)
 const SOMBRA_PARED := ["retrato", "marco_foto", "marco_huella", "perchero", "marco_viral", "reloj", "alacenas", "llave_agua", "retrato_familiar", "paisaje", "corcho"]
 ## Arte que dibujan sus propios nodos (el sofá cambia de imagen; el rascador tiembla al arañarlo): [imagen, (x izquierda, base)].
 const ARTE_EXTRA := [["sofa_plastico", Vector2(240, SUELO)], ["rascador", Vector2(RASCADOR_X - 50.0, SUELO)]]
@@ -198,7 +213,7 @@ const PIEZAS := [
 	# Pasillo de arriba.
 	[Rect2(4186, SUELO - 47, 70, 47), true, "Baúl", "arte", "baul"],  # 40 cm (arriba-extra); se pasa por delante
 	[Rect2(4258, SUELO - 97, 152, 50), false, "Consola", "arte", "aparador"],  # 80 cm, 47 px libres debajo
-	[Rect2(4264, ALFEIZAR, 172, 6), true, "Alféizar", "arte", "ventana_pasillo"],  # 90 cm, sobre la consola
+	[Rect2(4264, ALFEIZAR_PASILLO, 172, 6), true, "Alféizar", "arte", "ventana_pasillo"],  # 90 cm, sobre la consola
 	# Dormitorio.
 	[Rect2(5591, SUELO - 53, 42, 6), true, "Banquito", "arte", "banquito"],
 	[Rect2(5644, SUELO - 65, 197, 65), false, "Cama", "arte", "cama"],  # colchón a 54 cm
@@ -232,7 +247,7 @@ const CAJA_CARTON := Vector2(3360, SUELO)
 ## El del mesón patrulla entre el borde y el microondas, sin pasar por el pollo (que está sobre el microondas, G5).
 const RATONES := [
 	[Vector2(3240, SUELO), 3200.0, 3290.0],
-	[Vector2(3518, SUELO - 108), 3500.0, 3536.0],
+	[Vector2(3528, SUELO - 108), 3514.0, 3540.0],  # a la derecha del fregadero
 ]
 const LASER := [Vector2(4900, SUELO), 4840.0, 4980.0]
 ## Objetos que se tiran con el botón de acción: [posición, tipo].
@@ -271,8 +286,10 @@ const CAJON := Vector2(5862, SUELO - 75)
 const RECT_CAJON := Rect2(-14, -12, 60, 24)
 ## La ropa va en el medio de la cama, apoyada en el edredón (ROPA_HUNDIDA): ROPA es donde la alcanza Felipe parado
 ## en el colchón; el rectángulo cubre la pila tal como se dibuja.
-const ROPA := Vector2(5772, SUELO - 65)
-const ROPA_HUNDIDA := 9.0
+const ROPA := Vector2(5768, SUELO - 65)
+## La pila va en medio de la cama, hundida en el edredón (pedido del creador, 2026-10-19): su base queda 22 px bajo el
+## borde de arriba del colchón, sobre el frente del edredón, con la tela que se hunde alrededor.
+const ROPA_HUNDIDA := 22.0
 const RECT_ROPA := Rect2(-26, ROPA_HUNDIDA - 48.0, 52, 48)
 const TECLADO := Rect2(6740, SUELO - 122, 52, 24)
 ## Lo interactuable que se dibuja por código: [nombre, rectángulo en el mundo] (G7).
@@ -462,6 +479,7 @@ var _goteo_bano := 0.0
 var _goteo_cocina := 0.0
 ## Detalles que se mueven o cuentan quién vive aquí (G9, G10): pelos, arañazos, polvo, cables, segundero, gotas.
 var _ambiente: Node2D
+var _sombras: Node2D
 var _paso_brisa := -1
 ## Bases opacas del arte (sombras de contacto, G5): imagen -> [x0, x1, patas [[x]...]].
 var _bases := {}
@@ -657,6 +675,13 @@ func _crear_objetos() -> void:
 	_ambiente.z_index = Capas.MUEBLES
 	_ambiente.draw.connect(_dibujar_ambiente)
 	add_child(_ambiente)
+	# Sombras de contacto de lo que se mueve (Felipe, Valeria, A.S.P.I., ratones, caja, comida): debajo de ellos y
+	# encima de los muebles (se apoyan también arriba de un mueble).
+	_sombras = Node2D.new()
+	_sombras.name = "Sombras"
+	_sombras.z_index = Capas.MUEBLES
+	_sombras.draw.connect(_dibujar_sombras_vivas)
+	add_child(_sombras)
 	_cesta = Node2D.new()
 	_cesta.name = "Nido"
 	_cesta.z_index = Capas.MUEBLES
@@ -730,6 +755,7 @@ func _physics_process(delta: float) -> void:
 	_actualizar_bano(delta)
 	_actualizar_goteo_cocina(delta)
 	_ambiente.queue_redraw()
+	_sombras.queue_redraw()
 	# La cortina con brisa (D-4) y las plantas de la baranda (B-4) se mecen cada 0,5 s.
 	var paso := int(tiempo * 2.0)
 	if paso != _paso_brisa and habitacion in ["dormitorio", "balcon"]:
@@ -1464,7 +1490,6 @@ func _dibujar_arte(c: Node2D, capa: String) -> void:
 				var t := ArteNivel.textura(datos[0])
 				if t:
 					ArteNivel.dibujar(c, datos[0], datos[1].x + t.get_width() / 2.0 + 1.0, datos[1].y + 2.0, datos[2], Color(0, 0, 0, 0.2))
-		_dibujar_zocalo_escalera(c)
 	for datos: Array in ARTE:
 		if datos[3] != capa:
 			continue
@@ -1476,55 +1501,107 @@ func _dibujar_arte(c: Node2D, capa: String) -> void:
 			continue
 		ArteNivel.dibujar(c, datos[0], datos[1].x + textura.get_width() / 2.0, datos[1].y, datos[2])
 	if capa == "escalera":
-		_dibujar_descanso(c)
+		_dibujar_armario_escalera(c)
 	elif capa == "pared":
 		_dibujar_ventana_pasillo(c)
-		# Alfombras sobre la franja del piso (antes de las sombras de contacto).
+		# Alfombras tendidas en el piso, en perspectiva (antes de las sombras de contacto).
 		for alfombra: Array in ALFOMBRAS:
-			var t := ArteNivel.textura(alfombra[0])
-			if t:
-				c.draw_texture(t, Vector2(alfombra[1], SUELO))
+			_dibujar_alfombra(c, alfombra[0], alfombra[1])
 		_dibujar_sombras_de_contacto(c)
 	elif capa == "mueble":
+		_dibujar_fregadero(c)
 		_dibujar_sofa(c)
 		# Imanes del refrigerador.
 		for iman: Array in [["iman_manzana", Vector2(3700, SUELO - 150)], ["iman_foto", Vector2(3722, SUELO - 166)], ["iman_pez", Vector2(3708, SUELO - 128)], ["iman_naranja", Vector2(3730, SUELO - 140)]]:
 			ArteNivel.dibujar(c, iman[0], iman[1].x, iman[1].y)
 
 
-## Sombras de contacto (crítica de Gemini): cada mueble que se apoya en el piso deja una sombra dura de pixel en su
-## base (dos franjas, la de abajo más angosta), así no parece pegado sobre la madera. Va en la capa de la pared:
-## debajo de los muebles y de Felipe. La lámpara del recibidor además deja un charco de luz cálida en el piso.
+## Sombras de contacto (crítica de Gemini y piso con profundidad): cada mueble que se apoya en el piso deja una sombra
+## elíptica de pixel sobre el piso, centrada en su base (la mitad de atrás asoma entre las patas, la de delante cae
+## sobre la banda del frente), y un bloque más oscuro bajo cada pata. Va en la capa de la pared: debajo de los muebles
+## y de Felipe. Los muebles adelantados (base bajo SUELO) la llevan en su base. La lámpara del recibidor además deja un
+## charco de luz cálida en el piso.
 const SIN_SOMBRA := ["escalera_peldanos", "vano"]
+const COLOR_SOMBRA := Color(0.12, 0.05, 0.03)
+
+
+## Sombra elíptica de pixel: 5 filas (2 detrás de la base, la base y 2 delante), más angostas en los extremos.
+static func sombra(c: CanvasItem, centro: Vector2, ancho: float, alfa := 0.4) -> void:
+	var filas := [[-2.0, 0.6, 0.6], [-1.0, 0.88, 0.85], [0.0, 1.0, 1.0], [1.0, 0.86, 0.75], [2.0, 0.55, 0.45]]
+	for f: Array in filas:
+		var w := roundf(ancho * f[1] / 2.0) * 2.0
+		c.draw_rect(Rect2(roundf(centro.x - w / 2.0), roundf(centro.y) + f[0], w, 1.0), Color(COLOR_SOMBRA, alfa * f[2]))
 
 
 func _dibujar_sombras_de_contacto(c: Node2D) -> void:
 	var piezas: Array = []
 	for datos: Array in ARTE:
-		if datos[3] == "mueble" and is_equal_approx(datos[1].y, SUELO) and not datos[0] in SIN_SOMBRA:
+		if datos[3] == "mueble" and datos[1].y >= SUELO - 0.5 and not datos[0] in SIN_SOMBRA:
 			piezas.append(datos)
 	piezas.append_array(ARTE_EXTRA)
-	# G5: franja de 3 px al 45 % con el ancho de la base opaca real, otra de 2 px al 28 % debajo y un bloque de 2 × 2
-	# más oscuro bajo cada pata.
 	for datos: Array in piezas:
 		var nombre: String = datos[0]
 		var base := _base_opaca(nombre)
 		if base.is_empty():
 			continue
 		var x: float = datos[1].x
+		var y: float = datos[1].y
 		var ancho := float(ArteNivel.textura(nombre).get_width())
 		var espejo: bool = datos.size() > 2 and datos[2]
 		var x0: float = x + (ancho - base[1] if espejo else base[0])
 		var x1: float = x + (ancho - base[0] if espejo else base[1])
-		c.draw_rect(Rect2(x0 - 2.0, SUELO - 1.0, x1 - x0 + 4.0, 3.0), Color(0.12, 0.05, 0.03, 0.45))
-		c.draw_rect(Rect2(x0 + 2.0, SUELO + 2.0, maxf(x1 - x0 - 4.0, 2.0), 2.0), Color(0.12, 0.05, 0.03, 0.28))
+		sombra(c, Vector2((x0 + x1) / 2.0, y), x1 - x0 + 8.0, 0.42)
 		for pata: Array in base[2]:
 			var centro: float = x + (ancho - pata[0] if espejo else pata[0])
-			c.draw_rect(Rect2(roundf(centro) - 1.0, SUELO, 2.0, 2.0), Color(0.08, 0.03, 0.02, 0.55))
-	# Charco de luz de la lámpara de pie, en franjas (no un degradado suave).
+			c.draw_rect(Rect2(roundf(centro) - 2.0, y - 1.0, 4.0, 2.0), Color(0.08, 0.03, 0.02, 0.5))
+	# Nido de Su Majestad (cesta de la sala) y armario bajo la escalera.
+	sombra(c, Vector2(70, SUELO), 64.0, 0.4)
+	c.draw_rect(Rect2(2400, SUELO - 2.0, 240, 4), Color(COLOR_SOMBRA, 0.3))
+	# Charco de luz de la lámpara de pie, en franjas (no un degradado suave), tendido en el piso.
 	var lampara := Vector2(1959, SUELO)
-	for franja: Vector3 in [Vector3(70, 0, 0.07), Vector3(50, 2, 0.08), Vector3(30, 4, 0.1)]:
-		c.draw_rect(Rect2(lampara.x - franja.x / 2.0, lampara.y + franja.y, franja.x, 8.0 - franja.y), Color(1.0, 0.85, 0.5, franja.z))
+	for franja: Vector3 in [Vector3(80, -6, 0.06), Vector3(60, -3, 0.07), Vector3(38, 0, 0.09)]:
+		c.draw_rect(Rect2(lampara.x - franja.x / 2.0, lampara.y + franja.y, franja.x, 12.0 - 2.0 * absf(franja.y) / 3.0), Color(1.0, 0.85, 0.5, franja.z))
+
+
+## Alfombra tendida en el piso: el arte se estira en un trapecio que va de 12 px detrás de la línea de apoyo (más angosto,
+## se aleja) a 6 px delante, así se ve acostada sobre el plano del piso y no parada contra la pared.
+func _dibujar_alfombra(c: Node2D, nombre: String, x: float) -> void:
+	var t := ArteNivel.textura(nombre)
+	if t == null:
+		return
+	var w := float(t.get_width())
+	var atras := SUELO - 12.0
+	var delante := SUELO + 6.0
+	var angosta := w * 0.04
+	var puntos := PackedVector2Array([Vector2(x + angosta, atras), Vector2(x + w - angosta, atras), Vector2(x + w, delante), Vector2(x, delante)])
+	c.draw_colored_polygon(PackedVector2Array([puntos[0] + Vector2(1, 2), puntos[1] + Vector2(1, 2), puntos[2] + Vector2(1, 2), puntos[3] + Vector2(1, 2)]), Color(COLOR_SOMBRA, 0.3))
+	c.draw_polygon(puntos, PackedColorArray([Color(0.82, 0.82, 0.82), Color(0.82, 0.82, 0.82), Color.WHITE, Color.WHITE]), PackedVector2Array([Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 1)]), t)
+
+
+## Fregadero embutido en la cubierta del mesón (bajo la llave): borde de acero con luz arriba, cuba hundida con la pared
+## del fondo iluminada y el frente en sombra, desagüe y una gota de agua en el fondo.
+func _dibujar_fregadero(c: Node2D) -> void:
+	var f := FREGADERO
+	var oscuro := Color("2b2622")
+	# Contorno con las esquinas recortadas (cuba redondeada) y borde de acero: fino atrás y a los lados, grueso delante.
+	c.draw_rect(Rect2(f.position.x, f.position.y - 1, f.size.x, f.size.y + 2), oscuro)
+	c.draw_rect(Rect2(f.position.x - 1, f.position.y, f.size.x + 2, f.size.y), oscuro)
+	c.draw_rect(Rect2(f.position.x + 1, f.position.y, f.size.x - 2, f.size.y), Color("c3c9cf"))
+	c.draw_rect(Rect2(f.position.x, f.position.y + 1, f.size.x, f.size.y - 2), Color("c3c9cf"))
+	c.draw_rect(Rect2(f.position.x + 1, f.end.y - 3, f.size.x - 2, 2), Color("e1e6ea"))
+	# Hueco de la cuba: hondo y oscuro atrás (la sombra del borde), más claro hacia delante, con el desagüe.
+	var cuba := Rect2(f.position.x + 2, f.position.y + 1, f.size.x - 4, f.size.y - 4)
+	var tonos := [Color("2f3439"), Color("3e444a"), Color("50575e"), Color("626a72"), Color("727a83")]
+	for i in cuba.size.y:
+		var tono: Color = tonos[mini(int(i * tonos.size() / cuba.size.y), tonos.size() - 1)]
+		var recorte := 1.0 if i == 0 or i == cuba.size.y - 1 else 0.0
+		c.draw_rect(Rect2(cuba.position.x + recorte, cuba.position.y + i, cuba.size.x - 2.0 * recorte, 1), tono)
+	var centro := Vector2(roundf(cuba.get_center().x), cuba.end.y - 3.0)
+	c.draw_rect(Rect2(centro.x - 2, centro.y, 4, 2), Color("1b1e21"))
+	c.draw_rect(Rect2(centro.x - 1, centro.y, 2, 1), Color("9aa2aa"))
+	# Agua en el fondo y un brillo en el canto de delante.
+	c.draw_rect(Rect2(centro.x + 4, cuba.end.y - 2, 6, 1), Color(0.6, 0.85, 1.0, 0.55))
+	c.draw_rect(Rect2(f.position.x + 3, f.end.y - 3, 7, 1), Color(1, 1, 1, 0.75))
 
 
 ## Base opaca de una imagen: [x0, x1 de las 3 filas de abajo, patas [[centro], ...] de la fila de abajo] (en cache).
@@ -1559,40 +1636,6 @@ func _base_opaca(nombre: String) -> Array:
 	return base
 
 
-## R-6: el zócalo sube con la escalera, en escalones de pixel bajo el larguero (el borde de abajo del arte de los
-## peldaños), hasta el faldón del descanso.
-var _zocalo_escalera: Array = []
-
-
-func _dibujar_zocalo_escalera(c: Node2D) -> void:
-	var t := ArteNivel.textura("escalera_peldanos")
-	if t == null:
-		return
-	if _zocalo_escalera.is_empty():
-		var imagen := t.get_image()
-		var ancho := imagen.get_width()
-		var x := 0
-		while x < ancho:
-			# Tramos de 24 px: el escalón de zócalo arranca a la altura del larguero en el lado alto del tramo (lo que
-			# queda bajo el larguero, detrás de la escalera, no se ve).
-			var abajo := imagen.get_height()
-			for k in range(x, mini(x + 24, ancho)):
-				var columna := ancho - 1 - k  # el arte va en espejo
-				for y in range(imagen.get_height() - 1, -1, -1):
-					if imagen.get_pixel(columna, y).a > 0.5:
-						abajo = mini(abajo, y)
-						break
-			_zocalo_escalera.append(Vector3(2322 + x, mini(x + 24, ancho) - x, SUELO - t.get_height() + abajo + 1))
-			x += 24
-	for tramo: Vector3 in _zocalo_escalera:
-		if tramo.z > SUELO - 20.0 or tramo.x >= 2536.0:
-			continue
-		var ancho_tramo := minf(tramo.y, 2536.0 - tramo.x)
-		c.draw_rect(Rect2(tramo.x, tramo.z, ancho_tramo, 18), Color("9a5b3c"))
-		c.draw_rect(Rect2(tramo.x, tramo.z, ancho_tramo, 2), Color("c98a5e"))
-		c.draw_rect(Rect2(tramo.x, tramo.z + 17, ancho_tramo, 1), Color("6e3a26"))
-
-
 ## Baranda del balcón con sus plantas que se mecen 1 px (B-4), cada maceta con su fase.
 func _dibujar_baranda(c: Node2D, pos: Vector2) -> void:
 	var t := ArteNivel.textura("baranda")
@@ -1607,32 +1650,105 @@ func _dibujar_baranda(c: Node2D, pos: Vector2) -> void:
 		c.draw_texture_rect_region(t, Rect2(pos.x + maceta.x + vaiven, arriba, maceta.y, corte), Rect2(maceta.x, 0, maceta.y, corte))
 
 
-## Descanso de la escalera (M1): un rellano grueso, como un escalón ancho, con el faldón cerrado hasta el piso
-## (un armario bajo la escalera, de tablas como los peldaños). Sin poste suelto.
-func _dibujar_descanso(c: Node2D) -> void:
-	var arriba := SUELO - 150.0
-	var rellano := Rect2(2532, arriba, 108, 14)
-	var faldon := Rect2(2536, arriba + 14, 104, 150 - 14)
+## Armario bajo la escalera (pedido del creador, 2026-10-19: el faldón con una puertita no se entendía). Tablas
+## verticales que cierran el hueco triangular bajo el larguero (siguen los peldaños) y el de bajo el descanso, con zócalo
+## propio y moldura bajo el larguero; una puerta con la parte de arriba inclinada como la escalera, entreabierta, con su
+## manilla, una caja adentro y la escoba que asoma con las cerdas en el piso. Arriba, el rellano grueso del descanso.
+const ESCALERA_X := 2322.0
+const ARMARIO_FIN := 2640.0
+const PUERTA_ARMARIO := Rect2(2462, 0, 50, 0)
+var _larguero: PackedFloat32Array = PackedFloat32Array()
+
+
+## Borde de abajo del larguero en cada columna (en el mundo), medido en el arte de los peldaños (va en espejo).
+func _borde_larguero() -> PackedFloat32Array:
+	if not _larguero.is_empty():
+		return _larguero
+	var t := ArteNivel.textura("escalera_peldanos")
+	if t == null:
+		return _larguero
+	var imagen := t.get_image()
+	var ancho := imagen.get_width()
+	for k in ancho:
+		var columna := ancho - 1 - k
+		var abajo := imagen.get_height()
+		for y in range(imagen.get_height() - 1, -1, -1):
+			if imagen.get_pixel(columna, y).a > 0.5:
+				abajo = y + 1
+				break
+		_larguero.append(SUELO - imagen.get_height() + abajo)
+	return _larguero
+
+
+func _dibujar_armario_escalera(c: Node2D) -> void:
+	var larguero := _borde_larguero()
+	var arriba_rellano := SUELO - 150.0
+	var rellano := Rect2(2532, arriba_rellano, ARMARIO_FIN - 2532, 14)
 	var oscuro := Color("241c1a")
-	# Faldón: tablas verticales con un marco y una puertita de armario.
-	c.draw_rect(faldon, Color("6e4630"))
-	for i in 7:
-		var x := faldon.position.x + 6.0 + i * 14.0
-		c.draw_rect(Rect2(x, faldon.position.y, 1, faldon.size.y), Color("5a3626"))
-	c.draw_rect(Rect2(faldon.position.x, faldon.position.y, 4, faldon.size.y), Color("8a5a3c"))
-	var puertita := Rect2(2566, SUELO - 96, 44, 96)
-	c.draw_rect(puertita.grow(2), oscuro)
-	c.draw_rect(puertita, Color("7d5038"))
-	c.draw_rect(Rect2(puertita.position + Vector2(4, 4), Vector2(36, 40)), Color("8a5a3c"))
-	c.draw_rect(Rect2(puertita.position + Vector2(4, 50), Vector2(36, 42)), Color("8a5a3c"))
-	c.draw_rect(Rect2(puertita.position.x + 34, puertita.position.y + 46, 4, 4), Color("c9a24a"))
-	c.draw_rect(Rect2(faldon.position.x, SUELO - 8, faldon.size.x, 8), Color("5a3626"))
+	var tabla := Color("6e4630")
+	var junta := Color("553324")
+	var luz := Color("8a5a3c")
+	# Techo del armario en cada columna: bajo el larguero y, después de la escalera, bajo el rellano.
+	var techo := func(x: float) -> float:
+		var k := int(x - ESCALERA_X)
+		if k >= 0 and k < larguero.size() and x < 2536.0:
+			return larguero[k]
+		return rellano.end.y
+	# Tablas: columnas de 1 px desde el techo hasta el piso, con una junta cada 12 px y un bisel claro a su lado.
+	var x := ESCALERA_X
+	while x < ARMARIO_FIN:
+		var y: float = techo.call(x)
+		if SUELO - y > 6.0:
+			var k := int(x - ESCALERA_X) % 12
+			var color := junta if k == 0 else (luz if k == 1 else tabla)
+			c.draw_rect(Rect2(x, y, 1, SUELO - y), color)
+			# Moldura bajo el larguero (sigue los peldaños).
+			c.draw_rect(Rect2(x, y, 1, 2), oscuro)
+			c.draw_rect(Rect2(x, y + 2, 1, 1), Color("9a6a48"))
+		x += 1.0
+	# Zócalo del armario.
+	c.draw_rect(Rect2(2340, SUELO - 7, ARMARIO_FIN - 2340, 7), Color("5a3626"))
+	c.draw_rect(Rect2(2340, SUELO - 7, ARMARIO_FIN - 2340, 1), Color("9a6a48"))
+	# Puerta: abajo recta, arriba inclinada como el larguero (6 px bajo él), entreabierta hacia la izquierda.
+	var p0 := PUERTA_ARMARIO.position.x
+	var p1 := PUERTA_ARMARIO.end.x
+	var arriba0: float = techo.call(p0) + 6.0
+	var arriba1: float = techo.call(p1) + 6.0
+	var abajo := SUELO - 8.0
+	var marco := PackedVector2Array([Vector2(p0 - 3, arriba0 - 3), Vector2(p1 + 3, arriba1 - 3), Vector2(p1 + 3, abajo + 1), Vector2(p0 - 3, abajo + 1)])
+	c.draw_colored_polygon(marco, oscuro)
+	# Adentro, oscuro, con una caja de cartón y el palo de la escoba.
+	var hueco := PackedVector2Array([Vector2(p0, arriba0), Vector2(p1, arriba1), Vector2(p1, abajo), Vector2(p0, abajo)])
+	c.draw_colored_polygon(hueco, Color("1a1312"))
+	c.draw_rect(Rect2(p1 - 22, abajo - 16, 20, 16), Color("8a6a44"))
+	c.draw_rect(Rect2(p1 - 22, abajo - 16, 20, 2), Color("a8845a"))
+	c.draw_rect(Rect2(p1 - 13, abajo - 16, 2, 16), Color("6e5236"))
+	# Hoja abierta un poco: se angosta hacia la bisagra (izquierda) y deja ver el hueco a la derecha.
+	var hoja_fin := p1 - 26.0
+	var hoja := PackedVector2Array([Vector2(p0, arriba0), Vector2(hoja_fin, lerpf(arriba0, arriba1, (hoja_fin - p0) / (p1 - p0)) - 2.0), Vector2(hoja_fin, abajo + 1.0), Vector2(p0, abajo)])
+	c.draw_colored_polygon(hoja, Color("7d5038"))
+	c.draw_polyline(hoja + PackedVector2Array([hoja[0]]), Color("4a2c1e"), 1.0)
+	c.draw_rect(Rect2(p0 + 3, abajo - 30, hoja_fin - p0 - 6, 22), Color("8a5a3c"))
+	c.draw_rect(Rect2(p0 + 3, abajo - 30, hoja_fin - p0 - 6, 1), Color("a8744e"))
+	# Manilla: pomo dorado con su brillo.
+	c.draw_rect(Rect2(hoja_fin - 6, abajo - 40, 4, 4), Color("c9a24a"))
+	c.draw_rect(Rect2(hoja_fin - 6, abajo - 40, 2, 1), Color("f2d98a"))
+	# Escoba que asoma por la rendija, apoyada hacia fuera, con las cerdas en el piso delante del armario.
+	var mango_arriba := Vector2(p1 - 6, arriba1 + 4)
+	var cerdas := Vector2(p1 + 12, SUELO + 2)
+	c.draw_line(mango_arriba, cerdas + Vector2(0, -12), Color("c08a52"), 2.0)
+	c.draw_line(mango_arriba + Vector2(1, 0), cerdas + Vector2(1, -12), Color("8a5a2c"), 1.0)
+	sombra(c, cerdas + Vector2(2, -1), 22.0, 0.45)
+	c.draw_colored_polygon(PackedVector2Array([cerdas + Vector2(-5, -13), cerdas + Vector2(7, -13), cerdas + Vector2(11, 0), cerdas + Vector2(-9, 0)]), Color("d9b25a"))
+	c.draw_rect(Rect2(cerdas.x - 6, cerdas.y - 14, 14, 3), Color("b0453a"))
+	for k in 4:
+		c.draw_rect(Rect2(cerdas.x - 6 + k * 5, cerdas.y - 9, 1, 9), Color("a9853a"))
 	# Rellano: tabla gruesa con canto claro y sombra abajo.
 	c.draw_rect(rellano.grow(1), oscuro)
 	c.draw_rect(rellano, Color("8a5a3c"))
 	c.draw_rect(Rect2(rellano.position, Vector2(rellano.size.x, 3)), Color("b07a52"))
 	c.draw_rect(Rect2(rellano.position.x, rellano.end.y - 3, rellano.size.x, 3), Color("6e3a26"))
-	c.draw_rect(Rect2(faldon.position.x, faldon.position.y, faldon.size.x, 3), Color(0, 0, 0, 0.3))
+	c.draw_rect(Rect2(rellano.position.x, rellano.end.y + 1, rellano.size.x, 3), Color(0, 0, 0, 0.3))
 
 
 ## Pantalla del monitor (en el mundo): ahí sale «jjjjjj» al pisar el teclado.
@@ -1713,7 +1829,7 @@ func _dibujar_cortina(c: Node2D) -> void:
 		return
 	var ancho := float(textura.get_width())
 	var arriba := VENTANA_DORMITORIO.position.y - 3.0 - CORTINA_SOBRE_VENTANA
-	var alto := minf(SUELO - 1.0 - arriba, float(textura.get_height()))
+	var alto := minf(PARED_BASE + 3.0 - arriba, float(textura.get_height()))
 	var izquierda := VENTANA_DORMITORIO.position.x + CORTINA_ADENTRO - CORTINA_FIN_TELA
 	var derecha := VENTANA_DORMITORIO.end.x - CORTINA_ADENTRO + CORTINA_FIN_TELA
 	var barra := ArteNivel.textura("cortina_barra")
@@ -1756,13 +1872,28 @@ func _etiqueta_nuevo(c: CanvasItem, pos: Vector2) -> void:
 func _dibujar_pieza(c: Node2D, tamano: Vector2, estilo: String) -> void:
 	match estilo:
 		"repisa", "lugar_visto":
-			# La repisa con ménsulas de Gemini, estirada al ancho de la pieza.
-			var arte := ArteNivel.textura("repisa")
+			# Piso con profundidad: la repisa sale de la pared hasta el plano de juego, así que se ve su tabla desde
+			# arriba (FONDO_PISO px de hondo, más oscura junto a la pared), con un listón atornillado a la pared.
 			var ancho := tamano.x + 8.0
+			var fondo := FONDO_PISO
+			c.draw_rect(Rect2(-4, -fondo - 4, ancho, 4), Color("5a3626"))
+			c.draw_rect(Rect2(-4, -fondo - 4, ancho, 1), Color("8a5a3c"))
+			# Tabla vista desde arriba: más clara que el canto (le da la luz), en franjas que se oscurecen hacia la
+			# pared y con las juntas de las tablas a lo largo.
+			for k in 5:
+				var franja := Rect2(-4, -fondo + k * fondo / 5.0, ancho, fondo / 5.0)
+				c.draw_rect(franja, Color("d9a272").darkened(0.3 - k * 0.07))
+			for junta: float in [0.35, 0.7]:
+				c.draw_rect(Rect2(-4, roundf(-fondo * junta), ancho, 1), Color(0.35, 0.2, 0.12, 0.35))
+			c.draw_rect(Rect2(-4, -fondo, ancho, 1), Color("4a2c1e"))
+			c.draw_rect(Rect2(-5, -fondo, 1, fondo), Color("4a2c1e"))
+			c.draw_rect(Rect2(ancho - 4, -fondo, 1, fondo), Color("4a2c1e"))
+			# La repisa con ménsulas de Gemini, estirada al ancho de la pieza: es el canto de delante.
+			var arte := ArteNivel.textura("repisa")
 			c.draw_texture_rect(arte, Rect2(-4, 0, ancho, ancho * arte.get_size().y / arte.get_size().x), false)
 			if estilo == "lugar_visto":
 				# Caja de recuerdos de Valeria (arriba-extra), sobre la repisa alta.
-				ArteNivel.dibujar(c, "caja_recuerdos", tamano.x / 2.0, 0.0)
+				ArteNivel.dibujar(c, "caja_recuerdos", tamano.x / 2.0, -8.0)
 
 
 ## Decorado sin colisión: lámpara del descanso, retrato familiar, pantalla, teclado e impresora, calcetines que vuelan.
@@ -1855,6 +1986,11 @@ func _dibujar_teclado(c: Node2D) -> void:
 
 
 func _dibujar_ropa(c: Interactivo) -> void:
+	# El edredón se hunde bajo la pila: una sombra ancha y dos pliegues que salen hacia los lados.
+	sombra(c, Vector2(0, ROPA_HUNDIDA - 1.0), 58.0, 0.5)
+	for lado: float in [-1.0, 1.0]:
+		c.draw_line(Vector2(lado * 27.0, ROPA_HUNDIDA - 2.0), Vector2(lado * 36.0, ROPA_HUNDIDA - 5.0), Color(0.35, 0.12, 0.08, 0.45), 1.0)
+		c.draw_line(Vector2(lado * 27.0, ROPA_HUNDIDA + 1.0), Vector2(lado * 34.0, ROPA_HUNDIDA + 3.0), Color(0.35, 0.12, 0.08, 0.35), 1.0)
 	ArteNivel.dibujar(c, "ropa_pelos" if _ropa_firmada else "ropa_limpia", 0.0, ROPA_HUNDIDA)
 
 
@@ -1962,16 +2098,16 @@ func _dibujar_ambiente() -> void:
 	var marca := Color(1, 1, 1, 0.7)
 	var entornada: Puerta = puertas.get(PUERTA_DORMITORIO)
 	if entornada:
-		ArteNivel.dibujar(c, "aranazo_1", entornada.position.x - 63.0, SUELO - 22.0, false, marca)
+		ArteNivel.dibujar(c, "aranazo_1", entornada.position.x - 63.0, PARED_BASE - 22.0, false, marca)
 	ArteNivel.dibujar(c, "aranazo_2", 6026.0, SUELO - 22.0, false, marca)
 	ArteNivel.dibujar(c, "aranazo_3", 754.0, SUELO - 20.0, false, marca)
 	# Polvo en lo alto: ropero, refrigerador, librero y alacenas, y una pelusa sobre el refrigerador.
-	for linea: Vector3 in [Vector3(6018, 6118, SUELO - 186), Vector3(3684, 3748, SUELO - 217), Vector3(2164, 2264, SUELO - 219), Vector3(3463, 3576, SUELO - 249)]:
+	for linea: Vector3 in [Vector3(6018, 6118, SUELO - 186), Vector3(3684, 3748, SUELO - 217), Vector3(2164, 2264, SUELO - 219), Vector3(3463, 3576, PARED_BASE - 249)]:
 		c.draw_rect(Rect2(linea.x, linea.z, linea.y - linea.x, 1), POLVO)
 	_pelo(c, Vector2(3741, SUELO - 217), 2)
 	# Sala (S-4): enchufe en el zócalo y el cable del cargador del portátil, con su luz que late.
-	_enchufe(c, Vector2(140, SUELO - 13))
-	_cable(c, Vector2(143, SUELO - 7), Vector2(208, SUELO - 2), 5.0)
+	_enchufe(c, Vector2(140, PARED_BASE - 13))
+	_cable(c, Vector2(143, PARED_BASE - 7), Vector2(208, SUELO - 2), 5.0)
 	c.draw_rect(Rect2(210, SUELO - 4, 2, 1), Color(0.4, 1.0, 0.5, 0.35 + 0.35 * sin(tiempo * 3.0)))
 	# Cocina: croquetas regadas junto al tazón (C-7), segundero del reloj (C-8) y la gota de la llave (C-5).
 	for croqueta: Vector2 in [Vector2(3031, SUELO - 2), Vector2(3036, SUELO - 1), Vector2(3039, SUELO - 3), Vector2(2990, SUELO - 1), Vector2(2996, SUELO - 2)]:
@@ -1982,15 +2118,21 @@ func _dibujar_ambiente() -> void:
 	c.draw_line(centro, centro + Vector2(cos(angulo), sin(angulo)) * 8.0, Color("c0392b"), 1.0)
 	if ArteNivel.textura("llave_agua"):
 		var caida := fmod(tiempo, 3.0)
-		var gota := Vector2(3466, SUELO - 128.0)
+		# Del caño de la llave al fondo del fregadero.
+		var gota := Vector2(FREGADERO.get_center().x, PARED_BASE - 102.0)
+		var caida_total := FREGADERO.end.y - 4.0 - gota.y
 		if caida < 0.8:
 			c.draw_rect(Rect2(gota.x, gota.y + 1.0, 1, 2), Color(0.6, 0.85, 1.0, caida / 0.8))
 		elif caida < 1.0:
 			var t := (caida - 0.8) / 0.2
-			c.draw_rect(Rect2(gota.x, gota.y + 1.0 + t * t * 18.0, 1, 2), Color(0.6, 0.85, 1.0))
+			c.draw_rect(Rect2(gota.x, gota.y + 1.0 + t * t * caida_total, 1, 2), Color(0.6, 0.85, 1.0))
+		elif caida < 1.25:
+			# Salpica en la cuba.
+			c.draw_rect(Rect2(gota.x - 2, FREGADERO.end.y - 4.0, 1, 1), Color(0.75, 0.9, 1.0, 0.8))
+			c.draw_rect(Rect2(gota.x + 2, FREGADERO.end.y - 4.0, 1, 1), Color(0.75, 0.9, 1.0, 0.8))
 	# Estudio (E-3, E-4): enchufe y cable de la base de carga, regleta bajo el escritorio y post-its en el monitor.
-	_enchufe(c, Vector2(6880, SUELO - 13))
-	_cable(c, Vector2(6868, SUELO - 4), Vector2(6883, SUELO - 7), 3.0)
+	_enchufe(c, Vector2(6880, PARED_BASE - 13))
+	_cable(c, Vector2(6868, SUELO - 4), Vector2(6883, PARED_BASE - 7), 6.0)
 	c.draw_rect(Rect2(6716, SUELO - 6, 26, 6), Color("2b2622"))
 	c.draw_rect(Rect2(6717, SUELO - 5, 24, 3), Color("e6e0d4"))
 	for k in 3:
@@ -1999,6 +2141,33 @@ func _dibujar_ambiente() -> void:
 	for nota: Array in [[Vector2(6786, SUELO - 143), Color("ffd95a")], [Vector2(6787, SUELO - 137), Color("f29ab0")], [Vector2(6744, SUELO - 144), Color("ffd95a")]]:
 		c.draw_rect(Rect2(nota[0], Vector2(4, 4)), nota[1])
 		c.draw_rect(Rect2(nota[0] + Vector2(0, 3), Vector2(4, 1)), (nota[1] as Color).darkened(0.25))
+
+
+## Sombras de contacto de lo que se mueve. La de Felipe cae en la superficie que tiene debajo (también en el aire: se
+## achica y se aclara con la altura, así se lee dónde va a caer).
+func _dibujar_sombras_vivas() -> void:
+	var c := _sombras
+	var espacio := get_world_2d().direct_space_state
+	var rayo := PhysicsRayQueryParameters2D.create(felipe.global_position + Vector2(0, -4), felipe.global_position + Vector2(0, 400))
+	rayo.exclude = [felipe.get_rid()]
+	var choque := espacio.intersect_ray(rayo)
+	if not choque.is_empty() and felipe.visible:
+		var altura: float = choque.position.y - felipe.global_position.y
+		var cerca := clampf(1.0 - altura / 260.0, 0.35, 1.0)
+		sombra(c, Vector2(felipe.global_position.x, choque.position.y), 40.0 * cerca, 0.42 * cerca)
+	if valeria and valeria.visible and not valeria.actividad in [Valeria.Actividad.SENTADA, Valeria.Actividad.FUERA]:
+		sombra(c, valeria.global_position, 58.0, 0.4 * valeria.modulate.a)
+	for hijo in get_children():
+		if not (hijo is CanvasItem and (hijo as CanvasItem).visible):
+			continue
+		if hijo is Raton:
+			sombra(c, hijo.global_position, 44.0, 0.36)
+		elif hijo is Aspi:
+			sombra(c, hijo.global_position, (hijo as Aspi).ancho + 8.0, 0.45)
+		elif hijo is CajaCarton:
+			sombra(c, hijo.global_position, CajaCarton.LADO + 6.0, 0.4)
+		elif hijo is Comida:
+			sombra(c, hijo.global_position, 46.0, 0.38)
 
 
 ## Mechón de pelo de 3 a 5 px en los dos tonos de Felipe.

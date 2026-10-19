@@ -60,6 +60,7 @@ const MURO := Color("2a1d1a")
 var ancho: float
 var alto: float
 var _textura_pared: ImageTexture
+var _textura_piso: ImageTexture
 var _luz: Node2D
 
 
@@ -131,9 +132,11 @@ func _crear_pared() -> Image:
 	var imagen := Image.create(int(ancho), int(alto), false, Image.FORMAT_RGBA8)
 	imagen.fill(MURO)
 	for habitacion: Array in Sala.HABITACIONES:
+		# La pared termina en la unión con el piso (Sala.PARED_BASE), FONDO_PISO px sobre la línea de apoyo.
 		var rect: Rect2i = Rect2i(habitacion[0])
+		rect.size.y = int(Sala.PARED_BASE) - rect.position.y
 		if habitacion[2] == "exterior":
-			imagen.fill_rect(Rect2i(rect.position.x, 0, rect.size.x, int(Sala.SUELO)), Color(0, 0, 0, 0))
+			imagen.fill_rect(Rect2i(rect.position.x, 0, rect.size.x, int(Sala.PARED_BASE)), Color(0, 0, 0, 0))
 			continue
 		var estilo: Array = PAREDES[habitacion[2]]
 		var mosaico := _imagen(estilo[0])
@@ -297,33 +300,76 @@ func _dibujar_pared(c: Node2D) -> void:
 	c.draw_texture(_textura_pared, Vector2.ZERO)
 	for ventana: Rect2 in Sala.VENTANAS:
 		_dibujar_ventana(c, ventana)
-	# Piso de cada cuarto (G7): cada baldosa se voltea de forma alterna y cada cuarto empieza con otro corrimiento, así
-	# no se ve la repetición. La cocina y el balcón tienen su propio piso.
+	# Piso con profundidad: un plano visto un poco desde arriba, desde la unión con la pared hasta el borde de abajo.
+	if _textura_piso == null:
+		_textura_piso = ImageTexture.create_from_image(_crear_piso())
+	c.draw_texture(_textura_piso, Vector2(0, Sala.PARED_BASE))
+	for habitacion: Array in Sala.HABITACIONES:
+		if habitacion[2] != "exterior":
+			var rect: Rect2 = habitacion[0]
+			# Sombra del zócalo sobre el piso (G4): dos franjas duras de pixel.
+			c.draw_rect(Rect2(rect.position.x, Sala.PARED_BASE, rect.size.x, 2), Color(0.1, 0.04, 0.02, 0.35))
+			c.draw_rect(Rect2(rect.position.x, Sala.PARED_BASE + 2, rect.size.x, 2), Color(0.1, 0.04, 0.02, 0.15))
+
+
+## Filas del piso desde la pared hacia el frente (alto de cada hilera de tablas o baldosas, en px): se achican hacia el
+## fondo. Suman lo que va de la pared (Sala.PARED_BASE) al borde de abajo (Sala.ALTO).
+const HILERAS_PARQUET := [4, 5, 6, 7, 8, 9, 11]
+const HILERAS_BALDOSA := [11, 16, 23]
+## Las juntas que van hacia la pared convergen: al fondo el piso se ve ESCALA_FONDO de ancho (punto de fuga en el
+## centro de cada cuarto). Junto a la pared el piso se oscurece (OSCURO_FONDO) y se aclara hacia el frente.
+const ESCALA_FONDO := 0.8
+const OSCURO_FONDO := 0.32
+
+static var _piso_en_cache: Image
+
+
+## Arma el piso de todo el nivel en perspectiva leve (una sola vez; queda en cache entre escenas): el parquet en hileras
+## que se achican hacia la pared (cada hilera es una tabla del mosaico, con otro corrimiento) y las baldosas de la cocina
+## y el balcón en filas que se achican, con las juntas convergiendo hacia el centro del cuarto.
+func _crear_piso() -> Image:
+	if _piso_en_cache:
+		return _piso_en_cache
+	var alto_piso := int(Sala.ALTO - Sala.PARED_BASE)
+	var imagen := Image.create(int(ancho), alto_piso, false, Image.FORMAT_RGBA8)
 	for i in Sala.HABITACIONES.size():
 		var habitacion: Array = Sala.HABITACIONES[i]
 		var rect: Rect2 = habitacion[0]
-		var piso := ArteNivel.textura(PISOS.get(habitacion[2], "piso"))
-		if piso == null:
-			piso = ArteNivel.textura("piso")
-		var w := float(piso.get_width())
-		var x := rect.position.x - fmod(73.0 * (i + 1), w)
-		var k := i
-		while x < rect.end.x:
-			var desde := maxf(x, rect.position.x)
-			var hasta := minf(x + w, rect.end.x)
-			var region := Rect2(desde - x, 0, hasta - desde, piso.get_height())
-			if k % 2 == 1:
-				region.position.x = w - (hasta - x)
-				c.draw_set_transform(Vector2(desde + hasta, 0), 0.0, Vector2(-1, 1))
-				c.draw_texture_rect_region(piso, Rect2(desde, Sala.SUELO, hasta - desde, piso.get_height()), region)
-				c.draw_set_transform(Vector2.ZERO)
-			else:
-				c.draw_texture_rect_region(piso, Rect2(desde, Sala.SUELO, hasta - desde, piso.get_height()), region)
-			x += w
-			k += 1
-		if habitacion[2] != "exterior":
-			# Sombra del zócalo sobre el piso (G4).
-			c.draw_rect(Rect2(rect.position.x, Sala.SUELO, rect.size.x, 2), Color(0.1, 0.04, 0.02, 0.3))
+		var mosaico := _imagen(PISOS.get(habitacion[2], "piso"))
+		if mosaico == null:
+			mosaico = _imagen("piso")
+		var baldosa: bool = PISOS.has(habitacion[2])
+		var hileras: Array = HILERAS_BALDOSA if baldosa else HILERAS_PARQUET
+		var mw := mosaico.get_width()
+		var mh := mosaico.get_height()
+		var centro := rect.get_center().x
+		var y := 0
+		for h in hileras.size():
+			var alto_hilera: int = hileras[h]
+			for dy in alto_hilera:
+				var fila := y + dy
+				if fila >= alto_piso:
+					break
+				var t := float(fila) / (alto_piso - 1)
+				var escala := lerpf(ESCALA_FONDO, 1.0, t)
+				var luz := 1.0 - OSCURO_FONDO * pow(1.0 - t, 1.6)
+				# Fila del mosaico: en el parquet cada hilera toma una tabla (6 px) del mosaico; en las baldosas, la fila
+				# entera del mosaico (30 px) se comprime en la hilera.
+				var v: int
+				var corrimiento: float
+				if baldosa:
+					v = mini(int(float(dy) / alto_hilera * mh), mh - 1)
+					corrimiento = 37.0 * i
+				else:
+					v = (h % 5) * 6 + mini(int(float(dy) / alto_hilera * 6.0), 5)
+					corrimiento = 73.0 * (i + 1) + 53.0 * h
+				for x in range(int(rect.position.x), int(rect.end.x)):
+					var u := centro + (x - centro) / escala + corrimiento
+					var pixel := mosaico.get_pixel(posmod(int(floorf(u)), mw), v)
+					imagen.set_pixel(x, fila, Color(pixel.r * luz, pixel.g * luz, pixel.b * luz, 1.0))
+			y += alto_hilera
+	_piso_en_cache = imagen
+	return imagen
 
 
 ## Ventana recortada (cocina, dormitorio, estudio), la misma ventana de la casa (G3): el marco de la ventana de la sala
@@ -418,7 +464,8 @@ static func vidrios() -> Array:
 ## polvo de 1 px que suben despacio dentro de cada rayo.
 func _dibujar_luz(c: Node2D) -> void:
 	var t := Time.get_ticks_msec() / 1000.0
-	var piso := Sala.SUELO
+	# Los rayos llegan al piso un poco delante de la línea de apoyo.
+	var piso := Sala.SUELO + 8.0
 	for datos: Array in vidrios():
 		var v: Rect2 = datos[0]
 		var tono: Color = TONO_LUZ[datos[1]]

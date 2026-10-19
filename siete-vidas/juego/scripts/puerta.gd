@@ -146,7 +146,7 @@ func _objetivo_apertura() -> float:
 func arte_indicador() -> Dictionary:
 	if escalera:
 		return {}
-	return ArteNivel.arte_en(self, arte(), 0.0, 0.0)
+	return ArteNivel.arte_en(self, arte(), 0.0, -Sala.FONDO_PISO)
 
 
 func _physics_process(delta: float) -> void:
@@ -180,43 +180,51 @@ func _physics_process(delta: float) -> void:
 func _draw() -> void:
 	if escalera:
 		return
+	# Piso con profundidad: la puerta está en la pared (su umbral en Sala.PARED_BASE, FONDO_PISO px más arriba que el
+	# nodo, que queda en la línea de apoyo) y el piso se ve delante de ella.
+	var fondo := -Sala.FONDO_PISO
 	var nombre := arte()
 	var textura := ArteNivel.textura(nombre)
 	var alto_arte := textura.get_size().y if textura else ALTO_MAXIMO
 	if apertura > 0.0 and not entornada and estilo != "balcon":
-		# Luz cálida que sale del vano.
-		draw_colored_polygon(PackedVector2Array([Vector2(-40, -alto_arte + 30), Vector2(40, -alto_arte + 30), Vector2(64, 0), Vector2(-64, 0)]), Color(1.0, 0.85, 0.55, 0.10))
+		# Luz cálida que sale del vano y se derrama por el piso hacia delante.
+		draw_colored_polygon(PackedVector2Array([Vector2(-40, fondo - alto_arte + 30), Vector2(40, fondo - alto_arte + 30), Vector2(64, fondo), Vector2(-64, fondo)]), Color(1.0, 0.85, 0.55, 0.10))
+		draw_colored_polygon(PackedVector2Array([Vector2(-48, fondo), Vector2(48, fondo), Vector2(60, 6), Vector2(-60, 6)]), Color(1.0, 0.85, 0.55, 0.08))
 	var temblor := (1.0 if int(_temblor * 40.0) % 2 == 0 else -1.0) if _temblor > 0.0 else 0.0
-	ArteNivel.dibujar(self, nombre, temblor, 0.0)
+	ArteNivel.dibujar(self, nombre, temblor, fondo)
 	if estilo == "vano":
 		# Arriba de la escalera de fondo: dentro del hueco se ven el remate del pasamanos y los peldaños que bajan (G2).
-		ArteNivel.dibujar(self, "vano_bajada", 0.0, -4.0)
+		ArteNivel.dibujar(self, "vano_bajada", 0.0, fondo - 4.0)
 	if _destello > 0.0:
 		var brillo := Color("fff3c4")
-		draw_rect(Rect2(MANILLA + Vector2(-2, 0), Vector2(5, 1)), brillo)
-		draw_rect(Rect2(MANILLA + Vector2(0, -2), Vector2(1, 5)), brillo)
+		draw_rect(Rect2(MANILLA + Vector2(-2, fondo), Vector2(5, 1)), brillo)
+		draw_rect(Rect2(MANILLA + Vector2(0, fondo - 2), Vector2(1, 5)), brillo)
 	if apertura > 0.0 and apertura < 1.0 and estilo == "" and not entornada:
 		# La hoja gira sobre la bisagra (borde derecho): la cerrada se angosta hacia allá mientras se abre.
 		var hoja := ArteNivel.textura("puerta_cerrada_v2")
 		if hoja:
 			var ancho := hoja.get_width()
 			var borde := ancho / 2.0
-			draw_set_transform(Vector2(borde, 0), 0.0, Vector2(maxf(1.0 - apertura, 0.08), 1.0))
+			draw_set_transform(Vector2(borde, fondo), 0.0, Vector2(maxf(1.0 - apertura, 0.08), 1.0))
 			draw_texture(hoja, Vector2(-ancho, -hoja.get_height()), Color(1, 1, 1).darkened(apertura * 0.35))
 			draw_set_transform(Vector2.ZERO)
 	if apertura <= 0.0 and estilo != "balcon":
-		# Rendija de luz abajo y, si hay alguien adentro, su sombra que va y viene.
+		# Rendija de luz abajo y, si hay alguien adentro, su sombra que va y viene; la luz se refleja en el piso.
 		if bano:
 			# Luz fría de tubo: la rendija y un reflejo sobre el piso (el baño no lleva tapete).
 			var alfa := 0.25 if _tubo_apagado() else 0.85
-			draw_rect(Rect2(-44, -3, 88, 2), Color(LUZ_BANO, alfa))
-			draw_rect(Rect2(-40, -1, 80, 3), Color(LUZ_BANO, alfa * 0.3))
+			draw_rect(Rect2(-44, fondo - 3, 88, 2), Color(LUZ_BANO, alfa))
+			draw_colored_polygon(PackedVector2Array([Vector2(-42, fondo), Vector2(42, fondo), Vector2(50, fondo + 8), Vector2(-50, fondo + 8)]), Color(LUZ_BANO, alfa * 0.25))
 		else:
-			draw_rect(Rect2(-44, -3, 88, 2), Color(1.0, 0.85, 0.5, 0.8))
+			draw_rect(Rect2(-44, fondo - 3, 88, 2), Color(1.0, 0.85, 0.5, 0.8))
+			draw_colored_polygon(PackedVector2Array([Vector2(-42, fondo), Vector2(42, fondo), Vector2(48, fondo + 5), Vector2(-48, fondo + 5)]), Color(1.0, 0.85, 0.5, 0.18))
 		if sombra_detras:
 			var x := sin(_tiempo * 1.3) * 30.0
-			draw_rect(Rect2(x - 9, -3, 18, 2), Color(0.15, 0.08, 0.06, 0.9))
+			draw_rect(Rect2(x - 9, fondo - 3, 18, 2), Color(0.15, 0.08, 0.06, 0.9))
 	if estilo != "vano" and not bano:
-		# Tapete terracota.
-		draw_rect(Rect2(-48, -2, 96, 4), Color(0.69, 0.33, 0.24))
-		draw_rect(Rect2(-48, -2, 96, 1), Color(0.82, 0.45, 0.32))
+		# Tapete terracota sobre el piso, delante del umbral: un trapecio que se angosta hacia la pared.
+		var tapete := PackedVector2Array([Vector2(-42, fondo + 4), Vector2(42, fondo + 4), Vector2(48, fondo + 13), Vector2(-48, fondo + 13)])
+		draw_colored_polygon(PackedVector2Array([tapete[0] + Vector2(0, 1), tapete[1] + Vector2(0, 1), tapete[2] + Vector2(1, 2), tapete[3] + Vector2(-1, 2)]), Color(0.12, 0.05, 0.03, 0.35))
+		draw_colored_polygon(tapete, Color(0.69, 0.33, 0.24))
+		draw_rect(Rect2(-42, fondo + 4, 84, 1), Color(0.82, 0.45, 0.32))
+		draw_rect(Rect2(-45, fondo + 9, 90, 1), Color(0.6, 0.27, 0.2))

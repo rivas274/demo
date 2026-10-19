@@ -64,8 +64,8 @@ func _correr() -> void:
 
 	# A.S.P.I.: persigue y hace daño al tocar.
 	await _esperar(90)
-	aspi.global_position = Vector2(6560, Sala.SUELO)
-	await _poner_en(felipe, Vector2(6440, Sala.SUELO))
+	aspi.global_position = Vector2(6760, Sala.SUELO)
+	await _poner_en(felipe, Vector2(6640, Sala.SUELO))
 	var corazones_antes := felipe.corazones
 	for i in 180:
 		await physics_frame

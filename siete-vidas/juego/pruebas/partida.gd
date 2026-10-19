@@ -235,10 +235,12 @@ func _pasillo() -> void:
 	_paso("Ensayo: A.S.P.I. aspira el vaso y Felipe se aferra")
 	await _hasta(func() -> bool: return sala.ensayo.paso == EnsayoAspi.Paso.LISTO, 8.0)
 	# El láser: quieto, sin perseguirlo.
-	await _ir_a(4600)
+	await _ir_a(4810)
 	await _hasta(func() -> bool: return sala.travesuras.agenda.esta_cumplida("laser"), 8.0)
 	_paso("Ignora el láser (%s)" % ("se apaga" if sala.travesuras.agenda.esta_cumplida("laser") else "no"))
-	# La foto vergonzosa se cayó del cajón de la consola: agachado bajo la consola, y sube por el baúl a buscarla.
+	# La foto vergonzosa se cayó del cajón de la consola: vuelve caminando (el pasillo es 200 px más ancho), pasa
+	# agachado bajo la consola y sube por el baúl a buscarla.
+	await _ir_a(4450, 4.0)
 	Input.action_press("agacharse")
 	await _ir_a(4225, 6.0)
 	Input.action_release("agacharse")
@@ -260,23 +262,23 @@ func _pasillo() -> void:
 
 
 func _dormitorio() -> void:
-	await _ir_a(5412)
-	await _subir_a(5412, Sala.SUELO - 53)
-	await _subir_a(5470, Sala.SUELO - 65)
+	await _ir_a(5612)
+	await _subir_a(5612, Sala.SUELO - 53)
+	await _subir_a(5670, Sala.SUELO - 65)
 	await _ir_a(Sala.ROPA.x)
 	await _tocar("interactuar")
 	await _segundos(1.0)
 	_paso("Desordena la ropa doblada" if sala._ropa_firmada else "No pudo desordenar la ropa")
-	await _ir_a(5626)
+	await _ir_a(5826)
 	felipe.mirando = 1.0
 	await _tocar("interactuar")
 	await _segundos(1.5)
-	await _subir_a(5692, Sala.SUELO - 96)
+	await _subir_a(5892, Sala.SUELO - 96)
 	await _segundos(0.6)
 	_paso("Saquea el cajón (calcetines %d)" % sala.calcetines)
-	await _ir_a(5600, 4.0)
+	await _ir_a(5800, 4.0)
 	await _hasta(func() -> bool: return felipe.is_on_floor(), 1.0)
-	await _ir_a(5420, 4.0)
+	await _ir_a(5620, 4.0)
 	await _hasta(func() -> bool: return felipe.is_on_floor(), 1.0)
 	await _entrar("dormitorio<pasillo")
 	await _ir_a(Sala.DESCANSOS[1].get_center().x)
@@ -314,10 +316,10 @@ func _balcon() -> void:
 	if felipe.global_position.y < Sala.SUELO - 2.0:
 		await _bajar()
 	await _entrar(Sala.PUERTA_BALCON)
-	await _ir_a(7310)
-	await _subir_a(7350, Sala.SUELO - 32)
-	await _subir_a(7440, Sala.SUELO - 89)
-	await _ir_a(7480)
+	await _ir_a(7510)
+	await _subir_a(7550, Sala.SUELO - 32)
+	await _subir_a(7640, Sala.SUELO - 89)
+	await _ir_a(7680)
 	await _hasta(func() -> bool: return sala.sentado_en_baranda, 3.0)
 	_paso("Se sienta en la baranda y mira la ciudad")
 	await _segundos(2.4)
@@ -339,11 +341,11 @@ func _ensuciar() -> void:
 	var batalla := sala.batalla
 	if felipe.global_position.y > Sala.SUELO - 50.0:
 		# Al escritorio por la silla.
-		await _ir_a(6420, 4.0)
+		await _ir_a(6620, 4.0)
 		if _fuera_de_pelea():
 			return
-		await _subir_a(6455, Sala.SUELO - 55)
-		await _subir_a(6525, Sala.SUELO - 98)
+		await _subir_a(6655, Sala.SUELO - 55)
+		await _subir_a(6725, Sala.SUELO - 98)
 	var tiro := false
 	for vuelta in 3:
 		if _fuera_de_pelea():
@@ -355,11 +357,11 @@ func _ensuciar() -> void:
 		if objetivo == null:
 			break
 		if objetivo.position.y < Sala.SUELO - 120.0 and felipe.global_position.y > Sala.SUELO - 120.0:
-			await _ir_a(6615, 2.0)
-			await _subir_a(6650, Sala.SUELO - 151)
+			await _ir_a(6815, 2.0)
+			await _subir_a(6850, Sala.SUELO - 151)
 		if _fuera_de_pelea():
 			return
-		var lado := 1.0 if objetivo.position.x > 6560.0 else -1.0
+		var lado := 1.0 if objetivo.position.x > 6760.0 else -1.0
 		await _ir_a(objetivo.position.x - lado * 18.0, 2.0)
 		felipe.mirando = lado
 		await _tocar("interactuar")
@@ -419,7 +421,7 @@ func _esperar_en_el_piso() -> void:
 		_paso("Come un snack del bolsillo (corazones %d, snacks %d)" % [felipe.corazones, felipe.snacks])
 		return
 	if not batalla.limpiando and absf(dx) < 90.0 and felipe.is_on_floor():
-		var lejos := clampf(aspi.global_position.x + (140.0 if dx > 0.0 else -140.0), 6300.0, 6820.0)
+		var lejos := clampf(aspi.global_position.x + (140.0 if dx > 0.0 else -140.0), 6500.0, 7020.0)
 		await _ir_a(lejos, 1.0)
 		return
 	await _cuadro()

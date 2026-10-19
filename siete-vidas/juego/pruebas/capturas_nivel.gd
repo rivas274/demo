@@ -15,11 +15,11 @@ const PUNTOS := [
 	["5-cocina-entrada", Vector2(3050, Sala.SUELO)],
 	["6-cocina-meson", Vector2(3433, Sala.SUELO - 55)],
 	["7-pasillo-consola", Vector2(4150, Sala.SUELO)],
-	["8-pasillo-estudio", Vector2(4720, Sala.SUELO)],
-	["9-dormitorio-cama", Vector2(5330, Sala.SUELO)],
-	["10-dormitorio-ropero", Vector2(5780, Sala.SUELO)],
-	["11-estudio", Vector2(6400, Sala.SUELO)],
-	["12-balcon", Vector2(7250, Sala.SUELO)],
+	["8-pasillo-estudio", Vector2(4920, Sala.SUELO)],
+	["9-dormitorio-cama", Vector2(5530, Sala.SUELO)],
+	["10-dormitorio-ropero", Vector2(5980, Sala.SUELO)],
+	["11-estudio", Vector2(6600, Sala.SUELO)],
+	["12-balcon", Vector2(7450, Sala.SUELO)],
 ]
 
 

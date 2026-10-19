@@ -332,7 +332,7 @@ func _correr() -> void:
 	_comprobar(_dijo("felipe", "Uñas: modo ancla"), "Felipe enseña a aferrarse: «Mantén {agacharse}. Uñas: modo ancla.»")
 	await _esperar_que(func() -> bool: return sala.ensayo.paso == EnsayoAspi.Paso.LISTO, 900)
 	_comprobar(sala.ensayo.paso == EnsayoAspi.Paso.LISTO and _dijo("aspi", "registrado"), "Vuelve a su cuarto: «Suciedad eliminada. Gato… registrado.»")
-	await _poner_en(Vector2(4600, Sala.SUELO))
+	await _poner_en(Vector2(4810, Sala.SUELO))
 	await _esperar(6 * 60)
 	_comprobar(t.agenda.esta_cumplida("laser"), "Quieto 5 s frente al láser: se apaga de vergüenza (secreta)")
 	await _poner_en(Vector2(Sala.DESCANSOS[1].get_center().x, Sala.SUELO))
@@ -361,16 +361,16 @@ func _correr() -> void:
 	await _esperar(90)
 	_comprobar(sala._ropa_firmada and _dijo("felipe", "pelo de rey"), "Desordenar la ropa doblada: queda revuelta y con pelos")
 	# El cajón (desde la cama) suelta el calcetín 3; la cortina no se trepa.
-	await _poner_en(Vector2(5625, Sala.SUELO - 65))
+	await _poner_en(Vector2(5825, Sala.SUELO - 65))
 	felipe.mirando = 1.0
 	await _tocar("interactuar")
 	await _esperar(60)
 	_comprobar(t.agenda.esta_cumplida("cajon"), "Un manotazo al cajón: calcetines volando (travesura «cajon»)")
 	await _esperar(60)
-	await _poner_en(Vector2(5692, Sala.SUELO - 96))
+	await _poner_en(Vector2(5892, Sala.SUELO - 96))
 	await _esperar(40)
 	_comprobar(sala.calcetines == 3 and "Coleccionista de Calcetines" in sala.logros, "Los 3 calcetines van al nido: «Coleccionista de Calcetines»")
-	await _poner_en(Vector2(5775, Sala.SUELO))
+	await _poner_en(Vector2(5975, Sala.SUELO))
 	Input.action_press("mover_arriba")
 	await _esperar(40)
 	Input.action_release("mover_arriba")
@@ -401,7 +401,7 @@ func _correr() -> void:
 		for intento in 3:
 			if batalla.apagados > apagados_antes or batalla.fase != BatallaAspi.Fase.PELEA:
 				break
-			await _poner_en(Vector2(6300, Sala.SUELO), 20)
+			await _poner_en(Vector2(6500, Sala.SUELO), 20)
 			if not batalla.llena:
 				batalla.deposito = BatallaAspi.CAPACIDAD[batalla.apagados] - 1
 				batalla.agregar_mancha(sala.aspi.global_position)
@@ -577,7 +577,7 @@ func _foto_suelta(cuarto: String) -> Recogible:
 ## ¿Hay una maceta de la baranda donde se para Felipe? (la del medio se borró del arte: M6).
 func _maceta_en(x: float) -> bool:
 	var imagen: Image = ArteNivel.textura("baranda").get_image()
-	var columna := int(x - 7400.0)
+	var columna := int(x - 7600.0)
 	for dx in range(-12, 13):
 		var cx := clampi(columna + dx, 0, imagen.get_width() - 1)
 		for y in range(0, 36):

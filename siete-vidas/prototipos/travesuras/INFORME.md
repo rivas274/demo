@@ -69,7 +69,7 @@ Suposición más arriesgada: que una lista con recompensas dé ganas de seguir e
 
 ### Qué se construyó
 - **Fuera el CAOS:** no quedan medidor, "+N CAOS", combos ni números de puntaje (la prueba lo revisa en todas las etiquetas de la pantalla). Se queda lo épico: congelado, palabras que saltan ("¡CRÍTICO! FLORERO: 0", "¡ZAPPING DEFINITIVO!", "¡IMPACTO DIRECTO!"), sacudida, destello, sonido y la voz de Felipe.
-- **La Agenda (Tab o Select):** una libreta con letra inclinada de Felipe, casillas, tachado, "¡HECHO!" y la recompensa de cada renglón. Mientras está abierta, el juego queda en pausa. Tiene 6 travesuras, 4 visibles y 2 secretas que se ven como "???" hasta cumplirlas:
+- **La Agenda (Tab o Select):** una libreta con letra inclinada de Felipe, casillas, tachado, "¡HECHO!" y la recompensa de cada renglón. Mientras está abierta, el juego queda en pausa. Tiene 6 travesuras, 4 visibles y 2 secretas que se ven como "???" hasta cumplirlas (en la v2b pasó a 7, ver abajo):
 
   | Travesura | Recompensa |
   | --- | --- |
@@ -129,7 +129,47 @@ Pendiente de la prueba del creador. Lo único que confirma el bot es técnico:
 
 Si eso hace que alguien *planee*, lo tiene que decir alguien jugando.
 
+### Agregado en la v2b (2026-10-19): el rascador y los diálogos de Valeria
+Misma pregunta y misma carpeta, 0 créditos. Fue una decisión del creador: "Teatro para Valeria".
+- **Rascador nuevo y caro** junto al brazo derecho del sofá, dibujado por código: poste con cuerda, base, plataforma y pompón, de unos 75 cm (90 px), con la etiqueta "$89.990" colgando. No tiene colisión. Se araña con E desde el piso, mirándolo, con la misma animación `zarpazo` y el efecto en el cuadro 4: hilos en la cuerda, fibras y un bamboleo de un píxel.
+  - **Con público** (Valeria en la sala y mirando hacia el rascador, también sentada viendo la tele): perdón al instante, que cuenta para "perdóname 2 veces" y da su snack. Ella dice "¡Mira, sí lo usa! ¡Valió cada centavo!", sale "¡OVACIÓN!" y "¡PERDONADO SIN RONRONEAR!", y saca el celular con flash. Vale una vez por visita: el bis no se cobra.
+  - **Sin público:** Felipe se queja ("¿Para quién actúo?", "Sin público no hay función.", "Arte desperdiciado. Nadie miró.") y no hay premio.
+  - **Garras afiladas:** al usarlo, con o sin público, quedan 6 s de filo, con chispitas en la pata delantera que parpadean al final. El siguiente arañazo al sofá es "¡CRÍTICO!" (congelado, destello y sacudida) y rompe el plástico de un golpe.
+- **Tercera secreta:** "Arañar el sofá justo al lado del rascador nuevo". Se cumple arañando el brazo del sofá pegado al rascador **mientras Valeria mira hacia él**. Se juntaron las dos condiciones que propuso el creador porque el brazo derecho es justo donde araña cualquiera que llega desde el piso: sin Valeria, la secreta saldría siempre en el primer arañazo. Recompensa: **otra foto vergonzosa** (Valeria de rodillas arañando el rascador "para enseñarle"), que estaba detrás del rascador. Valeria grita "¡Pipe! ¡El rascador está AHÍ! ¡A diez centímetros!" y después "Esto va directo a mis historias." con el flash. Felipe: "El rascador es para mirarlo. El sofá, para arañarlo." La agenda pasa a 7 (4 visibles y 3 secretas), y el HUD, la libreta y el resumen cuentan sobre 7 ("Siete de siete...").
+- **Diálogos de Valeria pulidos**, con la voz de la biblia: le dice "Pipe", le habla como a un bebé, teletrabaja y sube todo a redes. El chiste es el contraste: él se cree un dios y ella lo trata de bebito gordito, y el enojo se le pasa al pensar en sus seguidores. Algunas frases: "¡PIPE! Estoy en una reunión...", "Felipe Ron con Pasas Primero. Nombre completo. Estás en problemas.", "¡El florero de mi abuela! Sobrevivió a dos mudanzas, Pipe. DOS.", "Ya, ya. Te perdono porque tengo que subirte a mis historias.", "¡NO! ¡Justo cuando se iban a besar!", "¿Quién subió la...? Pipe, ¿desde cuándo tienes pulgares?". Cuando perdona saca el celular con flash; es solo efecto y frase, sin mecánica.
+- **Arreglos de diálogo que salieron al revisar el video:**
+  - La frase de Felipe al cumplir una travesura le borraba la reacción a Valeria. Ahora él espera a que ella termine.
+  - "¡GARRAS AFILADAS!" se pisaba con la ovación; ahora sale después.
+  - El "¡RIIIP!" del segundo arañazo tapaba el "¡CRÍTICO!".
+  - La frase de la persiana se cortaba. Ahora Valeria la dice al sentarse.
+  - El último renglón de la agenda (7) chocaba con el pie de la libreta.
+- **Qué se ve en el video del bot** (`prototipo-travesuras-v2b.mp4`, 95 s con sonido; segundos de juego):
+  - **1,8 s:** el rascador sin público. Felipe dice "Arte desperdiciado. Nadie miró." y le quedan las chispitas.
+  - **4,9 s:** con las garras afiladas, sube al sofá. El primer arañazo es "¡CRÍTICO!" y el plástico se rompe de un golpe; antes hacían falta 3 pulsaciones.
+  - **12–15 s:** maúlla y llega Valeria ("¡PIPE! Estoy en una reunión..."). Ronronea, ella lo perdona con flash y se sienta a ver la tele.
+  - **21 s:** tira el control ("¡NO! ¡Justo cuando se iban a besar!"). Felipe baja al rascador y, con ella regañándolo, lo araña. Llega el perdón 2 al instante (23,8 s): "¡Mira, sí lo usa!", "¡OVACIÓN!" y el cartel. Valeria vuelve a la tele y dice la frase de la persiana.
+  - **28,6 s:** con ella viendo la tele, araña el brazo del sofá pegado al rascador. Con el filo que le quedaba sale otro "¡CRÍTICO!", junto con "¡A DIEZ CENTÍMETROS!" y "¡TRAVESURA SECRETA!". Viene la frase de Felipe y luego "Esto va directo a mis historias." con el flash. La foto cae sobre la mesa.
+  - **Después:** sigue como antes con el alféizar, la aspiradora, el florero ("¡El florero de mi abuela!..."), la persecución, el vaso encima ("Acabo de lavarme el pelo. ACABO.") y el resumen: 7/7 · 3/3 · calcetines 3/3 · fotos 2 · snacks 3 · 2 perdones.
+- **Problemas que todavía se ven:**
+  - El cartel del perdón 2 tapa la cabeza de Valeria con el celular. El flash alcanza a verse porque el cartel sale medio segundo después.
+  - El rascador queda apretado entre el sofá y la mesa, y la etiqueta del precio se monta sobre la pata de la mesa.
+  - Al empezar, Felipe aparece encima del rascador.
+  - Que el perdón valga una vez por visita es una decisión mía para que no se puedan juntar snacks sin fin. Hay que confirmarla.
+- **Capturas:**
+  - `capturas/v2b-rascador-sin-publico.png`
+  - `capturas/v2b-rascador-ovacion.png`
+  - `capturas/v2b-secreta-junto-al-rascador.png`
+  - `capturas/v2-agenda.png` y `capturas/v2-resumen.png`, actualizadas a 7.
+- **Pruebas:** pasan `prueba_agenda.gd` (54 comprobaciones, entre ellas la queja sin público, el CRÍTICO tras afilar, el perdón con público, que el bis no da premio y la secreta nueva) y `prueba_impacto.gd` (13).
+- **Para mirar al jugar:**
+  - ¿El rascador hace que esperes a Valeria a propósito, como "en su cara" pero al revés?
+  - ¿La queja sin público da risa?
+  - ¿Te dan ganas de afilar antes de ir al sofá?
+
 ### Veredicto (v2): PENDIENTE
 Lo decide el creador jugando (F5). Qué mirar: las preguntas de "Qué mirar en la v2" del README.
 
 **Siguientes preguntas (para otros prototipos, no para este):** ¿para qué sirven los snacks y los calcetines (llave, ronroneo más fuerte, cosmética)? ¿Una agenda por habitación o una por día?
+
+## Veredicto (v2 + v2b): SEGUIR — 2026-10-19
+El creador: "me gusta, mejoró"; pidió pulir los diálogos de Valeria (hecho en v2b) y pasar al nivel 1. La Agenda, el rascador como teatro para Valeria y su voz entran al diseño del nivel 1 (`siete-vidas/diseno/nivel-01-propuesta-v4.md`).

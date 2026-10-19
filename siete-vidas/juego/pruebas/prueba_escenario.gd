@@ -3,12 +3,14 @@ extends SceneTree
 ##   godot --headless --path siete-vidas/juego --script res://pruebas/prueba_escenario.gd
 ## Termina con código 0 si todo pasa y 1 si algo falla.
 
-## Altura máxima con doble salto (~140 px) con margen, y distancia horizontal máxima entre muebles.
-const SUBIDA_MAXIMA := 125.0
-const HUECO_MAXIMO := 160.0
+## Sin doble salto ni trepar (nivel 1): el salto llega a ~79 px; con margen, 72 de subida y 90 de distancia entre muebles.
+## Los escalones del camino obligatorio son de 60 px o menos (los mide prueba_reglas_nivel y el bot).
+const SUBIDA_MAXIMA := 72.0
+const HUECO_MAXIMO := 90.0
 
-## Piezas que no hace falta alcanzar: las invisibles (piso, techo, paredes de cada habitación).
-const SIN_ALCANZAR := ["invisible"]
+## Piezas que no hace falta alcanzar: las invisibles (piso, techo, paredes) y los lugares vistos (se vuelve con una
+## maña nueva: R17).
+const SIN_ALCANZAR := ["invisible", "lugar_visto"]
 
 var _fallos: Array[String] = []
 
@@ -40,7 +42,7 @@ func _correr() -> void:
 
 	var antes := _posiciones_en_pantalla(sala, capas)
 	# Arriba del librero del recibidor: la cámara cambia de habitación y sube.
-	felipe.position = Vector2(1925, Sala.SUELO - 218)
+	felipe.position = Vector2(2214, Sala.SUELO - 218)
 	await _esperar(180)
 	var despues := _posiciones_en_pantalla(sala, capas)
 	var movimiento_juego: Vector2 = despues[0] - antes[0]
@@ -78,10 +80,8 @@ func _comprobar_alcanzables() -> void:
 	for habitacion: Array in Sala.HABITACIONES:
 		var cuarto: Rect2 = habitacion[0]
 		alcanzadas.append(Rect2(cuarto.position.x, Sala.SUELO, cuarto.size.x, 0))
-	# Las cortinas que llegan al piso se suben trepando: su parte de arriba cuenta como alcanzada.
-	for zona: Rect2 in Sala.TREPABLES:
-		if zona.end.y >= Sala.SUELO:
-			alcanzadas.append(Rect2(zona.position.x, zona.position.y, zona.size.x, 0))
+	# En el nivel 1 no se trepa nada (Felipe.puede_trepar apagado).
+	_comprobar(Sala.TREPABLES.is_empty(), "No hay nada que trepar en el nivel 1 (se gana con Afilar Garras)")
 	var hubo_cambio := true
 	while hubo_cambio:
 		hubo_cambio = false
@@ -98,7 +98,9 @@ func _comprobar_alcanzables() -> void:
 					break
 	for pieza: Array in Sala.PIEZAS:
 		if not pieza[3] in SIN_ALCANZAR:
-			_comprobar(pieza[0] in alcanzadas, "Se puede llegar a: %s" % pieza[2])
+			_comprobar(pieza[0] in alcanzadas, "Se puede llegar sin doble salto a: %s" % pieza[2])
+		elif pieza[3] == "lugar_visto":
+			_comprobar(not pieza[0] in alcanzadas, "El lugar visto %s no se alcanza todavía" % pieza[2])
 
 
 func _esperar(cuadros: int) -> void:

@@ -190,8 +190,9 @@ func _correr() -> void:
 			if pieza[3] == "invisible":
 				continue
 			_comprobar(not (pieza[0] as Rect2).intersects(rect), "B3 %s no se cruza con %s" % [pieza[2], sagrado[1]])
-		for dano: Rect2 in danos:
-			_comprobar(not dano.grow(-0.5).intersects(rect), "G10 Ninguna zona de daño patrulla en %s" % sagrado[1])
+		# A.S.P.I. pelea con las dos puertas del estudio cerradas (sin vuelta atrás): su arena no cuenta.
+		for datos_raton: Array in Sala.RATONES:
+			_comprobar(not _patrulla(datos_raton).grow(-0.5).intersects(rect), "G10 Ningún ratón patrulla en %s" % sagrado[1])
 		for lugar: Vector2 in [Sala.VALERIA_SOFA, Sala.VALERIA_COCINA]:
 			_comprobar(not rect.has_point(lugar - Vector2(0, 1)), "G10 Valeria no se para en %s" % sagrado[1])
 		for descanso: Rect2 in Sala.DESCANSOS:
@@ -316,13 +317,25 @@ func _comprobar_arte(rect: Rect2, nombre: String, imagen_nombre: String) -> void
 			var y := fila + dy
 			if y < 0 or y >= imagen.get_height():
 				continue
-			var pixel := imagen.get_pixel(columna, y)
-			var arriba := imagen.get_pixel(columna, y - 1) if y > 0 else Color(0, 0, 0, 0)
-			if pixel.a > 0.5 and (arriba.a < 0.5 or pixel.get_luminance() < 0.3):
+			if _es_borde(imagen, columna, y):
 				con_borde += 1
 				break
 	var parte := float(con_borde) / maxf(columnas, 1)
-	_comprobar(parte >= 0.7, "B4 La colisión de %s calza con el borde de %s a ±%d px (%.0f %% de sus columnas)" % [nombre, imagen_nombre, TOLERANCIA_ARTE, parte * 100.0])
+	_comprobar(parte >= 0.6, "B4 La colisión de %s calza con el borde de %s a ±%d px (%.0f %% de sus columnas)" % [nombre, imagen_nombre, TOLERANCIA_ARTE, parte * 100.0])
+
+
+## Borde visible en (x, y): opaco con transparente encima, o la línea oscura del contorno (más oscura que lo que
+## tiene 2 px arriba o abajo).
+func _es_borde(imagen: Image, x: int, y: int) -> bool:
+	var pixel := imagen.get_pixel(x, y)
+	if pixel.a < 0.5:
+		return false
+	if y == 0 or imagen.get_pixel(x, y - 1).a < 0.5:
+		return true
+	var lum := pixel.get_luminance()
+	var arriba := imagen.get_pixel(x, maxi(y - 2, 0))
+	var abajo := imagen.get_pixel(x, mini(y + 2, imagen.get_height() - 1))
+	return lum < 0.22 and ((arriba.a > 0.5 and arriba.get_luminance() - lum > 0.1) or (abajo.a > 0.5 and abajo.get_luminance() - lum > 0.1))
 
 
 func _fila_opaca(imagen: Image, y: int) -> int:

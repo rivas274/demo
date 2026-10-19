@@ -17,6 +17,10 @@ const ATURDIR := 3.0
 const RADIO_IMPACTO := 44.0
 
 var tipo: String
+## Cuánto se hunde el dibujo bajo su posición (la línea de atrás del mueble) hasta el medio de la cara de arriba que se
+## ve en el arte, con su sombra de contacto (lección 29). Negativo: sube (la repisa dibujada, con su tabla vista desde
+## arriba). La posición (alcance, caída) no cambia.
+var hundido := 0.0
 var roto := false
 var _velocidad := Vector2.ZERO
 var _cayendo := false
@@ -50,6 +54,8 @@ func caer_sin_romper(hacia := 1.0) -> void:
 	remove_from_group(Comida.GRUPO)
 	_velocidad = Vector2(hacia * 120.0, -140.0)
 	_cayendo = true
+	position.y += hundido
+	queue_redraw()
 	_sin_romper = true
 
 
@@ -70,6 +76,8 @@ func salir_volando(felipe: Felipe) -> void:
 	remove_from_group(Comida.GRUPO)
 	_velocidad = Vector2(felipe.mirando * 90.0, -90.0)
 	_cayendo = true
+	position.y += hundido
+	queue_redraw()
 
 
 func verbo(_felipe: Felipe) -> String:
@@ -85,7 +93,7 @@ func rect_dibujo() -> Rect2:
 
 ## Para el contorno del Indicador: la imagen y dónde se dibuja.
 func arte_indicador() -> Dictionary:
-	return ArteNivel.arte_en(self, tipo, 0.0, 0.0)
+	return ArteNivel.arte_en(self, tipo, 0.0, hundido)
 
 
 func _physics_process(delta: float) -> void:
@@ -125,6 +133,17 @@ func _al_caer() -> void:
 
 
 func _draw() -> void:
+	if not roto and not _cayendo:
+		var t := ArteNivel.textura(tipo)
+		if t:
+			# Sombra de contacto (Gemini, tanda 3F): 1 px más ancha que la base a cada lado; el vaso, además, sobre un
+			# posavasos de 1 px.
+			var ancho := t.get_width() * 0.8 + 2.0
+			if tipo == "vaso":
+				draw_rect(Rect2(-ancho / 2.0 - 1.0, hundido - 1.0, ancho + 2.0, 1.0), Color("8a4a3a"))
+			Sala.sombra(self, Vector2(0, hundido), ancho + 2.0, 0.5)
+			ArteNivel.dibujar(self, tipo, 0.0, hundido - (1.0 if tipo == "vaso" else 0.0))
+			return
 	if (not roto or tipo == "llaves") and ArteNivel.dibujar(self, tipo, 0.0, 0.0):
 		return
 	match tipo:

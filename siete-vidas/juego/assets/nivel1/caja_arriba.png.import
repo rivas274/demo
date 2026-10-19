@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bydqkreafmqan"
-path="res://.godot/imported/impresora.png-c310f7cf956c942eebca0c04f5729662.ctex"
+uid="uid://f41yrk3acee5"
+path="res://.godot/imported/caja_arriba.png-58a1c28f8bc8d41297c80b27eb739f8b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/nivel1/impresora.png"
-dest_files=["res://.godot/imported/impresora.png-c310f7cf956c942eebca0c04f5729662.ctex"]
+source_file="res://assets/nivel1/caja_arriba.png"
+dest_files=["res://.godot/imported/caja_arriba.png-58a1c28f8bc8d41297c80b27eb739f8b.ctex"]
 
 [params]
 

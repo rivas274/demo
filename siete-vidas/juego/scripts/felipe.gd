@@ -463,7 +463,7 @@ func guardar_snack() -> bool:
 	return true
 
 
-## Tirar algo de un manotazo (el vaso de la mesa, el pestillo): usa la animación del zarpazo y
+## Tirar algo de un manotazo (el vaso de la mesa, la caja de la mudanza): usa la animación del zarpazo y
 ## `al_impacto` se llama cuando la pata llega (cuadro de impacto), no al apretar.
 func dar_manotazo(al_impacto := Callable()) -> void:
 	estado = Estado.ZARPAZO

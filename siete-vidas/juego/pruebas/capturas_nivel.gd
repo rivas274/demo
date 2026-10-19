@@ -11,15 +11,18 @@ const PUNTOS := [
 	["1-sala-sofa", Vector2(300, Sala.SUELO)],
 	["2-sala-comedor", Vector2(1000, Sala.SUELO)],
 	["3-recibidor-entrada", Vector2(1700, Sala.SUELO)],
-	["4-recibidor-escalera", Vector2(2318, Sala.SUELO)],
+	["4-recibidor-escalera", Vector2(2200, Sala.SUELO)],
+	["4b-escalera-adentro", Vector2(2390, Sala.SUELO)],
 	["5-cocina-entrada", Vector2(3050, Sala.SUELO)],
-	["6-cocina-meson", Vector2(3433, Sala.SUELO - 55)],
-	["7-pasillo-consola", Vector2(4150, Sala.SUELO)],
-	["8-pasillo-estudio", Vector2(4920, Sala.SUELO)],
-	["9-dormitorio-cama", Vector2(5530, Sala.SUELO)],
-	["10-dormitorio-ropero", Vector2(5980, Sala.SUELO)],
-	["11-estudio", Vector2(6600, Sala.SUELO)],
-	["12-balcon", Vector2(7450, Sala.SUELO)],
+	["6-cocina-estufa", Vector2(3433, Sala.SUELO - 55)],
+	["6b-cocina-fregadero", Vector2(3640, Sala.SUELO - 109)],
+	["6c-cocina-refrigerador", Vector2(3900, Sala.SUELO - 109)],
+	["7-pasillo-consola", Vector2(4530, Sala.SUELO)],
+	["8-pasillo-estudio", Vector2(5300, Sala.SUELO)],
+	["9-dormitorio-cama", Vector2(5910, Sala.SUELO)],
+	["10-dormitorio-ropero", Vector2(6360, Sala.SUELO)],
+	["11-estudio", Vector2(6980, Sala.SUELO)],
+	["12-balcon", Vector2(7830, Sala.SUELO)],
 	["13-pasillo-bano", Vector2(Sala.BANO.x, Sala.SUELO)],
 ]
 
@@ -47,6 +50,21 @@ func _correr() -> void:
 		sala.travesuras.dialogo.limpiar()
 		await _esperar(2)
 		await _capturar(punto[0])
+	# La escalera después del atajo: la caja de arriba tirada desde el peldaño, abierta en el piso.
+	sala.travesuras.dialogo.limpiar()
+	felipe.global_position = Sala.PELDANO_CAJAS
+	await _esperar(20)
+	felipe.mirando = -1.0
+	sala.cajas.interactuar(felipe)
+	await _esperar(12)
+	await _capturar("4c-escalera-caja-cayendo")
+	await _esperar(80)
+	sala.travesuras.dialogo.limpiar()
+	felipe.global_position = Vector2(2400, Sala.SUELO)
+	await _esperar(40)
+	sala.travesuras.dialogo.limpiar()
+	await _esperar(2)
+	await _capturar("4d-escalera-caja-tirada")
 	quit()
 
 

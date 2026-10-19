@@ -43,7 +43,7 @@ func _correr() -> void:
 			["{interactuar}", Sala.ASPI[0], "tirar cosas (ensuciar en la pelea)"],
 			["{agacharse}", Vector2(_pieza("Zapatero").get_center().x, Sala.SUELO), "agacharse (bajo el zapatero)"],
 			["{zarpazo}", Sala.RATONES[1][0], "zarpazo (el ratón que cuida el pollo)"],
-			["{saltar}", Vector2(Sala.REJA.get_center().x, Sala.SUELO), "subir muebles (librero y reja)"],
+			["{saltar}", Vector2(Sala.CAJAS.get_center().x, Sala.SUELO), "subir muebles (librero y cajas de la mudanza)"],
 			["{maullar}", Sala.PUERTAS[2][1], "maullar (puerta de la cocina)"]]:
 		var ensenada := false
 		for leccion: Array in lecciones:
@@ -98,14 +98,16 @@ func _correr() -> void:
 		for descanso: Rect2 in Sala.DESCANSOS:
 			junto = junto or (Sala.habitacion_de(descanso.get_center()) == Sala.habitacion_de(atajo[1].get_center()) and _distancia(atajo[1], descanso) <= ATAJO_A_DESCANSO)
 		_comprobar(junto, "R6 El atajo «%s» termina junto a un punto de descanso" % atajo[0])
-	_comprobar(Sala.REJA.size.y > SALTO + 60.0, "R6 La reja no se salta desde el piso (%.0f px; el salto llega a ~%.0f)" % [Sala.REJA.size.y, SALTO])
+	_comprobar(Sala.CAJAS.size.y > SALTO + 40.0, "R6 La pila de cajas no se salta desde el piso (%.0f px; el salto llega a ~%.0f)" % [Sala.CAJAS.size.y, SALTO])
+	_comprobar(absf(ArteNivel.textura("cajas_pila").get_height() - Sala.CAJAS.size.y) <= 2.0 and absf(ArteNivel.textura("cajas_base").get_height() - CajasMudanza.ALTO_BASE) <= 2.0 and absf(ArteNivel.textura("cajas_pila").get_width() - Sala.CAJAS.size.x) <= 2.0, "B4 La colisión de las cajas calza con su arte a ±2 px (pila y base)")
+	_comprobar(CajasMudanza.ALTO_BASE <= SALTO - 7.0, "R6 Tirada la caja de arriba, las dos que quedan se suben de un salto (%.0f px)" % CajasMudanza.ALTO_BASE)
 
 	# R7. Verticalidad de gato y habitaciones unidas por puertas que van y vuelven.
 	var escalera := Vector2.INF
 	for datos: Array in Sala.PUERTAS:
 		if datos[0] == Sala.PUERTA_ESCALERA:
 			escalera = datos[1]
-	_comprobar(escalera.x > Sala.REJA.end.x and Sala.habitacion_de(escalera) == Sala.habitacion_de(Sala.REJA.get_center()), "R7 La escalera está detrás de la reja")
+	_comprobar(escalera.x - 20.0 >= Sala.CAJAS.end.x and Sala.habitacion_de(escalera) == Sala.habitacion_de(Sala.CAJAS.get_center()), "R7 El pie de la escalera está detrás de las cajas (Felipe cabe entre ellas y el primer escalón)")
 	_comprobar(Sala.PELDANOS.size() == 7 and Sala.PELDANOS[-1].y <= Sala.SUELO - 140.0, "R7 La escalera de fondo tiene 7 escalones que suben unos 150 px")
 	var altas := 0
 	for pieza: Array in Sala.PIEZAS:
@@ -138,7 +140,7 @@ func _correr() -> void:
 	# R8 y G8. Escala de gato: ratones a la mitad de Felipe y todo lo interactuable con lado MENOR ≥ 24 px (comida incluida).
 	var raton := ArteNivel.textura("raton").get_size()
 	_comprobar(raton.y >= 30.0, "R8 El ratón de cuerda mide la mitad de Felipe (%.0f px de alto)" % raton.y)
-	var interactuables := ["vaso", "taza", "maceta", "llaves", "tazon", "pollo", "bolsita", "calcetin", "caja", "raton", "aspi", "rascador", "reja_frente"]
+	var interactuables := ["vaso", "taza", "maceta", "llaves", "tazon", "pollo", "bolsita", "calcetin", "caja", "raton", "aspi", "rascador", "cajas_pila", "caja_arriba"]
 	for tirable: Array in Sala.TIRABLES:
 		if not tirable[1] in interactuables:
 			interactuables.append(tirable[1])
@@ -190,13 +192,14 @@ func _correr() -> void:
 	for sagrado: Array in sagrados:
 		var rect: Rect2 = (sagrado[0] as Rect2).grow(-0.5)
 		for datos: Array in Sala.ARTE:
-			if datos[0] in ["escalera_peldanos", "vano"]:
+			# La escalera y lo suyo (el vano y la escoba apoyada en su armario) no cuentan contra sí misma.
+			if datos[0] in ["escalera_peldanos", "vano"] or (datos[0] == "escoba" and sagrado[0] == Sala.ESCALERA_RECT):
 				continue
 			var tam := ArteNivel.textura(datos[0]).get_size()
 			var dibujo := Rect2(datos[1] - Vector2(0, tam.y), tam)
 			_comprobar(not dibujo.intersects(rect), "B3 %s no se cruza con %s" % [datos[0], sagrado[1]])
 		for pieza: Array in Sala.PIEZAS:
-			if pieza[3] == "invisible":
+			if pieza[3] == "invisible" or (pieza[4] == "escalera_peldanos" and sagrado[0] == Sala.ESCALERA_RECT):
 				continue
 			_comprobar(not (pieza[0] as Rect2).intersects(rect), "B3 %s no se cruza con %s" % [pieza[2], sagrado[1]])
 		# A.S.P.I. pelea con las dos puertas del estudio cerradas (sin vuelta atrás): su arena no cuenta.
@@ -260,7 +263,7 @@ func _correr() -> void:
 	cosas.append_array(Sala.CALCETINES)
 	cosas.append(Sala.CAJA_CARTON)
 	cosas.append(Sala.LASER[0])
-	cosas.append(Sala.REJA.get_center())
+	cosas.append(Sala.CAJAS.get_center())
 	cosas.append(Sala.CAJON)
 	for lista: Array in [Sala.RATONES, Sala.TIRABLES, Sala.COMIDA]:
 		for cosa: Array in lista:
@@ -358,7 +361,7 @@ func _comprobar_arte(rect: Rect2, nombre: String, imagen_nombre: String) -> void
 		if candidato.grow(2).encloses(Rect2(rect.position.x, rect.position.y, rect.size.x, 1)):
 			dibujo = candidato
 	if imagen_nombre == "microondas":
-		dibujos = [Rect2(3570, Sala.SUELO - 109 - textura.get_height(), textura.get_width(), textura.get_height())]
+		dibujos = [Rect2(Sala.MICROONDAS_X, Sala.SUELO - 109 - textura.get_height(), textura.get_width(), textura.get_height())]
 		dibujo = dibujos[0]
 	_comprobar(dibujo != Rect2(), "B4 %s está dentro de su arte (%s)" % [nombre, imagen_nombre])
 	if dibujo == Rect2():

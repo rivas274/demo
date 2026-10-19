@@ -1,6 +1,6 @@
 # Nivel 1, "La Gran Fuga" (v4, construido)
 
-Documento vigente del nivel. Fecha: 2026-10-19 · Fase 3 (vertical slice). Sale de la propuesta v4 aprobada por el creador (habilidades apagadas, bolsillo de 5 y nido de calcetines, arañar y maullar, Valeria con 4 poses y caminar, escalera de fondo con reja) y cuenta lo que quedó **construido** en `siete-vidas/juego/` (datos en `scripts/sala.gd`). Plan de arte: `nivel-01-plan-arte.md`. Revisiones que se corrigieron: `revisiones/2026-10-18-nivel1-gran-fuga.md` (sección 9) y `revisiones/2026-10-19-nivel1-v4.md` (sección 11).
+Documento vigente del nivel. Fecha: 2026-10-19 · Fase 3 (vertical slice). Sale de la propuesta v4 aprobada por el creador (habilidades apagadas, bolsillo de 5 y nido de calcetines, arañar y maullar, Valeria con 4 poses y caminar, escalera de fondo; desde el 2026-10-19 con cajas de la mudanza en vez de la reja) y cuenta lo que quedó **construido** en `siete-vidas/juego/` (datos en `scripts/sala.gd`). Plan de arte: `nivel-01-plan-arte.md`. Revisiones que se corrigieron: `revisiones/2026-10-18-nivel1-gran-fuga.md` (sección 9) y `revisiones/2026-10-19-nivel1-v4.md` (sección 11).
 
 ## 1. Propósito
 
@@ -27,11 +27,11 @@ Valeria vive en la planta baja y va donde hay ruido. Empieza sentada en el sofá
 - **Maullar es llave:** junto a la puerta de la cocina, Valeria la abre ("Ya, entra, pero no hay nada para ti.").
 - **Popo táctico (secreta):** agachado 1,2 s sobre la arena: censura irónica (pegatina de pescadito y "CONTENIDO SENSIBLE" sobre una papa). Valeria sale con mascarilla ("¡ACABO DE LIMPIARLA! Voy por bolsas...") y del susto se le cae la **foto vergonzosa** que tenía lista para subir (cae flotando junto a la lámpara). Al volver por bolsas deja abierta la puerta de la cocina (efecto, no recompensa: si Felipe ya maulló, la puerta ya estaba abierta y el cartel no promete nada que ya pasó).
 - **Travesura suelta:** las llaves del zapatero (se sube desde el borde de la caja de arena): "¡CLINK CRÍTICO!" y Valeria desde la cocina: "¿Mis llaves? ¿OTRA VEZ?".
-- **Escalera:** sección 4. **Hito:** la reja con el cartel "PIPE: NO".
+- **Escalera:** sección 4. **Hito:** las cajas de la mudanza con la cesta de ropa al pie de la escalera.
 
-### 2.3 Cocina (opcional, 960 px)
-- **Enseña, de a una:** comer (tazón hondo: "Tres croquetas. Esto es un crimen.") → zarpazo (ratón de cuerda en el piso, 90 px después de su frase; queda patas arriba con la llave girando) → la caja de cartón se rompe de un zarpazo y suelta un snack → silla → mesón: un ratón patrulla entre el borde y el microondas (cuida la subida) → microondas: el pollo.
-- **Robar el almuerzo de Valeria:** el pollo asado, que espera sobre el microondas (fuera de la patrulla del ratón: nunca lo tapa). Valeria, junto a la puerta, mira hacia el mesón: "¡EN SU CARA!" y "¡ESE ERA MI ALMUERZO! Esto va a mis historias.", y regaña. **Travesura "almuerzo"**, 2 snacks.
+### 2.3 Cocina (opcional, 1340 px desde el 2026-10-19)
+- **Enseña, de a una:** comer (tazón hondo: "Tres croquetas. Esto es un crimen.") → zarpazo (ratón de cuerda en el piso, 90 px después de su frase; queda patas arriba con la llave girando) → la caja de cartón se rompe de un zarpazo y suelta un snack → silla → estufa → mesón largo (el fregadero bajo la ventana): un ratón patrulla entre el fregadero y el microondas (cuida la subida) → microondas: el pollo. La cámara se mueve: la cocina mide 1340 px (sección 18).
+- **Robar el almuerzo de Valeria:** el pollo asado, que espera sobre el microondas (fuera de la patrulla del ratón: nunca lo tapa). Valeria, frente a la estufa, mira hacia el microondas: "¡EN SU CARA!" y "¡ESE ERA MI ALMUERZO! Esto va a mis historias.", y regaña. **Travesura "almuerzo"**, 2 snacks.
 - **Calcetín 2 (exploración):** mesón → microondas → refrigerador (escalones de 54 px).
 - **Hito:** el refrigerador con imanes y el pollo grande a escala de gato.
 
@@ -76,12 +76,12 @@ El calcetín 2 (refrigerador) es de exploración. Calcetines al nido (cada 10, u
 
 ## 4. La escalera
 
-- **Reja anti-fuga** (decisión del creador): Valeria la atornilló después del video viral. Mide 1,5 m (182 px), se dibuja de 48 px (la cara de frente del arte de Gemini) con colisión fina de 12 px, cartel "PIPE: NO" escrito por código en dos líneas sobre el cartel de cartón del arte (34 px, centrado en la reja, sin pisar el librero; la firma "Con amor, mamá" se quitó porque a 6 px no se leía). Desde afuera Felipe la **empuja** ("¿Una reja? ¿En MI escalera? Qué tierno.").
-- **El librero es la escalera del gato:** repisas a 48, 103 y 155 px (escalones de 48 a 55). Desde la de arriba se salta la reja y se cae adentro, al pie de la escalera.
-- **Subir:** al pie, "Ascender" (acción o arriba): Felipe sube los **7 escalones** con la animación `subir_escalera`, un saltito por escalón por la línea de los peldaños (`Sala.PELDANOS`), camina por el descanso hasta el vano y hay un fundido al pasillo. La escalera va en **dos capas**: peldaños detrás de Felipe y pasamanos con barrotes delante, que baja a **70 %** de opacidad mientras sube.
-- **Descanso:** un rellano grueso (como un escalón ancho) con el faldón cerrado hasta el piso: tablas y la puertita de un armario bajo la escalera (sin poste suelto).
-- **Bajar:** por el vano del pasillo aparece en el descanso y baja escalón por escalón (cuadros de saltar y caer); `prueba_nivel` comprueba que pisa los 7 peldaños sin volver a subir, que termina adentro de la reja, en el piso y con el control de vuelta.
-- **Atajo (R6):** desde adentro, "Abrir": un manotazo al pestillo la abre para siempre ("El pestillo, por dentro. Aficionada.", logro "Atajo de Gato"), a 348 px de la caja de arena.
+- **Cajas de la mudanza** (decisión del creador, 2026-10-19; reemplazan la reja «PIPE: NO», que se veía mal y se atravesaba): tres cajas de unos 30 cm con la cesta de ropa encima (pieza D de Gemini, tanda 3F, 66 × 135), al pie de la escalera sobre el primer escalón. Valeria lleva un año «ordenando». La pila es **sólida** (`CajasMudanza`, 64 × 133): desde el piso no se pasa caminando, gateando ni de un salto (el salto llega a 79 px); `prueba_nivel` empuja a Felipe contra ella. Desde afuera solo la empuja: «Cajas de la mudanza. Llevan un año «ordenándose».».
+- **El librero es la escalera del gato:** repisas a 48, 103 y 155 px. Desde la de arriba pasa por encima de la cesta y cae al pie de la escalera.
+- **Subir:** al pie (x 2362), "Ascender" (acción o arriba): Felipe sube los **7 escalones** con la animación `subir_escalera`, un saltito por escalón por la línea de los peldaños (`Sala.PELDANOS`), camina por el descanso hasta el vano y hay un fundido al pasillo. La escalera va en **dos capas**: peldaños detrás de Felipe y pasamanos con barrotes delante, que baja a **70 %** de opacidad mientras sube.
+- **Descanso:** un rellano grueso con el armario bajo la escalera (tablas, puerta entreabierta) y la **escoba de Gemini** (pieza F, 44 × 133) apoyada fuera, bajo el descanso; la escoba de código se quitó (lección 32).
+- **Bajar:** por el vano del pasillo aparece en el descanso y baja escalón por escalón; termina adentro de las cajas, en el piso. Si la pila sigue entera: «Desde aquí arriba, esas cajas se ven… empujables.».
+- **Atajo (R6), "desde arriba":** parado en el **segundo peldaño** (x 2348–2372, 45 px, una tabla de colisión que calza con el arte), "Tirar": un manotazo vuelca la caja de arriba con la cesta, que cae en arco dando media vuelta y queda **abierta con la ropa en el piso** (pieza E, delante del librero), con «¡PUM! · MUDANZA: 0», sacudida y el logro "Atajo de Gato"; Felipe: «Mudanza terminada. De nada.» y Valeria, si está abajo sin audífonos: «¡Mis cajas! ¡Estaban ORDENADAS!». Quedan dos cajas (67 px, se suben de un salto) y el borde de la caja abierta (33 px) es un escalón: se va y se vuelve sin el librero. Queda a 349 px de la caja de arena.
 
 ## 5. Cómo se anuncia cada interacción (sin carteles)
 
@@ -134,12 +134,12 @@ Alto de todos los cuartos: 424 px (3,5 m). Piso en y = 448. Muros entre cuartos.
 | Cuarto | x en el mundo | Ancho | Qué hay (x en el mundo · altura) |
 | --- | --- | --- | --- |
 | Sala | 0–1280 | 1280 | nido 40 · ventana 170–350 (alféizar 109) · sofá 240–480 (asiento 49, respaldo 102) · rascador 520–620 (69/114/165) · silla 680 (55) · mesa 745–923 (91, vaso en 905) · silla 929 (55) · retrato · puerta 1188 |
-| Recibidor | 1440–2640 | 1200 | puerta 1532 · zapatero 1626–1786 (97; 40 libres debajo; llaves) · caja de arena 1832–1936 (45) · lámpara 1942 · puerta de la cocina 2070 · librero 2162–2266 (48/103/155/218) · reja 2284–2296 (182) · escalera 2322–2548 con el armario bajo la escalera (puerta entreabierta y escoba) y vano cuadrado en el descanso 2497–2637 (150) |
-| Cocina | 2800–3760 | 960 | puerta 2892 · ventana 3150–3300 (alféizar 109, cenefa) · tazón 3010 · Valeria 3080 · ratón 3200–3290 · caja de cartón 3360 · silla 3400 (55) · mesón 3464–3668 (108, fregadero 3467–3503 bajo la llave, ratón 3514–3540) · microondas 3570 (162, pollo 3612) · refrigerador 3674–3758 (216, calcetín 2) |
-| Pasillo | 4000–5240 | 1240 | vano de la escalera 4092 (140 × 248) · baúl 4190 (54) · alfombra 4370–4630 · consola 4256–4412 (97, vaso; 47 libres) · ventana 4260–4440 apoyada en la consola, alféizar 4264–4436 (109; la pizza, afuera tras el vidrio, en 4389) · puerta del dormitorio 4536 · **puerta del baño 4740** (cerrada; rectángulo sagrado 4648–4832) · láser 4840–4980 · retrato familiar 4900–5000 · cojín 4984–5054 · puerta del estudio 5148 |
-| Dormitorio | 5400–6120 | 720 | puerta 5492 · banquito 5586 (53) · cama 5644–5844 (65) · ventana 5669–5819 sobre la cama (alféizar 109) · cortina 5636–5852 (telas a los lados, barra a 230, hasta el piso) · ropa doblada 5768 (en medio de la cama, hundida en el edredón) · cómoda 5850–5934 (96, cajón) · repisa 5940–6010 (145) con el paisaje encima · cesta 5947–6007 (35) · repisa alta 5935–6015 (290, lugar visto) · ropero 6016–6120 (185) |
-| Estudio | 6440–7080 | 640 | puerta 6532 · silla 6624 (55) · ventana 6655–6805 sobre el escritorio (alféizar 109, paños cortos) · escritorio 6688–6848 (98; vaso, teclado, pantalla, taza de café) · impresora bajo el escritorio · repisa 6836–6896 (151, 2 macetas) · base de carga 6800–6874 · puerta del balcón 6988 |
-| Balcón | 7240–7880 | 640 | puerta 7332 · maceta grande 7530 (32) · baranda 7600–7784 (89; tramo sin maceta 7670–7720) · ciudad · toldo de la panadería 7580–7880, 196 px bajo el piso (solo existe en el salto final) |
+| Recibidor | 1440–2640 | 1200 | puerta 1532 · zapatero 1626–1786 (97; 40 libres debajo; llaves) · caja de arena 1832–1936 (45) · lámpara 1942 · puerta de la cocina 2070 · librero 2162–2266 (48/103/155/218) · **cajas de la mudanza 2272–2336 (133 con la cesta; 67 tiradas; caja abierta en el piso 2200–2264, borde a 33)** · peldaño 2 2348–2372 (45, desde ahí se tira) · pie de la escalera 2362 · escalera 2322–2548 con el armario bajo la escalera (puerta entreabierta; escoba de Gemini en 2590) y vano cuadrado en el descanso 2497–2637 (150) |
+| Cocina | 2800–4140 | 1340 | puerta 2892 · reloj 3210 · tazón 3010 y lata · ratón 3200–3290 · caja de cartón 3360 · Valeria 3500 (frente a la estufa) · silla 3400 (55) · estufa con olla 3462–3550 (109) · alacenas 3458–3648 (a 1,49 m) · mesón largo 3556–4032 (109; fregadero embutido 3706–3808 con el grifo de Gemini en 3799) · ventana 3682–3832 sobre el fregadero (alféizar 109, cenefa) · ratón del mesón 3846–3890 · microondas 3926–4024 (163, pollo 3975) · refrigerador 4046–4130 (216, calcetín 2) |
+| Pasillo | 4380–5620 | 1240 | vano de la escalera 4472 (140 × 248) · baúl 4570 (54) · alfombra 4750–5010 · consola 4636–4792 (97, vaso; 47 libres) · ventana 4640–4820 apoyada en la consola, alféizar 4644–4816 (109; la pizza, afuera tras el vidrio, en 4769) · puerta del dormitorio 4916 · **puerta del baño 5120** (cerrada; rectángulo sagrado 5028–5212) · láser 5220–5360 · retrato familiar 5280–5380 · cojín 5364–5434 · puerta del estudio 5528 |
+| Dormitorio | 5780–6500 | 720 | puerta 5872 · banquito 5966 (53) · cama 6024–6224 (65) · ventana 6049–6199 sobre la cama (alféizar 109) · cortina 6016–6232 (telas a los lados, barra a 230, hasta el piso) · ropa doblada 6148 (en medio de la cama, hundida en el edredón) · cómoda 6230–6314 (96, cajón) · repisa 6320–6390 (145) con el paisaje encima · cesta 6327–6387 (35) · repisa alta 6315–6395 (290, lugar visto) · ropero 6396–6500 (185) |
+| Estudio | 6820–7460 | 640 | puerta 6912 · silla 7004 (55) · ventana 7035–7185 sobre el escritorio (alféizar 109, paños cortos) · escritorio 7068–7228 (98; vaso, teclado, pantalla, taza de café) · impresora bajo el escritorio · repisa 7216–7276 (151, 2 macetas) · base de carga 7180–7254 · puerta del balcón 7368 |
+| Balcón | 7620–8260 | 640 | puerta 7712 · maceta grande 7910 (32) · baranda 7980–8164 (89; tramo sin maceta 8050–8100) · ciudad · toldo de la panadería 7960–8260, 196 px bajo el piso (solo existe en el salto final) |
 
 Árbol: sala → recibidor → (cocina) y escalera → pasillo → (dormitorio) y estudio → balcón.
 
@@ -154,10 +154,10 @@ Alto de todos los cuartos: 424 px (3,5 m). Piso en y = 448. Muros entre cuartos.
 | R3 | ✔ Frases de 48 caracteres o menos sin contar el botón; `prueba_nivel` comprueba que salen una sola vez |
 | R4 | ✔ La meta es el balcón, último cuarto; `prueba_nivel`: la cámara lo muestra al empezar. 👁 Por la ventana de la sala se ve el balcón con la luz roja |
 | R5 | ✔ Caja de arena (recibidor, a una puerta de la cocina) y cojín (pasillo, junto a la puerta del jefe); reaparecer es inmediato |
-| R6 | ✔ El pestillo de la reja se abre solo desde adentro y queda a 348 px de la caja de arena; se va por el librero y se vuelve por la reja |
+| R6 | ✔ La caja de arriba de la mudanza se tira solo desde el segundo peldaño (adentro) y queda a 349 px de la caja de arena; se va por el librero y se vuelve por las cajas |
 | R7 | ✔ Dos pisos unidos por la escalera (7 escalones); librero, mesón, microondas, refrigerador, ropero; puertas que van y vuelven; ningún cuarto de menos de 640 px. La puerta del baño no es habitación (no está en `PUERTAS`): R7 sigue valiendo. ✔ `prueba_escenario`: todo se alcanza sin doble salto ni trepar y **ningún hueco atrapa a Felipe** |
 | R8 | ✔ Huecos bajo muebles sólidos de 0 o de 36 px o más (zapatero 40, consola 47); lado **menor** ≥ 24 px de todo lo interactuable (comida y recompensas incluidas), **también lo dibujado por código** (teclado, ropa y cajón: `Sala.DIBUJADOS_INTERACTUABLES`) y el tamaño que declara cada interactuable del nivel armado (G7); puertas medidas en la imagen (vano de 112 y 120 px); ratón a la mitad de Felipe |
-| R9 | ✔ Pared distinta por cuarto. 👁 Hito por cuarto: retrato oficial, reja "PIPE: NO", refrigerador con imanes, retrato familiar, cama y cortina, base de carga roja, la ciudad |
+| R9 | ✔ Pared distinta por cuarto. 👁 Hito por cuarto: retrato oficial, cajas de la mudanza, refrigerador con imanes, retrato familiar, cama y cortina, base de carga roja, la ciudad |
 | R10 | ✔ 3 calcetines sobre algo pisable; el del refrigerador pide subir |
 | R11 | ✔ La única zona fuerte es el estudio; cierra con el balcón |
 | R12 | ✔ 5 cosas para tirar en el estudio y una en alto (repisa). Ver sección 6 |
@@ -327,3 +327,14 @@ El creador: «se ve apresurado, montado; el piso se ve mal; ¿por qué el sofá 
 - **Luz de la sala:** la lámpara ya no es una luz redonda (halo en el tapiz); su luz cae en el tablero de la mesita y en el piso en escalones.
 - **Además:** grosor de muro en las puertas abiertas (jamba y dintel en dos tonos), farol del balcón borrado (cortado por el borde y con halo) y repisa alta del dormitorio a 2,26 m (`SUELO − 274`; la caja de recuerdos quedaba cortada; sigue fuera de alcance).
 - **Cumplimiento de reglas:** R1–R19 sin cambios (`prueba_reglas_nivel` en 0 fallos); R17: la repisa alta sigue sin alcanzarse (89 px sobre el ropero, tope 72).
+
+
+## 18. Cocina más grande, cajas de la mudanza y objetos apoyados (el creador, 2026-10-19, `revisiones/2026-10-19-cocina-escalera.md`)
+
+Pasada única con el arte de Gemini de la tanda 3F (`arte/referencias/gemini/cocina-v2.png`, procesado con `preparar_arte_nivel.cocina_v2()`), 0 créditos.
+
+- **Cocina de 1340 px** (la cámara se mueve; todo x ≥ 4000 corrió 380 px con un script sobre los literales: 173 en `sala.gd`, el bot y las pruebas; `ANCHO` 8260). Composición de Gemini adaptada a la escala de gato (mesón a 90 cm = 109 px, no los 130–140 que sugería): puerta → rincón del gato (tazón, lata, croquetas) → ratón y caja → silla → **estufa con olla** → **mesón largo con el fregadero embutido** bajo la ventana (grifo de cuello de cisne del arte; la gota sigue) → microondas con el pollo → refrigerador. Alacenas nuevas sobre la estufa. Se quitaron el fregadero y el paño de código.
+- **Escalera:** reja, cartel y `reja_frente.png` borrados; cajas de la mudanza sólidas y atajo "desde arriba" (sección 4).
+- **Objetos sobre muebles** (lección 29): cada tirable lleva cuánto se hunde (`Sala.TIRABLES`, tercer dato; `Vaso.hundido`) hasta el medio de la cara de arriba que se ve en el arte, con sombra de contacto 1 px más ancha que su base: mesa 5, consola 4, zapatero 2, escritorio 9 (su cubierta se ve de 16 px), repisa dibujada −6 (al medio de su tabla). El vaso lleva posavasos de 1 px. Monitor, teclado y pantalla bajaron 9 px; libro del banquito al doble (42 × 12) en medio del asiento; microondas y monitor con sombra (`Sala.APOYADOS`). **Se quitaron la impresora y la regleta con sus cables** del estudio (en la pelea, al pisar el teclado vuelan los apuntes: «¡FIUU!»).
+- **Barreras:** `prueba_nivel` empuja a Felipe contra cada muro de cada cuarto, cada mueble sólido que llega al piso y la pila de cajas (24 empujes), y prueba las puertas cerradas (cocina, balcón, baño): nada se atraviesa.
+- **Cumplimiento:** R1–R19 en 0 fallos; R6 con la caja de la mudanza; R8 con la colisión de las cajas medida contra su arte.

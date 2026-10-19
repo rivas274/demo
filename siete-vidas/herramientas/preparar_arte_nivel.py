@@ -29,9 +29,7 @@ PIEZAS = {
     "aparador": ("muebles-sala", 4, (156, 98), None),  # 81 cm
     "lampara": ("muebles-sala", 3, (34, 160), None),
     # Cocina.
-    "alacenas": ("muebles-cocina", 0, (210, 66), None),
     "refrigerador": ("muebles-cocina", 2, (84, 218), None),  # 1,80 m
-    "meson": ("muebles-cocina", 3, (204, 109), None),  # 90 cm
     # Dormitorio.
     "comoda": ("muebles-dormitorio", 0, (84, 97), (0.0, 0.47, 1.0, 1.0)),  # 80 cm, sin el espejo
     "ropero": ("muebles-dormitorio", 1, (104, 185), None),  # 1,53 m
@@ -69,7 +67,6 @@ PIEZAS = {
     "tazon": ("comida-grande", 0, (48, 35), None),
     "pollo": ("comida-grande", 2, (64, 50), None),
     "bolsita": ("comida-grande", 3, (28, 32), None),
-    "reja_frente": ("reja-antifuga", 0, (48, 182), (0.0, 0.0, 0.69, 1.0)),  # solo la cara de frente, 48 px (decisión del creador)
     "banquito": ("muebles-cocina", 4, (52, 54), None),  # banquito del dormitorio, 45 cm
     # Tanda 3C (nivel 1 v4): sala, recibidor, cocina y ventanas.
     "rascador": ("sala-extra", 0, (100, 165), None),  # plataformas medidas en el arte (Sala.PIEZAS)
@@ -98,7 +95,6 @@ PIEZAS = {
     "ropa_pelos": ("arriba-extra", 7, (52, 48), None),  # la misma, después de que Felipe se acicala encima
     "caja_recuerdos": ("arriba-extra", 8, (44, 33), None),  # lugar visto: repisa alta del dormitorio
     "monitor": ("arriba-extra", 9, (44, 48), (0.08, 0.0, 0.48, 0.50)),  # del escritorio con monitor e impresora
-    "impresora": ("arriba-extra", 9, (44, 34), (0.54, 0.13, 0.94, 0.48)),
     "papel": ("arriba-extra", 10, (30, 16), None),  # papel plano en el piso (mancha de la pelea)
     "papel_arrugado": ("arriba-extra", 11, (16, 20), None),  # papeles que escupe la impresora
     # A.S.P.I. (escala de gato: más grande que una real); la gigante es imaginación de Felipe.
@@ -107,7 +103,7 @@ PIEZAS = {
 }
 
 # Piezas con huecos (entre patas, barrotes, respaldos): el blanco encerrado también es fondo.
-HUECOS = {"llaves", "rascador", "zapatero", "reja_frente", "banquito", "aparador", "baranda", "lampara", "escritorio", "repisa", "mesa_v2", "silla_v2", "librero_v2", "escalera_baranda"}
+HUECOS = {"llaves", "rascador", "zapatero", "banquito", "aparador", "baranda", "lampara", "escritorio", "repisa", "mesa_v2", "silla_v2", "librero_v2", "escalera_baranda"}
 
 # Piezas con patas que hay que alargar para dejar el hueco de agachado (R8): nombre -> (fracción de la pieza donde
 # empiezan las patas, alto de las patas en el juego).
@@ -548,7 +544,7 @@ PIEZAS_AMBIENTE = {
     "aranazo_2": ("sala-extra", 5, (16, 14), None),
     "aranazo_3": ("sala-extra", 7, (5, 12), None),
     "lata": ("comida-grande", 1, (24, 27), None),  # lata de atún abierta junto al tazón (C-7)
-    "libro": ("objetos", 6, (28, 8), None),  # libro achatado sobre el banquito (D-3)
+    "libro": ("objetos", 6, (42, 12), None),  # libro sobre el banquito (D-3), al doble de su tamaño real (lección 29)
     "maceta_rota": ("detalles", 8, (32, 11), None),  # isla de jardinería del balcón (B-3)
 }
 
@@ -693,10 +689,7 @@ def recoloreos():
     recolorear(z, abajo, (226, 210, 180), 150.0)
     z[17:28, 88:116] = z[17:28, 88:116][:, ::-1]
     guardar(z, "zapatero")
-    # C-2: alacenas recortadas a dos módulos (la mitad izquierda del mesón); sobre el microondas no queda nada.
-    a = abrir("alacenas")
-    guardar(np.concatenate([a[:, :116], a[:, -2:]], axis=1), "alacenas")
-    print("Recoloreos: ventana del pasillo, peldaños, zapatero, alacenas")
+    print("Recoloreos: ventana del pasillo, peldaños, zapatero")
 
 
 def telas():
@@ -780,6 +773,46 @@ def pisos_gemini():
                 ruta.unlink()
 
 
+def cocina_v2():
+    """Tanda 3F de Gemini (`cocina-v2.png`, 2026-10-19): cocina más grande y cajas de mudanza. Cada pieza se escala
+    por su medida real a 1,21 px por cm (escala de gato: alturas de muebles casi reales) y se recorta a su borde opaco:
+    A mesón largo con fregadero embutido y grifo de cuello de cisne (cubierta a 90 cm = 109 px; el grifo sobresale),
+    B estufa con horno y olla (cubierta a 109), C alacenas (70 cm), D pila de 3 cajas de mudanza con la cesta de ropa
+    (cajas de unos 30 cm; también por separado la base de 2 cajas y la caja de arriba con la cesta, que se cae), E caja
+    abierta con ropa (la de arriba, ya en el piso) y F escoba (1,1 m: cabe bajo el descanso). El mueble bajo suelto de
+    la hoja no se usa."""
+    imagen, cajas = piezas("cocina-v2")
+
+    def pieza(indice, escala):
+        recorte = recortar_opaco(imagen.crop(cajas[indice]))
+        tam = (round(recorte.width * escala), round(recorte.height * escala))
+        return recortar_opaco(sin_sueltos(recorte.resize(tam, Image.NEAREST)))
+
+    # A: la cubierta está en la fila 93 de la pieza (el grifo va encima); de ahí al piso, 90 cm.
+    meson = recortar_opaco(imagen.crop(cajas[0]))
+    meson = pieza(0, 109.0 / (meson.height - 93))
+    meson.save(DESTINO / "meson.png")
+    # B: la cubierta de la estufa en la fila 40 (la olla asoma encima).
+    estufa = recortar_opaco(imagen.crop(cajas[1]))
+    pieza(1, 109.0 / (estufa.height - 40)).save(DESTINO / "estufa.png")
+    alacenas = recortar_opaco(imagen.crop(cajas[2]))
+    pieza(2, 80.0 / alacenas.height).save(DESTINO / "alacenas.png")
+    # D: tres cajas de 36 px y la cesta encima; la caja de arriba (con la cesta) termina en la fila 194 de la pieza.
+    escala_cajas = 0.351
+    pila = pieza(3, escala_cajas)
+    pila.save(DESTINO / "cajas_pila.png")
+    corte = round(194 * escala_cajas)
+    a = np.asarray(pila)
+    guardar(a[corte:], "cajas_base")
+    guardar(a[:corte + 2], "caja_arriba")
+    pieza(6, 0.3).save(DESTINO / "caja_abierta.png")
+    escoba = recortar_opaco(imagen.crop(cajas[4]))
+    pieza(4, 133.0 / escoba.height).save(DESTINO / "escoba.png")
+    for nombre in ["meson", "estufa", "alacenas", "cajas_pila", "cajas_base", "caja_arriba", "caja_abierta", "escoba"]:
+        tam = Image.open(DESTINO / f"{nombre}.png").size
+        print(f"Cocina v2: {nombre} {tam[0]} x {tam[1]}")
+
+
 def ambientes():
     for nombre, (hoja, indice, tamano, fraccion) in PIEZAS_AMBIENTE.items():
         imagen, cajas = piezas(hoja)
@@ -791,6 +824,7 @@ def ambientes():
     telas()
     tanda_3e()
     pisos_gemini()
+    cocina_v2()
 
 
 if __name__ == "__main__":

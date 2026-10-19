@@ -12,7 +12,7 @@ extends RefCounted
 ##   ARTE_PARED      -3        ventanas, cuadros, alacenas: lo colgado en la pared
 ##   ESCALERA        -2        peldaños, vano y descanso de la escalera de fondo
 ##   PUERTAS         -2        puertas (y su luz)
-##   MUEBLES         -1        arte de muebles, sofá, rascador, reja, decorado, nido, piezas dibujadas
+##   MUEBLES         -1        arte de muebles, sofá, rascador, cajas de la mudanza, decorado, nido, piezas dibujadas
 ##   PERSONAJES      -1        Valeria (va después de los muebles en el árbol: queda delante de ellos)
 ##   JUEGO            0        Felipe, A.S.P.I., ratones, vasos, comida, recompensas, manchas del piso
 ##   MARCAS           1        arañazos sobre lo arañable

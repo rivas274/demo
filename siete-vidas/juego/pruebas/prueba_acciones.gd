@@ -71,7 +71,7 @@ func _probar_habilidades() -> void:
 	await _esperar(6)
 	_comprobar(felipe.estado != Felipe.Estado.ZOOMIES and absf(felipe.global_position.x - x_antes) < 10.0, "Sin Zoomies, tocar Shift no da el impulso")
 	# La cortina del dormitorio es un lugar visto: sin Afilar Garras no se trepa.
-	await _poner_en(Vector2(5975, Sala.SUELO))
+	await _poner_en(Vector2(6355, Sala.SUELO))
 	Input.action_press("mover_arriba")
 	await _esperar(30)
 	Input.action_release("mover_arriba")

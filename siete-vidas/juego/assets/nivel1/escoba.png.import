@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dwdwuelirocqi"
-path="res://.godot/imported/reja_frente.png-5c878545e89fd9fbfe3540c8bd380876.ctex"
+uid="uid://busvcg76l6sal"
+path="res://.godot/imported/escoba.png-79c447af8e2447934740ff7dd74879e9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/nivel1/reja_frente.png"
-dest_files=["res://.godot/imported/reja_frente.png-5c878545e89fd9fbfe3540c8bd380876.ctex"]
+source_file="res://assets/nivel1/escoba.png"
+dest_files=["res://.godot/imported/escoba.png-79c447af8e2447934740ff7dd74879e9.ctex"]
 
 [params]
 

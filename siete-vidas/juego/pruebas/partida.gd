@@ -1,7 +1,7 @@
 extends SceneTree
 ## Partida completa del nivel 1 v4 jugada por un bot con los mismos botones que una persona (moverse, saltar,
 ## agacharse, acción, zarpazo y maullar), SIN doble salto, Zoomies ni trepar: título, sala (sofá, rascador con
-## Valeria, vaso y perdón), recibidor (zapatero, maullido, popo táctico, llaves, librero y reja), cocina (tazón,
+## Valeria, vaso y perdón), recibidor (zapatero, maullido, popo táctico, llaves, librero y cajas de la mudanza), cocina (tazón,
 ## ratones, caja, pollo y calcetín del refrigerador), escalera escalón por escalón, pasillo (ensayo de A.S.P.I.,
 ## láser, puerta entornada), dormitorio (ropa y cajón), pelea con A.S.P.I. y balcón con el resumen del día.
 ## Siempre por las puertas. Mira la pantalla (el estado del juego) para decidir, como una persona.
@@ -171,62 +171,67 @@ func _cocina() -> void:
 	await _segundos(0.8)
 	await _ir_a(3390, 3.0)
 	_paso("Rompe la caja de cartón (snacks %d)" % felipe.snacks)
-	# Silla → mesón: el ratón que cuida el pollo y el pollo, en la cara de Valeria.
+	# Silla → estufa → mesón (cocina v2): el ratón que cuida el microondas, y el pollo en la cara de Valeria.
 	await _ir_a(3433)
 	await _subir_a(3433, Sala.SUELO - 55)
-	await _subir_a(3486, Sala.SUELO - 108)
-	await _cazar_raton(3470, 3570)
+	await _subir_a(3500, Sala.SUELO - 109)
+	await _ir_a(3800, 6.0)
+	await _cazar_raton(3790, 3925)
 	# El pollo espera sobre el microondas, fuera de la patrulla del ratón.
-	await _ir_a(3555)
-	await _subir_a(3600, Sala.SUELO - 162)
+	await _ir_a(3905)
+	await _subir_a(3950, Sala.SUELO - 163)
 	await _ir_a(Sala.POLLO.x + 30.0)
 	felipe.mirando = -1.0
 	await _tocar("interactuar")
 	await _segundos(1.2)
 	_paso("Roba el pollo de Valeria" if sala.travesuras.agenda.esta_cumplida("almuerzo") else "No pudo con el pollo")
 	# Microondas → refrigerador: el calcetín.
-	await _ir_a(3655)
-	await _subir_a(3716, Sala.SUELO - 216)
+	await _subir_a(Sala.CALCETIN_REFRIGERADOR.x, Sala.SUELO - 216)
 	await _segundos(0.5)
 	_paso("Calcetín del refrigerador (%d)" % sala.calcetines)
-	await _ir_a(3560, 4.0)
+	await _ir_a(3900, 4.0)
 	await _hasta(func() -> bool: return felipe.is_on_floor(), 1.0)
-	await _ir_a(3460, 4.0)
+	await _ir_a(3600, 6.0)
+	await _ir_a(3380, 6.0)
 	await _hasta(func() -> bool: return felipe.is_on_floor(), 1.0)
-	await _ir_a(3380, 4.0)
 	await _entrar("cocina<recibidor")
 
 
 func _librero_y_escalera() -> void:
-	# El librero es la escalera del gato: tres repisas de ~50 px y, desde la de arriba, se salta la reja.
+	# El librero es la escalera del gato: tres repisas de ~50 px y, desde la de arriba, se pasa por encima de las cajas
+	# de la mudanza (sólidas: desde el piso no se pasan).
 	await _ir_a(2240)
 	await _subir_a(2240, Sala.SUELO - 48)
 	await _subir_a(2240, Sala.SUELO - 103)
 	await _subir_a(2240, Sala.SUELO - 155)
 	await _ir_a(2252)
 	await _saltar(1.0, INF)
-	await _hasta(func() -> bool: return felipe.is_on_floor(), 2.0)
-	await _ir_a(Sala.REJA.end.x + 40.0, 2.0)
-	_paso("Salta la reja desde el librero (x %.0f)" % felipe.global_position.x)
-	# El pestillo, desde adentro: atajo de vuelta.
-	await _ir_a(Sala.REJA.end.x + 18.0, 2.0)
-	if felipe.objeto_cercano() == sala.reja:
+	await _hasta(func() -> bool: return felipe.is_on_floor() and felipe.global_position.y > Sala.SUELO - 2.0, 3.0)
+	await _ir_a(Sala.CAJAS.end.x + 40.0, 2.0)
+	_paso("Pasa las cajas de la mudanza desde el librero (x %.0f)" % felipe.global_position.x)
+	# Desde el segundo peldaño («desde arriba»), un manotazo tira la caja de arriba: atajo de vuelta.
+	await _subir_a(Sala.PELDANO_CAJAS.x, Sala.PELDANO_CAJAS.y)
+	if felipe.objeto_cercano() == sala.cajas:
+		felipe.mirando = -1.0
 		await _tocar("interactuar")
-		await _segundos(1.0)
-	_paso("Abre el pestillo (atajo)" if sala.reja.abierta_ya else "No abrió el pestillo")
+		await _segundos(1.4)
+	_paso("Tira la caja de arriba (atajo)" if sala.cajas.tirada_ya else "No tiró la caja")
+	# Baja del peldaño al piso, al pie de la escalera.
+	await _ir_a(Sala.ESCALERA_PIE.x + 44.0, 2.0)
+	await _hasta(func() -> bool: return felipe.is_on_floor() and felipe.global_position.y > Sala.SUELO - 2.0, 1.5)
 	await _entrar(Sala.PUERTA_ESCALERA)
 
 
 func _pasillo() -> void:
 	# Baúl → consola: el vaso; sale A.S.P.I. a limpiar y Felipe se aferra.
-	await _ir_a(4168)
-	await _subir_a(4220, Sala.SUELO - 47)
-	await _subir_a(4300, Sala.SUELO - 97)
-	await _ir_a(4382)
+	await _ir_a(4548)
+	await _subir_a(4600, Sala.SUELO - 47)
+	await _subir_a(4680, Sala.SUELO - 97)
+	await _ir_a(4762)
 	felipe.mirando = 1.0
 	await _tocar("interactuar")
 	await _segundos(1.0)
-	await _ir_a(4470, 3.0)
+	await _ir_a(4850, 3.0)
 	await _hasta(func() -> bool: return felipe.is_on_floor(), 1.0)
 	await _hasta(func() -> bool: return sala.ensayo.paso == EnsayoAspi.Paso.LIMPIA, 10.0)
 	Input.action_press("agacharse")
@@ -235,26 +240,26 @@ func _pasillo() -> void:
 	_paso("Ensayo: A.S.P.I. aspira el vaso y Felipe se aferra")
 	await _hasta(func() -> bool: return sala.ensayo.paso == EnsayoAspi.Paso.LISTO, 8.0)
 	# El láser: quieto, sin perseguirlo.
-	await _ir_a(4810)
+	await _ir_a(5190)
 	await _hasta(func() -> bool: return sala.travesuras.agenda.esta_cumplida("laser"), 8.0)
 	_paso("Ignora el láser (%s)" % ("se apaga" if sala.travesuras.agenda.esta_cumplida("laser") else "no"))
 	# La foto vergonzosa se cayó del cajón de la consola: vuelve caminando (el pasillo es 200 px más ancho), pasa
 	# agachado bajo la consola y sube por el baúl a buscarla.
-	await _ir_a(4450, 4.0)
+	await _ir_a(4830, 4.0)
 	Input.action_press("agacharse")
-	await _ir_a(4225, 6.0)
+	await _ir_a(4605, 6.0)
 	Input.action_release("agacharse")
 	await _segundos(0.3)
-	await _ir_a(4168)
-	await _subir_a(4220, Sala.SUELO - 47)
-	await _subir_a(4300, Sala.SUELO - 97)
-	await _ir_a(4335, 2.0)
+	await _ir_a(4548)
+	await _subir_a(4600, Sala.SUELO - 47)
+	await _subir_a(4680, Sala.SUELO - 97)
+	await _ir_a(4715, 2.0)
 	await _segundos(0.4)
 	_paso("Recoge la foto vergonzosa (fotos %d)" % sala.travesuras.recompensas.fotos)
-	await _ir_a(4440, 3.0)
+	await _ir_a(4820, 3.0)
 	await _hasta(func() -> bool: return felipe.is_on_floor(), 1.0)
 	# La puerta entornada del dormitorio se abre arañándola.
-	await _ir_a(4505)
+	await _ir_a(4885)
 	await _tocar("interactuar")
 	await _segundos(1.0)
 	_paso("Araña la puerta entornada")
@@ -262,23 +267,23 @@ func _pasillo() -> void:
 
 
 func _dormitorio() -> void:
-	await _ir_a(5612)
-	await _subir_a(5612, Sala.SUELO - 53)
-	await _subir_a(5670, Sala.SUELO - 65)
+	await _ir_a(5992)
+	await _subir_a(5992, Sala.SUELO - 53)
+	await _subir_a(6050, Sala.SUELO - 65)
 	await _ir_a(Sala.ROPA.x)
 	await _tocar("interactuar")
 	await _segundos(1.0)
 	_paso("Desordena la ropa doblada" if sala._ropa_firmada else "No pudo desordenar la ropa")
-	await _ir_a(5826)
+	await _ir_a(6206)
 	felipe.mirando = 1.0
 	await _tocar("interactuar")
 	await _segundos(1.5)
-	await _subir_a(5892, Sala.SUELO - 96)
+	await _subir_a(6272, Sala.SUELO - 96)
 	await _segundos(0.6)
 	_paso("Saquea el cajón (calcetines %d)" % sala.calcetines)
-	await _ir_a(5800, 4.0)
+	await _ir_a(6180, 4.0)
 	await _hasta(func() -> bool: return felipe.is_on_floor(), 1.0)
-	await _ir_a(5620, 4.0)
+	await _ir_a(6000, 4.0)
 	await _hasta(func() -> bool: return felipe.is_on_floor(), 1.0)
 	await _entrar("dormitorio<pasillo")
 	await _ir_a(Sala.DESCANSOS[1].get_center().x)
@@ -316,10 +321,10 @@ func _balcon() -> void:
 	if felipe.global_position.y < Sala.SUELO - 2.0:
 		await _bajar()
 	await _entrar(Sala.PUERTA_BALCON)
-	await _ir_a(7510)
-	await _subir_a(7550, Sala.SUELO - 32)
-	await _subir_a(7640, Sala.SUELO - 89)
-	await _ir_a(7680)
+	await _ir_a(7890)
+	await _subir_a(7930, Sala.SUELO - 32)
+	await _subir_a(8020, Sala.SUELO - 89)
+	await _ir_a(8060)
 	await _hasta(func() -> bool: return sala.sentado_en_baranda, 3.0)
 	_paso("Se sienta en la baranda y mira la ciudad")
 	await _segundos(2.4)
@@ -336,16 +341,16 @@ func _balcon() -> void:
 # --- Pelea --------------------------------------------------------------------------------------------------
 
 ## Tira al piso lo que haga falta para llenarle el depósito: lo del escritorio (vaso, taza de café), una maceta de la repisa
-## o, si no queda nada, pisa el teclado (la impresora escupe papeles). Después baja atravesando el mueble.
+## o, si no queda nada, pisa el teclado (los apuntes vuelan). Después baja atravesando el mueble.
 func _ensuciar() -> void:
 	var batalla := sala.batalla
 	if felipe.global_position.y > Sala.SUELO - 50.0:
 		# Al escritorio por la silla.
-		await _ir_a(6620, 4.0)
+		await _ir_a(7000, 4.0)
 		if _fuera_de_pelea():
 			return
-		await _subir_a(6655, Sala.SUELO - 55)
-		await _subir_a(6725, Sala.SUELO - 98)
+		await _subir_a(7035, Sala.SUELO - 55)
+		await _subir_a(7105, Sala.SUELO - 98)
 	var tiro := false
 	for vuelta in 3:
 		if _fuera_de_pelea():
@@ -357,11 +362,11 @@ func _ensuciar() -> void:
 		if objetivo == null:
 			break
 		if objetivo.position.y < Sala.SUELO - 120.0 and felipe.global_position.y > Sala.SUELO - 120.0:
-			await _ir_a(6815, 2.0)
-			await _subir_a(6850, Sala.SUELO - 151)
+			await _ir_a(7195, 2.0)
+			await _subir_a(7230, Sala.SUELO - 151)
 		if _fuera_de_pelea():
 			return
-		var lado := 1.0 if objetivo.position.x > 6760.0 else -1.0
+		var lado := 1.0 if objetivo.position.x > 7140.0 else -1.0
 		await _ir_a(objetivo.position.x - lado * 18.0, 2.0)
 		felipe.mirando = lado
 		await _tocar("interactuar")
@@ -372,7 +377,7 @@ func _ensuciar() -> void:
 		# Sin nada que tirar: pisa el teclado hasta que salga un papel.
 		await _ir_a(Sala.TECLADO.get_center().x, 2.0)
 		await _hasta(func() -> bool: return not batalla.manchas.is_empty(), 4.5)
-		_paso("Pisa el teclado: la impresora escupe papeles (depósito %d)" % batalla.deposito)
+		_paso("Pisa el teclado: vuelan los apuntes (depósito %d)" % batalla.deposito)
 	await _bajar_al_piso()
 
 
@@ -421,7 +426,7 @@ func _esperar_en_el_piso() -> void:
 		_paso("Come un snack del bolsillo (corazones %d, snacks %d)" % [felipe.corazones, felipe.snacks])
 		return
 	if not batalla.limpiando and absf(dx) < 90.0 and felipe.is_on_floor():
-		var lejos := clampf(aspi.global_position.x + (140.0 if dx > 0.0 else -140.0), 6500.0, 7020.0)
+		var lejos := clampf(aspi.global_position.x + (140.0 if dx > 0.0 else -140.0), 6880.0, 7400.0)
 		await _ir_a(lejos, 1.0)
 		return
 	await _cuadro()

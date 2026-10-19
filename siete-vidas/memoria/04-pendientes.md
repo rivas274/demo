@@ -2,6 +2,9 @@
 
 Orden acordado: un tema a la vez, con propuesta y aprobación.
 
+- [ ] **Publicar la ficha de concepto en línea** con la acción «Tirar» (cajas de la mudanza, 2026-10-19): la copia local ya está regenerada; el creador pidió no publicarla en esta pasada.
+- [ ] **Mostrar al creador** la cocina de 1340 px y las cajas de la mudanza (`cocina-escalera-antes-despues.png`, `cocina-escalera-detalles.png`, `nivel1-v4h.mp4`).
+
 ## Ahora (Fase 1 – Concepto y pilares)
 
 1. [x] **Pilares** (2026-10-18): `siete-vidas/diseno/pilares.md`. Biblia en línea actualizada; las reglas entraron como R17 a R19.

@@ -122,6 +122,14 @@ func decir(quien: String, texto: String, animo := 0, urgente := false) -> bool:
 	return true
 
 
+## Cierra lo que se esté diciendo y vacía la cola (por ejemplo, al cambiar de escena o empezar una cinemática).
+func limpiar() -> void:
+	_cola.clear()
+	_caja.visible = false
+	hablando = ""
+	texto_actual = ""
+
+
 ## Hay una frase en pantalla.
 func ocupado() -> bool:
 	return _caja.visible

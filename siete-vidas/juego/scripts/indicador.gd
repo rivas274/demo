@@ -38,14 +38,15 @@ const SHADER := """
 shader_type canvas_item;
 uniform vec4 color : source_color = vec4(1.0, 0.97, 0.78, 1.0);
 uniform vec2 paso = vec2(0.01, 0.01);
-float alfa(vec2 uv) {
-	if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) { return 0.0; }
-	return texture(TEXTURE, uv).a;
+float dentro(vec2 uv) {
+	return step(0.0, uv.x) * step(0.0, uv.y) * step(uv.x, 1.0) * step(uv.y, 1.0);
 }
 void fragment() {
-	float a = alfa(UV);
-	float v = max(max(alfa(UV + vec2(paso.x, 0.0)), alfa(UV - vec2(paso.x, 0.0))),
-		max(alfa(UV + vec2(0.0, paso.y)), alfa(UV - vec2(0.0, paso.y))));
+	vec2 dx = vec2(paso.x, 0.0);
+	vec2 dy = vec2(0.0, paso.y);
+	float a = texture(TEXTURE, UV).a * dentro(UV);
+	float v = max(max(texture(TEXTURE, UV + dx).a * dentro(UV + dx), texture(TEXTURE, UV - dx).a * dentro(UV - dx)),
+		max(texture(TEXTURE, UV + dy).a * dentro(UV + dy), texture(TEXTURE, UV - dy).a * dentro(UV - dy)));
 	COLOR = (a < 0.5 && v > 0.5) ? color : vec4(0.0);
 }
 """
@@ -73,6 +74,8 @@ func _input(evento: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if not is_instance_valid(objeto):
+		objeto = null
 	var nuevo: Node2D = null
 	if felipe and _puede_mostrar():
 		nuevo = felipe.objeto_cercano()

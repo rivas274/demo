@@ -2,8 +2,13 @@
 y la lleva a su tamaño en el juego (escala de gato: alturas de muebles casi reales, 1,21 px por cm; lo que le
 importa al gato, más grande; ver CLAUDE.md), sin suavizar los pixeles.
 
+Cada pieza se recorta a su borde opaco antes y después de escalar (hallazgo M1: sin margen transparente, así
+los muebles se apoyan exacto en su colisión) y se le quitan los pixeles sueltos de menos de 4 px.
+Valeria (poses y caminar) se lleva a una sola escala (de pie, 200 px) y su caminar se alinea por los pies y la
+cabeza (preparar_valeria()).
+
 Uso: python3 preparar_arte_nivel.py
-Lee siete-vidas/arte/referencias/gemini/ y escribe siete-vidas/juego/assets/nivel1/.
+Lee siete-vidas/arte/referencias/gemini/ y escribe siete-vidas/juego/assets/nivel1/ y assets/personajes/.
 Necesita numpy y scipy (pip install numpy scipy).
 """
 from pathlib import Path
@@ -15,6 +20,7 @@ from scipy import ndimage
 RAIZ = Path(__file__).resolve().parent.parent
 ORIGEN = RAIZ / "arte" / "referencias" / "gemini"
 DESTINO = RAIZ / "juego" / "assets" / "nivel1"
+PERSONAJES = RAIZ / "juego" / "assets" / "personajes"
 
 # nombre -> (hoja, índice de la pieza en la hoja, (ancho, alto) en el juego, recorte opcional en fracciones de la pieza)
 # El índice sigue el orden de piezas() (filas de arriba abajo, luego de izquierda a derecha).
@@ -82,13 +88,45 @@ PIEZAS = {
     "lata_v2": ("comida-grande", 1, (32, 36), None),
     "pollo": ("comida-grande", 2, (64, 50), None),
     "bolsita": ("comida-grande", 3, (28, 32), None),
+    "reja_frente": ("reja-antifuga", 0, (48, 182), (0.0, 0.0, 0.69, 1.0)),  # solo la cara de frente, 48 px (decisión del creador)
+    "banquito": ("muebles-cocina", 4, (52, 54), None),  # banquito del dormitorio, 45 cm
+    # Tanda 3C (nivel 1 v4): sala, recibidor, cocina y ventanas. arriba-extra.png no llegó: baúl, consola,
+    # cojín con hueco, retrato familiar, cómoda abierta, ropa, caja de recuerdos, escritorio con pantalla y
+    # papeles se dibujan por código o con piezas que ya había.
+    "rascador": ("sala-extra", 0, (100, 165), None),  # plataformas medidas en el arte (Sala.PIEZAS)
+    "sofa_plastico": ("sala-extra", 1, (240, 102), None),
+    "sofa_aranado": ("sala-extra", 2, (240, 98), None),
+    "cesta_vacia": ("sala-extra", 8, (60, 35), None),
+    "cesta_3": ("sala-extra", 9, (60, 35), None),
+    "cesta_llena": ("sala-extra", 10, (60, 42), None),
+    "zapatero": ("recibidor-cocina-extra", 0, (160, 98), None),  # 36 px libres debajo (patas estiradas)
+    "llaves": ("recibidor-cocina-extra", 1, (32, 31), None),  # se tiran: lado menor ≥ 24 (R8)
+    "microondas": ("recibidor-cocina-extra", 2, (98, 54), None),  # escala de gato: escalón de 54 px
+    "iman_manzana": ("recibidor-cocina-extra", 3, (11, 12), None),
+    "iman_naranja": ("recibidor-cocina-extra", 4, (11, 12), None),
+    "iman_foto": ("recibidor-cocina-extra", 7, (12, 13), None),
+    "iman_pez": ("recibidor-cocina-extra", 9, (14, 11), None),
+    "raton_volcado": ("recibidor-cocina-extra", 11, (60, 39), None),
+    "caja_rota": ("recibidor-cocina-extra", 12, (70, 38), None),
+    "ventana_sala": ("ventanas-patio", 0, (180, 151), (0.0, 0.24, 1.0, 1.0)),
+    "balcon_mini": ("ventanas-patio", 0, (54, 36), (0.30, 0.0, 0.645, 0.205)),
+    "ventana_pasillo": ("ventanas-patio", 1, (180, 54), None),  # el alféizar es la fila del borde de la repisa
     # A.S.P.I. (escala de gato: más grande que una real); la gigante es imaginación de Felipe.
     "aspi": ("aspi-gemini-1", 0, (76, 47), None),
     "aspi_gigante": ("aspi-gigante", 0, (330, 270), None),
 }
 
 # Piezas con huecos (entre patas, barrotes, respaldos): el blanco encerrado también es fondo.
-HUECOS = {"comedor", "aparador", "banco", "baranda", "librero", "perchero", "reja", "lampara", "escritorio", "repisa", "escalera", "puerta_balcon", "mesa_v2", "silla_v2", "librero_v2", "escalera_baranda", "reja_v2"}
+HUECOS = {"llaves", "rascador", "zapatero", "reja_frente", "banquito", "comedor", "aparador", "banco", "baranda", "librero", "perchero", "reja", "lampara", "escritorio", "repisa", "escalera", "puerta_balcon", "mesa_v2", "silla_v2", "librero_v2", "escalera_baranda", "reja_v2"}
+
+# Piezas con patas que hay que alargar para dejar el hueco de agachado (R8): nombre -> (fracción de la pieza donde
+# empiezan las patas, alto de las patas en el juego).
+PATAS = {"zapatero": (0.76, 36)}
+
+# Valeria (tanda 3B): poses y caminar, a una sola escala (de pie mide 200 px, 3 Felipes).
+VALERIA_POSES = ("valeria-poses", ["neutra", "enojada", "perdonando", "grabando", "serie"])
+VALERIA_CAMINAR = ("valeria-caminar", 8)
+VALERIA_ALTO = 200
 
 # Texturas que se repiten: nombre -> (hoja, índice, tamaño del mosaico, suavizado).
 # El suavizado (0 a 1) acerca cada pixel al color promedio: las paredes no deben competir con Felipe (regla R14).
@@ -150,6 +188,78 @@ def sin_huecos(imagen):
     return Image.fromarray(a, "RGBA")
 
 
+def recortar_opaco(imagen):
+    """Recorta la imagen al rectángulo de sus pixeles opacos (sin margen transparente)."""
+    caja = imagen.getchannel("A").point(lambda v: 255 if v > 0 else 0).getbbox()
+    return imagen.crop(caja) if caja else imagen
+
+
+def sin_sueltos(imagen, minimo=4):
+    """Quita los grupos de pixeles opacos de menos de `minimo` pixeles (restos del fondo)."""
+    a = np.asarray(imagen).copy()
+    opaco = a[:, :, 3] > 0
+    etiquetas, cantidad = ndimage.label(opaco)
+    if cantidad:
+        tamanos = ndimage.sum(opaco, etiquetas, range(1, cantidad + 1))
+        for i, tamano in enumerate(tamanos, start=1):
+            if tamano < minimo:
+                a[etiquetas == i, 3] = 0
+    return Image.fromarray(a, "RGBA")
+
+
+def escalar(imagen, tamano):
+    """Recorta al borde opaco, escala sin suavizar y vuelve a recortar (M1)."""
+    imagen = recortar_opaco(imagen)
+    return recortar_opaco(sin_sueltos(imagen.resize(tamano, Image.NEAREST)))
+
+
+def con_patas(imagen, tamano, fraccion, alto_patas):
+    """Escala el cuerpo y las patas por separado: las patas quedan de `alto_patas` (hueco para pasar agachado)."""
+    imagen = recortar_opaco(imagen)
+    corte = int(imagen.height * fraccion)
+    cuerpo = imagen.crop((0, 0, imagen.width, corte)).resize((tamano[0], tamano[1] - alto_patas), Image.NEAREST)
+    patas = imagen.crop((0, corte, imagen.width, imagen.height)).resize((tamano[0], alto_patas), Image.NEAREST)
+    salida = Image.new("RGBA", tamano, (0, 0, 0, 0))
+    salida.paste(cuerpo, (0, 0))
+    salida.paste(patas, (0, tamano[1] - alto_patas))
+    return recortar_opaco(sin_sueltos(salida))
+
+
+def preparar_valeria():
+    """Poses de Valeria (valeria_<pose>.png) y su caminar (valeria_caminar.png, 8 cuadros iguales) a una sola escala.
+    El caminar de Gemini no trae los pies ni el cuerpo en el mismo lugar: cada cuadro se alinea por la línea de los
+    pies y por el centro de la cabeza, para que no tiemble."""
+    PERSONAJES.mkdir(parents=True, exist_ok=True)
+    hoja, nombres = VALERIA_POSES
+    imagen, cajas = piezas(hoja)
+    escala = VALERIA_ALTO / recortar_opaco(imagen.crop(cajas[0])).height
+    for indice, nombre in enumerate(nombres):
+        pose = sin_huecos(recortar_opaco(imagen.crop(cajas[indice])))
+        tam = (round(pose.width * escala), round(pose.height * escala))
+        escalar(pose, tam).save(PERSONAJES / f"valeria_{nombre}.png")
+    hoja, cantidad = VALERIA_CAMINAR
+    imagen, cajas = piezas(hoja)
+    cuadros = []
+    for caja in cajas[:cantidad]:
+        cuadro = sin_huecos(recortar_opaco(imagen.crop(caja)))
+        cuadros.append(escalar(cuadro, (round(cuadro.width * escala), round(cuadro.height * escala))))
+    # Centro de la cabeza: promedio de x de los pixeles opacos del 25 % de arriba.
+    centros = []
+    for c in cuadros:
+        a = np.asarray(c)[:, :, 3] > 0
+        ys, xs = np.nonzero(a[: max(1, c.height // 4)])
+        centros.append(xs.mean())
+    izquierda = max(centros)
+    derecha = max(c.width - centro for c, centro in zip(cuadros, centros))
+    ancho = int(np.ceil(izquierda + derecha)) + 2
+    alto = max(c.height for c in cuadros)
+    salida = Image.new("RGBA", (ancho * cantidad, alto), (0, 0, 0, 0))
+    for i, (c, centro) in enumerate(zip(cuadros, centros)):
+        salida.paste(c, (i * ancho + int(round(ancho / 2 - centro)), alto - c.height))
+    salida.save(PERSONAJES / "valeria_caminar.png")
+    print(f"Valeria: escala {escala:.4f}, caminar de {cantidad} cuadros de {ancho} x {alto}")
+
+
 def recortar(imagen, caja, fraccion):
     if fraccion:
         x0, y0, x1, y1 = caja
@@ -168,7 +278,10 @@ def main():
         recorte = recortar(imagen, cajas[indice], fraccion)
         if nombre in HUECOS:
             recorte = sin_huecos(recorte)
-        recorte.resize(tamano, Image.NEAREST).save(DESTINO / f"{nombre}.png")
+        if nombre in PATAS:
+            con_patas(recorte, tamano, *PATAS[nombre]).save(DESTINO / f"{nombre}.png")
+        else:
+            escalar(recorte, tamano).save(DESTINO / f"{nombre}.png")
     for nombre, (hoja, indice, tamano, suavizado) in MOSAICOS.items():
         if hoja not in hojas:
             hojas[hoja] = piezas(hoja)
@@ -198,6 +311,7 @@ def main():
             imagen = recortar(imagen, (0, 0, imagen.width, imagen.height), fraccion)
         imagen.resize(tamano, Image.NEAREST).save(DESTINO / f"{nombre}.png")
     print(f"{len(PIEZAS) + len(MOSAICOS) + len(FONDOS)} imágenes en {DESTINO}")
+    preparar_valeria()
 
 
 if __name__ == "__main__":

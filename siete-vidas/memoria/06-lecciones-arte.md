@@ -33,9 +33,14 @@ Léelas **antes** de diseñar, construir o revisar cualquier escenario. Cada una
 | 19 | Rectángulo blanco alrededor del sofá (el contorno del aviso) que parece un recorte pegado | Nada de cajas o rectángulos de depuración a la vista; el resalte sigue la silueta |
 | 20 | Simetría perfecta, objetos en fila como catálogo, clones (seis zapatillas iguales) | Islas con intención, alturas variadas, nada clonado |
 | 21 | Nada se mueve; sin desgaste ni historias | Algo vive en cada cuarto; pelos, arañazos y objetos personales |
+| 22 | Muebles sin sombra de contacto | Sombra de 2 px de alto bajo cada pata y 1 px de oclusión detrás de los muebles grandes (Gemini) |
+| 23 | Objetos cortados al ras del borde de la pantalla | Nada importante se corta en el borde: o entra entero o sale claramente |
+| 24 | Luces y sombras sin una dirección común | Una dirección de luz por cuarto (por defecto arriba a la izquierda, o la ventana); sombras y brillos la siguen |
+| 25 | Puertas abiertas sin grosor de muro | Toda abertura muestra el grosor del muro (jamba con 2 tonos) |
+| 26 | Halo circular de luz pegado en la pared (efecto "filtro") | La luz cae en superficies (mesa, piso) en escalones; nada de círculos suaves sobre el tapiz |
 
 ## Antes de dar por terminado un escenario
 
-1. Recorre las 21 filas de arriba contra capturas reales.
+1. Recorre todas las filas de arriba contra capturas reales.
 2. Si dudas de alguna, pásale la captura a Gemini.
 3. Pregúntate si el creador lo vería en 5 segundos. Si la respuesta es sí, no está terminado.

@@ -17,7 +17,7 @@
 - **Subir imágenes locales:** `create_asset_upload`, luego PUT con curl a la URL devuelta, luego `finalize_asset_upload`.
 - **Red del entorno:** deben estar permitidos `mcp.spritecook.ai` y `api.spritecook.ai`; sin el segundo no se pueden descargar ni ver las imágenes.
 - **Proyecto en SpriteCook:** "Siete Vidas, Cero Disculpas" (nombre antiguo del juego; se deja así en SpriteCook), id `126fcb42-c3f6-40b5-9f75-42715fbdce40`. Pasar siempre `project_id`.
-- **Créditos:** 800 del plan de pago; quedan **264** (2026-10-19, tras subir_escalera, maullar y aranar; reserva aprobada de 26 para rehacer). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
+- **Créditos:** 800 del plan de pago; quedan **244** (2026-10-19: subir_escalera, maullar, aranar y el caminar de Valeria con 20 de la reserva aprobada, porque la hoja de Gemini no alternaba las piernas). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
 - **Regla de oro:** mostrar al creador el prompt, el modelo, los ajustes y el costo, y esperar aprobación antes de cada llamada que gaste créditos.
 
 ### Modelos y costos útiles (consultados el 2026-10-17)
@@ -113,3 +113,5 @@ Lista completa en `siete-vidas/juego/assets/CREDITOS.md` (también va en los cr�
 - **Retoque de pixel art:** Pixelorama (gratis, código abierto) o Aseprite.
 - **Niveles:** TileMap de Godot y LDtk.
 - **Audio:** Furnace o LMMS (música), jsfxr y Audacity (efectos).
+
+- **Valeria caminar (SpriteCook, 2026-10-19, 20 créditos):** desde `valeria_neutra.png` con margen a 110×210 (asset `4dfe9315-8e8c-48aa-803e-1a1bf0c25694`), animación `339c7c01-783d-4ea4-8d60-20d82b53bc8e`, 8 cuadros de 224×224 con Valeria de ~200 px; archivo `siete-vidas/arte/valeria/valeria-caminar-spritecook.png`. Reemplaza la hoja de Gemini.

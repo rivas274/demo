@@ -1,7 +1,7 @@
 # Nivel 1, "La Gran Fuga": plan de arte y animaciones (para aprobar antes de gastar)
 
 Fecha: 2026-10-19 · Autor: director de arte · Estado: **propuesta; no se ha gastado nada.**
-Base: propuesta v4 aprobada (`nivel-01-propuesta-v4.md`, sección 9 y "Decisiones del creador"), revisión del 2026-10-18 (B2, G1, G3, G4, G6, G7, G8, G9, G11, M1), tandas 1 y 2 de Gemini (`nivel-01-gran-fuga.md`) y lo que ya hay en `siete-vidas/juego/assets/nivel1/`.
+Base: propuesta v4 aprobada (hoy el documento vigente `nivel-01-gran-fuga.md`), revisión del 2026-10-18 (B2, G1, G3, G4, G6, G7, G8, G9, G11, M1), tandas 1 y 2 de Gemini y lo que ya hay en `siete-vidas/juego/assets/nivel1/`.
 
 Reglas que mandan (CLAUDE.md): toda animación de Felipe sale **directamente de Felipe A** con `animate_game_art`; 8 cuadros de 106×106 a una sola escala, 0,72; cabeza en las filas 25 a 70; estirar y aplastar ±8 % como máximo; objetos aparte, por código; escala de gato (1,21 px/cm en alturas, lo que le importa al gato al doble, nada interactuable menor a 24 px **por su lado menor**); humanos de 3 Felipes con proporciones normales.
 

@@ -54,6 +54,11 @@ SONIDOS = {
     + tono(110, 55, 0.7, "cuadrada", 0.45, ruido=0.4),
     "succion": lambda: tono(90, 600, 1.4, "seno", 0.3, ruido=0.85),
     "puf": lambda: tono(500, 70, 0.35, "seno", 0.35, ruido=0.6),
+    # Nivel 1 v4: acciones de gato y reacciones.
+    "maullido": lambda: tono(520, 780, 0.12, "triangulo", 0.3) + tono(780, 420, 0.3, "triangulo", 0.3),
+    "aranar": lambda: tono(1400, 900, 0.07, "seno", 0.2, ruido=0.9) + tono(1300, 800, 0.07, "seno", 0.2, ruido=0.9),
+    "ronroneo": lambda: tono(55, 60, 0.45, "cuadrada", 0.18, ruido=0.4) + tono(60, 55, 0.45, "cuadrada", 0.18, ruido=0.4),
+    "resorte": lambda: tono(300, 900, 0.08, "seno", 0.3) + tono(900, 250, 0.18, "seno", 0.3),
 }
 
 if __name__ == "__main__":

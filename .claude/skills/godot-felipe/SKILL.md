@@ -11,7 +11,7 @@ Antes de tocar nada, lee `siete-vidas/juego/scripts/felipe.gd` en la parte que v
 ## 1. Cómo está armado Felipe
 
 - `Felipe` es un `CharacterBody2D`. Todo el movimiento va en `_physics_process`: leer entrada → `match estado` → ajustar `velocity` → `move_and_slide()` → `_actualizar_suelo()` → `_actualizar_animacion()`.
-- **Estado principal:** `enum Estado { SUELO, AIRE, ZOOMIES, ZARPAZO, COMIENDO, ATERRIZANDO, OCIO, DESMAYADO, ARANANDO, MAULLANDO, SUBIENDO_ESCALON }`.
+- **Estado principal:** `enum Estado { SUELO, AIRE, ZOOMIES, ZARPAZO, COMIENDO, ATERRIZANDO, OCIO, DESMAYADO, ARANANDO, MAULLANDO, SUBIENDO_ESCALON, RONRONEANDO }` (12: el tope de la sección 3 antes de pensar en una máquina por nodos).
 - **Habilidades por nivel:** `tiene_doble_salto`, `tiene_zoomies` y `puede_trepar` (`@export`, apagadas por defecto: en el nivel 1 no están). Las pruebas que las usan las prenden explícitamente.
 - **Estados paralelos como booleanos:** `agachado` y `trepando` conviven con el enum (se puede estar en SUELO y agachado). Es la forma barata de una máquina paralela: no crees `Estado.AGACHADO`.
 - **Perillas** con `@export` (velocidades, gravedad, tiempos) y reglas fijas como `const` (`ESCALA_SPRITE`, `DEFORMACION_MAXIMA`, `CUADRO_*`, `ALTO_DE_PIE`). Nombres en español y tipos en todo.
@@ -79,7 +79,7 @@ Otras reglas: `animation_finished` solo para animaciones sin bucle; no llames `p
 
 ## 6b. Jefes: entrada y "jugo"
 
-Toda pelea usa `PresentacionJefe`; la entrada sigue estos 8 pasos (del video "5 ways to make your boss entry feel EPIC", @motionbykrit), y cada jefe solo pone sus datos:
+Toda pelea usa `PresentacionJefe`; la entrada sigue estos 8 pasos (del video "5 ways to make your boss entry feel EPIC", @motionbykrit), que están como datos en `PresentacionJefe.PASOS` (y `PASOS_CORTOS`, 1 s, al volver tras perder una vida). Cada jefe solo pone sus datos (nombre, título, `texto_rugido`, colores) y escucha `paso_empezado(nombre)` y `empujon(n)` para sus efectos; la presentación empieza recién cuando terminó el fundido de la puerta:
 1. **Sin vuelta atrás:** se cierra la puerta detrás de Felipe (con una frase suya).
 2. **La espera:** cuarto vacío, retumbo grave que crece, polvo o pelusa que tiembla.
 3. **Revelar despacio:** la cámara empieza abajo (ruedas, pies) y sube hasta la cara.

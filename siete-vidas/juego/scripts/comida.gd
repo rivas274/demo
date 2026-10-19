@@ -9,7 +9,7 @@ const GRUPO := "interactuables"
 ## Se la comieron (cuando la boca llega): el nivel la usa para la Agenda (el pollo de Valeria).
 signal comido(comida: Comida)
 
-## "tazon" (croquetas en el piso de la cocina), "pollo" (el almuerzo de Valeria), "lata_v2" o "bolsita" (premios).
+## "tazon" (croquetas en el piso de la cocina) o "pollo" (el almuerzo de Valeria, en el mesón).
 var tipo: String
 
 

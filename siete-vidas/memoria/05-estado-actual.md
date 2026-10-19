@@ -8,19 +8,21 @@ Actualizado: 2026-10-19. **Léelo al empezar un chat nuevo** para retomar sin re
 
 ## En curso
 
-- **Construcción del nivel 1 v4** (`siete-vidas/diseno/nivel-01-propuesta-v4.md`, aprobado; plan de arte en `nivel-01-plan-arte.md`). Se hace en dos partes:
-  - **PARTE A (hecha, 2026-10-19): sistemas reutilizables y acciones de Felipe.** Ver "Ya cerrado (2026-10-19)".
-  - **PARTE B (sigue): el nivel en sí.** Mapa nuevo (sección 10), escalera de fondo con reja y librero, Valeria en escena (4 poses + caminar de Gemini, ya en `arte/referencias/gemini/`), pelea nueva con A.S.P.I., balcón y video. Lo que necesita de la parte A está en "Para la PARTE B" abajo.
+- **Nivel 1 v4 construido** (PARTE A y PARTE B, 2026-10-19). Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md`. Sigue: mostrarle al creador el video y las capturas, y una revisión nueva con `revisor-niveles`.
 
 ## Ya cerrado (2026-10-19)
 
-- **PARTE A del nivel 1 v4, en el juego** (todas las pruebas pasan; bot completo):
-  - **Felipe:** `maullar` (Q / B; el maullido sale en el cuadro 3 y lo oyen los nodos del grupo `oyen_maullidos`), `aranar` (acción frente a sofá, rascador o puerta entornada; marcas y pelusa en los cuadros 3 y 5; garras afiladas → CRÍTICO), `subir_escalera` (función `subir_escalera(peldaños)` / `subir_escalon(destino)`, un ciclo por escalón con saltito; bajar con cuadros de saltar y caer), comer un snack del bolsillo (mantener acción 0,6 s sin nada cerca; bolsillo de 5, empieza con 3), y **todo efecto en su cuadro de impacto** (zarpazo y manotazo en el 4, comer en el 3: arregla B5 en vaso, reja y comida). Doble salto, Zoomies y trepar **apagados** (`tiene_doble_salto`, `tiene_zoomies`, `puede_trepar`).
-  - **Sistemas (scripts nuevos):** `Travesuras` (los junta), `Agenda` (8 travesuras del nivel 1, 3 secretas), `Recompensas` (nido con ranura cada 10, galería, bolsillo, caminos), `Libreta` (Tab / View), `Hud` (contadores arriba y carteles «¡TRAVESURA CUMPLIDA!» / «¡TRAVESURA SECRETA!»), `ResumenDia` (tipo Balatro), `Dialogo` + `Frases` (retratos de Felipe, Valeria y A.S.P.I.; una sola cola; no repite; descarta lo viejo; nunca tapa a Felipe), `Jugo`, `Indicador` (contorno + burbuja con ícono del botón y verbo), `IconosBotones` (Kenney Input Prompts Pixel, CC0), `Recogible`, `Aranable`, `Rascador` (teatro para Valeria con interfaz de testigo), `Chispas`.
-  - **En el nivel viejo (v3), mínimo:** el sofá ya se araña (línea "sofa" de la agenda: el plástico se rompe y sale un calcetín). El bot prende doble salto, Zoomies y trepar porque el mapa viejo los necesita; `prueba_nivel` comprueba que sin Afilar Garras la cortina no se trepa.
-  - **Arte nuevo en el juego:** hojas `maullar`, `aranar`, `subir_escalera` (escala única 0,72), retratos de Valeria y A.S.P.I. recortados de la tanda 3B (`herramientas/preparar_retratos.py`), íconos de Kenney.
-  - **Prueba nueva:** `prueba_acciones.gd` (85 comprobaciones), también en GitHub Actions. Capturas: `pruebas/capturas_sistemas.gd` y `diseno/revisiones/capturas/2026-10-19-parte-a-*.png`.
-  - **Ficha:** copia local regenerada con las filas nuevas; **falta volver a publicar la versión en línea** (lo hace el creador o la sesión principal).
+- **PARTE B del nivel 1 v4, en el juego** (todas las pruebas pasan; el bot termina con la agenda 8 de 8):
+  - **Mapa:** 7 cuartos (sala 1280, recibidor 1200, cocina 960, pasillo 1040, dormitorio 720, estudio 640, balcón 640) con el arte nuevo de Gemini. Cada colisión pisable sale de la fila opaca de su arte (`Sala.PIEZAS`, ±2 px medido por la prueba); puertas de una sola hoja; nada se cruza con una puerta ni con la escalera; ningún hueco sin salida. Sin avisos ni fila de controles: Indicador y primeras frases de Felipe (`Sala.LECCIONES`).
+  - **Escalera de fondo con reja anti-fuga** (48 px, colisión fina, cartel "PIPE: NO" por código): librero de 3 repisas, 7 escalones con `subir_escalera`, pasamanos delante al 70 %, pestillo = atajo.
+  - **Valeria** (`scripts/valeria.gd`): 4 poses + de pie + caminar a una sola escala (200 px); va al ruido, regaña, perdona al frotarse (acción nueva de Felipe, "Encantar"), graba el rascador de espaldas al sofá, se encierra en la cocina y la abre si Felipe maúlla del otro lado; arriba no oye (audífonos). Cumple las interfaces de testigo y de maullidos.
+  - **Agenda del nivel 1** conectada (`Sala.AGENDA_SITIOS`): perdón, sofá, popo táctico, almuerzo, láser, cajón, teclado y desenchufar; el balcón termina con el resumen del día.
+  - **Pelea con A.S.P.I.:** `PresentacionJefe` con los 8 pasos como datos (`PASOS`, `PASOS_CORTOS`, señales `paso_empezado` y `empujon`), que empieza después del fundido (B1); embestida anunciada, soplido contra el que acampa, bolas en arco, lo roto vuelve de a uno, papeles del teclado, «¡CLIC!» con congelado y polvo, entrada corta al volver. Ensayo sin daño en el pasillo (`scripts/ensayo_aspi.gd`).
+  - **Felipe:** acción nueva **frotarse** (`Felipe.frotarse(objetivo)`, estado `RONRONEANDO`, animación `ronronear`). Tres lugares: memoria (tabla Acciones de Felipe), ficha (plantilla y copia local regenerada; **falta publicar la versión en línea**) y juego (prueba en `prueba_acciones`).
+  - **Herramienta de arte:** recorte al borde opaco antes y después de escalar (M1), Valeria a una sola escala con el caminar alineado, patas del zapatero, piezas de la tanda 3C; se borró el arte descartado (puertas con poste, comedor de una pieza, librero viejo, rejas apiladas, plato, lata, juguetes, perchero, escalera vieja).
+  - **Pruebas:** reglas (R1–R19 en lo medible, arte contra colisión, lado menor ≥ 24, puertas medidas en la imagen, rectángulo sagrado), escenario (sin doble salto y sin trampas), nivel de punta a punta, jefe, mecánicas, movimiento, acciones y el bot. Capturas de cada cuarto: `pruebas/capturas_nivel.gd`.
+  - **No llegó `arriba-extra.png`:** esas piezas van dibujadas por código (ver `nivel-01-gran-fuga.md`, sección 10).
+- **PARTE A del nivel 1 v4** (acciones de Felipe y sistemas reutilizables): maullar, arañar, subir escalón, snack del bolsillo, efectos en el cuadro de impacto; Agenda, libreta, HUD, resumen del día, diálogo con retratos, jugo, Indicador (Kenney), recompensas, rascador, arañables. Prueba `prueba_acciones.gd`.
 
 ## Ya cerrado (2026-10-18)
 
@@ -35,16 +37,6 @@ Actualizado: 2026-10-19. **Léelo al empezar un chat nuevo** para retomar sin re
 - **Biblia en línea actualizada** (título, pilares, peso, 9 vidas).
 - **Reglas R17 a R19** (de los pilares) en `reglas-de-niveles.md`; el nivel 1 se ajusta al rehacerlo.
 - **Recursos gratis:** Kenney (CC0) sirve para sonido, partículas e interfaz; nunca personajes ni fondos (consistencia de estilo).
-
-## Para la PARTE B (lo que dejó lista la parte A)
-
-- `sala.travesuras` (un `Travesuras` con `Agenda.NIVEL_1`): llamar `travesuras.cumplir(id, donde)` cuando pase cada travesura (`perdon`, `sofa`, `popo`, `almuerzo`, `laser`, `cajon`, `teclado`, `desenchufar`); `donde` = sobre algo pisable. `Recompensas.camino_abierto(id)` avisa los caminos (`puerta_cocina`, `balcon`). Al final, `travesuras.mostrar_resumen()` en el balcón (en lugar de la pantalla final actual).
-- **Valeria** debe cumplir la interfaz de testigo del rascador: grupo `Rascador.GRUPO_TESTIGOS`, `ve(punto) -> bool`, `visita: int` (sube al volver a entrar al cuarto) y `perdonar(felipe, motivo)`; y oír maullidos: grupo `Felipe.GRUPO_OYENTES` con `oir_maullido(felipe)`. Sus frases van con `travesuras.decir_valeria(evento)` (agregar eventos en `Frases.VALERIA`) y retratos 0 neutra, 1 enojada, 2 derretida, 3 grabando. Contar perdones con `travesuras.contar_perdon()`.
-- **Escalera:** `felipe.subir_escalera(peldaños)` (7 escalones de unos 21 px; 0,2 s cada uno) y la señal `escalera_terminada`; dibujar el pasamanos delante. La reja nueva usa `dar_manotazo(_abrir)` como la actual.
-- **Objetos:** `Aranable` para el sofá con plástico (`aranazos_para_romper`) y la puerta entornada del dormitorio (`aranazos_para_romper = 1`, señal `roto`); `Rascador` en la sala (sus plataformas, si las tiene, son piezas del nivel). Todo interactuable puede dar `verbo()`, `arte_indicador()` o `rect_indicador()` y `primera_frase()` para el Indicador (la primera vez sale la línea de Felipe con el ícono, en vez de los avisos de abajo).
-- Quitar los `AVISOS` y la fila de controles de abajo (M2): ahora los reemplazan el Indicador y las primeras frases. Que el bot vuelva a jugar **sin** doble salto, Zoomies ni trepar.
-- Pendiente de antes (sigue valiendo para la PARTE B): B1 (entrada del jefe en negro), B2–B4, G1–G13, M1–M5 de la revisión del 2026-10-18; R17–R19 en `prueba_reglas_nivel.gd`; pruebas nuevas de arte contra colisión, comida ≥ 24 px y entrar al jefe por la puerta.
-
 
 ## Para diseñar después
 

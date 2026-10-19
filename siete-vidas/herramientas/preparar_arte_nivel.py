@@ -26,34 +26,24 @@ PERSONAJES = RAIZ / "juego" / "assets" / "personajes"
 # El índice sigue el orden de piezas() (filas de arriba abajo, luego de izquierda a derecha).
 PIEZAS = {
     # Sala.
-    "comedor": ("muebles-sala", 0, (245, 129), None),  # mesa de 75 cm con dos sillas
-    "sofa": ("muebles-sala", 1, (240, 102), None),  # 85 cm de alto
     "aparador": ("muebles-sala", 4, (156, 98), None),  # 81 cm
     "lampara": ("muebles-sala", 3, (34, 160), None),
-    "librero": ("muebles-sala", 2, (92, 218), None),  # 1,80 m; sus repisas son plataformas
     # Cocina.
     "alacenas": ("muebles-cocina", 0, (210, 66), None),
     "refrigerador": ("muebles-cocina", 2, (84, 218), None),  # 1,80 m
     "meson": ("muebles-cocina", 3, (204, 109), None),  # 90 cm
-    "banco": ("muebles-cocina", 4, (52, 79), None),  # 65 cm
     # Dormitorio.
     "comoda": ("muebles-dormitorio", 0, (84, 97), (0.0, 0.47, 1.0, 1.0)),  # 80 cm, sin el espejo
     "ropero": ("muebles-dormitorio", 1, (104, 185), None),  # 1,53 m
     "cama": ("muebles-dormitorio", 2, (200, 90), None),  # colchón a 55 cm (fila 25 del arte)
-    "perchero": ("muebles-dormitorio", 4, (40, 160), None),
-    "escalera": ("escalera-fondo", 0, (300, 292), None),  # de fondo: se dibuja en la pared
     # Recibidor y balcón.
-    "reja": ("escalera-y-baranda", 1, (64, 91), None),  # una reja para bebés de 75 cm; van dos apiladas
     "baranda": ("escalera-y-baranda", 2, (184, 128), None),
     # Objetos.
     "vaso": ("objetos", 0, (24, 32), None),  # lado menor ≥ 24 (R8)
-    "lata": ("objetos", 1, (30, 18), None),
-    "plato": ("objetos", 2, (40, 16), None),
     "maceta": ("objetos", 3, (28, 37), None),
     "maceta_grande": ("objetos", 3, (45, 60), None),  # balcón: escalón a la baranda
     "calcetin": ("objetos", 4, (24, 33), None),
     "rollo": ("objetos", 5, (35, 24), None),
-    "juguetes": ("objetos", 7, (26, 18), None),
     "caja": ("objetos", 8, (64, 54), None),
     "raton": ("objetos", 9, (62, 54), None),  # escala de gato: la mitad de Felipe
     # Tanda 2.
@@ -62,9 +52,6 @@ PIEZAS = {
     "cojin": ("muebles-extra", 2, (70, 42), None),
     "base_carga": ("muebles-extra", 4, (74, 38), None),
     "repisa": ("muebles-extra", 5, (160, 47), None),
-    "puerta_cerrada": ("puertas", 0, (144, 248), None),
-    "puerta_abierta": ("puertas", 1, (176, 248), None),
-    "puerta_balcon": ("puertas", 2, (176, 212), None),
     "vano": ("puertas", 3, (134, 150), None),
     "cortina": ("detalles", 0, (60, 290), None),
     "bola_pelo": ("detalles", 1, (24, 24), None),
@@ -84,9 +71,7 @@ PIEZAS = {
     "librero_v2": ("librero-gato", 0, (104, 218), None),  # 1,80 m, 3 repisas
     "escalera_peldanos": ("escalera-dos-capas", 19, (226, 150), None),  # detrás de Felipe; ancho igual al del pasamanos (peldaños de 25 px)
     "escalera_baranda": ("escalera-dos-capas", 18, (186, 217), None),  # delante de Felipe
-    "reja_v2": ("reja-antifuga", 0, (105, 182), None),  # 1,5 m, en 3/4
     "tazon": ("comida-grande", 0, (48, 35), None),
-    "lata_v2": ("comida-grande", 1, (32, 36), None),
     "pollo": ("comida-grande", 2, (64, 50), None),
     "bolsita": ("comida-grande", 3, (28, 32), None),
     "reja_frente": ("reja-antifuga", 0, (48, 182), (0.0, 0.0, 0.69, 1.0)),  # solo la cara de frente, 48 px (decisión del creador)
@@ -118,7 +103,7 @@ PIEZAS = {
 }
 
 # Piezas con huecos (entre patas, barrotes, respaldos): el blanco encerrado también es fondo.
-HUECOS = {"llaves", "rascador", "zapatero", "reja_frente", "banquito", "comedor", "aparador", "banco", "baranda", "librero", "perchero", "reja", "lampara", "escritorio", "repisa", "escalera", "puerta_balcon", "mesa_v2", "silla_v2", "librero_v2", "escalera_baranda", "reja_v2"}
+HUECOS = {"llaves", "rascador", "zapatero", "reja_frente", "banquito", "aparador", "baranda", "lampara", "escritorio", "repisa", "mesa_v2", "silla_v2", "librero_v2", "escalera_baranda"}
 
 # Piezas con patas que hay que alargar para dejar el hueco de agachado (R8): nombre -> (fracción de la pieza donde
 # empiezan las patas, alto de las patas en el juego).

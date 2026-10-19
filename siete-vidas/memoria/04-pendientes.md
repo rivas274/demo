@@ -12,11 +12,15 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
    - Después de la parte B: **ajuste del salto** (video de referencia del creador, 5 pasos ya implementados): caer más rápido (gravedad de caída de 1,38× a ~1,7×), margen 0,12 s, salto recordado 0,15 s, más polvo al aterrizar desde alto; estirar/aplastar sigue en ±8 %. Revisar saltos del nivel, prueba de movimiento y video antes/después.
 3. [ ] **Volver al nivel 1** con lo que el prototipo apruebe (regla de los tres lugares) y seguir hacia el vertical slice. Antes de cada cambio de fase, `/puerta-fase`.
 
-## Nivel 1 v4 (Fase 3, en construcción)
+## Nivel 1 v4 (Fase 3)
 
-- [x] **PARTE A (2026-10-19):** acciones de Felipe (maullar, arañar, subir escalón, snack del bolsillo de 5, efectos en el cuadro de impacto), habilidades apagadas en el nivel 1 y sistemas reutilizables (Agenda, libreta, HUD y carteles, resumen del día, diálogo con retratos, jugo, Indicador con íconos de Kenney, recompensas, rascador, arañables). Prueba `prueba_acciones.gd`. Detalle en `05-estado-actual.md`.
-- [ ] Volver a publicar la ficha en línea (https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe) con las filas nuevas (la copia local ya está regenerada).
-- [ ] **PARTE B:** mapa nuevo del nivel, escalera con reja y librero conectada a `subir_escalera`, Valeria en escena (testigo del rascador, oye maullidos, perdona), travesuras conectadas a la agenda, pelea nueva con A.S.P.I., balcón con resumen del día, bot sin habilidades y video. Lista en `05-estado-actual.md` ("Para la PARTE B").
+- [x] **PARTE A (2026-10-19):** acciones de Felipe (maullar, arañar, subir escalón, snack del bolsillo de 5, efectos en el cuadro de impacto), habilidades apagadas en el nivel 1 y sistemas reutilizables (Agenda, libreta, HUD y carteles, resumen del día, diálogo con retratos, jugo, Indicador con íconos de Kenney, recompensas, rascador, arañables). Prueba `prueba_acciones.gd`.
+- [x] **PARTE B (2026-10-19):** mapa nuevo de 7 cuartos con el arte medido (colisión a ±2 px del borde opaco), Valeria en escena (poses y caminar de Gemini), escalera de fondo con reja anti-fuga y librero, frotarse (ronronear contra Valeria), agenda completa conectada, ensayo de A.S.P.I. en el pasillo, pelea nueva (8 pasos, sin negro, soplido, bolas en arco, entrada corta), balcón con resumen del día, bot sin habilidades (agenda 8 de 8) y video. Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md`.
+- [ ] Volver a publicar la ficha en línea (https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe): la copia local ya tiene las filas de la PARTE A y la de frotarse (lo hace el creador o la sesión principal).
+- [ ] Mostrar al creador el video del nivel y las capturas; nueva revisión con el agente `revisor-niveles` (la del 2026-10-18 queda resuelta salvo G13, sonido de casa).
+- [ ] Arte que falta (Gemini, sin créditos de SpriteCook): `arriba-extra.png` (baúl, consola con cajón, cojín con hueco, retrato familiar, cómoda abierta, ropa doblada, caja de recuerdos, escritorio con pantalla e impresora, papeles); hoy van dibujados por código.
+- [ ] Sonidos finales (hoy sintetizados con `sonidos_demo.py`, incluidos maullido, arañar, ronroneo y resorte) y sonido de casa (G13); música de la pelea.
+- [ ] Ajustar la dificultad de la fase 3 con una persona (el bot llega con 1 a 5 corazones).
 
 ## Diseñar después (de los pilares)
 

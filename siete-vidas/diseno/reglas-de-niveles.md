@@ -19,18 +19,18 @@ Salen de lo que pidió el creador (consistencia, proporciones reales, humor, un 
 
 ## Reglas
 
-Una ✔ indica que `prueba_reglas_nivel.gd` la valida; 👁 que se revisa con capturas. R17 a R19 salen de los pilares (`pilares.md`, aprobadas el 2026-10-18); el nivel 1 todavía no las cumple y se ajustará al rehacerlo.
+Una ✔ indica que `prueba_reglas_nivel.gd` la valida; 👁 que se revisa con capturas. R17 a R19 salen de los pilares (`pilares.md`, aprobadas el 2026-10-18); el nivel 1 v4 las cumple (ver `nivel-01-gran-fuga.md`). Las líneas que enseñan son las primeras frases de Felipe del nivel (`Sala.LECCIONES`), no avisos de texto.
 
 | # | Regla | Cómo se valida |
 | --- | --- | --- |
-| R1 | **Enseñar → probar → girar.** Toda mecánica que el nivel exige se enseña antes en la ruta (`Sala.RUTA`) con su aviso. Se enseña una idea a la vez: los avisos de un mismo piso quedan a 150 px o más. Después se pone a prueba con poco riesgo y, más adelante, se usa de otra forma. | ✔ aviso antes de la exigencia y separación entre avisos. 👁 el "giro". |
+| R1 | **Enseñar → probar → girar.** Toda mecánica que el nivel exige se enseña antes en la ruta (`Sala.RUTA`) con su aviso. Se enseña una idea a la vez: los avisos de un mismo piso quedan a 150 px o más. Después se pone a prueba con poco riesgo y, más adelante, se usa de otra forma. | ✔ frase antes de la exigencia y separación entre frases (`LECCIONES`). 👁 el "giro". |
 | R2 | **Enseñar sin peligro.** Los primeros 80 px de la zona de cada aviso no tienen nada que haga daño (juguetes, ratones, A.S.P.I.). | ✔ |
 | R3 | **Mostrar antes que decir.** El espacio enseña. El texto se limita a la tecla o el botón en uso, en una línea de 48 caracteres o menos (sin contar las teclas), y aparece una sola vez. | ✔ largo. `prueba_nivel` valida que aparezca una sola vez. |
 | R4 | **Meta a la vista.** La salida queda al final del recorrido y se muestra al empezar (la cámara la enseña) aunque todavía no se pueda alcanzar. | ✔ posición. `prueba_nivel` valida que se muestre. |
 | R5 | **Descanso cerca del peligro.** Toda zona de daño tiene un punto de descanso en su habitación o en una contigua (a una puerta), y hay un descanso junto a la puerta del jefe. Reaparecer es inmediato. | ✔ |
 | R6 | **Atajos que vuelven.** El nivel tiene al menos un atajo. Se abre solo desde el lado lejano y termina a 400 px o menos de un descanso, en la misma habitación. El camino de ida no es el de vuelta. | ✔ |
 | R7 | **Verticalidad de gato.** Hay más de un piso (unidos por una escalera), algo que trepar y muebles que hacen de camino. Cada habitación es un espacio aparte y se pasa por puertas que van y vuelven; desde el inicio se llega a todas. Toda superficie se alcanza con doble salto o trepando. | ✔ (`prueba_escenario` valida el alcance) |
-| R8 | **Escala de gato y huecos legibles.** Felipe es la medida: alturas de muebles casi reales (deciden los saltos), muebles y puertas gruesos, lo que le importa al gato grande (ratones a la mitad de Felipe) y nada interactuable menor a 24 px. Bajo un mueble sólido no hay hueco, o hay uno de 36 px o más para pasar agachado. | ✔ huecos, tamaño mínimo y ratones. 👁 el resto en capturas. |
+| R8 | **Escala de gato y huecos legibles.** Felipe es la medida: alturas de muebles casi reales (deciden los saltos), muebles y puertas gruesos, lo que le importa al gato grande (ratones a la mitad de Felipe) y nada interactuable menor a 24 px. Bajo un mueble sólido no hay hueco, o hay uno de 36 px o más para pasar agachado. | ✔ huecos, lado menor de lo interactuable, puertas medidas en la imagen y ratones; colisión contra el borde opaco del arte (±2 px). 👁 el resto en capturas. |
 | R9 | **Un hito por zona.** Cada habitación tiene su pared, su color y un objeto reconocible, para orientarse sin mapa. | ✔ pared distinta. 👁 el hito. |
 | R10 | **Exploración premiada.** Hay al menos 3 calcetines. Cada uno descansa sobre algo donde Felipe se puede parar, y al menos uno pide subir o mirar fuera del camino. | ✔ |
 | R11 | **Ritmo.** Entre dos zonas de daño fuertes (juguetes, A.S.P.I.) de una misma habitación hay al menos una pantalla (640 px) de calma. Los ratones son práctica. El nivel cierra con un alivio (el balcón). | ✔ calma. 👁 alivio. |
@@ -40,9 +40,9 @@ Una ✔ indica que `prueba_reglas_nivel.gd` la valida; 👁 que se revisa con ca
 | R15 | **Felipe se ve siempre igual.** Las reglas de consistencia y proporciones de CLAUDE.md valen dentro de cualquier nivel. | ✔ `prueba_movimiento` (altura) y 👁 `comparar_felipe.py` |
 | R16 | **El jefe se presenta y cambia el mundo.** Una entrada de menos de 5 s congela el juego: acercamiento, «¡BATALLA INICIADA!» y el nombre del jefe. El escenario se transforma según la imaginación de Felipe (lo absurdo va en el fondo, sin colisión). La pelea tiene fases que se anuncian con un cartel y una pista de una línea, y al ganar todo vuelve de golpe a la normalidad. Todo jefe usa la misma presentación reutilizable, `PresentacionJefe` (`scripts/presentacion_jefe.gd`): cada pelea solo da nombre, título, colores y su propio "momento". | ✔ `prueba_jefe` (incluye un segundo jefe de prueba) |
 
-| R17 | **Un barrio que se descubre** (pilar 1). Cada zona tiene un lugar que se ve antes de poder alcanzarlo (se vuelve con una maña nueva), un atajo de vuelta y una historia contada con el escenario, no con texto. | 👁 por ahora; ✔ el lugar visto y el atajo cuando el nivel 1 se rehaga (pendiente). |
-| R18 | **Una travesura con reacción por habitación** (pilares 2 y 5). Cada habitación, salvo el alivio final, tiene al menos una travesura de la Agenda de Su Majestad con una reacción graciosa del mundo (alguien grita, algo se rompe, Felipe comenta). | 👁 por ahora; ✔ cuando el nivel tenga la Agenda (pendiente). |
-| R19 | **Cada maña es llave y travesura** (pilar 2). Cada maña nueva que el nivel enseña abre al menos un camino y además sirve para molestar a alguien. | 👁 |
+| R17 | **Un barrio que se descubre** (pilar 1). Cada zona tiene un lugar que se ve antes de poder alcanzarlo (se vuelve con una maña nueva), un atajo de vuelta y una historia contada con el escenario, no con texto. | ✔ lugar visto que no se alcanza todavía (`LUGARES_VISTOS`) y atajo (`ATAJOS`). 👁 la historia del escenario. |
+| R18 | **Una travesura con reacción por habitación** (pilares 2 y 5). Cada habitación, salvo el alivio final, tiene al menos una travesura de la Agenda de Su Majestad con una reacción graciosa del mundo (alguien grita, algo se rompe, Felipe comenta). | ✔ cada travesura de la Agenda pasa en su cuarto con su reacción (`AGENDA_SITIOS`) y cada habitación, salvo el alivio, tiene una. 👁 que la reacción sea graciosa. |
+| R19 | **Cada maña es llave y travesura** (pilar 2). Cada maña nueva que el nivel enseña abre al menos un camino y además sirve para molestar a alguien. | ✔ cada maña de `MANAS` tiene camino y víctima. 👁 que se use así en el juego. |
 
 ## Al diseñar un nivel nuevo
 

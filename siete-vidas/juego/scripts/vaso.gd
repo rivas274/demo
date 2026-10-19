@@ -2,11 +2,14 @@ class_name Vaso
 extends Node2D
 ## Objeto que Felipe tira de un manotazo con el botón de acción: cae y, según el tipo,
 ## se rompe (vaso: logro "La Gravedad Funciona") o aturde al enemigo que esté debajo (rollo, maceta).
-## Las macetas vuelven a su lugar mientras A.S.P.I. siga encendida, para no quedarse sin munición.
-## Escala de gato: vaso, rollo y maceta al doble de su tamaño real.
+## Las llaves no se rompen: caen con un "¡CLINK CRÍTICO!". En la pelea, lo que se rompe vuelve a su lugar de a uno
+## (reponer(), lo decide BatallaAspi); un soplido de A.S.P.I. las tira sin romperlas (caer_sin_romper()).
+## Escala de gato: vaso, rollo, maceta y llaves al doble de su tamaño real (lado menor ≥ 24 px, R8).
 
 ## Se rompió en el piso (en la pelea deja una mancha que A.S.P.I. va a limpiar).
 signal caido(posicion: Vector2)
+## Se cayó sin romperse (soplido): no deja mancha.
+signal tirado(objeto: Vaso)
 
 const LOGRO := "La Gravedad Funciona"
 ## Segundos que queda aturdido el enemigo al que le cae encima.
@@ -19,12 +22,35 @@ var _velocidad := Vector2.ZERO
 var _cayendo := false
 var _piso: float
 var _inicio: Vector2
+var _sin_romper := false
 
 
 func _init(y_piso: float, tipo_objeto: String = "vaso") -> void:
 	_piso = y_piso
 	tipo = tipo_objeto
 	name = "Vaso" if tipo == "vaso" else tipo.capitalize()
+
+
+## Vuelve a su lugar, entero (las macetas de la pelea, de a una).
+func reponer() -> void:
+	position = _inicio
+	rotation = 0.0
+	roto = false
+	_cayendo = false
+	visible = true
+	if not is_in_group(Comida.GRUPO):
+		add_to_group(Comida.GRUPO)
+	queue_redraw()
+
+
+## Un soplido lo tira sin romperlo: cae al piso y desaparece hasta que lo repongan.
+func caer_sin_romper(hacia := 1.0) -> void:
+	if _cayendo or roto:
+		return
+	remove_from_group(Comida.GRUPO)
+	_velocidad = Vector2(hacia * 120.0, -140.0)
+	_cayendo = true
+	_sin_romper = true
 
 
 func _ready() -> void:
@@ -50,6 +76,13 @@ func verbo(_felipe: Felipe) -> String:
 	return "Liberar"
 
 
+## Rectángulo del dibujo (para medir el lado menor en las pruebas y el contorno).
+func rect_dibujo() -> Rect2:
+	var t := ArteNivel.textura(tipo)
+	var tam := t.get_size() if t else Vector2(24, 24)
+	return Rect2(global_position + Vector2(-tam.x / 2.0, -tam.y), tam)
+
+
 ## Para el contorno del Indicador: la imagen y dónde se dibuja.
 func arte_indicador() -> Dictionary:
 	return ArteNivel.arte_en(self, tipo, 0.0, 0.0)
@@ -71,10 +104,17 @@ func _physics_process(delta: float) -> void:
 
 
 func _al_caer() -> void:
-	caido.emit(global_position)
 	var sala := get_parent()
+	if _sin_romper:
+		_sin_romper = false
+		visible = false
+		tirado.emit(self)
+		if sala.has_method("sonar"):
+			sala.sonar("caja")
+		return
+	caido.emit(global_position)
 	if sala.has_method("sonar"):
-		sala.sonar("vidrio" if tipo != "rollo" else "caja")
+		sala.sonar("caja" if tipo in ["rollo", "llaves"] else "vidrio")
 	if tipo == "vaso":
 		if sala.has_method("desbloquear_logro"):
 			sala.desbloquear_logro(LOGRO)
@@ -82,18 +122,10 @@ func _al_caer() -> void:
 	for enemigo in get_tree().get_nodes_in_group("enemigos"):
 		if enemigo.has_method("aturdir") and absf(enemigo.global_position.x - global_position.x) < RADIO_IMPACTO and absf(enemigo.global_position.y - global_position.y) < 20.0:
 			enemigo.aturdir(ATURDIR)
-	if tipo == "maceta":
-		await get_tree().create_timer(4.0).timeout
-		var jefa_encendida := get_tree().get_nodes_in_group("enemigos").any(func(e: Node) -> bool: return e is Aspi and e.necesita_aturdir and not e.apagada)
-		if jefa_encendida:
-			position = _inicio
-			roto = false
-			add_to_group(Comida.GRUPO)
-			queue_redraw()
 
 
 func _draw() -> void:
-	if not roto and ArteNivel.dibujar(self, tipo, 0.0, 0.0):
+	if (not roto or tipo == "llaves") and ArteNivel.dibujar(self, tipo, 0.0, 0.0):
 		return
 	match tipo:
 		"rollo":

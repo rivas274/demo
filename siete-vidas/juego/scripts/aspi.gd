@@ -10,6 +10,8 @@ const GOLPES_PARA_APAGAR := 3
 
 ## Avisa cuando la apagan (en la demo, abre la puerta del balcón).
 signal apagado
+## Oyó maullar a Felipe (en la pelea gira hacia él: "¿Gato detectado?").
+signal oyo_maullido(felipe: Felipe)
 
 @export var velocidad_patrulla := 40.0
 @export var velocidad_persecucion := 80.0
@@ -37,6 +39,9 @@ var destino := INF
 var golpes := 0
 var apagada := false
 var persiguiendo := false
+## Anticipación de un ataque: luz que parpadea (roja: embestida; amarilla: soplido) y vibración.
+var luz_aviso := Color(0, 0, 0, 0)
+var vibrando := false
 
 var _direccion := 1.0
 var _tiempo_golpe := 0.0
@@ -52,6 +57,7 @@ func _init(izquierda: float, derecha: float) -> void:
 
 func _ready() -> void:
 	add_to_group("enemigos")
+	add_to_group(Felipe.GRUPO_OYENTES)
 	# Choca con el piso y los muebles sólidos, pero no con Felipe (el daño se calcula por distancia).
 	collision_layer = 0
 	set_collision_layer_value(4, true)
@@ -98,6 +104,10 @@ func _physics_process(delta: float) -> void:
 	queue_redraw()
 
 
+func oir_maullido(felipe: Felipe) -> void:
+	oyo_maullido.emit(felipe)
+
+
 func aturdir(segundos: float) -> void:
 	if apagada:
 		return
@@ -128,6 +138,8 @@ func recibir_zarpazo(felipe: Felipe) -> void:
 
 func _draw() -> void:
 	# El ratón de cuerda hereda de A.S.P.I. pero tiene su propio dibujo.
+	var temblor := Vector2(1 if vibrando and Time.get_ticks_msec() % 80 < 40 else 0, 0)
+	draw_set_transform(temblor)
 	if not ArteNivel.dibujar(self, arte, 0.0, 1.0, false, Color(0.6, 0.6, 0.62) if apagada else Color.WHITE):
 		var cuerpo := Color("3a3d44") if not apagada else Color("6a6d72")
 		draw_rect(Rect2(-ancho / 2.0 + 3.0, -alto, ancho - 6.0, alto), cuerpo)
@@ -137,7 +149,11 @@ func _draw() -> void:
 	var luz := Color("e0483b") if persiguiendo else Color("5fd18a")
 	if apagada:
 		luz = Color("2a2a2a")
+	elif luz_aviso.a > 0.0:
+		luz = luz_aviso if Time.get_ticks_msec() % 160 < 80 else Color(1, 1, 1)
+		draw_circle(Vector2(_direccion * 18.0, -40.0), 7.0, Color(luz_aviso, 0.35))
 	draw_circle(Vector2(_direccion * 18.0, -40.0), 3.0, luz)
+	draw_set_transform(Vector2.ZERO)
 	if _tiempo_aturdida > 0.0:
 		for i in 3:
 			var angulo := Time.get_ticks_msec() * 0.006 + i * TAU / 3.0

@@ -14,13 +14,19 @@ func _init() -> void:
 	name = "Caja de carton"
 
 
+## Tamaño de la colisión: el del arte (la colisión calza con el dibujo, hallazgo B4).
+func tamano() -> Vector2:
+	var t := ArteNivel.textura("caja")
+	return t.get_size() if t else Vector2(LADO, LADO)
+
+
 func _ready() -> void:
 	add_to_group("enemigos")
 	var forma := CollisionShape2D.new()
 	var caja := RectangleShape2D.new()
-	caja.size = Vector2(LADO, LADO)
+	caja.size = tamano()
 	forma.shape = caja
-	forma.position = Vector2(0, -LADO / 2.0)
+	forma.position = Vector2(0, -caja.size.y / 2.0)
 	add_child(forma)
 
 
@@ -38,6 +44,8 @@ func recibir_zarpazo(_felipe: Felipe) -> void:
 
 func _draw() -> void:
 	var carton := Color("c49a6c")
+	if roto and ArteNivel.dibujar(self, "caja_rota", 0.0, 0.0):
+		return
 	if roto:
 		for trozo: Rect2 in [Rect2(-26, -8, 18, 8), Rect2(-4, -6, 14, 6), Rect2(12, -9, 16, 9)]:
 			draw_rect(trozo, carton)

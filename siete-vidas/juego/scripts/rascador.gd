@@ -18,8 +18,9 @@ extends Node2D
 signal funcion(rascador: Rascador, con_publico: bool, premio: bool, testigo: Node)
 
 const GRUPO_TESTIGOS := "testigos"
-const ANCHO := 40.0
-const ALTO := 90.0
+## Del arte de la tanda 3C (100 × 165; sus plataformas son piezas del nivel).
+const ANCHO := 60.0
+const ALTO := 160.0
 
 ## Verbo de Felipe en el Indicador.
 @export var verbo_indicador := "Actuar"

@@ -39,19 +39,20 @@ PIEZAS = {
     # Dormitorio.
     "comoda": ("muebles-dormitorio", 0, (84, 97), (0.0, 0.47, 1.0, 1.0)),  # 80 cm, sin el espejo
     "ropero": ("muebles-dormitorio", 1, (104, 185), None),  # 1,53 m
-    "cama": ("muebles-dormitorio", 2, (244, 110), None),  # colchón a 55 cm
+    "cama": ("muebles-dormitorio", 2, (200, 90), None),  # colchón a 55 cm (fila 25 del arte)
     "perchero": ("muebles-dormitorio", 4, (40, 160), None),
     "escalera": ("escalera-fondo", 0, (300, 292), None),  # de fondo: se dibuja en la pared
     # Recibidor y balcón.
     "reja": ("escalera-y-baranda", 1, (64, 91), None),  # una reja para bebés de 75 cm; van dos apiladas
     "baranda": ("escalera-y-baranda", 2, (184, 128), None),
     # Objetos.
-    "vaso": ("objetos", 0, (20, 27), None),
+    "vaso": ("objetos", 0, (24, 32), None),  # lado menor ≥ 24 (R8)
     "lata": ("objetos", 1, (30, 18), None),
     "plato": ("objetos", 2, (40, 16), None),
     "maceta": ("objetos", 3, (28, 37), None),
-    "calcetin": ("objetos", 4, (22, 30), None),
-    "rollo": ("objetos", 5, (30, 21), None),
+    "maceta_grande": ("objetos", 3, (45, 60), None),  # balcón: escalón a la baranda
+    "calcetin": ("objetos", 4, (24, 33), None),
+    "rollo": ("objetos", 5, (35, 24), None),
     "juguetes": ("objetos", 7, (26, 18), None),
     "caja": ("objetos", 8, (64, 54), None),
     "raton": ("objetos", 9, (62, 54), None),  # escala de gato: la mitad de Felipe
@@ -81,7 +82,7 @@ PIEZAS = {
     "mesa_v2": ("comedor-piezas", 0, (178, 91), None),  # 75 cm, tablero en la fila de arriba
     "silla_v2": ("comedor-piezas", 1, (59, 109), None),  # de perfil, derecha
     "librero_v2": ("librero-gato", 0, (104, 218), None),  # 1,80 m, 3 repisas
-    "escalera_peldanos": ("escalera-dos-capas", 19, (195, 150), None),  # detrás de Felipe
+    "escalera_peldanos": ("escalera-dos-capas", 19, (226, 150), None),  # detrás de Felipe; ancho igual al del pasamanos (peldaños de 25 px)
     "escalera_baranda": ("escalera-dos-capas", 18, (186, 217), None),  # delante de Felipe
     "reja_v2": ("reja-antifuga", 0, (105, 182), None),  # 1,5 m, en 3/4
     "tazon": ("comida-grande", 0, (48, 35), None),
@@ -121,7 +122,11 @@ HUECOS = {"llaves", "rascador", "zapatero", "reja_frente", "banquito", "comedor"
 
 # Piezas con patas que hay que alargar para dejar el hueco de agachado (R8): nombre -> (fracción de la pieza donde
 # empiezan las patas, alto de las patas en el juego).
-PATAS = {"zapatero": (0.76, 36)}
+PATAS = {"zapatero": (0.80, 38)}
+
+# Rectángulos a borrar después de escalar (x0, y0, x1, y1 en la imagen final): el pasamanos trae dibujado el contorno
+# de la escalera (una línea vertical y la del piso) que en el juego no calza con los peldaños de atrás.
+BORRAR = {"escalera_baranda": [(0, 80, 4, 217), (0, 202, 186, 217)]}
 
 # Valeria (tanda 3B): poses y caminar, a una sola escala (de pie mide 200 px, 3 Felipes).
 VALERIA_POSES = ("valeria-poses", ["neutra", "enojada", "perdonando", "grabando", "serie"])
@@ -279,9 +284,15 @@ def main():
         if nombre in HUECOS:
             recorte = sin_huecos(recorte)
         if nombre in PATAS:
-            con_patas(recorte, tamano, *PATAS[nombre]).save(DESTINO / f"{nombre}.png")
+            final = con_patas(recorte, tamano, *PATAS[nombre])
         else:
-            escalar(recorte, tamano).save(DESTINO / f"{nombre}.png")
+            final = escalar(recorte, tamano)
+        if nombre in BORRAR:
+            a = np.asarray(final).copy()
+            for x0, y0, x1, y1 in BORRAR[nombre]:
+                a[y0:y1, x0:x1, 3] = 0
+            final = recortar_opaco(Image.fromarray(a, "RGBA"))
+        final.save(DESTINO / f"{nombre}.png")
     for nombre, (hoja, indice, tamano, suavizado) in MOSAICOS.items():
         if hoja not in hojas:
             hojas[hoja] = piezas(hoja)

@@ -79,8 +79,21 @@ func _draw() -> void:
 	# Brillo para que se lea como "esto se recoge".
 	if not _recogido:
 		var brillo := 0.35 + 0.25 * sin(_vida * 6.0)
-		draw_circle(Vector2(0, -12), 18.0, Color(1.0, 0.95, 0.6, brillo * 0.35))
-	Recogible.dibujar_icono(self, tipo, Vector2(0, -12), 1.0)
+		draw_circle(Vector2(0, -Recogible.tamano_icono(tipo).y / 2.0), 20.0, Color(1.0, 0.95, 0.6, brillo * 0.35))
+	# Se apoya por su borde de abajo (ningún margen transparente: M1).
+	Recogible.dibujar_icono(self, tipo, Vector2(0, -Recogible.tamano_icono(tipo).y / 2.0), 1.0)
+
+
+## Tamaño del dibujo de cada recompensa (lado menor ≥ 24 px, R8): calcetín y bolsita de premios de Gemini.
+static func tamano_icono(que: String) -> Vector2:
+	match que:
+		"calcetin":
+			var arte := ArteNivel.textura("calcetin")
+			return arte.get_size() if arte else Vector2(25, 26)
+		"snack":
+			var bolsa := ArteNivel.textura("bolsita")
+			return bolsa.get_size() if bolsa else Vector2(28, 32)
+	return Vector2(30, 26)
 
 
 ## Dibuja el ícono centrado en `centro` (lo usan también el HUD y el resumen, a otra escala).
@@ -102,7 +115,12 @@ static func dibujar_icono(lienzo: CanvasItem, que: String, centro: Vector2, esca
 			for i in 3:
 				lienzo.draw_rect(Rect2(centro + Vector2(-9, -11 + i * 5) * e, Vector2(14, 2) * e), raya)
 		"snack":
-			# Snack de pescado, 32 x 16 px.
+			# Bolsita de premios (Gemini, tanda 3A); si falta, un pescado dibujado.
+			var bolsa := ArteNivel.textura("bolsita")
+			if bolsa:
+				var tam_bolsa := bolsa.get_size() * e
+				lienzo.draw_texture_rect(bolsa, Rect2(centro - tam_bolsa / 2.0, tam_bolsa), false)
+				return
 			var c := centro
 			var cuerpo := PackedVector2Array([c + Vector2(-14, 0) * e, c + Vector2(-4, -7) * e, c + Vector2(8, -5) * e, c + Vector2(14, 0) * e, c + Vector2(8, 6) * e, c + Vector2(-4, 7) * e])
 			lienzo.draw_colored_polygon(cuerpo, Color(1.0, 0.55, 0.35))

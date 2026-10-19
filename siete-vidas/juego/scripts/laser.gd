@@ -8,6 +8,8 @@ var limite_izquierdo: float
 var limite_derecho: float
 
 var _destino: Vector2
+## Apagado "de vergüenza" (Felipe lo ignoró 5 s).
+var apagado := false
 var _azar := RandomNumberGenerator.new()
 
 
@@ -22,7 +24,14 @@ func _ready() -> void:
 	_destino = position
 
 
+func apagar() -> void:
+	apagado = true
+	queue_redraw()
+
+
 func _process(delta: float) -> void:
+	if apagado:
+		return
 	var felipe: Felipe = get_tree().get_first_node_in_group("felipe")
 	if felipe and absf(felipe.global_position.x - global_position.x) < RADIO_HUIDA and absf(felipe.global_position.y - global_position.y) < 60.0:
 		# Se escapa al otro lado de Felipe, justo fuera de su alcance.
@@ -35,5 +44,7 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
+	if apagado:
+		return
 	draw_circle(Vector2(0, -1), 4.0, Color(1, 0.1, 0.1, 0.25))
 	draw_circle(Vector2(0, -1), 2.0, Color("ff2a2a"))

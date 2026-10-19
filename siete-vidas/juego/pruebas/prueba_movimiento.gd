@@ -108,11 +108,11 @@ func _correr() -> void:
 	await _esperar(40)
 	_comprobar(absf(felipe.velocity.x) <= felipe.velocidad_gatear + 1.0, "Agachado gatea más lento (%.0f px/s)" % absf(felipe.velocity.x))
 	_comprobar(felipe.sprite.animation == "gatear" and felipe.sprite.is_playing(), "Agachado y en movimiento usa la animación de gatear")
-	var hueco := Sala.SUELO - _pieza("Aparador").end.y
+	var hueco := Sala.SUELO - _pieza("Zapatero").end.y
 	var alto_gateando := 0.0
 	for i in felipe.sprite.sprite_frames.get_frame_count("gatear"):
 		alto_gateando = maxf(alto_gateando, _alto_visible(felipe.sprite.sprite_frames.get_frame_texture("gatear", i).get_image()) * Felipe.ESCALA_SPRITE)
-	_comprobar(alto_gateando <= hueco, "Gateando cabe bajo el aparador (%.0f px de %.0f libres)" % [alto_gateando, hueco])
+	_comprobar(alto_gateando <= hueco, "Gateando cabe bajo el zapatero (%.0f px de %.0f libres)" % [alto_gateando, hueco])
 	Input.action_release("mover_derecha")
 	Input.action_release("agacharse")
 	await _esperar(2)
@@ -120,12 +120,12 @@ func _correr() -> void:
 	await _esperar(20)
 	_comprobar(felipe.sprite.animation == "quieto", "Después de pararse queda quieto")
 
-	# Debajo del aparador (30 cm libres) solo se pasa agachado.
-	var aparador := _pieza("Aparador")
+	# Debajo del zapatero (33 cm libres) solo se pasa agachado.
+	var aparador := _pieza("Zapatero")
 	await _poner_en(felipe, Vector2(aparador.position.x - 60, Sala.SUELO))
 	Input.action_press("mover_derecha")
 	await _esperar(60)
-	_comprobar(felipe.position.x < aparador.position.x, "De pie no cabe bajo el aparador")
+	_comprobar(felipe.position.x < aparador.position.x, "De pie no cabe bajo el zapatero")
 	Input.action_press("agacharse")
 	for i in 240:
 		await physics_frame
@@ -133,14 +133,14 @@ func _correr() -> void:
 			break
 	Input.action_release("agacharse")
 	await _esperar(4)
-	_comprobar(felipe.position.x > aparador.get_center().x and felipe.agachado, "Bajo el aparador sigue agachado aunque suelte S")
+	_comprobar(felipe.position.x > aparador.get_center().x and felipe.agachado, "Bajo el zapatero sigue agachado aunque suelte S")
 	for i in 240:
 		await physics_frame
 		if felipe.position.x > aparador.end.x + 30:
 			break
 	await _esperar(4)
 	Input.action_release("mover_derecha")
-	_comprobar(felipe.position.x > aparador.end.x and not felipe.agachado, "Al salir del aparador se para solo")
+	_comprobar(felipe.position.x > aparador.end.x and not felipe.agachado, "Al salir del zapatero se para solo")
 
 	# Agachado + saltar sobre un mueble atravesable: baja a través de él.
 	var mesa := _pieza("Mesa")
@@ -155,7 +155,7 @@ func _correr() -> void:
 
 	# Con comida cerca, el botón de acción la come.
 	var platos := root.get_tree().get_nodes_in_group(Comida.GRUPO).size()
-	await _poner_en(felipe, Vector2(2870, Sala.SUELO - 109))
+	await _poner_en(felipe, Vector2(2990, Sala.SUELO))
 	await _tocar("interactuar")
 	_comprobar(felipe.estado == Felipe.Estado.COMIENDO and felipe.sprite.animation == "comer", "Junto a la comida, el botón de acción la come")
 	await _esperar(60)

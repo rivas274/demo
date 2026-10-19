@@ -2,3 +2,4 @@
 siete-vidas/juego/.godot/
 siete-vidas/prototipos/*/.godot/
 build/
+__pycache__/

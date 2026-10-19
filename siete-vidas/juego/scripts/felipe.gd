@@ -24,8 +24,10 @@ signal sin_snacks
 ## Escalera: terminó un escalón (contando desde 1) y terminó todos los pedidos.
 signal escalon_subido(numero: int)
 signal escalera_terminada
+## Terminó de frotarse ronroneando contra alguien (Valeria): ese alguien recibe perdonar(felipe, "frotarse").
+signal ronroneo_terminado(objetivo: Node2D)
 
-enum Estado { SUELO, AIRE, ZOOMIES, ZARPAZO, COMIENDO, ATERRIZANDO, OCIO, DESMAYADO, ARANANDO, MAULLANDO, SUBIENDO_ESCALON }
+enum Estado { SUELO, AIRE, ZOOMIES, ZARPAZO, COMIENDO, ATERRIZANDO, OCIO, DESMAYADO, ARANANDO, MAULLANDO, SUBIENDO_ESCALON, RONRONEANDO }
 
 ## Felipe mide unos 67 px de alto: Valeria (1,65 m) mide 3 Felipes. Ver la guía del personaje.
 const ESCALA_SPRITE := 0.72
@@ -102,6 +104,8 @@ const TIEMPO_COMER_SNACK := 0.6
 ## Escalera: segundos por escalón (7 escalones en 1,4 s) y altura del saltito.
 const DURACION_ESCALON := 0.2
 const SALTITO_ESCALON := 6.0
+## Frotarse contra las piernas de un humano: lo que dura el ronroneo (un ciclo de "ronronear", 8 cuadros a 8 fps).
+const DURACION_RONRONEO := 1.0
 
 @export_group("Movimiento")
 @export var velocidad_caminar := 120.0
@@ -193,6 +197,8 @@ var _tiempo_escalon := 0.0
 var _duracion_escalon := DURACION_ESCALON
 var _escalones_subidos := 0
 var _chispas: Chispas
+var _tiempo_ronroneo := 0.0
+var _ronroneando_a: Node2D
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 @onready var polvo: CPUParticles2D = $Polvo
@@ -244,6 +250,12 @@ func _physics_process(delta: float) -> void:
 		Estado.ZARPAZO, Estado.COMIENDO, Estado.OCIO, Estado.ARANANDO, Estado.MAULLANDO:
 			_frenar(delta)
 			_aplicar_gravedad(delta)
+		Estado.RONRONEANDO:
+			_frenar(delta)
+			_aplicar_gravedad(delta)
+			_tiempo_ronroneo -= delta
+			if _tiempo_ronroneo <= 0.0:
+				_terminar_ronroneo()
 		Estado.DESMAYADO:
 			_frenar(delta)
 			_aplicar_gravedad(delta)
@@ -464,6 +476,33 @@ func aranar(objetivo: Node2D) -> void:
 	_reiniciar("aranar")
 
 
+## Se frota ronroneando contra las piernas de alguien (Valeria enojada): un ciclo de "ronronear" y, al terminar,
+## objetivo.perdonar(felipe, "frotarse"). Es el botón de acción junto a ella ("Encantar").
+func frotarse(objetivo: Node2D) -> void:
+	if not is_on_floor() or estado == Estado.DESMAYADO:
+		return
+	estado = Estado.RONRONEANDO
+	velocity.x = 0.0
+	_ronroneando_a = objetivo
+	_tiempo_ronroneo = DURACION_RONRONEO
+	if objetivo and absf(objetivo.global_position.x - global_position.x) > 2.0:
+		mirando = signf(objetivo.global_position.x - global_position.x)
+	sprite.flip_h = mirando < 0.0
+	_reiniciar("ronronear")
+	sonido.emit("ronroneo")
+
+
+func _terminar_ronroneo() -> void:
+	var objetivo := _ronroneando_a
+	_ronroneando_a = null
+	estado = Estado.SUELO if is_on_floor() else Estado.AIRE
+	sprite.play("quieto")
+	if is_instance_valid(objetivo):
+		if objetivo.has_method("perdonar"):
+			objetivo.call("perdonar", self, "frotarse")
+		ronroneo_terminado.emit(objetivo)
+
+
 ## Rascador: deja las garras afiladas unos segundos (chispitas en las patas).
 func afilar_garras() -> void:
 	garras_afiladas = duracion_garras
@@ -671,7 +710,7 @@ func _aterrizar() -> void:
 
 func _actualizar_animacion(direccion: float) -> void:
 	sprite.flip_h = mirando < 0.0
-	if estado in [Estado.ZARPAZO, Estado.COMIENDO, Estado.OCIO, Estado.DESMAYADO, Estado.ARANANDO, Estado.MAULLANDO, Estado.SUBIENDO_ESCALON]:
+	if estado in [Estado.ZARPAZO, Estado.COMIENDO, Estado.OCIO, Estado.DESMAYADO, Estado.ARANANDO, Estado.MAULLANDO, Estado.SUBIENDO_ESCALON, Estado.RONRONEANDO]:
 		return
 	if estado == Estado.ZOOMIES:
 		_reproducir("correr")
@@ -940,6 +979,7 @@ func recibir_dano(cantidad: int, desde_x: float) -> void:
 		_terminar_escalera()
 	if estado == Estado.OCIO:
 		_terminar_ocio()
+	_ronroneando_a = null
 	if agachado:
 		_poner_agachado(false)
 	corazones = maxi(corazones - cantidad, 0)
@@ -1004,7 +1044,7 @@ func _reaparecer() -> void:
 func _actualizar_trepar(direccion: float) -> bool:
 	_tiempo_sin_trepar = maxf(0.0, _tiempo_sin_trepar - get_physics_process_delta_time())
 	var zona := _zona_trepable()
-	if not puede_trepar or zona == Rect2() or agachado or estado in [Estado.DESMAYADO, Estado.OCIO, Estado.ZARPAZO, Estado.COMIENDO, Estado.ARANANDO, Estado.MAULLANDO]:
+	if not puede_trepar or zona == Rect2() or agachado or estado in [Estado.DESMAYADO, Estado.OCIO, Estado.ZARPAZO, Estado.COMIENDO, Estado.ARANANDO, Estado.MAULLANDO, Estado.RONRONEANDO]:
 		trepando = false
 		return false
 	if not trepando:

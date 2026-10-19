@@ -1,22 +1,30 @@
 extends SceneTree
-## Valida las reglas de diseño de niveles (siete-vidas/diseno/reglas-de-niveles.md) sobre los datos del nivel. Sin ventana:
+## Valida las reglas de diseño de niveles (siete-vidas/diseno/reglas-de-niveles.md) sobre los datos del nivel y su arte.
+## Sin ventana:
 ##   godot --headless --path siete-vidas/juego --script res://pruebas/prueba_reglas_nivel.gd
-## Cada comprobación lleva el número de su regla. Termina con código 0 si todo pasa y 1 si algo falla.
+## Cada comprobación lleva el número de su regla o el hallazgo de la revisión (B3, B4, G1–G10, M1). Termina con código 0
+## si todo pasa y 1 si algo falla.
 
-## R2: los primeros píxeles de cada aviso no tienen nada que haga daño.
+## R2: los primeros píxeles de cada lección no tienen nada que haga daño.
 const ENTRADA_SEGURA := 80.0
-## R1: un aviso a la vez.
-const SEPARACION_AVISOS := 150.0
-## R3: avisos de una línea.
-const LARGO_AVISO := 48
+## R1: una idea a la vez.
+const SEPARACION_LECCIONES := 150.0
+## R3: líneas de 48 caracteres o menos (sin contar los botones).
+const LARGO_LINEA := 48
 ## R6: el atajo termina cerca de un descanso.
 const ATAJO_A_DESCANSO := 400.0
-## R8: hueco mínimo para pasar agachado (30 cm).
+## R8: hueco mínimo para pasar agachado (30 cm), lado menor de lo interactuable y puertas.
 const HUECO_AGACHADO := 36.0
+const LADO_MINIMO := 24.0
+const VANO_MINIMO := 100.0
+## Salto de Felipe sin doble salto (~79 px): lo que no se alcanza con él es un lugar visto.
+const SALTO := 79.0
 ## R11: calma entre dos zonas de daño (una pantalla).
 const CALMA := 640.0
-## R13: la habitación final es el alivio (no necesita con qué jugar).
+## R13 y R18: la habitación final es el alivio (no necesita con qué jugar ni travesura).
 const ALIVIO := "balcon"
+## B4/G2/G5/M1: tolerancia entre la colisión y el borde visible del arte.
+const TOLERANCIA_ARTE := 2
 
 var _fallos: Array[String] = []
 
@@ -28,41 +36,41 @@ func _initialize() -> void:
 func _correr() -> void:
 	var danos := _zonas_de_dano()
 	var conexiones := _conexiones()
+	var lecciones := Sala.LECCIONES
 
-	# R1. Enseñar → probar → girar: cada mecánica que el nivel exige tiene su aviso antes en la ruta, y los avisos van de a uno.
-	var avisos := Sala.AVISOS
-	var aparador: Rect2 = _pieza("Aparador")
+	# R1. Enseñar → probar → girar: cada mecánica que el nivel exige tiene su línea antes en la ruta, de a una.
 	for exigida: Array in [
 			["{interactuar}", Sala.ASPI[0], "tirar cosas (ensuciar en la pelea)"],
-			["{agacharse}", Vector2(aparador.get_center().x, Sala.SUELO), "agacharse (bajo el aparador)"],
-			["{zarpazo}", Sala.RATONES[1][0], "zarpazo (ratones de la cocina)"],
-			["{saltar}", Vector2(Sala.REJA.get_center().x, Sala.SUELO), "doble salto (librero y reja)"],
-			["{mover_arriba}", Sala.TREPABLES[0].get_center(), "trepar"]]:
+			["{agacharse}", Vector2(_pieza("Zapatero").get_center().x, Sala.SUELO), "agacharse (bajo el zapatero)"],
+			["{zarpazo}", Sala.RATONES[1][0], "zarpazo (el ratón que cuida el pollo)"],
+			["{saltar}", Vector2(Sala.REJA.get_center().x, Sala.SUELO), "subir muebles (librero y reja)"],
+			["{maullar}", Sala.PUERTAS[2][1], "maullar (puerta de la cocina)"]]:
 		var ensenada := false
-		for aviso: Array in avisos:
-			if exigida[0] in aviso[1] and _antes_en_ruta(aviso[0].get_center(), exigida[1]):
+		for leccion: Array in lecciones:
+			if exigida[0] in leccion[1] and _antes_en_ruta(leccion[0].get_center(), exigida[1]):
 				ensenada = true
 		_comprobar(ensenada, "R1 Se enseña %s antes de exigirlo" % exigida[2])
-	for i in avisos.size():
-		for j in range(i + 1, avisos.size()):
-			var a: Rect2 = avisos[i][0]
-			var b: Rect2 = avisos[j][0]
+	for i in lecciones.size():
+		for j in range(i + 1, lecciones.size()):
+			var a: Rect2 = lecciones[i][0]
+			var b: Rect2 = lecciones[j][0]
 			if Sala.habitacion_de(a.get_center()) == Sala.habitacion_de(b.get_center()):
-				_comprobar(absf(a.position.x - b.position.x) >= SEPARACION_AVISOS, "R1 Avisos separados: «%s» y «%s»" % [avisos[i][1], avisos[j][1]])
+				_comprobar(absf(a.position.x - b.position.x) >= SEPARACION_LECCIONES, "R1 Lecciones separadas: «%s» y «%s»" % [lecciones[i][1], lecciones[j][1]])
+	_comprobar(not "AVISOS" in Sala.new().get_script().get_script_constant_map(), "M2 Sin avisos de texto abajo: enseñan el Indicador y las frases de Felipe")
 
-	# R2. Enseñar sin peligro: la entrada de cada aviso está libre de daño.
-	for aviso: Array in avisos:
-		var entrada := Rect2(aviso[0].position, Vector2(ENTRADA_SEGURA, aviso[0].size.y))
+	# R2. Enseñar sin peligro: la entrada de cada lección está libre de daño.
+	for leccion: Array in lecciones:
+		var entrada := Rect2(leccion[0].position, Vector2(ENTRADA_SEGURA, leccion[0].size.y))
 		var libre := true
 		for dano: Rect2 in danos:
 			libre = libre and not entrada.intersects(dano)
-		_comprobar(libre, "R2 Entrada segura en el aviso «%s»" % aviso[1])
+		_comprobar(libre, "R2 Entrada segura en la lección «%s»" % leccion[1])
 
-	# R3. Mostrar antes que decir: avisos de una línea.
-	for aviso: Array in avisos:
-		var texto: String = aviso[1]
-		var sin_teclas := RegEx.create_from_string("\\{[a-z_]+\\}").sub(texto, "X", true)
-		_comprobar(sin_teclas.length() <= LARGO_AVISO and not "\n" in texto, "R3 Aviso de una línea: «%s»" % texto)
+	# R3. Mostrar antes que decir: líneas de una frase corta.
+	for leccion: Array in lecciones:
+		var texto: String = leccion[1]
+		var sin_teclas := RegEx.create_from_string("\\{[a-z_]+\\} ?").sub(texto, "", true)
+		_comprobar(sin_teclas.length() <= LARGO_LINEA and not "\n" in texto, "R3 Línea corta: «%s» (%d)" % [texto, sin_teclas.length()])
 
 	# R4. Meta a la vista: la salida está en la última habitación de la ruta (se muestra al empezar: prueba_nivel).
 	_comprobar(Sala.orden_en_ruta(Vector2(Sala.SALIDA, Sala.SUELO)) == Sala.RUTA.size() - 1, "R4 La meta (balcón) es la última habitación de la ruta")
@@ -83,24 +91,27 @@ func _correr() -> void:
 		antes_del_jefe = antes_del_jefe or (cuarto in conexiones.get(jefe, []) and Sala.RUTA.find(cuarto) < Sala.RUTA.find(jefe))
 	_comprobar(antes_del_jefe, "R5 Hay un descanso junto a la puerta del jefe")
 
-	# R6. Atajos: la reja se abre solo desde la escalera y deja junto a la caja de arena.
-	var junto := false
-	for descanso: Rect2 in Sala.DESCANSOS:
-		junto = junto or (Sala.habitacion_de(descanso.get_center()) == Sala.habitacion_de(Sala.REJA.get_center()) and _distancia(Sala.REJA, descanso) <= ATAJO_A_DESCANSO)
-	_comprobar(junto, "R6 El atajo (la reja) termina junto a un punto de descanso")
-	_comprobar(Sala.REJA.size.y > 140.0, "R6 La reja no se salta desde el piso (%.0f px, doble salto ~140)" % Sala.REJA.size.y)
+	# R6. Atajos: el pestillo se abre solo desde la escalera y deja junto a la caja de arena.
+	_comprobar(Sala.ATAJOS.size() >= 1, "R6 El nivel tiene al menos un atajo")
+	for atajo: Array in Sala.ATAJOS:
+		var junto := false
+		for descanso: Rect2 in Sala.DESCANSOS:
+			junto = junto or (Sala.habitacion_de(descanso.get_center()) == Sala.habitacion_de(atajo[1].get_center()) and _distancia(atajo[1], descanso) <= ATAJO_A_DESCANSO)
+		_comprobar(junto, "R6 El atajo «%s» termina junto a un punto de descanso" % atajo[0])
+	_comprobar(Sala.REJA.size.y > SALTO + 60.0, "R6 La reja no se salta desde el piso (%.0f px; el salto llega a ~%.0f)" % [Sala.REJA.size.y, SALTO])
 
 	# R7. Verticalidad de gato y habitaciones unidas por puertas que van y vuelven.
 	var escalera := Vector2.INF
 	for datos: Array in Sala.PUERTAS:
 		if datos[0] == Sala.PUERTA_ESCALERA:
 			escalera = datos[1]
-	_comprobar(escalera.x > Sala.REJA.end.x and Sala.habitacion_de(escalera) == Sala.habitacion_de(Sala.REJA.get_center()), "R7 La escalera está detrás de las rejas")
+	_comprobar(escalera.x > Sala.REJA.end.x and Sala.habitacion_de(escalera) == Sala.habitacion_de(Sala.REJA.get_center()), "R7 La escalera está detrás de la reja")
+	_comprobar(Sala.PELDANOS.size() == 7 and Sala.PELDANOS[-1].y <= Sala.SUELO - 140.0, "R7 La escalera de fondo tiene 7 escalones que suben unos 150 px")
 	var altas := 0
 	for pieza: Array in Sala.PIEZAS:
 		if pieza[3] != "invisible" and Sala.SUELO - pieza[0].position.y >= 150.0:
 			altas += 1
-	_comprobar(altas >= 3 and Sala.TREPABLES.size() >= 1, "R7 Hay muebles altos para trepar (%d) y algo que trepar" % altas)
+	_comprobar(altas >= 3, "R7 Hay muebles altos que hacen de camino (%d)" % altas)
 	var destinos := {}
 	for datos: Array in Sala.PUERTAS:
 		destinos[datos[0]] = datos[2]
@@ -114,6 +125,8 @@ func _correr() -> void:
 				visitadas[vecino] = true
 				pendientes.append(vecino)
 	_comprobar(visitadas.size() == Sala.HABITACIONES.size(), "R7 Desde la sala se llega por puertas a todas las habitaciones (%d)" % visitadas.size())
+	for habitacion: Array in Sala.HABITACIONES:
+		_comprobar((habitacion[0] as Rect2).size.x >= 640.0, "R7 La habitación %s no es más angosta que la pantalla (%.0f px)" % [habitacion[1], habitacion[0].size.x])
 
 	# R8. Medidas reales y huecos legibles: bajo un mueble sólido o no hay hueco o se pasa agachado.
 	for pieza: Array in Sala.PIEZAS:
@@ -122,13 +135,67 @@ func _correr() -> void:
 		var hueco: float = Sala.SUELO - pieza[0].end.y
 		_comprobar(hueco <= 0.5 or hueco >= HUECO_AGACHADO, "R8 Hueco bajo %s: %.0f px (0 o al menos %d)" % [pieza[2], hueco, HUECO_AGACHADO])
 
-	# R8. Escala de gato: los ratones miden la mitad de Felipe y nada interactuable mide menos de 24 px.
+	# R8 y G8. Escala de gato: ratones a la mitad de Felipe y todo lo interactuable con lado MENOR ≥ 24 px (comida incluida).
 	var raton := ArteNivel.textura("raton").get_size()
 	_comprobar(raton.y >= 30.0, "R8 El ratón de cuerda mide la mitad de Felipe (%.0f px de alto)" % raton.y)
-	for nombre: String in ["vaso", "rollo", "maceta", "lata", "plato", "calcetin", "caja", "raton", "aspi"]:
+	var interactuables := ["vaso", "rollo", "maceta", "llaves", "tazon", "pollo", "lata_v2", "bolsita", "calcetin", "caja", "raton", "aspi", "rascador", "reja_frente"]
+	for tirable: Array in Sala.TIRABLES:
+		if not tirable[1] in interactuables:
+			interactuables.append(tirable[1])
+	for comida: Array in Sala.COMIDA:
+		if not comida[1] in interactuables:
+			interactuables.append(comida[1])
+	for nombre: String in interactuables:
 		var tam := ArteNivel.textura(nombre).get_size()
-		_comprobar(maxf(tam.x, tam.y) >= 24.0, "R8 %s se lee (%.0f × %.0f px)" % [nombre, tam.x, tam.y])
-	_comprobar(Puerta.ANCHO >= 100.0, "R8 Las puertas son gruesas (%.0f px)" % Puerta.ANCHO)
+		_comprobar(minf(tam.x, tam.y) >= LADO_MINIMO, "R8 %s se lee (%.0f × %.0f px, lado menor ≥ %d)" % [nombre, tam.x, tam.y, LADO_MINIMO])
+	for recompensa: String in ["calcetin", "snack", "foto"]:
+		var tam := Recogible.tamano_icono(recompensa)
+		_comprobar(minf(tam.x, tam.y) >= LADO_MINIMO, "R8 La recompensa %s se lee (%.0f × %.0f px)" % [recompensa, tam.x, tam.y])
+
+	# B2 y R8. Puertas medidas en la imagen (no en la constante): gruesas y con un vano de 100 px o más.
+	for nombre: String in ["puerta_abierta_v2", "puerta_cerrada_v2", "puerta_entornada", "puerta_balcon_v2", "puerta_balcon_abierta", "vano"]:
+		var ancho := ArteNivel.textura(nombre).get_size().x
+		_comprobar(ancho >= Puerta.ANCHO, "B2 La puerta %s mide %.0f px de ancho en la imagen" % [nombre, ancho])
+	for nombre: String in ["puerta_abierta_v2", "vano"]:
+		var vano := _vano_de(ArteNivel.textura(nombre).get_image())
+		_comprobar(vano >= VANO_MINIMO, "B2 El vano de %s, medido en la imagen, mide %d px (sin poste en el medio)" % [nombre, vano])
+
+	# B4, G1–G5 y M1. Cada mueble pisable calza con el borde visible de su arte (±2 px).
+	for pieza: Array in Sala.PIEZAS:
+		if pieza[4] == "":
+			continue
+		_comprobar_arte(pieza[0], pieza[2], pieza[4])
+	for datos: Array in Sala.ARTE:
+		if datos[1].y == Sala.SUELO:
+			var imagen: Image = ArteNivel.textura(datos[0]).get_image()
+			_comprobar(_fila_opaca(imagen, imagen.get_height() - 1) > 0 and _fila_opaca(imagen, 0) > 0, "M1 %s no tiene margen transparente (se apoya en el piso)" % datos[0])
+	var cola := _filas_sin_cuerpo(ArteNivel.textura("raton").get_image())
+	_comprobar(absf(cola - Raton.COLA) <= 1.0, "G1 El ratón se apoya por el cuerpo (cola de %d px; el juego la baja %.0f)" % [cola, Raton.COLA])
+
+	# B3 y G10. Rectángulo sagrado: nada se cruza con una puerta, la escalera ni la meta.
+	var sagrados: Array = []
+	for datos: Array in Sala.PUERTAS:
+		if datos[0] != Sala.PUERTA_ESCALERA:
+			sagrados.append([Sala.rect_sagrado(datos[1]), "la puerta %s" % datos[0]])
+	sagrados.append([Sala.ESCALERA_RECT, "la escalera"])
+	for sagrado: Array in sagrados:
+		var rect: Rect2 = (sagrado[0] as Rect2).grow(-0.5)
+		for datos: Array in Sala.ARTE:
+			if datos[0] in ["escalera_peldanos", "vano"]:
+				continue
+			var tam := ArteNivel.textura(datos[0]).get_size()
+			var dibujo := Rect2(datos[1] - Vector2(0, tam.y), tam)
+			_comprobar(not dibujo.intersects(rect), "B3 %s no se cruza con %s" % [datos[0], sagrado[1]])
+		for pieza: Array in Sala.PIEZAS:
+			if pieza[3] == "invisible":
+				continue
+			_comprobar(not (pieza[0] as Rect2).intersects(rect), "B3 %s no se cruza con %s" % [pieza[2], sagrado[1]])
+		for dano: Rect2 in danos:
+			_comprobar(not dano.grow(-0.5).intersects(rect), "G10 Ninguna zona de daño patrulla en %s" % sagrado[1])
+		for lugar: Vector2 in [Sala.VALERIA_SOFA, Sala.VALERIA_COCINA]:
+			_comprobar(not rect.has_point(lugar - Vector2(0, 1)), "G10 Valeria no se para en %s" % sagrado[1])
+		for descanso: Rect2 in Sala.DESCANSOS:
+			_comprobar(not descanso.intersects(rect), "G10 El descanso no está en %s" % sagrado[1])
 
 	# R9. Hitos: cada habitación tiene su propia pared.
 	var estilos := {}
@@ -152,6 +219,7 @@ func _correr() -> void:
 		for j in range(i + 1, fuertes.size()):
 			if Sala.habitacion_de(fuertes[i].get_center()) == Sala.habitacion_de(fuertes[j].get_center()):
 				_comprobar(_distancia(fuertes[i], fuertes[j]) >= CALMA, "R11 Calma entre zonas de daño")
+	_comprobar(Sala.RUTA[-1] == ALIVIO, "R11 El nivel cierra con el alivio (balcón)")
 
 	# R12. El jefe es un examen: hay con qué ensuciar y algo de eso pide subir.
 	var en_estudio := 0
@@ -168,6 +236,7 @@ func _correr() -> void:
 	cosas.append(Sala.CAJA_CARTON)
 	cosas.append(Sala.LASER[0])
 	cosas.append(Sala.REJA.get_center())
+	cosas.append(Sala.CAJON)
 	for lista: Array in [Sala.RATONES, Sala.TIRABLES, Sala.COMIDA]:
 		for cosa: Array in lista:
 			cosas.append(cosa[0])
@@ -179,10 +248,137 @@ func _correr() -> void:
 			hay = hay or (habitacion[0] as Rect2).grow(1).has_point(cosa)
 		_comprobar(hay, "R13 La habitación %s tiene algo con qué jugar" % habitacion[1])
 
+	# R17. Un barrio que se descubre: lugares que se ven antes de alcanzarlos (y no se alcanzan), atajo y escenario.
+	_comprobar(Sala.LUGARES_VISTOS.size() >= 1, "R17 Hay al menos un lugar visto para volver con una maña nueva")
+	var alcanzables := _superficies_alcanzables()
+	for lugar: Array in Sala.LUGARES_VISTOS:
+		var rect: Rect2 = lugar[1]
+		var se_alcanza := false
+		for superficie: Rect2 in alcanzables:
+			se_alcanza = se_alcanza or (superficie.position.x < rect.end.x and superficie.end.x > rect.position.x and absf(superficie.position.y - rect.end.y) < 12.0)
+		_comprobar(not se_alcanza and lugar[2] != "", "R17 «%s» se ve pero no se alcanza todavía (se vuelve con %s)" % [lugar[0], lugar[2]])
+		_comprobar(Sala.habitacion_de(rect.get_center()) != "", "R17 «%s» está dentro de un cuarto" % lugar[0])
+
+	# R18. Una travesura de la Agenda con reacción por habitación (salvo el alivio).
+	var con_travesura := {}
+	for travesura: Dictionary in Agenda.NIVEL_1:
+		var id: String = travesura["id"]
+		var sitio: Array = Sala.AGENDA_SITIOS.get(id, [])
+		_comprobar(not sitio.is_empty() and Sala.habitacion_de(sitio[0]) == travesura["cuarto"], "R18 La travesura «%s» pasa en %s" % [travesura["nombre"], travesura["cuarto"]])
+		_comprobar(not sitio.is_empty() and String(sitio[1]) != "", "R18 La travesura «%s» tiene su reacción" % travesura["nombre"])
+		con_travesura[travesura["cuarto"]] = true
+	for habitacion: Array in Sala.HABITACIONES:
+		if habitacion[1] != ALIVIO:
+			_comprobar(con_travesura.has(habitacion[1]), "R18 La habitación %s tiene una travesura de la Agenda" % habitacion[1])
+
+	# R19. Cada maña es llave y travesura: abre un camino y molesta a alguien.
+	for mana: String in Sala.MANAS:
+		var datos: Array = Sala.MANAS[mana]
+		_comprobar(String(datos[0]) != "" and String(datos[1]) != "", "R19 %s abre «%s» y molesta a «%s»" % [mana, datos[0], datos[1]])
+
 	for fallo in _fallos:
 		printerr("FALLO: " + fallo)
 	print("Resultado: %d fallos" % _fallos.size())
 	quit(1 if _fallos.size() > 0 else 0)
+
+
+## La colisión de la pieza coincide con un borde visible de su arte: en la mayoría de las columnas que cubre, a ±2 px
+## de la fila de arriba de la pieza hay un borde (opaco con transparente encima, o la línea oscura del contorno).
+func _comprobar_arte(rect: Rect2, nombre: String, imagen_nombre: String) -> void:
+	var textura := ArteNivel.textura(imagen_nombre)
+	var dibujos := Sala.rects_de_arte(imagen_nombre)
+	var dibujo := Rect2()
+	for candidato in dibujos:
+		if candidato.grow(2).encloses(Rect2(rect.position.x, rect.position.y, rect.size.x, 1)):
+			dibujo = candidato
+	if imagen_nombre == "microondas":
+		dibujos = [Rect2(3570, Sala.SUELO - 109 - textura.get_height(), textura.get_width(), textura.get_height())]
+		dibujo = dibujos[0]
+	_comprobar(dibujo != Rect2(), "B4 %s está dentro de su arte (%s)" % [nombre, imagen_nombre])
+	if dibujo == Rect2():
+		return
+	var espejo := false
+	for datos: Array in Sala.ARTE + Sala.ARTE_EXTRA:
+		if datos[0] == imagen_nombre and absf(datos[1].x - dibujo.position.x) < 0.5 and datos.size() > 2:
+			espejo = datos[2]
+	var imagen: Image = textura.get_image()
+	var fila := int(roundf(rect.position.y - dibujo.position.y))
+	var columnas := 0
+	var con_borde := 0
+	for x in range(int(rect.position.x), int(rect.end.x)):
+		var columna := x - int(dibujo.position.x)
+		if espejo:
+			columna = imagen.get_width() - 1 - columna
+		if columna < 0 or columna >= imagen.get_width():
+			continue
+		columnas += 1
+		for dy in range(-TOLERANCIA_ARTE, TOLERANCIA_ARTE + 1):
+			var y := fila + dy
+			if y < 0 or y >= imagen.get_height():
+				continue
+			var pixel := imagen.get_pixel(columna, y)
+			var arriba := imagen.get_pixel(columna, y - 1) if y > 0 else Color(0, 0, 0, 0)
+			if pixel.a > 0.5 and (arriba.a < 0.5 or pixel.get_luminance() < 0.3):
+				con_borde += 1
+				break
+	var parte := float(con_borde) / maxf(columnas, 1)
+	_comprobar(parte >= 0.7, "B4 La colisión de %s calza con el borde de %s a ±%d px (%.0f %% de sus columnas)" % [nombre, imagen_nombre, TOLERANCIA_ARTE, parte * 100.0])
+
+
+func _fila_opaca(imagen: Image, y: int) -> int:
+	var n := 0
+	for x in imagen.get_width():
+		if imagen.get_pixel(x, y).a > 0.5:
+			n += 1
+	return n
+
+
+## Filas de abajo con muy pocos pixeles (la cola del ratón, que cuelga bajo el cuerpo).
+func _filas_sin_cuerpo(imagen: Image) -> int:
+	var filas := 0
+	for y in range(imagen.get_height() - 1, -1, -1):
+		if _fila_opaca(imagen, y) > imagen.get_width() / 2:
+			break
+		filas += 1
+	return filas
+
+
+## Vano de una puerta medido en la imagen: de la primera a la última columna oscura (luminancia < 0,15) a media
+## altura, sin contar los 4 px del contorno de afuera.
+func _vano_de(imagen: Image) -> int:
+	var y := imagen.get_height() / 2
+	var primera := -1
+	var ultima := -1
+	for x in range(4, imagen.get_width() - 4):
+		var pixel := imagen.get_pixel(x, y)
+		if pixel.a > 0.5 and pixel.get_luminance() < 0.15:
+			if primera < 0:
+				primera = x
+			ultima = x
+	return ultima - primera + 1 if primera >= 0 else 0
+
+
+## Superficies donde Felipe puede pararse partiendo del piso, con saltos de ~79 px (sin doble salto ni trepar).
+func _superficies_alcanzables() -> Array[Rect2]:
+	var alcanzadas: Array[Rect2] = []
+	for habitacion: Array in Sala.HABITACIONES:
+		var cuarto: Rect2 = habitacion[0]
+		alcanzadas.append(Rect2(cuarto.position.x, Sala.SUELO, cuarto.size.x, 0))
+	var hubo_cambio := true
+	while hubo_cambio:
+		hubo_cambio = false
+		for pieza: Array in Sala.PIEZAS:
+			var superficie: Rect2 = pieza[0]
+			if pieza[3] == "invisible" or superficie in alcanzadas:
+				continue
+			for desde in alcanzadas:
+				var subida := desde.position.y - superficie.position.y
+				var hueco := maxf(0.0, maxf(superficie.position.x - desde.end.x, desde.position.x - superficie.end.x))
+				if Sala.habitacion_de(superficie.get_center()) == Sala.habitacion_de(desde.get_center() + Vector2(0, -1)) and subida <= SALTO - 7.0 and hueco <= 90.0:
+					alcanzadas.append(superficie)
+					hubo_cambio = true
+					break
+	return alcanzadas
 
 
 ## Habitación -> habitaciones a las que se llega por una puerta.

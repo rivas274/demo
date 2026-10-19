@@ -6,7 +6,10 @@ extends Node2D
 
 const GRUPO := "interactuables"
 
-## "plato" (croquetas en el piso de la cocina) o "lata" (atún escondido en un estante).
+## Se la comieron (cuando la boca llega): el nivel la usa para la Agenda (el pollo de Valeria).
+signal comido(comida: Comida)
+
+## "tazon" (croquetas en el piso de la cocina), "pollo" (el almuerzo de Valeria), "lata_v2" o "bolsita" (premios).
 var tipo: String
 
 
@@ -26,6 +29,7 @@ func interactuar(felipe: Felipe) -> void:
 
 
 func al_comido() -> void:
+	comido.emit(self)
 	var desaparecer := create_tween()
 	desaparecer.tween_property(self, "scale", Vector2(1.2, 0.0), 0.15)
 	desaparecer.tween_callback(queue_free)
@@ -37,6 +41,12 @@ func verbo(_felipe: Felipe) -> String:
 
 func arte_indicador() -> Dictionary:
 	return ArteNivel.arte_en(self, tipo, 0.0, 0.0)
+
+
+func rect_dibujo() -> Rect2:
+	var t := ArteNivel.textura(tipo)
+	var tam := t.get_size() if t else Vector2(24, 24)
+	return Rect2(global_position + Vector2(-tam.x / 2.0, -tam.y), tam)
 
 
 func _draw() -> void:

@@ -72,6 +72,24 @@ const FELIPE := {
 	"agenda_completa": [
 		["Agenda completa. Hoy fui un genio. Como ayer.", 7],
 	],
+	# Nivel 1 v4 (propuesta, sección 2): una por momento, casi todas salen una sola vez.
+	"meta": [["La libertad está allá arriba.", 0]],
+	"inicio": [["Día 1 de la dieta. Último día de esta casa.", 0]],
+	"reja": [["¿Una reja? ¿En MI escalera? Qué tierno.", 4]],
+	"pestillo": [["El pestillo, por dentro. Aficionada.", 7]],
+	"tazon": [["Tres croquetas. Esto es un crimen.", 2]],
+	"cocina_cerrada": [["Cerrada. Y adentro huele a café.", 1]],
+	"balcon_cerrado": [["Cerrada. Esa aspiradora tiene la llave.", 1]],
+	"robot": [["Arriba manda el robot. Abajo, la servidumbre.", 0]],
+	"robot_registra": [["Ese robot cree que me registra. Yo lo registro a él.", 0]],
+	"puerta_abierta": [["Puerta entornada. Invitación aceptada.", 7]],
+	"ropa": [["Ahora tiene mi firma.", 7]],
+	"cojin": [["Tiene mi forma. Obviamente.", 7]],
+	"cortina": [["Mis garras no están a la altura. Todavía.", 2]],
+	"quien_cerro": [["…¿Quién cerró?", 2]],
+	"balcon": [["Soy un gato de interior. Mi cardio es mirar por la ventana.", 0]],
+	"aterrice": [["No me caí. Aterricé con estilo.", 7]],
+	"limpieza": [["Limpieza cancelada.", 7]],
 }
 
 const VALERIA := {
@@ -90,6 +108,18 @@ const VALERIA := {
 		["¡PIPE! Estoy en una reunión...", 1],
 		["Felipe Ron con Pasas Primero. Nombre completo. Estás en problemas.", 1],
 	],
+	# Nivel 1 v4.
+	"vaso": [["¡PIPE! ¡Ese vaso era de mi abuela!", 1]],
+	"sofa_atrapado": [["¡Ahí no, bebito, AQUÍ!", 1]],
+	"sofa_roto": [["¡El sofá! ¡Lo estoy pagando en 12 cuotas!", 1]],
+	"grabando": [["¡Miren! ¡Usa su rascador! #GatoFit #BebitoGordito", 3]],
+	"cocina_dieta": [["Voy por un café. Y tú no entras: dieta.", 0]],
+	"cocina_abre": [["Ya, entra, pero no hay nada para ti.", 0]],
+	"popo": [["¡ACABO DE LIMPIARLA! Voy por bolsas...", 1]],
+	"llaves": [["¿Mis llaves? ¿OTRA VEZ?", 1]],
+	"almuerzo": [["¡ESE ERA MI ALMUERZO! Esto va a mis historias.", 1]],
+	"audifonos": [["Reunión. Audífonos puestos. Pórtate bien, bebito.", 0]],
+	"maullido": [["¿Qué pasa, mi bebito gordito? Dieta, mi amor.", 2]],
 }
 
 var _ultima := {}

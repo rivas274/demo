@@ -1097,7 +1097,7 @@ func _actualizar_bano(delta: float) -> void:
 		if distancia <= BANO_GOTEO:
 			sonar("goteo", 0.8)
 	if en_el_piso and distancia <= BANO_FRASE and not _cruzando:
-		_decir("bano")
+		_decir("bano", true)
 	if not _dijo.has("bano") or _dijo.has("bano_manija"):
 		return
 	if en_el_piso and distancia <= BANO_MANIJA and absf(felipe.velocity.x) < 1.0:
@@ -1559,16 +1559,37 @@ func _base_opaca(nombre: String) -> Array:
 	return base
 
 
-## R-6: el zócalo sube con la escalera, en escalones de pixel bajo el larguero, hasta el faldón del descanso.
+## R-6: el zócalo sube con la escalera, en escalones de pixel bajo el larguero (el borde de abajo del arte de los
+## peldaños), hasta el faldón del descanso.
+var _zocalo_escalera: Array = []
+
+
 func _dibujar_zocalo_escalera(c: Node2D) -> void:
-	var madera := Color("9a5b3c")
-	for i in range(1, PELDANOS.size()):
-		var desde: float = PELDANOS[i - 1].x + 6.0
-		var hasta: float = PELDANOS[i].x + 6.0 if i < PELDANOS.size() - 1 else 2536.0
-		var arriba: float = PELDANOS[i].y + 26.0
-		c.draw_rect(Rect2(desde, arriba, hasta - desde, 18), madera)
-		c.draw_rect(Rect2(desde, arriba, hasta - desde, 2), Color("c98a5e"))
-		c.draw_rect(Rect2(desde, arriba + 17, hasta - desde, 1), Color("6e3a26"))
+	var t := ArteNivel.textura("escalera_peldanos")
+	if t == null:
+		return
+	if _zocalo_escalera.is_empty():
+		var imagen := t.get_image()
+		var ancho := imagen.get_width()
+		var x := 0
+		while x < ancho:
+			# Tramos de 24 px: el escalón de zócalo va bajo el punto más bajo del larguero en el tramo.
+			var abajo := 0
+			for k in range(x, mini(x + 24, ancho)):
+				var columna := ancho - 1 - k  # el arte va en espejo
+				for y in range(imagen.get_height() - 1, -1, -1):
+					if imagen.get_pixel(columna, y).a > 0.5:
+						abajo = maxi(abajo, y)
+						break
+			_zocalo_escalera.append(Vector3(2322 + x, mini(x + 24, ancho) - x, SUELO - t.get_height() + abajo + 1))
+			x += 24
+	for tramo: Vector3 in _zocalo_escalera:
+		if tramo.z > SUELO - 20.0 or tramo.x >= 2536.0:
+			continue
+		var ancho_tramo := minf(tramo.y, 2536.0 - tramo.x)
+		c.draw_rect(Rect2(tramo.x, tramo.z, ancho_tramo, 18), Color("9a5b3c"))
+		c.draw_rect(Rect2(tramo.x, tramo.z, ancho_tramo, 2), Color("c98a5e"))
+		c.draw_rect(Rect2(tramo.x, tramo.z + 17, ancho_tramo, 1), Color("6e3a26"))
 
 
 ## Baranda del balcón con sus plantas que se mecen 1 px (B-4), cada maceta con su fase.

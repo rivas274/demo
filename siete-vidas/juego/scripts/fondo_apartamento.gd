@@ -43,7 +43,7 @@ const CANTO := Color("c98a5e")
 const PENUMBRA := [0.12, 0.08, 0.04]
 ## Cocina (C-1): azulejo solo hasta 1,5 m (182 px) con un listel de 4 px; arriba, pintura lisa crema cálida.
 const AZULEJO_ALTO := 182
-const PINTURA_COCINA := Color(1.12, 1.02, 0.86)
+const PINTURA_COCINA := Color("e9d6b4")
 ## Piso por estilo de cuarto (G7, C-4, B-2): la cocina y el balcón tienen el suyo (tanda 3E); los demás, parquet.
 const PISOS := {"azulejo": "piso_cocina", "exterior": "piso_balcon"}
 ## Rayos de luz (G6): el sol de la tarde entra por el oeste, siempre hacia la derecha. Tono por cuarto.
@@ -142,7 +142,7 @@ func _crear_pared() -> Image:
 		if habitacion[2] == "azulejo":
 			# Arriba, pintura lisa; abajo, el azulejo con menos contraste y un listel de remate.
 			var pintura := _imagen("pared_rosa")
-			_tenir(pintura, PINTURA_COCINA)
+			_pintar(pintura, PINTURA_COCINA)
 			_repetir(imagen, pintura, rect)
 			_contraste(mosaico, 0.85)
 			var corte := rect.end.y - AZULEJO_ALTO
@@ -200,6 +200,15 @@ func _contraste(imagen: Image, factor: float) -> void:
 		for x in imagen.get_width():
 			var c := imagen.get_pixel(x, y)
 			imagen.set_pixel(x, y, Color(suma.r + (c.r - suma.r) * factor, suma.g + (c.g - suma.g) * factor, suma.b + (c.b - suma.b) * factor, c.a))
+
+
+## Pintura lisa: la textura del mosaico conserva solo su luz (en escala de grises) sobre un color.
+func _pintar(imagen: Image, color: Color) -> void:
+	for y in imagen.get_height():
+		for x in imagen.get_width():
+			var luz := imagen.get_pixel(x, y).get_luminance()
+			var k := 1.0 + (luz - 0.6) * 0.25
+			imagen.set_pixel(x, y, Color(color.r * k, color.g * k, color.b * k))
 
 
 func _tenir(imagen: Image, tinte: Color) -> void:

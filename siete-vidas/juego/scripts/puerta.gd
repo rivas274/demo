@@ -207,13 +207,16 @@ func _draw() -> void:
 	if apertura <= 0.0 and estilo != "balcon":
 		# Rendija de luz abajo y, si hay alguien adentro, su sombra que va y viene.
 		if bano:
-			draw_rect(Rect2(-44, -3, 88, 2), Color(LUZ_BANO, 0.25 if _tubo_apagado() else 0.8))
+			# Luz fría de tubo: la rendija y un reflejo sobre el piso (el baño no lleva tapete).
+			var alfa := 0.25 if _tubo_apagado() else 0.85
+			draw_rect(Rect2(-44, -3, 88, 2), Color(LUZ_BANO, alfa))
+			draw_rect(Rect2(-40, -1, 80, 3), Color(LUZ_BANO, alfa * 0.3))
 		else:
 			draw_rect(Rect2(-44, -3, 88, 2), Color(1.0, 0.85, 0.5, 0.8))
 		if sombra_detras:
 			var x := sin(_tiempo * 1.3) * 30.0
 			draw_rect(Rect2(x - 9, -3, 18, 2), Color(0.15, 0.08, 0.06, 0.9))
-	if estilo != "vano":
+	if estilo != "vano" and not bano:
 		# Tapete terracota.
 		draw_rect(Rect2(-48, -2, 96, 4), Color(0.69, 0.33, 0.24))
 		draw_rect(Rect2(-48, -2, 96, 1), Color(0.82, 0.45, 0.32))

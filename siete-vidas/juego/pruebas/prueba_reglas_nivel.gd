@@ -160,6 +160,10 @@ func _correr() -> void:
 	for nombre: String in ["puerta_abierta_v2", "puerta_cerrada_v2", "puerta_entornada", "puerta_balcon_v2", "puerta_balcon_abierta", "vano"]:
 		var ancho := ArteNivel.textura(nombre).get_size().x
 		_comprobar(ancho >= Puerta.ANCHO, "B2 La puerta %s mide %.0f px de ancho en la imagen" % [nombre, ancho])
+	# G1 y G2 del plan de ambientes: un solo marco de puerta (140 × 248) en todos los estados y en el vano.
+	for nombre: String in ["puerta_abierta_v2", "puerta_cerrada_v2", "puerta_entornada", "puerta_balcon_v2", "puerta_balcon_abierta", "vano"]:
+		var tam := ArteNivel.textura(nombre).get_size()
+		_comprobar(tam == Vector2(140, 248), "G1 La puerta %s tiene el marco de la casa (%.0f × %.0f)" % [nombre, tam.x, tam.y])
 	for nombre: String in ["puerta_abierta_v2", "vano"]:
 		var vano := _vano_de(ArteNivel.textura(nombre).get_image())
 		_comprobar(vano >= VANO_MINIMO, "B2 El vano de %s, medido en la imagen, mide %d px (sin poste en el medio)" % [nombre, vano])
@@ -182,6 +186,7 @@ func _correr() -> void:
 		if datos[0] != Sala.PUERTA_ESCALERA:
 			sagrados.append([Sala.rect_sagrado(datos[1]), "la puerta %s" % datos[0]])
 	sagrados.append([Sala.ESCALERA_RECT, "la escalera"])
+	sagrados.append([Sala.rect_sagrado(Sala.BANO), "la puerta del baño"])
 	for sagrado: Array in sagrados:
 		var rect: Rect2 = (sagrado[0] as Rect2).grow(-0.5)
 		for datos: Array in Sala.ARTE:

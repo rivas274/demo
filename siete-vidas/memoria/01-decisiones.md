@@ -38,6 +38,9 @@ Actualizado: 2026-10-18. Detalle completo en la biblia (ver README.md).
 
 - **Travesuras v1 (2026-10-18): CAMBIAR.** Tirar, arañar, maullar e intimidar con la voz de Felipe y respuesta épica divierten al principio, pero sin incentivo pierden sentido; el medidor de CAOS y el puntaje no sirven. Se prueba en v2 la **Agenda de Su Majestad**: lista de 5 a 8 travesuras con nombre por nivel (algunas secretas), cada una con recompensa útil (calcetín, snack por perdón, foto vergonzosa o un camino nuevo) y resumen al final del nivel; sin contador de puntos.
 
+- **Travesuras v2 (2026-10-19): SEGUIR.** La Agenda de Su Majestad, el rascador (teatro para Valeria) y la voz de Valeria (lo trata de "bebito gordito", vive para sus redes) funcionan. Pasan al nivel 1.
+- **Fase 3 (2026-10-19):** el creador decide pasar al nivel 1 tutorial con calidad final y mejorar el arte. Primero se rediseña el nivel en papel, se aprueba y después se construye.
+
 ## Mecánicas
 
 - **Tres medidores:** afecto humano (por casa), respeto felino, peso. No hay medidor de hambre.

@@ -6,7 +6,7 @@ Antes de proponer o construir algo, lee la memoria del proyecto en `siete-vidas/
 
 Al empezar un chat nuevo, lee primero `siete-vidas/memoria/05-estado-actual.md` (dónde vamos). Al cerrar cualquier decisión nueva, actualiza esos archivos, incluido ese.
 
-**Equipo de diseño y fase actual:** el proyecto avanza por fases con agentes (`.claude/agents/`) y comandos (`.claude/skills/`: `/pilares`, `/prototipo`, `/prueba-juego`, `/revision-diseno`, `/puerta-fase`, `/godot-felipe`). Fase actual: **Fase 1 – Concepto y pilares**; detalle en `siete-vidas/memoria/README.md` (Equipo de diseño).
+**Equipo de diseño y fase actual:** el proyecto avanza por fases con agentes (`.claude/agents/`) y comandos (`.claude/skills/`: `/pilares`, `/prototipo`, `/prueba-juego`, `/revision-diseno`, `/puerta-fase`, `/godot-felipe`). Fase actual: **Fase 3 – Vertical slice: el nivel 1 tutorial con calidad final** (desde el 2026-10-19); detalle en `siete-vidas/memoria/README.md` (Equipo de diseño).
 
 ## Regla fija: cada cambio de un personaje se refleja en tres lugares
 

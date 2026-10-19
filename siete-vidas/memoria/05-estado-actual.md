@@ -4,9 +4,11 @@ Actualizado: 2026-10-18. **Léelo al empezar un chat nuevo** para retomar sin re
 
 ## Fase del proyecto
 
-**Fase 1 → 2: prototipo de concepto** ("¿es divertido ser Felipe?"). Fases: 1 Concepto y pilares → 2 Prototipo de concepto → 3 Vertical slice → 4 Producción → 5 Pulido y lanzamiento (Steam). Para pasar de fase: `/puerta-fase`.
+**Fase 3: vertical slice — el nivel 1 tutorial con calidad final** (desde el 2026-10-19). Fases 1 y 2 cerradas. Fases: 1 Concepto y pilares → 2 Prototipo de concepto → 3 Vertical slice → 4 Producción → 5 Pulido y lanzamiento (Steam). Para pasar de fase: `/puerta-fase`.
 
 ## En curso
+
+- **Rediseño en papel del nivel 1 tutorial** → `siete-vidas/diseno/nivel-01-propuesta-v4.md` (agente diseñador). Se presenta al creador; al aprobarse, plan de arte con costos (director de arte) y después se construye.
 
 - **Prototipo "travesuras" v2 con la Agenda de Su Majestad** (`siete-vidas/prototipos/travesuras/`, ver su `INFORME.md` y `README.md`). Reemplaza el medidor de CAOS por 6 travesuras con nombre (2 secretas) y recompensas útiles (calcetín, snack por perdón, foto vergonzosa, un camino que se abre) y un resumen tipo Balatro al final. **Lista (2026-10-18):** video enviado; falta que el creador la juegue (Godot 4.3, F5; Tab = agenda, F = terminar el día) y dé el veredicto SEGUIR / CAMBIAR / DESCARTAR. Abierto: para qué sirven los snacks y los calcetines.
 

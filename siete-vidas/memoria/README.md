@@ -16,7 +16,7 @@ Esta carpeta guarda lo que ya se decidió, para que cualquier sesión nueva reto
 
 ## Equipo de diseño (agentes y comandos)
 
-**Fase actual: Fase 1 – Concepto y pilares** (desde el 2026-10-18). Fases: 1 Concepto y pilares → 2 Prototipo de concepto (¿es divertido ser Felipe?) → 3 Vertical slice (nivel 1 con calidad final) → 4 Producción → 5 Pulido y lanzamiento (Steam). El nivel 1 ya construido queda como base; se vuelve a él después del prototipo de acciones de gato. Pasar de fase se decide con `/puerta-fase`.
+**Fase actual: Fase 3 – Vertical slice** (desde el 2026-10-19): el nivel 1 tutorial con calidad final. Fases 1 y 2 cerradas (pilares aprobados; prototipo de travesuras con veredicto SEGUIR). Fases: 1 Concepto y pilares → 2 Prototipo de concepto (¿es divertido ser Felipe?) → 3 Vertical slice (nivel 1 con calidad final) → 4 Producción → 5 Pulido y lanzamiento (Steam). El nivel 1 ya construido queda como base; se vuelve a él después del prototipo de acciones de gato. Pasar de fase se decide con `/puerta-fase`.
 
 Adaptado de Claude Code Game Studios y GodotPrompter (MIT; créditos en `.claude/CREDITOS.md`). Agentes en `.claude/agents/`, comandos en `.claude/skills/`.
 

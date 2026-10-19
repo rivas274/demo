@@ -44,6 +44,7 @@ func _ready() -> void:
 	add_child(hud)
 	dialogo = Dialogo.new()
 	dialogo.name = "Dialogo"
+	dialogo.seguir = felipe
 	add_child(dialogo)
 	libreta = Libreta.new()
 	libreta.name = "Libreta"
@@ -80,8 +81,7 @@ func _al_cumplir(t: Dictionary) -> void:
 	var id := String(t["id"])
 	var secreta := bool(t.get("secreta", false))
 	var recompensa: Dictionary = t.get("recompensa", {})
-	var arriba := felipe != null and _en_pantalla(felipe.global_position).y < 150.0
-	hud.cartel("¡TRAVESURA SECRETA!" if secreta else "¡TRAVESURA CUMPLIDA!", String(t["nombre"]), String(recompensa.get("texto", "")), secreta, arriba)
+	hud.cartel("¡TRAVESURA SECRETA!" if secreta else "¡TRAVESURA CUMPLIDA!", String(t["nombre"]), String(recompensa.get("texto", "")), secreta, altura_cartel())
 	var frase: Array = t.get("frase", [])
 	if frase.size() >= 2:
 		dialogo.decir("felipe", String(frase[0]), int(frase[1]))
@@ -204,6 +204,24 @@ func mostrar_resumen(frase_final: Array = []) -> ResumenDia:
 		resumen_cerrado.emit())
 	add_child(resumen)
 	return resumen
+
+
+## Altura del cartel que no tapa a Felipe (sus 67 px sobre los pies) ni al cuadro de diálogo.
+func altura_cartel() -> float:
+	if felipe == null:
+		return Hud.Y_CARTEL
+	var pies := _en_pantalla(felipe.global_position).y
+	var felipe_ocupa := Vector2(pies - 72.0, pies)
+	var dialogo_ocupa := Vector2(dialogo.lugar(), dialogo.lugar() + 56.0)
+	for y: float in Hud.ALTURAS_CARTEL:
+		var cartel := Vector2(y, y + Hud.ALTO_CARTEL)
+		if not _se_cruzan(cartel, felipe_ocupa) and not _se_cruzan(cartel, dialogo_ocupa):
+			return y
+	return Hud.Y_CARTEL
+
+
+func _se_cruzan(a: Vector2, b: Vector2) -> bool:
+	return a.x < b.y and b.x < a.y
 
 
 func _en_pantalla(posicion: Vector2) -> Vector2:

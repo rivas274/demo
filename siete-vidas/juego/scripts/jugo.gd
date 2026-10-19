@@ -70,9 +70,9 @@ func palabra(texto: String, posicion: Vector2, color := Color(1.0, 0.9, 0.3), ta
 	var medida := etiqueta.get_minimum_size()
 	etiqueta.size = medida
 	etiqueta.pivot_offset = medida / 2.0
-	# Dentro de la pantalla, debajo del HUD y encima del cuadro de diálogo.
+	# Dentro de la pantalla y debajo del HUD.
 	var x := clampf(posicion.x - medida.x / 2.0, 4.0, 636.0 - medida.x)
-	var y := clampf(posicion.y - medida.y / 2.0, 34.0, 292.0 - medida.y)
+	var y := clampf(posicion.y - medida.y / 2.0, 34.0, 352.0 - medida.y)
 	etiqueta.position = Vector2(x, y).round()
 	etiqueta.scale = Vector2.ZERO
 	etiqueta.rotation = randf_range(-0.12, 0.12)

@@ -18,6 +18,10 @@ var _mostrando := false
 var _golpe := {}
 
 const X0 := 104.0
+## Alto del cartel y alturas posibles (bajo el diálogo de arriba, al medio, abajo).
+const ALTO_CARTEL := 96.0
+const Y_CARTEL := 104.0
+const ALTURAS_CARTEL := [104.0, 180.0, 252.0]
 const FONDO := Color(0.1, 0.07, 0.09, 0.78)
 
 
@@ -83,10 +87,10 @@ func _texto(fuente: Font, pos: Vector2, texto: String, tamano: int, color: Color
 
 
 ## Cartel épico en cola: título grande, nombre de la travesura y la recompensa.
-## `abajo`: si Felipe está arriba en la pantalla, el cartel baja para no taparlo.
-func cartel(titulo: String, nombre: String, recompensa: String, secreta: bool, abajo := false) -> void:
+## `y_cartel`: altura en pantalla para no tapar a Felipe ni al diálogo (Travesuras la elige); -1 = Y_CARTEL.
+func cartel(titulo: String, nombre: String, recompensa: String, secreta: bool, y_cartel := -1.0) -> void:
 	carteles.append([titulo, nombre])
-	_cola.append([titulo, nombre, recompensa, secreta, abajo])
+	_cola.append([titulo, nombre, recompensa, secreta, y_cartel if y_cartel >= 0.0 else Y_CARTEL])
 	golpear("agenda")
 	if not _mostrando:
 		_mostrando = true
@@ -109,7 +113,7 @@ func _siguiente_cartel() -> void:
 	caja.name = "Cartel"
 	caja.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	caja.size = Vector2(640, 96)
-	caja.position = Vector2(0, 168 if datos[4] else 48)
+	caja.position = Vector2(0, float(datos[4]))
 	caja.pivot_offset = Vector2(320, 48)
 	add_child(caja)
 	var franja := Polygon2D.new()

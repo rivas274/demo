@@ -7,6 +7,8 @@ extends CanvasLayer
 ## - Frases de 1 o 2 líneas; se escriben letra a letra, se cierran solas y se saltan (Enter o LB).
 ## - No repite la misma frase seguida y descarta las que esperaron demasiado en la cola.
 ## - {acción} dentro del texto se cambia por el ícono del botón en uso (por ejemplo "{maullar} Servidumbre: abran.").
+## - Nunca tapa a Felipe: con la cámara del juego, en el piso queda abajo de la pantalla, así que el cuadro sale
+##   arriba (bajo el HUD); si Felipe está arriba (librero, repisa), sale abajo.
 
 signal dicho(quien: String, texto: String)
 
@@ -31,6 +33,10 @@ const ANCHO_TEXTO := 548.0
 const TAM_LETRA := 14
 const MAX_LINEAS := 2
 const MAX_COLA := 3
+## Posición del cuadro arriba (bajo el HUD) y abajo; y de la pantalla desde la que Felipe "está abajo".
+const Y_ARRIBA := 44.0
+const Y_ABAJO := 300.0
+const FELIPE_ABAJO_DESDE := 190.0
 
 ## Letras por segundo.
 @export var velocidad_texto := 55.0
@@ -40,6 +46,8 @@ const MAX_COLA := 3
 ## Una frase que espera en la cola más que esto se descarta (ya no viene al caso).
 @export var caducidad_cola := 2.0
 
+## Personaje al que el cuadro no debe tapar (Felipe). Sin él, el cuadro va arriba.
+var seguir: Node2D
 var hablando := ""
 var texto_actual := ""
 ## Frases que se mostraron, en orden: [quien, texto] (para las pruebas y el resumen).
@@ -68,7 +76,7 @@ func _ready() -> void:
 	estilo.set_border_width_all(2)
 	estilo.set_corner_radius_all(3)
 	_caja.add_theme_stylebox_override("panel", estilo)
-	_caja.position = Vector2(8, 300)
+	_caja.position = Vector2(8, Y_ARRIBA)
 	_caja.size = Vector2(624, 56)
 	_caja.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_caja)
@@ -135,6 +143,14 @@ func ocupado() -> bool:
 	return _caja.visible
 
 
+## Dónde va el cuadro (y en pantalla) para no tapar a Felipe. Se decide al empezar cada frase.
+func lugar() -> float:
+	if seguir == null or not is_instance_valid(seguir) or not seguir.is_inside_tree():
+		return Y_ARRIBA
+	var pies := seguir.get_viewport().get_canvas_transform() * seguir.global_position
+	return Y_ARRIBA if pies.y > FELIPE_ABAJO_DESDE else Y_ABAJO
+
+
 ## Cuántas líneas ocupa la frase en el cuadro (las frases deben caber en 1 o 2).
 static func lineas_de(texto: String) -> int:
 	var limpio := texto
@@ -175,6 +191,7 @@ func _mostrar(quien: String, texto: String, animo: int) -> void:
 		_retrato_codigo.personaje = quien
 		_retrato_codigo.animo = animo
 		_retrato_codigo.queue_redraw()
+	_caja.position.y = lugar()
 	# Pequeño golpe al aparecer.
 	_caja.pivot_offset = Vector2(30, 28)
 	_caja.scale = Vector2(1.0, 0.7)

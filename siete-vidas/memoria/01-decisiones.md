@@ -47,6 +47,8 @@ Actualizado: 2026-10-19 (PARTE B del nivel 1 v4). Detalle completo en la biblia 
 
 - **Plan de arte del nivel 1 aprobado (2026-10-19)** (`siete-vidas/diseno/nivel-01-plan-arte.md`): Valeria inventada (moño castaño, sudadera verde azulado, buzo gris, pantuflas de gato); su caminar con hoja de Gemini; SpriteCook 72 créditos (subir_escalera, aranar, maullar) + 26 de reserva; encargo a Gemini tanda 3 (3A primero).
 
+- **Baño (2026-10-19, idea del creador):** la casa tendrá baño, como lugar visto que se desbloquea con una maña más adelante (pilar 1). En el nivel 1: puerta cerrada en el pasillo de arriba con luz bajo la puerta, goteo y frase de Felipe ("El trono de porcelana. Algún día será mío."). Propuesta: se abre con el doble salto (colgarse de la manilla); adentro, rollo para desenrollar, tina, cajón con foto vergonzosa y calcetín. Se arma cuando exista el doble salto.
+
 ## Mecánicas
 
 - **Tres medidores:** afecto humano (por casa), respeto felino, peso. No hay medidor de hambre.

@@ -91,6 +91,18 @@ Referencias de diseño (no se usan en el juego): foto real de Felipe (`a0fbe97b-
 - **En uso:** sofá, comedor (mesa con 2 sillas), aparador (también como consola del pasillo), escritorio, caja de arena, cojín, base de carga, repisa (estirada al ancho de cada repisa), puertas (abierta, cerrada, puerta-ventana del balcón y vano), cortina, bolas de pelo, manchas, A.S.P.I. con el depósito lleno, cuadros (retrato, paisaje, reloj), librero, reja para bebés (dos apiladas), perchero, lámpara, alacenas, mesón, refrigerador, banco, cama, cómoda (sin el espejo), ropero, baranda con macetas, vaso, rollo, maceta, lata, plato, calcetín, caja, ratón de cuerda, A.S.P.I., A.S.P.I. gigante, papel tapiz con un tinte por habitación (sala, recibidor verde, pasillo azul, estudio mostaza), azulejos (cocina), pared rosa (dormitorio), moldura, piso, cielo, dos capas de ciudad y fin del mundo. **Sin usar todavía:** clóset abierto, libro y juguetes. La escalera de fondo de la tanda 2 se dibuja en la pared del recibidor, apagada.
 - **API directa (alternativa):** agregar `GEMINI_API_KEY` en la configuración del entorno (se lee en una sesión nueva). La red de la nube sí llega a `generativelanguage.googleapis.com`.
 
+## Recursos gratis de terceros (créditos y licencias)
+
+Lista completa en `siete-vidas/juego/assets/CREDITOS.md` (también va en los créditos del juego). Kenney (CC0) sirve para sonido, partículas e interfaz; **nunca personajes ni fondos**.
+
+| Paquete | Autor | Licencia | En el juego | Para qué |
+| --- | --- | --- | --- | --- |
+| Input Prompts Pixel 1.0 | Kenney (kenney.nl) | CC0 1.0 (dominio público; uso comercial; atribución no obligatoria, se acredita igual) | `juego/assets/kenney/input-prompts-pixel.png` (hoja de 16 px, descargada el 2026-10-19) y `LICENCIA-input-prompts-pixel.txt` | Íconos de teclas y botones del mando en el `Indicador`, los diálogos, la libreta y el HUD (`scripts/iconos_botones.gd`; si falta la imagen se dibuja una tecla por código) |
+
+## Retratos de Valeria y A.S.P.I. (2026-10-19)
+
+- Hoja de Gemini (tanda 3B): `arte/referencias/gemini/retratos-valeria-aspi.png`. `python3 siete-vidas/herramientas/preparar_retratos.py` la recorta en `juego/assets/personajes/retratos-valeria-aspi.png` (3 × 2 cuadros de 66 px, como los de Felipe): Valeria neutra, enojada, derretida, grabando; A.S.P.I. normal (luz verde) y en alerta (luz roja). La usa `Dialogo`; si falta, queda un retrato provisional por código (`RetratoValeria`).
+
 ## Otras herramientas
 
 - **Sonidos provisionales:** `siete-vidas/herramientas/sonidos_demo.py` sintetiza los WAV de la demo (salto, zarpazo, golpe, comer, vidrio, logro, calcetín, caja, y para la pelea: batalla, succión y puf) en `siete-vidas/juego/assets/sonidos/`. Se reemplazarán por sonidos finales.

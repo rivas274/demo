@@ -11,15 +11,19 @@ Demo jugable de **Felipe: Nueve Vidas, Cero Disculpas**: el primer nivel, **"La 
 | Acción | Teclado | Mando (Xbox) |
 | --- | --- | --- |
 | Moverse | A / D o flechas | Palanca izquierda o cruceta |
-| Trepar (en la cortina) | W o ↑ | Palanca arriba o cruceta arriba |
+| Trepar (en la cortina; **apagado en el nivel 1**, se gana con Afilar Garras) | W o ↑ | Palanca arriba o cruceta arriba |
 | Aferrarse (cuando A.S.P.I. aspira) | Mantener S o ↓ | Palanca abajo o cruceta abajo |
 | Entrar por una puerta | E o W/↑ junto a la puerta | Y o arriba |
 | Pausa | Esc | Start |
 | Agacharse y gatear (agachado + saltar = bajar de una repisa) | S o ↓ | Palanca abajo o cruceta abajo |
-| Saltar (dos veces = Doble Salto) | Espacio | A |
-| Zoomies (tocar = impulso; mantener = correr) | Shift | RB |
+| Saltar (dos veces = Doble Salto, **apagado en el nivel 1**) | Espacio | A |
+| Correr (mantener); Zoomies al tocar (**apagado en el nivel 1**) | Shift | RB |
 | Zarpazo | J | X |
-| Acción: usar el objeto cercano; si es comida, comerla | E | Y |
+| Acción: usar lo cercano (comer, tirar, arañar, pasar); la burbuja sobre Felipe dice qué hace | E | Y |
+| Comer un snack del bolsillo (sin nada cerca) | Mantener E 0,6 s | Mantener Y |
+| Maullar | Q | B |
+| Agenda de Su Majestad (libreta; pausa el juego) | Tab | View / Select |
+| Saltar la frase del diálogo | Enter | LB |
 | (Ocio: sin tocar nada 8 s, Felipe se acicala, juega o da vueltas) | — | — |
 
 ## Estructura
@@ -30,7 +34,9 @@ Demo jugable de **Felipe: Nueve Vidas, Cero Disculpas**: el primer nivel, **"La 
 | `scripts/` | `felipe.gd` (movimiento y efectos), `animaciones_felipe.gd` (arma las animaciones desde las hojas), `sala.gd` (sala armada desde datos, con muebles provisionales), `fondo_apartamento.gd` (fondo provisional en capas con parallax), `comida.gd` (comida que se come con el botón de acción), `vaso.gd` (se tira de la mesa: logro), `aspi.gd` (A.S.P.I., primer enemigo), `medidores.gd` (corazones, vidas, báscula y logros), `pantallas.gd` (título, intro, pausa, final y avisos del tutorial), `raton.gd`, `caja_carton.gd`, `calcetin.gd`, `laser.gd` |
 | `assets/sonidos/` | Sonidos provisionales generados con `siete-vidas/herramientas/sonidos_demo.py` |
 | `assets/felipe/` | Hojas de animación de Felipe (8 cuadros de 106×106) |
-| `pruebas/` | Pruebas automáticas (movimiento, escenario, mecánicas, nivel, reglas de diseño, jefe) y `partida.gd`, un bot que juega el nivel completo y sirve para grabar video |
+| `scripts/` (sistemas del nivel) | `travesuras.gd` (los junta y conecta con Felipe), `agenda.gd` (Agenda de Su Majestad, datos del nivel 1), `recompensas.gd` (nido, galería, bolsillo, caminos), `libreta.gd`, `hud.gd` (contadores y carteles), `resumen_dia.gd`, `dialogo.gd` y `frases.gd` (retratos, una sola cola), `retrato_valeria.gd` (provisional), `jugo.gd`, `indicador.gd` e `iconos_botones.gd` (Kenney), `recogible.gd`, `aranable.gd` (sofá, puerta entornada), `rascador.gd` (teatro para Valeria; interfaz de testigo), `chispas.gd` (garras afiladas) |
+| `assets/kenney/`, `assets/personajes/` | Íconos de botones (Kenney, CC0; ver `assets/CREDITOS.md`) y retratos de Valeria y A.S.P.I. |
+| `pruebas/` | Pruebas automáticas (movimiento, escenario, mecánicas, nivel, reglas de diseño, jefe, acciones y sistemas del nivel), `partida.gd` (un bot que juega el nivel completo y sirve para grabar video) y capturas (`capturas.gd`, `capturas_sistemas.gd`) |
 
 ## Comandos
 
@@ -42,6 +48,9 @@ godot --headless --path siete-vidas/juego --script res://pruebas/prueba_mecanica
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_nivel.gd
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_reglas_nivel.gd  # reglas de siete-vidas/diseno/reglas-de-niveles.md
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_jefe.gd  # pelea con A.S.P.I.
+godot --headless --path siete-vidas/juego --script res://pruebas/prueba_acciones.gd  # maullar, arañar, snacks, escalera, rascador, agenda, diálogo, indicador
+# Capturas a 640×360 del Indicador, el diálogo, la libreta, los carteles y el resumen:
+xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/capturas_sistemas.gd -- /tmp/capturas
 # Partida completa jugada por un bot (prueba de que el nivel se puede terminar):
 godot --headless --path siete-vidas/juego --fixed-fps 60 --script res://pruebas/partida.gd
 # Video del gameplay (imagen y sonido) con el modo de grabación de Godot, en una pantalla virtual:

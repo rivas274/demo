@@ -1,6 +1,6 @@
 # Decisiones cerradas
 
-Actualizado: 2026-10-18. Detalle completo en la biblia (ver README.md).
+Actualizado: 2026-10-19. Detalle completo en la biblia (ver README.md).
 
 ## Producto
 
@@ -42,6 +42,8 @@ Actualizado: 2026-10-18. Detalle completo en la biblia (ver README.md).
 - **Fase 3 (2026-10-19):** el creador decide pasar al nivel 1 tutorial con calidad final y mejorar el arte. Primero se rediseña el nivel en papel, se aprueba y después se construye.
 
 - **Nivel 1 v4 aprobado (2026-10-19)** (`siete-vidas/diseno/nivel-01-propuesta-v4.md`): doble salto, Zoomies y trepar apagados en el nivel 1; snacks en bolsillo de 5, calcetines al nido (10 = una ranura de maña), fotos a la galería; animaciones nuevas de arañar y maullar (intimidar, después); Valeria con 4 poses de Gemini y caminar; escalera de fondo con reja y librero, con animación de subir.
+
+- **Controles nuevos (2026-10-19, al construir la parte A):** maullar con **Q** (mando **B**, el único libre); la Agenda con **Tab** (mando **View/Select**); saltar la frase del diálogo con **Enter** (mando **LB**). Comer un snack: mantener la acción 0,6 s sin nada cerca. El diálogo va arriba cuando Felipe está en el piso y abajo cuando está arriba, para no taparlo nunca.
 
 - **Plan de arte del nivel 1 aprobado (2026-10-19)** (`siete-vidas/diseno/nivel-01-plan-arte.md`): Valeria inventada (moño castaño, sudadera verde azulado, buzo gris, pantuflas de gato); su caminar con hoja de Gemini; SpriteCook 72 créditos (subir_escalera, aranar, maullar) + 26 de reserva; encargo a Gemini tanda 3 (3A primero).
 

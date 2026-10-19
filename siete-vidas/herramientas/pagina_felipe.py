@@ -30,6 +30,10 @@ ANIMS = [
     {"id": "sc-vueltas", "nombre": "Ocio: perseguirse la cola", "godot": "vueltas", "archivo": "felipe-vueltas-sheet.png",
      "frames": 8, "fps": 10},
     {"id": "sc-trepar", "nombre": "Trepar", "godot": "trepar", "archivo": "felipe-trepar-sheet.png", "frames": 8, "fps": 10},
+    {"id": "sc-maullar", "nombre": "Maullar", "godot": "maullar", "archivo": "felipe-maullar-sheet.png", "frames": 8, "fps": 10},
+    {"id": "sc-aranar", "nombre": "Arañar (impacto en 3 y 5)", "godot": "aranar", "archivo": "felipe-aranar-sheet.png", "frames": 8, "fps": 12},
+    {"id": "sc-subir", "nombre": "Subir escalera (un escalón)", "godot": "subir_escalera", "archivo": "felipe-subir-escalera-sheet.png",
+     "frames": 8, "fps": 10},
 ]
 
 

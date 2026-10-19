@@ -11,10 +11,16 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
    - Al volver al nivel: **entrada de jefe en 8 pasos** dentro de `PresentacionJefe` (sin vuelta atrás, espera, revelar de abajo arriba, nombre, barra que se llena, música, tamaño, rugido) y jugo en la pelea; lista en `.claude/skills/godot-felipe/SKILL.md` §6b. Recursos gratis CC0 de Kenney (sonidos, partículas, interfaz) como opción, anotando créditos.
 3. [ ] **Volver al nivel 1** con lo que el prototipo apruebe (regla de los tres lugares) y seguir hacia el vertical slice. Antes de cada cambio de fase, `/puerta-fase`.
 
+## Nivel 1 v4 (Fase 3, en construcción)
+
+- [x] **PARTE A (2026-10-19):** acciones de Felipe (maullar, arañar, subir escalón, snack del bolsillo de 5, efectos en el cuadro de impacto), habilidades apagadas en el nivel 1 y sistemas reutilizables (Agenda, libreta, HUD y carteles, resumen del día, diálogo con retratos, jugo, Indicador con íconos de Kenney, recompensas, rascador, arañables). Prueba `prueba_acciones.gd`. Detalle en `05-estado-actual.md`.
+- [ ] Volver a publicar la ficha en línea (https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe) con las filas nuevas (la copia local ya está regenerada).
+- [ ] **PARTE B:** mapa nuevo del nivel, escalera con reja y librero conectada a `subir_escalera`, Valeria en escena (testigo del rascador, oye maullidos, perdona), travesuras conectadas a la agenda, pelea nueva con A.S.P.I., balcón con resumen del día, bot sin habilidades y video. Lista en `05-estado-actual.md` ("Para la PARTE B").
+
 ## Diseñar después (de los pilares)
 
 - [ ] **Ficha de Su Majestad** (menú de pausa): retrato, defensa, carisma, ataque y velocidad (chiste) con frases satíricas según el peso; definir cuánto sube cada una.
-- [ ] Snacks cargados: cuántos, cómo se usan en pelea, dónde se recargan.
+- [ ] Snacks cargados: dónde se recargan además de las recompensas (bolsillo de 5 y comer manteniendo la acción, hechos el 2026-10-19).
 - [ ] Retratos de otros personajes para los diálogos (Valeria, gatos del techo): encargo a Gemini con costo.
 
 ## En curso

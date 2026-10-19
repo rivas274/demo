@@ -1,6 +1,6 @@
 # Estado actual: dónde vamos
 
-Actualizado: 2026-10-18. **Léelo al empezar un chat nuevo** para retomar sin repetir conversaciones. Al cerrar cada tema, actualiza este archivo (qué se cerró, qué sigue).
+Actualizado: 2026-10-19. **Léelo al empezar un chat nuevo** para retomar sin repetir conversaciones. Al cerrar cada tema, actualiza este archivo (qué se cerró, qué sigue).
 
 ## Fase del proyecto
 
@@ -8,9 +8,19 @@ Actualizado: 2026-10-18. **Léelo al empezar un chat nuevo** para retomar sin re
 
 ## En curso
 
-- **Nivel 1 v4 aprobado en papel** (`siete-vidas/diseno/nivel-01-propuesta-v4.md`, con las decisiones del creador al final). Plan de arte aprobado (`nivel-01-plan-arte.md`). Ahora: encargo a Gemini tanda 3A (esperando el "sí, adelante" del creador en la sesión gemini) y animación `subir_escalera` (26 créditos, esperando el sí a su ficha). Después Valeria (3B), aranar y maullar, y se construye.
+- **Construcción del nivel 1 v4** (`siete-vidas/diseno/nivel-01-propuesta-v4.md`, aprobado; plan de arte en `nivel-01-plan-arte.md`). Se hace en dos partes:
+  - **PARTE A (hecha, 2026-10-19): sistemas reutilizables y acciones de Felipe.** Ver "Ya cerrado (2026-10-19)".
+  - **PARTE B (sigue): el nivel en sí.** Mapa nuevo (sección 10), escalera de fondo con reja y librero, Valeria en escena (4 poses + caminar de Gemini, ya en `arte/referencias/gemini/`), pelea nueva con A.S.P.I., balcón y video. Lo que necesita de la parte A está en "Para la PARTE B" abajo.
 
-- **Prototipo "travesuras" v2 con la Agenda de Su Majestad** (`siete-vidas/prototipos/travesuras/`, ver su `INFORME.md` y `README.md`). Reemplaza el medidor de CAOS por 6 travesuras con nombre (2 secretas) y recompensas útiles (calcetín, snack por perdón, foto vergonzosa, un camino que se abre) y un resumen tipo Balatro al final. **Lista (2026-10-18):** video enviado; falta que el creador la juegue (Godot 4.3, F5; Tab = agenda, F = terminar el día) y dé el veredicto SEGUIR / CAMBIAR / DESCARTAR. Abierto: para qué sirven los snacks y los calcetines.
+## Ya cerrado (2026-10-19)
+
+- **PARTE A del nivel 1 v4, en el juego** (todas las pruebas pasan; bot completo):
+  - **Felipe:** `maullar` (Q / B; el maullido sale en el cuadro 3 y lo oyen los nodos del grupo `oyen_maullidos`), `aranar` (acción frente a sofá, rascador o puerta entornada; marcas y pelusa en los cuadros 3 y 5; garras afiladas → CRÍTICO), `subir_escalera` (función `subir_escalera(peldaños)` / `subir_escalon(destino)`, un ciclo por escalón con saltito; bajar con cuadros de saltar y caer), comer un snack del bolsillo (mantener acción 0,6 s sin nada cerca; bolsillo de 5, empieza con 3), y **todo efecto en su cuadro de impacto** (zarpazo y manotazo en el 4, comer en el 3: arregla B5 en vaso, reja y comida). Doble salto, Zoomies y trepar **apagados** (`tiene_doble_salto`, `tiene_zoomies`, `puede_trepar`).
+  - **Sistemas (scripts nuevos):** `Travesuras` (los junta), `Agenda` (8 travesuras del nivel 1, 3 secretas), `Recompensas` (nido con ranura cada 10, galería, bolsillo, caminos), `Libreta` (Tab / View), `Hud` (contadores arriba y carteles «¡TRAVESURA CUMPLIDA!» / «¡TRAVESURA SECRETA!»), `ResumenDia` (tipo Balatro), `Dialogo` + `Frases` (retratos de Felipe, Valeria y A.S.P.I.; una sola cola; no repite; descarta lo viejo; nunca tapa a Felipe), `Jugo`, `Indicador` (contorno + burbuja con ícono del botón y verbo), `IconosBotones` (Kenney Input Prompts Pixel, CC0), `Recogible`, `Aranable`, `Rascador` (teatro para Valeria con interfaz de testigo), `Chispas`.
+  - **En el nivel viejo (v3), mínimo:** el sofá ya se araña (línea "sofa" de la agenda: el plástico se rompe y sale un calcetín). El bot prende doble salto, Zoomies y trepar porque el mapa viejo los necesita; `prueba_nivel` comprueba que sin Afilar Garras la cortina no se trepa.
+  - **Arte nuevo en el juego:** hojas `maullar`, `aranar`, `subir_escalera` (escala única 0,72), retratos de Valeria y A.S.P.I. recortados de la tanda 3B (`herramientas/preparar_retratos.py`), íconos de Kenney.
+  - **Prueba nueva:** `prueba_acciones.gd` (85 comprobaciones), también en GitHub Actions. Capturas: `pruebas/capturas_sistemas.gd` y `diseno/revisiones/capturas/2026-10-19-parte-a-*.png`.
+  - **Ficha:** copia local regenerada con las filas nuevas; **falta volver a publicar la versión en línea** (lo hace el creador o la sesión principal).
 
 ## Ya cerrado (2026-10-18)
 
@@ -26,22 +36,20 @@ Actualizado: 2026-10-18. **Léelo al empezar un chat nuevo** para retomar sin re
 - **Reglas R17 a R19** (de los pilares) en `reglas-de-niveles.md`; el nivel 1 se ajusta al rehacerlo.
 - **Recursos gratis:** Kenney (CC0) sirve para sonido, partículas e interfaz; nunca personajes ni fondos (consistencia de estilo).
 
-## Pendiente, en orden
+## Para la PARTE B (lo que dejó lista la parte A)
 
-1. **Jugar la v2 y dar veredicto.**
-2. **Si sigue:** animaciones de maullar e intimidar (unos 20 créditos cada una, desde Felipe A; mostrar prompt y costo antes de gastar). Opcional: probar sonidos y partículas de Kenney.
-3. **`/puerta-fase`** para pasar a la fase 3.
-4. **Volver al nivel 1** con la lista del revisor:
-   - Bloqueantes: entrada del jefe en negro, puertas con un poste en medio (arte de 176 px para un hueco de 104), lámpara y caja de arena delante de puertas, Felipe flotando sobre la mesa, manotazo desincronizado.
-   - Graves: ratones flotando, comida diminuta, escalera sin sentido y sin animación de subir, interacciones sin aviso, pelea que se gana sentado en la repisa, nada reacciona a Felipe.
-   - Nuevo: Agenda de Su Majestad, diálogos con retratos, jugo épico, entrada de jefe en 8 pasos.
-   - Cumplir R17 a R19 y validarlas en `prueba_reglas_nivel.gd`.
-   - Pruebas nuevas: arte contra colisión, tamaño de la comida (lado menor ≥ 24 px), entrar al jefe por la puerta.
+- `sala.travesuras` (un `Travesuras` con `Agenda.NIVEL_1`): llamar `travesuras.cumplir(id, donde)` cuando pase cada travesura (`perdon`, `sofa`, `popo`, `almuerzo`, `laser`, `cajon`, `teclado`, `desenchufar`); `donde` = sobre algo pisable. `Recompensas.camino_abierto(id)` avisa los caminos (`puerta_cocina`, `balcon`). Al final, `travesuras.mostrar_resumen()` en el balcón (en lugar de la pantalla final actual).
+- **Valeria** debe cumplir la interfaz de testigo del rascador: grupo `Rascador.GRUPO_TESTIGOS`, `ve(punto) -> bool`, `visita: int` (sube al volver a entrar al cuarto) y `perdonar(felipe, motivo)`; y oír maullidos: grupo `Felipe.GRUPO_OYENTES` con `oir_maullido(felipe)`. Sus frases van con `travesuras.decir_valeria(evento)` (agregar eventos en `Frases.VALERIA`) y retratos 0 neutra, 1 enojada, 2 derretida, 3 grabando. Contar perdones con `travesuras.contar_perdon()`.
+- **Escalera:** `felipe.subir_escalera(peldaños)` (7 escalones de unos 21 px; 0,2 s cada uno) y la señal `escalera_terminada`; dibujar el pasamanos delante. La reja nueva usa `dar_manotazo(_abrir)` como la actual.
+- **Objetos:** `Aranable` para el sofá con plástico (`aranazos_para_romper`) y la puerta entornada del dormitorio (`aranazos_para_romper = 1`, señal `roto`); `Rascador` en la sala (sus plataformas, si las tiene, son piezas del nivel). Todo interactuable puede dar `verbo()`, `arte_indicador()` o `rect_indicador()` y `primera_frase()` para el Indicador (la primera vez sale la línea de Felipe con el ícono, en vez de los avisos de abajo).
+- Quitar los `AVISOS` y la fila de controles de abajo (M2): ahora los reemplazan el Indicador y las primeras frases. Que el bot vuelva a jugar **sin** doble salto, Zoomies ni trepar.
+- Pendiente de antes (sigue valiendo para la PARTE B): B1 (entrada del jefe en negro), B2–B4, G1–G13, M1–M5 de la revisión del 2026-10-18; R17–R19 en `prueba_reglas_nivel.gd`; pruebas nuevas de arte contra colisión, comida ≥ 24 px y entrar al jefe por la puerta.
+
 
 ## Para diseñar después
 
 - Ficha de Su Majestad (cuánto sube cada estadística, frases).
-- Snacks cargados: cuántos, uso en pelea, dónde se recargan.
+- Snacks: dónde se recargan además de las recompensas (el bolsillo de 5 y comer manteniendo la acción ya están).
 - Retratos de otros personajes para los diálogos (Gemini, con costo).
 
 ## Decisiones abiertas (esperan al creador)

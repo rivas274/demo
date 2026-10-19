@@ -11,7 +11,8 @@ Antes de tocar nada, lee `siete-vidas/juego/scripts/felipe.gd` en la parte que v
 ## 1. Cómo está armado Felipe
 
 - `Felipe` es un `CharacterBody2D`. Todo el movimiento va en `_physics_process`: leer entrada → `match estado` → ajustar `velocity` → `move_and_slide()` → `_actualizar_suelo()` → `_actualizar_animacion()`.
-- **Estado principal:** `enum Estado { SUELO, AIRE, ZOOMIES, ZARPAZO, COMIENDO, ATERRIZANDO, OCIO, DESMAYADO }`.
+- **Estado principal:** `enum Estado { SUELO, AIRE, ZOOMIES, ZARPAZO, COMIENDO, ATERRIZANDO, OCIO, DESMAYADO, ARANANDO, MAULLANDO, SUBIENDO_ESCALON }`.
+- **Habilidades por nivel:** `tiene_doble_salto`, `tiene_zoomies` y `puede_trepar` (`@export`, apagadas por defecto: en el nivel 1 no están). Las pruebas que las usan las prenden explícitamente.
 - **Estados paralelos como booleanos:** `agachado` y `trepando` conviven con el enum (se puede estar en SUELO y agachado). Es la forma barata de una máquina paralela: no crees `Estado.AGACHADO`.
 - **Perillas** con `@export` (velocidades, gravedad, tiempos) y reglas fijas como `const` (`ESCALA_SPRITE`, `DEFORMACION_MAXIMA`, `CUADRO_*`, `ALTO_DE_PIE`). Nombres en español y tipos en todo.
 - **Animaciones:** `AnimatedSprite2D` (`$Sprite`) con el `SpriteFrames` que arma `AnimacionesFelipe.crear()` desde `AnimacionesFelipe.HOJAS` (archivo, fps, bucle, cuadros, rango). Agregar una animación es una línea en `HOJAS`.
@@ -63,7 +64,7 @@ func _al_cambiar_cuadro() -> void:
 		sonido.emit("zarpazo")
 ```
 
-Hoy `_golpear()` y `Vaso.interactuar()` actúan en el mismo cuadro en que se aprieta el botón; pasarlo al cuadro de impacto es una mejora pendiente (con su prueba). Lo mismo para comer: la comida desaparece cuando la boca llega.
+Así está hecho desde el 2026-10-19 (`Felipe._al_cambiar_cuadro`): zarpazo y manotazo en el cuadro 4 (`dar_manotazo(al_impacto)` recibe lo que pasa cuando la pata llega), comer en el 3 (la comida desaparece con `al_comido()`), arañar en el 3 y el 5 (`al_aranar(felipe)` del objetivo) y maullar en el 3. La señal `impacto(tipo)` sirve para el congelado del `Jugo`. `prueba_acciones.gd` comprueba que nada pase antes de su cuadro.
 
 Otras reglas: `animation_finished` solo para animaciones sin bucle; no llames `play()` cada cuadro (usa `_reproducir()`, que ya lo evita); para poses sueltas, `_poner_cuadro()`.
 

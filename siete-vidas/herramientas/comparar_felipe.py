@@ -28,6 +28,9 @@ ESCALAS = {
     "felipe-jugar-sheet.png": [8, 0.72],
     "felipe-trepar-sheet.png": [8, 0.72],
     "felipe-vueltas-sheet.png": [8, 0.72],
+    "felipe-subir-escalera-sheet.png": [8, 0.72],
+    "felipe-maullar-sheet.png": [8, 0.72],
+    "felipe-aranar-sheet.png": [8, 0.72],
 }
 ANCHO_CELDA, PISO = 130, 118
 

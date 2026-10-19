@@ -17,7 +17,7 @@
 - **Subir imágenes locales:** `create_asset_upload`, luego PUT con curl a la URL devuelta, luego `finalize_asset_upload`.
 - **Red del entorno:** deben estar permitidos `mcp.spritecook.ai` y `api.spritecook.ai`; sin el segundo no se pueden descargar ni ver las imágenes.
 - **Proyecto en SpriteCook:** "Siete Vidas, Cero Disculpas" (nombre antiguo del juego; se deja así en SpriteCook), id `126fcb42-c3f6-40b5-9f75-42715fbdce40`. Pasar siempre `project_id`.
-- **Créditos:** 800 del plan de pago; quedan **336** (2026-10-18). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
+- **Créditos:** 800 del plan de pago; quedan **264** (2026-10-19, tras subir_escalera, maullar y aranar; reserva aprobada de 26 para rehacer). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
 - **Regla de oro:** mostrar al creador el prompt, el modelo, los ajustes y el costo, y esperar aprobación antes de cada llamada que gaste créditos.
 
 ### Modelos y costos útiles (consultados el 2026-10-17)
@@ -75,6 +75,9 @@ Solo lo que se usa (las formas de peso dibujadas, el Modo Buda, la pose sentado,
 | Bola de estambre (recortada de una pose descartada, se mueve por código) | — | — | `estambre-bola.png` |
 | Ocio: perseguirse la cola (desde Felipe A) | `vueltas` | `bc3dbbc7-7d04-446f-ae5c-e05f6b7cfb73` | `felipe-vueltas-sheet.png` |
 | Trepar (desde Felipe A, `pixel-engine-v1.5`, 26 créditos) | `trepar` (cuadros 3-7) | `e49fc39b-d07a-4369-a9fa-1d365e95411d` | `felipe-trepar-sheet.png` |
+| Subir escalera (ciclo por escalón; desde Felipe A, `v1.5`, 26 créditos, 2026-10-19) | `subir_escalera` | `e21218e8-1723-4e37-898d-b3e853066501` | `felipe-subir-escalera-sheet.png` |
+| Maullar (desde Felipe A, por defecto, 20 créditos, 2026-10-19) | `maullar` | `37d30556-b7ab-4b4c-a178-350d8cdcaad6` | `felipe-maullar-sheet.png` |
+| Arañar (de pie en dos patas; desde Felipe A, `v1.5`, 26 créditos, 2026-10-19) | `aranar` | `516af3a3-e643-4976-91f3-58aa19940204` | `felipe-aranar-sheet.png` |
 
 Referencias de diseño (no se usan en el juego): foto real de Felipe (`a0fbe97b-61b6-4d6d-8cb3-c5b4afaa6a74`, no está en el repositorio), prueba de 4 estilos v1 (`8868e7a2-…`, `../referencias/felipe-prueba-estilos-v1.png`), híbrido v2 A y B (`22529bf7-…`, `../referencias/felipe-hibrido-v2.png`) y comparación de proporciones (`../referencias/proporciones-felipe.png`).
 

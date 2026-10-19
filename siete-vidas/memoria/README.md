@@ -52,6 +52,7 @@ Si la biblia en línea cambia, vuelve a exportarla a `../biblia/`. Si algo de es
 
 - **Un tema a la vez.** Se presenta una propuesta, el creador opina, se cierra y se pasa al siguiente.
 - **Propuesta antes de gastar.** Nunca llamar a SpriteCook (créditos limitados) sin mostrar antes el prompt, los ajustes y el costo, y recibir aprobación.
+- **Claude es la guía del creador** (su primer juego indie): si una idea no tiene sentido, sobrecarga o arruina el juego, decirlo claro y proponer la alternativa. La meta: que se sienta vivo, hecho con cariño y bien hecho, sin sobrecargar.
 - **Idioma:** español. Explicaciones claras, sin jerga técnica innecesaria.
 - **Cuidado legal:** el juego se publicará en Steam. Nada de marcas, personajes ni personas reales (ver 01-decisiones.md, sección Legal).
 - Al cerrar un tema, actualizar esta carpeta y la biblia.

@@ -367,7 +367,26 @@ func _correr() -> void:
 	var contorno_ropa := ropa.rect_indicador()
 	_comprobar(absf(contorno_ropa.position.y - dibujo_ropa.position.y) <= 2.0 and absf(contorno_ropa.end.y - dibujo_ropa.end.y) <= 2.0 and absf(contorno_ropa.get_center().x - dibujo_ropa.get_center().x) <= 2.0, "La ropa doblada: el contorno del Indicador calza con la pila dibujada")
 	var cama := Sala._rect_pieza("Cama")
-	_comprobar(dibujo_ropa.end.y > cama.position.y and dibujo_ropa.end.y <= cama.position.y + 12.0 and dibujo_ropa.position.x > cama.position.x and dibujo_ropa.end.x < cama.end.x, "La ropa doblada se apoya en el colchón, dentro de la cama (no flota sobre el borde)")
+	_comprobar(dibujo_ropa.end.y >= cama.position.y + 14.0 and dibujo_ropa.end.y <= cama.position.y + 24.0 and absf(dibujo_ropa.get_center().x - (cama.position.x + 125.0)) <= 12.0, "La ropa doblada está en medio de la cama, hundida en el edredón (base %.0f px bajo el colchón, no en el borde de arriba)" % (dibujo_ropa.end.y - cama.position.y))
+	# Piso con profundidad: la pared (zócalo, puertas, ventanas) termina entre 16 y 24 px sobre la línea de apoyo, y
+	# las puertas se dibujan con el umbral en esa unión, con el piso delante.
+	_comprobar(Sala.SUELO - Sala.PARED_BASE >= 16.0 and Sala.SUELO - Sala.PARED_BASE <= 24.0 and Sala.ALTO - Sala.SUELO >= 16.0, "Piso con profundidad: banda de %.0f px entre el zócalo y la línea de apoyo, y %.0f px delante" % [Sala.SUELO - Sala.PARED_BASE, Sala.ALTO - Sala.SUELO])
+	var umbrales := true
+	for puerta: Puerta in sala.puertas.values():
+		var arte_puerta := puerta.arte_indicador()
+		if not arte_puerta.is_empty() and absf((arte_puerta["rect"] as Rect2).end.y - Sala.PARED_BASE) > 0.5:
+			umbrales = false
+	_comprobar(umbrales, "Piso con profundidad: cada puerta tiene el umbral en la unión pared-piso (no en la línea de apoyo)")
+	for ventana: Rect2 in Sala.VENTANAS:
+		_comprobar(absf(Sala.PARED_BASE - ventana.end.y - 109.0) < 0.5, "Las ventanas recortadas tienen el alféizar a 90 cm de la unión pared-piso")
+	# Cocina: la llave tiene su fregadero debajo, embutido en la cubierta del mesón, y el ratón del mesón no lo tapa.
+	var meson := Sala._rect_pieza("Mesón")
+	var caño := 0.0
+	for datos: Array in Sala.ARTE:
+		if datos[0] == "llave_agua":
+			caño = datos[1].x + (ArteNivel.textura("llave_agua").get_width() - 1 - 3 if datos[2] else 3)
+	_comprobar(absf(caño - Sala.FREGADERO.get_center().x) <= 1.0 and Sala.FREGADERO.position.y >= meson.position.y and Sala.FREGADERO.end.y <= meson.position.y + 22.0 and Sala.FREGADERO.position.x >= meson.position.x - 6.0, "El caño de la llave cae en el fregadero, embutido en la cubierta del mesón")
+	_comprobar(Sala.RATONES[1][1] >= Sala.FREGADERO.end.x + 10.0 and Sala.RATONES[1][0].y <= Sala.FREGADERO.position.y, "El ratón del mesón patrulla a la derecha del fregadero y por detrás de la cuba (no camina encima)")
 	await _poner_en(Sala.ROPA)
 	await _tocar("interactuar")
 	await _esperar(90)

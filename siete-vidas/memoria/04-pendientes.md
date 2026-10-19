@@ -13,6 +13,7 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
    - [x] Baño: puerta cerrada en el pasillo de arriba (pasada de ambientes, 2026-10-19).
    - [ ] Baño completo y la maña "Abrir puertas" (Felipe la aprende al ver a otro gato colgarse de una manilla): diseñar el momento y el cuarto; recién ahí entra a la tabla de acciones y a la ficha.
    - [ ] Mostrar al creador la hoja `ambientes-antes-despues.png` y el video `nivel1-v4e.mp4`, y mandar la hoja a Gemini con la pregunta de `revisiones/2026-10-19-ambientes-gemini.md`.
+   - Prueba de luz y efectos en la sala al atardecer (después de la pasada del piso); si gusta, receta por cuarto.
 3. [ ] **Volver al nivel 1** con lo que el prototipo apruebe (regla de los tres lugares) y seguir hacia el vertical slice. Antes de cada cambio de fase, `/puerta-fase`.
 
 ## Nivel 1 v4 (Fase 3)

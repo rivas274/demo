@@ -192,3 +192,57 @@ Va en `encargo-gemini-tanda-3e.md` al aplicar. Se guarda en `arte/referencias/ge
 1. Las 8 pruebas del juego (`prueba_movimiento`, `_escenario`, `_mecanicas`, `_nivel`, `_reglas_nivel`, `_jefe`, `_acciones` y `partida.gd`), primero después del paso 0 y otra vez al final.
 2. `capturas_nivel.gd`, con y sin `--debug-collisions`, sumando el punto "13-pasillo-bano" (Felipe en x = 4740), y una hoja de antes y después con las 13 vistas. Esa hoja se le muestra al creador y se manda a Gemini con la misma pregunta de `2026-10-19-ambientes-gemini.md`.
 3. Al aplicar, hay que actualizar `nivel-01-gran-fuga.md` (§2.4 baño, §7 mapa con el pasillo de 1240 px, §8 R7/R17 y una sección 15 "Ambientes"), `memoria/03` (piezas nuevas y arte existente que se empieza a usar: arañazos, cortinas cortas, libro, lata y maceta rota), `01-decisiones.md` y `04-pendientes.md` (baño y "Abrir puertas") y `05-estado-actual.md`.
+
+## Aplicado (2026-10-19)
+
+Una sola pasada, en orden. **47 hechos, 0 en espera, 0 descartados.** La tanda 3E de Gemini (`arte/referencias/gemini/vida-casa.png` y `vida-casa-fachada.png`, commit 4da2e07) llegó durante la pasada y, por pedido del coordinador, se integró en la misma pasada con cajas explícitas en `preparar_arte_nivel.py` (`PIEZAS_3E`; los números que escribió Gemini se pintan de blanco o quedan fuera de la caja). SpriteCook: 0 créditos. Felipe no se tocó. Todas las pruebas en 0 fallos y el bot 8 de 8. Hoja antes y después con las 13 vistas (fuera del repositorio, en el scratchpad de la sesión: `ambientes-antes-despues.png`) y video del bot `nivel1-v4e.mp4`.
+
+| # | Estado | Nota |
+| --- | --- | --- |
+| Paso 0 / P-1 | hecho | 103 literales corridos (toda x ≥ 4630 + 200; `ANCHO` 7880); a mano: el ancho del pasillo (1240), la planta del primer plano (9960) y el bot del láser (de 4600 a 4810, fuera de los 60 px de la manija). El bot vuelve caminando antes de agacharse bajo la consola |
+| G1 | hecho | Cerrada y puerta-ventana ensanchadas por columnas de su propio panel; la abierta del balcón pierde 16 columnas del vano oscuro; la entornada es el marco de la abierta con la hoja cerrada apoyada, 12 px oscuros y 2 px de sombra. `prueba_reglas_nivel` mide 140 × 248 en los seis |
+| G2 | hecho | `vano_alto()`: 140 × 248; `ESCALERA_RECT` sube a `SUELO − 398`; `vano_bajada.png` (poste y dos peldaños al 60 %) dentro del hueco del pasillo |
+| G3 | hecho | `ventana_marco.png` (162 × 138, bordes 18/18/26/8) en 9 partes, parante en cruz con bisel, vidrio al 8 % y dos reflejos. El marco trae el cabezal de la persiana de la sala (se lee como la misma ventana) |
+| G4 | hecho | Zócalo de 18 px, cornisa de 14 con dentículos cada 6 px y 3 franjas de penumbra, por código en `FondoApartamento._molduras` (ya no se usa `moldura.png`). La cornisa casi no entra en cámara: el techo queda arriba del cuadro |
+| G5 | hecho | Sombras de contacto 45/28 % con la base opaca real y bloque bajo cada pata (`Sala._base_opaca`); `SOMBRA_PARED` para 11 piezas colgadas (silueta +1, +2 al 20 %) |
+| G6 | hecho | 5 rayos hacia la derecha en 3 franjas, tono por cuarto (`TONO_LUZ`), 5 motas por rayo |
+| G7 | hecho | Costura del piso arreglada en la herramienta; baldosas volteadas de forma alterna y corrimiento distinto por cuarto |
+| G8 | hecho | `Sala.DINTEL`; retrato, retrato familiar, reloj, marcos y video viral al dintel o con desfase a propósito; el paisaje se apoya en la repisa (D-1) |
+| G9 | hecho | `Sala._dibujar_ambiente`: pelos, arañazos de la tanda 3C (`aranazo_1..3`, al 70 %; el del poste va en el nodo del pasamanos para quedar encima), polvo y pelusa |
+| G10 | hecho | En la sala, en vez de la luz del portátil (Valeria es otro nodo), late la luz del cargador al final del cable (S-4) |
+| G11 | hecho | Ningún decorado nuevo entra en un rectángulo sagrado (la prueba suma el del baño); lo único pisable nuevo es la mesita, medida |
+| S-1 | hecho | Retrato a x 660 al dintel; marco con Felipe panza arriba y la huella, a otra altura (3E) |
+| S-2 | hecho | Mesita de 88 × 96 con lámpara, taza y cargador (3E); colisión «Mesita» a 58 px (48 cm) de la columna 6 a la 76, medida por la prueba |
+| S-3 | hecho | Alfombra terracota de 300 × 10 en la franja del piso (3E) |
+| S-4 | hecho | Enchufe en el zócalo y cable con caída hasta el cargador de la mesita |
+| R-1 | hecho | Perchero de 118 × 101 sobre el zapatero, de 140 a 241 px (3E; más ancho que lo pedido porque Gemini lo dibujó apaisado) |
+| R-2 | hecho | Zapatillas de 24 × 16 en el hueco zapatero–caja de arena (3E) |
+| R-3 | hecho | Video viral de 44 × 59 sobre la caja de arena, al dintel (3E) |
+| R-4 | hecho | Peldaños recoloreados a madera `8a6a55` |
+| R-5 | hecho | Un par verde azulado, uno crema y uno volteado |
+| R-6 | hecho | Escalones de zócalo bajo el borde del larguero (medido en el arte), hasta el faldón |
+| C-1 | hecho | Azulejo hasta 182 px con contraste al 85 % y listel; arriba, `pared_rosa` llevada a pintura crema `e9d6b4` |
+| C-2 | hecho | Alacenas a 2 módulos (118 px, de 3461 a 3579): nada sobre el microondas ni el pollo |
+| C-3 | hecho | `visillo_cocina.png` (cortina corta de `detalles.png`, crema con franja terracota) sobre el tercio de abajo del vidrio |
+| C-4 | hecho | `piso_cocina.png` (3E) |
+| C-5 | hecho | Gemini dibujó la llave y el trapo juntos (el trapo cuelga de la llave, no del cajón): una sola pieza `llave_agua` de 30 × 38; la gota dibujada se borra y cae por código cada 3 s con `goteo.wav` |
+| C-6 | hecho | 3 polaroids entre los imanes (3E) |
+| C-7 | hecho | 5 croquetas y `lata.png` (de `comida-grande.png`) |
+| C-8 | hecho | Segundero rojo que avanza cada segundo |
+| P-2 | hecho | Ver 2.4.1: `Sala.BANO` (4740), `Puerta.bano` (luz fría que titila, sin tapete, temblor y destello de la manilla), frases en `Frases.FELIPE` («bano», «bano_manija»), goteo a 0,8 de tono a 300 px o menos. Comprobado en `prueba_nivel` (5 comprobaciones) y `prueba_reglas_nivel` (rectángulo sagrado) |
+| P-3 | hecho | La madera crema de `ventana_pasillo.png` pasa a la de la ventana de la sala (el toldo y la vista no se tocan) |
+| P-4 | hecho | Retrato familiar de 4900 a 5000, al dintel |
+| P-5 | hecho | Alfombra de pasillo de 4370 a 4630 (3E) |
+| P-6 | hecho | `aranazo_1` en el marco de la puerta entornada |
+| D-1 | hecho | Paisaje con la base en la repisa |
+| D-2 | hecho | Alfombra rosa vieja a los pies de la cama (3E) |
+| D-3 | hecho | `libro.png` (de `objetos.png`, 28 × 8) atrás del banquito |
+| D-4 | hecho | La mitad de abajo de cada paño se corre 1 px cada 0,5 s (el ruedo queda tras la cama, por eso se mueve la mitad) |
+| E-1 | hecho | `panos_estudio.png` (cortina corta de `detalles.png` en oliva) a los dos lados |
+| E-2 | hecho | Corcho de 64 × 46 (no 70 × 52) de 6831 a 6895: entre el paño y la puerta del balcón (3E) |
+| E-3 | hecho | Enchufe, cable de la base de carga y regleta con 3 cables |
+| E-4 | hecho | 3 post-its en el borde del monitor |
+| B-1 | hecho | `vida-casa-fachada.png`: hueco ensanchado repitiendo una columna a la derecha del farol, 80 filas de muro liso menos y escala para un hueco de 133 × 242 detrás de la puerta-ventana (`Sala.FACHADA_BALCON`, capa `FACHADA`). No hizo falta el reemplazo de ladrillo |
+| B-2 | hecho | `piso_balcon.png` (3E) |
+| B-3 | hecho | Regadera, saco de tierra (3E) y maceta rota de `detalles.png`, de 7434 a 7526 |
+| B-4 | hecho | Las dos macetas de la baranda se mecen 1 px con fases distintas |

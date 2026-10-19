@@ -1573,13 +1573,14 @@ func _dibujar_zocalo_escalera(c: Node2D) -> void:
 		var ancho := imagen.get_width()
 		var x := 0
 		while x < ancho:
-			# Tramos de 24 px: el escalón de zócalo va bajo el punto más bajo del larguero en el tramo.
-			var abajo := 0
+			# Tramos de 24 px: el escalón de zócalo arranca a la altura del larguero en el lado alto del tramo (lo que
+			# queda bajo el larguero, detrás de la escalera, no se ve).
+			var abajo := imagen.get_height()
 			for k in range(x, mini(x + 24, ancho)):
 				var columna := ancho - 1 - k  # el arte va en espejo
 				for y in range(imagen.get_height() - 1, -1, -1):
 					if imagen.get_pixel(columna, y).a > 0.5:
-						abajo = maxi(abajo, y)
+						abajo = mini(abajo, y)
 						break
 			_zocalo_escalera.append(Vector3(2322 + x, mini(x + 24, ancho) - x, SUELO - t.get_height() + abajo + 1))
 			x += 24

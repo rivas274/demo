@@ -147,7 +147,6 @@ MOSAICOS = {
     "pared_tapiz": ("paredes", 0, (64, 64), 0.7),
     "pared_azulejo": ("paredes", 1, (48, 48), 0.6),
     "pared_rosa": ("paredes", 2, (64, 64), 0.3),
-    "moldura": ("paredes", 3, (192, 14), 0.0),
     "piso": ("paredes", 4, (256, 30), 0.0),
 }
 
@@ -538,7 +537,7 @@ def main():
     luz_de_borde("aspi_gigante")
     taza_de_cafe()
     ambientes()
-    print(f"{len(PIEZAS) + len(MOSAICOS) + len(FONDOS) + 5} imágenes en {DESTINO}")
+    print(f"{len(list(DESTINO.glob('*.png')))} imágenes en {DESTINO}")
     preparar_valeria()
 
 

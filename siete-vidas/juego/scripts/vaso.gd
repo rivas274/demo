@@ -32,11 +32,27 @@ func _ready() -> void:
 	add_to_group(Comida.GRUPO)
 
 
+## Felipe da el manotazo; el vaso sale volando cuando la pata llega (cuadro de impacto, hallazgo B5).
 func interactuar(felipe: Felipe) -> void:
+	felipe.dar_manotazo(salir_volando.bind(felipe))
+
+
+## Lo empuja la pata: sale hacia donde mira Felipe y cae.
+func salir_volando(felipe: Felipe) -> void:
+	if _cayendo or roto:
+		return
 	remove_from_group(Comida.GRUPO)
-	felipe.dar_manotazo()
 	_velocidad = Vector2(felipe.mirando * 90.0, -90.0)
 	_cayendo = true
+
+
+func verbo(_felipe: Felipe) -> String:
+	return "Liberar"
+
+
+## Para el contorno del Indicador: la imagen y dónde se dibuja.
+func arte_indicador() -> Dictionary:
+	return ArteNivel.arte_en(self, tipo, 0.0, 0.0)
 
 
 func _physics_process(delta: float) -> void:

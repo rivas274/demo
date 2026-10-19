@@ -38,6 +38,8 @@ func _correr() -> void:
 	var peso_antes := felipe.peso
 	await _poner_en(felipe, Vector2(2870, Sala.SUELO - 109))
 	await _tocar("interactuar")
+	# Cura cuando la boca llega a la comida (cuadro de impacto de "comer").
+	await _esperar(30)
 	_comprobar(felipe.corazones == 5, "Comer cura un corazón")
 	_comprobar(is_equal_approx(felipe.peso, peso_antes + Felipe.PESO_POR_COMIDA), "Comer sube el peso (%.1f kg)" % felipe.peso)
 	await _esperar(60)

@@ -32,12 +32,29 @@ func interactuar(felipe: Felipe) -> void:
 		return
 	abierta_ya = true
 	remove_from_group(Comida.GRUPO)
-	felipe.dar_manotazo()
+	# El pestillo se abre cuando la pata llega (cuadro de impacto), no al apretar.
+	felipe.dar_manotazo(_abrir)
+
+
+func _abrir() -> void:
 	for hijo in get_children():
 		if hijo is CollisionShape2D:
 			hijo.set_deferred("disabled", true)
 	abierta.emit()
 	queue_redraw()
+
+
+## Solo desde el lado de la escalera se puede abrir.
+func disponible(felipe: Felipe) -> bool:
+	return not abierta_ya and felipe.global_position.x >= rect.end.x
+
+
+func verbo(_felipe: Felipe) -> String:
+	return "Abrir"
+
+
+func rect_indicador() -> Rect2:
+	return Rect2(rect.position + Vector2(0, rect.size.y / 2.0), Vector2(rect.size.x, rect.size.y / 2.0))
 
 
 func _draw() -> void:

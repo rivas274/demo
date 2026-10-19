@@ -27,6 +27,12 @@ const HOJAS := {
 	"vueltas": ["felipe-vueltas-sheet.png", 10.0, true],
 	## Trepar (cortinas): se usan los cuadros 3 a 7, de pie en dos patas clavando las uñas.
 	"trepar": ["felipe-trepar-sheet.png", 8.0, true, 8, [3, 7]],
+	## Maullar (botón propio): la boca se abre del todo en Felipe.CUADRO_MAULLIDO.
+	"maullar": ["felipe-maullar-sheet.png", 10.0, false],
+	## Arañar de pie en dos patas (sofá, rascador, puerta entornada): las garras bajan en Felipe.CUADROS_IMPACTO_ARANAR.
+	"aranar": ["felipe-aranar-sheet.png", 12.0, false],
+	## Subir un escalón: un ciclo por escalón; Felipe.subir_escalon() ajusta la velocidad al tiempo del escalón.
+	"subir_escalera": ["felipe-subir-escalera-sheet.png", 20.0, false],
 }
 
 

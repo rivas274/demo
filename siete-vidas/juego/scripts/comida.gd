@@ -19,13 +19,24 @@ func _ready() -> void:
 	add_to_group(GRUPO)
 
 
+## Felipe se pone a comer; la comida desaparece cuando la boca llega (cuadro de impacto: al_comido).
 func interactuar(felipe: Felipe) -> void:
 	remove_from_group(GRUPO)
-	felipe.comer()
+	felipe.comer(self)
+
+
+func al_comido() -> void:
 	var desaparecer := create_tween()
-	desaparecer.tween_interval(0.45)
 	desaparecer.tween_property(self, "scale", Vector2(1.2, 0.0), 0.15)
 	desaparecer.tween_callback(queue_free)
+
+
+func verbo(_felipe: Felipe) -> String:
+	return "Degustar"
+
+
+func arte_indicador() -> Dictionary:
+	return ArteNivel.arte_en(self, tipo, 0.0, 0.0)
 
 
 func _draw() -> void:

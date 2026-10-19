@@ -39,6 +39,18 @@ func interactuar(_felipe_que_entra: Felipe) -> void:
 	cruzada.emit(self)
 
 
+## Verbo de Felipe para el Indicador: la escalera se "asciende", las puertas se "pasan".
+func verbo(_felipe: Felipe) -> String:
+	return "Ascender" if escalera else "Pasar"
+
+
+func arte_indicador() -> Dictionary:
+	if escalera:
+		return {}
+	var arte := "vano" if estilo == "vano" else ("puerta_balcon" if estilo == "balcon" and cerrada else ("puerta_cerrada" if cerrada else "puerta_abierta"))
+	return ArteNivel.arte_en(self, arte, 0.0, 0.0)
+
+
 func _physics_process(_delta: float) -> void:
 	if _felipe == null:
 		return

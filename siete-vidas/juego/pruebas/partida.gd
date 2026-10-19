@@ -22,6 +22,11 @@ func _correr() -> void:
 	sala = load("res://escenas/apartamento.tscn").instantiate()
 	root.add_child(sala)
 	felipe = sala.get_node("Felipe")
+	# El nivel de hoy (v3) se armó con doble salto, Zoomies y trepar, que en el nivel 1 vienen apagados
+	# (decisión del creador, 2026-10-19). Mientras la PARTE B rehace el nivel sin ellos, el bot los prende.
+	felipe.tiene_doble_salto = true
+	felipe.tiene_zoomies = true
+	felipe.puede_trepar = true
 	# Título, introducción y la meta.
 	await _esperar(100)
 	await _tocar("ui_accept")
@@ -227,13 +232,15 @@ func _cazar_raton(desde: float, hasta: float) -> void:
 	_paso("Caza ratones entre %d y %d" % [desde, hasta])
 
 
-## Se acerca y lo golpea apenas lo tiene al alcance del zarpazo, antes de que lo toque.
+## Se acerca y lo golpea apenas lo tiene al alcance del zarpazo, antes de que lo toque. El golpe sale cuando
+## la pata llega (cuadro de impacto, 0,25 s después de apretar): se anticipa como lo haría una persona.
 func _cazar(enemigo: Aspi) -> void:
 	for i in 400:
 		if not is_instance_valid(enemigo) or enemigo.apagada:
 			break
 		var dx := enemigo.global_position.x - felipe.global_position.x
-		if absf(dx) < 46.0:
+		var acercandose := signf(enemigo.velocity.x) == -signf(dx)
+		if absf(dx) < (64.0 if acercandose else 40.0):
 			await _golpear(signf(dx))
 		else:
 			Input.action_press("mover_derecha" if dx > 0.0 else "mover_izquierda")
@@ -248,7 +255,7 @@ func _golpear(lado: float) -> void:
 	Input.action_release("mover_izquierda")
 	felipe.mirando = lado
 	await _tocar("zarpazo")
-	await _esperar(10)
+	await _esperar(18)
 
 
 ## Si un ratón se acerca a su altura, lo golpea primero.

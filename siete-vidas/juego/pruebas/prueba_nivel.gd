@@ -94,6 +94,8 @@ func _correr() -> void:
 	_comprobar(not reja.abierta_ya, "Desde el recibidor la reja no se abre")
 	await _poner_en(felipe, Vector2(Sala.REJA.end.x + 12, Sala.SUELO))
 	await _tocar("interactuar")
+	# El pestillo se abre cuando la pata llega (cuadro de impacto del manotazo).
+	await _esperar(20)
 	_comprobar(reja.abierta_ya and "Atajo de Gato" in sala.logros, "Desde la escalera se abre la reja (logro Atajo de Gato)")
 
 	# Al pie de la escalera de fondo se sube como por una puerta (Felipe sube en diagonal).
@@ -115,6 +117,13 @@ func _correr() -> void:
 	_comprobar(sala.calcetines == 1, "El calcetín del refrigerador se recoge")
 	var cortina: Rect2 = Sala.TREPABLES[0]
 	await _poner_en(felipe, Vector2(cortina.get_center().x, Sala.SUELO))
+	# En el nivel 1 trepar viene apagado (se gana con Afilar Garras): la cortina no se trepa.
+	Input.action_press("mover_arriba")
+	await _esperar(40)
+	Input.action_release("mover_arriba")
+	_comprobar(not felipe.trepando and felipe.is_on_floor(), "Sin Afilar Garras la cortina no se trepa (trepar apagado en el nivel 1)")
+	# Nivel viejo (v3): el calcetín de la repisa alta todavía pide trepar; la PARTE B lo rehace como lugar visto.
+	felipe.puede_trepar = true
 	felipe.mirando = 1.0
 	Input.action_press("mover_arriba")
 	var animacion_trepar := false

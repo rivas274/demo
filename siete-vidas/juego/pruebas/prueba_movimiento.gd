@@ -19,6 +19,11 @@ func _correr() -> void:
 	sala.peligros_activos = false
 	root.add_child(sala)
 	var felipe: Felipe = sala.get_node("Felipe")
+	# En el nivel 1 el doble salto, los Zoomies y trepar vienen apagados (decisión del creador): aquí se prenden
+	# para seguir probándolos; prueba_acciones.gd comprueba que estén apagados por defecto.
+	felipe.tiene_doble_salto = true
+	felipe.tiene_zoomies = true
+	felipe.puede_trepar = true
 	# Esta prueba es solo del movimiento: los enemigos se prueban en prueba_mecanicas.gd.
 	for enemigo in root.get_tree().get_nodes_in_group("enemigos"):
 		enemigo.queue_free()
@@ -52,7 +57,7 @@ func _correr() -> void:
 	Input.action_press("saltar")
 	await _esperar(2)
 	Input.action_release("saltar")
-	_comprobar(not felipe.tiene_doble_salto, "El doble salto se gasta en el aire")
+	_comprobar(not felipe.doble_salto_disponible, "El doble salto se gasta en el aire")
 
 	# Reglas del salto acordadas en la ficha de concepto.
 	for i in 90:
@@ -75,7 +80,7 @@ func _correr() -> void:
 
 	await _esperar(60)
 	_comprobar(felipe.is_on_floor(), "Vuelve a aterrizar")
-	_comprobar(felipe.tiene_doble_salto, "Al aterrizar recupera el doble salto")
+	_comprobar(felipe.doble_salto_disponible, "Al aterrizar recupera el doble salto")
 
 	var x_antes := felipe.position.x
 	Input.action_press("zoomies")

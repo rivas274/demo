@@ -14,6 +14,16 @@ static func textura(nombre: String) -> Texture2D:
 	return _cache[nombre]
 
 
+## Imagen y rectángulo (en el mundo) de una pieza dibujada en `c` con dibujar(); {} si no hay imagen.
+## Lo usa el Indicador para el contorno del objeto cercano.
+static func arte_en(c: Node2D, nombre: String, centro_x: float, base: float) -> Dictionary:
+	var t := textura(nombre)
+	if t == null:
+		return {}
+	var tam := t.get_size()
+	return {"textura": t, "rect": Rect2(c.global_position + Vector2(centro_x - tam.x / 2.0, base - tam.y), tam)}
+
+
 ## Dibuja la pieza con la base en `base` y centrada en `centro_x` (en coordenadas de `c`). Devuelve si existía.
 static func dibujar(c: CanvasItem, nombre: String, centro_x: float, base: float, espejo := false, tinte := Color.WHITE) -> bool:
 	var t := textura(nombre)

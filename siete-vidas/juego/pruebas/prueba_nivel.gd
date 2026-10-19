@@ -287,16 +287,21 @@ func _correr() -> void:
 	await _esperar(10)
 	_comprobar(t.agenda.esta_cumplida("teclado"), "Pisar el teclado: «jjjjjjjjjj» (secreta)")
 	var batalla := sala.batalla
-	await _poner_en(Vector2(6300, Sala.SUELO))
 	for i in BatallaAspi.APAGADOS_TOTALES:
-		batalla.deposito = BatallaAspi.CAPACIDAD[batalla.apagados] - 1
-		batalla.agregar_mancha(sala.aspi.global_position)
-		await _esperar_que(func() -> bool: return batalla.llena, 600)
-		await _esperar(25)
-		# Cae sobre ella desde un poco más arriba que su tapa (por debajo del escritorio, que se atraviesa desde abajo).
-		felipe.global_position = sala.aspi.global_position + Vector2(0, -62)
-		felipe.velocity = Vector2.ZERO
-		await _esperar(80)
+		var apagados_antes := batalla.apagados
+		for intento in 3:
+			if batalla.apagados > apagados_antes or batalla.fase != BatallaAspi.Fase.PELEA:
+				break
+			await _poner_en(Vector2(6300, Sala.SUELO), 20)
+			if not batalla.llena:
+				batalla.deposito = BatallaAspi.CAPACIDAD[batalla.apagados] - 1
+				batalla.agregar_mancha(sala.aspi.global_position)
+				await _esperar_que(func() -> bool: return batalla.llena, 600)
+			await _esperar(25)
+			# Cae sobre ella desde un poco más arriba que su tapa (por debajo del escritorio, que se atraviesa desde abajo).
+			felipe.global_position = sala.aspi.global_position + Vector2(0, -62)
+			felipe.velocity = Vector2.ZERO
+			await _esperar(80)
 	await _esperar(60)
 	_comprobar(sala.aspi.apagada and t.agenda.esta_cumplida("desenchufar") and "Desenchufada" in sala.logros, "Apagada tres veces: «Desenchufar a A.S.P.I.» y el logro")
 	await _poner_en(sala.puertas[Sala.PUERTA_BALCON].global_position)

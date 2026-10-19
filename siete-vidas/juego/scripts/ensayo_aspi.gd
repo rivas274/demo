@@ -101,7 +101,7 @@ func _physics_process(delta: float) -> void:
 				(sala.puertas["pasillo>estudio"] as Puerta).abrir_un_momento(0.6)
 				sala.travesuras.decir_felipe("robot_registra")
 				terminado.emit()
-	if paso in [Paso.VA, Paso.LIMPIA]:
-		for hijo in get_children():
-			if hijo is Node2D:
-				(hijo as Node2D).queue_redraw()
+	# Siempre se redibuja: al terminar se borran la mancha y las líneas de la succión.
+	for hijo in get_children():
+		if hijo is Node2D:
+			(hijo as Node2D).queue_redraw()

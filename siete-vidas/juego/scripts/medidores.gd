@@ -43,7 +43,8 @@ func _draw() -> void:
 	if felipe.tiene_collar:
 		draw_string(fuente, Vector2(104, 20), "Collar de la Vergüenza", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, ROJO)
 	if _tiempo_notificacion > 0.0:
-		var caja := Rect2(get_viewport_rect().size.x - 216, 8, 208, 34)
+		# Debajo de la barra del jefe (arriba a la derecha), para no taparla (M4).
+		var caja := Rect2(get_viewport_rect().size.x - 216, 44, 208, 34)
 		draw_rect(caja, FONDO)
 		draw_rect(caja, ROJO, false, 1.0)
 		draw_string(fuente, caja.position + Vector2(8, 13), "Nuevo logro desbloqueado", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("6f625b"))

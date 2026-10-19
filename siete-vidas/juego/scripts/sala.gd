@@ -42,7 +42,7 @@ const PUERTAS := [
 	["recibidor<sala", Vector2(1532, SUELO), "sala>recibidor"],
 	["recibidor>cocina", Vector2(2070, SUELO), "cocina<recibidor"],  # cerrada: Valeria adentro
 	["cocina<recibidor", Vector2(2892, SUELO), "recibidor>cocina"],
-	["recibidor>pasillo", Vector2(2330, SUELO), "pasillo<recibidor"],  # pie de la escalera de fondo
+	["recibidor>pasillo", Vector2(2346, SUELO), "pasillo<recibidor"],  # pie de la escalera de fondo
 	["pasillo<recibidor", Vector2(4092, SUELO), "recibidor>pasillo"],  # vano arriba de la escalera
 	["pasillo>dormitorio", Vector2(4536, SUELO), "dormitorio<pasillo"],  # entornada: se araña
 	["dormitorio<pasillo", Vector2(5292, SUELO), "pasillo>dormitorio"],
@@ -56,10 +56,10 @@ const PUERTA_COCINA := "recibidor>cocina"
 const PUERTA_DORMITORIO := "pasillo>dormitorio"
 ## La escalera de fondo: al pie se "asciende" como por una puerta, escalón por escalón (Felipe.subir_escalera).
 const PUERTA_ESCALERA := "recibidor>pasillo"
-const ESCALERA_PIE := Vector2(2330, SUELO)
+const ESCALERA_PIE := Vector2(2346, SUELO)
 ## Pies de Felipe en cada uno de los 7 escalones (arte escalera_peldanos espejado, de 25 px de huella y ~21 de alto).
 const PELDANOS := [
-	Vector2(2334, SUELO - 23), Vector2(2360, SUELO - 45), Vector2(2386, SUELO - 67), Vector2(2410, SUELO - 88),
+	Vector2(2340, SUELO - 23), Vector2(2360, SUELO - 45), Vector2(2386, SUELO - 67), Vector2(2410, SUELO - 88),
 	Vector2(2434, SUELO - 107), Vector2(2458, SUELO - 130), Vector2(2490, SUELO - 150),
 ]
 ## Arriba de la escalera: el descanso con el vano bajo, por donde se pasa al pasillo.

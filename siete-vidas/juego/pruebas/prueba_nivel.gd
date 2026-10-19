@@ -292,7 +292,8 @@ func _correr() -> void:
 		batalla.deposito = BatallaAspi.CAPACIDAD[batalla.apagados] - 1
 		batalla.agregar_mancha(sala.aspi.global_position)
 		await _esperar_que(func() -> bool: return batalla.llena, 400)
-		felipe.global_position = sala.aspi.global_position + Vector2(0, -130)
+		# Cae sobre ella desde un poco más arriba que su tapa (por debajo del escritorio, que se atraviesa desde abajo).
+		felipe.global_position = sala.aspi.global_position + Vector2(0, -62)
 		felipe.velocity = Vector2.ZERO
 		await _esperar(80)
 	await _esperar(60)

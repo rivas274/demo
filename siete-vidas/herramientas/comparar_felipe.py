@@ -15,6 +15,7 @@ ARTE = Path(__file__).resolve().parent.parent / "arte" / "felipe"
 # hoja -> [cuadros, escala en el juego]
 ESCALAS = {
     "felipe-idle-sheet.png": [8, 0.72],
+    "felipe-caminar-largo-sheet.png": [8, 0.72],
     "felipe-walk-sheet.png": [8, 0.72],
     "felipe-run-sheet.png": [8, 0.72],
     "felipe-jump-sheet.png": [8, 0.72],

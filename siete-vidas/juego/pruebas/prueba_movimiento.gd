@@ -300,12 +300,15 @@ func _probar_ajuste_del_salto(felipe: Felipe) -> void:
 ## apoyado se desliza ≤ 2 px por cuadro caminando y corriendo.
 func _probar_patas_sin_patinar(felipe: Felipe) -> void:
 	var medir := preload("res://pruebas/medir_pasos.gd")
-	var medidas: Array = medir.pie_apoyado(AnimacionesFelipe.CARPETA + "felipe-walk-sheet.png", AnimacionesFelipe.CUADROS, 8, 20, 40.0)
+	# Hoja de pasos largos: se mide en las 4 filas del piso (con 8 filas, la pata que se levanta tapa el calce).
+	var hoja_caminar: String = AnimacionesFelipe.HOJAS["caminar"][0]
+	_comprobar(hoja_caminar == "felipe-caminar-largo-sheet.png", "Caminar usa la hoja de pasos largos (%s)" % hoja_caminar)
+	var medidas: Array = medir.pie_apoyado(AnimacionesFelipe.CARPETA + hoja_caminar, AnimacionesFelipe.CUADROS, 4, 20, 40.0)
 	var suma := 0.0
 	for m: Array in medidas:
 		suma += -float(m[1])
 	var paso_hoja := suma / maxf(medidas.size(), 1.0) * Felipe.ESCALA_SPRITE
-	_comprobar(medidas.size() >= 4 and absf(paso_hoja - AnimacionesFelipe.PASO["caminar"]) <= 0.5, "G9 El pie apoyado de caminar adelanta %.1f px del juego por cuadro (AnimacionesFelipe.PASO: %.1f)" % [paso_hoja, AnimacionesFelipe.PASO["caminar"]])
+	_comprobar(medidas.size() >= 5 and absf(paso_hoja - AnimacionesFelipe.PASO["caminar"]) <= 0.2, "G9 El pie apoyado de caminar adelanta %.1f px del juego por cuadro (AnimacionesFelipe.PASO: %.1f)" % [paso_hoja, AnimacionesFelipe.PASO["caminar"]])
 	for datos: Array in [["caminar", felipe.velocidad_caminar, false], ["correr", felipe.velocidad_correr, true]]:
 		var nombre: String = datos[0]
 		_poner_en(felipe, Vector2(300, Sala.SUELO))

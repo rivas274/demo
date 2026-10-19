@@ -6,17 +6,20 @@ extends RefCounted
 const CARPETA := "res://assets/felipe/"
 const CUADROS := 8
 ## Cuánto adelanta el pie apoyado cada cuadro de la hoja, en px del juego (medido en la hoja con
-## prueba_movimiento: caminar ~2,5 px de hoja × 0,72; correr ~5 px × 0,72). Felipe ajusta el ritmo de la animación a su
-## velocidad con esto (G9 de la revisión 3): las patas no patinan.
-const PASO := {"caminar": 1.8, "correr": 3.6}
+## pruebas/medir_pasos.gd desde prueba_movimiento: caminar —hoja de pasos largos— ~5 px de hoja × 0,72; correr ~5 px
+## × 0,72). Felipe ajusta el ritmo de la animación a su velocidad con esto (G9 de la revisión 3): las patas no patinan.
+## Caminar (2026-10-19): 5 pares medibles (cuadros 0-1, 1-2, 2-3, 3-4 y 5-6: 5, 5, 4, 6 y 5 px de hoja) dan 3,6 px; a
+## 120 px/s el ciclo va a 33 cuadros/s, bajo FPS_MAXIMO.
+const PASO := {"caminar": 3.6, "correr": 3.6}
 ## Tope de cuadros por segundo del ciclo (más rápido se ve borroso a 60 Hz). Con el tope, el pie apoyado se desliza
-## como mucho v / FPS_MAXIMO − PASO: 1,7 px caminando a 120 px/s y 2,0 px corriendo a 190 px/s.
+## como mucho v / FPS_MAXIMO − PASO: caminando a 120 px/s no llega al tope (0 px) y corriendo a 190 px/s, 2,0 px.
 const FPS_MAXIMO := 34.0
 
 ## nombre -> [archivo, fps, en bucle, cuadros de la hoja (opcional, 8 por defecto), [primer, último] cuadro que usa (opcional)]
 const HOJAS := {
 	"quieto": ["felipe-idle-sheet.png", 8.0, true],
-	"caminar": ["felipe-walk-sheet.png", 10.0, true],
+	## Pasos largos y lentos de gato orgulloso (felipe-walk-sheet.png queda en reserva, sin usar).
+	"caminar": ["felipe-caminar-largo-sheet.png", 10.0, true],
 	"correr": ["felipe-run-sheet.png", 14.0, true],
 	"zarpazo": ["felipe-attack-sheet.png", 16.0, false],
 	"comer": ["felipe-eat-sheet.png", 8.0, false],

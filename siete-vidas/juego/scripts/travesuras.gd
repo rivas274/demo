@@ -88,7 +88,8 @@ func _al_cumplir(t: Dictionary) -> void:
 	var tipo := String(recompensa.get("tipo", ""))
 	if _donde.has(id) and tipo in ["calcetin", "snack", "foto"]:
 		for i in int(recompensa.get("cantidad", 1)):
-			soltar(tipo, _donde[id], Vector2(randf_range(-40.0, 40.0), -160.0))
+			# La foto es papel: sale apenas hacia arriba y cae flotando (si saltara alto, se iría a otro mueble).
+			soltar(tipo, _donde[id], Vector2(randf_range(-40.0, 40.0), -60.0 if tipo == "foto" else -160.0))
 	else:
 		recompensas.dar(recompensa)
 	travesura_cumplida.emit(id)

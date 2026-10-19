@@ -229,7 +229,7 @@ func _dibujar_luz(c: Node2D) -> void:
 func _dibujar_primer_plano(c: Node2D) -> void:
 	# Siluetas oscuras delante de Felipe, a la altura de la planta baja: dan profundidad y enmarcan.
 	# Solo en el balcón (afuera): adentro taparían zonas de juego (M3).
-	for planta: Vector3 in [Vector3(9150, 560, 0.6)]:
+	for planta: Vector3 in [Vector3(9760, 560, 0.6)]:
 		_planta(c, Vector2(planta.x, planta.y), planta.z)
 
 

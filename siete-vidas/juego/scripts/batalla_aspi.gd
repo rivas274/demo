@@ -685,7 +685,12 @@ func _terminar() -> void:
 	await get_tree().create_timer(0.5 * 0.3, true, false, false).timeout
 	Engine.time_scale = 1.0
 	sala.travesuras.cumplir("desenchufar")
-	await get_tree().create_timer(0.8, false).timeout
+	await get_tree().create_timer(0.6, false).timeout
+	# Se lame la pata como si nada, apenas toca el piso.
+	for i in 180:
+		if felipe.is_on_floor() and felipe.estado == Felipe.Estado.SUELO:
+			break
+		await get_tree().physics_frame
 	felipe.acicalarse()
 	terminada.emit()
 

@@ -56,6 +56,9 @@ Detalle y comparación descartada en `siete-vidas/memoria/02-guia-felipe.md` (se
 
 ## Regla fija: diseño de niveles
 
+Antes de diseñar, construir o revisar un escenario, lee `siete-vidas/memoria/06-lecciones-arte.md` (errores que el creador ya vio) y búscalos en capturas reales.
+
+
 Todo nivel cumple `siete-vidas/diseno/reglas-de-niveles.md`. Al diseñarlo, su documento dice cómo cumple cada regla; al probarlo, `prueba_reglas_nivel.gd` valida las medibles y las demás se revisan con capturas. Si una regla no se cumple, se cambia el nivel; cambiar una regla lo decide el creador.
 
 Todo jefe se presenta con el componente reutilizable `PresentacionJefe` (`siete-vidas/juego/scripts/presentacion_jefe.gd`: entrada tipo Broforce, nombre y título en franja, carteles de fase y barra de vida). No se hace una presentación nueva por jefe: cada pelea solo da sus datos y su "momento".

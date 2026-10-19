@@ -7,6 +7,7 @@ Esta carpeta guarda lo que ya se decidió, para que cualquier sesión nueva reto
 | Archivo | Qué contiene |
 | --- | --- |
 | [05-estado-actual.md](05-estado-actual.md) | **Dónde vamos:** fase, lo que está en curso, pendientes en orden y decisiones abiertas. Empieza por aquí en un chat nuevo |
+| [06-lecciones-arte.md](06-lecciones-arte.md) | **Errores de arte y ambientes que no se repiten** (leer antes de diseñar, construir o revisar un escenario) |
 | [01-decisiones.md](01-decisiones.md) | Todas las decisiones de diseño cerradas, en resumen |
 | [02-guia-felipe.md](02-guia-felipe.md) | Guía del personaje principal (model sheet en texto) |
 | [03-arte-y-herramientas.md](03-arte-y-herramientas.md) | Resolución, estilo visual, SpriteCook, créditos y assets generados |

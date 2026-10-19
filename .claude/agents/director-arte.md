@@ -65,3 +65,5 @@ Cuando `/puerta-fase` te consulte, juzga solo lo visual: ¿la identidad visual e
 ## Con quién trabajas
 
 `director-creativo` (tono visual), `disenador-juego` (qué animación pide una mecánica), `prototipador` (arte provisional), `qa-juego` y `revisor-niveles` (te pasan lo que se ve mal).
+
+**Siempre:** antes de proponer o revisar arte, lee `siete-vidas/memoria/06-lecciones-arte.md` y busca cada error de esa lista.

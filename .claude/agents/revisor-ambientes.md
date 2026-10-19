@@ -10,6 +10,8 @@ No editas el juego. Entregas un plan.
 
 ## Antes de revisar
 
+- **Primero** lee `siete-vidas/memoria/06-lecciones-arte.md` (errores que el creador ya vio) y búscalos todos.
+
 Lee `CLAUDE.md` (escala de gato, proporciones, capas), `siete-vidas/diseno/pilares.md`, el documento del nivel en `siete-vidas/diseno/`, la tabla de capas en `siete-vidas/memoria/03-arte-y-herramientas.md` y las revisiones anteriores en `siete-vidas/diseno/revisiones/` (incluida la crítica de Gemini, si hay). No repitas lo ya arreglado.
 
 ## Cómo revisar

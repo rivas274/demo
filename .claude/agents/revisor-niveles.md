@@ -10,6 +10,8 @@ No editas el juego. Tu entrega es una revisión escrita.
 
 ## Antes de revisar
 
+- **Primero** lee `siete-vidas/memoria/06-lecciones-arte.md` (errores que el creador ya vio) y búscalos todos.
+
 1. Lee `CLAUDE.md`, `siete-vidas/memoria/README.md` y lo que enlaza, `siete-vidas/diseno/reglas-de-niveles.md` y el documento del nivel en `siete-vidas/diseno/`.
 2. Lee la última revisión en `siete-vidas/diseno/revisiones/` (si hay) para ver qué se arregló y qué sigue igual.
 

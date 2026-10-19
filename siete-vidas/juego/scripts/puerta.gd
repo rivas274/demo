@@ -29,6 +29,13 @@ var _felipe: Felipe
 var _cerca := false
 var _tiempo := 0.0
 var _abierta_un_rato := 0.0
+## Alguien la está cruzando (Valeria): queda abierta hasta soltar_paso() (G2).
+var _sosteniendo := false
+## La otra cara de esta misma puerta (en el cuarto de al lado): se abre y se cierra con esta.
+var par: Puerta
+## Hoja de la puerta: 0 cerrada, 1 abierta. Va hacia su objetivo en DURACION_APERTURA (se ve girar la hoja).
+var apertura := 1.0
+const DURACION_APERTURA := 0.25
 
 
 func _init(nombre_puerta: String, posicion: Vector2, puerta_destino: String, alto_disponible: float) -> void:
@@ -40,6 +47,7 @@ func _init(nombre_puerta: String, posicion: Vector2, puerta_destino: String, alt
 
 
 func _ready() -> void:
+	apertura = 0.0 if _objetivo_apertura() == 0.0 else 1.0
 	add_to_group(Comida.GRUPO)
 	_felipe = get_tree().get_first_node_in_group("felipe")
 
@@ -48,9 +56,13 @@ func interactuar(_felipe_que_entra: Felipe) -> void:
 	cruzada.emit(self)
 
 
+## Cerrada, ¿se ofrece igual para "Probar"? (en la pelea, la del balcón no: M3, la burbuja pisaba a A.S.P.I.).
+var ofrecer_cerrada := true
+
+
 ## La entornada se ofrece como arañable (otro nodo); la cerrada sigue ofreciéndose (Felipe dice algo al probarla).
 func disponible(_felipe_que_pregunta: Felipe) -> bool:
-	return not entornada
+	return not entornada and (not cerrada or ofrecer_cerrada)
 
 
 ## Verbo de Felipe para el Indicador: la escalera se "asciende", las puertas se "pasan".
@@ -68,7 +80,7 @@ func arte() -> String:
 		return "puerta_balcon_v2" if cerrada else "puerta_balcon_abierta"
 	if entornada:
 		return "puerta_entornada"
-	if cerrada and _abierta_un_rato <= 0.0:
+	if apertura <= 0.0:
 		return "puerta_cerrada_v2"
 	return "puerta_abierta_v2"
 
@@ -77,6 +89,33 @@ func arte() -> String:
 func abrir_un_momento(segundos := 0.6) -> void:
 	_abierta_un_rato = segundos
 	queue_redraw()
+
+
+## Alguien va a cruzarla: se abre (la hoja gira en 0,25 s) y queda abierta hasta soltar_paso().
+func abrir_para_paso(con_par := true) -> void:
+	_sosteniendo = true
+	queue_redraw()
+	if con_par and par:
+		par.abrir_para_paso(false)
+
+
+## Ya pasó: si la puerta estaba cerrada, vuelve a cerrarse (la hoja gira de vuelta).
+func soltar_paso(con_par := true) -> void:
+	_sosteniendo = false
+	queue_redraw()
+	if con_par and par:
+		par.soltar_paso(false)
+
+
+## ¿Está abierta del todo? (para esperar a que termine de abrirse antes de cruzar).
+func abierta_del_todo() -> bool:
+	return apertura >= 1.0
+
+
+func _objetivo_apertura() -> float:
+	if estilo != "" or entornada or escalera:
+		return 0.0 if cerrada else 1.0
+	return 1.0 if (not cerrada or _abierta_un_rato > 0.0 or _sosteniendo) else 0.0
 
 
 func arte_indicador() -> Dictionary:
@@ -91,6 +130,11 @@ func _physics_process(delta: float) -> void:
 		_abierta_un_rato -= delta
 		if _abierta_un_rato <= 0.0:
 			queue_redraw()
+	var objetivo := _objetivo_apertura()
+	if apertura != objetivo:
+		# Las puertas de madera giran; el balcón y la entornada cambian de golpe (no tienen hoja que girar).
+		apertura = move_toward(apertura, objetivo, delta / DURACION_APERTURA) if estilo == "" and not entornada else objetivo
+		queue_redraw()
 	if sombra_detras and cerrada:
 		queue_redraw()
 	if _felipe == null:
@@ -110,11 +154,20 @@ func _draw() -> void:
 	var nombre := arte()
 	var textura := ArteNivel.textura(nombre)
 	var alto_arte := textura.get_size().y if textura else ALTO_MAXIMO
-	if not cerrada and not entornada and estilo != "balcon":
+	if apertura > 0.0 and not entornada and estilo != "balcon":
 		# Luz cálida que sale del vano.
 		draw_colored_polygon(PackedVector2Array([Vector2(-40, -alto_arte + 30), Vector2(40, -alto_arte + 30), Vector2(64, 0), Vector2(-64, 0)]), Color(1.0, 0.85, 0.55, 0.10))
 	ArteNivel.dibujar(self, nombre, 0.0, 0.0)
-	if cerrada and estilo != "balcon":
+	if apertura > 0.0 and apertura < 1.0 and estilo == "" and not entornada:
+		# La hoja gira sobre la bisagra (borde derecho): la cerrada se angosta hacia allá mientras se abre.
+		var hoja := ArteNivel.textura("puerta_cerrada_v2")
+		if hoja:
+			var ancho := hoja.get_width()
+			var borde := ancho / 2.0
+			draw_set_transform(Vector2(borde, 0), 0.0, Vector2(maxf(1.0 - apertura, 0.08), 1.0))
+			draw_texture(hoja, Vector2(-ancho, -hoja.get_height()), Color(1, 1, 1).darkened(apertura * 0.35))
+			draw_set_transform(Vector2.ZERO)
+	if apertura <= 0.0 and estilo != "balcon":
 		# Rendija de luz abajo y, si hay alguien adentro, su sombra que va y viene.
 		draw_rect(Rect2(-44, -3, 88, 2), Color(1.0, 0.85, 0.5, 0.8))
 		if sombra_detras:

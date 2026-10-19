@@ -5,6 +5,13 @@ extends RefCounted
 
 const CARPETA := "res://assets/felipe/"
 const CUADROS := 8
+## Cuánto adelanta el pie apoyado cada cuadro de la hoja, en px del juego (medido en la hoja con
+## prueba_movimiento: caminar ~2,5 px de hoja × 0,72; correr ~5 px × 0,72). Felipe ajusta el ritmo de la animación a su
+## velocidad con esto (G9 de la revisión 3): las patas no patinan.
+const PASO := {"caminar": 1.8, "correr": 3.6}
+## Tope de cuadros por segundo del ciclo (más rápido se ve borroso a 60 Hz). Con el tope, el pie apoyado se desliza
+## como mucho v / FPS_MAXIMO − PASO: 1,7 px caminando a 120 px/s y 2,0 px corriendo a 190 px/s.
+const FPS_MAXIMO := 34.0
 
 ## nombre -> [archivo, fps, en bucle, cuadros de la hoja (opcional, 8 por defecto), [primer, último] cuadro que usa (opcional)]
 const HOJAS := {

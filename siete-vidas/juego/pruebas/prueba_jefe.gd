@@ -41,10 +41,14 @@ func _correr() -> void:
 	var subtitulos := {}
 	var dialogo_a_la_vista := false
 	var indicador_a_la_vista := false
+	var vio_imaginacion := false
+	var encima: Array[String] = []
+	var dos_aspi := false
+	var felipe_delante := true
 	for i in 900:
 		await physics_frame
 		if batalla.fase == BatallaAspi.Fase.ENTRADA:
-			var negro: float = sala.get_node("Interfaz/Fundido").modulate.a
+			var negro: float = sala.fundido_alfa()
 			negro_maximo = maxf(negro_maximo, negro)
 			if batalla.presentacion.t < 0.05:
 				empezo_en_negro = empezo_en_negro or negro > 0.01
@@ -57,8 +61,22 @@ func _correr() -> void:
 				dialogo_a_la_vista = dialogo_a_la_vista or sala.travesuras.dialogo.ocupado()
 				indicador_a_la_vista = indicador_a_la_vista or sala.travesuras.indicador.is_visible_in_tree()
 			gigante_maximo = maxf(gigante_maximo, batalla.gigante)
+			# B1: durante la imaginación nada del escenario se dibuja encima, y nunca se ven dos A.S.P.I.
+			if batalla.transformacion > 0.0 or batalla.gigante > 0.0:
+				vio_imaginacion = true
+				for nombre in _encima_de_la_imaginacion(batalla):
+					if not nombre in encima:
+						encima.append(nombre)
+				if batalla.gigante > 0.0 and aspi.visible:
+					dos_aspi = true
+				felipe_delante = felipe_delante and Capas.z_efectivo(felipe) > Capas.z_efectivo(batalla.get_node("Imaginacion"))
 		if batalla.fase == BatallaAspi.Fase.PELEA:
 			break
+	_comprobar(vio_imaginacion and encima.is_empty(), "B1 Durante la imaginación nada del escenario (muebles, puertas, repisa) se dibuja encima de ella %s" % str(encima))
+	_comprobar(vio_imaginacion and not dos_aspi, "B1 Nunca se ven dos A.S.P.I. a la vez: la real aparece cuando la gigante ya se fue")
+	_comprobar(vio_imaginacion and felipe_delante, "B1 Felipe queda delante de su propia imaginación")
+	_comprobar(_tabla_ordenada(), "B1 La tabla única de capas (Capas) va de atrás hacia adelante, sin saltos de orden")
+	_comprobar(not aspi.visible or batalla.gigante == 0.0, "B1 Al terminar la entrada, la gigante ya no está")
 	_comprobar(negro_maximo < 0.01 and not empezo_en_negro, "Entrar por la puerta: la presentación empieza con el fundido ya terminado (nada en negro, B1)")
 	var orden := []
 	for paso: Array in PresentacionJefe.PASOS:
@@ -167,10 +185,14 @@ func _correr() -> void:
 	_comprobar(batalla.apagados == 2, "Segundo apagado: fase 3 (furia), aunque caiga a la velocidad máxima")
 
 	# Fase 3: tose y escupe bolas de pelo en arco que llegan arriba (al escritorio).
-	await _esperar(100)
+	# M8: sin azar ni carreras. Felipe queda en el escritorio, lejos del teclado (pisarlo suelta papeles en lugares al
+	# azar) y A.S.P.I. lejos; se espera el ESTADO (tos y bola alta), no un tiempo fijo.
+	await _esperar_que(func() -> bool: return batalla._reinicio <= 0.0 and batalla.ataque == BatallaAspi.Ataque.NINGUNO, 300)
+	batalla.manchas.clear()
+	batalla.tipos_mancha.clear()
 	aspi.velocidad_patrulla = 0.0
-	aspi.global_position = Vector2(arena.position.x + 90, Sala.SUELO)
-	await _poner_en(Vector2(arena.position.x + 330, Sala.SUELO - 98), 2)
+	aspi.global_position = Vector2(arena.position.x + 40, Sala.SUELO)
+	await _poner_en(Vector2(arena.position.x + 380, Sala.SUELO - 98), 2)
 	felipe._tiempo_invulnerable = 0.0
 	corazones = felipe.corazones
 	var tosio := false
@@ -317,6 +339,38 @@ func _tocar(accion: String) -> void:
 	await physics_frame
 	Input.action_release(accion)
 	await physics_frame
+
+
+## Nodos del nivel que se dibujan con un z igual o mayor que la imaginación, fuera de la imaginación misma, Felipe y los
+## efectos de la batalla (viento, papeles, polvo, bolas).
+func _encima_de_la_imaginacion(batalla: BatallaAspi) -> Array[String]:
+	var lista: Array[String] = []
+	# El z con que se dibuja DE VERDAD la imaginación (no el de la tabla): así la prueba falla si alguien la baja.
+	var z_imaginacion := Capas.z_efectivo(batalla.get_node("Imaginacion"))
+	var pendientes: Array[Node] = [sala]
+	while not pendientes.is_empty():
+		var nodo: Node = pendientes.pop_back()
+		if nodo is CanvasLayer:
+			continue
+		for hijo in nodo.get_children():
+			pendientes.append(hijo)
+		if not nodo is CanvasItem or nodo == sala:
+			continue
+		var item := nodo as CanvasItem
+		if not item.is_visible_in_tree() or Capas.z_efectivo(item) < z_imaginacion:
+			continue
+		if item == felipe or felipe.is_ancestor_of(item) or batalla.is_ancestor_of(item):
+			continue
+		lista.append(String(item.name))
+	return lista
+
+
+func _tabla_ordenada() -> bool:
+	for tabla: Array in [Capas.MUNDO, Capas.PANTALLA]:
+		for i in range(1, tabla.size()):
+			if int(tabla[i][1]) < int(tabla[i - 1][1]):
+				return false
+	return true
 
 
 func _esperar_que(condicion: Callable, maximo: int) -> void:

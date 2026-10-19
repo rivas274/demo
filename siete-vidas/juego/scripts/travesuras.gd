@@ -18,6 +18,8 @@ var hud: Hud
 var dialogo: Dialogo
 var jugo: Jugo
 var indicador: Indicador
+## La cola única de anuncios (carteles, logros, franjas de fase): G5 de la revisión 3.
+var anuncios: Anuncios
 var frases := Frases.new()
 ## Perdones de Valeria en el día (los suma el nivel con contar_perdon(); salen en el resumen).
 var perdones := 0
@@ -37,6 +39,9 @@ func _ready() -> void:
 	jugo = Jugo.new()
 	jugo.name = "Jugo"
 	add_child(jugo)
+	anuncios = Anuncios.new()
+	anuncios.felipe = felipe
+	add_child(anuncios)
 	hud = Hud.new()
 	hud.name = "Hud"
 	hud.agenda = agenda
@@ -46,6 +51,8 @@ func _ready() -> void:
 	dialogo.name = "Dialogo"
 	dialogo.seguir = felipe
 	add_child(dialogo)
+	hud.anuncios = anuncios
+	anuncios.dialogo = dialogo
 	libreta = Libreta.new()
 	libreta.name = "Libreta"
 	libreta.agenda = agenda
@@ -61,6 +68,7 @@ func _ready() -> void:
 	recompensas.ranura_ganada.connect(_al_ganar_ranura)
 	if felipe:
 		jugo.camara = felipe.get_node_or_null("Camara")
+		jugo.evitar = felipe
 		felipe.impacto.connect(_al_impacto)
 		felipe.maullo.connect(_al_maullar)
 		felipe.aranazo.connect(_al_aranar)
@@ -87,9 +95,20 @@ func _al_cumplir(t: Dictionary) -> void:
 		dialogo.decir("felipe", String(frase[0]), int(frase[1]))
 	var tipo := String(recompensa.get("tipo", ""))
 	if _donde.has(id) and tipo in ["calcetin", "snack", "foto"]:
+		var donde: Vector2 = _donde[id]
+		# Nunca sobre la cara de Felipe (M2): si sale pegada a él, sale a su lado y en un arco corto hacia afuera.
+		var lado := 0.0
+		if felipe and donde.distance_to(felipe.global_position + Vector2(0, -30)) < 60.0:
+			lado = signf(donde.x - felipe.global_position.x)
+			if lado == 0.0:
+				lado = -felipe.mirando
+			donde.x = felipe.global_position.x + lado * 44.0
 		for i in int(recompensa.get("cantidad", 1)):
 			# La foto es papel: sale apenas hacia arriba y cae flotando (si saltara alto, se iría a otro mueble).
-			soltar(tipo, _donde[id], Vector2(randf_range(-40.0, 40.0), -60.0 if tipo == "foto" else -160.0))
+			var impulso := Vector2(randf_range(-40.0, 40.0), -60.0 if tipo == "foto" else -160.0)
+			if lado != 0.0:
+				impulso = Vector2(lado * randf_range(20.0, 50.0), -110.0)
+			soltar(tipo, donde, impulso)
 	else:
 		recompensas.dar(recompensa)
 	travesura_cumplida.emit(id)
@@ -205,6 +224,13 @@ func mostrar_resumen(frase_final: Array = []) -> ResumenDia:
 		resumen_cerrado.emit())
 	add_child(resumen)
 	return resumen
+
+
+## Muestra u oculta la interfaz del juego (HUD, diálogo, palabras y carteles) mientras hay una pantalla encima (G7).
+func mostrar_interfaz(visible_ahora: bool) -> void:
+	for capa: CanvasLayer in [hud, dialogo, jugo]:
+		if capa:
+			capa.visible = visible_ahora
 
 
 ## Altura del cartel que no tapa a Felipe (sus 67 px sobre los pies) ni al cuadro de diálogo.

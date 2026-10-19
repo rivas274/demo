@@ -63,6 +63,10 @@ var zoom_momento := 1.15
 var imaginacion := true
 ## Pantallas del nivel: al terminar, el juego sigue solo si no se abrió la pausa.
 var pantallas: Pantallas
+## La cola única de anuncios del nivel (G5): las franjas de fase pasan adelante pero nunca se montan sobre otro aviso.
+var anuncios: Anuncios
+## Dónde va la franja de fase (y en pantalla), elegida por la cola al mostrarla.
+var _y_cartel := -1.0
 ## Los pasos que se están usando (PASOS o PASOS_CORTOS).
 var pasos: Array = PASOS
 
@@ -167,9 +171,20 @@ func saltar() -> void:
 
 ## Cartel de fase con su pista de una línea debajo (R16).
 func cartel(texto: String, segundos := 1.4, pista := "") -> void:
+	if anuncios:
+		var alto := 30.0 + (18.0 if pista != "" else 0.0) + 6.0
+		anuncios.anunciar("fase", texto, Vector2(640, alto), Vector2(640, alto), func(rect: Rect2, _chico: bool) -> float:
+			_mostrar_cartel(texto, segundos, pista, rect.position.y + 22.0)
+			return segundos, func() -> void: _cartel = 0.0, true)
+		return
+	_mostrar_cartel(texto, segundos, pista, -1.0)
+
+
+func _mostrar_cartel(texto: String, segundos: float, pista: String, y: float) -> void:
 	_texto_cartel = texto
 	_pista = pista
 	_cartel = segundos
+	_y_cartel = y
 
 
 ## La pista que se está mostrando bajo el cartel ("" si no hay).
@@ -372,14 +387,18 @@ func _dibujar() -> void:
 	elif presentando and texto_rugido != "" and texto_en_pantalla == texto_rugido:
 		var temblor := Vector2(_azar.randf_range(-2, 2), _azar.randf_range(-2, 2)).round()
 		c.draw_set_transform(Vector2(tam.x * 0.5, tam.y * 0.3) + temblor, -0.03)
-		_texto_con_sombra(c, fuente, texto_rugido, 18, Color("ff6a5a"), Color.BLACK, Vector2(2, 2))
+		# Caja oscura detrás: el rojo no se pierde en el fondo en llamas (M1).
+		var ancho_rugido := fuente.get_string_size(texto_rugido, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
+		c.draw_rect(Rect2(-ancho_rugido / 2.0 - 12, -20, ancho_rugido + 24, 28), Color(0.06, 0.02, 0.05, 0.85))
+		c.draw_string_outline(fuente, Vector2(-ancho_rugido / 2.0, 0), texto_rugido, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, 5, Color.BLACK)
+		_texto_con_sombra(c, fuente, texto_rugido, 18, Color("ff7a6a"), Color.BLACK, Vector2(2, 2))
 		c.draw_set_transform(Vector2.ZERO)
 	if presentando and (_en("barra") or _en("musica") or _en("tamano") or _en("rugido")) and pasos == PASOS:
 		_barra_de_vida(c, tam, fuente, _llenado if not (_en("tamano") or _en("rugido")) else 1.0, 0.0)
 	if _cartel > 0.0 and _texto_cartel != "":
 		var alfa := minf(_cartel * 2.0, 1.0)
 		var ancho := fuente.get_string_size(_texto_cartel, HORIZONTAL_ALIGNMENT_LEFT, -1, 22).x
-		var y := tam.y * 0.38
+		var y := _y_cartel if _y_cartel >= 0.0 else tam.y * 0.38
 		c.draw_rect(Rect2(0, y - 22, tam.x, 30 + (18 if _pista != "" else 0)), Color(0.08, 0.03, 0.05, 0.8 * alfa))
 		c.draw_string(fuente, Vector2((tam.x - ancho) / 2.0, y), _texto_cartel, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(Color("ffe066"), alfa))
 		if _pista != "":

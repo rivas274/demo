@@ -399,11 +399,16 @@ func _probar_dialogo() -> void:
 	# M3: el aviso de logro va por encima del diálogo (capa más alta) y nunca debajo de su cuadro.
 	var medidores := sala.get_node("Interfaz/Medidores") as Medidores
 	dialogo.limpiar()
+	sala.travesuras.anuncios.limpiar()
 	await _esperar(2)
 	sala.felipe.global_position = Vector2(120, Sala.SUELO)
 	dialogo.decir("felipe", "Una frase arriba.", 0, true)
 	sala.desbloquear_logro("Logro de prueba")
-	await _esperar(2)
+	# El logro sale cuando le toca en la cola única de anuncios (G5 de la revisión 3).
+	for i in 400:
+		if medidores.mostrando_logro():
+			break
+		await process_frame
 	var cuadro := dialogo.rect_en_pantalla()
 	_comprobar(medidores.mostrando_logro() and cuadro.has_area() and not medidores.rect_logro().intersects(cuadro), "M3 Con el diálogo en pantalla, el aviso de logro sale fuera de su cuadro")
 	_comprobar(Medidores.CAPA_AVISO > dialogo.layer, "M3 El aviso de logro va en una capa por encima del diálogo")

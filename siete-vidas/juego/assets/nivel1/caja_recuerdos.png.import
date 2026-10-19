@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d1wforgvbk3vj"
-path="res://.godot/imported/aspi_llena.png-bbbafaaf842c9af8ad519b254608e053.ctex"
+uid="uid://bumicxtojulbo"
+path="res://.godot/imported/caja_recuerdos.png-225303966e70eeebfad9eea5b8595c11.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/nivel1/aspi_llena.png"
-dest_files=["res://.godot/imported/aspi_llena.png-bbbafaaf842c9af8ad519b254608e053.ctex"]
+source_file="res://assets/nivel1/caja_recuerdos.png"
+dest_files=["res://.godot/imported/caja_recuerdos.png-225303966e70eeebfad9eea5b8595c11.ctex"]
 
 [params]
 

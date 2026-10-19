@@ -49,12 +49,10 @@ PIEZAS = {
     # Tanda 2.
     "escritorio": ("muebles-extra", 0, (160, 98), None),  # 81 cm, con 30 cm libres debajo
     "caja_arena": ("muebles-extra", 1, (104, 46), None),
-    "cojin": ("muebles-extra", 2, (70, 42), None),
     "base_carga": ("muebles-extra", 4, (74, 38), None),
     "repisa": ("muebles-extra", 5, (160, 47), None),
     "vano": ("puertas", 3, (134, 150), None),
     "bola_pelo": ("detalles", 1, (24, 24), None),
-    "aspi_llena": ("detalles", 2, (76, 87), None),  # tapa del depósito abierta
     "mancha": ("detalles", 8, (60, 20), None),
     "retrato": ("cuadros", 0, (84, 100), None),  # retrato oficial de Su Majestad
     "paisaje": ("cuadros", 1, (64, 66), None),
@@ -75,9 +73,7 @@ PIEZAS = {
     "bolsita": ("comida-grande", 3, (28, 32), None),
     "reja_frente": ("reja-antifuga", 0, (48, 182), (0.0, 0.0, 0.69, 1.0)),  # solo la cara de frente, 48 px (decisión del creador)
     "banquito": ("muebles-cocina", 4, (52, 54), None),  # banquito del dormitorio, 45 cm
-    # Tanda 3C (nivel 1 v4): sala, recibidor, cocina y ventanas. arriba-extra.png no llegó: baúl, consola,
-    # cojín con hueco, retrato familiar, cómoda abierta, ropa, caja de recuerdos, escritorio con pantalla y
-    # papeles se dibujan por código o con piezas que ya había.
+    # Tanda 3C (nivel 1 v4): sala, recibidor, cocina y ventanas.
     "rascador": ("sala-extra", 0, (100, 165), None),  # plataformas medidas en el arte (Sala.PIEZAS)
     "sofa_plastico": ("sala-extra", 1, (240, 102), None),
     "sofa_aranado": ("sala-extra", 2, (240, 98), None),
@@ -96,6 +92,17 @@ PIEZAS = {
     "ventana_sala": ("ventanas-patio", 0, (180, 151), (0.0, 0.24, 1.0, 1.0)),
     "balcon_mini": ("ventanas-patio", 0, (54, 36), (0.30, 0.0, 0.645, 0.205)),
     "ventana_pasillo": ("ventanas-patio", 1, (180, 54), None),  # el alféizar es la fila del borde de la repisa
+    # arriba-extra (Gemini, la mandó el creador; revisión 3): reemplaza lo que se dibujaba por código.
+    "baul": ("arriba-extra", 0, (70, 48), None),  # 40 cm, se pasa por delante (cabe entre la puerta y la consola)
+    "cojin": ("arriba-extra", 2, (70, 48), None),  # cojín redondo con hueco: descanso del pasillo
+    "retrato_familiar": ("arriba-extra", 3, (100, 80), None),  # Felipe tapa a toda la familia (M8 de la revisión 2)
+    "ropa_limpia": ("arriba-extra", 6, (52, 48), None),  # ropa doblada de la cama (interactuable, lado menor ≥ 24)
+    "ropa_pelos": ("arriba-extra", 7, (52, 48), None),  # la misma, después de que Felipe se acicala encima
+    "caja_recuerdos": ("arriba-extra", 8, (44, 33), None),  # lugar visto: repisa alta del dormitorio
+    "monitor": ("arriba-extra", 9, (44, 48), (0.08, 0.0, 0.48, 0.50)),  # del escritorio con monitor e impresora
+    "impresora": ("arriba-extra", 9, (44, 34), (0.54, 0.13, 0.94, 0.48)),
+    "papel": ("arriba-extra", 10, (30, 16), None),  # papel plano en el piso (mancha de la pelea)
+    "papel_arrugado": ("arriba-extra", 11, (16, 20), None),  # papeles que escupe la impresora
     # A.S.P.I. (escala de gato: más grande que una real); la gigante es imaginación de Felipe.
     "aspi": ("aspi-gemini-1", 0, (76, 47), None),
     "aspi_gigante": ("aspi-gigante", 0, (330, 270), None),
@@ -123,9 +130,11 @@ RELLENOS = {"baranda": [(70, 36, 121, 62, 58, 18)]}
 # se tapa con el marco y el alféizar de al lado, y la caja se dibuja por código afuera, tras el vidrio (G3).
 PARCHES = {"ventana_pasillo": [(114, 28, 153, 33, 32), (104, 33, 163, 54, 56)]}
 
-# Valeria (tanda 3B): poses y caminar, a una sola escala (de pie mide 200 px, 3 Felipes).
+# Valeria (tanda 3B): poses a una sola escala (de pie mide 200 px, 3 Felipes). Su caminar es de SpriteCook
+# (revisión 3, B2: las piernas sí alternan), 8 cuadros de 224 × 224 ya a escala 1:1.
 VALERIA_POSES = ("valeria-poses", ["neutra", "enojada", "perdonando", "grabando", "serie"])
-VALERIA_CAMINAR = ("valeria-caminar", 8)
+VALERIA_CAMINAR_SPRITECOOK = RAIZ / "arte" / "valeria" / "valeria-caminar-spritecook.png"
+VALERIA_CUADROS = 8
 VALERIA_ALTO = 200
 
 # Texturas que se repiten: nombre -> (hoja, índice, tamaño del mosaico, suavizado).
@@ -226,9 +235,7 @@ def con_patas(imagen, tamano, fraccion, alto_patas):
 
 
 def preparar_valeria():
-    """Poses de Valeria (valeria_<pose>.png) y su caminar (valeria_caminar.png, 8 cuadros iguales) a una sola escala.
-    El caminar de Gemini no trae los pies ni el cuerpo en el mismo lugar: cada cuadro se alinea por la línea de los
-    pies y por el centro de la cabeza, para que no tiemble."""
+    """Poses de Valeria (valeria_<pose>.png) a una sola escala y su caminar (valeria_caminar.png)."""
     PERSONAJES.mkdir(parents=True, exist_ok=True)
     hoja, nombres = VALERIA_POSES
     imagen, cajas = piezas(hoja)
@@ -237,27 +244,61 @@ def preparar_valeria():
         pose = sin_huecos(recortar_opaco(imagen.crop(cajas[indice])))
         tam = (round(pose.width * escala), round(pose.height * escala))
         escalar(pose, tam).save(PERSONAJES / f"valeria_{nombre}.png")
-    hoja, cantidad = VALERIA_CAMINAR
-    imagen, cajas = piezas(hoja)
+    preparar_valeria_caminar()
+
+
+def pie_apoyado(cuadros):
+    """Cuánto retrocede el pie apoyado de un cuadro al siguiente (px, negativo = hacia atrás), en los pares donde los
+    dos pies se ven separados en las filas del piso. Devuelve [(cuadro, desplazamiento)]."""
+    medidas = []
+    for i, a in enumerate(cuadros):
+        c = cuadros[(i + 1) % len(cuadros)]
+        alto = a.shape[0]
+        banda = slice(alto - 18, alto)
+        etiquetas, _ = ndimage.label(a[banda, :, 3] > 40)
+        mejores = []
+        for s in ndimage.find_objects(etiquetas):
+            x0, x1 = s[1].start, s[1].stop
+            # Pies juntos (una sola mancha ancha) no sirven para medir; tiene que tocar el piso.
+            if x1 - x0 < 6 or x1 - x0 > 34 or not (a[alto - 3:alto, x0:x1, 3] > 40).any():
+                continue
+            error, dx = min((np.abs(a[banda, x0:x1, 3] - c[banda, x0 + d:x1 + d, 3]).mean(), d)
+                            for d in range(-20, 9) if 0 <= x0 + d and x1 + d <= a.shape[1])
+            mejores.append((error, dx))
+        if mejores:
+            error, dx = min(mejores)
+            if error < 30 and dx < 0:
+                medidas.append((i, dx))
+    return medidas
+
+
+def preparar_valeria_caminar():
+    """Caminar de SpriteCook: cada cuadro se alinea por los pies (su fila más baja va al piso), se mantiene la x (el
+    avance del pie apoyado es la medida) y se recorta a una ventana común centrada en la cabeza."""
+    imagen = np.asarray(Image.open(VALERIA_CAMINAR_SPRITECOOK).convert("RGBA"))
+    ancho = imagen.shape[1] // VALERIA_CUADROS
     cuadros = []
-    for caja in cajas[:cantidad]:
-        cuadro = sin_huecos(recortar_opaco(imagen.crop(caja)))
-        cuadros.append(escalar(cuadro, (round(cuadro.width * escala), round(cuadro.height * escala))))
-    # Centro de la cabeza: promedio de x de los pixeles opacos del 25 % de arriba.
-    centros = []
-    for c in cuadros:
-        a = np.asarray(c)[:, :, 3] > 0
-        ys, xs = np.nonzero(a[: max(1, c.height // 4)])
-        centros.append(xs.mean())
-    izquierda = max(centros)
-    derecha = max(c.width - centro for c, centro in zip(cuadros, centros))
-    ancho = int(np.ceil(izquierda + derecha)) + 2
-    alto = max(c.height for c in cuadros)
-    salida = Image.new("RGBA", (ancho * cantidad, alto), (0, 0, 0, 0))
-    for i, (c, centro) in enumerate(zip(cuadros, centros)):
-        salida.paste(c, (i * ancho + int(round(ancho / 2 - centro)), alto - c.height))
+    for i in range(VALERIA_CUADROS):
+        f = imagen[:, i * ancho:(i + 1) * ancho].copy()
+        filas = np.nonzero(f[:, :, 3].max(axis=1) > 40)[0]
+        baja = f.shape[0] - 1 - filas.max()
+        g = np.zeros_like(f)
+        g[baja:] = f[:f.shape[0] - baja]
+        g[:, :, 3] = np.where(g[:, :, 3] > 40, 255, 0)
+        cuadros.append(g)
+    opaco = np.any([c[:, :, 3] > 0 for c in cuadros], axis=0)
+    ys, xs = np.nonzero(opaco)
+    cabeza = np.mean([np.nonzero(c[ys.min():ys.min() + 40, :, 3] > 0)[1].mean() for c in cuadros])
+    medio = int(round(max(cabeza - xs.min(), xs.max() + 1 - cabeza))) + 2
+    x0, x1, y0 = int(round(cabeza)) - medio, int(round(cabeza)) + medio, ys.min()
+    salida = Image.new("RGBA", ((x1 - x0) * VALERIA_CUADROS, cuadros[0].shape[0] - y0), (0, 0, 0, 0))
+    for i, c in enumerate(cuadros):
+        salida.paste(Image.fromarray(c[y0:, x0:x1].astype(np.uint8), "RGBA"), (i * (x1 - x0), 0))
     salida.save(PERSONAJES / "valeria_caminar.png")
-    print(f"Valeria: escala {escala:.4f}, caminar de {cantidad} cuadros de {ancho} x {alto}")
+    medidas = pie_apoyado(cuadros)
+    promedio = -np.mean([d for _, d in medidas])
+    print(f"Valeria: caminar de {VALERIA_CUADROS} cuadros de {x1 - x0} x {salida.height}; pie apoyado {promedio:.2f} px por "
+          f"cuadro (pares {[i for i, _ in medidas]}: {[d for _, d in medidas]})")
 
 
 def recortar(imagen, caja, fraccion):

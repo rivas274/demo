@@ -6,6 +6,8 @@ extends Control
 
 signal empezar
 signal reiniciar
+## Cambió el modo (título, intro, juego, pausa, final): el nivel esconde o muestra su interfaz (G7).
+signal modo_cambiado(modo: Modo)
 
 enum Modo { TITULO, INTRO, JUGANDO, PAUSA, FIN }
 
@@ -30,7 +32,12 @@ const FONDO := Color(0.13, 0.09, 0.1, 0.88)
 const CLARO := Color("f3efe8")
 const ACENTO := Color("ffd58a")
 
-var modo := Modo.JUGANDO
+var modo := Modo.JUGANDO:
+	set(valor):
+		if valor == modo:
+			return
+		modo = valor
+		modo_cambiado.emit(modo)
 var aviso := ""
 ## Aviso que manda sobre el del tutorial (por ejemplo, al mostrar la meta).
 var aviso_fijo := ""

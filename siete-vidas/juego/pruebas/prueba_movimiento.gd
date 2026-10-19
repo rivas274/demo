@@ -39,6 +39,7 @@ func _correr() -> void:
 	Input.action_release("mover_derecha")
 	_comprobar(felipe.position.x > x_inicial + 40.0, "Caminar a la derecha lo mueve (%.0f px)" % (felipe.position.x - x_inicial))
 	_comprobar(felipe.sprite.animation == "caminar", "Usa la animación de caminar")
+	await _probar_patas_sin_patinar(felipe)
 
 	await _esperar(30)
 	var y_suelo := felipe.position.y
@@ -294,6 +295,35 @@ func _probar_ajuste_del_salto(felipe: Felipe) -> void:
 
 ## Mira el cuadro que se está dibujando y compara dónde está su punto más bajo
 ## con el centro del cuerpo: debe quedar del lado hacia donde mira Felipe.
+## G9 (revisión 3): las patas no patinan. Se mide en la hoja cuánto adelanta el pie apoyado por cuadro (AnimacionesFelipe
+## .PASO debe coincidir con la medida, ±0,5 px) y, en el juego, que el ciclo vaya al ritmo de la velocidad: el pie
+## apoyado se desliza ≤ 2 px por cuadro caminando y corriendo.
+func _probar_patas_sin_patinar(felipe: Felipe) -> void:
+	var medir := preload("res://pruebas/medir_pasos.gd")
+	var medidas: Array = medir.pie_apoyado(AnimacionesFelipe.CARPETA + "felipe-walk-sheet.png", AnimacionesFelipe.CUADROS, 8, 20, 40.0)
+	var suma := 0.0
+	for m: Array in medidas:
+		suma += -float(m[1])
+	var paso_hoja := suma / maxf(medidas.size(), 1.0) * Felipe.ESCALA_SPRITE
+	_comprobar(medidas.size() >= 4 and absf(paso_hoja - AnimacionesFelipe.PASO["caminar"]) <= 0.5, "G9 El pie apoyado de caminar adelanta %.1f px del juego por cuadro (AnimacionesFelipe.PASO: %.1f)" % [paso_hoja, AnimacionesFelipe.PASO["caminar"]])
+	for datos: Array in [["caminar", felipe.velocidad_caminar, false], ["correr", felipe.velocidad_correr, true]]:
+		var nombre: String = datos[0]
+		_poner_en(felipe, Vector2(300, Sala.SUELO))
+		await _esperar(20)
+		if datos[2]:
+			Input.action_press("zoomies")
+		Input.action_press("mover_derecha")
+		await _esperar(50)
+		var fps := felipe.sprite.speed_scale * felipe.sprite.sprite_frames.get_animation_speed(felipe.sprite.animation)
+		var anim := felipe.sprite.animation
+		var v := absf(felipe.velocity.x)
+		Input.action_release("mover_derecha")
+		Input.action_release("zoomies")
+		var desliza := v / fps - float(AnimacionesFelipe.PASO[nombre])
+		_comprobar(anim == nombre and desliza <= 2.0 and fps <= AnimacionesFelipe.FPS_MAXIMO + 0.01, "G9 Al %s (%.0f px/s) el ciclo va a %.0f cuadros/s: el pie apoyado se desliza %.1f px por cuadro (≤ 2)" % [nombre, v, fps, desliza])
+		await _esperar(30)
+
+
 func _patas_delanteras_abajo(felipe: Felipe) -> bool:
 	var imagen := felipe.sprite.sprite_frames.get_frame_texture(felipe.sprite.animation, felipe.sprite.frame).get_image()
 	var suma_x := 0.0

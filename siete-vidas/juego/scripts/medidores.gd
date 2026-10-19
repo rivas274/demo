@@ -16,6 +16,10 @@ var dialogo: Dialogo
 var _notificacion := ""
 var _tiempo_notificacion := 0.0
 var _aviso: Control
+## La cola única de anuncios (G5): el logro espera su turno y su lugar (nunca al mismo tiempo que un cartel).
+var anuncios: Anuncios
+var _rect_aviso := Rect2()
+const DURACION_LOGRO := 2.6
 
 ## Capa del aviso de logro: por encima del diálogo (capa 7) y del HUD (capa 6).
 const CAPA_AVISO := Capas.CAPA_AVISOS
@@ -40,6 +44,13 @@ func _ready() -> void:
 
 
 func mostrar_logro(titulo: String) -> void:
+	if anuncios:
+		anuncios.anunciar("logro", titulo, TAM_AVISO, TAM_AVISO, func(rect: Rect2, _chico: bool) -> float:
+			_notificacion = titulo
+			_rect_aviso = rect
+			_tiempo_notificacion = DURACION_LOGRO
+			return DURACION_LOGRO, func() -> void: _tiempo_notificacion = 0.0, false, 0.0, true)
+		return
 	_notificacion = titulo
 	_tiempo_notificacion = 3.5
 
@@ -58,6 +69,8 @@ func mostrando_logro() -> bool:
 ## Dónde va el aviso: arriba a la derecha, bajo la barra del jefe (M4 de la revisión 1); si el diálogo está arriba,
 ## justo debajo de él (M3).
 func rect_logro() -> Rect2:
+	if _rect_aviso.has_area():
+		return _rect_aviso
 	var ancho_pantalla := get_viewport_rect().size.x
 	var caja := Rect2(Vector2(ancho_pantalla - TAM_AVISO.x - 8, 44), TAM_AVISO)
 	if dialogo and is_instance_valid(dialogo):

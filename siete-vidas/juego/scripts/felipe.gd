@@ -724,7 +724,11 @@ func _aterrizar() -> void:
 func _actualizar_animacion(direccion: float) -> void:
 	sprite.flip_h = mirando < 0.0
 	if estado in [Estado.ZARPAZO, Estado.COMIENDO, Estado.OCIO, Estado.DESMAYADO, Estado.ARANANDO, Estado.MAULLANDO, Estado.SUBIENDO_ESCALON, Estado.RONRONEANDO]:
+		# La escalera fija su propio ritmo (Felipe.subir_escalon); lo demás va a su velocidad normal.
+		if estado != Estado.SUBIENDO_ESCALON:
+			sprite.speed_scale = 1.0
 		return
+	_sincronizar_pasos()
 	if estado == Estado.ZOOMIES:
 		_reproducir("correr")
 	elif estado == Estado.ATERRIZANDO:
@@ -754,6 +758,21 @@ func _actualizar_animacion(direccion: float) -> void:
 		_reproducir("caminar")
 	else:
 		_reproducir("quieto")
+
+
+## Las patas no patinan (G9 de la revisión 3): caminando o corriendo, la animación va al ritmo de la velocidad
+## horizontal. Cada cuadro de la hoja adelanta el pie apoyado AnimacionesFelipe.PASO px (medido); a velocidad v hay que
+## mostrar v / PASO cuadros por segundo, con tope en AnimacionesFelipe.FPS_MAXIMO (más rápido se ve borroso). Con el
+## tope, el pie se desliza menos de 2 px por cuadro (antes, ~10). Además el cuerpo sube 1 px en el paso.
+func _sincronizar_pasos() -> void:
+	var nombre := sprite.animation
+	if nombre in AnimacionesFelipe.PASO and sprite.is_playing() and is_on_floor():
+		var fps := minf(absf(velocity.x) / float(AnimacionesFelipe.PASO[nombre]), AnimacionesFelipe.FPS_MAXIMO)
+		sprite.speed_scale = maxf(fps, 2.0) / sprite.sprite_frames.get_animation_speed(nombre)
+		sprite.offset.y = -2.0 if sprite.frame in [1, 2, 5, 6] else 0.0
+	else:
+		sprite.speed_scale = 1.0
+		sprite.offset.y = 0.0
 
 
 ## Fases del salto: despegue agachado, subida estirada, pausa arriba con las patas

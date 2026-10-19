@@ -108,9 +108,9 @@ var _reinicio := 0.0
 var _rayo := 0.0
 var _desvaneciendo := false
 var _volviendo := false
-var _origen_gigante := Vector2.ZERO
 var _centro_gigante := Vector2.ZERO
 var _encima: Node2D
+var _imaginacion: Node2D
 var _manchas_dibujo: Node2D
 var _municion: Array[Vaso] = []
 var _por_reponer: Array[Vaso] = []
@@ -119,6 +119,9 @@ var _destino_embestida := 0.0
 var _hacia_soplido := 1.0
 var _polvo: CPUParticles2D
 var _papeles: Array[Vector3] = []
+## Cuándo fue el último «¡CLIC!» (s): mientras se ve, no hay otro rótulo sobre A.S.P.I. (M3).
+var _tiempo_clic := -10.0
+const DURA_CLIC := 1.3
 
 
 func _init(jefa: Aspi, gato: Felipe, nivel: Sala) -> void:
@@ -128,8 +131,8 @@ func _init(jefa: Aspi, gato: Felipe, nivel: Sala) -> void:
 	name = "Batalla"
 	arena = Sala.rect_de("estudio")
 	_centro_gigante = Vector2(arena.get_center().x, Sala.SUELO - 160)
-	# Detrás de los muebles y delante de la pared: la imaginación se ve en el estudio.
-	z_index = -10
+	# La batalla en sí no dibuja nada: cada parte va en su capa de la tabla única (Capas, B1 de la revisión 3).
+	z_index = Capas.JUEGO
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
@@ -148,19 +151,25 @@ func _ready() -> void:
 	presentacion.paso_empezado.connect(_al_paso)
 	presentacion.empujon.connect(_al_empujon)
 	add_child(presentacion)
+	# La imaginación de Felipe tapa TODO el escenario (muebles, puertas, repisa); solo Felipe va delante (B1).
+	_imaginacion = Node2D.new()
+	_imaginacion.name = "Imaginacion"
+	Capas.usar(_imaginacion, Capas.IMAGINACION)
+	_imaginacion.draw.connect(_dibujar_imaginacion)
+	add_child(_imaginacion)
 	_manchas_dibujo = Node2D.new()
 	_manchas_dibujo.name = "Manchas"
-	_manchas_dibujo.z_index = 9
+	Capas.usar(_manchas_dibujo, Capas.MUEBLES)
 	_manchas_dibujo.draw.connect(_dibujar_manchas)
 	add_child(_manchas_dibujo)
 	_encima = Node2D.new()
 	_encima.name = "Viento y depósito"
-	_encima.z_index = 30
+	Capas.usar(_encima, Capas.EFECTOS)
 	_encima.draw.connect(_dibujar_encima)
 	add_child(_encima)
 	_polvo = CPUParticles2D.new()
 	_polvo.name = "Polvo"
-	_polvo.z_index = 31
+	Capas.usar(_polvo, Capas.EFECTOS)
 	_polvo.emitting = false
 	_polvo.one_shot = true
 	_polvo.amount = 24
@@ -191,18 +200,25 @@ func _process(delta: float) -> void:
 	if fase == Fase.ENTRADA and not _desvaneciendo:
 		gigante = ease(presentacion.momento, 0.4)
 		transformacion = presentacion.momento
-		aspi.visible = gigante < 0.15
 		if presentacion.momento > 0.0 and fmod(presentacion.t, 0.9) < delta:
 			_rayo = 1.0
-	elif _desvaneciendo:
-		aspi.visible = true
+	# Nunca dos A.S.P.I. a la vez (B1): la real se esconde mientras exista la gigante y vuelve justo cuando la
+	# gigante, ya encogida hasta su tamaño y su lugar, desaparece (con un «¡puf!» de polvo).
+	var habia_gigante := not aspi.visible
+	aspi.visible = gigante <= 0.0
+	if habia_gigante and aspi.visible and fase != Fase.ESPERANDO:
+		_polvo.global_position = aspi.global_position + Vector2(0, -20)
+		_polvo.restart()
+		_polvo.emitting = true
+	# Felipe queda delante de su propia imaginación; el escenario, detrás.
+	felipe.z_index = Capas.FELIPE_IMAGINANDO if (gigante > 0.0 or transformacion > 0.0) else Capas.JUEGO
 	presentacion.vida = 1.0 - float(apagados) / APAGADOS_TOTALES if fase == Fase.PELEA else -1.0
 	presentacion.escudo = float(deposito) / CAPACIDAD[mini(apagados, 2)] if fase == Fase.PELEA else 0.0
 	if not _papeles.is_empty():
 		for i in _papeles.size():
 			_papeles[i].y += delta
 		_papeles = _papeles.filter(func(p: Vector3) -> bool: return p.y < 1.2)
-	queue_redraw()
+	_imaginacion.queue_redraw()
 	_encima.queue_redraw()
 	_manchas_dibujo.queue_redraw()
 
@@ -241,11 +257,14 @@ func empezar() -> void:
 	aspi.quieta = true
 	aspi.inofensiva = true
 	felipe.empuje = Vector2.ZERO
-	_origen_gigante = aspi.global_position + Vector2(0, -Aspi.ALTO / 2.0)
 	presentacion.divisiones = APAGADOS_TOTALES
 	presentacion.pantallas = sala.pantallas
 	presentacion.frase_sin_vuelta = ["Felipe", Frases.FELIPE["quien_cerro"][0][0]]
 	presentacion.presentar(felipe, aspi, Rect2(arena.position.x, 0, arena.size.x, Sala.ALTO))
+	# En la pelea la puerta cerrada del balcón no se ofrece ("Probar" pisaba a A.S.P.I. llena: M3).
+	var balcon: Puerta = sala.puertas.get(Sala.PUERTA_BALCON)
+	if balcon:
+		balcon.ofrecer_cerrada = false
 	empezada.emit()
 
 
@@ -329,7 +348,7 @@ func _salir() -> void:
 	limpiando = false
 	llena = false
 	deposito = 0
-	aspi.arte = "aspi"
+	aspi.cerrar_tapa()
 	aspi.quieta = true
 	aspi.inofensiva = true
 	aspi.global_position = Sala.ASPI[0]
@@ -384,6 +403,14 @@ func _actualizar_pelea(delta: float) -> void:
 	if ataque != Ataque.NINGUNO:
 		_actualizar_ataque(delta)
 		return
+	# En furia, la tos cuenta siempre (también si Felipe acampa arriba): la bola en arco es justo lo que llega al
+	# escritorio y a la repisa (M8 de la revisión 3: antes el reloj se detenía mientras acampaba y la bola salía o no
+	# según dónde lo dejara caer el soplido).
+	if apagados >= 2:
+		_espera_bola -= delta
+		if _espera_bola <= 0.0 and manchas.is_empty():
+			_empezar_ataque(Ataque.AVISO_BOLA)
+			return
 	# Contra el que acampa: va debajo y, a su tiempo, sopla.
 	if apagados >= 1 and acampando > 1.0:
 		aspi.destino = felipe.global_position.x
@@ -402,10 +429,6 @@ func _actualizar_pelea(delta: float) -> void:
 	if _espera_embestida <= 0.0 and felipe.is_on_floor() and absf(distancia.y) < 30.0 and absf(distancia.x) < DISTANCIA_EMBESTIDA:
 		_empezar_ataque(Ataque.AVISO_EMBESTIDA)
 		return
-	if apagados >= 2:
-		_espera_bola -= delta
-		if _espera_bola <= 0.0:
-			_empezar_ataque(Ataque.AVISO_BOLA)
 
 
 func _contar_acampada(delta: float) -> void:
@@ -554,8 +577,7 @@ func _llenar() -> void:
 	aspi.destino = INF
 	aspi.quieta = true
 	aspi.inofensiva = true
-	aspi.arte = "aspi_llena"
-	aspi.queue_redraw()
+	aspi.abrir_tapa()
 	sala.sonar("logro")
 	presentacion.cartel("¡DEPÓSITO LLENO!", 1.6, PISTA_LLENA)
 	# Nunca queda justo bajo la repisa: sale disparada unos 80 px hacia adelante.
@@ -579,18 +601,19 @@ func _actualizar_llena(delta: float) -> void:
 		deposito = 0
 		llena = false
 		aspi.quieta = false
-		aspi.arte = "aspi"
+		aspi.cerrar_tapa()
 		presentacion.cartel("¡LO VACIÓ!", 1.2, PISTAS[apagados])
 
 
 ## ¡CLIC!: congelado, destello, sacudida, polvo y sonido en capas.
 func _apagar() -> void:
 	apagados += 1
-	aspi.arte = "aspi"
+	aspi.cerrar_tapa()
 	sala.travesuras.jugo.congelar(0.1)
 	presentacion.destello(0.7)
 	presentacion.sacudir(0.2)
 	sala.travesuras.jugo.palabra_en_mundo("¡CLIC!", aspi.global_position + Vector2(0, -70), Color(1.0, 0.95, 0.5), 22)
+	_tiempo_clic = Time.get_ticks_msec() / 1000.0
 	_polvo.global_position = aspi.global_position + Vector2(0, -20)
 	_polvo.restart()
 	_polvo.emitting = true
@@ -626,7 +649,7 @@ func _al_oir_maullido(_felipe_que_maulla: Felipe) -> void:
 func _escupir_bola() -> void:
 	var bola := Node2D.new()
 	bola.name = "Bola de pelo"
-	bola.z_index = 30
+	Capas.usar(bola, Capas.EFECTOS)
 	var desde := aspi.global_position + Vector2(0, -30)
 	var hasta := felipe.global_position + Vector2(0, -20)
 	var velocidad := Vector2((hasta.x - desde.x) / VUELO_BOLA, (hasta.y - desde.y) / VUELO_BOLA - 0.5 * GRAVEDAD_BOLA * VUELO_BOLA)
@@ -701,27 +724,32 @@ func _dibujar_bola(bola: Node2D) -> void:
 	bola.draw_texture(arte, -arte.get_size() / 2.0)
 
 
-## La imaginación de Felipe en la entrada: el estudio en llamas y la bestia gigante (detrás de los muebles).
-func _draw() -> void:
+## La imaginación de Felipe en la entrada: el estudio en llamas y la bestia gigante, POR ENCIMA de todo el escenario
+## (capa Capas.IMAGINACION; B1). El estudio real se desvanece con `transformacion` y vuelve al final del rugido.
+## La gigante nace de la A.S.P.I. real (mismo lugar y ancho) y al final se encoge hasta ella.
+func _dibujar_imaginacion() -> void:
+	var c := _imaginacion
 	var tiempo := Time.get_ticks_msec() / 1000.0
 	if transformacion > 0.0:
 		var a := transformacion
-		draw_texture_rect(ArteNivel.textura("fin_del_mundo"), arena, false, Color(1, 1, 1, a))
+		c.draw_texture_rect(ArteNivel.textura("fin_del_mundo"), arena, false, Color(1, 1, 1, a))
 		if _rayo > 0.0:
-			draw_rect(arena, Color(1, 0.9, 0.9, 0.18 * _rayo * a))
+			c.draw_rect(arena, Color(1, 0.9, 0.9, 0.18 * _rayo * a))
 	if gigante > 0.0:
 		var arte := ArteNivel.textura("aspi_gigante")
 		var tam := arte.get_size()
 		var k := ease(gigante, 0.6)
 		var escala := lerpf(Aspi.ANCHO / tam.x, 1.0, k)
-		var centro := _origen_gigante.lerp(_centro_gigante + Vector2(0, sin(tiempo * 2.0) * 5.0), k)
-		if fase == Fase.ENTRADA and gigante < 1.0:
+		# Desde (y hacia) donde está la A.S.P.I. real ahora: los empujones la movieron.
+		var origen := aspi.global_position + Vector2(0, -tam.y * escala / 2.0)
+		var centro := origen.lerp(_centro_gigante + Vector2(0, sin(tiempo * 2.0) * 5.0), k)
+		if fase == Fase.ENTRADA and gigante < 1.0 and not _desvaneciendo:
 			# Temblor de sueño mientras crece.
 			centro += Vector2(sin(tiempo * 40.0), cos(tiempo * 33.0)) * 2.0
 		var mira := 1.0 if felipe.global_position.x >= centro.x else -1.0
-		draw_set_transform(centro, sin(tiempo * 1.3) * 0.03 * k, Vector2(escala * mira, escala))
-		draw_texture(arte, -tam / 2.0, Color(1, 1, 1, minf(gigante * 3.0, 1.0)))
-		draw_set_transform(Vector2.ZERO)
+		c.draw_set_transform(centro, sin(tiempo * 1.3) * 0.03 * k, Vector2(escala * mira, escala))
+		c.draw_texture(arte, -tam / 2.0)
+		c.draw_set_transform(Vector2.ZERO)
 
 
 ## Las manchas en el piso (tierra de maceta, agua, papel) que A.S.P.I. va a limpiar, y la pelusa que tiembla en la espera.
@@ -729,8 +757,7 @@ func _dibujar_manchas() -> void:
 	var c := _manchas_dibujo
 	for i in manchas.size():
 		if tipos_mancha[i] == "papel":
-			c.draw_rect(Rect2(manchas[i] - 14, Sala.SUELO - 4, 28, 4), Color(0.96, 0.95, 0.9))
-			c.draw_line(Vector2(manchas[i] - 10, Sala.SUELO - 3), Vector2(manchas[i] + 8, Sala.SUELO - 3), Color(0.5, 0.5, 0.6), 1.0)
+			ArteNivel.dibujar(c, "papel", manchas[i], Sala.SUELO + 1.0)
 		else:
 			ArteNivel.dibujar(c, "mancha", manchas[i], Sala.SUELO + 2.0)
 	if fase == Fase.ENTRADA and presentacion.paso_actual in ["espera", "revelar", "nombre", "barra", "musica", "tamano"]:
@@ -748,11 +775,17 @@ func _dibujar_encima() -> void:
 		var x := p.x + p.y * 160.0
 		var y := Sala.SUELO - 40.0 - sin(p.y * 3.0 + p.z * 6.0) * 60.0 - p.y * 40.0
 		c.draw_set_transform(Vector2(x, y), p.y * 6.0 + p.z)
-		c.draw_rect(Rect2(-6, -4, 12, 8), Color(0.97, 0.96, 0.92))
+		ArteNivel.dibujar(c, "papel_arrugado", 0.0, 10.0)
 		c.draw_set_transform(Vector2.ZERO)
 	if _reinicio > 0.0 and fase == Fase.PELEA:
-		var punto := aspi.global_position + Vector2(-34, -ALTO_ARRIBA - 22)
-		c.draw_string(ThemeDB.fallback_font, punto, "REINICIANDO" + ".".repeat(int(tiempo * 3.0) % 4), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("9fd8ff"))
+		# Barra de reinicio sobre la carcasa (no es un rótulo: no pisa al «¡CLIC!»); el texto sale cuando el «¡CLIC!» ya se fue.
+		var barra := Rect2(aspi.global_position + Vector2(-18, -ALTO_ARRIBA - 12), Vector2(36, 4))
+		c.draw_rect(barra.grow(1), Color(0.05, 0.1, 0.15, 0.9))
+		c.draw_rect(Rect2(barra.position, Vector2(barra.size.x * (1.0 - _reinicio / REINICIO), barra.size.y)), Color("9fd8ff"))
+		if tiempo - _tiempo_clic > DURA_CLIC:
+			var punto := aspi.global_position + Vector2(-34, -ALTO_ARRIBA - 22)
+			c.draw_string_outline(ThemeDB.fallback_font, punto, "REINICIANDO" + ".".repeat(int(tiempo * 3.0) % 4), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, 4, Color(0.05, 0.1, 0.15))
+			c.draw_string(ThemeDB.fallback_font, punto, "REINICIANDO" + ".".repeat(int(tiempo * 3.0) % 4), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("9fd8ff"))
 	if _aviso_succion > 0.0 and not limpiando:
 		# Anticipación de la succión: el cepillo gira y se ven líneas de aire.
 		for i in 6:
@@ -760,7 +793,8 @@ func _dibujar_encima() -> void:
 			var centro := aspi.global_position + Vector2(0, -6)
 			c.draw_line(centro, centro + Vector2(cos(angulo), sin(angulo) * 0.4) * 14.0, Color(0.9, 0.95, 1.0, 0.8), 1.0)
 	if llena:
-		var arriba := aspi.global_position + Vector2(0, -ALTO_ARRIBA - 34)
+		# Por encima de la tapa abierta (que sube unos 32 px).
+		var arriba := aspi.global_position + Vector2(0, -ALTO_ARRIBA - 52)
 		if int(tiempo * 4.0) % 2 == 0:
 			c.draw_circle(aspi.global_position + Vector2(0, -ALTO_ARRIBA - 4), 5.0, Color("e0483b"))
 		var fuente := ThemeDB.fallback_font

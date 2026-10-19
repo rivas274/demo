@@ -8,6 +8,8 @@ extends CanvasLayer
 @export var sacudida_maxima := 5.0
 
 var camara: Camera2D
+## Lo que las palabras no tapan (Felipe): si una cae encima, sube por sobre su cabeza (M1).
+var evitar: Node2D
 ## Palabras que saltaron (para las pruebas).
 var palabras: Array[String] = []
 
@@ -63,8 +65,13 @@ func palabra(texto: String, posicion: Vector2, color := Color(1.0, 0.9, 0.3), ta
 	etiqueta.text = texto
 	etiqueta.add_theme_font_size_override("font_size", tamano)
 	etiqueta.add_theme_color_override("font_color", color)
-	etiqueta.add_theme_color_override("font_outline_color", Color(0.1, 0.05, 0.08))
-	etiqueta.add_theme_constant_override("outline_size", 6)
+	# Contorno grueso y sombra: se lee sobre cualquier pared o fondo (M1: el celeste se perdía en la pared beige).
+	etiqueta.add_theme_color_override("font_outline_color", Color(0.08, 0.04, 0.07))
+	etiqueta.add_theme_constant_override("outline_size", 8)
+	etiqueta.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.75))
+	etiqueta.add_theme_constant_override("shadow_offset_x", 2)
+	etiqueta.add_theme_constant_override("shadow_offset_y", 2)
+	etiqueta.add_theme_constant_override("shadow_outline_size", 8)
 	etiqueta.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(etiqueta)
 	var medida := etiqueta.get_minimum_size()
@@ -73,6 +80,12 @@ func palabra(texto: String, posicion: Vector2, color := Color(1.0, 0.9, 0.3), ta
 	# Dentro de la pantalla y debajo del HUD.
 	var x := clampf(posicion.x - medida.x / 2.0, 4.0, 636.0 - medida.x)
 	var y := clampf(posicion.y - medida.y / 2.0, 34.0, 352.0 - medida.y)
+	# Nunca encima de Felipe: si lo tapa, sube por sobre su cabeza.
+	if evitar and is_instance_valid(evitar) and evitar.is_inside_tree() and get_viewport():
+		var pies := get_viewport().get_canvas_transform() * evitar.global_position
+		var felipe_ocupa := Rect2(pies + Vector2(-38, -74), Vector2(76, 76))
+		if Rect2(Vector2(x, y), medida).intersects(felipe_ocupa):
+			y = maxf(34.0, felipe_ocupa.position.y - medida.y - 4.0)
 	etiqueta.position = Vector2(x, y).round()
 	etiqueta.scale = Vector2.ZERO
 	etiqueta.rotation = randf_range(-0.12, 0.12)

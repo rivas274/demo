@@ -10,6 +10,14 @@ var felipe: Felipe
 var _valeria_en_puerta := ""
 ## De pie, Valeria siempre pisa el piso (G2): aquí queda dónde se paró sobre un mueble, si pasó.
 var _valeria_sobre_mueble := ""
+## G1: Valeria nunca se dibuja bajo el piso; G3: nunca cambia de lugar más de lo que camina en un cuadro, salvo al
+## cruzar una puerta (Valeria.cruces). Aquí queda lo primero que falló.
+var _valeria_bajo_el_piso := ""
+var _valeria_salto := ""
+var _valeria_antes := Vector2.INF
+var _valeria_cruces := 0
+var _valeria_cuadro := 0
+const MEDIR := preload("res://pruebas/medir_pasos.gd")
 
 
 func _initialize() -> void:
@@ -25,13 +33,37 @@ func _correr() -> void:
 	await _esperar(30)
 	_comprobar(not felipe.tiene_doble_salto and not felipe.tiene_zoomies and not felipe.puede_trepar, "En el nivel 1 no hay doble salto, Zoomies ni trepar")
 
+	# G7: título e introducción tapan todo: HUD, diálogo y palabras no se dibujan encima.
+	sala.pantallas.mostrar_titulo()
+	await _esperar(2)
+	var oculta_en_titulo := not t.hud.visible and not t.dialogo.visible and not t.jugo.visible
+	sala.pantallas.modo = Pantallas.Modo.INTRO
+	await process_frame
+	var oculta_en_intro := not t.hud.visible and not t.dialogo.visible and not t.jugo.visible
+	sala.pantallas.modo = Pantallas.Modo.JUGANDO
+	paused = false
+	await _esperar(2)
+	_comprobar(oculta_en_titulo and oculta_en_intro and t.hud.visible and t.dialogo.visible, "G7 En el título y la introducción no se ven el HUD, el diálogo ni las palabras; al jugar, sí")
+	var capa_pantallas: CanvasLayer = sala.pantallas.get_parent()
+	_comprobar(capa_pantallas.layer > t.hud.layer and capa_pantallas.layer > t.dialogo.layer and capa_pantallas.layer > Capas.CAPA_AVISOS and capa_pantallas.layer > Capas.CAPA_JEFE, "G7 Las pantallas (título, intro, pausa) van en la capa de más arriba")
+	_comprobar(Capas.CAPA_FUNDIDO > t.dialogo.layer and Capas.CAPA_FUNDIDO > t.hud.layer and Capas.CAPA_FUNDIDO > Capas.CAPA_AVISOS, "G7 El negro de las puertas tapa también el diálogo, los carteles y los logros")
+
+	# B2: el pie apoyado del caminar de Valeria no patina: medido en la hoja, retrocede lo que ella avanza por cuadro
+	# (VELOCIDAD / FPS_CAMINAR) con menos de 2 px de diferencia, y las piernas alternan (el pie apoyado cambia).
+	var pasos: Array = MEDIR.pie_apoyado(Valeria.RUTA % "caminar", Valeria.CUADROS_CAMINAR, 18, 34, 40.0)
+	var peor := 0.0
+	for medida: Array in pasos:
+		peor = maxf(peor, absf(-float(medida[1]) - Valeria.VELOCIDAD / Valeria.FPS_CAMINAR))
+	_comprobar(pasos.size() >= 4 and peor <= 2.0, "B2 El pie apoyado de Valeria se desliza %.1f px por cuadro como mucho (≤ 2; %d pares medidos: %s)" % [peor, pasos.size(), str(pasos)])
+	_comprobar(absf(Valeria.VELOCIDAD - Valeria.PASO_CUADRO * Valeria.FPS_CAMINAR) < 0.01, "B2 La velocidad de Valeria sale del paso medido (%.1f px por cuadro × %.0f cuadros/s = %.0f px/s)" % [Valeria.PASO_CUADRO, Valeria.FPS_CAMINAR, Valeria.VELOCIDAD])
+
 	# La meta se muestra al empezar (la cámara pasa por el balcón) y Felipe lo dice.
 	sala.pantallas.empezar.emit()
 	await _esperar(10)
 	var camara_meta: Camera2D = sala.get_node_or_null("Camara de la meta")
 	_comprobar(camara_meta != null and camara_meta.is_current() and Sala.habitacion_de(camara_meta.position) == "balcon", "Al empezar, la cámara muestra el balcón (la meta)")
-	await create_timer(2.0).timeout
-	_comprobar(felipe.get_node("Camara").is_current(), "Después vuelve a Felipe")
+	await create_timer(3.0).timeout
+	_comprobar(felipe.get_node("Camara").is_current() and sala.fundido_alfa() < 0.01, "Después vuelve a Felipe (con fundidos, sin cortes duros: M4)")
 	_comprobar(_dijo("felipe", "libertad"), "Felipe dice que la libertad está allá arriba")
 
 	# Sin avisos de texto ni fila de controles (M2): la primera vez, una línea de Felipe con el botón.
@@ -68,6 +100,9 @@ func _correr() -> void:
 	_comprobar(sala.sofa.esta_roto and t.agenda.esta_cumplida("sofa"), "Con las garras afiladas, el arañazo rompe el plástico: travesura «sofa»")
 	_comprobar("¡PLÁSTICO: 0!" in t.jugo.palabras, "Reacción: «¡PLÁSTICO: 0!»")
 	_comprobar(absf(sala.pieza("Asiento del sofá").position.y - (Sala.SUELO - 45)) < 0.5, "Sin plástico, la colisión del asiento baja a su arte nuevo")
+	await process_frame
+	await process_frame
+	_comprobar(sala.sofa_dibujado == "sofa_aranado", "G4 Al romper el plástico, el sofá se redibuja sin plástico ni etiqueta (%s)" % sala.sofa_dibujado)
 	await _esperar(120)
 	await _poner_en(Vector2(370, Sala.SUELO - 49))
 	await _esperar(30)
@@ -100,7 +135,20 @@ func _correr() -> void:
 	var camara: Camera2D = felipe.get_node("Camara")
 	_comprobar(sala.habitacion == "recibidor" and felipe.global_position.distance_to(sala.puertas["recibidor<sala"].global_position) < 4.0, "La puerta lleva de la sala al recibidor")
 	_comprobar(camara.limit_left == int(recibidor.position.x) and camara.limit_right == int(recibidor.end.x), "La cámara queda dentro del recibidor")
-	_comprobar(sala.valeria.cuarto == "recibidor" and _dijo("valeria", "dieta"), "Valeria pasa al recibidor rumbo a la cocina: «Y tú no entras: dieta.»")
+	# G3: Valeria no se teletransporta: camina hasta la puerta de la sala, sale por ella y recién entonces aparece en
+	# el recibidor (por la puerta, con la puerta abierta).
+	var cruces_antes := sala.valeria.cruces
+	_comprobar(sala.valeria.cuarto == "sala", "G3 Valeria sigue en la sala cuando Felipe sale (no aparece de golpe en el recibidor)")
+	var vio_puerta_abierta := false
+	for i in 900:
+		await physics_frame
+		_vigilar_valeria()
+		if sala.valeria.cuarto == "recibidor" and sala.valeria.visible:
+			vio_puerta_abierta = sala.puertas["recibidor<sala"].apertura > 0.99
+			break
+	_comprobar(sala.valeria.cuarto == "recibidor" and vio_puerta_abierta and sala.valeria.cruces == cruces_antes + 1, "G3 Valeria entra al recibidor por la puerta abierta, una sola vez")
+	await _esperar_que(func() -> bool: return _dijo("valeria", "dieta"), 120)
+	_comprobar(_dijo("valeria", "dieta"), "Valeria pasa al recibidor rumbo a la cocina: «Y tú no entras: dieta.»")
 	await _esperar_que(func() -> bool: return sala.valeria.cuarto == "cocina", 900)
 	_comprobar(sala.valeria.cuarto == "cocina" and sala.puertas[Sala.PUERTA_COCINA].cerrada, "Valeria se encierra en la cocina")
 
@@ -110,8 +158,19 @@ func _correr() -> void:
 	await _esperar(20)
 	_comprobar(sala.habitacion == "recibidor", "La puerta de la cocina está cerrada")
 	await _tocar("maullar")
-	await _esperar(40)
+	# G2: la puerta se abre con Valeria en el vano (no sola y vacía).
+	var abierta_sin_nadie := false
+	for i in 360:
+		await physics_frame
+		_vigilar_valeria()
+		var p: Puerta = sala.puertas[Sala.PUERTA_COCINA]
+		if p.apertura > 0.5 and not (sala.valeria.cuarto == "recibidor" and sala.valeria.visible) and sala.valeria.actividad != Valeria.Actividad.FUERA:
+			abierta_sin_nadie = true
+		if not p.cerrada and _dijo("valeria", "entra"):
+			break
 	_comprobar(not sala.puertas[Sala.PUERTA_COCINA].cerrada and _dijo("valeria", "entra"), "Al maullar, Valeria abre la puerta de la cocina")
+	_comprobar(sala.valeria.cuarto == "recibidor" and sala.valeria.visible and absf(sala.valeria.global_position.x - sala.puertas[Sala.PUERTA_COCINA].global_position.x) < 2.0, "G2 Valeria se asoma en el vano para decir su frase (no habla desde fuera de cuadro)")
+	_comprobar(not abierta_sin_nadie, "G2 La puerta de la cocina no se abre sola, vacía")
 
 	# Las llaves del zapatero: «¡CLINK CRÍTICO!».
 	await _poner_en(Vector2(1745, Sala.SUELO - 97))
@@ -128,7 +187,7 @@ func _correr() -> void:
 	await _esperar(90)
 	Input.action_release("agacharse")
 	_comprobar(t.agenda.esta_cumplida("popo") and "CONTENIDO SENSIBLE" in t.jugo.palabras, "Agachado en la arena: popo táctico con censura irónica")
-	await _esperar(20)
+	await _esperar_que(func() -> bool: return sala.valeria.cuarto == "recibidor" and sala.valeria.visible and _dijo("valeria", "LIMPIARLA"), 600)
 	_comprobar(sala.valeria.mascarilla and sala.valeria.cuarto == "recibidor", "Valeria sale con mascarilla: «¡ACABO DE LIMPIARLA!»")
 	_comprobar(t.agenda.texto_recompensa("popo") == "Foto vergonzosa" and _foto_suelta("recibidor") != null, "G6 El popo táctico da una foto vergonzosa (no un camino ya abierto)")
 	var fotos_antes := t.recompensas.fotos
@@ -310,12 +369,14 @@ func _correr() -> void:
 	var negra := false
 	await _esperar_que(func() -> bool: return sala.batalla.fase == BatallaAspi.Fase.ENTRADA, 200)
 	while sala.batalla.fase == BatallaAspi.Fase.ENTRADA:
-		negra = negra or sala.get_node("Interfaz/Fundido").modulate.a > 0.05
+		negra = negra or sala.fundido_alfa() > 0.05
 		await physics_frame
 	_comprobar(not negra, "Entrar al estudio por la puerta: la presentación se ve (sin fundido a negro, B1)")
 	felipe._tiempo_invulnerable = 999.0
 	await _poner_en(sala.puertas[Sala.PUERTA_BALCON].global_position)
-	await _tocar("interactuar")
+	# En la pelea la puerta cerrada no se ofrece en la burbuja (M3), pero arriba se prueba igual.
+	_comprobar(felipe.objeto_cercano() != sala.puertas[Sala.PUERTA_BALCON], "M3 En la pelea, la burbuja no ofrece «Probar» en la puerta cerrada del balcón")
+	await _tocar("mover_arriba")
 	await _esperar(30)
 	_comprobar(sala.habitacion == "estudio" and _dijo("felipe", "aspiradora tiene la llave"), "Con A.S.P.I. encendida, la puerta del balcón no abre")
 	await _poner_en(Vector2(Sala.TECLADO.get_center().x, Sala.SUELO - 98))
@@ -374,11 +435,12 @@ func _correr() -> void:
 	_comprobar(aterrizo and absf(felipe.global_position.y - Sala.TOLDO.position.y) < 2.0, "G1 Aterriza en el toldo de la panadería de abajo")
 	_comprobar(siempre_a_la_vista, "G1 La cámara lo sigue: Felipe se ve en todo el salto")
 	_comprobar(not cartel_antes_de_aterrizar, "G1 El cartel «PODER NUEVO» sale recién después de aterrizar")
-	await _esperar(75)
+	await _esperar_que(func() -> bool: return _cartel_de("PODER NUEVO") != null, 600)
+	await _esperar(15)
 	var cartel := _cartel_de("PODER NUEVO")
 	var pies_en_pantalla := (sala.get_viewport().get_canvas_transform() * felipe.global_position).y
 	_comprobar(cartel != null and "Caer de Pie" in sala.logros and _se_ve(felipe), "G1 Tras aterrizar, el cartel «PODER NUEVO · CAER DE PIE» y el logro, con Felipe a la vista")
-	_comprobar(cartel != null and (cartel.position.y + Hud.ALTO_CARTEL <= pies_en_pantalla - 72.0 or cartel.position.y >= pies_en_pantalla), "G1 El cartel no tapa a Felipe aterrizado")
+	_comprobar(cartel != null and not Rect2(cartel.position, cartel.size).intersects(Rect2((sala.get_viewport().get_canvas_transform() * felipe.global_position) + Vector2(-34, -72), Vector2(68, 72))), "G1 El cartel no tapa a Felipe aterrizado")
 	await create_timer(4.0).timeout
 	var resumen: ResumenDia = null
 	for hijo in t.get_children():
@@ -387,6 +449,8 @@ func _correr() -> void:
 	_comprobar(sala.terminado and resumen != null and paused, "Sale el resumen del día (en lugar de la pantalla final)")
 	_comprobar(t.agenda.cumplidas() == Agenda.NIVEL_1.size(), "La agenda queda completa (%d de %d)" % [t.agenda.cumplidas(), Agenda.NIVEL_1.size()])
 	_comprobar(_valeria_en_puerta == "", "Valeria nunca se paró en una puerta %s" % _valeria_en_puerta)
+	_comprobar(_valeria_bajo_el_piso == "", "G1 Valeria nunca se dibuja bajo el piso %s" % _valeria_bajo_el_piso)
+	_comprobar(_valeria_salto == "", "G3 Valeria nunca salta de lugar más de lo que camina en un cuadro, salvo por una puerta %s" % _valeria_salto)
 	_comprobar(_valeria_sobre_mueble == "", "G2 De pie, Valeria siempre pisa el piso %s" % _valeria_sobre_mueble)
 	paused = false
 	Engine.time_scale = 1.0
@@ -470,9 +534,19 @@ func _vigilar_valeria() -> void:
 	if sala == null or not is_instance_valid(sala) or sala.valeria == null:
 		return
 	var v := sala.valeria
+	if v.visible and v.rect_dibujado().end.y > Sala.SUELO + 0.5 and _valeria_bajo_el_piso == "":
+		_valeria_bajo_el_piso = "(%s, pose %s, x %.0f, abajo %.0f)" % [Valeria.Actividad.keys()[v.actividad], v.pose(), v.global_position.x, v.rect_dibujado().end.y]
+	if _valeria_antes != Vector2.INF and v.cruces == _valeria_cruces and _valeria_salto == "":
+		var salto := absf(v.global_position.x - _valeria_antes.x)
+		var cuadros := maxi(1, Engine.get_physics_frames() - _valeria_cuadro)
+		if salto > Valeria.VELOCIDAD / 60.0 * cuadros + 0.5:
+			_valeria_salto = "(%.0f px en %d cuadros, x %.0f)" % [salto, cuadros, v.global_position.x]
+	_valeria_antes = v.global_position
+	_valeria_cuadro = Engine.get_physics_frames()
+	_valeria_cruces = v.cruces
 	if v.actividad != Valeria.Actividad.SENTADA and v.actividad != Valeria.Actividad.FUERA and absf(v.global_position.y - Sala.SUELO) > 0.5:
 		_valeria_sobre_mueble = "(%s, x %.0f, y %.0f)" % [Valeria.Actividad.keys()[v.actividad], v.global_position.x, v.global_position.y]
-	if v.actividad in [Valeria.Actividad.CAMINANDO, Valeria.Actividad.FUERA]:
+	if v.actividad in [Valeria.Actividad.CAMINANDO, Valeria.Actividad.FUERA, Valeria.Actividad.PUERTA]:
 		return
 	for datos: Array in Sala.PUERTAS:
 		if datos[0] != Sala.PUERTA_ESCALERA and Sala.rect_sagrado(datos[1]).grow(-30).has_point(v.global_position - Vector2(0, 1)):

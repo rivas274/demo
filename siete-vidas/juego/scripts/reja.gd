@@ -11,8 +11,9 @@ signal abierta
 signal empujada
 
 const ANCHO_DIBUJO := 48.0
-## Cartel de cartón dentro del ancho de la reja (48 px): no se monta sobre el librero (M2).
-const CARTEL := Rect2(-22, -164, 44, 20)
+## Cartel de cartón sobre el que trae el arte (28 × 30, al centro de la reja de 48 px): no se monta sobre el
+## librero (M2).
+const CARTEL := Rect2(-17, -162, 34, 33)
 
 var rect: Rect2
 var abierta_ya := false
@@ -104,8 +105,7 @@ func _draw() -> void:
 	# Cinta adhesiva en las esquinas de arriba, sin salirse del cartel.
 	draw_rect(Rect2(CARTEL.position + Vector2(1, -1), Vector2(7, 3)), Color(0.95, 0.93, 0.8, 0.9))
 	draw_rect(Rect2(Vector2(CARTEL.end.x - 8, CARTEL.position.y - 1), Vector2(7, 3)), Color(0.95, 0.93, 0.8, 0.9))
-	# Una sola línea legible (el chiste está en "PIPE: NO"): la firma de 6 px no se leía (M2).
-	var titulo := "PIPE: NO"
-	var tamano := 11
-	var ancho_titulo := fuente.get_string_size(titulo, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano).x
-	draw_string(fuente, Vector2(-ancho_titulo / 2.0, CARTEL.position.y + 14), titulo, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano, Color(0.7, 0.08, 0.1))
+	# "PIPE: NO" en dos líneas legibles (la firma de 6 px no se leía y se quitó: el chiste está en "PIPE: NO", M2).
+	for linea: Array in [["PIPE:", 11, 13], ["NO", 14, 28]]:
+		var ancho_linea := fuente.get_string_size(linea[0], HORIZONTAL_ALIGNMENT_LEFT, -1, linea[1]).x
+		draw_string(fuente, Vector2(-ancho_linea / 2.0, CARTEL.position.y + linea[2]), linea[0], HORIZONTAL_ALIGNMENT_LEFT, -1, linea[1], Color(0.7, 0.08, 0.1))

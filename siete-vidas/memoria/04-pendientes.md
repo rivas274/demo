@@ -17,7 +17,12 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [x] **PARTE A (2026-10-19):** acciones de Felipe (maullar, arañar, subir escalón, snack del bolsillo de 5, efectos en el cuadro de impacto), habilidades apagadas en el nivel 1 y sistemas reutilizables (Agenda, libreta, HUD y carteles, resumen del día, diálogo con retratos, jugo, Indicador con íconos de Kenney, recompensas, rascador, arañables). Prueba `prueba_acciones.gd`.
 - [x] **PARTE B (2026-10-19):** mapa nuevo de 7 cuartos con el arte medido (colisión a ±2 px del borde opaco), Valeria en escena (poses y caminar de Gemini), escalera de fondo con reja anti-fuga y librero, frotarse (ronronear contra Valeria), agenda completa conectada, ensayo de A.S.P.I. en el pasillo, pelea nueva (8 pasos, sin negro, soplido, bolas en arco, entrada corta), balcón con resumen del día, bot sin habilidades (agenda 8 de 8) y video. Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md`.
 - [ ] Volver a publicar la ficha en línea (https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe): la copia local ya tiene las filas de la PARTE A y la de frotarse (lo hace el creador o la sesión principal).
-- [ ] Mostrar al creador el video del nivel y las capturas; nueva revisión con el agente `revisor-niveles` (la del 2026-10-18 queda resuelta salvo G13, sonido de casa).
+- [x] Revisión 2 del nivel 1 (`revisiones/2026-10-19-nivel1-v4.md`): los hallazgos de código están arreglados (G1, G2, G3, G5, G6, G7, M1–M7; G4 provisional por código) y bajar la escalera tiene prueba. Estado de cada uno en `nivel-01-gran-fuga.md`, sección 11.
+- [ ] Mostrar al creador el video `nivel1-v4b.mp4` y las capturas; tercera revisión con `revisor-niveles`.
+- [ ] Arte de Gemini que espera (tanda 3D): `dormitorio-cortina.png` (G4, hoy la cortina va por código) y el retrato familiar (M8).
+- [ ] Animación `entrar_puerta` (G8): el creador decidió no pedirla todavía; las puertas siguen con fundido.
+- [ ] Intimidar (G9): queda para el Barrio Viejo (decisión del creador).
+- [ ] Opcional: animación `sentarse` desde Felipe A (SpriteCook, 20 créditos) para la baranda del balcón (M6; hoy se queda quieto y se acicala).
 - [ ] Arte que falta (Gemini, sin créditos de SpriteCook): `arriba-extra.png` (baúl, consola con cajón, cojín con hueco, retrato familiar, cómoda abierta, ropa doblada, caja de recuerdos, escritorio con pantalla e impresora, papeles); hoy van dibujados por código.
 - [ ] Sonidos finales (hoy sintetizados con `sonidos_demo.py`, incluidos maullido, arañar, ronroneo y resorte) y sonido de casa (G13); música de la pelea.
 - [ ] Ajustar la dificultad de la fase 3 con una persona (el bot llega con 1 a 5 corazones).

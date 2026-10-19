@@ -1,6 +1,6 @@
 # Nivel 1, "La Gran Fuga" (v4, construido)
 
-Documento vigente del nivel. Fecha: 2026-10-19 · Fase 3 (vertical slice). Sale de la propuesta v4 aprobada por el creador (habilidades apagadas, bolsillo de 5 y nido de calcetines, arañar y maullar, Valeria con 4 poses y caminar, escalera de fondo con reja) y cuenta lo que quedó **construido** en `siete-vidas/juego/` (datos en `scripts/sala.gd`). Plan de arte: `nivel-01-plan-arte.md`. Revisión que se corrigió: `revisiones/2026-10-18-nivel1-gran-fuga.md`.
+Documento vigente del nivel. Fecha: 2026-10-19 · Fase 3 (vertical slice). Sale de la propuesta v4 aprobada por el creador (habilidades apagadas, bolsillo de 5 y nido de calcetines, arañar y maullar, Valeria con 4 poses y caminar, escalera de fondo con reja) y cuenta lo que quedó **construido** en `siete-vidas/juego/` (datos en `scripts/sala.gd`). Plan de arte: `nivel-01-plan-arte.md`. Revisiones que se corrigieron: `revisiones/2026-10-18-nivel1-gran-fuga.md` (sección 9) y `revisiones/2026-10-19-nivel1-v4.md` (sección 11).
 
 ## 1. Propósito
 
@@ -25,36 +25,36 @@ Valeria vive en la planta baja y va donde hay ruido. Empieza sentada en el sofá
 ### 2.2 Recibidor (1200 px)
 - **Enseña, de a una:** agacharse (bajo el zapatero, 40 px libres) → descanso (caja de arena, con lámpara al lado) → maullar (puerta cerrada de la cocina; abajo se ve la sombra de Valeria) → el librero como escalera.
 - **Maullar es llave:** junto a la puerta de la cocina, Valeria la abre ("Ya, entra, pero no hay nada para ti.").
-- **Popo táctico (secreta):** agachado 1,2 s sobre la arena: censura irónica (pegatina de pescadito y "CONTENIDO SENSIBLE" sobre una papa). Valeria sale con mascarilla ("¡ACABO DE LIMPIARLA! Voy por bolsas...") y deja la puerta abierta: **recompensa camino** (la puerta de la cocina).
+- **Popo táctico (secreta):** agachado 1,2 s sobre la arena: censura irónica (pegatina de pescadito y "CONTENIDO SENSIBLE" sobre una papa). Valeria sale con mascarilla ("¡ACABO DE LIMPIARLA! Voy por bolsas...") y del susto se le cae la **foto vergonzosa** que tenía lista para subir (cae flotando junto a la lámpara). Al volver por bolsas deja abierta la puerta de la cocina (efecto, no recompensa: si Felipe ya maulló, la puerta ya estaba abierta y el cartel no promete nada que ya pasó).
 - **Travesura suelta:** las llaves del zapatero (se sube desde el borde de la caja de arena): "¡CLINK CRÍTICO!" y Valeria desde la cocina: "¿Mis llaves? ¿OTRA VEZ?".
-- **Escalera:** sección 4. **Hito:** la reja con el cartel "PIPE: NO. Con amor, mamá".
+- **Escalera:** sección 4. **Hito:** la reja con el cartel "PIPE: NO".
 
 ### 2.3 Cocina (opcional, 960 px)
-- **Enseña, de a una:** comer (tazón hondo: "Tres croquetas. Esto es un crimen.") → zarpazo (ratón de cuerda en el piso, 90 px después de su frase; queda patas arriba con la llave girando) → la caja de cartón se rompe de un zarpazo y suelta un snack → silla → mesón: un ratón cuida el pollo.
-- **Robar el almuerzo de Valeria:** el pollo asado del mesón. Valeria, junto a la puerta, mira hacia el mesón: "¡EN SU CARA!" y "¡ESE ERA MI ALMUERZO! Esto va a mis historias.", y regaña. **Travesura "almuerzo"**, 2 snacks.
+- **Enseña, de a una:** comer (tazón hondo: "Tres croquetas. Esto es un crimen.") → zarpazo (ratón de cuerda en el piso, 90 px después de su frase; queda patas arriba con la llave girando) → la caja de cartón se rompe de un zarpazo y suelta un snack → silla → mesón: un ratón patrulla entre el borde y el microondas (cuida la subida) → microondas: el pollo.
+- **Robar el almuerzo de Valeria:** el pollo asado, que espera sobre el microondas (fuera de la patrulla del ratón: nunca lo tapa). Valeria, junto a la puerta, mira hacia el mesón: "¡EN SU CARA!" y "¡ESE ERA MI ALMUERZO! Esto va a mis historias.", y regaña. **Travesura "almuerzo"**, 2 snacks.
 - **Calcetín 2 (exploración):** mesón → microondas → refrigerador (escalones de 54 px).
 - **Hito:** el refrigerador con imanes y el pollo grande a escala de gato.
 
 ### 2.4 Pasillo de arriba (1040 px)
 - **Giro:** baúl → consola: Felipe tira el vaso; sale A.S.P.I. del estudio, va a la mancha y la aspira. La succión arrastra a Felipe de pie: "Mantén {agacharse}. Uñas: modo ancla." (agachado se aferra). Aquí no hace daño. Vuelve a su cuarto: "Suciedad eliminada. Gato… registrado." Felipe: "Ese robot cree que me registra. Yo lo registro a él."
-- **Ignorar el láser (secreta):** 5 s quieto con el punto rojo cerca: se apaga "de vergüenza" y cae una **foto vergonzosa** del cajón de la consola.
+- **Ignorar el láser (secreta):** el punto mide 8 px, con halo que late; la primera vez Felipe dice "No. No voy a caer.". 5 s quieto con el punto rojo cerca: se apaga "de vergüenza" y cae una **foto vergonzosa** del cajón de la consola.
 - **Arañar es llave:** la puerta del dormitorio está entornada; se abre arañándola ("Puerta entornada. Invitación aceptada.").
 - **Descanso:** cojín, a 2 px del rectángulo sagrado de la puerta del estudio.
-- **Lugar visto (R17):** desde el alféizar se ve, por la ventana, el toldo del vecino con una caja de pizza (se vuelve con Caer de Pie).
+- **Lugar visto (R17):** por la ventana se ve el toldo del vecino con una caja de pizza **afuera, detrás del vidrio** (con reflejos encima); el alféizar se pisa pero está vacío y Felipe dice "Esa pizza es mía. Algún día." (se vuelve con Caer de Pie).
 - **Hito:** el retrato familiar donde Felipe tapa a todos. Bajo la consola se pasa agachado (47 px libres); el baúl se pasa por delante.
 
 ### 2.5 Dormitorio (opcional, 720 px)
-- **Repasa** subir muebles: banquito → cama → cómoda → repisa → ropero. Una cesta de ropa al pie de la cortina sirve para salir del hueco entre la cómoda y el ropero.
+- **Repasa** subir muebles: banquito → cama → cómoda → repisa → ropero. La repisa es el alféizar de la ventana que está entre la cómoda y el ropero; la cortina cuelga a sus lados desde una barra con remates. Una cesta de ropa al pie de la cortina sirve para salir del hueco entre la cómoda y el ropero.
 - **Saquear el cajón de calcetines:** manotazo al cajón (desde la cama): calcetines volando y el **calcetín 3** sobre la cómoda ("Inventario.").
-- **Travesura suelta:** firmar la ropa doblada de la cama (se acicala encima: "Ahora tiene mi firma.").
-- **Lugar visto (R17):** la cortina llega a la repisa alta con la caja de recuerdos de Valeria; no se trepa todavía (Afilar Garras).
+- **Travesura suelta:** desordenar la ropa doblada de la cama (una pila de 52 × 26 con una manga colgando; se acicala encima y queda revuelta y con pelos: "Doblada era aburrida. Ahora tiene pelo de rey.").
+- **Lugar visto (R17):** la cortina llega hasta la barra, bajo la repisa alta con la caja de recuerdos de Valeria; no se trepa todavía (Afilar Garras). La cortina va **dibujada por código** (barra, argollas, remates, pliegues y borde ondulado) hasta que llegue `dormitorio-cortina.png` de la tanda 3D de Gemini.
 
 ### 2.6 Estudio de Valeria (jefe, 640 px, una pantalla)
-- **Examen** (sección 5). **Pisar el teclado (secreta):** la pantalla dice "jjjjjjjjjj", **foto vergonzosa 2**, y durante la pelea la impresora (en el piso, bajo el escritorio) escupe un papel cada 4 s que cuenta como mancha.
+- **Examen** (sección 5). **Pisar el teclado (secreta;** teclado dibujado de 52 × 24, con cuatro filas de teclas, delante de la pantalla**):** la pantalla dice "jjjjjjjjjj", **foto vergonzosa 3**, y durante la pelea la impresora (en el piso, bajo el escritorio) escupe un papel cada 4 s que cuenta como mancha.
 - **Desenchufar a A.S.P.I.:** recompensa camino (la puerta del balcón) y logro "Desenchufada".
 
 ### 2.7 Balcón (alivio, 640 px)
-- Sin enemigos ni agenda. Maceta grande → baranda. Felipe se sienta, la cámara se abre hacia la ciudad (1,5 s) y suspira: "Soy un gato de interior. Mi cardio es mirar por la ventana." El jugador salta (salto real): cámara lenta, cartel **"PODER NUEVO · CAER DE PIE"**, "No me caí. Aterricé con estilo." y el **resumen del día** tipo Balatro (travesuras, secretas, calcetines, fotos, snacks y perdones) en lugar de la pantalla final de antes.
+- Sin enemigos ni agenda. Maceta grande → baranda (la maceta del medio de la baranda se quitó: Felipe se queda en un tramo libre, sin meterse en una maceta). Felipe se queda quieto y se acicala (no hay animación de sentarse todavía), la cámara se abre hacia la ciudad (1,5 s) y suspira: "Soy un gato de interior. Mi cardio es mirar por la ventana." El jugador salta (salto real): cámara lenta y la cámara **lo sigue hacia abajo** (se abre 230 px bajo el balcón: fachada, ventanas del piso de abajo y el letrero de la panadería); aterriza **a la vista** sobre el toldo verde de la panadería con el polvo grande del aterrizaje, y recién entonces sale el cartel **"PODER NUEVO · CAER DE PIE"** a una altura que no lo tapa, "No me caí. Aterricé con estilo." y el **resumen del día** tipo Balatro (travesuras, secretas, calcetines, fotos, snacks y perdones).
 
 ## 3. Agenda de Su Majestad del nivel
 
@@ -64,27 +64,28 @@ Valeria vive en la planta baja y va donde hay ruido. Empieza sentada en el sofá
 | --- | --- | --- | --- | --- | --- |
 | 1 | Romper algo y que me perdone igual | Sala | visible | Tirar el vaso y frotarse contra Valeria enojada | Snack |
 | 2 | Arañar el sofá nuevo (con plástico) | Sala | visible | Garras afiladas en el rascador (con Valeria grabando) y arañar el sofá | Calcetín 1 |
-| 3 | Popo táctico en la arena recién limpiada | Recibidor | **secreta** | Agachado 1,2 s sobre la caja de arena | Camino: puerta de la cocina |
+| 3 | Popo táctico en la arena recién limpiada | Recibidor | **secreta** | Agachado 1,2 s sobre la caja de arena | Foto vergonzosa 1 (se le cae a Valeria) |
 | 4 | Robar el almuerzo de Valeria | Cocina | visible | Comer el pollo del mesón | 2 snacks |
-| 5 | Ignorar el láser | Pasillo | **secreta** | 5 s quieto con el láser cerca | Foto vergonzosa 1 |
+| 5 | Ignorar el láser | Pasillo | **secreta** | 5 s quieto con el láser cerca | Foto vergonzosa 2 |
 | 6 | Saquear el cajón de calcetines | Dormitorio | visible | Manotazo al cajón de la cómoda | Calcetín 3 |
-| 7 | Pisar el teclado de Valeria | Estudio | **secreta** | Pararse en el teclado del escritorio | Foto 2 y papeles (manchas) en la pelea |
+| 7 | Pisar el teclado de Valeria | Estudio | **secreta** | Pararse en el teclado del escritorio | Foto 3 y papeles (manchas) en la pelea |
 | 8 | Desenchufar a A.S.P.I. | Estudio | visible | Apagarla tres veces | Camino: balcón |
 
-El calcetín 2 (refrigerador) es de exploración. Calcetines al nido (cada 10, una ranura de maña: "3/10 para tu próxima ranura"); fotos a la galería (las dos dan "Galería Viral"); snacks al bolsillo de 5 (mantener la acción 0,6 s sin nada cerca come uno).
+El calcetín 2 (refrigerador) es de exploración. Calcetines al nido (cada 10, una ranura de maña: "3/10 para tu próxima ranura"); fotos a la galería: **las tres secretas dan una foto cada una** y la galería completa (3) da "Galería Viral"; snacks al bolsillo de 5 (mantener la acción 0,6 s sin nada cerca come uno).
 
 ## 4. La escalera
 
-- **Reja anti-fuga** (decisión del creador): Valeria la atornilló después del video viral. Mide 1,5 m (182 px), se dibuja de 48 px (la cara de frente del arte de Gemini) con colisión fina de 12 px, cartel "PIPE: NO. Con amor, mamá" escrito por código. Desde afuera Felipe la **empuja** ("¿Una reja? ¿En MI escalera? Qué tierno.").
+- **Reja anti-fuga** (decisión del creador): Valeria la atornilló después del video viral. Mide 1,5 m (182 px), se dibuja de 48 px (la cara de frente del arte de Gemini) con colisión fina de 12 px, cartel "PIPE: NO" escrito por código en dos líneas sobre el cartel de cartón del arte (34 px, centrado en la reja, sin pisar el librero; la firma "Con amor, mamá" se quitó porque a 6 px no se leía). Desde afuera Felipe la **empuja** ("¿Una reja? ¿En MI escalera? Qué tierno.").
 - **El librero es la escalera del gato:** repisas a 48, 103 y 155 px (escalones de 48 a 55). Desde la de arriba se salta la reja y se cae adentro, al pie de la escalera.
 - **Subir:** al pie, "Ascender" (acción o arriba): Felipe sube los **7 escalones** con la animación `subir_escalera`, un saltito por escalón por la línea de los peldaños (`Sala.PELDANOS`), camina por el descanso hasta el vano y hay un fundido al pasillo. La escalera va en **dos capas**: peldaños detrás de Felipe y pasamanos con barrotes delante, que baja a **70 %** de opacidad mientras sube.
-- **Bajar:** por el vano del pasillo aparece en el descanso y baja escalón por escalón (cuadros de saltar y caer).
+- **Descanso:** un rellano grueso (como un escalón ancho) con el faldón cerrado hasta el piso: tablas y la puertita de un armario bajo la escalera (sin poste suelto).
+- **Bajar:** por el vano del pasillo aparece en el descanso y baja escalón por escalón (cuadros de saltar y caer); `prueba_nivel` comprueba que pisa los 7 peldaños sin volver a subir, que termina adentro de la reja, en el piso y con el control de vuelta.
 - **Atajo (R6):** desde adentro, "Abrir": un manotazo al pestillo la abre para siempre ("El pestillo, por dentro. Aficionada.", logro "Atajo de Gato"), a 348 px de la caja de arena.
 
 ## 5. Cómo se anuncia cada interacción (sin carteles)
 
 - Se quitaron los avisos de texto y la fila de controles de abajo (M2).
-- **Indicador:** contorno claro de 1 px en el objeto y burbuja sobre Felipe con el ícono del botón en uso (Kenney) y el verbo: Pasar, Probar (puerta cerrada), Ascender, Degustar, Liberar, Firmar, Actuar, Encantar, Abrir, Empujar, Arañar, Saquear.
+- **Indicador:** contorno claro de 1 px en el objeto y burbuja sobre Felipe con el ícono del botón en uso (Kenney) y el verbo: Pasar, Probar (puerta cerrada), Ascender, Degustar, Liberar, Firmar (sofá), Desordenar (ropa), Actuar, Encantar, Abrir, Empujar, Arañar (puerta entornada), Saquear. Un verbo por acción.
 - **Primeras frases de Felipe** (`Sala.LECCIONES`, una sola vez por zona, 48 caracteres o menos sin el botón): "{saltar} Los muebles son mi escalera." · "{interactuar} Ese sofá tiene plástico. Por ahora." · "{interactuar} Un rascador. Necesito público." · "{interactuar} Ese vaso está muy cerca del borde. Aún." · "Mantén {agacharse}. Es estrategia, no humildad." · "Mi trono. Aquí vuelvo si algo sale mal." · "{maullar} Servidumbre: abran." · "{saltar} El librero es mi escalera." · "{interactuar} Escalones. Mi única pasión." · "{interactuar} Comida a la vista. Me sacrifico." · "{zarpazo} Un ratón de cuerda. Qué insolencia." · "{interactuar} Puerta entornada. Qué invitación." · "{saltar} Banquito, cama, cómoda. Escalera real." · "{interactuar} El cajón de los calcetines. Botín." · "{saltar} La maceta, la baranda… y la libertad."
 - **Señales del escenario:** luz cálida que sale de las puertas abiertas y tapete; rendija de luz y sombra que se mueve bajo la puerta cerrada de la cocina; etiqueta "NUEVO" en sofá y rascador; corazón roto sobre Valeria enojada.
 
@@ -95,9 +96,9 @@ La presentación **empieza cuando terminó el fundido de la puerta** (B1); el fu
 
 | s | Paso | Qué pasa |
 | --- | --- | --- |
-| 0,0–0,4 | 1. Sin vuelta atrás | La puerta se cierra sola con un portazo y polvo. Felipe: "…¿Quién cerró?" |
+| 0,0–0,4 | 1. Sin vuelta atrás | La puerta se cierra sola con un portazo y polvo. Subtítulo de la presentación: "FELIPE: …¿Quién cerró?" (el cuadro de diálogo y el Indicador se esconden durante toda la entrada) |
 | 0,4–1,2 | 2. La espera | Penumbra; la luz de A.S.P.I. pasa a roja; retumbo que crece; las pelusas del piso tiemblan |
-| 1,2–2,2 | 3. Revelar despacio | Golpe de cámara a Felipe con «¡BATALLA INICIADA!»; la cámara sube de las ruedas al sensor mientras crece la imaginación (estudio en llamas y la bestia gigante al fondo, sin colisión) |
+| 1,2–2,2 | 3. Revelar despacio | Golpe de cámara a Felipe con «¡BATALLA INICIADA!»; la cámara sube de las ruedas al sensor mientras crece la imaginación (estudio en llamas y la bestia gigante al fondo, sin colisión), enmarcada con una viñeta oscura con motas de polvo |
 | 2,2–2,8 | 4. Nombre y título | Franja: **A.S.P.I.**, "Devoradora de Pelos · Nivel 99" |
 | 2,8–3,4 | 5. La barra se llena | Barra de vida que se llena |
 | 3,0 | 6. Música | Entra el tema de la pelea (provisional) |
@@ -133,11 +134,11 @@ Alto de todos los cuartos: 424 px (3,5 m). Piso en y = 448. Muros entre cuartos.
 | --- | --- | --- | --- |
 | Sala | 0–1280 | 1280 | nido 40 · ventana 170–350 · sofá 240–480 (asiento 49, respaldo 102) · rascador 520–620 (69/114/165) · silla 680 (55) · mesa 745–923 (91, vaso en 905) · silla 929 (55) · retrato · puerta 1188 |
 | Recibidor | 1440–2640 | 1200 | puerta 1532 · zapatero 1626–1786 (97; 40 libres debajo; llaves) · caja de arena 1832–1936 (45) · lámpara 1942 · puerta de la cocina 2070 · librero 2162–2266 (48/103/155/218) · reja 2284–2296 (182) · escalera 2322–2548 y vano en el descanso (150) |
-| Cocina | 2800–3760 | 960 | puerta 2892 · tazón 3010 · Valeria 3080 · ratón 3200–3290 · caja de cartón 3360 · silla 3400 (55) · mesón 3464–3668 (108, pollo 3510, ratón) · microondas 3570 (162) · refrigerador 3674–3758 (216, calcetín 2) |
-| Pasillo | 4000–5040 | 1040 | vano de la escalera 4092 · baúl 4190 (54) · consola 4256–4412 (97, vaso; 47 libres) · alféizar 4264–4436 (150) · puerta del dormitorio 4536 · láser 4640–4780 · cojín 4784–4854 · puerta del estudio 4948 |
-| Dormitorio | 5200–5920 | 720 | puerta 5292 · banquito 5386 (53) · cama 5444–5644 (65) · cómoda 5650–5734 (96, cajón) · repisa 5740–5810 (145) · cortina y cesta 5745–5807 (cesta 35) · repisa alta 5735–5815 (290, lugar visto) · ropero 5816–5920 (185) |
+| Cocina | 2800–3760 | 960 | puerta 2892 · tazón 3010 · Valeria 3080 · ratón 3200–3290 · caja de cartón 3360 · silla 3400 (55) · mesón 3464–3668 (108, ratón 3500–3536) · microondas 3570 (162, pollo 3612) · refrigerador 3674–3758 (216, calcetín 2) |
+| Pasillo | 4000–5040 | 1040 | vano de la escalera 4092 · baúl 4190 (54) · consola 4256–4412 (97, vaso; 47 libres) · alféizar 4264–4436 (150; la pizza, afuera tras el vidrio, en 4380) · puerta del dormitorio 4536 · láser 4640–4780 · cojín 4784–4854 · puerta del estudio 4948 |
+| Dormitorio | 5200–5920 | 720 | puerta 5292 · banquito 5386 (53) · cama 5444–5644 (65) · cómoda 5650–5734 (96, cajón) · ventana 5748–5804 con la repisa 5740–5810 (145) de alféizar · cortina 5736–5816 (barra a 276) · cesta 5747–5807 (35) · repisa alta 5735–5815 (290, lugar visto) · ropero 5816–5920 (185) |
 | Estudio | 6240–6880 | 640 | puerta 6332 · silla 6424 (55) · escritorio 6488–6648 (98; vaso, teclado, pantalla, rollo) · impresora bajo el escritorio · repisa 6636–6696 (151, 2 macetas) · base de carga 6600–6674 · puerta del balcón 6788 |
-| Balcón | 7040–7680 | 640 | puerta 7132 · maceta grande 7330 (32) · baranda 7400–7584 (89) · ciudad |
+| Balcón | 7040–7680 | 640 | puerta 7132 · maceta grande 7330 (32) · baranda 7400–7584 (89; tramo sin maceta 7470–7520) · ciudad · toldo de la panadería 7380–7680, 196 px bajo el piso (solo existe en el salto final) |
 
 Árbol: sala → recibidor → (cocina) y escalera → pasillo → (dormitorio) y estudio → balcón.
 
@@ -154,16 +155,16 @@ Alto de todos los cuartos: 424 px (3,5 m). Piso en y = 448. Muros entre cuartos.
 | R5 | ✔ Caja de arena (recibidor, a una puerta de la cocina) y cojín (pasillo, junto a la puerta del jefe); reaparecer es inmediato |
 | R6 | ✔ El pestillo de la reja se abre solo desde adentro y queda a 348 px de la caja de arena; se va por el librero y se vuelve por la reja |
 | R7 | ✔ Dos pisos unidos por la escalera (7 escalones); librero, mesón, microondas, refrigerador, ropero; puertas que van y vuelven; ningún cuarto de menos de 640 px. ✔ `prueba_escenario`: todo se alcanza sin doble salto ni trepar y **ningún hueco atrapa a Felipe** |
-| R8 | ✔ Huecos bajo muebles sólidos de 0 o de 36 px o más (zapatero 40, consola 47); lado **menor** ≥ 24 px de todo lo interactuable (comida y recompensas incluidas); puertas medidas en la imagen (vano de 112 y 120 px); ratón a la mitad de Felipe |
+| R8 | ✔ Huecos bajo muebles sólidos de 0 o de 36 px o más (zapatero 40, consola 47); lado **menor** ≥ 24 px de todo lo interactuable (comida y recompensas incluidas), **también lo dibujado por código** (teclado, ropa y cajón: `Sala.DIBUJADOS_INTERACTUABLES`) y el tamaño que declara cada interactuable del nivel armado (G7); puertas medidas en la imagen (vano de 112 y 120 px); ratón a la mitad de Felipe |
 | R9 | ✔ Pared distinta por cuarto. 👁 Hito por cuarto: retrato oficial, reja "PIPE: NO", refrigerador con imanes, retrato familiar, cama y cortina, base de carga roja, la ciudad |
 | R10 | ✔ 3 calcetines sobre algo pisable; el del refrigerador pide subir |
 | R11 | ✔ La única zona fuerte es el estudio; cierra con el balcón |
 | R12 | ✔ 5 cosas para tirar en el estudio y una en alto (repisa). Ver sección 6 |
 | R13 | ✔ Todos los cuartos menos el balcón tienen con qué jugar. 👁 Su chiste (sección 2) |
-| R14 | 👁 El primer plano quedó solo en el balcón; el pasamanos baja a 70 % mientras Felipe sube; diálogo y carteles no tapan a Felipe. ✔ Rectángulo sagrado: ningún mueble, decorado, ratón, descanso ni lugar de Valeria se cruza con una puerta o la escalera (B3, G10) |
+| R14 | 👁 El primer plano quedó solo en el balcón; el pasamanos baja a 70 % mientras Felipe sube; diálogo y carteles no tapan a Felipe (tampoco al aterrizar en el balcón: G1); el aviso de logro va por encima del diálogo y fuera de su cuadro (M3); ningún ratón patrulla sobre la comida o lo que se tira (G5). ✔ Rectángulo sagrado: ningún mueble, decorado, ratón, descanso ni lugar de Valeria se cruza con una puerta o la escalera (B3, G10) |
 | R15 | ✔ `prueba_movimiento` (altura de Felipe); la animación nueva de esta parte (ninguna) no aplica |
 | R16 | ✔ `prueba_jefe`: entrada de 8 pasos en menos de 5 s, sin negro al entrar por la puerta, imaginación solo en la entrada, cartel y pista por fase, todo vuelve de golpe al ganar, y la misma presentación sirve para otro jefe |
-| R17 | ✔ Dos lugares vistos que no se alcanzan todavía (toldo del vecino: Caer de Pie; caja de recuerdos: Afilar Garras); atajo de la reja. 👁 La historia la cuenta el escenario: reja anti-fuga con cartel, retratos, carpeta de fotos |
+| R17 | ✔ Dos lugares vistos que no se alcanzan todavía (toldo del vecino: Caer de Pie, con la caja tras el vidrio y el alféizar vacío, G3; caja de recuerdos: Afilar Garras); atajo de la reja. 👁 La historia la cuenta el escenario: reja anti-fuga con cartel, retratos, carpeta de fotos |
 | R18 | ✔ Las 8 travesuras pasan en su cuarto con su reacción, y cada cuarto menos el balcón tiene al menos una |
 | R19 | ✔ `Sala.MANAS`: maullar abre la cocina y molesta a Valeria y A.S.P.I.; arañar abre la puerta del dormitorio y destroza el sofá; frotarse saca a Valeria del regaño; el zarpazo voltea al ratón que cuida el camino al refrigerador y rompe la caja |
 
@@ -201,4 +202,29 @@ Alto de todos los cuartos: 424 px (3,5 m). Piso en y = 448. Muros entre cuartos.
 - **Microondas de 98 × 54** (escala de gato) para que el escalón al refrigerador sea de 54 px.
 - **Dormitorio y cocina más angostos** (720 y 960 px) para no dejar huecos sin salida detrás del ropero y del refrigerador.
 - **La tanda `arriba-extra.png` de Gemini no llegó:** baúl, retrato familiar, caja de recuerdos, pantalla, teclado, impresora, ropa doblada, calcetines del cajón y papeles se dibujan por código; consola = aparador y cómoda = la de siempre.
+- **Cortina por código** (provisional): la de Gemini se veía como columna y se borró; espera `dormitorio-cortina.png` (tanda 3D). La ventana del dormitorio pasó de encima de la cama al hueco entre la cómoda y el ropero, para que la cortina cuelgue junto a ella.
+- **Retoques de arte en la herramienta** (`preparar_arte_nivel.py`, sin pedir arte nuevo): a la ventana del pasillo se le tapó la caja de pizza que traía sobre el alféizar (PARCHES) y a la baranda se le quitó la maceta del medio (BORRAR + RELLENOS).
 - **El caminar de Valeria de Gemini** se usa (alineado por pies y cabeza en la herramienta); no hizo falta el balanceo de código.
+
+## 11. Hallazgos de la revisión 2 (2026-10-19, `revisiones/2026-10-19-nivel1-v4.md`)
+
+| # | Estado |
+| --- | --- |
+| G1 | **Arreglado.** Al saltar, cámara lenta y la cámara baja con Felipe (se abre 230 px bajo el balcón); aterriza a la vista en el toldo de la panadería con el polvo grande y recién ahí sale el cartel, a una altura que no lo tapa. `prueba_nivel` comprueba que se ve en todo el salto, que aterriza en el toldo y que el cartel sale después y sin taparlo |
+| G2 | **Arreglado.** De pie (regañando, caminando, grabando), Valeria siempre tiene los pies en el piso; al pararse del sofá baja delante de él. `prueba_nivel` lo vigila en cada cuadro |
+| G3 | **Arreglado.** La caja de pizza está afuera, sobre el toldo, detrás del vidrio con reflejos; el alféizar quedó vacío (la herramienta tapa la caja del arte) y Felipe dice "Esa pizza es mía. Algún día.". `prueba_reglas_nivel` comprueba que la caja está dentro del vidrio y por encima del alféizar |
+| G4 | **Provisional (código).** Cortina con barra, remates, argollas, pliegues y borde ondulado a los lados de una ventana nueva entre la cómoda y el ropero (la repisa es su alféizar). Falta el arte de Gemini (`dormitorio-cortina.png`, tanda 3D) |
+| G5 | **Arreglado.** El pollo pasó al microondas y el ratón patrulla entre el borde del mesón y el microondas (3500–3536). `prueba_reglas_nivel`: ningún ratón tapa la comida ni lo que se tira, con su dibujo completo |
+| G6 | **Arreglado.** El popo táctico da una foto vergonzosa (se le cae a Valeria); las tres secretas dan fotos y la galería completa da "Galería Viral". Valeria igual deja la cocina abierta al volver (efecto, no premio) |
+| G7 | **Arreglado (código).** Teclado de 52 × 24 con teclas y ropa de 52 × 26 con volumen; la prueba R8 mide lo dibujado por código y el tamaño que declara cada interactuable del nivel armado. El arte de Gemini (tanda `arriba-extra`) sigue pendiente |
+| G8 | **Pendiente, no es error:** el creador decidió no pedir todavía la animación `entrar_puerta`; las puertas siguen con fundido |
+| G9 | **Pendiente, no es error:** intimidar queda para el Barrio Viejo (decisión del creador) |
+| M1 | **Arreglado.** Rellano grueso con faldón cerrado y puertita de armario; sin poste |
+| M2 | **Arreglado.** "PIPE: NO" en dos líneas sobre el cartel del arte, centrado en la reja; la firma ilegible se quitó |
+| M3 | **Arreglado.** El aviso de logro va en una capa sobre el diálogo y, si el diálogo está arriba, sale justo debajo de él (`prueba_acciones`) |
+| M4 | **Arreglado** en `PresentacionJefe` (para todos los jefes): esconde el diálogo y el Indicador mientras presenta, la frase de "sin vuelta atrás" sale como subtítulo y los discos rosados se cambiaron por una viñeta oscura con motas (`prueba_jefe`) |
+| M5 | **Arreglado.** Punto de 8 px con halo que late y centro brillante; frase "No. No voy a caer." la primera vez |
+| M6 | **Arreglado.** Se quitó la maceta del medio de la baranda (herramienta de arte); Felipe se queda quieto y se acicala mientras no haya animación de sentarse (opcional, SpriteCook) |
+| M7 | **Arreglado.** Sofá "Firmar", ropa "Desordenar", puerta entornada "Arañar" (`prueba_acciones`) |
+| M8 | **Espera** el retrato familiar nuevo de Gemini |
+| Sospecha: bajar la escalera | **Funciona.** `prueba_nivel` baja desde el vano: pisa los 7 peldaños sin volver a subir, termina adentro de la reja, en el piso, y puede caminar |

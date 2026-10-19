@@ -8,9 +8,22 @@ Actualizado: 2026-10-19. **Léelo al empezar un chat nuevo** para retomar sin re
 
 ## En curso
 
-- **Nivel 1 v4 construido** (PARTE A y PARTE B, 2026-10-19). Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md`. Sigue: mostrarle al creador el video y las capturas, y una revisión nueva con `revisor-niveles`.
+- **Nivel 1 v4 construido** (PARTE A y PARTE B, 2026-10-19) y **corregido tras la revisión 2** (hallazgos de código). Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md` (sección 11: estado de cada hallazgo). Sigue: mostrarle al creador el video `nivel1-v4b.mp4` y las capturas; esperar la tanda 3D de Gemini (cortina, retrato familiar) y una tercera revisión con `revisor-niveles`.
 
 ## Ya cerrado (2026-10-19)
+
+- **Arreglos de la revisión 2 del nivel 1** (solo código, 0 créditos; todas las pruebas pasan y el bot termina 5 de 5 con la agenda 8 de 8):
+  - **Balcón (G1, M6):** la cámara sigue el salto final hasta el toldo de la panadería de abajo y el cartel "PODER NUEVO · CAER DE PIE" sale después de aterrizar, sin tapar a Felipe; la baranda ya no tiene maceta donde se sienta (se acicala mientras no haya animación de sentarse).
+  - **Valeria (G2):** de pie siempre pisa el piso; al pararse del sofá baja delante de él.
+  - **Lugar visto (G3):** la caja de pizza está afuera, tras el vidrio; el alféizar quedó vacío. Frase "Esa pizza es mía. Algún día.".
+  - **Cocina (G5):** el pollo pasó al microondas; el ratón patrulla el mesón sin taparlo.
+  - **Popo táctico (G6):** da una foto vergonzosa (las tres secretas dan fotos; "Galería Viral" con las tres).
+  - **Legibilidad (G7, M1, M2, M5, M7):** teclado 52 × 24 y ropa 52 × 26 dibujados por código (la prueba R8 mide también lo dibujado por código y el tamaño que declara cada interactuable), descanso grueso con faldón, cartel "PIPE: NO" sin pisar el librero, láser de 8 px con halo, verbos distintos (sofá "Firmar", ropa "Desordenar", puerta "Arañar").
+  - **Interfaz (M3, M4):** el aviso de logro va sobre el diálogo y fuera de su cuadro; `PresentacionJefe` esconde el diálogo y el Indicador mientras presenta, muestra la frase del portazo como subtítulo y usa una viñeta oscura en vez de discos rosados.
+  - **Cortina (G4, provisional):** dibujada por código con barra y pliegues junto a una ventana nueva entre la cómoda y el ropero, hasta que llegue `dormitorio-cortina.png`.
+  - **Escalera:** bajar funciona (prueba nueva en `prueba_nivel`).
+  - **No se tocó a Felipe** (ni sprites ni acciones): no aplica la regla de los tres lugares.
+  - **Quedan abiertos:** G8 (`entrar_puerta`, el creador decidió no pedirla aún), G9 (intimidar, para el Barrio Viejo), M8 (retrato familiar de Gemini).
 
 - **Ajuste del salto** (video de referencia del creador): cae con más peso (gravedad de caída 2400 = 1,7 × la de subida, antes 1940; tope 740 px/s, antes 600), margen 0,12 s (antes 0,1), salto recordado 0,15 s (antes 0,12) y polvo al aterrizar que crece con la velocidad de caída (8 a 28 granos, más rápidos y grandes). La subida no cambió (altura de unos 80 px); `prueba_escenario` calcula con estos números que todo se sigue alcanzando sin doble salto. Tres lugares: memoria (tabla Acciones de Felipe), ficha local regenerada (**falta publicarla en línea**) y juego (pruebas en `prueba_movimiento` y `prueba_escenario`). Video antes/después con `pruebas/demo_salto.gd` (entrada fija).
 

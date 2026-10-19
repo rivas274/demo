@@ -38,6 +38,8 @@ Léelas **antes** de diseñar, construir o revisar cualquier escenario. Cada una
 | 24 | Luces y sombras sin una dirección común | Una dirección de luz por cuarto (por defecto arriba a la izquierda, o la ventana); sombras y brillos la siguen |
 | 25 | Puertas abiertas sin grosor de muro | Toda abertura muestra el grosor del muro (jamba con 2 tonos) |
 | 26 | Halo circular de luz pegado en la pared (efecto "filtro") | La luz cae en superficies (mesa, piso) en escalones; nada de círculos suaves sobre el tapiz |
+| 27 | El resalte de un mueble dibujado encima de todo cruzaba a Valeria sentada en él | El resalte va detrás de muebles y personajes: solo se ve donde hay pared o piso detrás (o sobre su apoyo, si está encima de otro mueble) |
+| 28 | El grifo nuevo quedaba tapado por el ratón que patrulla el mesón | Al agregar un detalle, mira qué pasa por delante (patrullas, personajes, carteles) en todo su recorrido y dale su capa |
 
 ## Antes de dar por terminado un escenario
 

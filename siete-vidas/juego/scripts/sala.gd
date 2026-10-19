@@ -223,7 +223,7 @@ const PIEZAS := [
 	[Rect2(5855, SUELO - 96, 74, 96), false, "Cómoda", "arte", "comoda"],  # 80 cm
 	[Rect2(5940, SUELO - 145, 70, 6), true, "Repisa", "repisa", ""],  # 1,20 m, repisa de pared entre la cómoda y el ropero
 	[Rect2(6016, SUELO - 185, 104, 185), false, "Ropero", "arte", "ropero"],  # 1,53 m
-	[Rect2(5935, SUELO - 290, 80, 6), true, "Repisa alta", "lugar_visto", ""],  # 2,40 m: se vuelve con Afilar Garras
+	[Rect2(5935, SUELO - 274, 80, 6), true, "Repisa alta", "lugar_visto", ""],  # 2,26 m (pasada única: la caja de recuerdos quedaba cortada por el borde de arriba): se vuelve con Afilar Garras
 	[Rect2(5954, SUELO - 35, 46, 6), true, "Cesta de ropa", "arte", "cesta_vacia"],  # para salir del hueco entre la cómoda y el ropero
 	# Estudio de Valeria (la pelea).
 	[Rect2(6637, SUELO - 55, 40, 6), true, "Silla del estudio", "arte", "silla_v2"],
@@ -342,7 +342,7 @@ const AGENDA_SITIOS := {
 ## Lugares que se ven antes de poder alcanzarlos (R17): [qué, dónde, con qué maña se vuelve].
 const LUGARES_VISTOS := [
 	["Toldo del vecino con la caja de pizza (afuera, tras el vidrio del pasillo)", PIZZA, "Caer de Pie"],
-	["Caja de recuerdos de Valeria (repisa alta del dormitorio)", Rect2(5935, SUELO - 300, 80, 10), "Afilar Garras"],
+	["Caja de recuerdos de Valeria (repisa alta del dormitorio)", Rect2(5935, SUELO - 284, 80, 10), "Afilar Garras"],
 ]
 ## La caja de pizza, sobre el toldo del vecino, del otro lado del vidrio (dentro de VIDRIO_PASILLO).
 ## Escala de gato (M7): 34 × 24 con la tapa abierta, grasa y vapor; se lee desde el pasillo.

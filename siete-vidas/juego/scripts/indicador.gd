@@ -45,6 +45,8 @@ var _aparecer := 0.0
 
 const SHADER := """
 shader_type canvas_item;
+// Sin sombrear: la luz del cuarto (LuzCuarto) no tiñe el contorno.
+render_mode unshaded;
 uniform vec4 color : source_color = vec4(1.0, 0.97, 0.78, 1.0);
 uniform vec2 paso = vec2(0.01, 0.01);
 float dentro(vec2 uv) {

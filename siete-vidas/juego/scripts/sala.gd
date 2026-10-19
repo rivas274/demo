@@ -422,6 +422,8 @@ static func rect_sagrado(pie: Vector2) -> Rect2:
 @export var batalla_con_jefe := true
 ## Las piezas de juguete hacen daño (la prueba de movimiento las apaga; en la v4 no hay).
 @export var peligros_activos := true
+## PRUEBA de luz y efectos en la sala (LuzCuarto, scripts/luz_cuarto.gd): false la quita entera.
+@export var luz_activa := true
 
 var logros: Array[String] = []
 var tiempo := 0.0
@@ -554,6 +556,8 @@ func _ready() -> void:
 		pantallas.mostrar_titulo()
 	_al_cambiar_modo(pantallas.modo)
 	_actualizar_camara()
+	if luz_activa:
+		add_child(LuzCuarto.new(self))
 
 
 func _crear_puertas() -> void:

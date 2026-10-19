@@ -142,6 +142,8 @@ Todos los hallazgos se arreglaron por código y con el arte que mandó el creado
 8. Sobre A.S.P.I. llena se apilaban «+1», «Glup.» y «¡LLENO!»; y en la tarjeta chica los textos largos se salían de la caja.
 9. El salto de la aspiradora real a la gigante era un corte seco: ahora con «¡puf!» y destello.
 10. El orden al ganar era logro y después la travesura; ahora la travesura y después su logro.
+11. En la pelea, junto a la puerta de entrada (cerrada por el portazo), mantener la acción "probaba" la puerta en vez de comer un snack del bolsillo: el bot comía seis veces sin efecto y una partida se quedó sin tiempo. Las puertas cerradas del estudio no se ofrecen mientras dura la pelea.
+12. El bot saltaba muchas veces al baúl nuevo (más bajo, 47 px) y tardaba en llegar a A.S.P.I. llena cuando se había alejado a comer: ahora sube al alto correcto y corre hacia ella (Shift). Con eso, 8 de 8 partidas con exactamente 3 saltos.
 
 **Lo que queda (no son errores de código):**
 

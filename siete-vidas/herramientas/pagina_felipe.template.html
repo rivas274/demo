@@ -126,7 +126,7 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
         <thead><tr><th>Acción</th><th>Teclado</th><th>Mando</th><th>Qué hace</th><th>Animación</th><th>Estado</th></tr></thead>
         <tbody>
           <tr><td>Quieto</td><td>—</td><td>—</td><td>Respira y mece la cola.</td><td><code>quieto</code></td><td>En el juego</td></tr>
-          <tr><td>Caminar</td><td>A / D o ← / →</td><td>Palanca izquierda o cruceta</td><td>120 px/s. Las patas no patinan: el ciclo va al ritmo de la velocidad (cuadros/s = velocidad ÷ 1,8 px, el avance medido del pie apoyado; tope 34 cuadros/s) y el cuerpo sube 1 px en cada paso.</td><td><code>caminar</code></td><td>En el juego</td></tr>
+          <tr><td>Caminar</td><td>A / D o ← / →</td><td>Palanca izquierda o cruceta</td><td>120 px/s, con pasos largos y lentos de gato orgulloso. Las patas no patinan: el ciclo va al ritmo de la velocidad (cuadros/s = velocidad ÷ 3,6 px, el avance medido del pie apoyado; a 120 px/s, 33 cuadros/s, bajo el tope de 34) y el cuerpo sube 1 px en cada paso.</td><td><code>caminar</code></td><td>En el juego</td></tr>
           <tr><td>Correr</td><td>Mantener Shift</td><td>Mantener RB</td><td>190 px/s. Ciclo al ritmo de la velocidad (÷ 3,6 px por cuadro; tope 34 cuadros/s).</td><td><code>correr</code></td><td>En el juego</td></tr>
           <tr><td>Zoomies</td><td>Tocar Shift</td><td>Tocar RB</td><td>Impulso de 380 px/s durante 0,18 s, con estela; espera de 0,45 s entre usos.</td><td><code>correr</code> + estirón</td><td>En el juego; <strong>apagado en el nivel 1</strong> (se gana en Downtown)</td></tr>
           <tr><td>Saltar</td><td>Espacio</td><td>A</td><td>Unos 80 px (la subida no cambió con el ajuste del salto). Soltar antes corta el salto. Margen de 0,12 s al salir de un borde y salto recordado de 0,15 s: apretar justo antes de aterrizar cuenta.</td><td><code>saltar</code> (agachado, subiendo, arriba)</td><td>En el juego</td></tr>
@@ -270,7 +270,7 @@ th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
           <thead><tr><th>Asset</th><th>Godot</th><th>Archivo</th><th>Créditos</th></tr></thead>
           <tbody>
             <tr><td>Quieto</td><td><code>quieto</code></td><td>felipe-idle-sheet.png</td><td>20</td></tr>
-            <tr><td>Caminar</td><td><code>caminar</code></td><td>felipe-walk-sheet.png</td><td>20</td></tr>
+            <tr><td>Caminar (pasos largos)</td><td><code>caminar</code></td><td>felipe-caminar-largo-sheet.png</td><td>26</td></tr>
             <tr><td>Correr / Zoomies</td><td><code>correr</code></td><td>felipe-run-sheet.png</td><td>20</td></tr>
             <tr><td>Saltar</td><td><code>saltar</code></td><td>felipe-jump-sheet.png</td><td>20</td></tr>
             <tr><td>Caer (cuadros 3 y 5)</td><td><code>caer</code></td><td>felipe-caida-sheet.png</td><td>26</td></tr>

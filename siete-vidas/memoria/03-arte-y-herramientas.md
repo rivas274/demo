@@ -17,7 +17,7 @@
 - **Subir imágenes locales:** `create_asset_upload`, luego PUT con curl a la URL devuelta, luego `finalize_asset_upload`.
 - **Red del entorno:** deben estar permitidos `mcp.spritecook.ai` y `api.spritecook.ai`; sin el segundo no se pueden descargar ni ver las imágenes.
 - **Proyecto en SpriteCook:** "Siete Vidas, Cero Disculpas" (nombre antiguo del juego; se deja así en SpriteCook), id `126fcb42-c3f6-40b5-9f75-42715fbdce40`. Pasar siempre `project_id`.
-- **Créditos:** 800 del plan de pago; quedan **244** (2026-10-19: subir_escalera, maullar, aranar y el caminar de Valeria con 20 de la reserva aprobada, porque la hoja de Gemini no alternaba las piernas). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
+- **Créditos:** 800 del plan de pago; quedan **218** (2026-10-19: subir_escalera, maullar, aranar, el caminar de Valeria con 20 de la reserva aprobada, porque la hoja de Gemini no alternaba las piernas, y el caminar de pasos largos de Felipe, 26). Subir imágenes no gasta créditos. Comprobar con `get_credit_balance` antes de gastar.
 - **Regla de oro:** mostrar al creador el prompt, el modelo, los ajustes y el costo, y esperar aprobación antes de cada llamada que gaste créditos.
 
 ### Modelos y costos útiles (consultados el 2026-10-17)
@@ -59,7 +59,8 @@ Solo lo que se usa (las formas de peso dibujadas, el Modo Buda, la pose sentado,
 | --- | --- | --- | --- |
 | Felipe A base (diseño aprobado, sin fondo, 86×94) | — | `14b3c27f-798c-4795-84fe-48ed15508247` | `felipe-A-base.png` |
 | Quieto (8 cuadros de 106×106) | `quieto` | `af423ca7-92f4-40e6-a26a-1959363e6892` | `felipe-idle-sheet.png` |
-| Caminar | `caminar` | `5890d9bd-c737-471c-ad0d-30169320104e` | `felipe-walk-sheet.png` |
+| Caminar (pasos largos y lentos de gato orgulloso; desde Felipe A, `pixel-engine-v1.5`, 26 créditos, 2026-10-19; pie apoyado 3,6 px del juego por cuadro) | `caminar` | `1d4f1aaa-84e6-4f77-bf00-9a58168185d6` | `felipe-caminar-largo-sheet.png` |
+| Caminar anterior (pasos cortos): **en reserva por pedido del creador**, sin usar en el juego | — | `5890d9bd-c737-471c-ad0d-30169320104e` | `felipe-walk-sheet.png` |
 | Correr / Zoomies | `correr` | `9de2013a-ffd6-4cb6-a338-63f80c2d5e78` | `felipe-run-sheet.png` |
 | Saltar | `saltar` | `2113c9a5-5acc-4289-8fcb-1f167c20d1ea` | `felipe-jump-sheet.png` |
 | Caer (8 cuadros desde Felipe A; se usan 3 = cayendo y 5 = contacto; `pixel-engine-v1.5`) | `caer` | `5c509ac4-58f9-4b3f-8dfe-7bb31529e754` | `felipe-caida-sheet.png` |

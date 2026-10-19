@@ -8,9 +8,14 @@ Actualizado: 2026-10-19. **Léelo al empezar un chat nuevo** para retomar sin re
 
 ## En curso
 
-- **Nivel 1 v4 con la crítica de Gemini aplicada** (2026-10-19). Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md` (secciones 12 y 13); qué se aplicó y qué se descartó, punto por punto, en `diseno/revisiones/2026-10-19-critica-gemini.md` ("Qué se aplicó"). Sigue: mostrarle al creador el video `nivel1-v4d.mp4` y la hoja `antes-despues-gemini.png`; decidir si se pide un `caminar` nuevo de Felipe (G9 de fondo), arte de transiciones de Valeria y una letra de pixel para toda la interfaz (diálogo, libreta, HUD y rótulos a la vez); cuarta revisión mirando transiciones.
+- **Nivel 1 v4 con la crítica de Gemini aplicada** (2026-10-19). Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md` (secciones 12 y 13); qué se aplicó y qué se descartó, punto por punto, en `diseno/revisiones/2026-10-19-critica-gemini.md` ("Qué se aplicó"). Sigue: mostrarle al creador el video `nivel1-v4d.mp4` y la hoja `antes-despues-gemini.png`; arte de transiciones de Valeria y una letra de pixel para toda la interfaz (diálogo, libreta, HUD y rótulos a la vez); cuarta revisión mirando transiciones.
 
 ## Ya cerrado (2026-10-19)
+
+- **Caminar de pasos largos de Felipe en el juego** (aprobado por el creador; SpriteCook `pixel-engine-v1.5` desde Felipe A, asset `1d4f1aaa-84e6-4f77-bf00-9a58168185d6`, 26 créditos; quedan 218):
+  - `caminar` usa `felipe-caminar-largo-sheet.png`. Pie apoyado medido con `pruebas/medir_pasos.gd` (banda de 4 filas del piso): cuadros 0-1, 1-2, 2-3, 3-4 y 5-6 adelantan 5, 5, 4, 6 y 5 px de hoja → `AnimacionesFelipe.PASO["caminar"]` = 3,6 px del juego (antes 1,8). A 120 px/s el ciclo va a 33 cuadros/s (bajo el tope de 34) y el desliz medio es 0; en 6-7 el pie casi se queda quieto en la hoja (1 a 3 px), así que ese cuadro patina un poco más (hasta ~2 px). Los pares 4-5, 6-7 y 7-0 no tienen un pie claro.
+  - **Se conservan** `felipe-walk-sheet.png` (en reserva, sin usar) y `felipe-run-sheet.png` (Zoomies), por pedido del creador.
+  - Tres lugares: memoria (02 tabla Acciones de Felipe, 03 assets y créditos, 04, este archivo), ficha (plantilla y copia local regenerada; **falta publicar**) y juego (`prueba_movimiento` mide la hoja nueva). Todas las pruebas en 0 fallos y el bot 3 de 3 con la agenda 8 de 8. Video antes/después con la sala (`caminar-antes-despues.mp4`, fuera del repositorio).
 
 - **Crítica de arte de Gemini aplicada en el nivel 1** (0 créditos; todas las pruebas pasan, `prueba_jefe` 3 de 3 seguidas y el bot 5 de 5 con la agenda 8 de 8):
   - **Cortina** del dormitorio: arte de Gemini (`dormitorio-cortina-alta.png`), dos paños de una barra, sin colisión (como la de código).

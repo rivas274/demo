@@ -21,7 +21,7 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [x] Revisión 3 (`revisiones/2026-10-19-nivel1-v4-revision3.md`): todos los hallazgos arreglados por código y con el arte que mandó el creador (sección "Arreglos" del informe; estado en `nivel-01-gran-fuga.md`, sección 12). Video `nivel1-v4c.mp4`.
 - [ ] Mostrar al creador el video `nivel1-v4c.mp4`; cuarta revisión con `revisor-niveles` mirando transiciones.
 - [ ] Arte de Gemini que espera (tanda 3D): `dormitorio-cortina.png` (G4, hoy la cortina va por código). Opcional: A.S.P.I. con la tapa a medio abrir, fachada de la panadería, ventana del pasillo con vista (hoy por código).
-- [ ] Opcional (SpriteCook): `caminar` nuevo de Felipe desde Felipe A con pasos más largos (20–26 créditos): la hoja actual adelanta el pie solo 1,8 px por cuadro y por eso el ciclo va rápido (34 cuadros/s con tope; G9).
+- [x] `caminar` nuevo de Felipe con pasos largos (2026-10-19, SpriteCook `pixel-engine-v1.5` desde Felipe A, 26 créditos): pie apoyado 3,6 px del juego por cuadro, el ciclo va a 33 cuadros/s a 120 px/s (antes 1,8 px y tope de 34; G9). La hoja vieja (`felipe-walk-sheet.png`) queda en reserva por pedido del creador.
 - [ ] Opcional (Gemini o SpriteCook): transiciones de Valeria (pararse del sofá, agacharse) y "tomar café"; hoy son fundidos cruzados de 0,2 s y respiración por código.
 - [ ] Animación `entrar_puerta` (G8): el creador decidió no pedirla todavía; las puertas siguen con fundido.
 - [ ] Intimidar (G9): queda para el Barrio Viejo (decisión del creador).

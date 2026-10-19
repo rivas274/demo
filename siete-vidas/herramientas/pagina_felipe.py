@@ -14,7 +14,7 @@ ARTE = Path(__file__).resolve().parent.parent / "arte" / "felipe"
 
 ANIMS = [
     {"id": "sc-idle", "nombre": "Quieto", "godot": "quieto", "archivo": "felipe-idle-sheet.png", "frames": 8, "fps": 8},
-    {"id": "sc-walk", "nombre": "Caminar", "godot": "caminar", "archivo": "felipe-walk-sheet.png", "frames": 8, "fps": 10},
+    {"id": "sc-walk", "nombre": "Caminar", "godot": "caminar", "archivo": "felipe-caminar-largo-sheet.png", "frames": 8, "fps": 10},
     {"id": "sc-run", "nombre": "Correr / Zoomies", "godot": "correr", "archivo": "felipe-run-sheet.png", "frames": 8, "fps": 12},
     {"id": "sc-jump", "nombre": "Saltar", "godot": "saltar", "archivo": "felipe-jump-sheet.png", "frames": 8, "fps": 10},
     {"id": "sc-gatear", "nombre": "Agacharse (0-2) y gatear (3-7)", "godot": "agacharse / gatear", "archivo": "felipe-gatear-sheet.png", "frames": 8, "fps": 10},

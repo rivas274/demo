@@ -89,7 +89,7 @@ func _al_cumplir(t: Dictionary) -> void:
 	var id := String(t["id"])
 	var secreta := bool(t.get("secreta", false))
 	var recompensa: Dictionary = t.get("recompensa", {})
-	hud.cartel("¡TRAVESURA SECRETA!" if secreta else "¡TRAVESURA CUMPLIDA!", String(t["nombre"]), String(recompensa.get("texto", "")), secreta, altura_cartel())
+	hud.cartel(tr("UI_TRAVESURA_SECRETA") if secreta else tr("UI_TRAVESURA_CUMPLIDA"), String(t["nombre"]), String(recompensa.get("texto", "")), secreta, altura_cartel())
 	var frase: Array = t.get("frase", [])
 	if frase.size() >= 2:
 		dialogo.decir("felipe", String(frase[0]), int(frase[1]))

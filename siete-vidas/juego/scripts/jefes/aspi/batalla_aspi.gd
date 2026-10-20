@@ -33,7 +33,12 @@ const DURA_CLIC := 1.3
 ## El dibujo de A.S.P.I. (luz de aviso, vibración y tapa del depósito) y el de la pelea.
 var apariencia: AparienciaAspi
 var dibujo: DibujoBatallaAspi
-var deposito := 0
+## Lo que tragó: se ve como la franja azul bajo la barra (escudo de la presentación).
+var deposito := 0:
+	set(valor):
+		deposito = valor
+		if presentacion:
+			presentacion.escudo = float(deposito) / DatosJefe.por_fase(datos.capacidad, vencidas)
 var llena := false
 ## x de cada mancha en el piso (y qué es: "mancha" o "papel").
 var manchas: Array[float] = []
@@ -168,8 +173,6 @@ func _process(delta: float) -> void:
 		_soltar_polvo(jefe.global_position + Vector2(0, -20))
 	# Felipe queda delante de su propia imaginación; el escenario, detrás.
 	felipe.z_index = Capas.FELIPE_IMAGINANDO if (gigante > 0.0 or transformacion > 0.0) else Capas.JUEGO
-	presentacion.vida = 1.0 - float(vencidas) / datos.fases if fase == Fase.PELEA else -1.0
-	presentacion.escudo = float(deposito) / DatosJefe.por_fase(datos.capacidad, vencidas) if fase == Fase.PELEA else 0.0
 	if not papeles.is_empty():
 		for i in papeles.size():
 			papeles[i].y += delta

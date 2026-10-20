@@ -61,10 +61,10 @@ Antes de diseñar, construir o revisar un escenario, lee `siete-vidas/memoria/06
 
 Todo nivel cumple `siete-vidas/diseno/reglas-de-niveles.md`. Al diseñarlo, su documento dice cómo cumple cada regla; al probarlo, `prueba_reglas_nivel.gd` valida las medibles y las demás se revisan con capturas. Si una regla no se cumple, se cambia el nivel; cambiar una regla lo decide el creador.
 
-Todo jefe se presenta con el componente reutilizable `PresentacionJefe` (`siete-vidas/juego/scripts/presentacion_jefe.gd`: entrada tipo Broforce, nombre y título en franja, carteles de fase y barra de vida). No se hace una presentación nueva por jefe: cada pelea solo da sus datos y su "momento".
+Todo jefe se presenta con el componente reutilizable `PresentacionJefe` (`siete-vidas/juego/scripts/ui/presentacion_jefe.gd`: entrada tipo Broforce, nombre y título en franja, carteles de fase y la barra `BarraVida` conectada a la Vida del jefe). No se hace una presentación nueva por jefe: cada pelea extiende `PeleaJefe` y solo da sus datos (`DatosJefe`), sus ataques (`ConductaJefe`) y su "momento".
 
 ## Juego en Godot
 
 El proyecto está en `siete-vidas/juego/` (Godot 4.3, GDScript con tipos). Antes de subir cambios al juego, corre la prueba de movimiento (ver `siete-vidas/juego/README.md`). Si Godot no está instalado en la sesión, instálalo como indica `siete-vidas/memoria/03-arte-y-herramientas.md`.
 
-**Arquitectura (regla):** lo nuevo se arma con piezas (componentes) y datos, sin heredar entidades y sin archivos de más de ~600 líneas; cómo y recetas en `siete-vidas/memoria/07-arquitectura.md`.
+**Arquitectura (regla):** lo nuevo se arma con piezas (componentes) y datos, sin heredar entidades y sin archivos de más de ~600 líneas; cómo y recetas en `siete-vidas/memoria/07-arquitectura.md`. La interfaz solo escucha y muestra: colores y letras del tema (`datos/ui/tema.tres`, vía `Estilo`), textos por clave con `tr()` (`traducciones/textos.csv`), pantallas por la pila `GestorPantallas` y teclas leídas de `Controles`.

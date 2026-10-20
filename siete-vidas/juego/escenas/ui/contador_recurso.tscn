@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/piezas/contador_recurso.gd" id="1_contador"]
+
+[node name="ContadorRecurso" type="Control"]
+mouse_filter = 2
+script = ExtResource("1_contador")

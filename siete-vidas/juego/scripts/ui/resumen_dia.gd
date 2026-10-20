@@ -26,12 +26,12 @@ var _frase_visible := 0.0
 ## Filas a partir de la agenda y las recompensas (más los perdones de Valeria, que cuenta el nivel).
 static func filas_de(agenda: Agenda, recompensas: Recompensas, perdones := 0) -> Array:
 	return [
-		["Travesuras de la agenda", agenda.cumplidas(), agenda.total(), ""],
-		["Secretas", agenda.secretas_cumplidas(), agenda.total_secretas(), ""],
-		["Calcetines al nido", recompensas.calcetines, -1, recompensas.texto_ranura()],
-		["Fotos vergonzosas", recompensas.fotos, -1, "a la galería"],
-		["Snacks en el bolsillo", recompensas.snacks(), Felipe.SNACKS_MAX, ""],
-		["Valeria te perdonó", perdones, -1, "veces"],
+		[TranslationServer.translate("RESUMEN_AGENDA"), agenda.cumplidas(), agenda.total(), ""],
+		[TranslationServer.translate("RESUMEN_SECRETAS"), agenda.secretas_cumplidas(), agenda.total_secretas(), ""],
+		[TranslationServer.translate("RESUMEN_CALCETINES"), recompensas.calcetines, -1, recompensas.texto_ranura()],
+		[TranslationServer.translate("RESUMEN_FOTOS"), recompensas.fotos, -1, TranslationServer.translate("RESUMEN_FOTOS_NOTA")],
+		[TranslationServer.translate("RESUMEN_SNACKS"), recompensas.snacks(), Felipe.SNACKS_MAX, ""],
+		[TranslationServer.translate("RESUMEN_PERDONES"), perdones, -1, TranslationServer.translate("RESUMEN_PERDONES_NOTA")],
 	]
 
 
@@ -54,7 +54,7 @@ func _ready() -> void:
 	_lienzo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_lienzo.draw.connect(_dibujar)
 	add_child(_lienzo)
-	get_tree().paused = true
+	GestorPantallas.de(self).abrir(self)
 
 
 func _process(delta: float) -> void:
@@ -85,59 +85,59 @@ func _apretado(accion: String) -> bool:
 
 
 func cerrar() -> void:
-	get_tree().paused = false
+	GestorPantallas.de(self).cerrar(self)
 	cerrado.emit()
 	queue_free()
 
 
 func _dibujar() -> void:
 	var c := _lienzo
-	var fuente := ThemeDB.fallback_font
+	var fuente := Estilo.fuente()
 	var entrada := minf(_tiempo * 4.0, 1.0)
-	c.draw_rect(Rect2(0, 0, 640, 360), Color(0.03, 0.06, 0.05, 0.82 * entrada))
+	c.draw_rect(Rect2(0, 0, 640, 360), Estilo.color(&"resumen_velo", Estilo.color(&"resumen_velo").a * entrada))
 	# Paño verde con borde dorado.
 	var panel := Rect2(110, 14, 420, 334)
-	c.draw_rect(panel.grow(3), Color(0.85, 0.65, 0.25))
-	c.draw_rect(panel, Color(0.12, 0.3, 0.24))
-	_texto(c, fuente, Vector2(320, 42), "FIN DEL DÍA", 22, Color(1.0, 0.85, 0.3), true)
-	_texto(c, fuente, Vector2(320, 57), "Informe de Su Majestad", 10, Color(0.8, 0.95, 0.85), true)
+	c.draw_rect(panel.grow(3), Estilo.color(&"resumen_borde"))
+	c.draw_rect(panel, Estilo.color(&"resumen_pano"))
+	_texto(c, fuente, Vector2(320, 42), tr("RESUMEN_TITULO"), 22, Estilo.color(&"resumen_titulo"), true)
+	_texto(c, fuente, Vector2(320, 57), tr("RESUMEN_SUBTITULO"), 10, Estilo.color(&"resumen_subtitulo"), true)
 	var y := 66.0
 	for i in _mostradas:
 		var fila: Array = filas[i]
 		var g := _golpes[i]
 		var caja := Rect2(126, y, 388, 30)
-		c.draw_rect(caja, Color(0.07, 0.18, 0.14))
-		c.draw_rect(Rect2(caja.position, Vector2(5, caja.size.y)), Color(1.0, 0.45, 0.35) if i % 2 == 0 else Color(0.35, 0.65, 1.0))
-		_texto(c, fuente, Vector2(138, y + 15), String(fila[0]), 13, Color(0.95, 0.95, 0.9), false)
+		c.draw_rect(caja, Estilo.color(&"resumen_fila"))
+		c.draw_rect(Rect2(caja.position, Vector2(5, caja.size.y)), Estilo.color(&"resumen_marca_a") if i % 2 == 0 else Estilo.color(&"resumen_marca_b"))
+		_texto(c, fuente, Vector2(138, y + 15), String(fila[0]), 13, Estilo.color(&"resumen_texto"), false)
 		var nota := String(fila[3]) if fila.size() > 3 else ""
 		if nota != "":
-			_texto(c, fuente, Vector2(138, y + 26), nota, 9, Color(0.7, 0.85, 0.75), false)
+			_texto(c, fuente, Vector2(138, y + 26), nota, 9, Estilo.color(&"resumen_nota"), false)
 		var numero := str(int(_valores[i]))
 		if int(fila[2]) >= 0:
 			numero += "/%d" % fila[2]
 		var completo := int(fila[2]) >= 0 and int(_valores[i]) >= int(fila[2])
 		var tam := 17 + int(8.0 * g)
 		var ancho := fuente.get_string_size(numero, HORIZONTAL_ALIGNMENT_LEFT, -1, tam).x
-		_texto(c, fuente, Vector2(504 - ancho, y + 21 - 3.0 * g), numero, tam, Color(1.0, 0.85, 0.3) if completo else Color.WHITE, false)
+		_texto(c, fuente, Vector2(504 - ancho, y + 21 - 3.0 * g), numero, tam, Estilo.color(&"resumen_titulo") if completo else Estilo.color(&"blanco"), false)
 		y += 34.0
 	if _frase_visible > 0.0:
 		var a := _frase_visible
 		var caja := Rect2(126, 274, 388, 50)
-		c.draw_rect(caja, Color(0.13, 0.09, 0.12, 0.95 * a))
-		c.draw_rect(caja, Color(0.95, 0.85, 0.6, a), false, 2.0)
+		c.draw_rect(caja, Estilo.color(&"resumen_frase_fondo", 0.95 * a))
+		c.draw_rect(caja, Estilo.color(&"borde_dorado", a), false, 2.0)
 		var animo := int(frase[1])
 		var cara := Rect2(animo % 3 * LADO_RETRATO, animo / 3 * LADO_RETRATO, LADO_RETRATO, LADO_RETRATO)
-		c.draw_texture_rect_region(RETRATOS, Rect2(130, 278, 42, 42), cara, Color(1, 1, 1, a))
-		c.draw_string(fuente, Vector2(180, 290), "FELIPE", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1.0, 0.8, 0.4, a))
-		c.draw_multiline_string(fuente, Vector2(180, 305), String(frase[0]), HORIZONTAL_ALIGNMENT_LEFT, 326, 13, 2, Color(1, 0.97, 0.92, a))
+		c.draw_texture_rect_region(RETRATOS, Rect2(130, 278, 42, 42), cara, Estilo.color(&"blanco", a))
+		c.draw_string(fuente, Vector2(180, 290), tr("NOMBRE_felipe"), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Estilo.color(&"nombre_hablante", a))
+		c.draw_multiline_string(fuente, Vector2(180, 305), String(frase[0]), HORIZONTAL_ALIGNMENT_LEFT, 326, 13, 2, Estilo.color(&"texto_claro", a))
 		if terminado and fmod(_tiempo, 1.0) < 0.7:
 			IconosBotones.dibujar(c, "saltar_dialogo", Vector2(268, 330), 12.0)
-			_texto(c, fuente, Vector2(286, 340), "seguir", 9, Color(1, 1, 1, 0.75), false)
+			_texto(c, fuente, Vector2(286, 340), tr("RESUMEN_SEGUIR"), 9, Estilo.color(&"resumen_pista"), false)
 
 
 func _texto(c: Control, fuente: Font, pos: Vector2, texto: String, tamano: int, color: Color, centrado: bool) -> void:
 	var p := pos
 	if centrado:
 		p.x -= fuente.get_string_size(texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano).x / 2.0
-	c.draw_string_outline(fuente, p, texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano, 4, Color(0.03, 0.05, 0.04))
+	c.draw_string_outline(fuente, p, texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano, 4, Estilo.color(&"resumen_contorno"))
 	c.draw_string(fuente, p, texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano, color)

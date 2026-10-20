@@ -25,6 +25,10 @@ window/stretch/mode="viewport"
 window/stretch/aspect="keep"
 window/stretch/scale_mode="integer"
 
+[gui]
+
+theme/custom="res://datos/ui/tema.tres"
+
 [input]
 
 mover_izquierda={
@@ -108,6 +112,11 @@ saltar_dialogo={
 , Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"button_index":9,"pressure":0.0,"pressed":false,"script":null)
 ]
 }
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://traducciones/textos.es.translation")
+locale/fallback="es"
 
 [rendering]
 

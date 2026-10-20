@@ -12,7 +12,12 @@ signal terminada
 
 enum Fase { ESPERANDO, ENTRADA, PELEA, FIN }
 
-var fase := Fase.ESPERANDO
+var fase := Fase.ESPERANDO:
+	set(valor):
+		fase = valor
+		# La barra del jefe se ve solo durante la pelea.
+		if presentacion:
+			presentacion.mostrar_barra = fase == Fase.PELEA
 var datos: DatosJefe
 var jefe: Enemigo
 var felipe: Felipe
@@ -20,7 +25,12 @@ var nivel: Nivel
 ## Donde se pelea.
 var arena: Rect2
 ## Cuántas fases venció ya Felipe (A.S.P.I.: apagados).
-var vencidas := 0
+## La Vida del jefe refleja las fases que le quedan: la barra (BarraVida) la escucha por su señal `cambio`.
+var vencidas := 0:
+	set(valor):
+		vencidas = valor
+		if jefe and jefe.vida:
+			jefe.vida.fijar(jefe.vida.maximo - vencidas)
 ## Entrada de 8 pasos, carteles y barra de vida (componente reutilizable para cualquier jefe).
 var presentacion: PresentacionJefe
 ## Felipe salió de la arena (perdió una vida): el jefe espera y al volver hay entrada corta.
@@ -92,7 +102,7 @@ func empezar() -> void:
 	if fase != Fase.ESPERANDO:
 		return
 	fase = Fase.ENTRADA
-	presentacion.divisiones = datos.fases
+	presentacion.conectar_vida(jefe.vida)
 	presentacion.pantallas = nivel.pantallas
 	_al_empezar()
 	presentacion.presentar(felipe, jefe, Rect2(arena.position.x, 0, arena.size.x, nivel.datos.alto))

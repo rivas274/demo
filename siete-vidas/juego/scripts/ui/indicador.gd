@@ -20,20 +20,10 @@ extends Node2D
 ## Primera vez que Felipe se acerca a un objeto con primera_frase(): para el diálogo.
 signal primera_vez(objeto: Node2D, frase: String)
 
-## Crema cálido y suave (no blanco): late entre 55 % y 100 % de opacidad.
-const COLOR_CONTORNO := Color(1.0, 0.86, 0.56)
-const FONDO := Color(0.13, 0.09, 0.12, 0.9)
-const BORDE := Color(0.95, 0.85, 0.6)
-const TEXTO := Color(1, 0.97, 0.92)
+## Colores en el tema (Estilo): el contorno es crema cálido y suave (no blanco) y late entre 55 % y 100 % de opacidad.
 ## Placa del rótulo (crítica de Gemini: la caja se veía genérica): marco de madera de 2 px con canto claro arriba y
 ## oscuro abajo, contorno casi negro, esquinas recortadas de pixel, filete crema por dentro (el borde del diálogo) y
 ## sombra dura de 2 px. El interior es el del diálogo, para que todo el texto del juego se lea igual.
-const MADERA := Color("8a5a3c")
-const MADERA_CLARA := Color("c08a5a")
-const MADERA_OSCURA := Color("5a3626")
-const CONTORNO := Color("1e1214")
-const SOMBRA := Color(0.05, 0.02, 0.03, 0.45)
-const SOMBRA_TEXTO := Color(0.05, 0.02, 0.03, 0.9)
 ## Altura de la burbuja sobre los pies de Felipe (mide 67 px con la cola).
 const ALTURA_BURBUJA := 84.0
 const TAM_LETRA := 10
@@ -80,7 +70,7 @@ func _ready() -> void:
 	var shader := Shader.new()
 	shader.code = SHADER
 	_material.shader = shader
-	_material.set_shader_parameter("color", COLOR_CONTORNO)
+	_material.set_shader_parameter("color", Estilo.color(&"indicador_contorno"))
 	_contorno = Node2D.new()
 	_contorno.name = "Contorno"
 	_contorno.z_as_relative = false
@@ -144,7 +134,7 @@ func _dibujar_contorno() -> void:
 			_material.set_shader_parameter("limites", Vector4(region.position.x / tam.x, region.position.y / tam.y, region.end.x / tam.x, region.end.y / tam.y))
 			# Late suave (no parpadea): de 55 % a 100 %.
 			var pulso := 0.775 + 0.225 * sin(Time.get_ticks_msec() / 1000.0 * 4.0)
-			_material.set_shader_parameter("color", Color(COLOR_CONTORNO, pulso * _aparecer))
+			_material.set_shader_parameter("color", Estilo.color(&"indicador_contorno", pulso * _aparecer))
 			if arte.get("espejo", false):
 				_contorno.draw_set_transform(Vector2(rect.get_center().x * 2.0, 0.0), 0.0, Vector2(-1, 1))
 			# Un píxel más por lado para que el contorno quepa fuera del dibujo.
@@ -156,22 +146,22 @@ func _dibujar_placa(caja: Rect2, punta: Vector2) -> void:
 	var marco := caja.grow(2.0)
 	var fuera := marco.grow(1.0)
 	# Sombra dura (abajo a la derecha), con el piquito.
-	_rect_recortado(Rect2(fuera.position + Vector2(2, 2), fuera.size), SOMBRA)
-	draw_colored_polygon(PackedVector2Array([punta + Vector2(-3, 4), punta + Vector2(7, 4), punta + Vector2(2, 9)]), SOMBRA)
+	_rect_recortado(Rect2(fuera.position + Vector2(2, 2), fuera.size), Estilo.color(&"indicador_sombra"))
+	draw_colored_polygon(PackedVector2Array([punta + Vector2(-3, 4), punta + Vector2(7, 4), punta + Vector2(2, 9)]), Estilo.color(&"indicador_sombra"))
 	# Contorno y marco de madera con esquinas recortadas.
-	_rect_recortado(fuera, CONTORNO)
-	draw_rect(marco, MADERA)
-	draw_rect(Rect2(marco.position, Vector2(marco.size.x, 1)), MADERA_CLARA)
-	draw_rect(Rect2(marco.position.x, marco.end.y - 1, marco.size.x, 1), MADERA_OSCURA)
+	_rect_recortado(fuera, Estilo.color(&"indicador_trazo"))
+	draw_rect(marco, Estilo.color(&"madera"))
+	draw_rect(Rect2(marco.position, Vector2(marco.size.x, 1)), Estilo.color(&"madera_clara"))
+	draw_rect(Rect2(marco.position.x, marco.end.y - 1, marco.size.x, 1), Estilo.color(&"madera_oscura"))
 	# Piquito de madera hacia Felipe, con su contorno.
-	draw_colored_polygon(PackedVector2Array([punta + Vector2(-6, 1), punta + Vector2(6, 1), punta + Vector2(0, 7)]), CONTORNO)
-	draw_colored_polygon(PackedVector2Array([punta + Vector2(-4, 1), punta + Vector2(4, 1), punta + Vector2(0, 5)]), MADERA)
+	draw_colored_polygon(PackedVector2Array([punta + Vector2(-6, 1), punta + Vector2(6, 1), punta + Vector2(0, 7)]), Estilo.color(&"indicador_trazo"))
+	draw_colored_polygon(PackedVector2Array([punta + Vector2(-4, 1), punta + Vector2(4, 1), punta + Vector2(0, 5)]), Estilo.color(&"madera"))
 	# Interior del diálogo y filete crema.
-	draw_rect(caja, Color(FONDO, 1.0))
-	draw_rect(Rect2(caja.position + Vector2(0.5, 0.5), caja.size - Vector2(1, 1)), Color(BORDE, 0.55), false, 1.0)
+	draw_rect(caja, Estilo.color(&"indicador_fondo", 1.0))
+	draw_rect(Rect2(caja.position + Vector2(0.5, 0.5), caja.size - Vector2(1, 1)), Estilo.color(&"borde_dorado", 0.55), false, 1.0)
 	# Clavitos de bronce en las esquinas del marco.
 	for esquina: Vector2 in [marco.position + Vector2(1, 1), Vector2(marco.end.x - 2, marco.position.y + 1)]:
-		draw_rect(Rect2(esquina, Vector2(1, 1)), Color("e6c06a"))
+		draw_rect(Rect2(esquina, Vector2(1, 1)), Estilo.color(&"indicador_clavo"))
 
 
 ## Rectángulo con las cuatro esquinas recortadas un pixel (borde de pixel art, no una caja de interfaz lisa).
@@ -189,7 +179,7 @@ func tiene_arte(cosa: Node2D) -> bool:
 func _draw() -> void:
 	if verbo == "" or felipe == null:
 		return
-	var fuente := ThemeDB.fallback_font
+	var fuente := Estilo.fuente()
 	var accion := "interactuar"
 	var ancho_icono := IconosBotones.ancho(accion, 14.0)
 	var ancho_texto := fuente.get_string_size(verbo, HORIZONTAL_ALIGNMENT_LEFT, -1, TAM_LETRA).x
@@ -201,8 +191,8 @@ func _draw() -> void:
 	_dibujar_placa(caja, Vector2(centro.x, caja.end.y))
 	IconosBotones.dibujar(self, accion, caja.position + Vector2(4, 3), 14.0)
 	# Texto con sombra dura de 1 px, como el del diálogo y la libreta (misma letra).
-	draw_string(fuente, caja.position + Vector2(ancho_icono + 9.0, 15.0), verbo, HORIZONTAL_ALIGNMENT_LEFT, -1, TAM_LETRA, SOMBRA_TEXTO)
-	draw_string(fuente, caja.position + Vector2(ancho_icono + 8.0, 14.0), verbo, HORIZONTAL_ALIGNMENT_LEFT, -1, TAM_LETRA, TEXTO)
+	draw_string(fuente, caja.position + Vector2(ancho_icono + 9.0, 15.0), verbo, HORIZONTAL_ALIGNMENT_LEFT, -1, TAM_LETRA, Estilo.color(&"indicador_sombra_texto"))
+	draw_string(fuente, caja.position + Vector2(ancho_icono + 8.0, 14.0), verbo, HORIZONTAL_ALIGNMENT_LEFT, -1, TAM_LETRA, Estilo.color(&"texto_claro"))
 	var progreso := felipe.progreso_comer_snack()
 	if progreso > 0.0 and objeto == null:
-		draw_rect(Rect2(caja.position + Vector2(2, tam.y - 3), Vector2((tam.x - 4) * progreso, 2)), Color(1.0, 0.75, 0.35))
+		draw_rect(Rect2(caja.position + Vector2(2, tam.y - 3), Vector2((tam.x - 4) * progreso, 2)), Estilo.color(&"indicador_verbo"))

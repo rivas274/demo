@@ -1,0 +1,27 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/base/menu_ui.gd" id="1_menu"]
+
+[node name="MenuPausa" type="VBoxContainer"]
+offset_left = 260.0
+offset_top = 160.0
+offset_right = 380.0
+offset_bottom = 236.0
+theme_override_constants/separation = 4
+alignment = 1
+script = ExtResource("1_menu")
+
+[node name="Continuar" type="Button" parent="."]
+layout_mode = 2
+theme_type_variation = &"BotonMenu"
+text = "MENU_CONTINUAR"
+
+[node name="Reiniciar" type="Button" parent="."]
+layout_mode = 2
+theme_type_variation = &"BotonMenu"
+text = "MENU_REINICIAR"
+
+[node name="Salir" type="Button" parent="."]
+layout_mode = 2
+theme_type_variation = &"BotonMenu"
+text = "MENU_SALIR"

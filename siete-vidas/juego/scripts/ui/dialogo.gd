@@ -12,6 +12,7 @@ extends CanvasLayer
 
 signal dicho(quien: String, texto: String)
 
+const ESCENA := "res://escenas/ui/cuadro_dialogo.tscn"
 const RETRATOS_FELIPE := "res://assets/felipe/felipe-retratos.png"
 ## Hoja de Valeria y A.S.P.I. (Gemini, tanda 3B; la recorta herramientas/preparar_retratos.py): 3 x 2 cuadros.
 ## Si falta, se usa el retrato provisional dibujado por código (RetratoValeria).
@@ -71,47 +72,14 @@ func _ready() -> void:
 	layer = Capas.CAPA_DIALOGO
 	add_to_group(PresentacionJefe.GRUPO_OCULTAR)
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_caja = Panel.new()
-	var estilo := StyleBoxFlat.new()
-	estilo.bg_color = Color(0.13, 0.09, 0.12, 0.94)
-	estilo.border_color = Color(0.95, 0.85, 0.6)
-	estilo.set_border_width_all(2)
-	estilo.set_corner_radius_all(3)
-	_caja.add_theme_stylebox_override("panel", estilo)
-	_caja.position = Vector2(8, Y_ARRIBA)
-	_caja.size = Vector2(624, 56)
-	_caja.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# El cuadro (panel, marco, retrato, nombre y texto) se arma en el editor: escenas/ui/cuadro_dialogo.tscn; su
+	# aspecto sale del tema (variaciones CuadroDialogo, NombreDialogo y TextoDialogo).
+	_caja = (load(ESCENA) as PackedScene).instantiate()
 	add_child(_caja)
-	var marco := ColorRect.new()
-	marco.color = Color(0.85, 0.75, 0.6)
-	marco.position = Vector2(4, 4)
-	marco.size = Vector2(48, 48)
-	_caja.add_child(marco)
-	_retrato = TextureRect.new()
-	_retrato.position = Vector2(5, 5)
-	_retrato.size = Vector2(46, 46)
-	_retrato.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_retrato.stretch_mode = TextureRect.STRETCH_SCALE
-	_caja.add_child(_retrato)
-	_retrato_codigo = RetratoValeria.new()
-	_retrato_codigo.position = Vector2(5, 5)
-	_retrato_codigo.size = Vector2(46, 46)
-	_caja.add_child(_retrato_codigo)
-	_nombre = Label.new()
-	_nombre.position = Vector2(60, 1)
-	_nombre.add_theme_font_size_override("font_size", 11)
-	_nombre.add_theme_color_override("font_color", Color(1.0, 0.8, 0.4))
-	_caja.add_child(_nombre)
-	_texto = RichTextLabel.new()
-	_texto.position = Vector2(60, 16)
-	_texto.size = Vector2(ANCHO_TEXTO, 38)
-	_texto.scroll_active = false
-	_texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_texto.add_theme_font_size_override("normal_font_size", TAM_LETRA)
-	_texto.add_theme_color_override("default_color", Color(1, 0.97, 0.92))
-	_texto.add_theme_constant_override("line_separation", -3)
-	_texto.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_caja.add_child(_texto)
+	_retrato = _caja.get_node("%Retrato")
+	_retrato_codigo = _caja.get_node("%RetratoCodigo")
+	_nombre = _caja.get_node("%Nombre")
+	_texto = _caja.get_node("%Texto")
 	_caja.visible = false
 
 
@@ -168,10 +136,10 @@ func lugar() -> float:
 ## Cuántas líneas ocupa la frase en el cuadro (las frases deben caber en 1 o 2).
 static func lineas_de(texto: String) -> int:
 	var limpio := texto
-	for accion: String in IconosBotones.TEXTO:
+	for accion: String in Controles.ACCIONES:
 		limpio = limpio.replace("{%s}" % accion, "MM")
 	var parrafo := TextParagraph.new()
-	parrafo.add_string(limpio, ThemeDB.fallback_font, TAM_LETRA)
+	parrafo.add_string(limpio, Estilo.fuente(), TAM_LETRA)
 	parrafo.width = ANCHO_TEXTO
 	parrafo.break_flags = TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE
 	return parrafo.get_line_count()
@@ -183,12 +151,13 @@ func _mostrar(quien: String, texto: String, animo: int) -> void:
 	_ultima = texto
 	historial.append([quien, texto])
 	_caja.visible = true
-	_escribir(texto)
+	# Las frases pasan por la traducción (hoy en español; mañana, una clave por frase en traducciones/).
+	_escribir(tr(texto))
 	_visibles = 0.0
 	_texto.visible_characters = 0
 	_espera = espera_base + espera_por_letra * texto.length()
 	var datos: Dictionary = PERSONAJES.get(quien, PERSONAJES["felipe"])
-	_nombre.text = String(datos["nombre"])
+	_nombre.text = tr("NOMBRE_" + quien) if PERSONAJES.has(quien) else String(datos["nombre"])
 	var hoja := _hoja(String(datos["hoja"]))
 	var cuadros: Array = datos["cuadros"]
 	_retrato.visible = hoja != null

@@ -79,6 +79,10 @@ func _ready() -> void:
 		var reproductor := AudioStreamPlayer.new()
 		add_child(reproductor)
 		_sonidos.append(reproductor)
+	# Una sola pila de pantallas (título, pausa, libreta, resumen): decide qué responde a las teclas y la pausa.
+	add_child(GestorPantallas.new())
+	# Teclas y botones que el jugador cambió (si los guardó).
+	Controles.cargar()
 	# Capas de pantalla de la tabla única (Capas): título, intro y pausa tapan todo (G7).
 	$Interfaz.layer = Capas.CAPA_INTERFAZ
 	var capa_pantallas := CanvasLayer.new()

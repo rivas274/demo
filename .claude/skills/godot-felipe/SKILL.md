@@ -21,8 +21,8 @@ Mapa, lista de piezas y recetas en `siete-vidas/memoria/07-arquitectura.md`. Reg
 
 ## 1. Cómo está armado Felipe
 
-- `Felipe` es un `CharacterBody2D`. Sus estados, el movimiento y el inicio de cada acción viven en `felipe.gd`; sus partes en `scripts/felipe/`: `EfectosFelipe` (`felipe.efectos`: estirar, inclinar, aterrizar, polvo, estela), `AnimadorFelipe` (`felipe.animador`: elige la animación sin cambiar el estado) y `ManasFelipe` (`felipe.manas`: lo que pasa en el cuadro de impacto y qué tiene al alcance). Sus corazones son la pieza `Vida` (nodo de `felipe.tscn`). Todo el movimiento va en `_physics_process`: leer entrada → `match estado` → ajustar `velocity` → `move_and_slide()` → `_actualizar_suelo()` → `_actualizar_animacion()`.
-- **Estado principal:** `enum Estado { SUELO, AIRE, ZOOMIES, ZARPAZO, COMIENDO, ATERRIZANDO, OCIO, DESMAYADO, ARANANDO, MAULLANDO, SUBIENDO_ESCALON, RONRONEANDO }` (12: el tope de la sección 3 antes de pensar en una máquina por nodos).
+- `Felipe` es un `CharacterBody2D` (`scripts/entidades/felipe/`). El movimiento, la entrada y el inicio de cada acción viven en `felipe.gd`; **cada estado es un objeto** en `estados/` (`EstadoFelipe` con `entrar(datos)`, `salir()`, `fisica(delta, direccion)`, `animacion_terminada()`); sus partes: `EfectosFelipe` (`felipe.efectos`: estirar, inclinar, aterrizar, polvo, estela), `AnimadorFelipe` (`felipe.animador`), `ManasFelipe` (`felipe.manas`: el cuadro de impacto y qué tiene al alcance), `AgachadoFelipe` y `TreparFelipe` (posturas paralelas). Sus corazones son la pieza `Vida` (nodo de `escenas/entidades/felipe.tscn`). Cada cuadro de `_physics_process`: leer entrada → `_estado.fisica(delta, direccion)` → `move_and_slide()` → suelo → animación.
+- **Estado principal:** `felipe.estado` es el `enum Estado { SUELO, AIRE, ZOOMIES, ZARPAZO, COMIENDO, ATERRIZANDO, OCIO, DESMAYADO, ARANANDO, MAULLANDO, SUBIENDO_ESCALON, RONRONEANDO }`; asignarlo o llamar `felipe.cambiar_estado(Estado.X, datos)` ejecuta `salir()` del actual y `entrar(datos)` del nuevo. Tabla de qué archivo lleva cada estado en `siete-vidas/memoria/07-arquitectura.md` (Felipe: estados). El jugo de cada acción (futura `RecetaJugo`) se llama desde `entrar()`/`salir()` del estado.
 - **Habilidades por nivel:** `tiene_doble_salto`, `tiene_zoomies` y `puede_trepar` (`@export`, apagadas por defecto: en el nivel 1 no están). Las pruebas que las usan las prenden explícitamente.
 - **Estados paralelos como booleanos:** `agachado` y `trepando` conviven con el enum (se puede estar en SUELO y agachado). Es la forma barata de una máquina paralela: no crees `Estado.AGACHADO`.
 - **Perillas** con `@export` (velocidades, gravedad, tiempos) y reglas fijas como `const` (`ESCALA_SPRITE`, `DEFORMACION_MAXIMA`, `CUADRO_*`, `ALTO_DE_PIE`). Nombres en español y tipos en todo.
@@ -44,14 +44,14 @@ Al cambiar estos números, corre `prueba_movimiento.gd` (mide altura del salto, 
 ## 3. Agregar una acción nueva (por ejemplo, maullar)
 
 1. **Entrada:** acción en el Input Map de `project.godot` (teclado y mando) y en `Felipe.ACCIONES` (así interrumpe el ocio).
-2. **Estado:** si Felipe se queda quieto mientras la hace, agrega `Estado.MAULLANDO` y trátalo como `ZARPAZO`/`COMIENDO` en el `match` (frena y aplica gravedad). Si se puede hacer mientras se mueve, usa un booleano o un temporizador, no un estado.
-3. **Entrar:** en `_intentar_acciones()`, con su condición (en el piso, no agachado).
-4. **Salir:** en `_al_terminar_animacion()` para acciones de un solo ciclo; nunca dejes un estado sin salida.
+2. **Estado:** si Felipe se queda quieto mientras la hace, agrega el valor al enum (`Estado.MAULLANDO`) y en `_crear_estados()` un `EstadoAccion.new(self, Estado.MAULLANDO, "maullar")` (frena, gravedad, su animación y vuelve al terminar). Si necesita algo propio, un archivo nuevo en `estados/` que extienda `EstadoFelipe`. Si se puede hacer mientras se mueve, usa un booleano o un temporizador, no un estado.
+3. **Entrar:** en `intentar_acciones()` (lo llama `EstadoLibre`), con su condición (en el piso, no agachado): `cambiar_estado(Estado.X)`.
+4. **Salir:** en `animacion_terminada()` o `fisica()` de su estado, con `felipe.cambiar_estado(...)`; nunca dejes un estado sin salida. Lo que el estado crea (un objeto, un objetivo) se limpia en `salir()`.
 5. **Animación:** línea en `AnimacionesFelipe.HOJAS` con una hoja desde Felipe A (la encarga el `director-arte`, con costo y aprobación). Mientras no exista, efectos de código.
 6. **Prueba:** una comprobación en `prueba_mecanicas.gd` o `prueba_movimiento.gd`.
 7. **Tres lugares:** memoria (tabla **Acciones de Felipe**), ficha de concepto (regenerar y publicar) y juego (`CLAUDE.md`).
 
-**¿Cuándo dejar el enum?** Hoy hay 8 estados y 2 booleanos: el enum con `match` alcanza y se lee en un archivo. Si pasa de unos 12 estados o cada acción necesita su propia entrada y salida larga, conviene una máquina por nodos (un nodo por estado con `entrar()`, `salir()`, `fisica()`). Proponlo al creador antes de cambiar; no lo hagas de paso.
+**Máquina de estados (2026-10-20):** ya es un objeto por estado (patrón Estado, `RefCounted`, no nodos). El enum se queda como nombre público del estado (lo leen pruebas, guion e interfaz).
 
 ## 4. El efecto en el cuadro justo
 

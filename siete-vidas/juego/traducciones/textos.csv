@@ -1,0 +1,66 @@
+keys,es
+TECLA_Space,Espacio
+TECLA_Escape,Esc
+TECLA_Enter,Enter
+TECLA_Tab,Tab
+TECLA_Shift,Shift
+TECLA_Left,←
+TECLA_Right,→
+TECLA_Up,↑
+TECLA_Down,↓
+UI_VIDAS,%d vidas
+UI_COLLAR,Collar de la Vergüenza
+UI_LOGRO_NUEVO,Nuevo logro desbloqueado
+UI_AGENDA_CONTADOR,AGENDA %d/%d
+UI_TRAVESURA_CUMPLIDA,¡TRAVESURA CUMPLIDA!
+UI_TRAVESURA_SECRETA,¡TRAVESURA SECRETA!
+UI_RECOMPENSA,RECOMPENSA: %s
+TITULO_JUEGO,FELIPE
+TITULO_SUBTITULO,"Nueve Vidas, Cero Disculpas"
+TITULO_DEMO,Demo: La Gran Fuga
+UI_JUGAR,[%s] Jugar
+UI_CONTINUAR_TECLA,[%s] Continuar
+INTRO_1,Valeria subió a internet el video de Su Majestad atorado en una caja de zapatos.
+INTRO_2,Doce millones de vistas. Cero disculpas.
+INTRO_3,"""Me voy de esta casa."" — Felipe Ron con Pasas I"
+PAUSA_TITULO,Pausa
+MENU_CONTINUAR,Continuar
+MENU_REINICIAR,Reiniciar
+MENU_SALIR,Salir
+FIN_TITULO,Demo completada
+FIN_FRASE,"""No me caí. Aterricé con estilo."" — Poder nuevo: Caer de Pie"
+FIN_TIEMPO,Tiempo: %s
+FIN_CALCETINES,Calcetines: %s
+FIN_LOGROS,Logros: %s
+FIN_VIDAS,Vidas perdidas: %s
+FIN_CONTINUARA,Continuará en La Cuadra...   [%s] Jugar de nuevo
+LIBRETA_TITULO,Agenda de Su Majestad
+LIBRETA_SUBTITULO,Cosas por hacer hoy (en orden de importancia: todas)
+LIBRETA_CERRAR,cerrar
+LIBRETA_CUENTA,%d de %d hechas
+LIBRETA_HECHO,¡HECHO!  Recompensa: %s
+LIBRETA_SECRETA,secreta  ·  recompensa: ???
+LIBRETA_RECOMPENSA,recompensa: %s
+CUARTO_sala,Sala
+CUARTO_recibidor,Recibidor
+CUARTO_cocina,Cocina
+CUARTO_pasillo,Pasillo
+CUARTO_dormitorio,Dormitorio
+CUARTO_estudio,Estudio
+CUARTO_balcon,Balcón
+RESUMEN_TITULO,FIN DEL DÍA
+RESUMEN_SUBTITULO,Informe de Su Majestad
+RESUMEN_SEGUIR,seguir
+RESUMEN_AGENDA,Travesuras de la agenda
+RESUMEN_SECRETAS,Secretas
+RESUMEN_CALCETINES,Calcetines al nido
+RESUMEN_FOTOS,Fotos vergonzosas
+RESUMEN_FOTOS_NOTA,a la galería
+RESUMEN_SNACKS,Snacks en el bolsillo
+RESUMEN_PERDONES,Valeria te perdonó
+RESUMEN_PERDONES_NOTA,veces
+NOMBRE_felipe,FELIPE
+NOMBRE_valeria,VALERIA
+NOMBRE_aspi,A.S.P.I.
+JEFE_BATALLA_INICIADA,¡BATALLA INICIADA!
+JEFE_LEMA_FELIPE,FELIPE · 8 kg de furia

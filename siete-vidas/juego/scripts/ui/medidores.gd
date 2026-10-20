@@ -1,18 +1,26 @@
 class_name Medidores
 extends Control
-## Interfaz con estilo de red social: corazones ("me gusta") de vida, vidas restantes
-## y notificaciones de logros. El peso no se muestra aquí (se quitó la báscula). Arte provisional dibujado con código.
+## Arriba a la izquierda, con estilo de red social: los corazones de Felipe (pieza BarraVida conectada a su Vida), sus
+## vidas restantes, el Collar de la Vergüenza y el aviso de logro. Solo escucha señales (Vida.cambio,
+## Felipe.vidas_cambiadas y collar_cambiado, Pantallas.modo_cambiado): no pregunta nada en cada cuadro.
 
-const ROJO := Color("e0483b")
-const VACIO := Color(0.25, 0.18, 0.18, 0.55)
-const TEXTO := Color("2b2421")
-const FONDO := Color(1, 0.98, 0.95, 0.85)
+const ESCENA_BARRA := "res://escenas/ui/barra_vida.tscn"
 
-var felipe: Felipe
+var felipe: Felipe:
+	set(valor):
+		felipe = valor
+		_conectar_felipe()
 ## Si hay pantallas (título, pausa, final), los medidores solo se ven mientras se juega.
-var pantallas: Pantallas
+var pantallas: Pantallas:
+	set(valor):
+		pantallas = valor
+		if pantallas and not pantallas.modo_cambiado.is_connected(_al_cambiar_modo):
+			pantallas.modo_cambiado.connect(_al_cambiar_modo)
+		_al_cambiar_modo(pantallas.modo if pantallas else Pantallas.Modo.JUGANDO)
 ## El cuadro de diálogo (si hay): el aviso de logro nunca queda debajo ni encima de él (M3).
 var dialogo: Dialogo
+## Los corazones (pieza BarraVida).
+var corazones: BarraVida
 var _notificacion := ""
 var _tiempo_notificacion := 0.0
 var _aviso: Control
@@ -28,6 +36,10 @@ const TAM_AVISO := Vector2(208, 34)
 
 func _ready() -> void:
 	name = "Medidores"
+	corazones = (load(ESCENA_BARRA) as PackedScene).instantiate()
+	corazones.position = Vector2(16, 16)
+	add_child(corazones)
+	_conectar_felipe()
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -58,8 +70,26 @@ func mostrar_logro(titulo: String) -> void:
 
 func _process(delta: float) -> void:
 	_tiempo_notificacion = maxf(0.0, _tiempo_notificacion - delta)
-	queue_redraw()
 	_aviso.queue_redraw()
+
+
+func _conectar_felipe() -> void:
+	if felipe == null or corazones == null:
+		return
+	corazones.conectar(felipe.vida)
+	for senal: Signal in [felipe.vidas_cambiadas, felipe.collar_cambiado]:
+		if not senal.is_connected(_redibujar):
+			senal.connect(_redibujar)
+	queue_redraw()
+
+
+func _redibujar(_valor: Variant = null) -> void:
+	queue_redraw()
+
+
+func _al_cambiar_modo(modo: Pantallas.Modo) -> void:
+	visible = modo == Pantallas.Modo.JUGANDO
+	queue_redraw()
 
 
 ## Hay un aviso de logro en pantalla.
@@ -82,26 +112,23 @@ func rect_logro() -> Rect2:
 
 
 func _draw() -> void:
-	if not felipe or (pantallas and pantallas.modo != Pantallas.Modo.JUGANDO):
+	if not felipe:
 		return
-	var fuente := ThemeDB.fallback_font
-	draw_rect(Rect2(6, 6, 92, 34), FONDO)
-	for i in Felipe.CORAZONES_MAX:
-		_corazon(Vector2(16 + i * 16, 16), ROJO if i < felipe.corazones else VACIO)
-	draw_string(fuente, Vector2(12, 36), "%d vidas" % felipe.vidas, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, TEXTO)
+	draw_rect(Rect2(6, 6, 92, 34), Estilo.color(&"fondo_medidor"))
+	draw_string(Estilo.fuente(), Vector2(12, 36), tr("UI_VIDAS") % felipe.vidas, HORIZONTAL_ALIGNMENT_LEFT, -1, Estilo.letra(&"medidor_vidas"), Estilo.color(&"texto_oscuro"))
 	if felipe.tiene_collar:
-		draw_string(fuente, Vector2(104, 20), "Collar de la Vergüenza", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, ROJO)
+		draw_string(Estilo.fuente(), Vector2(104, 20), tr("UI_COLLAR"), HORIZONTAL_ALIGNMENT_LEFT, -1, Estilo.letra(&"medidor_collar"), Estilo.color(&"rojo"))
 
 
 func _dibujar_aviso() -> void:
 	if not mostrando_logro():
 		return
-	var fuente := ThemeDB.fallback_font
+	var fuente := Estilo.fuente()
 	var caja := rect_logro()
-	_aviso.draw_rect(caja, Color(FONDO, 1.0))
-	_aviso.draw_rect(caja, ROJO, false, 1.0)
-	_aviso.draw_string(fuente, caja.position + Vector2(8, 13), "Nuevo logro desbloqueado", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("6f625b"))
-	_aviso.draw_string(fuente, caja.position + Vector2(8, 27), _notificacion, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, TEXTO)
+	_aviso.draw_rect(caja, Estilo.color(&"fondo_medidor", 1.0))
+	_aviso.draw_rect(caja, Estilo.color(&"rojo"), false, 1.0)
+	_aviso.draw_string(fuente, caja.position + Vector2(8, 13), tr("UI_LOGRO_NUEVO"), HORIZONTAL_ALIGNMENT_LEFT, -1, Estilo.letra(&"logro_titulo"), Estilo.color(&"texto_apagado"))
+	_aviso.draw_string(fuente, caja.position + Vector2(8, 27), _notificacion, HORIZONTAL_ALIGNMENT_LEFT, -1, Estilo.letra(&"logro_nombre"), Estilo.color(&"texto_oscuro"))
 
 
 ## Peso con personalidad: el humor de Felipe según los kilos (no cambia su dibujo ni su movimiento).
@@ -113,9 +140,3 @@ static func nivel_de_peso(kilos: float) -> String:
 		if kilos < nivel[0]:
 			return nivel[1]
 	return NIVELES_PESO[-1][1]
-
-
-func _corazon(centro: Vector2, color: Color) -> void:
-	draw_circle(centro + Vector2(-3, -2), 3.5, color)
-	draw_circle(centro + Vector2(3, -2), 3.5, color)
-	draw_colored_polygon(PackedVector2Array([centro + Vector2(-6.5, -1), centro + Vector2(6.5, -1), centro + Vector2(0, 7)]), color)

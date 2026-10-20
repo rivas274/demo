@@ -39,21 +39,24 @@ const GOLPE := 0.4
 const EMPUJONES := [3.5, 3.75]
 const ZOOM_FELIPE := 2.6
 const ZOOM_JEFE := 3.0
-const TEXTO_INICIO := "¡BATALLA INICIADA!"
+const TEXTO_INICIO := "JEFE_BATALLA_INICIADA"
 ## Lo que se esconde durante la presentación (cada nodo implementa al_presentar_jefe(presentando: bool)).
 const GRUPO_OCULTAR := "ocultar_en_presentacion"
+const ESCENA_BARRA := "res://escenas/ui/barra_jefe.tscn"
+## Barra del jefe arriba a la derecha, lejos de los corazones y del HUD de la Agenda.
+const POS_BARRA := Vector2(402, 4)
 
 ## Datos del jefe.
 var nombre := ""
 var titulo := ""
-var lema_felipe := "FELIPE · 8 kg de furia"
+var lema_felipe := "JEFE_LEMA_FELIPE"
 ## Subtítulo de los pasos 1 y 2 ("…¿Quién cerró?"): [quién, frase]. Vacío = sin subtítulo.
 var frase_sin_vuelta: Array = []
 ## Subtítulo que se está mostrando (para las pruebas; "" si no hay).
 var subtitulo_en_pantalla := ""
 var texto_rugido := ""
-var color_inicio := Color("c81e2a")
-var color_nombre := Color("15101a")
+var color_inicio := Estilo.color(&"jefe_rojo")
+var color_nombre := Estilo.color(&"jefe_banda")
 ## Alto del jefe (para la subida de la cámara de las ruedas a la cara).
 var alto_jefe := 48.0
 ## Encuadre al final del momento del jefe (INF: sobre el jefe) y su zoom.
@@ -81,15 +84,28 @@ var zoom_maximo := 1.0
 ## Penumbra del paso "espera" (0 a 1).
 var penumbra := 0.0
 ## Barra de vida del jefe (0 a 1; negativa la oculta), escudo (0 a 1) y marcas entre golpes.
-var vida := -1.0
-var escudo := 0.0
-var divisiones := 0
+## La barra del jefe (pieza BarraVida conectada a la Vida del jefe con conectar_vida). Se ve durante la pelea
+## (mostrar_barra, lo pone la pelea) y, llenándose, en la entrada.
+var barra: BarraVida
+var mostrar_barra := false
+## Lo que muestra la barra (0 a 1), o -1 si no se ve.
+var vida: float:
+	get:
+		return barra.fraccion if barra and mostrar_barra and not presentando else -1.0
+## Franja azul bajo la barra (A.S.P.I.: el depósito).
+var escudo: float:
+	get:
+		return barra.escudo if barra else 0.0
+	set(valor):
+		if barra:
+			barra.escudo = valor
 
 var _felipe: Felipe
 var _jefe: Node2D
 var _camara: Camera2D
 var _interfaz: Node2D
 var _flash := 0.0
+var _destello: Node2D
 var _sacudida := 0.0
 var _barras := 0.0
 var _cartel := 0.0
@@ -120,6 +136,21 @@ func _ready() -> void:
 	_interfaz.name = "Interfaz del jefe"
 	_interfaz.draw.connect(_dibujar)
 	capa.add_child(_interfaz)
+	barra = (load(ESCENA_BARRA) as PackedScene).instantiate()
+	barra.titulo = "%s — %s" % [nombre, titulo]
+	barra.position = POS_BARRA
+	barra.visible = false
+	capa.add_child(barra)
+	# El destello va encima de todo, también de la barra.
+	_destello = Node2D.new()
+	_destello.name = "Destello"
+	_destello.draw.connect(_dibujar_destello)
+	capa.add_child(_destello)
+
+
+## La barra muestra esta Vida (la del jefe): se mueve sola con sus señales.
+func conectar_vida(vida_jefe: Vida) -> void:
+	barra.conectar(vida_jefe)
 
 
 ## Empieza la entrada completa: congela el juego y toma la cámara. `limites` son los bordes para la cámara.
@@ -210,7 +241,20 @@ func _process(delta: float) -> void:
 			_ola = -1.0
 	if presentando:
 		_avanzar(delta)
+	_actualizar_barra()
 	_interfaz.queue_redraw()
+	_destello.queue_redraw()
+
+
+## En la entrada la barra se llena (pasos barra, música, tamaño y rugido); en la pelea muestra la Vida del jefe.
+func _actualizar_barra() -> void:
+	var en_entrada := presentando and (_en("barra") or _en("musica") or _en("tamano") or _en("rugido")) and pasos == PASOS
+	barra.visible = en_entrada or (mostrar_barra and not presentando)
+	var forzada := -1.0
+	if en_entrada:
+		forzada = _llenado if not (_en("tamano") or _en("rugido")) else 1.0
+	if barra.forzada != forzada:
+		barra.forzada = forzada
 
 
 ## Rango [desde, hasta] del paso con ese nombre en la entrada actual (vacío si no está).
@@ -347,12 +391,12 @@ func _en_felipe() -> Vector2:
 func _dibujar() -> void:
 	var c := _interfaz
 	var tam := c.get_viewport_rect().size
-	var fuente := ThemeDB.fallback_font
+	var fuente := Estilo.fuente()
 	if presentando and penumbra > 0.0:
-		c.draw_rect(Rect2(Vector2.ZERO, tam), Color(0.05, 0.02, 0.08, 0.45 * penumbra))
+		c.draw_rect(Rect2(Vector2.ZERO, tam), Estilo.color(&"jefe_penumbra", 0.45 * penumbra))
 	if _barras > 0.0:
-		c.draw_rect(Rect2(0, 0, tam.x, 44.0 * _barras), Color.BLACK)
-		c.draw_rect(Rect2(0, tam.y - 44.0 * _barras, tam.x, 44.0 * _barras), Color.BLACK)
+		c.draw_rect(Rect2(0, 0, tam.x, 44.0 * _barras), Estilo.color(&"negro"))
+		c.draw_rect(Rect2(0, tam.y - 44.0 * _barras, tam.x, 44.0 * _barras), Estilo.color(&"negro"))
 	if presentando and imaginacion and momento > 0.0 and momento < 1.0:
 		_vineta(c, tam, minf(momento * 4.0, 1.0) * minf((1.0 - momento) * 4.0, 1.0))
 	if subtitulo_en_pantalla != "":
@@ -360,29 +404,29 @@ func _dibujar() -> void:
 		var linea := "%s: %s" % [quien, subtitulo_en_pantalla]
 		var ancho_linea := fuente.get_string_size(linea, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
 		var pos := Vector2((tam.x - ancho_linea) / 2.0, tam.y - 16.0)
-		c.draw_string(fuente, pos + Vector2(1, 1), linea, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.BLACK)
-		c.draw_string(fuente, pos, linea, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 0.95, 0.85))
+		c.draw_string(fuente, pos + Vector2(1, 1), linea, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Estilo.color(&"negro"))
+		c.draw_string(fuente, pos, linea, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Estilo.color(&"jefe_subtitulo"))
 	if _ola >= 0.0:
 		# Ola de polvo del rugido: cruza la pantalla de un lado al otro.
 		var x := _ola / 1.2 * (tam.x + 200.0) - 100.0
 		for i in 18:
 			var y := tam.y - 40.0 - fmod(i * 37.0, 160.0)
-			c.draw_circle(Vector2(x - fmod(i * 53.0, 120.0), y), 10.0 + fmod(i * 7.0, 12.0), Color(0.85, 0.8, 0.72, 0.35))
+			c.draw_circle(Vector2(x - fmod(i * 53.0, 120.0), y), 10.0 + fmod(i * 7.0, 12.0), Estilo.color(&"jefe_polvo"))
 	if texto_en_pantalla == TEXTO_INICIO:
 		var k := clampf((t - _rango("revelar")[0]) / 0.15, 0.0, 1.0)
 		_banda(c, tam, tam.y * 0.5, color_inicio, -1.0)
 		c.draw_set_transform(tam / 2.0 + Vector2(0, 10), -0.06, Vector2.ONE * lerpf(2.6, 1.0, k))
-		_texto_con_sombra(c, fuente, TEXTO_INICIO, 30, Color("ffe066"), Color.BLACK, Vector2(2, 2))
+		_texto_con_sombra(c, fuente, tr(TEXTO_INICIO), 30, Estilo.color(&"jefe_amarillo"), Estilo.color(&"negro"), Vector2(2, 2))
 		c.draw_set_transform(Vector2.ZERO)
-		c.draw_string(fuente, Vector2(20, tam.y - 56), lema_felipe, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
+		c.draw_string(fuente, Vector2(20, tam.y - 56), tr(lema_felipe), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Estilo.color(&"blanco"))
 	elif presentando and texto_en_pantalla == nombre and nombre != "":
 		var k := clampf((t - _rango("nombre")[0]) / 0.2, 0.0, 1.0)
 		var desliza := (1.0 - ease(k, 0.3)) * tam.x
 		_banda(c, tam, tam.y * 0.68, color_nombre, 1.0, desliza)
 		c.draw_set_transform(Vector2(tam.x * 0.5 + desliza, tam.y * 0.68), 0.05)
-		_texto_con_sombra(c, fuente, nombre, 40, Color("ffe066"), color_inicio, Vector2(3, 3), Vector2(0, 3))
+		_texto_con_sombra(c, fuente, nombre, 40, Estilo.color(&"jefe_amarillo"), color_inicio, Vector2(3, 3), Vector2(0, 3))
 		var sub := fuente.get_string_size(titulo, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
-		c.draw_string(fuente, Vector2(-sub / 2.0, 24), titulo, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
+		c.draw_string(fuente, Vector2(-sub / 2.0, 24), titulo, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Estilo.color(&"blanco"))
 		c.draw_set_transform(Vector2.ZERO)
 	elif presentando and texto_rugido != "" and texto_en_pantalla == texto_rugido:
 		var temblor := Vector2(_azar.randf_range(-2, 2), _azar.randf_range(-2, 2)).round()
@@ -392,44 +436,29 @@ func _dibujar() -> void:
 		# Cartela de alerta (crítica de Gemini): fondo semitransparente con marco rojo de 1 px y esquinas marcadas,
 		# para que el texto no compita con el contorno del jefe.
 		var cartela := Rect2(-ancho_rugido / 2.0 - 12, -20, ancho_rugido + 24, 28)
-		c.draw_rect(cartela.grow(2), Color(0.06, 0.02, 0.05, 0.5))
-		c.draw_rect(cartela, Color(0.06, 0.02, 0.05, 0.78))
-		c.draw_rect(cartela.grow(-2), Color("ff5a4a"), false, 1.0)
+		c.draw_rect(cartela.grow(2), Estilo.color(&"jefe_cartela_sombra"))
+		c.draw_rect(cartela, Estilo.color(&"jefe_cartela"))
+		c.draw_rect(cartela.grow(-2), Estilo.color(&"jefe_alerta"), false, 1.0)
 		for esquina: Vector2 in [cartela.position, Vector2(cartela.end.x - 5, cartela.position.y), Vector2(cartela.position.x, cartela.end.y - 5), cartela.end - Vector2(5, 5)]:
-			c.draw_rect(Rect2(esquina, Vector2(5, 5)), Color("ff5a4a"))
-		c.draw_string_outline(fuente, Vector2(-ancho_rugido / 2.0, 0), texto_rugido, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, 5, Color.BLACK)
-		_texto_con_sombra(c, fuente, texto_rugido, 18, Color("ff7a6a"), Color.BLACK, Vector2(2, 2))
+			c.draw_rect(Rect2(esquina, Vector2(5, 5)), Estilo.color(&"jefe_alerta"))
+		c.draw_string_outline(fuente, Vector2(-ancho_rugido / 2.0, 0), texto_rugido, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, 5, Estilo.color(&"negro"))
+		_texto_con_sombra(c, fuente, texto_rugido, 18, Estilo.color(&"jefe_rugido"), Estilo.color(&"negro"), Vector2(2, 2))
 		c.draw_set_transform(Vector2.ZERO)
-	if presentando and (_en("barra") or _en("musica") or _en("tamano") or _en("rugido")) and pasos == PASOS:
-		_barra_de_vida(c, tam, fuente, _llenado if not (_en("tamano") or _en("rugido")) else 1.0, 0.0)
 	if _cartel > 0.0 and _texto_cartel != "":
 		var alfa := minf(_cartel * 2.0, 1.0)
 		var ancho := fuente.get_string_size(_texto_cartel, HORIZONTAL_ALIGNMENT_LEFT, -1, 22).x
 		var y := _y_cartel if _y_cartel >= 0.0 else tam.y * 0.38
-		c.draw_rect(Rect2(0, y - 22, tam.x, 30 + (18 if _pista != "" else 0)), Color(0.08, 0.03, 0.05, 0.8 * alfa))
-		c.draw_string(fuente, Vector2((tam.x - ancho) / 2.0, y), _texto_cartel, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(Color("ffe066"), alfa))
+		c.draw_rect(Rect2(0, y - 22, tam.x, 30 + (18 if _pista != "" else 0)), Estilo.color(&"jefe_cartel_fondo", 0.8 * alfa))
+		c.draw_string(fuente, Vector2((tam.x - ancho) / 2.0, y), _texto_cartel, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Estilo.color(&"jefe_amarillo", alfa))
 		if _pista != "":
 			var texto := _etiquetar(_pista)
 			var ancho_pista := fuente.get_string_size(texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
-			c.draw_string(fuente, Vector2((tam.x - ancho_pista) / 2.0, y + 18), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(1, 1, 1, alfa))
-	if vida >= 0.0 and not presentando:
-		_barra_de_vida(c, tam, fuente, vida, escudo)
+			c.draw_string(fuente, Vector2((tam.x - ancho_pista) / 2.0, y + 18), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Estilo.color(&"blanco", alfa))
+
+
+func _dibujar_destello() -> void:
 	if _flash > 0.0:
-		c.draw_rect(Rect2(Vector2.ZERO, tam), Color(1, 1, 1, minf(_flash, 1.0) * 0.8))
-
-
-## Barra arriba a la derecha (lejos de los corazones y del HUD de la Agenda, a la izquierda).
-func _barra_de_vida(c: Node2D, tam: Vector2, fuente: Font, valor: float, azul: float) -> void:
-	var caja := Rect2(tam.x - 232, 22, 220, 9)
-	c.draw_rect(Rect2(caja.position.x - 6, 4, caja.size.x + 12, 34), Color(0.1, 0.05, 0.07, 0.6))
-	c.draw_string(fuente, Vector2(caja.position.x, 16), "%s — %s" % [nombre, titulo], HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color.WHITE)
-	c.draw_rect(caja.grow(2), Color(0.1, 0.05, 0.07, 0.85))
-	c.draw_rect(Rect2(caja.position, Vector2(caja.size.x * clampf(valor, 0.0, 1.0), caja.size.y)), color_inicio)
-	for i in range(1, divisiones):
-		var x := caja.position.x + caja.size.x * i / divisiones
-		c.draw_line(Vector2(x, caja.position.y), Vector2(x, caja.end.y), Color(0, 0, 0, 0.6), 1.0)
-	if azul > 0.0:
-		c.draw_rect(Rect2(caja.position + Vector2(0, caja.size.y - 3), Vector2(caja.size.x * azul, 3)), Color("7fd0ff"))
+		_destello.draw_rect(Rect2(Vector2.ZERO, _destello.get_viewport_rect().size), Estilo.color(&"destello", minf(_flash, 1.0) * 0.8))
 
 
 ## Viñeta oscura con polvo (el "momento" es imaginación de Felipe): bordes que se oscurecen hacia afuera y motas
@@ -441,7 +470,7 @@ func _vineta(c: Node2D, tam: Vector2, fuerza: float) -> void:
 	var ancho_banda := 7.0
 	for i in bandas:
 		var alfa := 0.6 * fuerza * (1.0 - float(i) / bandas)
-		var color := Color(0.06, 0.02, 0.08, alfa)
+		var color := Estilo.color(&"jefe_vineta", alfa)
 		var d := i * ancho_banda
 		c.draw_rect(Rect2(d, d, tam.x - d * 2.0, ancho_banda), color)
 		c.draw_rect(Rect2(d, tam.y - d - ancho_banda, tam.x - d * 2.0, ancho_banda), color)
@@ -454,14 +483,12 @@ func _vineta(c: Node2D, tam: Vector2, fuerza: float) -> void:
 		var al_centro := (p - tam / 2.0) / (tam / 2.0)
 		if maxf(absf(al_centro.x), absf(al_centro.y)) < 0.7:
 			continue
-		c.draw_rect(Rect2(p.round(), Vector2(2, 2)), Color(0.95, 0.85, 0.7, 0.5 * fuerza * (0.5 + borde * 0.5)))
+		c.draw_rect(Rect2(p.round(), Vector2(2, 2)), Estilo.color(&"jefe_mota", 0.5 * fuerza * (0.5 + borde * 0.5)))
 
 
 ## "{agacharse}" -> "[S]" (o el botón del mando) para la pista del cartel.
 func _etiquetar(texto: String) -> String:
-	for accion: String in IconosBotones.TEXTO:
-		texto = texto.replace("{%s}" % accion, "[%s]" % IconosBotones.texto(accion))
-	return texto
+	return Controles.etiquetar(texto)
 
 
 func _texto_con_sombra(c: Node2D, fuente: Font, texto: String, tamano: int, color: Color, sombra: Color, desfase: Vector2, base := Vector2.ZERO) -> void:

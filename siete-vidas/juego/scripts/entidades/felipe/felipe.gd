@@ -22,6 +22,9 @@ signal snack_comido
 signal snacks_cambiados(cantidad: int)
 ## Mantuvo el botón de acción para comer, pero el bolsillo está vacío.
 signal sin_snacks
+## Cambiaron sus intentos (las nueve vidas) o se puso el Collar de la Vergüenza (para la interfaz).
+signal vidas_cambiadas(vidas: int)
+signal collar_cambiado(tiene: bool)
 ## Escalera: terminó un escalón (contando desde 1) y terminó todos los pedidos.
 signal escalon_subido(numero: int)
 signal escalera_terminada
@@ -162,9 +165,15 @@ var corazones: int:
 	set(valor):
 		vida.fijar(valor)
 ## Intentos que le quedan (las nueve vidas del título; no confundir con la pieza Vida, que son los corazones).
-var vidas := VIDAS_MAX
+var vidas := VIDAS_MAX:
+	set(valor):
+		vidas = valor
+		vidas_cambiadas.emit(vidas)
 var peso := PESO_INICIAL
-var tiene_collar := false
+var tiene_collar := false:
+	set(valor):
+		tiene_collar = valor
+		collar_cambiado.emit(tiene_collar)
 ## Poder que gana al escapar por el balcón (fin del tutorial).
 var tiene_caer_de_pie := false
 ## Zonas donde puede trepar (cortinas), en coordenadas del mundo. Las pone el nivel.

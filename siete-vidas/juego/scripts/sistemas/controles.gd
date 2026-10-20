@@ -103,3 +103,10 @@ static func cargar(ruta := ARCHIVO) -> bool:
 				if e is InputEvent:
 					InputMap.action_add_event(accion, e)
 	return true
+
+
+## "{saltar} para saltar" -> "[Espacio] para saltar" (o el botón del mando en uso).
+static func etiquetar(texto_con_acciones: String, mando: Variant = null) -> String:
+	for accion: String in ACCIONES:
+		texto_con_acciones = texto_con_acciones.replace("{%s}" % accion, "[%s]" % texto(accion, mando))
+	return texto_con_acciones

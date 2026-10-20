@@ -33,7 +33,10 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [ ] Animación `entrar_puerta` (G8): el creador decidió no pedirla todavía; las puertas siguen con fundido.
 - [ ] Intimidar (G9): queda para el Barrio Viejo (decisión del creador). La pieza `Asustable` ya está lista en el ratón y A.S.P.I. (`07-arquitectura.md`): la maña solo tiene que llamar `asustar(felipe)` a las que estén cerca.
 - [x] Arquitectura por piezas y datos (2026-10-20, `07-arquitectura.md`).
-- [ ] Opcional: partir `valeria.gd` (727 líneas: su dibujo decide su pose y separarlo sin cambiar nada pide cuidado) y `batalla_aspi.gd` (739: sus ataques) para quedar bajo ~600.
+- [x] Partir `valeria.gd` y `batalla_aspi.gd` bajo ~600, Felipe con estados, jefes con conductas en datos e interfaz con piezas, tema, pila de pantallas y textos traducibles (2026-10-20, `07-arquitectura.md`).
+- [ ] Traducir las frases de Felipe y Valeria (`Frases`) y los textos de niveles y jefes a claves en `traducciones/textos.csv` (hoy pasan por `tr()` en español: preparado, no hecho).
+- [ ] Pantalla de opciones para remapear controles (la base ya está: `Controles.remapear`, `guardar` y `cargar`).
+- [ ] Una letra de pixel para toda la interfaz: se pone una vez en `datos/ui/tema.tres` (`default_font`) y la toman todos (`Estilo.fuente()`). Los tamaños de letra de la libreta, el resumen, el indicador y la presentación del jefe siguen como números en su dibujo: pasarlos al tema al elegir la letra.
 - [ ] Opcional: animación `sentarse` desde Felipe A (SpriteCook, 20 créditos) para la baranda del balcón (M6; hoy se queda quieto y se acicala).
 - [ ] Sonidos finales (hoy sintetizados con `sonidos_demo.py`, incluidos maullido, arañar, ronroneo y resorte) y sonido de casa (G13); música de la pelea.
 - [ ] Ajustar la dificultad de la fase 3 con una persona (el bot llega con 1 a 5 corazones).

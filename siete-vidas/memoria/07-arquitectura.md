@@ -1,6 +1,6 @@
 # Arquitectura del juego: piezas y datos
 
-Actualizado: 2026-10-20 (segunda ronda: Felipe con estados, jefes con conductas en datos, Valeria en partes, carpetas
+Actualizado: 2026-10-20 (plan de estabilización: capas de humanos y zonas de texto; antes, segunda ronda: Felipe con estados, jefes con conductas en datos, Valeria en partes, carpetas
 por responsabilidad y la interfaz con piezas, tema, pila de pantallas, textos traducibles y controles remapeables;
 decisión en `01-decisiones.md`, «Forma de construir»).
 
@@ -76,13 +76,54 @@ Decisiones de criterio (sin sobreingeniería):
 | `scripts/niveles/nivel_1/` | Lo propio del nivel 1: `Nivel1` (datos), `GuionNivel1`, `ValeriaPorLaCasa`, `FinalBalcon`, `ArteNivel1`, `DecoradoNivel1`, `FondoApartamento`, `LuzCuarto` |
 | `scripts/sistemas/` | Lo que no se ve pero ordena el juego: `Capas` (tabla única de capas), `Controles` (InputMap, remapeo), `Particulas` (fábrica de polvo), `Travesuras`, `Agenda`, `Recompensas`, `Frases`, `Jugo` |
 | `scripts/ui/` | Pantallas y avisos: `Pantallas`, `Hud`, `Medidores`, `Dialogo`, `Anuncios`, `Libreta`, `ResumenDia`, `Indicador`, `IconosBotones`, `PresentacionJefe`, `RetratoValeria` |
-| `scripts/ui/base/` | `Estilo` (acceso al tema), `GestorPantallas` (pila), `MenuUI` (menú navegable) |
+| `scripts/ui/base/` | `Estilo` (acceso al tema), `ZonasTexto` (zonas fijas de texto), `GestorPantallas` (pila), `MenuUI` (menú navegable) |
 | `scripts/ui/piezas/` | `BarraVida`, `ContadorRecurso`, `Cartel` |
 | `scripts/datos/` | Las clases de los recursos: `DatosEnemigo`, `DatosObjeto`, `DatosJefe` |
 | `pruebas/` | Pruebas automáticas (`prueba_componentes.gd` para las piezas del juego, `prueba_interfaz.gd` para las de la interfaz), el bot `partida.gd` y las capturas |
 
 Tamaños: el más grande es `felipe.gd` (603 líneas), luego `guion_nivel_1.gd` (572), `presentacion_jefe.gd` (507),
 `valeria.gd` (494) y `batalla_aspi.gd` (433). Todo lo demás, menos de 500.
+
+## Capas y zonas de texto (plan de estabilización 2026-10-20)
+
+**Capas del mundo** (`scripts/sistemas/capas.gd`, tabla única): de atrás hacia adelante, pared, arte de pared, puertas,
+muebles y `TRAS_FELIPE` (−1), `JUEGO` (0: Felipe, enemigos, objetos), `MARCAS` (1), **`PERSONAJES` (2: solo los
+humanos)**, `JUEGO_DELANTE` (3: Felipe parado sobre algo que queda delante de los humanos), `PRIMER_PLANO` (4:
+pasamanos), luz, estela, imaginación, efectos, censura e Indicador.
+
+- Valeria va **delante** de Felipe. Donde lo tapa se dibuja su contorno de 1 px: pieza `SiluetaTapada`
+  (`scripts/componentes/`), hija del humano, que pone `clip_children` en él y copia el cuadro del sprite de Felipe con un
+  shader de borde. Otro humano futuro solo agrega la pieza.
+- Felipe va delante de Valeria cuando está parado en una superficie de `Nivel1.DELANTE_DE_HUMANOS` (hoy el asiento del
+  sofá): `GuionNivel1._actualizar_capa_felipe()` lo decide por la pieza donde se apoya (`superficie_de_felipe()`), no
+  con casos sueltos; en el aire conserva la capa. La pelea con A.S.P.I. solo toca su capa mientras imagina.
+
+**Zonas de texto** (`scripts/ui/base/zonas_texto.gd`, tabla única como `Capas`; pantalla de 640×360):
+
+| Zona | Lugar | Qué va | Quién la usa |
+| --- | --- | --- | --- |
+| A. HUD | y 0–26 | Corazones y vidas, agenda, contadores, barra del jefe (nombre dentro, abreviado si no cabe: `BarraVida.titulo_corto`) | `Medidores`, `Hud`, `PresentacionJefe.POS_BARRA` |
+| B. Diálogo | y 30–80 | Cuadro con retrato (abajo solo si Felipe está tan arriba que lo taparía) | `Dialogo` |
+| C. Carteles | y 30–90 (misma franja) | Travesura, logro, fase del jefe, «PODER NUEVO»: título y una línea | `Anuncios` (cola única): `ZonasTexto.cartel(tamaño)` |
+| D. Palabras | sobre Felipe u objeto, fuera de A–C | «¡CRÍTICO!», «¡POP!»…: 1 a la vez, 0,9 s, Silkscreen 16/24 con contorno de 1 px; `pegatina` = sobre pergamino | `Jugo.palabra` → `ZonasTexto.colocar_palabra` |
+| E. Avisos de botón | burbuja sobre Felipe | «E Degustar» | `Indicador.rect_burbuja()` (D la esquiva) |
+
+- **Diálogo y carteles se turnan:** un anuncio espera a que termine la frase (hasta `Anuncios.ESPERA_MAXIMA`); mientras se
+  ve un anuncio, las frases nuevas esperan en la cola sin envejecer (`Dialogo.esperar`); la fase del jefe (urgente) hace
+  ceder la frase (`Dialogo.ceder`), que vuelve después.
+- **En tiempo real:** carteles, logro, franja de fase y palabras no se estiran con la cámara lenta de una derrota.
+- **Letra:** los estilos de carteles y palabras (`ZonasTexto.ESTILOS_C_Y_D`) son de 16 px o más.
+- **Prueba:** `pruebas/prueba_zonas_texto.gd` (rectángulos de todos los anuncios y palabras, HUD, diálogo, nombre del
+  jefe, letras y que cada carácter de `textos.csv` exista en las letras del tema). Capturas:
+  `pruebas/capturas_estabilizacion.gd -- <carpeta> [textos|luces]`.
+
+### Receta: un texto nuevo en pantalla
+
+1. ¿Es un anuncio grande? `anuncios.anunciar(tipo, texto, tamaño, mostrar)`: sale en la zona C cuando le toca; el
+   tamaño no pasa de 640 × 60.
+2. ¿Es una palabra del mundo? `jugo.palabra_en_mundo(clave, donde, color, tamaño)`: se recoloca sola.
+3. Nunca una segunda línea chica; si hace falta detalle, va a la libreta o al diálogo.
+4. Corre `prueba_zonas_texto` y mira la captura.
 
 ## Las piezas del juego (componentes)
 
@@ -98,6 +139,7 @@ Tamaños: el más grande es `felipe.gd` (603 líneas), luego `guion_nivel_1.gd` 
 | `OyeMaullido` | Maña «Maullar»: oye dentro del radio y avisa con `oyo` | Valeria, A.S.P.I., puerta de la cocina |
 | `Asustable` | Maña futura «Intimidar»: `asustar(quien)` → huye | Ratón, A.S.P.I. |
 | `SueltaRecompensa` | Al morir la Vida suelta un Recogible | Caja de cartón |
+| `SiluetaTapada` | Contorno de 1 px de Felipe solo donde un humano lo tapa (`clip_children` del humano) | Valeria |
 | `ReaccionDerrota` (datos en `datos/derrotas/`, `DatosDerrota`) | Al morir la Vida: destello por silueta, congelado y sacudida (`Jugo`), sale volando y rebota (`move_and_collide`), «¡POP!» con piezas sueltas (`PiezaSuelta`: física simple, quedan en el piso, una puede seguir girando) y nube (`Particulas`), cámara lenta solo si sus datos la piden (vuelve siempre a `time_scale` 1), marca al lado, fantasmita y frase de Felipe | Ratón (se desarma), A.S.P.I. (rebota y escupe pelusa) |
 | `SombraContacto` | Pide su sombra de contacto | Ratón, A.S.P.I., caja, comida, Valeria |
 | `Interactivo` | Responde al botón sin clase propia | Cajón, ropa doblada |

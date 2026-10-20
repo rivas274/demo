@@ -102,7 +102,7 @@ Idea tomada de un video sobre cómo hacer que un dash se sienta bien (5 pasos). 
 ## Derrotas jugosas (aprobadas por el creador, 2026-10-20)
 
 - [x] **Lógica, datos y pruebas (hechos 2026-10-20):** `ReaccionDerrota` + `DatosDerrota` (`datos/derrotas/raton.tres` y `aspi.tres`), `PiezaSuelta`, frases de Felipe «derrota_raton» y «derrota_aspi», cámara lenta del golpe final de A.S.P.I. movida a su derrota.
-- [ ] **Arte de Gemini** (`diseno/encargo-gemini-derrotas.md`, `arte/referencias/gemini/derrotas.png`): al llegar, recortar cada pieza al borde opaco, a la densidad del ratón, sin blanco puro, con los nombres que ya usan los datos (`derrota_carcasa`, `derrota_llave_1` a `_4`, `derrota_resorte`, `derrota_resorte_alma`, `derrota_tornillo`, `derrota_engranaje`, `derrota_pelusa`; la nube, en `color_nube`/partículas). Hoy la carcasa es `raton_volcado` y lo demás son provisionales de pixel de `PiezaSuelta`.
+- [x] **Arte de Gemini (hecho 2026-10-20):** `herramientas/preparar_arte_nivel.py derrotas` recorta `arte/referencias/gemini/derrotas.png` a la escala del ratón y sin blanco puro: `derrota_carcasa`, `derrota_llave_1` a `_5`, `derrota_resorte`, `derrota_resorte_alma` (sin la sombra ovalada), `derrota_tornillo`, `derrota_engranaje`, `derrota_pelusa`. Se quitaron los provisionales de `PiezaSuelta`. Las nubes de pelusa de la hoja no se usan (la nube son partículas).
 - [ ] **Mostrar al creador:** `derrota-raton.gif` y `derrota-aspi.gif`.
 
 ## Menú «Decreto real» (elegido por el creador, 2026-10-20)

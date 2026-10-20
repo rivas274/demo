@@ -62,6 +62,9 @@ godot --headless --path siete-vidas/juego --script res://pruebas/prueba_jefe.gd 
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_acciones.gd  # maullar, arañar, snacks, escalera, rascador, agenda, diálogo, indicador
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_componentes.gd  # las piezas por separado, estados de Felipe, conductas de jefe y un enemigo armado solo con datos
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_interfaz.gd  # barra de vida, pila de pantallas, menú, textos, controles y tema
+godot --headless --path siete-vidas/juego --script res://pruebas/prueba_zonas_texto.gd  # zonas fijas de texto (HUD, diálogo, carteles, palabras) y caracteres de las letras
+# Capturas de los cruces Felipe–Valeria y el balcón; con «textos», cada texto en su zona; con «luces», las lámparas:
+xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/capturas_estabilizacion.gd -- /tmp/estab [textos|luces]
 # Capturas a 640×360 del Indicador, el diálogo, la libreta, los carteles y el resumen:
 xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/capturas_sistemas.gd -- /tmp/capturas
 # Capturas de cada cuarto (agregar --debug-collisions para ver las colisiones sobre el arte):

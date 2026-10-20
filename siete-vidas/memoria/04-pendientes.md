@@ -88,3 +88,12 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - Gemini (Nano Banana) directo: falta que el creador agregue `GEMINI_API_KEY` al entorno (se lee en una sesión nueva). Sirve para imágenes fijas, no animaciones.
 
 
+
+## Jugo de las acciones (después del reordenamiento, 2026-10-20)
+
+Idea tomada de un video sobre cómo hacer que un dash se sienta bien (5 pasos). Encaja con el pilar 5 (respuesta jugosa, como Balatro).
+
+- [ ] **Zoomies: polvo y derrape al frenar (aprobado por el creador).** Al terminar el impulso, Felipe patina unos px con nube de polvo y pelos y una marca de derrape en el piso: da sensación de más velocidad y concuerda con el humor (un gato de 8 kg que no sabe frenar). Primero con efectos de código; una animación de derrape desde Felipe A (≈26 créditos) solo si el creador la aprueba.
+- [ ] **Zoomies, resto de la receta:** anticipación de 0,05 s (aplastar y estirar dentro de ±8 %), líneas de velocidad pixel art, pausa corta y sacudida si choca con un mueble (con frase de Felipe). Ya tiene estela. Sin zoom de cámara (deforma el pixel art): adelantar la cámara hacia donde corre.
+- [ ] **Pieza reutilizable `RecetaJugo`** (anticipación, estela, líneas, pausa de impacto, polvo) con sus números por acción, y revisar con ella salto, zarpazo, tirar y arañar del nivel 1.
+- Cuándo: los Zoomies están apagados en el nivel 1 (se ganan en Downtown); se hace al terminar el reordenamiento del código, no antes.

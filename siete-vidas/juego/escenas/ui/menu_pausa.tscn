@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/base/menu_ui.gd" id="1_menu"]
+[ext_resource type="Script" path="res://scripts/ui/base/boton_menu.gd" id="2_boton"]
 
 [node name="MenuPausa" type="VBoxContainer"]
 offset_left = 260.0
@@ -15,13 +16,17 @@ script = ExtResource("1_menu")
 layout_mode = 2
 theme_type_variation = &"BotonMenu"
 text = "MENU_CONTINUAR"
+script = ExtResource("2_boton")
+principal = true
 
 [node name="Reiniciar" type="Button" parent="."]
 layout_mode = 2
 theme_type_variation = &"BotonMenu"
 text = "MENU_REINICIAR"
+script = ExtResource("2_boton")
 
 [node name="Salir" type="Button" parent="."]
 layout_mode = 2
 theme_type_variation = &"BotonMenu"
 text = "MENU_SALIR"
+script = ExtResource("2_boton")

@@ -83,6 +83,7 @@ func _ready() -> void:
 	add_child(GestorPantallas.new())
 	# Teclas y botones que el jugador cambió (si los guardó).
 	Controles.cargar()
+	Opciones.cargar()
 	# Capas de pantalla de la tabla única (Capas): título, intro y pausa tapan todo (G7).
 	$Interfaz.layer = Capas.CAPA_INTERFAZ
 	var capa_pantallas := CanvasLayer.new()

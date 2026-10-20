@@ -3,7 +3,11 @@ extends VBoxContainer
 ## Menú base: una columna de botones (BotonMenu, o cualquier Button) que se recorre con el teclado (flechas, W/S) o
 ## el mando (cruceta, palanca) y se elige con Enter o A. Al mostrarse toma el foco en el primer botón; el foco da la
 ## vuelta de abajo hacia arriba. Avisa con `elegido(nombre del botón)`: el menú no sabe qué hace cada opción.
-## Se arma en el editor (escenas/ui/menu_pausa.tscn); el texto de cada botón es una clave de traducción.
+## Se arma en el editor (escenas/ui/menu_pausa.tscn); el texto de cada botón es una clave de traducción. Con
+## `animar_entrada`, los botones (BotonMenu) caen desde arriba uno tras otro al mostrarse.
+
+## Al mostrarse, los botones caen desde arriba, escalonados (no con Opciones.reducir_movimiento).
+@export var animar_entrada := true
 
 signal elegido(opcion: StringName)
 
@@ -32,6 +36,20 @@ func _botones() -> Array[Button]:
 func _al_mostrarse() -> void:
 	if is_visible_in_tree():
 		enfocar()
+		if animar_entrada:
+			_entrar.call_deferred()
+
+
+## Entrada escalonada: espera a que el contenedor acomode los botones y los deja caer uno tras otro.
+func _entrar() -> void:
+	# El contenedor acomoda a sus hijos al final del cuadro: recién después se sabe dónde va cada botón.
+	await get_tree().process_frame
+	var i := 0
+	for boton in _botones():
+		if boton is BotonMenu:
+			var b := boton as BotonMenu
+			b.entrar(i * b.datos.escalon_entrada)
+			i += 1
 
 
 ## Pone el foco en la primera opción (o en la que se pida).

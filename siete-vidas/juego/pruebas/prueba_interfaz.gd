@@ -1,5 +1,5 @@
 extends SceneTree
-## Prueba de las piezas de la interfaz por separado: BarraVida (escucha a Vida), ContadorRecurso, Cartel, MenuUI,
+## Prueba de las piezas de la interfaz por separado: BarraVida (escucha a Vida), ContadorRecurso, Cartel, MenuUI, BotonMenu,
 ## la pila de pantallas (GestorPantallas y la pausa), Pantallas con su menú, los textos traducibles (tr), los controles
 ## (Controles: textos sacados del InputMap y remapeo) y el tema (Estilo: ningún nombre pedido falta). Sin ventana:
 ##   godot --headless --path siete-vidas/juego --script res://pruebas/prueba_interfaz.gd
@@ -23,6 +23,7 @@ func _correr() -> void:
 	_probar_contador_y_cartel()
 	await _probar_gestor_pantallas()
 	await _probar_menu_y_pausa()
+	await _probar_boton()
 	_probar_textos()
 	_probar_controles()
 	_probar_tema()
@@ -130,6 +131,52 @@ func _probar_menu_y_pausa() -> void:
 	_comprobar(elegidos == [&"Continuar"] and pantallas.modo == Pantallas.Modo.JUGANDO and not paused and not menu.visible, "Pausa: «Continuar» vuelve al juego")
 	pantallas.queue_free()
 	await _esperar(1)
+
+
+## BotonMenu: el golpe al apretar vuelve a escala 1; el vaivén sube con foco y vuelve a 0 sin foco; con «reducir
+## movimiento» no se mece ni entra cayendo.
+func _probar_boton() -> void:
+	var menu := VBoxContainer.new()
+	mundo.add_child(menu)
+	var boton := BotonMenu.new()
+	boton.text = "MENU_CONTINUAR"
+	menu.add_child(boton)
+	await _esperar(2)
+	var d := boton.datos
+	_comprobar(d != null and d.escala_apretado == 0.9 and d.vaiven_grados == 6.0, "BotonMenu: sus números salen de datos/ui/boton_menu.tres")
+	boton.button_down.emit()
+	await _segundos(d.tiempo_apretar + 0.05)
+	_comprobar(is_equal_approx(boton.scale.x, d.escala_apretado), "BotonMenu: al apretar se encoge a 0,9")
+	boton.button_up.emit()
+	await _segundos(d.tiempo_soltar + 0.1)
+	_comprobar(is_equal_approx(boton.scale.x, 1.0), "BotonMenu: al soltar vuelve a escala 1")
+	boton.grab_focus()
+	await _segundos(0.1)
+	_comprobar(boton.amplitud > 0.0 and boton.amplitud < d.vaiven_grados, "BotonMenu: con foco el vaivén sube de a poco (nunca de golpe)")
+	await _segundos(d.vaiven_rampa)
+	_comprobar(is_equal_approx(boton.amplitud, d.vaiven_grados) and boton.modulate.r > 1.1, "BotonMenu: con foco se mece hasta 6° y brilla")
+	boton.release_focus()
+	await _segundos(d.vaiven_rampa + 0.1)
+	_comprobar(is_equal_approx(boton.amplitud, 0.0), "BotonMenu: sin foco la amplitud vuelve a 0")
+	Opciones.reducir_movimiento = true
+	boton.grab_focus()
+	await _segundos(d.vaiven_rampa + 0.1)
+	var y := boton.position.y
+	boton.entrar()
+	await _esperar(2)
+	_comprobar(boton.rotation == 0.0 and boton.position.y == y, "BotonMenu: con «reducir movimiento» no se mece ni entra cayendo")
+	Opciones.reducir_movimiento = false
+	boton.entrar()
+	await _esperar(1)
+	_comprobar(boton.position.y < 0.0, "BotonMenu: la entrada empieza fuera del borde de arriba")
+	await _segundos(d.tiempo_entrada + 0.1)
+	_comprobar(is_equal_approx(boton.position.y, y), "BotonMenu: y cae hasta su sitio")
+	menu.queue_free()
+	await _esperar(1)
+
+
+func _segundos(s: float) -> void:
+	await create_timer(s, true).timeout
 
 
 func _probar_textos() -> void:

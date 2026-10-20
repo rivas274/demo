@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dfo3ucfa4mu2"
-path="res://.godot/imported/ventana_marco.png-428223b70bda6f90c4ac87b73f8678e5.ctex"
+uid="uid://bnpusukgc4cvd"
+path="res://.godot/imported/teclado.png-a7dd7d84d8487095b17aa4f9a5d2aa11.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/nivel1/ventana_marco.png"
-dest_files=["res://.godot/imported/ventana_marco.png-428223b70bda6f90c4ac87b73f8678e5.ctex"]
+source_file="res://assets/nivel1/teclado.png"
+dest_files=["res://.godot/imported/teclado.png-a7dd7d84d8487095b17aa4f9a5d2aa11.ctex"]
 
 [params]
 

@@ -31,7 +31,7 @@ Cada travesura tiene su ciclo: hacerla → que te pillen → salirte con la tuya
 - Desempata: si dudamos entre castigar o dar una salida graciosa, gana la salida graciosa.
 
 ### 4. Tus decisiones tienen peso, literalmente
-Cada snack cura y engorda. Felipe los carga: los come ya o los guarda para una pelea. El peso no cambia cómo se mueve, pero sí quién es: más kilos, más defensa, más carisma (te perdonan más fácil) y más ataque. Se ve en la "Ficha de Su Majestad" (menú de pausa): su retrato, barras y una frase satírica por estadística. La velocidad aparece solo como chiste ("Un rey no corre: lo esperan") y no cambia.
+Cada snack cura y engorda. Felipe los carga: los come ya o los guarda para una pelea. El peso no cambia cómo se mueve, pero sí quién es: más kilos, más defensa, más carisma (te perdonan más fácil) y más ataque. Se ve en la "Ficha de Su Majestad" (menú de pausa): su retrato, barras y una frase satírica por estadística. La velocidad aparece solo como chiste ("Un rey no corre: lo esperan") y no cambia. *Nota (2026-10-20):* hecho en la pausa «Decreto real»; el peso se ve solo ahí (nunca en el HUD) y, por ahora, las estadísticas son solo de chiste (no cambian el juego).
 - Sí: guardar dos snacks para el jefe; engordar a propósito para que Valeria perdone más fácil ("Así se ve un rey").
 - No: medidor de hambre, temporizadores, formas que cambien los saltos, la báscula en pantalla.
 - Desempata: si dudamos entre una recompensa aparte o una que pase por el peso, gana el peso.

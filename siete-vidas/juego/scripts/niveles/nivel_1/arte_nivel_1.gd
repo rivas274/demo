@@ -138,11 +138,12 @@ func _dibujar_arte(c: Node2D, capa: String) -> void:
 		_dibujar_cortina(c)
 	elif capa == "pared":
 		ArteNivel.sombras_de_pared(c, Nivel1.ARTE, Nivel1.SOMBRA_PARED)
+		# La vista del pasillo va detrás de su marco (que es arte de esta capa).
+		_dibujar_vista_pasillo(c)
 	ArteNivel.dibujar_capa(c, Nivel1.ARTE, capa, Nivel1.APOYADOS, {"baranda": _dibujar_baranda})
 	if capa == "escalera":
 		_dibujar_armario_escalera(c)
 	elif capa == "pared":
-		_dibujar_ventana_pasillo(c)
 		# Alfombras tendidas en el piso, en perspectiva (antes de las sombras de contacto).
 		for alfombra: Array in Nivel1.ALFOMBRAS:
 			_dibujar_alfombra(c, alfombra[0], alfombra[1])
@@ -317,66 +318,30 @@ func _dibujar_armario_escalera(c: Node2D) -> void:
 	c.draw_rect(Rect2(rellano.position.x, rellano.end.y + 1, rellano.size.x, 3), Color(0, 0, 0, 0.3))
 
 
-## Ventana del pasillo (G3): la caja de pizza está AFUERA, sobre el toldo del vecino, detrás del vidrio (el arte de
-## Gemini la traía sobre el alféizar; la herramienta la borra). El vidrio con reflejos va encima de la caja.
-func _dibujar_ventana_pasillo(c: Node2D) -> void:
-	# Parte de arriba de la ventana (M7): sigue las columnas del arte hacia arriba (contorno, marco del muro, marco de
-	# madera, panel de la izquierda, parante y vidrio), así la ventana es una sola y no una caja encima del arte.
-	var arriba := Nivel1.VENTANA_PASILLO_ARRIBA
-	var izq := arriba.position.x
-	var oscuro := Color8(31, 8, 4)
-	var columnas := [
-		[4, 10, Color8(210, 179, 150)], [12, 2, Color8(222, 194, 173)], [14, 4, Color8(186, 124, 80)],
-		[18, 48, Color8(212, 181, 152)], [66, 10, Color8(199, 157, 135)], [162, 4, Color8(149, 86, 51)],
-		[167, 9, Color8(210, 179, 150)],
-	]
-	for columna: Array in columnas:
-		c.draw_rect(Rect2(izq + columna[0], arriba.position.y, columna[1], arriba.size.y), columna[2])
-	var cielo := Rect2(Nivel1.VIDRIO_PASILLO.position.x, arriba.position.y + 5, Nivel1.VIDRIO_PASILLO.size.x - 1, arriba.size.y - 3)
-	for i in 6:
-		c.draw_rect(Rect2(cielo.position.x, cielo.position.y + i * cielo.size.y / 6.0, cielo.size.x, cielo.size.y / 6.0 + 1), Color(0.98, 0.86, 0.66).lerp(Color(0.95, 0.72, 0.6), i / 6.0))
-	# Techos lejanos del vecindario, pálidos.
-	for techo: Vector3 in [Vector3(4720, 24, 14), Vector3(4742, 18, 22), Vector3(4772, 30, 10), Vector3(4784, 20, 18)]:
-		c.draw_rect(Rect2(techo.x, arriba.end.y - techo.z, techo.y, techo.z), Color(0.83, 0.6, 0.55))
-	# Contornos oscuros (afuera, junto al parante y al marco derecho) y el dintel de madera arriba.
-	for x: float in [4.0, 76.0, 166.0, 175.0]:
-		c.draw_rect(Rect2(izq + x, arriba.position.y, 1, arriba.size.y), oscuro)
-	c.draw_rect(Rect2(izq + 4, arriba.position.y, 172, 5), Color8(185, 122, 81))
-	c.draw_rect(Rect2(izq + 4, arriba.position.y + 4, 172, 1), Color8(143, 86, 57))
-	c.draw_rect(Rect2(izq + 4, arriba.position.y, 172, 1), oscuro)
-	# Caja de pizza AFUERA, sobre el toldo del vecino (G3), abierta: tapa levantada con la mancha de grasa, la pizza
-	# adentro y vapor que sube (un poco azulada: está lejos y tras el vidrio).
-	var caja := Nivel1.PIZZA
-	var lejos := Color(0.9, 0.92, 1.0)
-	var base := Rect2(caja.position.x, caja.end.y - 9, caja.size.x, 9)
-	var tapa := PackedVector2Array([base.position + Vector2(3, 0), base.position + Vector2(caja.size.x - 3, 0), Vector2(caja.end.x - 6, caja.position.y + 3), Vector2(caja.position.x + 6, caja.position.y + 3)])
-	c.draw_colored_polygon(tapa, Color("d9b074") * lejos)
-	c.draw_polyline(tapa + PackedVector2Array([tapa[0]]), Color("6e4a2a") * lejos, 1.0)
-	c.draw_circle(Vector2(caja.position.x + 13, caja.position.y + 9), 4.0, Color("a8763c") * lejos)
-	c.draw_circle(Vector2(caja.position.x + 21, caja.position.y + 7), 2.5, Color("a8763c") * lejos)
-	c.draw_rect(base, Color("e0b878") * lejos)
-	c.draw_rect(Rect2(base.position.x + 2, base.position.y + 1, base.size.x - 4, 4), Color("f2c14e") * lejos)
-	for p: Vector2 in [Vector2(7, 2), Vector2(15, 3), Vector2(24, 2), Vector2(11, 4), Vector2(28, 4)]:
-		c.draw_rect(Rect2(base.position + p, Vector2(2, 2)), Color("c0392b") * lejos)
-	c.draw_rect(Rect2(base.position.x, base.position.y + 5, base.size.x, 4), Color("b98a50") * lejos)
-	c.draw_rect(Rect2(base.position.x, base.end.y, base.size.x, 1), Color(0, 0, 0, 0.35))
+## Vista de la ventana del pasillo (B2, G3): el patio de luz con el toldo del vecino y la caja de pizza AFUERA, detrás
+## del vidrio (`vista_pasillo`, Gemini, con el toldo un poco más oscuro); encima, el tinte del vidrio, dos reflejos de
+## pixel y el vapor de la pizza (por código). El marco de la casa (`ventana_casa`) se dibuja después, delante.
+func _dibujar_vista_pasillo(c: Node2D) -> void:
+	var vidrio := Nivel1.VIDRIO_PASILLO
+	var vista := ArteNivel.textura("vista_pasillo")
+	if vista:
+		c.draw_texture(vista, vidrio.position)
 	var t := tiempo
+	var pizza := Nivel1.PIZZA
 	for i in 3:
-		var x0 := caja.position.x + 8.0 + i * 9.0
+		var x0 := pizza.position.x + 24.0 + i * 9.0
 		var puntos := PackedVector2Array()
 		for k in 6:
-			var y := caja.position.y - 2.0 - k * 3.0 - fmod(t * 6.0 + i * 4.0, 3.0)
+			var y := pizza.position.y + 50.0 - k * 3.0 - fmod(t * 6.0 + i * 4.0, 3.0)
 			puntos.append(Vector2(x0 + sin(k * 1.3 + t * 3.0 + i) * 2.0, y))
 		c.draw_polyline(puntos, Color(1, 1, 1, 0.55), 1.0)
-	# Vidrio: tinte frío y dos reflejos en diagonal por encima de la caja y del toldo.
-	var vidrio := Nivel1.VIDRIO_PASILLO
-	c.draw_rect(vidrio, Color(0.75, 0.88, 1.0, 0.14))
-	# Los reflejos quedan dentro del vidrio (no cruzan al panel de la izquierda).
-	for desde: float in [34.0, 76.0]:
+	c.draw_rect(vidrio, Color(0.75, 0.88, 1.0, 0.08))
+	for desde: float in [0.3, 0.72]:
+		var x0 := vidrio.position.x + vidrio.size.x * desde
 		c.draw_colored_polygon(PackedVector2Array([
-			vidrio.position + Vector2(desde, 0), vidrio.position + Vector2(desde + 8, 0),
-			vidrio.position + Vector2(desde - 22, vidrio.size.y), vidrio.position + Vector2(desde - 30, vidrio.size.y),
-		]), Color(1, 1, 1, 0.16))
+			Vector2(x0, vidrio.position.y), Vector2(x0 + 8, vidrio.position.y),
+			Vector2(x0 - 28, vidrio.end.y), Vector2(x0 - 36, vidrio.end.y),
+		]), Color(1, 1, 1, 0.1))
 
 
 ## Cortina del dormitorio (arte de Gemini, `dormitorio-cortina-alta`): dos paños, el derecho en espejo, colgados de

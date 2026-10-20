@@ -132,12 +132,16 @@ pantallas o avisar lo que eligió el jugador en un menú (señal `elegido`).
 | `BarraVida` (`escenas/ui/barra_vida.tscn`, `barra_jefe.tscn`) | Muestra una `Vida`: `conectar(vida)` y se mueve sola con `Vida.cambio`. Forma `CORAZONES` o `BARRA` (con título, divisiones por punto y franja de escudo) | Corazones de Felipe (`Medidores`), barra del jefe (`PresentacionJefe`: la pelea pone en la Vida del jefe las fases que le quedan) |
 | `ContadorRecurso` (`contador_recurso.tscn`) | Ícono + número; `fijar(texto, tiene)` con golpe al cambiar | Calcetines, fotos y snacks del HUD |
 | `Cartel` (`Cartel.crear`) | Franja o tarjeta con título, nombre y recompensa; entra, espera y sale | Carteles de travesura y «PODER NUEVO» (la cola es `Anuncios`) |
-| `MenuUI` (`menu_pausa.tscn`) | Columna de botones `BotonMenu` con foco: flechas, W/S, cruceta o palanca; Enter o A elige; el foco da la vuelta. Avisa `elegido(nombre)` | Menú de pausa (Continuar, Reiniciar, Salir) |
-| Cuadro de diálogo (`cuadro_dialogo.tscn`) | Panel con marco, retrato, nombre y texto, con el estilo del tema; `Dialogo` pone las frases | Diálogos de Felipe, Valeria y A.S.P.I. |
-| `BotonMenu` (`scripts/ui/base/boton_menu.gd`, números en `datos/ui/boton_menu.tres`, `DatosBoton`) | Botón base: al apretar se encoge a 0,9 y vuelve con rebote; con foco o el mouse encima brilla (1,2) y se mece como péndulo colgado de arriba al centro (hasta 6°, la amplitud sube y baja con tween, nunca de golpe); entrada opcional cayendo desde arriba con rebote, escalonada por `MenuUI`; `principal` con pulso sutil. Preparado para el menú de estambre (decisión del creador): `punto_cuelgue` (pivote), `golpear(fuerza)` suma un columpio que se apaga solo y emite `golpeado`; `MenuUI.colocar_hueco(boton)` pone el nodo `HuecoFelipe` al costado del botón para que la pantalla asome a Felipe con su `zarpazo`. Con el arte de Gemini (2026-10-20): letreros de madera del tema (`BotonEstambre`, `BotonEstambrePrincipal`) a su tamaño, hilo repetido desde la argolla (los letreros cuelgan en cadena) y `MenuUI` dibuja el ovillo arriba; `golpear` suelta motas de pelusa | Menú de pausa |
-| `FelipeAsomado` (`scripts/ui/piezas/felipe_asomado.gd`) | Felipe asoma por el costado del menú (en `HuecoFelipe`), hace su `zarpazo` y en su cuadro de impacto llama `golpear` del letrero elegido; la pantalla espera `manotazo()` y después hace lo elegido | Menú de pausa |
+| `MenuUI` (nodo `%Menu` de `menu_pausa.tscn`) | Columna de botones `BotonMenu` con foco: flechas, W/S, cruceta o palanca; Enter o A elige; el foco da la vuelta. Avisa `elegido(nombre)` | Menú de pausa (Continuar, Opciones, Reiniciar, Salir), opciones |
+| Cuadro de diálogo (`cuadro_dialogo.tscn`) | Pergamino del kit con el marco de retrato encima del retrato, nombre en lacre y texto en tinta; `Dialogo` pone las frases | Diálogos de Felipe, Valeria y A.S.P.I. |
+| `BotonMenu` (`scripts/ui/base/boton_menu.gd`; tipos en `datos/ui/*.tres`, `DatosBoton`) | Botón de menú: al apretar se encoge y vuelve con rebote; con foco o el mouse encima brilla y, si sus datos lo piden, se mece (vaivén con tween, nunca de golpe); entrada opcional cayendo desde arriba, escalonada por `MenuUI`; `principal` con pulso sutil; `estampar()` estampa el sello de sus datos y avisa `estampado`. **Variantes por datos y tema, sin herencia:** `boton_menu.tres` (el de siempre, variación `BotonMenu`) y `boton_pergamino.tres` (variación `BotonPergamino`, 112 × 44, sin vaivén, con sello; escena `escenas/ui/boton_pergamino.tscn`) | Menú de pausa (pergamino), opciones (el de siempre) |
+| `SelloHuella` (`escenas/ui/sello_huella.tscn`) | Sello de lacre: `estampar()` lo deja caer en escalas enteras (3×, 2×, 1×), lo cambia por el lacre aplastado, suelta 3 destellos y espera; con `estampado_de_entrada` aparece ya puesto. Con «reducir movimiento» no cae ni vuelan los destellos | Botones de pergamino, pergamino de la pausa |
+| `MarcoFicha` (`escenas/ui/marco_ficha.tscn`) | Marco de madera y oro en 9 partes con ventana de retrato y cuerpo de pergamino; `ventana()` y `cuerpo()` dicen dónde poner el contenido | `FichaSuMajestad` |
+| `BarraEstadistica` (`escenas/ui/barra_estadistica.tscn`) | Ícono, nombre, barra (marco del kit y relleno de color, se llena de a poco) y frase de una línea; `escuchar(señal)` la conecta a una fuente que avisa `{estadistica: [valor, frase]}` | `FichaSuMajestad` |
+| `FichaSuMajestad` (`escenas/ui/ficha_su_majestad.tscn`, datos en `datos/ui/ficha.tres`, `DatosFicha`) | Retrato, kilos y humor; escucha `Felipe.peso_cambiado`, calcula las estadísticas con la tabla del peso y avisa `estadisticas_cambiadas` a sus barras. **Solo de chiste:** nada del juego lee las estadísticas. Único lugar donde se ve el peso | Pausa |
+| `FelipeEnCojin` (`escenas/ui/felipe_en_cojin.tscn`) | Felipe A a 0,72 con sus animaciones sobre el cojín y la corona aparte: mide el tope del cráneo de cada cuadro de la hoja y la apoya ahí | Pausa |
 | `GestorPantallas` | Pila: `abrir(pantalla, pausa)`, `cerrar(pantalla)`, `arriba()`, `es_la_de_arriba(pantalla)`; pausa mientras haya una que pausa | `Pantallas` (título, intro, pausa, fin), `Libreta`, `ResumenDia` |
-| `Estilo` | `color(&"nombre", alfa)`, `letra(&"nombre")`, `medida(&"nombre")`, `fuente()`, `texto_con_contorno`, `texto_centrado` | Todo lo que se dibuja con código |
+| `Estilo` | `color(&"nombre", alfa)`, `letra(&"nombre")`, `medida(&"nombre")`, `fuente()`, `texto_con_contorno`, `texto_centrado`; kit «Decreto real»: `panel(c, rect, &"panel")` (9 partes), `caja(&"nombre")`, `icono(&"hud_libreta")`, `relleno(c, textura, rect)` (barra sin deformar el pixel) | Todo lo que se dibuja con código |
 | `RecetaJugo` (`scripts/sistemas/receta_jugo.gd`, datos en `datos/jugo/`) | Jugo de una acción con datos: anticipación, líneas de velocidad (`LineasVelocidad`), cámara adelantada, pausa de impacto y sacudida, polvo, pelos, derrape y marca (`MarcaDerrape`) | Zoomies; pausa de impacto de zarpazo, manotazo y arañazo |
 | `PantallaOpciones` (`escenas/ui/pantalla_opciones.tscn`) | Opciones desde la pausa, en la pila de pantallas: una fila por acción para remapear (teclado y mando, Esc cancela), reducir movimiento y volumen (`Opciones`) | Pausa |
 | `Controles` | Qué tecla o botón tiene cada acción (leído del InputMap), `etiquetar("{saltar}")`, `remapear`, `guardar`, `cargar` (`user://controles.cfg`, se carga al empezar el nivel) | Avisos, pistas de jefe, íconos (`IconosBotones` busca el ícono por tecla, así sigue al remapeo) |
@@ -205,17 +209,17 @@ múltiplo); `Estilo.escribir` dibuja con ellas y `Estilo.recortar` corta con «�
 
 ### Cómo agregar una pantalla de menú
 
-1. **Escena:** en `escenas/ui/`, un `VBoxContainer` con el script `scripts/ui/base/menu_ui.gd` y un `Button` por
-   opción con el script `scripts/ui/base/boton_menu.gd` (toma solo el letrero de estambre del tema y cuelga) y como
-   texto una clave (`MENU_OPCIONES`); `principal = true` en el principal (coronita). Agrega un `Control` `HuecoFelipe`
-   (top_level) si Felipe va a asomar, y en la pantalla un `FelipeAsomado`. Copia
-   `menu_pausa.tscn`.
+1. **Escena:** en `escenas/ui/`, un `VBoxContainer` con el script `scripts/ui/base/menu_ui.gd` y, por opción, una
+   instancia de `boton_pergamino.tscn` (o un `Button` con `boton_menu.gd`, el de siempre) con una clave como texto
+   (`MENU_OPCIONES`); `principal = true` en el principal. Un tipo de botón nuevo es un `.tres` de `DatosBoton` (y su
+   variación del tema), no un script nuevo. Copia `menu_pausa.tscn`.
 2. **Textos:** agrega las claves a `traducciones/textos.csv` (columna `es`).
 3. **Pantalla:** el nodo que la muestra (un `Control` en una capa de `Capas`) la instancia, conecta `elegido(opcion)` a
    lo que haga cada opción y, al abrirse y cerrarse, llama `GestorPantallas.de(self).abrir(self)` y `.cerrar(self)`.
    Solo responde a teclas propias si `GestorPantallas.de(self).es_la_de_arriba(self)`.
 4. **Colores y letras:** del tema (`Estilo.color(&"...")`); si falta uno, se agrega a `datos/ui/tema.tres`.
-5. Prueba: como `_probar_menu_y_pausa` en `prueba_interfaz.gd` (foco en la primera opción, elegir, la pausa).
+5. **Elegir:** si los botones sellan, la pantalla espera `await boton.estampar()` antes de hacer lo elegido (`Pantallas._al_elegir`).
+6. Prueba: como `_probar_menu_y_pausa` en `prueba_interfaz.gd` (foco en la primera opción, elegir, el sello, la pausa).
 
 ### Cómo traducir un texto
 

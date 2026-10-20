@@ -68,7 +68,7 @@ const CORTINA_FIN_TELA := 42.0
 const CORTINA_SOBRE_VENTANA := 18.0
 ## Vidrio de la ventana del pasillo (en el mundo): el hueco de 150 × 120 del marco de la casa (`ventana_casa`, G2),
 ## con la vista del toldo y la caja de pizza detrás (`vista_pasillo`, B2). El alféizar del marco queda a 90 cm.
-const VIDRIO_PASILLO := Rect2(4655, ALFEIZAR_PASILLO - 132, 150, 120)
+const VIDRIO_PASILLO := Rect2(4639, ALFEIZAR_PASILLO - 132, 150, 120)
 ## Puertas: [nombre, posición (al pie, al centro), puerta a la que lleva]. Van de a pares.
 const PUERTAS := [
 	["sala>recibidor", Vector2(1188, SUELO), "recibidor<sala"],
@@ -150,7 +150,7 @@ const ARTE := [
 	["baul", Vector2(4566, SUELO), false, "mueble"],
 	["aparador", Vector2(4636, SUELO), false, "mueble"],
 	["retrato_familiar", Vector2(5280, DINTEL + 80.0), false, "pared"],  # P-4: el trono (cojín) con su retrato
-	["ventana_casa", Vector2(4623, ALFEIZAR_PASILLO + 15.0), false, "pared"],  # el marco de la casa; alféizar 15 px sobre su base
+	["ventana_casa", Vector2(4607, ALFEIZAR_PASILLO + 15.0), false, "pared"],  # el marco de la casa (hueco = VIDRIO_PASILLO); alféizar 15 px sobre su base; termina antes del rectángulo de la puerta del dormitorio
 	["cojin", Vector2(5364, SUELO), false, "mueble"],
 	["paisaje", Vector2(6323, SUELO - 145 - FONDO_PISO + 6.0), false, "pared"],  # D-1: apoyado contra la pared, al fondo de la repisa
 	["banquito", Vector2(5966, SUELO), false, "mueble"],

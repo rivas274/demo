@@ -34,6 +34,9 @@ ANIMS = [
     {"id": "sc-aranar", "nombre": "Arañar (impacto en 3 y 5)", "godot": "aranar", "archivo": "felipe-aranar-sheet.png", "frames": 8, "fps": 12},
     {"id": "sc-subir", "nombre": "Subir escalera (un escalón)", "godot": "subir_escalera", "archivo": "felipe-subir-escalera-sheet.png",
      "frames": 8, "fps": 10},
+    {"id": "sc-derrape", "nombre": "Derrape (Zoomies, cuadros 3-6)", "godot": "derrape", "archivo": "felipe-derrape-sheet.png", "frames": 8, "fps": 12},
+    {"id": "sc-sentarse", "nombre": "Sentarse (0-4) y sentado (5-7)", "godot": "sentarse / sentado", "archivo": "felipe-sentarse-sheet.png", "frames": 8, "fps": 8},
+    {"id": "sc-entrar", "nombre": "Entrar por una puerta", "godot": "entrar_puerta", "archivo": "felipe-entrar-puerta-sheet.png", "frames": 8, "fps": 10},
 ]
 
 

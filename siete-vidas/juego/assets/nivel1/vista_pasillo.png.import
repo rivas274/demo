@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://pbkqmtq20hob"
-path="res://.godot/imported/ventana_pasillo.png-2891f57f56331db02a1778944feb894c.ctex"
+uid="uid://chatsl3pj3dr5"
+path="res://.godot/imported/vista_pasillo.png-c5b7107cf49462d0eb7cc2a4dbf783d3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/nivel1/ventana_pasillo.png"
-dest_files=["res://.godot/imported/ventana_pasillo.png-2891f57f56331db02a1778944feb894c.ctex"]
+source_file="res://assets/nivel1/vista_pasillo.png"
+dest_files=["res://.godot/imported/vista_pasillo.png-c5b7107cf49462d0eb7cc2a4dbf783d3.ctex"]
 
 [params]
 

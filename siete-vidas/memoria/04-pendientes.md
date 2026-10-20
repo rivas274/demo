@@ -99,8 +99,8 @@ Idea tomada de un video sobre cómo hacer que un dash se sienta bien (5 pasos). 
 - Los Zoomies siguen apagados en el nivel 1 (se ganan en Downtown).
 - [ ] Rehacer la animación de derrape: hoy se inclina poco y no clava las patas delanteras. Pedirla de nuevo desde Felipe A con `pixel-engine-v1.5` (≈26 créditos), cuadro por cuadro, cuando se activen los Zoomies (Downtown). (Sugerencia del creador, 2026-10-20.)
 
-## Menú con estambre (aprobado por el creador, 2026-10-20)
+## Menú «Decreto real» (elegido por el creador, 2026-10-20)
 
-- [x] **Botones colgando de estambre:** cada botón es un letrero que cuelga de un hilo y se balancea (comportamiento ya pedido en el botón base: apretar 90 % con rebote, balanceo hasta 6° con foco, entrada que cae con rebote, opción «reducir movimiento»). **Hecho (2026-10-20)** en `BotonMenu` con el arte de Gemini (`07-arquitectura.md`).
-- [x] **Manotazo de Felipe:** al elegir un botón, Felipe asoma por el costado del menú y le da un manotazo con la animación `zarpazo` (sin créditos); el letrero se columpia más fuerte y suelta pelusa. **Preparado:** `BotonMenu.golpear(fuerza)` (columpio + señal `golpeado` para la pelusa) y `MenuUI.colocar_hueco(boton)` (nodo `HuecoFelipe` al costado); **hecho** con `FelipeAsomado` en el menú de pausa (única pantalla con botones; el título, la intro y el final siguen con «[Enter] …»).
-- [x] **Arte:** encargo a Gemini en `siete-vidas/diseno/encargo-gemini-menu-estambre.md` (letreros, letrero principal con coronita, hilo, ovillo, pelusa).
+- [x] **Pausa «Decreto real» (hecha 2026-10-20):** Ficha de Su Majestad a la izquierda (retrato, kilos, humor y barras de defensa, carisma, ataque y peso con su frase; la velocidad, solo chiste), pergamino «Decretos de Su Majestad» con Felipe en su cojín y la corona al centro, y 4 botones de pergamino a la derecha que estampan el sello de lacre con destellos al elegir.
+- [x] **Toda la interfaz con el kit (G6/G7, hecha 2026-10-20):** HUD (pergaminos e íconos del kit), diálogo (pergamino y marco de retrato), libreta (pergamino con la foto del unicornio), resumen del día (pergamino con la cinta), aviso de logro (etiqueta con sello), barra del jefe (marco de madera y oro con relleno rojo y escudo azul) y carteles (cinta y pergamino).
+- [ ] **Mostrar al creador:** capturas antes y después de la pausa, la ficha, el HUD, el diálogo, los carteles, la libreta, el resumen y la barra del jefe, y el GIF del sello.

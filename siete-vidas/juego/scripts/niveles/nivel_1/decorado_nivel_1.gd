@@ -18,7 +18,7 @@ func _init(de: Nivel, con_guion: GuionNivel1) -> void:
 
 
 ## Pantalla del monitor (en el mundo): ahí sale «jjjjjj» al pisar el teclado.
-const PANTALLA_MONITOR := Rect2(7126 + 6, Nivel1.SUELO - 89 - 48 + 6, 33, 28)
+const PANTALLA_MONITOR := Rect2(7126 + 4, Nivel1.SUELO - 89 - 48 + 6, 36, 26)
 
 
 ## Decorado sin colisión: pantalla y teclado del escritorio, jirones del sofá, calcetines que vuelan.
@@ -82,25 +82,15 @@ func _dibujar_serie(c: Node2D) -> void:
 	c.draw_rect(Rect2(r.position.x - 6.0, Nivel1.SUELO - 89.0, r.size.x + 12.0, 2.0), Color(0.6, 0.85, 1.0, 0.12))
 
 
-## Teclado de Valeria (G7): en perspectiva, del tamaño declarado en TECLADO (52 × 24), con cuatro filas de teclas.
+## Teclado de Valeria (arte de Gemini, consistencia-casa.png): del tamaño de TECLADO (52 × 24); pisado, las teclas se
+## ven hundidas (más oscuro).
 func _dibujar_teclado(c: Node2D) -> void:
+	var teclado := ArteNivel.textura("teclado")
+	if teclado == null:
+		return
 	var r := Nivel1.TECLADO
-	var oscuro := Color("241c1a")
-	var tapa := PackedVector2Array([r.position + Vector2(6, 0), r.position + Vector2(r.size.x - 6, 0), r.position + Vector2(r.size.x, r.size.y - 6), r.position + Vector2(0, r.size.y - 6)])
-	c.draw_colored_polygon(tapa, Color("3a3d44"))
-	c.draw_rect(Rect2(r.position + Vector2(0, r.size.y - 6), Vector2(r.size.x, 6)), Color("26282d"))
-	c.draw_polyline(tapa + PackedVector2Array([tapa[0]]), oscuro, 1.0)
-	var tecla := Color("c9ced6") if not guion.teclado_pisado else Color("8f96a3")
-	for fila in 4:
-		var y := r.position.y + 3.0 + fila * 4.5
-		var margen := 7.0 - fila * 1.3
-		var x := r.position.x + margen
-		while x < r.end.x - margen - 4.0:
-			c.draw_rect(Rect2(x, y, 4, 3), tecla)
-			c.draw_rect(Rect2(x, y + 3, 4, 1), Color(0, 0, 0, 0.4))
-			x += 5.5
-	# Barra espaciadora.
-	c.draw_rect(Rect2(r.position.x + 16, r.end.y - 8, 20, 2), tecla)
+	var tinte := Color(0.75, 0.75, 0.8) if guion.teclado_pisado else Color.WHITE
+	c.draw_texture(teclado, Vector2(r.position.x, r.end.y - teclado.get_height()), tinte)
 
 
 ## Ropa doblada de la cama (arriba-extra, 52 × 48): limpia y, después de que Felipe se acicala encima, con pelos.

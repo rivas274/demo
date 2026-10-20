@@ -111,6 +111,8 @@ Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md` (recorrido, agenda
   - **Valeria en videollamada:** al caer la caja dice «¡¿Qué fue ESO?! …(a la cámara) Perdón, era el gato. ¡FELIPE, MIS CAJAS!».
   - **Recarga de snacks (bolsillo de 5):** además de las recompensas, el plato de comida de Felipe suma 1 al comerlo y los puntos de descanso (cojín y caja de arena) rellenan hasta 3. Por datos: `DatosObjeto.recarga_snacks` y `DatosNivel.snacks_en_descanso`.
   - **Estadísticas de la Ficha de Su Majestad, solo de chiste:** cambian con el peso (barras y frases) pero no afectan al juego por ahora (ni defensa, ni daño, ni perdón). Queda así en `DatosFicha`.
+  - **Menú de pausa «Decreto real»** (idea 1 de `arte/referencias/gemini/menu-ideas/`, con el sello estampado y los destellos de la idea 2): Ficha de Su Majestad a la izquierda, pergamino «Decretos de Su Majestad» con Felipe en su cojín y la corona al centro, y botones de pergamino que estampan un sello de lacre al elegir. Toda la interfaz usa el mismo kit (HUD, diálogo, libreta, resumen, logro, barra del jefe y carteles), una sola familia visual (G6/G7).
+  - **El peso se ve solo en la Ficha de la pausa** (kilos, humor y barra de peso), nunca en el HUD.
 - **Profundidad con parallax en capas (como Silksong):** cada escena tiene capas lejanas que se mueven menos que la cámara, la capa de juego, y un primer plano de siluetas oscuras que se mueve más. La cámara se mueve en horizontal y en vertical.
 
 ## Legal (Steam)
@@ -120,4 +122,4 @@ Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md` (recorrido, agenda
 - Licencias comerciales para cada recurso; aviso MIT de Godot en créditos; contrato de cesión con colaboradores.
 - **Arte con IA:** declararlo en Steam. El arte final debe estar retocado o unificado a mano; la IA sirve para bocetos y bases.
 - Pregunta abierta: ¿Valeria está basada en una persona real? Si sí, cambiar nombre o pedir permiso escrito.
-- **Sistema de la casa (2026-10-19, plan de ambientes):** un solo marco de puerta (140 × 248) en todos los estados, una sola ventana (la de la sala, en 9 partes), zócalo y cornisa iguales en los 6 cuartos, cuadros con el borde de arriba en el dintel (`Nivel1.DINTEL`), luz del oeste hacia la derecha con el tono de cada cuarto, y la regla de islas para la decoración (pegada a un mueble, fuera de los rectángulos sagrados, menos de 24 px si no se pisa).
+- **Sistema de la casa (2026-10-19, plan de ambientes):** un solo marco de puerta (140 × 248) en todos los estados, una sola ventana (el marco de madera de `consistencia-casa.png`, con hueco de 150 × 120, en cocina, dormitorio, estudio y pasillo), zócalo y cornisa iguales en los 6 cuartos, cuadros con el borde de arriba en el dintel (`Nivel1.DINTEL`), luz del oeste hacia la derecha con el tono de cada cuarto, y la regla de islas para la decoración (pegada a un mueble, fuera de los rectángulos sagrados, menos de 24 px si no se pisa).

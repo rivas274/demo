@@ -86,7 +86,6 @@ PIEZAS = {
     "caja_rota": ("recibidor-cocina-extra", 12, (70, 38), None),
     "ventana_sala": ("ventanas-patio", 0, (180, 151), (0.0, 0.24, 1.0, 1.0)),
     "balcon_mini": ("ventanas-patio", 0, (54, 36), (0.30, 0.0, 0.645, 0.205)),
-    "ventana_pasillo": ("ventanas-patio", 1, (180, 54), None),  # el alféizar es la fila del borde de la repisa
     # arriba-extra (Gemini, la mandó el creador; revisión 3): reemplaza lo que se dibujaba por código.
     "baul": ("arriba-extra", 0, (70, 48), None),  # 40 cm, se pasa por delante (cabe entre la puerta y la consola)
     "cojin": ("arriba-extra", 2, (70, 48), None),  # cojín redondo con hueco: descanso del pasillo
@@ -120,9 +119,8 @@ BORRAR = {"escalera_baranda": [(0, 80, 4, 217), (0, 202, 186, 217)], "baranda": 
 RELLENOS = {"baranda": [(70, 36, 121, 62, 58, 18)]}
 
 # Parches después de escalar: (x0, y0, x1, y1, dx) copia en ese rectángulo los pixeles que están dx a la izquierda
-# en la imagen original. La ventana del pasillo traía la caja de pizza sobre el alféizar (adentro, al alcance):
-# se tapa con el marco y el alféizar de al lado, y la caja se dibuja por código afuera, tras el vidrio (G3).
-PARCHES = {"ventana_pasillo": [(114, 28, 153, 33, 32), (104, 33, 163, 54, 56)]}
+# en la imagen original.
+PARCHES = {}
 
 # Valeria (tanda 3B): poses a una sola escala (de pie mide 200 px, 3 Felipes). Su caminar es de SpriteCook
 # (revisión 3, B2: las piernas sí alternan), 8 cuadros de 224 × 224 ya a escala 1:1.
@@ -657,23 +655,7 @@ def vano_alto():
     print("Vano: 140 x 248, con la bajada de la escalera")
 
 
-def ventana_marco():
-    """G3: marco de la ventana de la sala para las ventanas de código, en 9 partes: sin el vidrio, la persiana de
-    adentro ni el alféizar (se recorta la fila 0 a 137 y las columnas 9 a 171; el centro queda transparente)."""
-    v = abrir("ventana_sala")[0:138, 9:171]
-    v[26:138, 18:144, 3] = 0
-    guardar(v, "ventana_marco")
-    print(f"Marco de ventana: {v.shape[1]} x {v.shape[0]} (bordes 18, 18, 26, 8)")
-
-
 def recoloreos():
-    # P-3: la ventana del pasillo deja la madera crema y pasa a la madera de la ventana de la sala (sin tocar el toldo
-    # ni la vista de afuera, que están tras el vidrio: columnas 77 a 163, filas de arriba).
-    v = abrir("ventana_pasillo")
-    rgb = v[:, :, :3].astype(int)
-    crema = (v[:, :, 3] > 0) & (rgb.min(axis=2) > 120) & (rgb.max(axis=2) - rgb.min(axis=2) < 75)
-    crema[0:42, 77:163] = False
-    guardar(recolorear(v, crema, (178, 117, 73), 187.0), "ventana_pasillo")
     # R-4: peldaños de madera apagada, no gris piedra.
     p = abrir("escalera_peldanos")
     rgb = p[:, :, :3].astype(int)
@@ -689,7 +671,7 @@ def recoloreos():
     recolorear(z, abajo, (226, 210, 180), 150.0)
     z[17:28, 88:116] = z[17:28, 88:116][:, ::-1]
     guardar(z, "zapatero")
-    print("Recoloreos: ventana del pasillo, peldaños, zapatero")
+    print("Recoloreos: peldaños, zapatero")
 
 
 def telas():
@@ -853,7 +835,6 @@ def ambientes():
         escalar(recortar(imagen, cajas[indice], fraccion), tamano).save(DESTINO / f"{nombre}.png")
     puertas_unificadas()
     vano_alto()
-    ventana_marco()
     recoloreos()
     telas()
     tanda_3e()
@@ -871,7 +852,8 @@ def ambientes():
 PIEZAS_CONSISTENCIA = {
     "ventana_casa": ("consistencia-casa", 0, (215, 170), None),  # G2: el mismo marco en las 4 ventanas (hueco de 150 × 120)
     "vista_pasillo": ("consistencia-casa", 1, (150, 120), (0.012, 0.17, 0.988, 0.988)),  # B2: 1,25 : 1 sin cortar el toldo
-    "armario_escalera": ("consistencia-casa", 2, (318, 150), None),
+    # El armario bajo la escalera (pieza 2) no calza con el larguero de la escalera: se probó y no se usa (sigue el de
+    # código, ArteNivel1._dibujar_armario_escalera).
     "teclado": ("consistencia-casa", 3, (52, 24), None),
     "monitor": ("correccion-estilo", 0, (44, 48), None),
     "microondas": ("correccion-estilo", 1, (98, 54), None),
@@ -895,7 +877,7 @@ def consistencia():
     for nombre, (hoja, indice, tamano, fraccion) in PIEZAS_CONSISTENCIA.items():
         imagen, cajas = piezas(hoja)
         recorte = recortar(imagen, cajas[indice], fraccion)
-        if nombre in ("ventana_casa", "armario_escalera"):
+        if nombre == "ventana_casa":
             recorte = sin_huecos(recorte)
         if nombre == "vista_pasillo":
             # Lleno: un rectángulo opaco entero (detrás del vidrio), sin recortar al borde opaco.

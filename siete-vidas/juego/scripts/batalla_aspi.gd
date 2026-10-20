@@ -94,6 +94,8 @@ var gigante := 0.0
 var bolas: Array[Node2D] = []
 ## Entrada de 8 pasos, carteles y barra de vida (componente reutilizable para cualquier jefe).
 var presentacion: PresentacionJefe
+## El dibujo de la pelea (scripts/dibujo_batalla_aspi.gd).
+var dibujo: DibujoBatallaAspi
 ## El estudio: ahí se pelea.
 var arena: Rect2
 ## Felipe salió del estudio (perdió una vida): A.S.P.I. espera en su base y al volver hay entrada corta.
@@ -132,6 +134,7 @@ func _init(jefa: Enemigo, gato: Felipe, nivel: Nivel) -> void:
 	felipe = gato
 	sala = nivel
 	name = "Batalla"
+	dibujo = DibujoBatallaAspi.new(self)
 	arena = Nivel1.rect_de("estudio")
 	_centro_gigante = Vector2(arena.get_center().x, Nivel1.SUELO - 160)
 	# La batalla en sí no dibuja nada: cada parte va en su capa de la tabla única (Capas, B1 de la revisión 3).
@@ -158,17 +161,17 @@ func _ready() -> void:
 	_imaginacion = Node2D.new()
 	_imaginacion.name = "Imaginacion"
 	Capas.usar(_imaginacion, Capas.IMAGINACION)
-	_imaginacion.draw.connect(_dibujar_imaginacion)
+	_imaginacion.draw.connect(func() -> void: dibujo.imaginacion(_imaginacion))
 	add_child(_imaginacion)
 	_manchas_dibujo = Node2D.new()
 	_manchas_dibujo.name = "Manchas"
 	Capas.usar(_manchas_dibujo, Capas.MUEBLES)
-	_manchas_dibujo.draw.connect(_dibujar_manchas)
+	_manchas_dibujo.draw.connect(func() -> void: dibujo.manchas(_manchas_dibujo))
 	add_child(_manchas_dibujo)
 	_encima = Node2D.new()
 	_encima.name = "Viento y depósito"
 	Capas.usar(_encima, Capas.EFECTOS)
-	_encima.draw.connect(_dibujar_encima)
+	_encima.draw.connect(func() -> void: dibujo.encima(_encima))
 	add_child(_encima)
 	_polvo = CPUParticles2D.new()
 	_polvo.name = "Polvo"
@@ -668,7 +671,13 @@ func _escupir_bola() -> void:
 	var velocidad := Vector2((hasta.x - desde.x) / VUELO_BOLA, (hasta.y - desde.y) / VUELO_BOLA - 0.5 * GRAVEDAD_BOLA * VUELO_BOLA)
 	bola.set_meta("velocidad", velocidad)
 	bola.global_position = desde
-	bola.draw.connect(_dibujar_bola.bind(bola))
+	bola.draw.connect(dibujo.bola.bind(bola))
+	# Lastima al tocar a Felipe (HaceDano, circular); la revisa _mover_bolas a mano para mirar antes que el piso.
+	var dano := HaceDano.new()
+	dano.radio = 22.0
+	dano.desfase_felipe = Vector2(0, -24)
+	dano.set_physics_process(false)
+	bola.add_child(dano)
 	add_child(bola)
 	bolas.append(bola)
 	sala.sonar("caja")
@@ -682,9 +691,7 @@ func _mover_bolas(delta: float) -> void:
 		bola.global_position += velocidad * delta
 		bola.rotation += velocidad.x * delta * 0.05
 		bola.queue_redraw()
-		var distancia := (felipe.global_position + Vector2(0, -24)) - bola.global_position
-		if distancia.length() < 22.0:
-			felipe.recibir_dano(1, bola.global_position.x)
+		if (Componentes.de(bola, HaceDano) as HaceDano).revisar():
 			_quitar_bola(bola)
 		elif bola.global_position.y > Nivel1.SUELO - 6.0 or not arena.grow(20).has_point(bola.global_position) or fase == Fase.FIN:
 			_quitar_bola(bola)
@@ -730,112 +737,3 @@ func _terminar() -> void:
 		await get_tree().physics_frame
 	felipe.acicalarse()
 	terminada.emit()
-
-
-func _dibujar_bola(bola: Node2D) -> void:
-	# Escala de gato: bolas de pelo grandes y legibles (el dibujo gira con el nodo).
-	var arte := ArteNivel.textura("bola_pelo")
-	bola.draw_texture(arte, -arte.get_size() / 2.0)
-
-
-## La imaginación de Felipe en la entrada: el estudio en llamas y la bestia gigante, POR ENCIMA de todo el escenario
-## (capa Capas.IMAGINACION; B1). El estudio real se desvanece con `transformacion` y vuelve al final del rugido.
-## La gigante nace de la A.S.P.I. real (mismo lugar y ancho) y al final se encoge hasta ella.
-func _dibujar_imaginacion() -> void:
-	var c := _imaginacion
-	var tiempo := Time.get_ticks_msec() / 1000.0
-	if transformacion > 0.0:
-		var a := transformacion
-		c.draw_texture_rect(ArteNivel.textura("fin_del_mundo"), arena, false, Color(1, 1, 1, a))
-		if _rayo > 0.0:
-			c.draw_rect(arena, Color(1, 0.9, 0.9, 0.18 * _rayo * a))
-	if gigante > 0.0:
-		var arte := ArteNivel.textura("aspi_gigante")
-		var tam := arte.get_size()
-		var k := ease(gigante, 0.6)
-		var escala := lerpf(aspi.datos.ancho / tam.x, 1.0, k)
-		# Desde (y hacia) donde está la A.S.P.I. real ahora: los empujones la movieron.
-		var origen := aspi.global_position + Vector2(0, -tam.y * escala / 2.0)
-		var centro := origen.lerp(_centro_gigante + Vector2(0, sin(tiempo * 2.0) * 5.0), k)
-		if fase == Fase.ENTRADA and gigante < 1.0 and not _desvaneciendo:
-			# Temblor de sueño mientras crece.
-			centro += Vector2(sin(tiempo * 40.0), cos(tiempo * 33.0)) * 2.0
-		var mira := 1.0 if felipe.global_position.x >= centro.x else -1.0
-		c.draw_set_transform(centro, sin(tiempo * 1.3) * 0.03 * k, Vector2(escala * mira, escala))
-		c.draw_texture(arte, -tam / 2.0)
-		# Luz de borde cálida del incendio (crítica de Gemini): la silueta oscura no se funde con el fondo. Late con
-		# las llamas y crece con la imaginación (en la A.S.P.I. chica no se nota).
-		var luz := ArteNivel.textura("aspi_gigante_luz")
-		if luz:
-			c.draw_texture(luz, -tam / 2.0, Color(1, 1, 1, k * (0.8 + 0.2 * sin(tiempo * 9.0))))
-		c.draw_set_transform(Vector2.ZERO)
-
-
-## Las manchas en el piso (tierra de maceta, agua, papel) que A.S.P.I. va a limpiar, y la pelusa que tiembla en la espera.
-func _dibujar_manchas() -> void:
-	var c := _manchas_dibujo
-	for i in manchas.size():
-		if tipos_mancha[i] == "papel":
-			ArteNivel.dibujar(c, "papel", manchas[i], Nivel1.SUELO + 1.0)
-		else:
-			ArteNivel.dibujar(c, "mancha", manchas[i], Nivel1.SUELO + 2.0)
-	if fase == Fase.ENTRADA and presentacion.paso_actual in ["espera", "revelar", "nombre", "barra", "musica", "tamano"]:
-		var t := Time.get_ticks_msec() / 1000.0
-		for i in 12:
-			var x := arena.position.x + 60.0 + i * 46.0
-			c.draw_circle(Vector2(x + sin(t * 30.0 + i) * 1.5, Nivel1.SUELO - 3), 3.0, Color(0.88, 0.85, 0.8, 0.9))
-
-
-## Delante de todo: el viento de la succión, el cepillo que gira, papeles que vuelan y el aviso del depósito lleno.
-func _dibujar_encima() -> void:
-	var c := _encima
-	var tiempo := Time.get_ticks_msec() / 1000.0
-	for p in _papeles:
-		var x := p.x + p.y * 160.0
-		var y := Nivel1.SUELO - 40.0 - sin(p.y * 3.0 + p.z * 6.0) * 60.0 - p.y * 40.0
-		c.draw_set_transform(Vector2(x, y), p.y * 6.0 + p.z)
-		ArteNivel.dibujar(c, "papel_arrugado", 0.0, 10.0)
-		c.draw_set_transform(Vector2.ZERO)
-	if _reinicio > 0.0 and fase == Fase.PELEA:
-		# Barra de reinicio sobre la carcasa (no es un rótulo: no pisa al «¡CLIC!»); el texto sale cuando el «¡CLIC!» ya se fue.
-		var barra := Rect2(aspi.global_position + Vector2(-18, -ALTO_ARRIBA - 12), Vector2(36, 4))
-		c.draw_rect(barra.grow(1), Color(0.05, 0.1, 0.15, 0.9))
-		c.draw_rect(Rect2(barra.position, Vector2(barra.size.x * (1.0 - _reinicio / REINICIO), barra.size.y)), Color("9fd8ff"))
-		if tiempo - _tiempo_clic > DURA_CLIC:
-			var punto := aspi.global_position + Vector2(-34, -ALTO_ARRIBA - 22)
-			c.draw_string_outline(ThemeDB.fallback_font, punto, "REINICIANDO" + ".".repeat(int(tiempo * 3.0) % 4), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, 4, Color(0.05, 0.1, 0.15))
-			c.draw_string(ThemeDB.fallback_font, punto, "REINICIANDO" + ".".repeat(int(tiempo * 3.0) % 4), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("9fd8ff"))
-	if _aviso_succion > 0.0 and not limpiando:
-		# Anticipación de la succión: el cepillo gira y se ven líneas de aire.
-		for i in 6:
-			var angulo := tiempo * 18.0 + i * TAU / 6.0
-			var centro := aspi.global_position + Vector2(0, -6)
-			c.draw_line(centro, centro + Vector2(cos(angulo), sin(angulo) * 0.4) * 14.0, Color(0.9, 0.95, 1.0, 0.8), 1.0)
-	if llena:
-		# Por encima de la tapa abierta (que sube unos 32 px).
-		var arriba := aspi.global_position + Vector2(0, -ALTO_ARRIBA - 52)
-		if int(tiempo * 4.0) % 2 == 0:
-			c.draw_circle(aspi.global_position + Vector2(0, -ALTO_ARRIBA - 4), 5.0, Color("e0483b"))
-		var fuente := ThemeDB.fallback_font
-		var texto := "¡LLENO!"
-		var ancho := fuente.get_string_size(texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
-		c.draw_rect(Rect2(arriba.x - ancho / 2.0 - 6, arriba.y - 13, ancho + 12, 18), Color(0.1, 0.05, 0.07, 0.85))
-		c.draw_string(fuente, Vector2(arriba.x - ancho / 2.0, arriba.y), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("ffe066"))
-		# Flecha hacia abajo: hay que caerle encima.
-		c.draw_colored_polygon(PackedVector2Array([arriba + Vector2(-6, 8), arriba + Vector2(6, 8), arriba + Vector2(0, 16)]), Color("ffe066"))
-	if ataque == Ataque.SOPLIDO or ataque == Ataque.AVISO_SOPLIDO:
-		for i in 8:
-			var avance := fmod(tiempo * 2.0 + i * 0.13, 1.0)
-			var x := aspi.global_position.x - 20.0 + i * 5.0
-			c.draw_line(Vector2(x, aspi.global_position.y - 40.0 - avance * 120.0), Vector2(x, aspi.global_position.y - 52.0 - avance * 120.0), Color(1, 1, 0.8, 0.6 * (1.0 - avance)), 1.5)
-	if not succionando:
-		return
-	var x_jefa := aspi.global_position.x
-	var radio: float = RADIO_SUCCION[mini(apagados, 2)]
-	for i in 16:
-		var lado := -1.0 if i % 2 == 0 else 1.0
-		var avance := fmod(tiempo * 1.4 + i * 0.37, 1.0)
-		var x := x_jefa + lado * (1.0 - avance) * radio
-		var y := Nivel1.SUELO - 6.0 - fmod(i * 23.0, 70.0)
-		if arena.has_point(Vector2(x, y)):
-			c.draw_line(Vector2(x, y), Vector2(x + lado * 18.0, y), Color(Color("dff3ff"), 0.7 * avance), 1.5)

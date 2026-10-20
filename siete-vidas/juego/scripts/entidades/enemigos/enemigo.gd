@@ -4,7 +4,8 @@ extends CharacterBody2D
 ## script con otros datos (DatosEnemigo, un .tres) y otra apariencia. No hereda de nadie: junta piezas que hacen un
 ## solo trabajo y las conecta con señales.
 ##   Vida (cuántos zarpazos aguanta) · RecibeGolpes (el zarpazo llega aquí) · HaceDano (lastima a Felipe al tocarlo) ·
-##   MovimientoPatrulla (va y viene, persigue) · OyeMaullido · Asustable · SombraContacto · Apariencia (el dibujo).
+##   MovimientoPatrulla (va y viene, persigue) · OyeMaullido · Asustable · SombraContacto · Apariencia (el dibujo) ·
+##   ReaccionDerrota (la derrota jugosa, si sus datos traen `derrota`).
 ## Si la escena ya trae una pieza (puesta en el editor), usa esa; si no, la crea con los números de `datos`.
 ## Escenas: escenas/entidades/raton.tscn y aspi.tscn. Receta para uno nuevo: siete-vidas/memoria/07-arquitectura.md.
 
@@ -31,6 +32,8 @@ var asustable: Asustable
 var sombra: SombraContacto
 ## El dibujo (Apariencia, o la que pida `datos.apariencia`, como AparienciaAspi).
 var apariencia: Node2D
+## La derrota jugosa (null si sus datos no la piden).
+var derrota: ReaccionDerrota
 var _armado := false
 
 
@@ -99,8 +102,14 @@ func armar() -> void:
 	sombra = _pieza(SombraContacto, func() -> Node: return SombraContacto.new(datos.sombra.x, datos.sombra.y))
 	var tipo_apariencia: Script = datos.apariencia if datos.apariencia else Apariencia
 	apariencia = _pieza(tipo_apariencia, func() -> Node: return tipo_apariencia.new())
+	if datos.derrota:
+		derrota = _pieza(ReaccionDerrota, func() -> Node: return ReaccionDerrota.new(datos.derrota))
+		if derrota.datos == null:
+			derrota.datos = datos.derrota
 	# Las piezas no se conocen: el enemigo las conecta.
 	vida.murio.connect(_al_vencerlo)
+	if derrota:
+		vida.murio.connect(derrota.reaccionar)
 	recibe_golpes.golpeado.connect(func(felipe: Felipe) -> void: patrulla.retroceder(felipe.mirando, RETROCESO_GOLPE.x, RETROCESO_GOLPE.y))
 	recibe_golpes.rebotado.connect(func(felipe: Felipe) -> void: patrulla.retroceder(felipe.mirando, RETROCESO_REBOTE.x, RETROCESO_REBOTE.y))
 	recibe_golpes.aturdido.connect(patrulla.detener)

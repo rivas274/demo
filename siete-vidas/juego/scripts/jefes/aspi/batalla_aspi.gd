@@ -396,7 +396,7 @@ func _al_oir_maullido(_felipe_que_maulla: Felipe) -> void:
 	jefe.patrulla.destino = felipe.global_position.x
 
 
-## Al tercer apagado se apaga del todo: cámara lenta, «¡APAGADA!», todo vuelve de golpe a la normalidad y Felipe se lame
+## Al tercer apagado se apaga del todo: su derrota (destello, rebote, pelusa, cámara lenta), «¡APAGADA!», todo vuelve a la normalidad y Felipe se lame
 ## la pata. La puerta del balcón se abre (camino de la Agenda).
 func _terminar() -> void:
 	presentacion.saltar()
@@ -416,12 +416,12 @@ func _terminar() -> void:
 		puerta.cerrada = false
 		puerta.ofrecer_cerrada = true
 		puerta.queue_redraw()
-	Engine.time_scale = 0.3
+	# La cámara lenta, el destello por silueta, el rebote contra la pared y la montaña de pelusa son de su derrota
+	# (ReaccionDerrota con datos/derrotas/aspi.tres); aquí, el cartel tipo Broforce y el sonido.
 	presentacion.destello(1.0)
 	presentacion.cartel("JEFE_APAGADA", 1.6)
 	nivel.sonar("puf")
-	await get_tree().create_timer(0.5 * 0.3, true, false, false).timeout
-	Engine.time_scale = 1.0
+	await get_tree().create_timer(0.5, true, false, true).timeout
 	nivel.travesuras.cumplir("desenchufar")
 	await get_tree().create_timer(0.6, false).timeout
 	# Se lame la pata como si nada, apenas toca el piso.

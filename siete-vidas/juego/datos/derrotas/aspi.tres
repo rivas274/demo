@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="DatosDerrota" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/datos/datos_derrota.gd" id="1_datos"]
+
+[resource]
+script = ExtResource("1_datos")
+destello = 0.14
+destello_pantalla = 0.6
+congelado = 0.08
+sacudida = Vector2(0.35, 1.0)
+impulso = Vector2(260, -150)
+gravedad = 900.0
+vueltas = 0.0
+rebote_pared = 0.45
+rebote_piso = 0.25
+desarmarse = false
+palabra = ""
+nube = 28
+color_nube = Color(0.72, 0.7, 0.68, 0.95)
+camara_lenta = 0.3
+duracion_lenta = 0.5
+marca = "derrota_pelusa"
+lado_marca = 52.0
+frase = "derrota_aspi"

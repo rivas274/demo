@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="DatosEnemigo" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="DatosEnemigo" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/datos/datos_enemigo.gd" id="1_datos"]
 [ext_resource type="Script" path="res://scripts/jefes/aspi/apariencia_aspi.gd" id="2_apariencia"]
+[ext_resource type="Resource" path="res://datos/derrotas/aspi.tres" id="9_derrota"]
 
 [resource]
 script = ExtResource("1_datos")
@@ -20,3 +21,4 @@ dano = 1
 alcance_dano = 18.0
 oye_maullido = true
 asustable = true
+derrota = ExtResource("9_derrota")

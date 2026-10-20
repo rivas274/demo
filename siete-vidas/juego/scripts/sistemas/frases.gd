@@ -5,6 +5,16 @@ extends RefCounted
 ## Cada frase: [texto, ánimo del retrato] (ver Dialogo.PERSONAJES). Todas caben en 1 o 2 líneas (la prueba lo mide).
 
 const FELIPE := {
+	"derrota_raton": [
+		["FELIPE_DERROTA_RATON_1", 7],
+		["FELIPE_DERROTA_RATON_2", 7],
+		["FELIPE_DERROTA_RATON_3", 4],
+		["FELIPE_DERROTA_RATON_4", 0],
+	],
+	"derrota_aspi": [
+		["FELIPE_DERROTA_ASPI_1", 7],
+		["FELIPE_DERROTA_ASPI_2", 4],
+	],
 	"zoomies_choque": [
 		["FELIPE_ZOOMIES_CHOQUE_1", 1],
 		["FELIPE_ZOOMIES_CHOQUE_2", 5],

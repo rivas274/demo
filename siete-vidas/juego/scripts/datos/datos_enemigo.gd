@@ -32,6 +32,8 @@ extends Resource
 @export var sonido_al_vencer := ""
 ## Frase de Felipe al vencerlo (clave de Frases.FELIPE; "" para ninguna).
 @export var frase_al_vencer := ""
+## Cómo se viene abajo (destello, vuelo, «¡POP!», cámara lenta y marca; datos/derrotas/). Sin datos, queda donde cayó.
+@export var derrota: DatosDerrota
 @export_group("Movimiento")
 @export var velocidad_patrulla := 40.0
 @export var velocidad_persecucion := 80.0

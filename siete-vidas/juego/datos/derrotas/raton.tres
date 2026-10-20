@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="DatosDerrota" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/datos/datos_derrota.gd" id="1_datos"]
+
+[resource]
+script = ExtResource("1_datos")
+destello = 0.08
+destello_pantalla = 0.0
+congelado = 0.05
+sacudida = Vector2(0.12, 0.4)
+impulso = Vector2(150, -240)
+gravedad = 900.0
+vueltas = 2.0
+rebote_pared = 0.5
+rebote_piso = 0.3
+desarmarse = true
+palabra = "PALABRA_POP"
+piezas = PackedStringArray("raton_volcado", "derrota_resorte", "derrota_llave", "derrota_tornillo", "derrota_tornillo", "derrota_engranaje", "derrota_engranaje")
+velocidad_piezas = Vector2(90, 190)
+pieza_que_gira = "derrota_llave"
+giro_segundos = 3.0
+nube = 10
+color_nube = Color(0.8, 0.8, 0.82, 0.9)
+camara_lenta = 1.0
+fantasma = "derrota_resorte_alma"
+palabra_fantasma = "PALABRA_BOING"
+frase = "derrota_raton"

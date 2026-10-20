@@ -193,7 +193,8 @@ func _desarmar() -> void:
 		fantasma.modulate.a = 0.6
 		fantasma.z_index = _cuerpo.z_index + 1
 		mundo.add_child(fantasma)
-		_palabra(datos.palabra_fantasma, pie + Vector2(0, -70), 0.25)
+		# Después del «¡POP!» (zonas de texto: una palabra a la vez, cada una 0,9 s).
+		_palabra(datos.palabra_fantasma, pie + Vector2(0, -70), ZonasTexto.DURACION_PALABRA)
 		var subir := fantasma.create_tween().set_parallel()
 		subir.tween_property(fantasma, "position:y", fantasma.position.y - datos.subida_fantasma, datos.tiempo_fantasma).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 		subir.tween_property(fantasma, "modulate:a", 0.0, datos.tiempo_fantasma).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)

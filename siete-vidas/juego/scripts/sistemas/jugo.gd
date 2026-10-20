@@ -15,6 +15,8 @@ var indicador: Indicador
 ## Caja en pantalla de la última palabra (para las pruebas de zonas).
 var ultima_caja := Rect2()
 var _palabra_actual: Control
+## La animación de la palabra: va en tiempo real (la cámara lenta de una derrota no la estira).
+var _tween_palabra: Tween
 ## Palabras que saltaron (para las pruebas).
 var palabras: Array[String] = []
 
@@ -126,6 +128,7 @@ func _saltar(texto: String, posicion: Vector2, color: Color, tamano: int, pegati
 		nodo.scale = Vector2.ONE * 2.0
 	# El tween es de la palabra: si otra la reemplaza, se va con ella.
 	var animar := nodo.create_tween()
+	_tween_palabra = animar
 	animar.tween_interval(0.05)
 	animar.tween_callback(func() -> void: nodo.scale = Vector2.ONE)
 	animar.tween_property(nodo, "position:y", abajo + 4.0, 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
@@ -155,6 +158,8 @@ func _evitar_en_pantalla() -> Array[Rect2]:
 func _process(delta: float) -> void:
 	# Tiempo real, sin la cámara lenta del congelado.
 	var real := delta / maxf(Engine.time_scale, 0.001)
+	if _tween_palabra and _tween_palabra.is_valid():
+		_tween_palabra.set_speed_scale(1.0 / maxf(Engine.time_scale, 0.001))
 	if _congelado > 0.0:
 		_congelado -= real
 		if _congelado <= 0.0:

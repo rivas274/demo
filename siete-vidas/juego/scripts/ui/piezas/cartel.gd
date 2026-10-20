@@ -49,6 +49,12 @@ func animar(duracion: float) -> void:
 	animacion.tween_callback(queue_free)
 
 
+## En tiempo real: la cámara lenta de una derrota no estira el cartel (Anuncios cuenta su turno igual).
+func _process(_delta: float) -> void:
+	if animacion and animacion.is_valid():
+		animacion.set_speed_scale(1.0 / maxf(Engine.time_scale, 0.001))
+
+
 ## Sale rápido (algo urgente pidió la pantalla).
 func ocultar() -> void:
 	if animacion:

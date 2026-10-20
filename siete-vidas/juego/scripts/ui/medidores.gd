@@ -78,7 +78,8 @@ func mostrar_logro(titulo: String) -> void:
 
 
 func _process(delta: float) -> void:
-	_tiempo_notificacion = maxf(0.0, _tiempo_notificacion - delta)
+	# En tiempo real (la cámara lenta de una derrota no estira el aviso).
+	_tiempo_notificacion = maxf(0.0, _tiempo_notificacion - delta / maxf(Engine.time_scale, 0.001))
 	_aviso.queue_redraw()
 
 

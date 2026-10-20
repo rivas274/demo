@@ -245,7 +245,8 @@ func sacudir(segundos := 0.25) -> void:
 func _process(delta: float) -> void:
 	_flash = maxf(0.0, _flash - delta * 3.0)
 	_sacudida = maxf(0.0, _sacudida - delta)
-	_cartel = maxf(0.0, _cartel - delta)
+	# El cartel de fase cuenta en tiempo real: la cámara lenta de una derrota no lo estira (lo cuenta igual Anuncios).
+	_cartel = maxf(0.0, _cartel - delta / maxf(Engine.time_scale, 0.001))
 	if _ola >= 0.0:
 		_ola += delta
 		if _ola > 1.2:

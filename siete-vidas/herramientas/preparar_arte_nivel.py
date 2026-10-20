@@ -947,9 +947,41 @@ def consistencia():
         print(f"Consistencia: {nombre} {Image.open(DESTINO / f'{nombre}.png').size} ({cambiados} px de blanco teñidos)")
 
 
+# Derrotas jugosas (Gemini, 2026-10-20, `derrotas.png`): [nombre, caja en la hoja (x0, y0, x1, y1)]. Todo a UNA escala,
+# la del ratón (la carcasa partida mide lo que el ratón entero, 64 px). La sombra ovalada bajo el resorte con alma y
+# las nubes de pelusa no se usan (la nube son partículas, `DatosDerrota.color_nube`).
+DERROTAS = [
+    ["derrota_carcasa", (46, 100, 567, 330)],
+    ["derrota_resorte", (599, 77, 742, 295)],
+    ["derrota_resorte_alma", (791, 71, 940, 295)],
+    ["derrota_llave_1", (46, 390, 218, 550)],
+    ["derrota_llave_2", (250, 385, 404, 550)],
+    ["derrota_llave_3", (471, 385, 509, 550)],
+    ["derrota_llave_4", (250, 582, 410, 748)],
+    ["derrota_llave_5", (46, 582, 224, 748)],
+    ["derrota_tornillo", (611, 582, 678, 672)],
+    ["derrota_engranaje", (832, 396, 946, 510)],
+    ["derrota_pelusa", (40, 809, 585, 1016)],
+]
+ESCALA_DERROTAS = 64.0 / 521.0
+
+
+def derrotas():
+    imagen, objeto = sin_fondo(Image.open(ORIGEN / "derrotas.png"))
+    for nombre, caja in DERROTAS:
+        recorte = recortar_opaco(sin_huecos(imagen.crop(caja)))
+        tamano = (max(1, round(recorte.width * ESCALA_DERROTAS)), max(1, round(recorte.height * ESCALA_DERROTAS)))
+        final = escalar(recorte, tamano)
+        final.save(DESTINO / f"{nombre}.png")
+        cambiados = sin_blanco_puro(nombre)
+        print(f"Derrotas: {nombre} {Image.open(DESTINO / f'{nombre}.png').size} ({cambiados} px de blanco teñidos)")
+
+
 if __name__ == "__main__":
     import sys
     if sys.argv[1:] == ["consistencia"]:
         consistencia()
+    elif sys.argv[1:] == ["derrotas"]:
+        derrotas()
     else:
         main()

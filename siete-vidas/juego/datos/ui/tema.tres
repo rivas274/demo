@@ -1,11 +1,22 @@
-[gd_resource type="Theme" load_steps=13 format=3]
+[gd_resource type="Theme" load_steps=30 format=3]
 
-[ext_resource type="Texture2D" path="res://assets/ui/menu_letrero.png" id="1_letrero"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu_letrero_resaltado.png" id="2_resaltado"]
-[ext_resource type="Texture2D" path="res://assets/ui/menu_letrero_principal.png" id="3_principal"]
 [ext_resource type="FontFile" path="res://fuentes/PixelOperator8.ttf" id="4_chica"]
 [ext_resource type="FontFile" path="res://fuentes/PixelOperator.ttf" id="5_media"]
 [ext_resource type="FontFile" path="res://fuentes/Silkscreen-Regular.ttf" id="6_titulo"]
+[ext_resource type="FontFile" path="res://fuentes/PixelOperator-Bold.ttf" id="7_negrita"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/boton.png" id="8_pergamino"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/boton_resaltado.png" id="9_pergamino_resaltado"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/boton_apretado.png" id="10_pergamino_apretado"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/panel.png" id="11_panel"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/cinta.png" id="12_cinta"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/etiqueta_logro.png" id="13_etiqueta"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/marco_retrato.png" id="14_marco_retrato"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/hud_corazon.png" id="15_hud_corazon"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/hud_libreta.png" id="16_hud_libreta"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/hud_calcetin.png" id="17_hud_calcetin"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/hud_foto.png" id="18_hud_foto"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/marco_barra.png" id="19_marco_barra"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/marco_barra_jefe.png" id="20_marco_barra_jefe"]
 
 [sub_resource type="StyleBoxFlat" id="panel_dialogo"]
 bg_color = Color(0.13, 0.09, 0.12, 0.94)
@@ -38,26 +49,104 @@ content_margin_top = 2.0
 content_margin_right = 10.0
 content_margin_bottom = 2.0
 
-[sub_resource type="StyleBoxTexture" id="letrero"]
-content_margin_left = 6.0
-content_margin_top = 10.0
-content_margin_right = 6.0
-content_margin_bottom = 2.0
-texture = ExtResource("1_letrero")
+[sub_resource type="StyleBoxTexture" id="pergamino"]
+content_margin_left = 14.0
+content_margin_top = 2.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+texture = ExtResource("8_pergamino")
+texture_margin_left = 14.0
+texture_margin_top = 8.0
+texture_margin_right = 14.0
+texture_margin_bottom = 8.0
 
-[sub_resource type="StyleBoxTexture" id="letrero_resaltado"]
-content_margin_left = 6.0
-content_margin_top = 10.0
-content_margin_right = 6.0
-content_margin_bottom = 2.0
-texture = ExtResource("2_resaltado")
+[sub_resource type="StyleBoxTexture" id="pergamino_resaltado"]
+content_margin_left = 14.0
+content_margin_top = 2.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+texture = ExtResource("9_pergamino_resaltado")
+texture_margin_left = 14.0
+texture_margin_top = 8.0
+texture_margin_right = 14.0
+texture_margin_bottom = 8.0
 
-[sub_resource type="StyleBoxTexture" id="letrero_principal"]
-content_margin_left = 6.0
-content_margin_top = 10.0
-content_margin_right = 6.0
+[sub_resource type="StyleBoxTexture" id="pergamino_apretado"]
+content_margin_left = 14.0
+content_margin_top = 4.0
+content_margin_right = 14.0
+content_margin_bottom = 4.0
+texture = ExtResource("10_pergamino_apretado")
+texture_margin_left = 14.0
+texture_margin_top = 8.0
+texture_margin_right = 14.0
+texture_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxTexture" id="panel_decreto"]
+content_margin_left = 8.0
+content_margin_top = 6.0
+content_margin_right = 8.0
+content_margin_bottom = 6.0
+texture = ExtResource("11_panel")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxTexture" id="cinta"]
+content_margin_left = 32.0
+content_margin_top = 4.0
+content_margin_right = 32.0
+content_margin_bottom = 10.0
+texture = ExtResource("12_cinta")
+texture_margin_left = 32.0
+texture_margin_top = 0.0
+texture_margin_right = 32.0
+texture_margin_bottom = 0.0
+
+[sub_resource type="StyleBoxTexture" id="etiqueta_logro"]
+content_margin_left = 52.0
+content_margin_top = 8.0
+content_margin_right = 34.0
+content_margin_bottom = 8.0
+texture = ExtResource("13_etiqueta")
+texture_margin_left = 52.0
+texture_margin_top = 0.0
+texture_margin_right = 34.0
+texture_margin_bottom = 0.0
+
+[sub_resource type="StyleBoxTexture" id="marco_retrato"]
+content_margin_left = 7.0
+content_margin_top = 7.0
+content_margin_right = 7.0
+content_margin_bottom = 7.0
+texture = ExtResource("14_marco_retrato")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxTexture" id="marco_barra"]
+content_margin_left = 3.0
+content_margin_top = 2.0
+content_margin_right = 3.0
 content_margin_bottom = 2.0
-texture = ExtResource("3_principal")
+texture = ExtResource("19_marco_barra")
+texture_margin_left = 4.0
+texture_margin_top = 3.0
+texture_margin_right = 4.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="marco_barra_jefe"]
+content_margin_left = 24.0
+content_margin_top = 6.0
+content_margin_right = 24.0
+content_margin_bottom = 6.0
+texture = ExtResource("20_marco_barra_jefe")
+texture_margin_left = 24.0
+texture_margin_top = 0.0
+texture_margin_right = 24.0
+texture_margin_bottom = 0.0
 
 [resource]
 default_font = ExtResource("5_media")
@@ -188,21 +277,6 @@ Felipe/constants/alto_hud = 22
 Felipe/constants/borde_panel = 2
 Felipe/constants/radio_panel = 3
 Felipe/constants/separacion_menu = 4
-BotonEstambre/base_type = &"Button"
-BotonEstambre/colors/font_color = Color(0.168627, 0.141176, 0.129412, 1)
-BotonEstambre/colors/font_focus_color = Color(0.168627, 0.141176, 0.129412, 1)
-BotonEstambre/colors/font_hover_color = Color(0.168627, 0.141176, 0.129412, 1)
-BotonEstambre/colors/font_pressed_color = Color(0.168627, 0.141176, 0.129412, 1)
-BotonEstambre/font_sizes/font_size = 16
-BotonEstambre/styles/normal = SubResource("letrero")
-BotonEstambre/styles/hover = SubResource("letrero_resaltado")
-BotonEstambre/styles/pressed = SubResource("letrero_resaltado")
-BotonEstambre/styles/focus = SubResource("letrero_resaltado")
-BotonEstambrePrincipal/base_type = &"BotonEstambre"
-BotonEstambrePrincipal/styles/normal = SubResource("letrero_principal")
-BotonEstambrePrincipal/styles/hover = SubResource("letrero_principal")
-BotonEstambrePrincipal/styles/pressed = SubResource("letrero_principal")
-BotonEstambrePrincipal/styles/focus = SubResource("letrero_principal")
 Felipe/font_sizes/titulo = 32
 Felipe/fonts/titulo = ExtResource("6_titulo")
 Felipe/font_sizes/subtitulo = 16
@@ -313,3 +387,40 @@ Felipe/font_sizes/letrero = 16
 Felipe/fonts/letrero = ExtResource("6_titulo")
 BotonOpcion/base_type = &"BotonMenu"
 BotonOpcion/font_sizes/font_size = 16
+BotonPergamino/base_type = &"BotonMenu"
+BotonPergamino/colors/font_color = Color(0.231373, 0.137255, 0.0980392, 1)
+BotonPergamino/colors/font_focus_color = Color(0.231373, 0.137255, 0.0980392, 1)
+BotonPergamino/colors/font_hover_color = Color(0.231373, 0.137255, 0.0980392, 1)
+BotonPergamino/colors/font_pressed_color = Color(0.231373, 0.137255, 0.0980392, 1)
+BotonPergamino/fonts/font = ExtResource("7_negrita")
+BotonPergamino/font_sizes/font_size = 16
+BotonPergamino/styles/normal = SubResource("pergamino")
+BotonPergamino/styles/hover = SubResource("pergamino_resaltado")
+BotonPergamino/styles/focus = SubResource("pergamino_resaltado")
+BotonPergamino/styles/pressed = SubResource("pergamino_apretado")
+Felipe/styles/panel = SubResource("panel_decreto")
+Felipe/styles/cinta = SubResource("cinta")
+Felipe/styles/etiqueta_logro = SubResource("etiqueta_logro")
+Felipe/styles/marco_retrato = SubResource("marco_retrato")
+Felipe/styles/marco_barra = SubResource("marco_barra")
+Felipe/styles/marco_barra_jefe = SubResource("marco_barra_jefe")
+Felipe/icons/hud_corazon = ExtResource("15_hud_corazon")
+Felipe/icons/hud_libreta = ExtResource("16_hud_libreta")
+Felipe/icons/hud_calcetin = ExtResource("17_hud_calcetin")
+Felipe/icons/hud_foto = ExtResource("18_hud_foto")
+Felipe/colors/tinta_decreto = Color(0.231373, 0.137255, 0.0980392, 1)
+Felipe/colors/tinta_decreto_suave = Color(0.462745, 0.313726, 0.215686, 1)
+Felipe/colors/lacre = Color(0.635294, 0.12549, 0.152941, 1)
+Felipe/font_sizes/decreto_titulo = 16
+Felipe/fonts/decreto_titulo = ExtResource("6_titulo")
+Felipe/font_sizes/ficha_nombre = 8
+Felipe/fonts/ficha_nombre = ExtResource("4_chica")
+Felipe/font_sizes/ficha_frase = 8
+Felipe/fonts/ficha_frase = ExtResource("4_chica")
+Felipe/font_sizes/ficha_peso = 16
+Felipe/fonts/ficha_peso = ExtResource("7_negrita")
+TituloDecreto/base_type = &"Label"
+TituloDecreto/colors/font_color = Color(0.231373, 0.137255, 0.0980392, 1)
+TituloDecreto/constants/line_spacing = 0
+TituloDecreto/fonts/font = ExtResource("6_titulo")
+TituloDecreto/font_sizes/font_size = 16

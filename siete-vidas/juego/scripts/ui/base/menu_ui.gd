@@ -3,14 +3,8 @@ extends VBoxContainer
 ## Menú base: una columna de botones (BotonMenu, o cualquier Button) que se recorre con el teclado (flechas, W/S) o
 ## el mando (cruceta, palanca) y se elige con Enter o A. Al mostrarse toma el foco en el primer botón; el foco da la
 ## vuelta de abajo hacia arriba. Avisa con `elegido(nombre del botón)`: el menú no sabe qué hace cada opción.
-## Se arma en el editor (escenas/ui/menu_pausa.tscn); el texto de cada botón es una clave de traducción. Con
-## `animar_entrada`, los botones (BotonMenu) caen desde arriba uno tras otro al mostrarse.
-
-## Hueco donde la pantalla de menú pone a Felipe asomado por un costado (nodo hijo `HuecoFelipe`, fuera del
-## acomodo de la columna: top_level). colocar_hueco(boton) lo lleva al costado de ese botón.
-var hueco_felipe: Control
-## Lado por el que asoma Felipe: -1 izquierda, 1 derecha.
-@export var lado_felipe := -1
+## Se arma en el editor (escenas/ui/menu_pausa.tscn: una columna de BotonPergamino); el texto de cada botón es una
+## clave de traducción. Con `animar_entrada`, los botones (BotonMenu) caen desde arriba uno tras otro al mostrarse.
 
 ## Al mostrarse, los botones caen desde arriba, escalonados (no con Opciones.reducir_movimiento).
 @export var animar_entrada := true
@@ -22,13 +16,6 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	preparar()
 	visibility_changed.connect(_al_mostrarse)
-	hueco_felipe = get_node_or_null("HuecoFelipe")
-	# Menú de estambre: los letreros cuelgan en cadena (cada hilo mide lo que separa un letrero del de arriba) y la
-	# columna cuelga de un ovillo.
-	var primero := _primero_colgado()
-	if primero:
-		add_theme_constant_override(&"separation", int(primero.datos.largo_hilo))
-	sort_children.connect(queue_redraw)
 
 
 ## Conecta cada botón (avisa `elegido` con su nombre) y arma el foco que da la vuelta. Llamarla de nuevo si se
@@ -44,25 +31,6 @@ func preparar() -> void:
 		# El foco da la vuelta (de la última a la primera y al revés).
 		boton.focus_neighbor_top = boton.get_path_to(botones[(i - 1 + botones.size()) % botones.size()])
 		boton.focus_neighbor_bottom = boton.get_path_to(botones[(i + 1) % botones.size()])
-
-
-func _primero_colgado() -> BotonMenu:
-	for boton in _botones():
-		if boton is BotonMenu and (boton as BotonMenu).cuelga():
-			return boton
-	return null
-
-
-## El ovillo arriba de la columna, donde termina el hilo del primer letrero.
-func _draw() -> void:
-	var primero := _primero_colgado()
-	if primero == null or primero.datos.ovillo == null:
-		return
-	var ovillo := primero.datos.ovillo
-	var x := primero.position.x + roundf(primero.size.x * primero.punto_cuelgue.x)
-	# La columna empieza arriba (alignment BEGIN): el primer letrero está en y = 0 aunque esté cayendo.
-	var abajo := -primero.datos.largo_hilo + 4.0
-	draw_texture(ovillo, Vector2(roundf(x - ovillo.get_width() * 0.35), roundf(abajo - ovillo.get_height())))
 
 
 func _botones() -> Array[Button]:
@@ -109,14 +77,3 @@ func enfocado() -> Button:
 		if boton.has_focus():
 			return boton
 	return null
-
-
-## Lleva el hueco de Felipe al costado del botón (a su altura, pegado por fuera) y lo devuelve; la pantalla pone
-## ahí a Felipe y, cuando su pata llega (cuadro de impacto del zarpazo), llama boton.golpear().
-func colocar_hueco(boton: Button) -> Control:
-	if hueco_felipe == null:
-		return null
-	var r := boton.get_global_rect()
-	var x := r.position.x - hueco_felipe.size.x if lado_felipe < 0 else r.end.x
-	hueco_felipe.global_position = Vector2(x, r.position.y + (r.size.y - hueco_felipe.size.y) / 2.0).round()
-	return hueco_felipe

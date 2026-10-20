@@ -25,10 +25,15 @@ var aviso := ""
 ## Aviso que manda sobre el del tutorial (por ejemplo, al mostrar la meta).
 var aviso_fijo := ""
 var datos_fin := {}
-## Menú de la pausa (Continuar, Reiniciar, Salir), armado en escenas/ui/menu_pausa.tscn.
+## La pausa «Decreto real» (escenas/ui/menu_pausa.tscn): la Ficha de Su Majestad a la izquierda, el pergamino con
+## Felipe en su cojín al centro y los decretos (botones de pergamino) a la derecha.
+var pausa: Control
+## Menú de la pausa (Continuar, Opciones, Reiniciar, Salir): BotonPergamino que estampan su sello al elegirlos.
 var menu_pausa: MenuUI
-## Felipe que asoma y le da un manotazo al letrero elegido (después se hace lo elegido).
-var felipe_asomado: FelipeAsomado
+## La Ficha de Su Majestad (el único lugar donde se ve el peso).
+var ficha: FichaSuMajestad
+## Mientras se estampa el sello de lo elegido, no se elige otra cosa.
+var _eligiendo := false
 ## Opciones (controles, reducir movimiento, volumen), encima de la pausa.
 var opciones: PantallaOpciones
 
@@ -38,16 +43,16 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	menu_pausa = (load(ESCENA_MENU_PAUSA) as PackedScene).instantiate()
-	menu_pausa.visible = false
+	pausa = (load(ESCENA_MENU_PAUSA) as PackedScene).instantiate()
+	pausa.visible = false
+	add_child(pausa)
+	menu_pausa = pausa.get_node("%Menu")
 	menu_pausa.elegido.connect(_al_elegir)
-	add_child(menu_pausa)
-	felipe_asomado = FelipeAsomado.new()
-	add_child(felipe_asomado)
+	ficha = pausa.get_node("%Ficha")
 	opciones = PantallaOpciones.crear()
 	opciones.visible = false
 	opciones.cerrada.connect(func() -> void:
-		menu_pausa.visible = modo == Modo.PAUSA
+		pausa.visible = modo == Modo.PAUSA
 		menu_pausa.enfocar(&"Opciones"))
 	add_child(opciones)
 	_al_cambiar_modo()
@@ -71,9 +76,15 @@ func _al_cambiar_modo() -> void:
 		gestor.cerrar(self)
 	else:
 		gestor.abrir(self)
-	if menu_pausa:
-		menu_pausa.visible = modo == Modo.PAUSA
+	if pausa:
+		pausa.visible = modo == Modo.PAUSA
 	queue_redraw()
+
+
+## La ficha de la pausa muestra los kilos de este Felipe.
+func conectar_felipe(felipe: Felipe) -> void:
+	if ficha:
+		ficha.conectar(felipe)
 
 
 ## Texto de un aviso con las teclas del dispositivo en uso: "{saltar} para saltar" -> "[Espacio] para saltar".
@@ -112,19 +123,20 @@ func _process(_delta: float) -> void:
 	queue_redraw()
 
 
+## Lo elegido se sella primero (el lacre cae sobre el pergamino y saltan destellos) y después se hace.
 func _al_elegir(opcion: StringName) -> void:
-	if felipe_asomado.ocupado:
+	if _eligiendo:
 		return
-	var boton := menu_pausa.get_node_or_null(NodePath(opcion)) as Button
-	var hueco := menu_pausa.colocar_hueco(boton) if boton else null
-	if hueco:
-		var fuerza := (boton as BotonMenu).datos.fuerza_manotazo if boton is BotonMenu else 1.0
-		await felipe_asomado.manotazo(boton, hueco, menu_pausa.lado_felipe, fuerza)
+	_eligiendo = true
+	var boton := menu_pausa.get_node_or_null(NodePath(opcion))
+	if boton is BotonMenu:
+		await (boton as BotonMenu).estampar()
+	_eligiendo = false
 	match opcion:
 		&"Continuar":
 			modo = Modo.JUGANDO
 		&"Opciones":
-			menu_pausa.visible = false
+			pausa.visible = false
 			opciones.abrir()
 		&"Reiniciar":
 			_reiniciar()
@@ -157,7 +169,6 @@ func _draw() -> void:
 			Estilo.texto_centrado(self, tr("UI_CONTINUAR_TECLA") % aceptar, 280, &"nota", claro)
 		Modo.PAUSA:
 			draw_rect(Rect2(Vector2.ZERO, tam), Estilo.color(&"fondo_pantalla"))
-			Estilo.texto_centrado(self, tr("PAUSA_TITULO"), 52, &"pausa", acento)
 		Modo.FIN:
 			draw_rect(Rect2(Vector2.ZERO, tam), Estilo.color(&"fondo_pantalla"))
 			Estilo.texto_centrado(self, tr("FIN_TITULO"), 80, &"fin", acento)

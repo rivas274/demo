@@ -83,3 +83,37 @@ static func recortar(texto: String, nombre: StringName, ancho_maximo: float) -> 
 	while corto.length() > 1 and ancho(corto + "…", nombre) > ancho_maximo:
 		corto = corto.substr(0, corto.length() - 1)
 	return corto.strip_edges() + "…"
+
+
+## Dibuja un panel del kit «Decreto real» (pergamino, cinta, etiqueta, marcos de barra y de retrato): un StyleBox del
+## tema (tipo "Felipe", styles/<nombre>) estirado en 9 partes al rectángulo, con las esquinas a su tamaño de pixel.
+static func panel(c: CanvasItem, rect: Rect2, nombre: StringName = &"panel") -> void:
+	var caja := tema().get_stylebox(nombre, TIPO)
+	if caja:
+		caja.draw(c.get_canvas_item(), Rect2(rect.position.round(), rect.size.round()))
+
+
+## Panel del kit por nombre (para usarlo como estilo de un nodo).
+static func caja(nombre: StringName) -> StyleBox:
+	return tema().get_stylebox(nombre, TIPO)
+
+
+## Ícono del kit con nombre ("hud_corazon", "hud_libreta"...), a 1 pixel por pixel del juego.
+static func icono(nombre: StringName) -> Texture2D:
+	return tema().get_icon(nombre, TIPO)
+
+
+## Dibuja un relleno de barra del kit (assets/ui/decreto/relleno_*.png) al ancho pedido sin deformar el pixel: el
+## borde izquierdo una vez, el color parejo del medio estirado solo a lo ancho y el mismo borde para cerrar. Se toma
+## la franja del medio de la textura si el rectángulo es más bajo que ella.
+static func relleno(c: CanvasItem, textura: Texture2D, r: Rect2) -> void:
+	if textura == null or r.size.x < 1.0:
+		return
+	r = Rect2(r.position.round(), r.size.round())
+	var alto := minf(r.size.y, textura.get_height())
+	var y := roundf((textura.get_height() - alto) / 2.0)
+	var borde := minf(2.0, r.size.x)
+	c.draw_texture_rect_region(textura, Rect2(r.position, Vector2(borde, r.size.y)), Rect2(0, y, borde, alto))
+	if r.size.x > borde * 2.0:
+		c.draw_texture_rect_region(textura, Rect2(r.position + Vector2(borde, 0), Vector2(r.size.x - borde * 2.0, r.size.y)), Rect2(6, y, 40, alto))
+		c.draw_texture_rect_region(textura, Rect2(r.position + Vector2(r.size.x - borde, 0), Vector2(borde, r.size.y)), Rect2(0, y, borde, alto))

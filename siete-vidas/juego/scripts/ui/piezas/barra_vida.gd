@@ -5,8 +5,8 @@ extends Control
 ## es la vida ni qué pasa al morir.
 ##
 ## - CORAZONES: un corazón por punto de vida (llenos en rojo, vacíos apagados), cada `paso` px.
-## - BARRA: título arriba ("NOMBRE — título"), barra roja con una división por punto y, debajo, una franja azul
-##   opcional (el "escudo": por ejemplo, el depósito de A.S.P.I.).
+## - BARRA: título arriba ("NOMBRE — título"), barra roja en el marco de madera y oro del kit «Decreto real», con una
+##   división por punto y, abajo, una franja azul opcional (el "escudo": por ejemplo, el depósito de A.S.P.I.).
 ## Se arma en el editor con escenas/ui/barra_vida.tscn; los colores y letras salen del tema (Estilo).
 
 ## Se redibujó con un valor nuevo (para las pruebas y para quien quiera reaccionar).
@@ -25,8 +25,11 @@ enum Forma { CORAZONES, BARRA }
 	set(valor):
 		titulo = valor
 		queue_redraw()
-## Ancho y alto de la barra (solo forma BARRA).
+## Ancho y alto de la barra (solo forma BARRA): el ancho del relleno; el marco del kit la rodea.
 @export var tam_barra := Vector2(220, 9)
+## Relleno de la vida y del escudo (kit «Decreto real», assets/ui/decreto/relleno_*.png).
+@export var relleno: Texture2D
+@export var relleno_escudo: Texture2D
 
 var actual := 0
 var maximo := 0
@@ -78,18 +81,37 @@ func _draw() -> void:
 	_dibujar_barra()
 
 
-## La barra de un jefe: el rectángulo (0, 0) es la esquina del fondo; la barra va 18 px más abajo y 6 a la derecha.
+## Marco de la barra del jefe (marco_barra_jefe, 9 partes): alto y cuánto entra el hueco del relleno desde el borde.
+const ALTO_MARCO := 25.0
+const HUECO_LADO := 20.0
+const HUECO_ARRIBA := 5.0
+const HUECO_ALTO := 14.0
+
+
+## La barra de un jefe: el título arriba (con contorno, sobre el juego) y debajo el marco del kit; el relleno va
+## dentro del hueco del marco (se dibuja antes, así el marco tapa sus bordes).
 func _dibujar_barra() -> void:
-	var caja := Rect2(Vector2(6, 18), tam_barra)
-	draw_rect(Rect2(0, 0, tam_barra.x + 12, 34), Estilo.color(&"jefe_fondo_barra"))
-	Estilo.escribir(self, Vector2(6, 12), Estilo.recortar(titulo, &"jefe_barra", tam_barra.x), &"jefe_barra", Estilo.color(&"jefe_texto_barra"))
-	draw_rect(caja.grow(2), Estilo.color(&"jefe_marco_barra"))
-	draw_rect(Rect2(caja.position, Vector2(caja.size.x * clampf(fraccion, 0.0, 1.0), caja.size.y)), Estilo.color(&"jefe_rojo"))
+	var marco := Rect2(0, 14, tam_barra.x + HUECO_LADO * 2.0, ALTO_MARCO)
+	var hueco := Rect2(marco.position + Vector2(HUECO_LADO, HUECO_ARRIBA), Vector2(tam_barra.x, HUECO_ALTO))
+	Estilo.texto_con_contorno(self, Vector2(HUECO_LADO, 10), Estilo.recortar(titulo, &"jefe_barra", marco.size.x - HUECO_LADO), &"jefe_barra", Estilo.color(&"jefe_texto_barra"))
+	draw_rect(hueco, Estilo.color(&"jefe_fondo_barra"))
+	# El relleno a su alto de pixel (tam_barra.y), centrado en el hueco.
+	var alto := minf(tam_barra.y, HUECO_ALTO)
+	var lleno := Rect2(hueco.position + Vector2(0, roundf((HUECO_ALTO - alto) / 2.0)), Vector2(roundf(hueco.size.x * clampf(fraccion, 0.0, 1.0)), alto))
+	if relleno:
+		Estilo.relleno(self, relleno, lleno)
+	else:
+		draw_rect(lleno, Estilo.color(&"jefe_rojo"))
 	for i in range(1, maximo):
-		var x := caja.position.x + caja.size.x * i / maximo
-		draw_line(Vector2(x, caja.position.y), Vector2(x, caja.end.y), Estilo.color(&"jefe_division"), 1.0)
+		var x := roundf(hueco.position.x + hueco.size.x * i / maximo)
+		draw_line(Vector2(x, hueco.position.y), Vector2(x, hueco.end.y), Estilo.color(&"jefe_division"), 1.0)
 	if escudo > 0.0:
-		draw_rect(Rect2(caja.position + Vector2(0, caja.size.y - 3), Vector2(caja.size.x * escudo, 3)), Estilo.color(&"jefe_escudo"))
+		var franja := Rect2(Vector2(hueco.position.x, lleno.end.y - 3), Vector2(roundf(hueco.size.x * escudo), 3))
+		if relleno_escudo:
+			Estilo.relleno(self, relleno_escudo, franja)
+		else:
+			draw_rect(franja, Estilo.color(&"jefe_escudo"))
+	Estilo.panel(self, marco, &"marco_barra_jefe")
 
 
 func _corazon(centro: Vector2, color: Color) -> void:

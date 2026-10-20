@@ -53,6 +53,11 @@ PIEZAS = {
 }
 # Piezas con el interior crema que se vacía (se ve el relleno de la barra por dentro): rectángulo interior en fracciones.
 VACIAR = {"marco_barra_jefe": (0.09, 0.22, 0.91, 0.78)}
+# Marco de la ficha: la ventana casi blanca se tiñe del fondo de los retratos (felipe-retratos.png), para que el
+# retrato se funda con ella. Marco de retrato chico: la ventana se vacía (el marco va encima del retrato).
+FONDO_RETRATO = (227, 211, 186)
+VENTANA = ("marco_ficha",)
+VENTANA_VACIA = ("marco_retrato",)
 
 
 def sin_blanco_puro(imagen):
@@ -81,6 +86,16 @@ def main():
             a[int(y0 * h):int(y1 * h), int(x0 * w):int(x1 * w), 3] = 0
             final = Image.fromarray(a, "RGBA")
         final = sin_blanco_puro(final)
+        if nombre in VENTANA:
+            a = np.asarray(final).copy()
+            claro = (a[:, :, :3].min(axis=2) > 225) & (a[:, :, 3] > 0)
+            a[claro, 0], a[claro, 1], a[claro, 2] = FONDO_RETRATO
+            final = Image.fromarray(a, "RGBA")
+        if nombre in VENTANA_VACIA:
+            a = np.asarray(final).copy()
+            claro = (a[:, :, :3].min(axis=2) > 225) & (a[:, :, 3] > 0)
+            a[claro, 3] = 0
+            final = Image.fromarray(a, "RGBA")
         final.save(DESTINO / f"{nombre}.png")
         print(nombre, final.size)
 

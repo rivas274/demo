@@ -97,6 +97,7 @@ func _ready() -> void:
 	pantallas.empezar.connect(_mostrar_meta)
 	pantallas.modo_cambiado.connect(_al_cambiar_modo)
 	capa_pantallas.add_child(pantallas)
+	pantallas.conectar_felipe(felipe)
 	var medidores := Medidores.new()
 	medidores.felipe = felipe
 	logro_desbloqueado.connect(medidores.mostrar_logro)

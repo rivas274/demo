@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="DatosBoton" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/datos/datos_boton.gd" id="1_datos"]
+[ext_resource type="PackedScene" path="res://escenas/ui/sello_huella.tscn" id="2_sello"]
+
+[resource]
+script = ExtResource("1_datos")
+variacion = &"BotonPergamino"
+tamano = Vector2(112, 44)
+sello = ExtResource("2_sello")
+lugar_sello = Vector2(1.04, 0.55)
+escala_apretado = 0.92
+tiempo_apretar = 0.06
+tiempo_soltar = 0.2
+brillo_foco = 1.08
+vaiven_grados = 0.0
+vaiven_periodo = 2.2
+vaiven_rampa = 0.4
+tiempo_brillo = 0.15
+tiempo_entrada = 0.7
+escalon_entrada = 0.07
+pulso_principal = 0.06
+periodo_pulso = 1.6

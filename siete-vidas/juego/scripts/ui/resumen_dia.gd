@@ -94,23 +94,23 @@ func _dibujar() -> void:
 	var c := _lienzo
 	var entrada := minf(_tiempo * 4.0, 1.0)
 	c.draw_rect(Rect2(0, 0, 640, 360), Estilo.color(&"resumen_velo", Estilo.color(&"resumen_velo").a * entrada))
-	# Paño verde con borde dorado.
+	# Pergamino del kit «Decreto real» con el título en la cinta de terciopelo (la misma familia que la pausa).
 	var panel := Rect2(110, 14, 420, 334)
-	c.draw_rect(panel.grow(3), Estilo.color(&"resumen_borde"))
-	c.draw_rect(panel, Estilo.color(&"resumen_pano"))
-	_texto(c, Vector2(320, 42), tr("RESUMEN_TITULO"), &"resumen_titulo", Estilo.color(&"resumen_titulo"), true)
-	_texto(c, Vector2(320, 56), tr("RESUMEN_SUBTITULO"), &"resumen_subtitulo", Estilo.color(&"resumen_subtitulo"), true)
-	var y := 66.0
+	Estilo.panel(c, panel, &"panel")
+	Estilo.panel(c, Rect2(150, 10, 340, 42), &"cinta")
+	_texto(c, Vector2(320, 38), tr("RESUMEN_TITULO"), &"resumen_titulo", Estilo.color(&"resumen_titulo"), true)
+	_texto(c, Vector2(320, 64), tr("RESUMEN_SUBTITULO"), &"resumen_subtitulo", Estilo.color(&"resumen_subtitulo"), true, false)
+	var y := 70.0
 	for i in _mostradas:
 		var fila: Array = filas[i]
 		var g := _golpes[i]
 		var caja := Rect2(126, y, 388, 30)
 		c.draw_rect(caja, Estilo.color(&"resumen_fila"))
 		c.draw_rect(Rect2(caja.position, Vector2(5, caja.size.y)), Estilo.color(&"resumen_marca_a") if i % 2 == 0 else Estilo.color(&"resumen_marca_b"))
-		_texto(c, Vector2(138, y + 15), String(fila[0]), &"resumen_fila", Estilo.color(&"resumen_texto"), false)
+		_texto(c, Vector2(138, y + 15), String(fila[0]), &"resumen_fila", Estilo.color(&"resumen_texto"), false, false)
 		var nota := String(fila[3]) if fila.size() > 3 else ""
 		if nota != "":
-			_texto(c, Vector2(138, y + 26), nota, &"resumen_nota", Estilo.color(&"resumen_nota"), false)
+			_texto(c, Vector2(138, y + 26), nota, &"resumen_nota", Estilo.color(&"resumen_nota"), false, false)
 		var numero := str(int(_valores[i]))
 		if int(fila[2]) >= 0:
 			numero += "/%d" % fila[2]
@@ -118,25 +118,29 @@ func _dibujar() -> void:
 		# El golpe pasa el número a la letra grande (24 px) un instante: la letra pixel va siempre a su tamaño.
 		var estilo := &"resumen_numero_golpe" if g > 0.5 else &"resumen_numero"
 		var ancho := Estilo.ancho(numero, estilo)
-		_texto(c, Vector2(504 - ancho, y + 22 - roundf(3.0 * g)), numero, estilo, Estilo.color(&"resumen_titulo") if completo else Estilo.color(&"blanco"), false)
-		y += 34.0
+		_texto(c, Vector2(504 - ancho, y + 22 - roundf(3.0 * g)), numero, estilo, Estilo.color(&"lacre") if completo else Estilo.color(&"tinta_decreto"), false, false)
+		y += 33.0
 	if _frase_visible > 0.0:
 		var a := _frase_visible
 		var caja := Rect2(126, 274, 388, 50)
-		c.draw_rect(caja, Estilo.color(&"resumen_frase_fondo", 0.95 * a))
-		c.draw_rect(caja, Estilo.color(&"borde_dorado", a), false, 2.0)
+		c.draw_rect(caja, Estilo.color(&"resumen_frase_fondo", Estilo.color(&"resumen_frase_fondo").a * a))
 		var animo := int(frase[1])
 		var cara := Rect2(animo % 3 * LADO_RETRATO, animo / 3 * LADO_RETRATO, LADO_RETRATO, LADO_RETRATO)
-		c.draw_texture_rect_region(RETRATOS, Rect2(130, 278, 42, 42), cara, Estilo.color(&"blanco", a))
-		Estilo.escribir(c, Vector2(180, 288), tr("NOMBRE_felipe"), &"resumen_nombre", Estilo.color(&"nombre_hablante", a))
-		c.draw_multiline_string(Estilo.fuente(&"resumen_frase"), Vector2(180, 302), tr(String(frase[0])), HORIZONTAL_ALIGNMENT_LEFT, 326, Estilo.letra(&"resumen_frase"), 2, Estilo.color(&"texto_claro", a))
+		c.draw_texture_rect_region(RETRATOS, Rect2(133, 280, 38, 38), cara, Estilo.color(&"blanco", a))
+		Estilo.panel(c, Rect2(129, 276, 46, 46), &"marco_retrato")
+		Estilo.escribir(c, Vector2(182, 288), tr("NOMBRE_felipe"), &"resumen_nombre", Estilo.color(&"lacre", a))
+		c.draw_multiline_string(Estilo.fuente(&"resumen_frase"), Vector2(182, 302), tr(String(frase[0])), HORIZONTAL_ALIGNMENT_LEFT, 326, Estilo.letra(&"resumen_frase"), 2, Estilo.color(&"tinta_decreto", a))
 		if terminado and fmod(_tiempo, 1.0) < 0.7:
 			IconosBotones.dibujar(c, "saltar_dialogo", Vector2(268, 330), 12.0)
 			_texto(c, Vector2(286, 340), tr("RESUMEN_SEGUIR"), &"resumen_pista", Estilo.color(&"resumen_pista"), false)
 
 
-func _texto(c: Control, pos: Vector2, texto: String, estilo: StringName, color: Color, centrado: bool) -> void:
+## Texto con contorno (sobre la cinta) o tinta sola (sobre el pergamino).
+func _texto(c: Control, pos: Vector2, texto: String, estilo: StringName, color: Color, centrado: bool, contorno := true) -> void:
 	var p := pos
 	if centrado:
 		p.x -= roundf(Estilo.ancho(texto, estilo) / 2.0)
-	Estilo.texto_con_contorno(c, p, texto, estilo, color, &"resumen_contorno")
+	if contorno:
+		Estilo.texto_con_contorno(c, p, texto, estilo, color, &"resumen_contorno")
+	else:
+		Estilo.escribir(c, p, texto, estilo, color)

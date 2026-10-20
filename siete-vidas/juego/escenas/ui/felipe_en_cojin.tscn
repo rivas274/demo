@@ -1,0 +1,10 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/piezas/felipe_en_cojin.gd" id="1_cojin"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/cojin.png" id="2_cojin"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/corona.png" id="3_corona"]
+
+[node name="FelipeEnCojin" type="Node2D"]
+script = ExtResource("1_cojin")
+cojin = ExtResource("2_cojin")
+corona = ExtResource("3_corona")

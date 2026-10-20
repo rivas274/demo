@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="DatosFicha" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/datos/datos_ficha.gd" id="1_datos"]
+
+[resource]
+script = ExtResource("1_datos")
+kilos = PackedFloat32Array(8, 9.5, 11, 13)
+defensa = PackedFloat32Array(0.35, 0.55, 0.8, 1)
+carisma = PackedFloat32Array(0.5, 0.68, 0.85, 1)
+ataque = PackedFloat32Array(0.3, 0.48, 0.7, 0.9)
+peso_vacio = 6.0
+peso_lleno = 13.0
+umbrales = Vector2(0.5, 0.8)
+frase_velocidad = "FICHA_VELOCIDAD_FRASE"
+humor_hasta = PackedFloat32Array(8.5, 9.5, 11)
+humores = PackedStringArray("HUMOR_ATLETICO", "HUMOR_ESPONJOSO", "HUMOR_MODO_INVIERNO", "HUMOR_MODO_BUDA")

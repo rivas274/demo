@@ -23,7 +23,7 @@ UI_CONTINUAR_TECLA,[%s] Continuar
 INTRO_1,Valeria subió a internet el video de Su Majestad atorado en una caja de zapatos.
 INTRO_2,Doce millones de vistas. Cero disculpas.
 INTRO_3,"""Me voy de esta casa."" — Felipe Ron con Pasas I"
-PAUSA_TITULO,Pausa
+PAUSA_TITULO,Decretos de Su Majestad
 MENU_CONTINUAR,Continuar
 MENU_REINICIAR,Reiniciar
 MENU_SALIR,Salir
@@ -264,3 +264,26 @@ ACCION_MAULLAR,Maullar
 ACCION_AGENDA,Agenda
 ACCION_PAUSA,Pausa
 ACCION_SALTAR_DIALOGO,Saltar diálogo
+FICHA_DEFENSA,Defensa
+FICHA_CARISMA,Carisma
+FICHA_ATAQUE,Ataque
+FICHA_PESO,Peso
+FICHA_VELOCIDAD,Velocidad
+FICHA_DEFENSA_1,"Esquiva regaños, a veces."
+FICHA_DEFENSA_2,Los regaños le rebotan.
+FICHA_DEFENSA_3,"Inmune a «¡PIPE, NO!»."
+FICHA_CARISMA_1,Te perdonan... con dudas.
+FICHA_CARISMA_2,Una mirada y te perdonan.
+FICHA_CARISMA_3,"Bebito gordito: perdonado."
+FICHA_ATAQUE_1,Zarpazo de terciopelo.
+FICHA_ATAQUE_2,Los vasos le temen.
+FICHA_ATAQUE_3,Derriba lo que mira.
+FICHA_PESO_1,"Atlético, según él."
+FICHA_PESO_2,Esponjoso con orgullo.
+FICHA_PESO_3,Más Felipe para amar.
+FICHA_VELOCIDAD_FRASE,Un rey no corre: lo esperan
+FICHA_SU_MAJESTAD,Su Majestad
+HUMOR_ATLETICO,Atlético
+HUMOR_ESPONJOSO,Esponjoso
+HUMOR_MODO_INVIERNO,Modo Invierno
+HUMOR_MODO_BUDA,Modo Buda

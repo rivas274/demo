@@ -19,6 +19,7 @@ signal maullo(boca: Vector2)
 signal aranazo(objetivo: Node2D, critico: bool)
 ## Se comió un snack del bolsillo.
 signal snack_comido
+signal peso_cambiado(kilos: float)
 signal snacks_cambiados(cantidad: int)
 ## Mantuvo el botón de acción para comer, pero el bolsillo está vacío.
 signal sin_snacks
@@ -76,7 +77,7 @@ const VIDAS_MAX := 9
 const TIEMPO_INVULNERABLE := 1.2
 ## Segundos desmayado antes de reaparecer.
 const TIEMPO_DESMAYO := 1.8
-## Peso en kilos: no cambia el dibujo de Felipe, solo el indicador de la interfaz.
+## Peso en kilos: no cambia el dibujo ni el movimiento; se ve solo en la Ficha de Su Majestad (pausa).
 const PESO_INICIAL := 8.0
 const PESO_POR_COMIDA := 0.3
 ## Alcance del zarpazo frente a Felipe (horizontal, vertical).
@@ -169,7 +170,11 @@ var vidas := VIDAS_MAX:
 	set(valor):
 		vidas = valor
 		vidas_cambiadas.emit(vidas)
-var peso := PESO_INICIAL
+## Kilos: solo los muestra la Ficha de Su Majestad (pausa), que escucha `peso_cambiado`.
+var peso := PESO_INICIAL:
+	set(valor):
+		peso = valor
+		peso_cambiado.emit(peso)
 var tiene_collar := false:
 	set(valor):
 		tiene_collar = valor

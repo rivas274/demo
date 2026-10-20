@@ -1,8 +1,13 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/piezas/barra_vida.gd" id="1_barra"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/relleno_rojo.png" id="2_rojo"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/relleno_azul.png" id="3_azul"]
 
 [node name="BarraJefe" type="Control"]
 mouse_filter = 2
 script = ExtResource("1_barra")
 forma = 1
+tam_barra = Vector2(196, 10)
+relleno = ExtResource("2_rojo")
+relleno_escudo = ExtResource("3_azul")

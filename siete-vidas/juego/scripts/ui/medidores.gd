@@ -32,7 +32,9 @@ const DURACION_LOGRO := 2.6
 
 ## Capa del aviso de logro: por encima del diálogo (capa 7) y del HUD (capa 6).
 const CAPA_AVISO := Capas.CAPA_AVISOS
-const TAM_AVISO := Vector2(208, 34)
+const TAM_AVISO := Vector2(232, 44)
+## Donde empieza el texto en la etiqueta de logro (después del sello).
+const X_TEXTO_LOGRO := 52.0
 
 
 func _ready() -> void:
@@ -122,8 +124,8 @@ func rect_logro() -> Rect2:
 func _draw() -> void:
 	if not felipe:
 		return
-	draw_rect(Rect2(6, 6, 92, 34), Estilo.color(&"fondo_medidor"))
-	Estilo.escribir(self, Vector2(12, 36), tr("UI_VIDAS") % felipe.vidas, &"medidor_vidas", Estilo.color(&"texto_oscuro"))
+	Estilo.panel(self, Rect2(6, 6, 92, 36), &"panel")
+	Estilo.escribir(self, Vector2(13, 36), tr("UI_VIDAS") % felipe.vidas, &"medidor_vidas", Estilo.color(&"tinta_decreto"))
 	if felipe.tiene_collar:
 		Estilo.escribir(self, Vector2(104, 20), tr("UI_COLLAR"), &"medidor_collar", Estilo.color(&"rojo"))
 
@@ -132,18 +134,9 @@ func _dibujar_aviso() -> void:
 	if not mostrando_logro():
 		return
 	var caja := rect_logro()
-	_aviso.draw_rect(caja, Estilo.color(&"fondo_medidor", 1.0))
-	_aviso.draw_rect(caja, Estilo.color(&"rojo"), false, 1.0)
-	Estilo.escribir(_aviso, caja.position + Vector2(8, 12), tr("UI_LOGRO_NUEVO"), &"logro_titulo", Estilo.color(&"texto_apagado"))
-	Estilo.escribir(_aviso, caja.position + Vector2(8, 28), _notificacion, &"logro_nombre", Estilo.color(&"texto_oscuro"))
-
-
-## Peso con personalidad: el humor de Felipe según los kilos (no cambia su dibujo ni su movimiento).
-const NIVELES_PESO := [[8.5, "Atlético"], [9.5, "Esponjoso"], [11.0, "Modo Invierno"], [INF, "Modo Buda"]]
-
-
-static func nivel_de_peso(kilos: float) -> String:
-	for nivel: Array in NIVELES_PESO:
-		if kilos < nivel[0]:
-			return nivel[1]
-	return NIVELES_PESO[-1][1]
+	# La etiqueta de logro del kit: el sello de la huella a la izquierda y el texto en la cinta de pergamino.
+	Estilo.panel(_aviso, caja, &"etiqueta_logro")
+	var x := caja.position.x + X_TEXTO_LOGRO
+	var ancho := caja.size.x - X_TEXTO_LOGRO - 30.0
+	Estilo.escribir(_aviso, Vector2(x, caja.position.y + 18), Estilo.recortar(tr("UI_LOGRO_NUEVO"), &"logro_titulo", ancho), &"logro_titulo", Estilo.color(&"tinta_decreto_suave"))
+	Estilo.escribir(_aviso, Vector2(x, caja.position.y + 33), Estilo.recortar(_notificacion, &"logro_nombre", ancho), &"logro_nombre", Estilo.color(&"tinta_decreto"))

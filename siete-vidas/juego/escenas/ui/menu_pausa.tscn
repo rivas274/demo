@@ -1,44 +1,78 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=7 format=3]
 
-[ext_resource type="Script" path="res://scripts/ui/base/menu_ui.gd" id="1_menu"]
-[ext_resource type="Script" path="res://scripts/ui/base/boton_menu.gd" id="2_boton"]
+[ext_resource type="PackedScene" path="res://escenas/ui/ficha_su_majestad.tscn" id="1_ficha"]
+[ext_resource type="Texture2D" path="res://assets/ui/decreto/pergamino.png" id="2_pergamino"]
+[ext_resource type="PackedScene" path="res://escenas/ui/sello_huella.tscn" id="3_sello"]
+[ext_resource type="PackedScene" path="res://escenas/ui/felipe_en_cojin.tscn" id="4_cojin"]
+[ext_resource type="Script" path="res://scripts/ui/base/menu_ui.gd" id="5_menu"]
+[ext_resource type="PackedScene" path="res://escenas/ui/boton_pergamino.tscn" id="6_boton"]
 
-[node name="MenuPausa" type="VBoxContainer"]
-offset_left = 260.0
-offset_top = 120.0
-offset_right = 380.0
-offset_bottom = 270.0
-theme_override_constants/separation = 4
-script = ExtResource("1_menu")
+[node name="PausaDecreto" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 640.0
+offset_bottom = 360.0
+mouse_filter = 2
 
-[node name="Continuar" type="Button" parent="."]
+[node name="Ficha" parent="." instance=ExtResource("1_ficha")]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 36.0
+offset_top = 34.0
+offset_right = 248.0
+offset_bottom = 326.0
+
+[node name="Pergamino" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 276.0
+offset_top = 50.0
+offset_right = 432.0
+offset_bottom = 262.0
+mouse_filter = 2
+texture = ExtResource("2_pergamino")
+
+[node name="Titulo" type="Label" parent="Pergamino"]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 34.0
+offset_right = 142.0
+offset_bottom = 74.0
+theme_type_variation = &"TituloDecreto"
+text = "PAUSA_TITULO"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Sello" parent="Pergamino" instance=ExtResource("3_sello")]
+position = Vector2(122, 166)
+estampado_de_entrada = true
+
+[node name="FelipeEnCojin" parent="." instance=ExtResource("4_cojin")]
+unique_name_in_owner = true
+position = Vector2(318, 318)
+
+[node name="Menu" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 472.0
+offset_top = 76.0
+offset_right = 584.0
+offset_bottom = 282.0
+theme_override_constants/separation = 10
+script = ExtResource("5_menu")
+
+[node name="Continuar" parent="Menu" instance=ExtResource("6_boton")]
 layout_mode = 2
-theme_type_variation = &"BotonMenu"
 text = "MENU_CONTINUAR"
-script = ExtResource("2_boton")
 principal = true
 
-[node name="Opciones" type="Button" parent="."]
+[node name="Opciones" parent="Menu" instance=ExtResource("6_boton")]
 layout_mode = 2
-theme_type_variation = &"BotonMenu"
 text = "MENU_OPCIONES"
-script = ExtResource("2_boton")
 
-[node name="Reiniciar" type="Button" parent="."]
+[node name="Reiniciar" parent="Menu" instance=ExtResource("6_boton")]
 layout_mode = 2
-theme_type_variation = &"BotonMenu"
 text = "MENU_REINICIAR"
-script = ExtResource("2_boton")
 
-[node name="Salir" type="Button" parent="."]
+[node name="Salir" parent="Menu" instance=ExtResource("6_boton")]
 layout_mode = 2
-theme_type_variation = &"BotonMenu"
 text = "MENU_SALIR"
-script = ExtResource("2_boton")
-
-[node name="HuecoFelipe" type="Control" parent="."]
-top_level = true
-layout_mode = 0
-offset_right = 72.0
-offset_bottom = 72.0
-mouse_filter = 2

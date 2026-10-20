@@ -24,8 +24,8 @@ var _mostrando := false
 var _golpe_agenda := 0.0
 
 const ESCENA_CONTADOR := "res://escenas/ui/contador_recurso.tscn"
-## Contadores de recursos: [clave, ancho].
-const CONTADORES := [["calcetin", 52.0], ["foto", 52.0], ["snack", 60.0]]
+## Contadores de recursos: [clave, ancho, ícono del kit (vacío: lo dibuja Recogible)].
+const CONTADORES := [["calcetin", 52.0, &"hud_calcetin"], ["foto", 52.0, &"hud_foto"], ["snack", 60.0, &""]]
 const X0 := 104.0
 const ANCHO_AGENDA := 116.0
 ## Alto del cartel y alturas posibles (bajo el diálogo de arriba, al medio, abajo).
@@ -57,6 +57,8 @@ func _ready() -> void:
 		contador.ancho = datos[1]
 		contador.position = Vector2(x, 6)
 		contador.dibujar_icono = Recogible.dibujar_icono
+		if datos[2] != &"":
+			contador.icono = Estilo.icono(datos[2])
 		_barra.add_child(contador)
 		contadores[datos[0]] = contador
 		x += float(datos[1]) + 4.0
@@ -100,17 +102,15 @@ func _actualizar_contadores() -> void:
 	(contadores["snack"] as ContadorRecurso).fijar("%d/%d" % [snacks, Felipe.SNACKS_MAX], snacks > 0, false)
 
 
-## La libreta: "AGENDA 2/8" y la tecla para abrirla.
+## La libreta: "AGENDA 2/8" y la tecla para abrirla, en un pergamino del kit «Decreto real».
 func _dibujar_agenda() -> void:
 	if agenda == null:
 		return
 	var g := _golpe_agenda
-	_barra.draw_rect(Rect2(X0, 6, ANCHO_AGENDA, Estilo.medida(&"alto_hud")), Estilo.color(&"fondo_hud"))
-	_barra.draw_rect(Rect2(X0 + 4, 9, 12, 15), Estilo.color(&"hud_libreta_papel"))
-	for k in 3:
-		_barra.draw_line(Vector2(X0 + 6, 13 + k * 4), Vector2(X0 + 14 - (k / 2) * 2, 13 + k * 4), Estilo.color(&"hud_libreta_tinta"), 1.0)
+	Estilo.panel(_barra, Rect2(X0, 6, ANCHO_AGENDA, Estilo.medida(&"alto_hud")), &"panel")
+	_barra.draw_texture(Estilo.icono(&"hud_libreta"), Vector2(X0 + 1, 7 - roundf(g * 2.0)))
 	var texto := tr("UI_AGENDA_CONTADOR") % [agenda.cumplidas(), agenda.total()]
-	Estilo.texto_con_contorno(_barra, Vector2(X0 + 20, 21 - roundf(g * 2.0)), texto, &"hud", Estilo.color(&"hud_agenda").lerp(Estilo.color(&"blanco"), g))
+	Estilo.escribir(_barra, Vector2(X0 + 24, 22 - roundf(g * 2.0)), texto, &"hud", Estilo.color(&"tinta_decreto").lerp(Estilo.color(&"lacre"), g))
 	IconosBotones.dibujar(_barra, "agenda", Vector2(X0 + ANCHO_AGENDA - IconosBotones.ancho("agenda", 12.0) - 3, 11), 12.0)
 
 

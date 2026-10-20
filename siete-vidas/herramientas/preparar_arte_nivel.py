@@ -862,6 +862,50 @@ PIEZAS_CONSISTENCIA = {
 }
 # El toldo del pasillo, un poco más oscuro (B2): sus rayas terracota y crema bajan este factor de luz.
 OSCURECER_TOLDO = 0.85
+# La caja de pizza parecía flotar contra los ladrillos (lección 4): se recorta por su contorno, se achica y se apoya
+# con la base sobre el toldo (fila BASE_PIZZA de la vista). Detrás se repone la pared y el toldo en espejo.
+ESCALA_PIZZA = 0.85
+BASE_PIZZA = 97
+CORRIMIENTO_FONDO = 52
+
+
+def pizza_en_el_toldo(imagen):
+    """Baja la caja de pizza de la vista del pasillo para que se apoye en el toldo; devuelve la imagen, su caja
+    (x0, y0, x1, y1) y la máscara de la caja."""
+    a = np.asarray(imagen.convert("RGBA")).copy()
+    lum = a[:, :, :3].astype(int) @ np.array([0.299, 0.587, 0.114])
+    zona = np.zeros(lum.shape, bool)
+    zona[0:98, 57:150] = True
+    contorno = ndimage.binary_closing((lum < 100) & zona, structure=np.ones((3, 3)), iterations=2)
+    lleno = ndimage.binary_fill_holes(contorno)
+    etiquetas, cantidad = ndimage.label(lleno)
+    tamanos = ndimage.sum(lleno, etiquetas, range(1, cantidad + 1))
+    caja = etiquetas == (int(np.argmax(tamanos)) + 1)
+    ys, xs = np.where(caja)
+    recorte = a[ys.min():ys.max() + 1, xs.min():xs.max() + 1].copy()
+    recorte[~caja[ys.min():ys.max() + 1, xs.min():xs.max() + 1], 3] = 0
+    # Fondo: la misma vista corrida a la izquierda, donde no hay caja.
+    fondo = a.copy()
+    # Lo que tapaba la caja se repone en espejo desde el borde izquierdo de la caja (ladrillos y rayas del toldo
+    # siguen sin cortes); lo que no alcanza, desde CORRIMIENTO_FONDO px a la izquierda.
+    yy, xx = np.where(ndimage.binary_dilation(caja, iterations=3))
+    borde = int(xs.min()) - 3
+    origen = 2 * borde - xx - 1
+    espejo = origen >= 0
+    fondo[yy[espejo], xx[espejo]] = a[yy[espejo], origen[espejo]]
+    resto = ~espejo
+    fondo[yy[resto], xx[resto]] = fondo[yy[resto], np.maximum(xx[resto] - CORRIMIENTO_FONDO, 0)]
+    chica = Image.fromarray(recorte, "RGBA")
+    chica = chica.resize((round(chica.width * ESCALA_PIZZA), round(chica.height * ESCALA_PIZZA)), Image.NEAREST)
+    x0 = int((xs.min() + xs.max()) / 2 - chica.width / 2)
+    y0 = BASE_PIZZA - chica.height
+    salida = Image.fromarray(fondo, "RGBA")
+    salida.alpha_composite(chica, (x0, y0))
+    mascara = np.zeros(lum.shape, bool)
+    alfa = np.asarray(chica)[:, :, 3] > 0
+    alto, ancho = alfa.shape
+    mascara[y0:y0 + alto, x0:x0 + ancho] = alfa[:max(0, min(alto, lum.shape[0] - y0)), :max(0, min(ancho, lum.shape[1] - x0))]
+    return salida, (x0, y0, x0 + chica.width, y0 + chica.height), mascara
 
 
 def sin_blanco_puro(nombre):
@@ -884,11 +928,13 @@ def consistencia():
             a = np.asarray(recorte.convert("RGBA")).copy()
             a[:, :, 3] = 255
             final = Image.fromarray(a, "RGBA").resize(tamano, Image.NEAREST)
+            final, caja, mascara = pizza_en_el_toldo(final)
             a = np.asarray(final).copy().astype(float)
             toldo = np.zeros(a.shape[:2], bool)
             toldo[int(tamano[1] * 0.52):, :] = True
-            a[toldo, :3] *= OSCURECER_TOLDO
+            a[toldo & ~mascara, :3] *= OSCURECER_TOLDO
             final = Image.fromarray(a.astype(np.uint8), "RGBA")
+            print(f"Vista del pasillo: caja de pizza en {caja} (Nivel1.PIZZA)")
         else:
             final = escalar(recorte, tamano)
         final.save(DESTINO / f"{nombre}.png")

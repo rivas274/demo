@@ -69,6 +69,7 @@ Actualizado: 2026-10-19 (PARTE B del nivel 1 v4). Detalle completo en la biblia 
 - **Mañas:** 17 equipables con ventaja y precio; 2 ranuras al inicio, hasta 6 (10 calcetines = 1 ranura).
 - **Acciones de gato:** pedir comida, infiltrarse, popo táctico, tirar cosas de la mesa, meterse en cajas, peleas en los techos, casas paralelas.
 - **Combate:** enemigos comunes fáciles y graciosos; jefes con reto. Felipe nunca golpea humanos (los vence con trampas); los animales derrotados huyen ofendidos.
+- **Derrotas jugosas (2026-10-20, aprobado por el creador):** vencer a un juguete o máquina tiene 5 pasos: destello por silueta y congelado, sale volando, «¡POP!» (se desarma o escupe lo que tenía), cámara lenta solo en el golpe final de un jefe y una marca que queda. El ratón de cuerda se desarma en carcasa, resorte, llave (que sigue girando), tornillos y engranajes, con un «resorte con alma» que sube; A.S.P.I. rebota contra la pared y deja una montaña de pelusa con un calcetín y una croqueta. Felipe lo comenta sin culpa (1 línea). Anti-pilar: nada sufre ni sangra. Por datos: `DatosDerrota` + pieza `ReaccionDerrota`.
 - **Jefes:** A.S.P.I., Hermanos Callejeros, Michi-Star, Tanque, el Patrón, Rey Rata, Kaiser, A.S.P.I. MAX (final).
 - **Guía anti-frustración:** tutorial jugando, "El Manual de Su Majestad", pistas tras 3 muertes, mapa con iconos de poder faltante, rascador de entrenamiento.
 - **Accesibilidad:** controles reasignables, subtítulos ajustables, modo daltónico, modo asistido que no bloquea logros.

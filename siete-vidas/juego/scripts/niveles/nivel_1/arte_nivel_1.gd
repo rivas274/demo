@@ -329,10 +329,10 @@ func _dibujar_vista_pasillo(c: Node2D) -> void:
 	var t := tiempo
 	var pizza := Nivel1.PIZZA
 	for i in 3:
-		var x0 := pizza.position.x + 24.0 + i * 9.0
+		var x0 := pizza.position.x + 18.0 + i * 9.0
 		var puntos := PackedVector2Array()
 		for k in 6:
-			var y := pizza.position.y + 50.0 - k * 3.0 - fmod(t * 6.0 + i * 4.0, 3.0)
+			var y := pizza.position.y + 40.0 - k * 3.0 - fmod(t * 6.0 + i * 4.0, 3.0)
 			puntos.append(Vector2(x0 + sin(k * 1.3 + t * 3.0 + i) * 2.0, y))
 		c.draw_polyline(puntos, Color(1, 1, 1, 0.55), 1.0)
 	c.draw_rect(vidrio, Color(0.75, 0.88, 1.0, 0.08))

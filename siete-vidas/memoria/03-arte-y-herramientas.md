@@ -119,7 +119,7 @@ Hojas `arte/referencias/gemini/consistencia-casa.png` y `correccion-estilo.png`,
 | Pieza | Tamaño en el juego | Dónde |
 | --- | --- | --- |
 | `ventana_casa.png` (marco de madera con parante en cruz y alféizar, huecos transparentes) | 215 × 170, hueco de 150 × 120 en (32, 23) | Las 4 ventanas de código: cocina, dormitorio, estudio (`FondoApartamento._dibujar_ventana`) y pasillo (arte de la capa pared, con el alféizar pisable a 90 cm) |
-| `vista_pasillo.png` (patio de luz, toldo del vecino un 15 % más oscuro y caja de pizza abierta) | 150 × 120, opaca | Detrás del vidrio del pasillo; el vapor de la pizza va por código |
+| `vista_pasillo.png` (patio de luz, toldo del vecino un 15 % más oscuro y caja de pizza abierta) | 150 × 120, opaca | Detrás del vidrio del pasillo; el vapor de la pizza va por código. La caja se recorta por su contorno, se achica al 85 % y se apoya sobre el toldo (`pizza_en_el_toldo`: parecía flotar contra los ladrillos, lección 4) |
 | `teclado.png` | 52 × 24 | Escritorio del estudio (pisado, se oscurece) |
 | `monitor.png`, `microondas.png`, `vaso.png`, `pollo.png` (correccion-estilo) | 44 × 48, 98 × 54, 24 × 32, 64 × 50 (el pollo pasa de 1,6 : 1 a 1,28 : 1) | Reemplazan a los anteriores en el mismo lugar |
 

@@ -47,6 +47,7 @@ func _correr() -> void:
 	await _probar_estados_felipe()
 	_probar_conductas_jefe()
 	await _probar_zoomies()
+	await _probar_derrotas()
 
 	for fallo in _fallos:
 		print("FALLA: ", fallo)
@@ -405,6 +406,68 @@ func _probar_zoomies() -> void:
 	jugo.queue_free()
 	felipe.tiene_zoomies = false
 	await _esperar(5)
+
+
+## Derrotas jugosas: ReaccionDerrota se dispara con Vida.murio, suelta sus piezas, la llave deja de girar y la cámara
+## lenta solo actúa si sus datos la piden (y vuelve a time_scale 1). Un enemigo sin datos de derrota no la lleva.
+func _probar_derrotas() -> void:
+	var raton := Enemigo.crear(load("res://datos/enemigos/raton.tres"), 0.0, 2000.0)
+	raton.position = Vector2(700, PISO)
+	raton.patrulla.quieta = true
+	mundo.add_child(raton)
+	await _segundos_fisica(0.3)
+	var derrota := raton.derrota
+	_comprobar(derrota != null and derrota.datos == load("res://datos/derrotas/raton.tres"), "Derrota: el ratón trae su ReaccionDerrota con datos/derrotas/raton.tres")
+	var antes := mundo.get_children().size()
+	raton.vida.morir()
+	await physics_frame
+	_comprobar(derrota.reaccionada, "Derrota: ReaccionDerrota se dispara con Vida.murio")
+	var lenta := [false]
+	var x0 := raton.global_position.x
+	var t := 0.0
+	while t < 2.0 and derrota.piezas.is_empty():
+		await physics_frame
+		t += 1.0 / Engine.physics_ticks_per_second
+		lenta[0] = lenta[0] or Engine.time_scale < 0.99 and not is_equal_approx(Engine.time_scale, 0.03)
+	_comprobar(absf(raton.global_position.x - x0) > 10.0, "Derrota: el ratón sale volando hacia donde iba el golpe (%.0f px)" % (raton.global_position.x - x0))
+	_comprobar(derrota.piezas.size() == derrota.datos.piezas.size() and not raton.apariencia.visible, "Derrota: «¡POP!», el ratón se desarma y suelta sus %d piezas" % derrota.datos.piezas.size())
+	_comprobar(not lenta[0] and Engine.time_scale == 1.0, "Derrota: el ratón no pide cámara lenta y el tiempo sigue a 1")
+	await _segundos_fisica(1.5)
+	var en_piso := derrota.piezas.all(func(p: PiezaSuelta) -> bool: return p.en_piso and absf(p.position.y - raton.position.y) < 0.5)
+	var llave: PiezaSuelta = derrota.piezas.filter(func(p: PiezaSuelta) -> bool: return p.nombre == derrota.datos.pieza_que_gira)[0]
+	_comprobar(en_piso and mundo.get_children().size() >= antes + derrota.piezas.size(), "Derrota: las piezas caen, rebotan y quedan en el piso (la marca)")
+	_comprobar(llave.girando, "Derrota: la llave de cuerda sigue girando sola en el piso")
+	await _segundos_fisica(derrota.datos.giro_segundos + 0.3)
+	_comprobar(not llave.girando, "Derrota: la llave deja de girar")
+	_comprobar(not is_instance_valid(derrota.fantasma) or derrota.fantasma.is_queued_for_deletion(), "Derrota: el resorte con alma sube y se desvanece")
+	for pieza in derrota.piezas:
+		pieza.queue_free()
+	raton.queue_free()
+	# A.S.P.I.: cámara lenta (solo ella), que vuelve a 1, y la montaña de pelusa.
+	var aspi := Enemigo.crear(load("res://datos/enemigos/aspi.tres"), 0.0, 2000.0)
+	aspi.position = Vector2(900, PISO)
+	aspi.patrulla.quieta = true
+	mundo.add_child(aspi)
+	await _segundos_fisica(0.3)
+	aspi.vida.morir()
+	var minima := 1.0
+	var reloj := 0.0
+	while reloj < 0.4:
+		await process_frame
+		reloj += get_root().get_process_delta_time() / maxf(Engine.time_scale, 0.001)
+		minima = minf(minima, Engine.time_scale)
+	_comprobar(is_equal_approx(minima, aspi.derrota.datos.camara_lenta), "Derrota: A.S.P.I. pide cámara lenta (time_scale %.2f)" % minima)
+	await create_timer(aspi.derrota.datos.duracion_lenta + 0.3, true, false, true).timeout
+	_comprobar(Engine.time_scale == 1.0 and not aspi.derrota.en_camara_lenta, "Derrota: después de la cámara lenta el tiempo vuelve a 1")
+	await _hasta(func() -> bool: return aspi.derrota.marca != null, 3.0)
+	_comprobar(aspi.derrota.marca != null and aspi.derrota.marca.nombre == "derrota_pelusa" and aspi.apariencia.visible and aspi.apariencia.rotation == 0.0, "Derrota: A.S.P.I. rebota, queda apagada y deja su montaña de pelusa")
+	if aspi.derrota.marca:
+		aspi.derrota.marca.queue_free()
+	aspi.queue_free()
+	var sin_derrota := Enemigo.crear(DatosEnemigo.new())
+	_comprobar(sin_derrota.derrota == null, "Derrota: un enemigo sin datos de derrota no la lleva (solo con datos)")
+	sin_derrota.free()
+	await physics_frame
 
 
 func _segundos_fisica(segundos: float) -> void:

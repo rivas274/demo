@@ -168,9 +168,10 @@ func _desarmar() -> void:
 	_enderezar()
 	if _apariencia:
 		_apariencia.visible = false
-	var sombra: Node2D = _cuerpo.get("sombra")
+	# Sin cuerpo, sin sombra (la dibuja SombrasVivas mientras `mostrar` diga que sí).
+	var sombra := _cuerpo.get("sombra") as SombraContacto
 	if sombra:
-		sombra.visible = false
+		sombra.mostrar = func() -> bool: return false
 	var mundo := _cuerpo.get_parent()
 	var pie := _cuerpo.position
 	for i in datos.piezas.size():

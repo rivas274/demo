@@ -378,7 +378,7 @@ const LUGARES_VISTOS := [
 ]
 ## La caja de pizza, sobre el toldo del vecino, del otro lado del vidrio (dentro de VIDRIO_PASILLO).
 ## Es la caja del arte de la vista (`vista_pasillo`), con la tapa abierta y la grasa; el vapor lo pone el código.
-const PIZZA := Rect2(VIDRIO_PASILLO.position.x + 58, VIDRIO_PASILLO.position.y + 9, 84, 82)
+const PIZZA := Rect2(VIDRIO_PASILLO.position.x + 63, VIDRIO_PASILLO.position.y + 25, 77, 72)
 ## Atajos (R6): [qué, dónde, desde dónde se abre].
 const ATAJOS := [["Caja de arriba de la pila de la mudanza", CAJAS, "escalera"]]
 ## Cada maña que el nivel enseña abre un camino y molesta a alguien (R19): maña -> [camino, a quién molesta].

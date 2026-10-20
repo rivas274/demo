@@ -98,6 +98,7 @@ Tamaños: el más grande es `felipe.gd` (603 líneas), luego `guion_nivel_1.gd` 
 | `OyeMaullido` | Maña «Maullar»: oye dentro del radio y avisa con `oyo` | Valeria, A.S.P.I., puerta de la cocina |
 | `Asustable` | Maña futura «Intimidar»: `asustar(quien)` → huye | Ratón, A.S.P.I. |
 | `SueltaRecompensa` | Al morir la Vida suelta un Recogible | Caja de cartón |
+| `ReaccionDerrota` (datos en `datos/derrotas/`, `DatosDerrota`) | Al morir la Vida: destello por silueta, congelado y sacudida (`Jugo`), sale volando y rebota (`move_and_collide`), «¡POP!» con piezas sueltas (`PiezaSuelta`: física simple, quedan en el piso, una puede seguir girando) y nube (`Particulas`), cámara lenta solo si sus datos la piden (vuelve siempre a `time_scale` 1), marca al lado, fantasmita y frase de Felipe | Ratón (se desarma), A.S.P.I. (rebota y escupe pelusa) |
 | `SombraContacto` | Pide su sombra de contacto | Ratón, A.S.P.I., caja, comida, Valeria |
 | `Interactivo` | Responde al botón sin clase propia | Cajón, ropa doblada |
 
@@ -166,6 +167,20 @@ múltiplo); `Estilo.escribir` dibuja con ellas y `Estilo.recortar` corta con «�
 5. Si necesita un dibujo especial, un script de apariencia en `DatosEnemigo.apariencia`. Si necesita un comportamiento
    nuevo, primero pregunta si es una **pieza nueva** que otros puedan llevar.
 6. Prueba: `prueba_componentes.gd` tiene un ejemplo («Pelusa malvada») armado solo con datos.
+
+### Cómo darle una derrota a un enemigo nuevo
+
+1. `datos/derrotas/` → *Nuevo recurso* → `DatosDerrota` (copia `raton.tres` si se desarma o `aspi.tres` si cae entero).
+2. Llena los 5 pasos en el inspector: destello y congelado; impulso, vueltas y rebotes; si se desarma, sus `piezas`
+   (nombres de imágenes de `assets/nivel1/`; si falta una, `PiezaSuelta` dibuja un provisional), la que sigue girando
+   y la nube; la cámara lenta (solo jefes, en su golpe final; 1 = sin cámara lenta); la marca y el fantasmita; y el
+   evento de `Frases.FELIPE` (frases de 1 línea, claves en `traducciones/textos.csv`).
+3. En su `DatosEnemigo`, pon ese `.tres` en `derrota`. `Enemigo` arma la pieza `ReaccionDerrota` sola y la conecta a
+   `Vida.murio`. Nada más: sin código.
+4. Si es jefe, el cartel (tipo Broforce) lo pone su pelea con `PresentacionJefe.cartel` en su «momento»; la cámara lenta
+   es de la derrota (no la pongas también en la pelea).
+5. Prueba: `_probar_derrotas` en `prueba_componentes.gd` (se dispara con `Vida.murio`, suelta piezas, la llave para y la
+   cámara lenta vuelve a 1); capturas con `pruebas/capturas_derrotas.gd`.
 
 ### Cómo agregar un objeto tirable
 

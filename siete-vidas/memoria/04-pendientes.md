@@ -99,6 +99,12 @@ Idea tomada de un video sobre cómo hacer que un dash se sienta bien (5 pasos). 
 - Los Zoomies siguen apagados en el nivel 1 (se ganan en Downtown).
 - [ ] Rehacer la animación de derrape: hoy se inclina poco y no clava las patas delanteras. Pedirla de nuevo desde Felipe A con `pixel-engine-v1.5` (≈26 créditos), cuadro por cuadro, cuando se activen los Zoomies (Downtown). (Sugerencia del creador, 2026-10-20.)
 
+## Derrotas jugosas (aprobadas por el creador, 2026-10-20)
+
+- [x] **Lógica, datos y pruebas (hechos 2026-10-20):** `ReaccionDerrota` + `DatosDerrota` (`datos/derrotas/raton.tres` y `aspi.tres`), `PiezaSuelta`, frases de Felipe «derrota_raton» y «derrota_aspi», cámara lenta del golpe final de A.S.P.I. movida a su derrota.
+- [ ] **Arte de Gemini** (`diseno/encargo-gemini-derrotas.md`, `arte/referencias/gemini/derrotas.png`): al llegar, recortar cada pieza al borde opaco, a la densidad del ratón, sin blanco puro, con los nombres que ya usan los datos (`derrota_carcasa`, `derrota_llave_1` a `_4`, `derrota_resorte`, `derrota_resorte_alma`, `derrota_tornillo`, `derrota_engranaje`, `derrota_pelusa`; la nube, en `color_nube`/partículas). Hoy la carcasa es `raton_volcado` y lo demás son provisionales de pixel de `PiezaSuelta`.
+- [ ] **Mostrar al creador:** `derrota-raton.gif` y `derrota-aspi.gif`.
+
 ## Menú «Decreto real» (elegido por el creador, 2026-10-20)
 
 - [x] **Pausa «Decreto real» (hecha 2026-10-20):** Ficha de Su Majestad a la izquierda (retrato, kilos, humor y barras de defensa, carisma, ataque y peso con su frase; la velocidad, solo chiste), pergamino «Decretos de Su Majestad» con Felipe en su cojín y la corona al centro, y 4 botones de pergamino a la derecha que estampan el sello de lacre con destellos al elegir.

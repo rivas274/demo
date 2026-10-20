@@ -18,7 +18,9 @@ extends RefCounted
 ##   MARCAS           1        arañazos sobre lo arañable
 ##   PERSONAJES       2        SOLO los humanos (Valeria): 200 px, más cerca de la cámara que el escenario. Felipe pasa
 ##                             DETRÁS de ella y se ve su silueta (SiluetaTapada) en la parte que ella tapa (plan 2026-10-20)
-##   PRIMER_PLANO     3        pasamanos de la escalera (delante de Felipe y de Valeria)
+##   JUEGO_DELANTE    3        Felipe parado sobre algo que queda delante de los humanos (el asiento del sofá junto a
+##                             Valeria: Nivel1.DELANTE_DE_HUMANOS); en el piso vuelve a JUEGO
+##   PRIMER_PLANO     4        pasamanos de la escalera (delante de Felipe y de Valeria)
 ##   LUZ              5        rayos de luz de las ventanas
 ##   ESTELA          10        estela de Felipe (Zoomies), palabras del ensayo de A.S.P.I.
 ##   IMAGINACION     25        la imaginación de Felipe (estudio en llamas y A.S.P.I. gigante): tapa TODO el escenario
@@ -43,7 +45,8 @@ const TRAS_FELIPE := -1
 const JUEGO := 0
 const MARCAS := 1
 const PERSONAJES := 2
-const PRIMER_PLANO := 3
+const JUEGO_DELANTE := 3
+const PRIMER_PLANO := 4
 const LUZ := 5
 const ESTELA := 10
 const IMAGINACION := 25
@@ -67,7 +70,7 @@ const CAPA_PANTALLAS := 40
 const MUNDO := [
 	["PARED", PARED], ["FACHADA", FACHADA], ["ARTE_PARED", ARTE_PARED], ["ESCALERA", ESCALERA], ["PUERTAS", PUERTAS],
 	["MUEBLES", MUEBLES], ["TRAS_FELIPE", TRAS_FELIPE], ["JUEGO", JUEGO], ["MARCAS", MARCAS], ["PERSONAJES", PERSONAJES],
-	["PRIMER_PLANO", PRIMER_PLANO],
+	["JUEGO_DELANTE", JUEGO_DELANTE], ["PRIMER_PLANO", PRIMER_PLANO],
 	["LUZ", LUZ], ["ESTELA", ESTELA], ["IMAGINACION", IMAGINACION],
 	["FELIPE_IMAGINANDO", FELIPE_IMAGINANDO], ["EFECTOS", EFECTOS], ["CENSURA", CENSURA], ["INDICADOR", INDICADOR],
 ]

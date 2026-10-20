@@ -110,6 +110,7 @@ func cada_cuadro(delta: float) -> void:
 	_actualizar_bano(delta)
 	_actualizar_goteo_cocina(delta)
 	arte.cada_cuadro(delta)
+	_actualizar_capa_felipe()
 
 
 ## ¿Hay una escena de Valeria en curso o esperando?
@@ -377,6 +378,27 @@ func _al_comer(comida: Comida) -> void:
 			valeria.reganar(felipe, "almuerzo", "almuerzo")
 		elif valeria.cuarto == "cocina":
 			travesuras.decir_valeria("almuerzo", true)
+
+
+## Felipe delante o detrás de Valeria según dónde está parado (Nivel1.DELANTE_DE_HUMANOS): solo cambia al apoyarse en
+## algo (en el aire conserva la capa, así no salta de un lado al otro a mitad de un salto).
+func _actualizar_capa_felipe() -> void:
+	if not felipe.is_on_floor():
+		return
+	var delante := superficie_de_felipe() in Nivel1.DELANTE_DE_HUMANOS
+	if delante and felipe.z_index == Capas.JUEGO:
+		felipe.z_index = Capas.JUEGO_DELANTE
+	elif not delante and felipe.z_index == Capas.JUEGO_DELANTE:
+		felipe.z_index = Capas.JUEGO
+
+
+## Nombre de la pieza donde está parado Felipe ("" si es el piso u otra cosa sin nombre).
+func superficie_de_felipe() -> String:
+	for i in felipe.get_slide_collision_count():
+		var choque := felipe.get_slide_collision(i)
+		if choque.get_normal().y < -0.7 and choque.get_collider() is Node:
+			return String((choque.get_collider() as Node).name)
+	return ""
 
 
 ## Popo táctico: agachado sobre la caja de arena recién limpiada (travesura secreta, con censura irónica).

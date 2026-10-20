@@ -28,6 +28,10 @@ const PARED_BASE := SUELO - FONDO_PISO
 const DINTEL := PARED_BASE - 248.0
 ## Mesita de la sala (S-2, tanda 3E): tablero a 58 px (48 cm), de la columna 6 a la 76 de su arte.
 const MESITA_X := 162.0
+## Superficies (nombres de Nivel1.PIEZAS) que quedan DELANTE de los humanos: Felipe parado ahí (el cojín del asiento
+## del sofá, junto a Valeria o en su regazo) se dibuja delante de ella (Capas.JUEGO_DELANTE); en el piso pasa detrás con
+## su silueta (plan de estabilización 2026-10-20).
+const DELANTE_DE_HUMANOS := ["Asiento del sofá"]
 ## Luz de las lámparas encendidas (plan de estabilización 2026-10-20, decisión 4; lección 26: nada de halos redondos).
 ## Cada una: [cuarto, arte, pantalla (rectángulo en la textura del arte), y del mundo donde cae la luz (tablero o piso),
 ## ancho de la luz al llegar ahí]. LuzCuarto dibuja con estos datos la pantalla encendida (más clara, con contorno

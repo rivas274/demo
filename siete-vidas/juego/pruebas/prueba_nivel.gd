@@ -86,6 +86,16 @@ func _correr() -> void:
 		var sin_sombra := t.indicador.material as CanvasItemMaterial
 		_comprobar(sin_sombra != null and sin_sombra.light_mode == CanvasItemMaterial.LIGHT_MODE_UNSHADED, "Luz: el Indicador (en el mundo) no recibe el ambiente ni las luces")
 
+	# Capas (plan de estabilización): sobre el asiento del sofá, junto a Valeria, Felipe va DELANTE de ella; en el piso,
+	# detrás con su silueta.
+	await _poner_en(Vector2(400, Nivel1.SUELO - 49))
+	await _esperar(20)
+	var silueta_sofa := guion.valeria.get_node_or_null("SiluetaTapada") as SiluetaTapada
+	_comprobar(guion.superficie_de_felipe() == "Asiento del sofá" and Capas.z_efectivo(felipe.sprite) > Capas.z_efectivo(guion.valeria) and not silueta_sofa.dibujando(), "Capas: sobre el asiento del sofá junto a Valeria, Felipe va delante de ella (sin silueta) [%s, z %d, piso %s, y %.0f]" % [guion.superficie_de_felipe(), felipe.z_index, felipe.is_on_floor(), felipe.global_position.y])
+	await _poner_en(Vector2(420, Nivel1.SUELO))
+	await _esperar(20)
+	_comprobar(Capas.z_efectivo(felipe.sprite) < Capas.z_efectivo(guion.valeria) and silueta_sofa.dibujando(), "Capas: en el piso, delante del sofá, Felipe pasa detrás de Valeria y se ve su silueta")
+
 	# Arañar el sofá delante de Valeria: a los dos arañazos lo deja frente al rascador y el plástico aguanta.
 	await _poner_en(Vector2(330, Nivel1.SUELO))
 	await _tocar("interactuar")

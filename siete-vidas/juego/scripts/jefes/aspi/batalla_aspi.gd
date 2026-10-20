@@ -172,7 +172,12 @@ func _process(delta: float) -> void:
 	if habia_gigante and jefe.visible and fase != Fase.ESPERANDO:
 		_soltar_polvo(jefe.global_position + Vector2(0, -20))
 	# Felipe queda delante de su propia imaginación; el escenario, detrás.
-	felipe.z_index = Capas.FELIPE_IMAGINANDO if (gigante > 0.0 or transformacion > 0.0) else Capas.JUEGO
+	# Solo toca la capa de Felipe mientras imagina (y para devolverla): el resto del tiempo la decide el nivel (delante
+	# o detrás de Valeria según dónde está parado).
+	if gigante > 0.0 or transformacion > 0.0:
+		felipe.z_index = Capas.FELIPE_IMAGINANDO
+	elif felipe.z_index == Capas.FELIPE_IMAGINANDO:
+		felipe.z_index = Capas.JUEGO
 	if not papeles.is_empty():
 		for i in papeles.size():
 			papeles[i].y += delta

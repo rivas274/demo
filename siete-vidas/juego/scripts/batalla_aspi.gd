@@ -71,7 +71,9 @@ const PISTA_LLENA := "Sáltale encima y aprieta el botón"
 const CARTELES := ["FASE 1: ¡LLÉNALE EL DEPÓSITO!", "FASE 2: ¡SE REINICIÓ!", "FASE 3: ¡FURIA!"]
 
 var fase := Fase.ESPERANDO
-var aspi: Aspi
+var aspi: Enemigo
+## El dibujo de A.S.P.I. (luz de aviso, vibración y tapa del depósito).
+var apariencia: AparienciaAspi
 var felipe: Felipe
 var sala: Sala
 var apagados := 0
@@ -112,8 +114,8 @@ var _centro_gigante := Vector2.ZERO
 var _encima: Node2D
 var _imaginacion: Node2D
 var _manchas_dibujo: Node2D
-var _municion: Array[Vaso] = []
-var _por_reponer: Array[Vaso] = []
+var _municion: Array[Objeto] = []
+var _por_reponer: Array[Objeto] = []
 var _reloj_reponer := 0.0
 var _destino_embestida := 0.0
 var _hacia_soplido := 1.0
@@ -124,8 +126,9 @@ var _tiempo_clic := -10.0
 const DURA_CLIC := 1.3
 
 
-func _init(jefa: Aspi, gato: Felipe, nivel: Sala) -> void:
+func _init(jefa: Enemigo, gato: Felipe, nivel: Sala) -> void:
 	aspi = jefa
+	apariencia = jefa.apariencia as AparienciaAspi
 	felipe = gato
 	sala = nivel
 	name = "Batalla"
@@ -137,15 +140,15 @@ func _init(jefa: Aspi, gato: Felipe, nivel: Sala) -> void:
 
 
 func _ready() -> void:
-	aspi.apagado.connect(_terminar)
-	aspi.oyo_maullido.connect(_al_oir_maullido)
-	aspi.quieta = true
-	aspi.invulnerable = true
+	aspi.vida.murio.connect(_terminar)
+	aspi.oido.oyo.connect(_al_oir_maullido)
+	aspi.patrulla.quieta = true
+	aspi.vida.invulnerable = true
 	# Sin jefa no hay pelea (algunas pruebas la quitan).
 	aspi.tree_exiting.connect(queue_free)
 	presentacion = PresentacionJefe.new(NOMBRE, TITULO)
 	presentacion.texto_rugido = RUGIDO
-	presentacion.alto_jefe = Aspi.ALTO + 20.0
+	presentacion.alto_jefe = aspi.datos.alto + 20.0
 	presentacion.encuadre_momento = _centro_gigante + Vector2(0, 40)
 	presentacion.terminada.connect(_al_terminar_presentacion)
 	presentacion.paso_empezado.connect(_al_paso)
@@ -187,12 +190,12 @@ func _ready() -> void:
 
 
 ## Lo que se puede tirar en el estudio: vuelve de a uno cuando se rompe (o cuando un soplido lo tira).
-func agregar_municion(objeto: Vaso) -> void:
+func agregar_municion(objeto: Objeto) -> void:
 	_municion.append(objeto)
-	objeto.caido.connect(func(posicion: Vector2) -> void:
+	objeto.tirable.caido.connect(func(posicion: Vector2) -> void:
 		agregar_mancha(posicion)
 		_por_reponer.append(objeto))
-	objeto.tirado.connect(func(o: Vaso) -> void: _por_reponer.append(o))
+	objeto.tirable.tirado.connect(func(_o: Node2D) -> void: _por_reponer.append(objeto))
 
 
 func _process(delta: float) -> void:
@@ -258,10 +261,10 @@ func empezar() -> void:
 	if fase != Fase.ESPERANDO:
 		return
 	fase = Fase.ENTRADA
-	aspi.necesita_aturdir = true
-	aspi.invulnerable = true
-	aspi.quieta = true
-	aspi.inofensiva = true
+	aspi.recibe_golpes.solo_aturdido = true
+	aspi.vida.invulnerable = true
+	aspi.patrulla.quieta = true
+	aspi.dano.activo = false
 	felipe.empuje = Vector2.ZERO
 	presentacion.divisiones = APAGADOS_TOTALES
 	presentacion.pantallas = sala.pantallas
@@ -285,7 +288,7 @@ func saltar_entrada() -> void:
 func agregar_mancha(posicion: Vector2, tipo := "mancha") -> void:
 	if fase in [Fase.ESPERANDO, Fase.FIN] or not arena.grow(4).has_point(posicion - Vector2(0, 1)):
 		return
-	manchas.append(clampf(posicion.x, aspi.limite_izquierdo, aspi.limite_derecho))
+	manchas.append(clampf(posicion.x, aspi.patrulla.limite_izquierdo, aspi.patrulla.limite_derecho))
 	tipos_mancha.append(tipo)
 	if tipo == "papel":
 		_papeles.append(Vector3(posicion.x, 0.0, 0.0))
@@ -307,11 +310,11 @@ func _al_paso(paso: String) -> void:
 			_polvo.emitting = true
 			# La frase la muestra la presentación como subtítulo (el diálogo se esconde durante la entrada, M4).
 		"espera":
-			aspi.luz_aviso = Color("e0483b")
+			apariencia.luz_aviso = Color("e0483b")
 		"musica":
 			sala.sonar("batalla")
 		"rugido":
-			aspi.luz_aviso = Color(0, 0, 0, 0)
+			apariencia.luz_aviso = Color(0, 0, 0, 0)
 			_desvaneciendo = true
 			for i in 10:
 				_papeles.append(Vector3(arena.position.x + 200 + i * 24.0, 0.0, randf()))
@@ -334,15 +337,15 @@ func _al_terminar_presentacion() -> void:
 	if fase == Fase.PELEA and _volviendo:
 		_volviendo = false
 		ausente = false
-		aspi.quieta = false
+		aspi.patrulla.quieta = false
 		return
 	if fase != Fase.ENTRADA:
 		return
 	fase = Fase.PELEA
 	gigante = 0.0
 	transformacion = 0.0
-	aspi.quieta = false
-	aspi.vision = arena.size.x
+	aspi.patrulla.quieta = false
+	aspi.patrulla.vision = arena.size.x
 	_cambiar_fase()
 
 
@@ -358,9 +361,9 @@ func _salir() -> void:
 	limpiando = false
 	llena = false
 	deposito = 0
-	aspi.cerrar_tapa()
-	aspi.quieta = true
-	aspi.inofensiva = true
+	apariencia.cerrar_tapa()
+	aspi.patrulla.quieta = true
+	aspi.dano.activo = false
 	aspi.global_position = Sala.ASPI[0]
 	for bola in bolas.duplicate():
 		_quitar_bola(bola)
@@ -381,10 +384,10 @@ func _cambiar_fase() -> void:
 	_espera_embestida = ESPERA_EMBESTIDA[apagados]
 	_espera_bola = ESPERA_BOLAS
 	_reinicio = REINICIO if apagados > 0 else 0.0
-	aspi.quieta = _reinicio > 0.0
-	aspi.inofensiva = true
-	aspi.velocidad_patrulla = VELOCIDAD[apagados] * 0.7
-	aspi.velocidad_persecucion = VELOCIDAD[apagados]
+	aspi.patrulla.quieta = _reinicio > 0.0
+	aspi.dano.activo = false
+	aspi.patrulla.velocidad_patrulla = VELOCIDAD[apagados] * 0.7
+	aspi.patrulla.velocidad_persecucion = VELOCIDAD[apagados]
 	presentacion.cartel(CARTELES[apagados], 2.4, PISTAS[apagados])
 	presentacion.destello(0.4)
 	presentacion.sacudir(0.25)
@@ -399,15 +402,15 @@ func _actualizar_pelea(delta: float) -> void:
 	if _reinicio > 0.0:
 		_reinicio -= delta
 		if _reinicio <= 0.0:
-			aspi.quieta = false
+			aspi.patrulla.quieta = false
 		return
 	if llena:
 		_actualizar_llena(delta)
 		return
-	if aspi.esta_aturdida():
+	if aspi.recibe_golpes.esta_aturdido():
 		_terminar_ataque()
 		limpiando = false
-		aspi.destino = INF
+		aspi.patrulla.destino = INF
 		return
 	_contar_acampada(delta)
 	if ataque != Ataque.NINGUNO:
@@ -423,18 +426,18 @@ func _actualizar_pelea(delta: float) -> void:
 			return
 	# Contra el que acampa: va debajo y, a su tiempo, sopla.
 	if apagados >= 1 and acampando > 1.0:
-		aspi.destino = felipe.global_position.x
-		aspi.velocidad_persecucion = VELOCIDAD_A_DEBAJO
+		aspi.patrulla.destino = felipe.global_position.x
+		aspi.patrulla.velocidad_persecucion = VELOCIDAD_A_DEBAJO
 		if acampando >= TIEMPO_ACAMPAR[apagados] and absf(aspi.global_position.x - felipe.global_position.x) < 16.0:
 			_empezar_ataque(Ataque.AVISO_SOPLIDO)
 		return
-	aspi.velocidad_persecucion = VELOCIDAD[apagados]
+	aspi.patrulla.velocidad_persecucion = VELOCIDAD[apagados]
 	if not manchas.is_empty():
 		_limpiar(delta)
 		return
 	limpiando = false
 	_aviso_succion = 0.0
-	aspi.destino = INF
+	aspi.patrulla.destino = INF
 	var distancia := felipe.global_position - aspi.global_position
 	if _espera_embestida <= 0.0 and felipe.is_on_floor() and absf(distancia.y) < 30.0 and absf(distancia.x) < DISTANCIA_EMBESTIDA:
 		_empezar_ataque(Ataque.AVISO_EMBESTIDA)
@@ -451,15 +454,15 @@ func _contar_acampada(delta: float) -> void:
 ## Va a la mancha, gira el cepillo 0,6 s (anticipación) y aspira hasta limpiarla.
 func _limpiar(delta: float) -> void:
 	var mancha := manchas[0]
-	aspi.destino = mancha
+	aspi.patrulla.destino = mancha
 	if absf(aspi.global_position.x - mancha) >= 6.0:
 		return
 	if not limpiando:
 		_aviso_succion += delta
-		aspi.vibrando = true
+		apariencia.vibrando = true
 		if _aviso_succion < AVISO_SUCCION:
 			return
-		aspi.vibrando = false
+		apariencia.vibrando = false
 		limpiando = true
 		_reloj = 0.0
 		sala.sonar("succion")
@@ -486,25 +489,25 @@ func _empezar_ataque(cual: Ataque) -> void:
 	match cual:
 		Ataque.AVISO_EMBESTIDA:
 			# Se echa atrás 10 px, luz roja que parpadea y un chirrido.
-			aspi.quieta = true
-			aspi.destino = INF
-			aspi.luz_aviso = Color("e0483b")
+			aspi.patrulla.quieta = true
+			aspi.patrulla.destino = INF
+			apariencia.luz_aviso = Color("e0483b")
 			var hacia := signf(felipe.global_position.x - aspi.global_position.x)
 			var atras := create_tween()
 			atras.tween_property(aspi, "position:x", aspi.position.x - hacia * 10.0, 0.15)
-			_destino_embestida = clampf(felipe.global_position.x + hacia * 70.0, aspi.limite_izquierdo, aspi.limite_derecho)
+			_destino_embestida = clampf(felipe.global_position.x + hacia * 70.0, aspi.patrulla.limite_izquierdo, aspi.patrulla.limite_derecho)
 			sala.sonar("zarpazo")
 		Ataque.AVISO_SOPLIDO:
-			aspi.quieta = true
-			aspi.destino = INF
-			aspi.vibrando = true
-			aspi.luz_aviso = Color("ffd23f")
+			aspi.patrulla.quieta = true
+			aspi.patrulla.destino = INF
+			apariencia.vibrando = true
+			apariencia.luz_aviso = Color("ffd23f")
 			sala.sonar("succion")
 			sala.travesuras.jugo.palabra_en_mundo("¡FUUU!", aspi.global_position + Vector2(0, -60), Color(1.0, 0.9, 0.4), 14)
 		Ataque.AVISO_BOLA:
-			aspi.quieta = true
-			aspi.destino = INF
-			aspi.vibrando = true
+			aspi.patrulla.quieta = true
+			aspi.patrulla.destino = INF
+			apariencia.vibrando = true
 			sala.travesuras.jugo.palabra_en_mundo("¡COF!", aspi.global_position + Vector2(0, -58), Color(0.9, 0.9, 0.9), 13)
 
 
@@ -515,10 +518,10 @@ func _actualizar_ataque(delta: float) -> void:
 			if _reloj_ataque >= AVISO_EMBESTIDA:
 				ataque = Ataque.EMBESTIDA
 				_reloj_ataque = 0.0
-				aspi.quieta = false
-				aspi.inofensiva = false
-				aspi.velocidad_persecucion = VELOCIDAD[apagados] * 3.0
-				aspi.destino = _destino_embestida
+				aspi.patrulla.quieta = false
+				aspi.dano.activo = true
+				aspi.patrulla.velocidad_persecucion = VELOCIDAD[apagados] * 3.0
+				aspi.patrulla.destino = _destino_embestida
 		Ataque.EMBESTIDA:
 			if _reloj_ataque >= DURACION_EMBESTIDA or absf(aspi.global_position.x - _destino_embestida) < 6.0:
 				_terminar_ataque()
@@ -540,12 +543,12 @@ func _actualizar_ataque(delta: float) -> void:
 func _terminar_ataque() -> void:
 	ataque = Ataque.NINGUNO
 	_reloj_ataque = 0.0
-	aspi.luz_aviso = Color(0, 0, 0, 0)
-	aspi.vibrando = false
-	aspi.quieta = false
-	aspi.inofensiva = true
-	aspi.destino = INF
-	aspi.velocidad_persecucion = VELOCIDAD[mini(apagados, 2)]
+	apariencia.luz_aviso = Color(0, 0, 0, 0)
+	apariencia.vibrando = false
+	aspi.patrulla.quieta = false
+	aspi.dano.activo = false
+	aspi.patrulla.destino = INF
+	aspi.patrulla.velocidad_persecucion = VELOCIDAD[mini(apagados, 2)]
 
 
 ## Sopla hacia arriba: Felipe sale empujado al piso (sin daño) y las macetas caen sin romperse.
@@ -553,7 +556,7 @@ func _soplar() -> void:
 	ataque = Ataque.SOPLIDO
 	_reloj_ataque = 0.0
 	soplidos += 1
-	aspi.vibrando = false
+	apariencia.vibrando = false
 	acampando = 0.0
 	# Desde la repisa sale hacia la puerta del balcón; desde el escritorio, hacia la silla: siempre a algo bajo.
 	var repisa := sala.pieza("Repisa de las macetas")
@@ -563,8 +566,8 @@ func _soplar() -> void:
 	presentacion.sacudir(0.2)
 	sala.travesuras.jugo.palabra_en_mundo("¡FIUUU!", felipe.global_position + Vector2(0, -80), Color(0.8, 0.95, 1.0), 16)
 	for objeto in _municion:
-		if objeto.tipo == "maceta" and not objeto.roto and objeto.visible:
-			objeto.caer_sin_romper(_hacia_soplido)
+		if objeto.tipo == "maceta" and not objeto.tirable.roto and objeto.visible:
+			objeto.tirable.caer_sin_romper(_hacia_soplido)
 
 
 ## Lo roto (o tirado) vuelve de a uno, cada REPOSICION segundos, mientras dure la pelea.
@@ -575,9 +578,9 @@ func _reponer(delta: float) -> void:
 	_reloj_reponer += delta
 	if _reloj_reponer >= REPOSICION:
 		_reloj_reponer = 0.0
-		var objeto: Vaso = _por_reponer.pop_front()
+		var objeto: Objeto = _por_reponer.pop_front()
 		if is_instance_valid(objeto):
-			objeto.reponer()
+			objeto.tirable.reponer()
 
 
 ## Depósito lleno: se detiene pitando, inofensiva, y espera a que se lo vacíen... o a que Felipe la apague.
@@ -585,25 +588,25 @@ func _llenar() -> void:
 	llena = true
 	_reloj = 0.0
 	_terminar_ataque()
-	aspi.destino = INF
-	aspi.quieta = true
-	aspi.inofensiva = true
-	aspi.abrir_tapa()
+	aspi.patrulla.destino = INF
+	aspi.patrulla.quieta = true
+	aspi.dano.activo = false
+	apariencia.abrir_tapa()
 	sala.sonar("logro")
 	presentacion.cartel("¡DEPÓSITO LLENO!", 1.6, PISTA_LLENA)
 	# Nunca queda justo bajo la repisa: sale disparada unos 80 px hacia adelante.
 	var repisa := sala.pieza("Repisa de las macetas")
 	if repisa and absf(aspi.global_position.x - (repisa.position.x + 30.0)) < 70.0:
-		var hacia := 1.0 if aspi.global_position.x + EMPUJE_LLENA < aspi.limite_derecho else -1.0
+		var hacia := 1.0 if aspi.global_position.x + EMPUJE_LLENA < aspi.patrulla.limite_derecho else -1.0
 		var sale := create_tween()
-		sale.tween_property(aspi, "position:x", clampf(aspi.position.x + hacia * EMPUJE_LLENA, aspi.limite_izquierdo, aspi.limite_derecho), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		sale.tween_property(aspi, "position:x", clampf(aspi.position.x + hacia * EMPUJE_LLENA, aspi.patrulla.limite_izquierdo, aspi.patrulla.limite_derecho), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 
 func _actualizar_llena(delta: float) -> void:
 	_reloj += delta
 	# Felipe cae sobre ella: le aprieta el botón de apagado con las patas.
 	var distancia := felipe.global_position - aspi.global_position
-	if felipe.velocity.y > 0.0 and absf(distancia.x) < Aspi.ANCHO / 2.0 + 4.0 and distancia.y > -ALTO_ARRIBA - 14.0 and distancia.y < -ALTO_ARRIBA + 18.0:
+	if felipe.velocity.y > 0.0 and absf(distancia.x) < aspi.datos.ancho / 2.0 + 4.0 and distancia.y > -ALTO_ARRIBA - 14.0 and distancia.y < -ALTO_ARRIBA + 18.0:
 		felipe.velocity.y = REBOTE
 		_apagar()
 		return
@@ -611,15 +614,15 @@ func _actualizar_llena(delta: float) -> void:
 		# Nadie la apagó: vacía el depósito y sigue.
 		deposito = 0
 		llena = false
-		aspi.quieta = false
-		aspi.cerrar_tapa()
+		aspi.patrulla.quieta = false
+		apariencia.cerrar_tapa()
 		presentacion.cartel("¡LO VACIÓ!", 1.2, PISTAS[apagados])
 
 
 ## ¡CLIC!: congelado, destello, sacudida, polvo y sonido en capas.
 func _apagar() -> void:
 	apagados += 1
-	aspi.cerrar_tapa()
+	apariencia.cerrar_tapa()
 	sala.travesuras.jugo.congelar(0.1)
 	presentacion.destello(0.7)
 	presentacion.sacudir(0.2)
@@ -634,8 +637,7 @@ func _apagar() -> void:
 	tipos_mancha.clear()
 	limpiando = false
 	if apagados >= APAGADOS_TOTALES:
-		aspi.apagada = true
-		aspi.apagado.emit()
+		aspi.vida.morir()
 		return
 	_cambiar_fase()
 
@@ -653,7 +655,7 @@ func _al_oir_maullido(_felipe_que_maulla: Felipe) -> void:
 	if fase != Fase.PELEA or llena or ataque != Ataque.NINGUNO or ausente:
 		return
 	sala.travesuras.jugo.palabra_en_mundo("¿Gato detectado?", aspi.global_position + Vector2(0, -64), Color(1.0, 0.6, 0.6), 11)
-	aspi.destino = felipe.global_position.x
+	aspi.patrulla.destino = felipe.global_position.x
 
 
 ## Bola de pelo en arco hacia donde está Felipe (llega a la repisa y al escritorio).
@@ -704,9 +706,9 @@ func _terminar() -> void:
 	llena = false
 	manchas.clear()
 	tipos_mancha.clear()
-	aspi.destino = INF
-	aspi.inofensiva = true
-	aspi.quieta = true
+	aspi.patrulla.destino = INF
+	aspi.dano.activo = false
+	aspi.patrulla.quieta = true
 	felipe.empuje = Vector2.ZERO
 	var puerta: Puerta = sala.puertas.get("estudio<pasillo")
 	if puerta:
@@ -751,7 +753,7 @@ func _dibujar_imaginacion() -> void:
 		var arte := ArteNivel.textura("aspi_gigante")
 		var tam := arte.get_size()
 		var k := ease(gigante, 0.6)
-		var escala := lerpf(Aspi.ANCHO / tam.x, 1.0, k)
+		var escala := lerpf(aspi.datos.ancho / tam.x, 1.0, k)
 		# Desde (y hacia) donde está la A.S.P.I. real ahora: los empujones la movieron.
 		var origen := aspi.global_position + Vector2(0, -tam.y * escala / 2.0)
 		var centro := origen.lerp(_centro_gigante + Vector2(0, sin(tiempo * 2.0) * 5.0), k)

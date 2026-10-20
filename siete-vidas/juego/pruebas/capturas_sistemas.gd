@@ -30,7 +30,7 @@ func _correr() -> void:
 	await _capturar("1-indicador-sofa-y-dialogo")
 	# 2. En la mesa, junto al vaso: contorno con la forma del dibujo y "Liberar".
 	t.dialogo.limpiar()
-	var vaso: Vaso = sala.get_node("Vaso")
+	var vaso: Objeto = sala.get_node("Vaso")
 	await _poner_en(vaso.global_position + Vector2(-30, 0))
 	felipe.mirando = 1.0
 	await _esperar(10)

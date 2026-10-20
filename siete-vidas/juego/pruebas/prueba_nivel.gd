@@ -220,7 +220,7 @@ func _correr() -> void:
 	_comprobar(felipe.corazones == corazones and _dijo("felipe", "croquetas"), "El tazón se come (cura) y Felipe se queja de las tres croquetas")
 	var raton := _raton_en("cocina", Sala.SUELO)
 	await _zarpazo_a(raton)
-	_comprobar(raton.apagada, "Un zarpazo voltea al ratón de cuerda")
+	_comprobar(raton.vida.muerto, "Un zarpazo voltea al ratón de cuerda")
 	var snacks_antes := felipe.snacks
 	var caja: CajaCarton = sala.get_node("Caja de carton")
 	await _zarpazo_a(caja)
@@ -469,7 +469,7 @@ func _correr() -> void:
 		negra = negra or sala.fundido_alfa() > 0.05
 		await physics_frame
 	_comprobar(not negra, "Entrar al estudio por la puerta: la presentación se ve (sin fundido a negro, B1)")
-	felipe._tiempo_invulnerable = 999.0
+	felipe.vida.restante_invulnerable = 999.0
 	await _poner_en(sala.puertas[Sala.PUERTA_BALCON].global_position)
 	# En la pelea la puerta cerrada no se ofrece en la burbuja (M3), pero arriba se prueba igual.
 	_comprobar(felipe.objeto_cercano() != sala.puertas[Sala.PUERTA_BALCON], "M3 En la pelea, la burbuja no ofrece «Probar» en la puerta cerrada del balcón")
@@ -505,7 +505,7 @@ func _correr() -> void:
 				Input.action_release("agacharse")
 			await _esperar(60)
 	await _esperar(60)
-	_comprobar(sala.aspi.apagada and t.agenda.esta_cumplida("desenchufar") and "Desenchufada" in sala.logros, "Apagada tres veces: «Desenchufar a A.S.P.I.» y el logro")
+	_comprobar(sala.aspi.vida.muerto and t.agenda.esta_cumplida("desenchufar") and "Desenchufada" in sala.logros, "Apagada tres veces: «Desenchufar a A.S.P.I.» y el logro")
 	await _poner_en(sala.puertas[Sala.PUERTA_BALCON].global_position)
 	await _tocar("interactuar")
 	await _esperar(30)
@@ -612,22 +612,22 @@ func _contar(quien: String, texto: String) -> int:
 	return n
 
 
-func _raton_en(cuarto: String, y: float) -> Raton:
+func _raton_en(cuarto: String, y: float) -> Enemigo:
 	for hijo in sala.get_children():
-		if hijo is Raton and Sala.habitacion_de(hijo.global_position) == cuarto and absf(hijo.global_position.y - y) < 4.0:
+		if (hijo is Enemigo and hijo.datos.nombre == "Raton") and Sala.habitacion_de(hijo.global_position) == cuarto and absf(hijo.global_position.y - y) < 4.0:
 			return hijo
 	return null
 
 
 func _zarpazo_a(objetivo: Node2D) -> void:
-	felipe._tiempo_invulnerable = 99.0
+	felipe.vida.restante_invulnerable = 99.0
 	await _poner_en(objetivo.global_position + Vector2(-34, 0))
 	felipe.global_position = objetivo.global_position + Vector2(-34, 0)
 	felipe.mirando = 1.0
 	felipe.estado = Felipe.Estado.SUELO
 	await _tocar("zarpazo")
 	await _esperar(30)
-	felipe._tiempo_invulnerable = 0.0
+	felipe.vida.restante_invulnerable = 0.0
 
 
 ## Lo pone en un lugar y espera a que termine cualquier acción anterior (la animación dura 0,67 s).

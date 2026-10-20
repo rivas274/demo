@@ -388,10 +388,10 @@ func _fuera_de_pelea() -> bool:
 
 
 ## Lo que se puede tirar ahora en el estudio, de más fácil a más difícil (escritorio antes que la repisa).
-func _municion() -> Vaso:
-	var mejor: Vaso = null
+func _municion() -> Objeto:
+	var mejor: Objeto = null
 	for hijo in sala.get_children():
-		if hijo is Vaso and Sala.habitacion_de(hijo.position) == "estudio" and hijo.visible and not hijo.roto and hijo.position.y < Sala.SUELO - 10.0:
+		if hijo is Objeto and Sala.habitacion_de(hijo.position) == "estudio" and hijo.visible and not hijo.tirable.roto and hijo.position.y < Sala.SUELO - 10.0:
 			if mejor == null or hijo.position.y > mejor.position.y:
 				mejor = hijo
 	return mejor
@@ -499,7 +499,7 @@ func _bajar() -> void:
 
 func _cazar_raton(desde: float, hasta: float) -> void:
 	for hijo in sala.get_children():
-		if is_instance_valid(hijo) and hijo is Raton and not hijo.apagada and hijo.global_position.x > desde and hijo.global_position.x < hasta \
+		if is_instance_valid(hijo) and (hijo is Enemigo and hijo.datos.nombre == "Raton") and not hijo.vida.muerto and hijo.global_position.x > desde and hijo.global_position.x < hasta \
 				and absf(hijo.global_position.y - felipe.global_position.y) < 20.0:
 			await _cazar(hijo)
 	_paso("Caza ratones entre %d y %d" % [desde, hasta])
@@ -507,9 +507,9 @@ func _cazar_raton(desde: float, hasta: float) -> void:
 
 ## Se acerca y lo golpea apenas lo tiene al alcance del zarpazo (el golpe sale en el cuadro de impacto, 0,25 s
 ## después de apretar: se anticipa como una persona).
-func _cazar(enemigo: Aspi) -> void:
+func _cazar(enemigo: Enemigo) -> void:
 	for i in int(6.0 * _fps):
-		if not is_instance_valid(enemigo) or enemigo.apagada:
+		if not is_instance_valid(enemigo) or enemigo.vida.muerto:
 			break
 		var dx := enemigo.global_position.x - felipe.global_position.x
 		var acercandose := signf(enemigo.velocity.x) == -signf(dx)
@@ -530,9 +530,9 @@ func _golpear(lado: float) -> void:
 
 
 ## Si un ratón se acerca a su altura, lo golpea primero.
-func _raton_cerca() -> Raton:
+func _raton_cerca() -> Enemigo:
 	for hijo in sala.get_children():
-		if is_instance_valid(hijo) and hijo is Raton and not hijo.apagada and felipe.is_on_floor() and not felipe.agachado:
+		if is_instance_valid(hijo) and (hijo is Enemigo and hijo.datos.nombre == "Raton") and not hijo.vida.muerto and felipe.is_on_floor() and not felipe.agachado:
 			var d: Vector2 = hijo.global_position - felipe.global_position
 			if absf(d.x) < 50.0 and absf(d.y) < 14.0:
 				return hijo

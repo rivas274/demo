@@ -15,10 +15,10 @@ func _correr() -> void:
 	sala.batalla_con_jefe = false
 	root.add_child(sala)
 	var felipe: Felipe = sala.get_node("Felipe")
-	var aspi: Aspi = sala.get_node("ASPI")
+	var aspi: Enemigo = sala.get_node("ASPI")
 	# Los ratones de cuerda tienen su propia prueba (prueba_nivel); aquí estorbarían.
 	for hijo in sala.get_children():
-		if hijo is Raton:
+		if (hijo is Enemigo and hijo.datos.nombre == "Raton"):
 			hijo.queue_free()
 	await _esperar(30)
 
@@ -71,21 +71,21 @@ func _correr() -> void:
 		await physics_frame
 		if felipe.corazones < corazones_antes:
 			break
-	_comprobar(aspi.persiguiendo or felipe.corazones < corazones_antes, "A.S.P.I. persigue a Felipe cuando lo ve")
+	_comprobar(aspi.patrulla.persiguiendo or felipe.corazones < corazones_antes, "A.S.P.I. persigue a Felipe cuando lo ve")
 	_comprobar(felipe.corazones < corazones_antes, "A.S.P.I. quita un corazón al tocarlo")
 
 	# Tres zarpazos la apagan (Felipe invulnerable para que el contacto no lo empuje entre golpe y golpe).
 	await _esperar(90)
-	felipe._tiempo_invulnerable = 99.0
+	felipe.vida.restante_invulnerable = 99.0
 	felipe.global_position = aspi.global_position + Vector2(-30, 0)
 	felipe.mirando = 1.0
 	felipe.estado = Felipe.Estado.SUELO
 	await _esperar(2)
 	await _tocar("zarpazo")
 	await _esperar(30)
-	_comprobar(aspi.golpes == 0, "Sin aturdir, el zarpazo rebota en A.S.P.I.")
-	for i in Aspi.GOLPES_PARA_APAGAR:
-		aspi.aturdir(3.0)
+	_comprobar((aspi.vida.maximo - aspi.vida.actual) == 0, "Sin aturdir, el zarpazo rebota en A.S.P.I.")
+	for i in aspi.vida.maximo:
+		aspi.recibe_golpes.aturdir(3.0)
 		felipe.global_position = aspi.global_position + Vector2(-30, 0)
 		felipe.mirando = 1.0
 		felipe.velocity = Vector2.ZERO
@@ -93,18 +93,18 @@ func _correr() -> void:
 		await _esperar(2)
 		await _tocar("zarpazo")
 		await _esperar(30)
-	_comprobar(aspi.apagada, "Tres zarpazos con A.S.P.I. aturdida la apagan (%d golpes)" % aspi.golpes)
-	felipe._tiempo_invulnerable = 0.0
+	_comprobar(aspi.vida.muerto, "Tres zarpazos con A.S.P.I. aturdida la apagan (%d golpes)" % (aspi.vida.maximo - aspi.vida.actual))
+	felipe.vida.restante_invulnerable = 0.0
 
 	# Vaso: tirarlo da el logro.
 	await _esperar(90)
-	var vaso: Vaso = sala.get_node("Vaso")
+	var vaso: Objeto = sala.get_node("Vaso")
 	await _poner_en(felipe, Vector2(vaso.position.x - 30, vaso.position.y))
 	felipe.mirando = 1.0
 	await _tocar("interactuar")
 	_comprobar(felipe.sprite.animation == "zarpazo", "Tirar el vaso con el botón de acción usa la animación del zarpazo")
 	await _esperar(90)
-	_comprobar(vaso.roto, "El vaso cae y se rompe")
+	_comprobar(vaso.tirable.roto, "El vaso cae y se rompe")
 	_comprobar("La Gravedad Funciona" in sala.logros, "Tirar el vaso da el logro La Gravedad Funciona")
 
 	for fallo in _fallos:

@@ -1,17 +1,25 @@
 class_name CajaCarton
 extends StaticBody2D
-## Caja de cartón (40 cm, 48 px): se rompe de un zarpazo y puede guardar algo adentro (un calcetín).
-## Está en el grupo "enemigos" solo para recibir zarpazos. Arte provisional.
+## Caja de cartón (40 cm a escala de gato): se rompe de un zarpazo y suelta un snack. Armada con piezas: Vida (1 golpe),
+## RecibeGolpes (el zarpazo), SueltaRecompensa (el snack) y SombraContacto. Este nodo solo es el cuerpo sólido y el
+## dibujo; al romperse deja de ser sólida y queda en trozos.
 
 signal rota
 
 const LADO := 60.0
 
 var roto := false
+var vida: Vida
 
 
 func _init() -> void:
 	name = "Caja de carton"
+	vida = Vida.new(1)
+	vida.murio.connect(_al_romperse)
+	add_child(vida)
+	add_child(RecibeGolpes.new())
+	add_child(SueltaRecompensa.new())
+	add_child(SombraContacto.new(LADO + 6.0, 0.4))
 
 
 ## Tamaño de la colisión: el del arte (la colisión calza con el dibujo, hallazgo B4).
@@ -21,7 +29,7 @@ func tamano() -> Vector2:
 
 
 func _ready() -> void:
-	add_to_group("enemigos")
+	add_to_group(Componentes.ENEMIGOS)
 	var forma := CollisionShape2D.new()
 	var caja := RectangleShape2D.new()
 	caja.size = tamano()
@@ -30,11 +38,9 @@ func _ready() -> void:
 	add_child(forma)
 
 
-func recibir_zarpazo(_felipe: Felipe) -> void:
-	if roto:
-		return
+func _al_romperse() -> void:
 	roto = true
-	remove_from_group("enemigos")
+	remove_from_group(Componentes.ENEMIGOS)
 	for hijo in get_children():
 		if hijo is CollisionShape2D:
 			hijo.set_deferred("disabled", true)

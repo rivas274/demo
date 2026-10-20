@@ -37,3 +37,16 @@ static func dibujar(c: CanvasItem, nombre: String, centro_x: float, base: float,
 	else:
 		c.draw_texture(t, Vector2(centro_x - tam.x / 2.0, base - tam.y), tinte)
 	return true
+
+
+## Color de las sombras de contacto (de muebles, objetos y personajes).
+const COLOR_SOMBRA := Color(0.12, 0.05, 0.03)
+
+
+## Sombra de contacto de pixel (Gemini, pasada única): 2 px de alto, la fila de la base entera y la de delante 2 px más
+## angosta por lado (bordes redondeados), nada de manchas grandes.
+static func sombra(c: CanvasItem, centro: Vector2, ancho: float, alfa := 0.4) -> void:
+	var filas := [[-1.0, 1.0, 1.0], [0.0, 1.0, 0.7]]
+	for f: Array in filas:
+		var w := roundf(ancho * f[1] / 2.0) * 2.0 - (4.0 if f[0] == 0.0 else 0.0)
+		c.draw_rect(Rect2(roundf(centro.x - w / 2.0), roundf(centro.y) + f[0], w, 1.0), Color(COLOR_SOMBRA, alfa * f[2]))

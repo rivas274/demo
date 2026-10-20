@@ -65,6 +65,7 @@ const DISTANCIA_ESTAMBRE := 28.0
 ## Acciones que, presionadas, cuentan como "estar jugando" (cortan el ocio y reinician la espera).
 const ACCIONES := ["mover_izquierda", "mover_derecha", "saltar", "zoomies", "zarpazo", "interactuar", "agacharse", "maullar"]
 ## Vida: corazones por vida y vidas por partida. Al perder la última, despierta en casa con el Collar de la Vergüenza.
+## Los corazones los lleva su pieza Vida (nodo hijo «Vida» de felipe.tscn); las nueve vidas, este script.
 const CORAZONES_MAX := 5
 const VIDAS_MAX := 9
 ## Segundos sin recibir más daño después de un golpe (parpadea).
@@ -92,8 +93,8 @@ const CUADROS_IMPACTO_ARANAR := [3, 5]
 const CUADRO_MAULLIDO := 3
 ## Boca respecto de los pies (mirando a la derecha), para las ondas del maullido.
 const BOCA := Vector2(18, -40)
-## Quien está en este grupo y a menos de RADIO_MAULLIDO px oye el maullido: se le llama oir_maullido(felipe)
-## (Valeria abre la puerta, A.S.P.I. gira hacia Felipe).
+## Las piezas OyeMaullido de este grupo a menos de RADIO_MAULLIDO px oyen el maullido (Valeria abre la puerta,
+## A.S.P.I. gira hacia Felipe).
 const GRUPO_OYENTES := "oyen_maullidos"
 const RADIO_MAULLIDO := 320.0
 ## Bolsillo de snacks (decisión del creador, 2026-10-19): 5 como máximo, empieza con 3.
@@ -148,7 +149,13 @@ var mirando := 1.0
 ## El doble salto de este salto todavía no se usó (se recupera al tocar el piso). Requiere tiene_doble_salto.
 var doble_salto_disponible := true
 var agachado := false
-var corazones := CORAZONES_MAX
+## Corazones que le quedan (atajo a su pieza Vida).
+var corazones: int:
+	get:
+		return vida.actual if vida else CORAZONES_MAX
+	set(valor):
+		vida.fijar(valor)
+## Intentos que le quedan (las nueve vidas del título; no confundir con la pieza Vida, que son los corazones).
 var vidas := VIDAS_MAX
 var peso := PESO_INICIAL
 var tiene_collar := false
@@ -185,7 +192,7 @@ var _tiempo_bajando := 0.0
 var _tiempo_sin_tocar := 0.0
 var _tiempo_levantandose := 0.0
 var _tiempo_ocio := 0.0
-var _tiempo_invulnerable := 0.0
+var _parpadeando := false
 var _tiempo_desmayado := 0.0
 var _estambre: Sprite2D
 var _efecto: Tween
@@ -214,6 +221,8 @@ var _tamano_polvo := Vector2.ONE
 @onready var sprite: AnimatedSprite2D = $Sprite
 @onready var polvo: CPUParticles2D = $Polvo
 @onready var cuerpo: CollisionShape2D = $Cuerpo
+## Sus corazones: 5, con 1,2 s invulnerable después de cada golpe.
+@onready var vida: Vida = $Vida
 
 
 func _ready() -> void:
@@ -223,6 +232,9 @@ func _ready() -> void:
 	_velocidad_polvo = Vector2(polvo.initial_velocity_min, polvo.initial_velocity_max)
 	_tamano_polvo = Vector2(polvo.scale_amount_min, polvo.scale_amount_max)
 	cuerpo.shape = cuerpo.shape.duplicate()
+	# El tiempo invulnerable lo descuenta Felipe al empezar su cuadro (_actualizar_invulnerable): así se congela mientras
+	# cruza una puerta o sube la escalera, cuando su física está apagada.
+	vida.set_physics_process(false)
 	set_collision_mask_value(CAPA_ATRAVESABLE, true)
 	# Felipe va en su propia capa (3): los enemigos no chocan con él; el daño se calcula por distancia.
 	collision_layer = 0
@@ -421,7 +433,7 @@ func progreso_comer_snack() -> float:
 func objeto_cercano() -> Node2D:
 	var mejor: Node2D = null
 	var mejor_distancia := INF
-	for objeto: Node2D in get_tree().get_nodes_in_group(Comida.GRUPO):
+	for objeto: Node2D in get_tree().get_nodes_in_group(Componentes.INTERACTUABLES):
 		if objeto.has_method("disponible") and not objeto.call("disponible", self):
 			continue
 		var punto: Vector2 = objeto.call("punto_para", global_position) if objeto.has_method("punto_para") else objeto.global_position
@@ -580,7 +592,7 @@ func _marcar_impacto() -> void:
 
 
 func _tragar() -> void:
-	corazones = mini(corazones + 1, CORAZONES_MAX)
+	vida.curar(1)
 	peso += PESO_POR_COMIDA
 	sonido.emit("comer")
 	if _comiendo_snack:
@@ -599,8 +611,8 @@ func _maullar_ahora() -> void:
 	sonido.emit("maullido")
 	maullo.emit(boca)
 	for oyente: Node in get_tree().get_nodes_in_group(GRUPO_OYENTES):
-		if oyente is Node2D and (oyente as Node2D).global_position.distance_to(global_position) <= RADIO_MAULLIDO and oyente.has_method("oir_maullido"):
-			oyente.call("oir_maullido", self)
+		if oyente is OyeMaullido and (oyente as OyeMaullido).global_position.distance_to(global_position) <= RADIO_MAULLIDO:
+			(oyente as OyeMaullido).oir_maullido(self)
 
 
 ## Escalera: sube (o baja) un escalón hasta `destino` (los pies, en el mundo) con un saltito,
@@ -1003,19 +1015,20 @@ func _rodar_estambre() -> void:
 	_estambre.rotation = vaiven / 7.0
 
 
-## El zarpazo golpea a los enemigos que estén justo enfrente.
+## El zarpazo golpea lo que esté justo enfrente y lleve la pieza RecibeGolpes (ratones, A.S.P.I., la caja).
 func _golpear() -> void:
-	for enemigo: Node2D in get_tree().get_nodes_in_group("enemigos"):
+	for enemigo: Node2D in get_tree().get_nodes_in_group(Componentes.ENEMIGOS):
 		var distancia := enemigo.global_position - global_position
 		var enfrente := signf(distancia.x) == mirando or absf(distancia.x) < 8.0
-		if enfrente and absf(distancia.x) <= ALCANCE_ZARPAZO.x and absf(distancia.y) <= ALCANCE_ZARPAZO.y:
-			enemigo.call("recibir_zarpazo", self)
+		var golpes := Componentes.de(enemigo, RecibeGolpes) as RecibeGolpes
+		if golpes and enfrente and absf(distancia.x) <= ALCANCE_ZARPAZO.x and absf(distancia.y) <= ALCANCE_ZARPAZO.y:
+			golpes.recibir_zarpazo(self)
 
 
-## Daño: quita corazones, empuja lejos de quien golpea y deja un rato invulnerable (parpadea).
-## Sin corazones, se desmaya y pierde una vida.
+## Daño (lo llaman las piezas HaceDano): quita corazones de su Vida, empuja lejos de quien golpea y deja un rato
+## invulnerable (parpadea). Sin corazones, se desmaya y pierde una vida.
 func recibir_dano(cantidad: int, desde_x: float) -> void:
-	if _tiempo_invulnerable > 0.0 or estado == Estado.DESMAYADO:
+	if not vida.puede_recibir() or estado == Estado.DESMAYADO:
 		return
 	if estado == Estado.SUBIENDO_ESCALON:
 		_terminar_escalera()
@@ -1024,25 +1037,27 @@ func recibir_dano(cantidad: int, desde_x: float) -> void:
 	_ronroneando_a = null
 	if agachado:
 		_poner_agachado(false)
-	corazones = maxi(corazones - cantidad, 0)
+	vida.danar(cantidad)
 	trepando = false
 	sonido.emit("golpe")
-	if corazones == 0:
+	if vida.muerto:
 		_desmayarse()
 		return
-	_tiempo_invulnerable = TIEMPO_INVULNERABLE
 	var lado := signf(global_position.x - desde_x)
 	velocity = Vector2((lado if lado != 0.0 else -mirando) * 220.0, -220.0)
 	estado = Estado.AIRE
 
 
 func _actualizar_invulnerable(delta: float) -> void:
-	if _tiempo_invulnerable <= 0.0:
+	vida.avanzar(delta)
+	var resta := vida.restante_invulnerable
+	if resta <= 0.0:
+		if _parpadeando:
+			_parpadeando = false
+			sprite.modulate.a = 1.0
 		return
-	_tiempo_invulnerable -= delta
-	sprite.modulate.a = 0.35 if int(_tiempo_invulnerable * 12.0) % 2 == 0 else 1.0
-	if _tiempo_invulnerable <= 0.0:
-		sprite.modulate.a = 1.0
+	_parpadeando = true
+	sprite.modulate.a = 0.35 if int(resta * 12.0) % 2 == 0 else 1.0
 
 
 func _desmayarse() -> void:
@@ -1071,12 +1086,12 @@ func _reaparecer() -> void:
 	if vidas <= 0:
 		vidas = VIDAS_MAX
 		tiene_collar = true
-	corazones = CORAZONES_MAX
+	vida.llenar()
 	global_position = punto_reaparicion
 	velocity = Vector2.ZERO
 	estado = Estado.SUELO
 	sprite.play("quieto")
-	_tiempo_invulnerable = TIEMPO_INVULNERABLE
+	vida.restante_invulnerable = TIEMPO_INVULNERABLE
 
 
 

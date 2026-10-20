@@ -52,7 +52,7 @@ func _init(rectangulo: Rect2, peldano_golpe: Vector2) -> void:
 
 
 func _ready() -> void:
-	add_to_group(Comida.GRUPO)
+	add_to_group(Componentes.INTERACTUABLES)
 	z_index = Capas.MUEBLES
 	_forma = CollisionShape2D.new()
 	_forma.shape = RectangleShape2D.new()
@@ -112,7 +112,7 @@ func interactuar(felipe: Felipe) -> void:
 		felipe.dar_manotazo(func() -> void: empujada.emit())
 		return
 	tirada_ya = true
-	remove_from_group(Comida.GRUPO)
+	remove_from_group(Componentes.INTERACTUABLES)
 	felipe.mirando = -1.0
 	felipe.sprite.flip_h = true
 	# La caja cae cuando la pata llega (cuadro de impacto), no al apretar.
@@ -192,13 +192,13 @@ func rect_borde_caja() -> Rect2:
 func _draw() -> void:
 	var cx := _centro_arte()
 	if not tirada_ya:
-		Sala.sombra(self, Vector2(cx, 0), ANCHO + 4.0, 0.4)
+		ArteNivel.sombra(self, Vector2(cx, 0), ANCHO + 4.0, 0.4)
 		ArteNivel.dibujar(self, "cajas_pila", cx, 0.0)
 		return
-	Sala.sombra(self, Vector2(cx, 0), ANCHO + 4.0, 0.4)
+	ArteNivel.sombra(self, Vector2(cx, 0), ANCHO + 4.0, 0.4)
 	ArteNivel.dibujar(self, "cajas_base", cx, 0.0)
 	if _abierta:
-		Sala.sombra(self, Vector2(CAIDA_X, 0), 80.0, 0.45)
+		ArteNivel.sombra(self, Vector2(CAIDA_X, 0), 80.0, 0.45)
 		ArteNivel.dibujar(self, "caja_abierta", CAIDA_X, 0.0)
 		_dibujar_ropa()
 		return
@@ -237,7 +237,7 @@ func _dibujar_ropa() -> void:
 		var hasta := Vector2(ropa[1], base - textura.get_height() / 2.0 + 2.0)
 		var centro := boca.lerp(hasta, t) + Vector2(0, -sin(t * PI) * float(ropa[3]))
 		if t >= 1.0:
-			Sala.sombra(self, Vector2(ropa[1], base + 1.0), textura.get_width() + 2.0, 0.35)
+			ArteNivel.sombra(self, Vector2(ropa[1], base + 1.0), textura.get_width() + 2.0, 0.35)
 		draw_set_transform(centro, float(ropa[4]) * t, Vector2.ONE)
 		draw_texture(textura, -textura.get_size() / 2.0)
 		draw_set_transform(Vector2.ZERO)

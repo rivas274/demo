@@ -43,7 +43,7 @@ func _init(nombre := "Rascador") -> void:
 
 
 func _ready() -> void:
-	add_to_group(Comida.GRUPO)
+	add_to_group(Componentes.INTERACTUABLES)
 	_fibras = CPUParticles2D.new()
 	_fibras.emitting = false
 	_fibras.one_shot = true

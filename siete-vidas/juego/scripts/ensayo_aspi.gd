@@ -14,7 +14,7 @@ const TIEMPO_LIMPIEZA := 2.6
 enum Paso { ESPERANDO, VA, LIMPIA, VUELVE, LISTO }
 
 var paso := Paso.ESPERANDO
-var aspi: Aspi
+var aspi: Enemigo
 var mancha_x := INF
 var sala: Sala
 var _puerta: Vector2
@@ -30,11 +30,11 @@ func _init(nivel: Sala, puerta: Vector2) -> void:
 
 func _ready() -> void:
 	var cuarto := Sala.rect_de("pasillo")
-	aspi = Aspi.new(cuarto.position.x + 40.0, cuarto.end.x - 40.0)
+	aspi = Enemigo.crear(load(Sala.RUTA_ASPI), cuarto.position.x + 40.0, cuarto.end.x - 40.0)
 	aspi.name = "ASPI del ensayo"
-	aspi.inofensiva = true
-	aspi.vision = 0.0
-	aspi.quieta = true
+	aspi.dano.activo = false
+	aspi.patrulla.vision = 0.0
+	aspi.patrulla.quieta = true
 	aspi.visible = false
 	aspi.position = _puerta
 	aspi.process_mode = Node.PROCESS_MODE_DISABLED
@@ -65,8 +65,8 @@ func empezar(x: float) -> void:
 	aspi.process_mode = Node.PROCESS_MODE_INHERIT
 	aspi.visible = true
 	aspi.global_position = _puerta
-	aspi.quieta = false
-	aspi.destino = x
+	aspi.patrulla.quieta = false
+	aspi.patrulla.destino = x
 	(sala.puertas["pasillo>estudio"] as Puerta).abrir_un_momento(0.8)
 	sala.sonar("succion")
 
@@ -91,7 +91,7 @@ func _physics_process(delta: float) -> void:
 			if _reloj >= TIEMPO_LIMPIEZA:
 				felipe.empuje = Vector2.ZERO
 				paso = Paso.VUELVE
-				aspi.destino = _puerta.x
+				aspi.patrulla.destino = _puerta.x
 				sala.travesuras.dialogo.decir("aspi", "Suciedad eliminada. Gato… registrado.", 1, true)
 		Paso.VUELVE:
 			if absf(aspi.global_position.x - _puerta.x) < 6.0:

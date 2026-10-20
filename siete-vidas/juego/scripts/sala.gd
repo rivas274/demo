@@ -261,6 +261,11 @@ const SOFA_ARANADO := {"Asiento del sofá": SUELO - 45, "Respaldo del sofá": SU
 const CAJAS := Rect2(2262, SUELO - CajasMudanza.ALTO_PILA, CajasMudanza.ANCHO, CajasMudanza.ALTO_PILA)
 ## Pies de Felipe en el segundo peldaño, desde donde tira la caja de arriba.
 const PELDANO_CAJAS := Vector2(2360, SUELO - 45)
+## Datos de los enemigos (datos/enemigos/): el ratón de cuerda y A.S.P.I. son el mismo Enemigo con otros números. Se
+## cargan al armar el nivel con load(), nunca con preload() en una constante: precargar un .tres con script desde un
+## script que se compila como dependencia de otro deja dos copias de su clase (DatosEnemigo) y fallan los tipos.
+const RUTA_RATON := "res://datos/enemigos/raton.tres"
+const RUTA_ASPI := "res://datos/enemigos/aspi.tres"
 ## Juguetes que duelen al pisarlos: la sala v4 no tiene nada que haga daño.
 const PELIGROS: Array[Rect2] = []
 ## Nada se trepa en el nivel 1 (trepar se gana con Afilar Garras): la cortina es un lugar visto.
@@ -462,7 +467,7 @@ var tiempo := 0.0
 var terminado := false
 var pantallas: Pantallas
 var batalla: BatallaAspi
-var aspi: Aspi
+var aspi: Enemigo
 var valeria: Valeria
 var ensayo: EnsayoAspi
 var cajas: CajasMudanza
@@ -470,7 +475,7 @@ var sofa: Aranable
 var rascador: Rascador
 var habitacion := ""
 var puertas := {}
-var tirables: Array[Vaso] = []
+var tirables: Array[Objeto] = []
 ## Sistemas reutilizables del nivel: agenda, libreta, HUD, diálogo, jugo e indicador.
 var travesuras: Travesuras
 ## El balcón: se sentó en la baranda, saltó.
@@ -643,19 +648,18 @@ func _crear_objetos() -> void:
 		objeto.comido.connect(_al_comer)
 		add_child(objeto)
 	for tirable: Array in TIRABLES:
-		var objeto := Vaso.new(SUELO, tirable[1])
+		var objeto := Objeto.crear(tirable[1], SUELO, tirable[2] if tirable.size() > 2 else 0.0)
 		objeto.position = tirable[0]
-		objeto.hundido = tirable[2] if tirable.size() > 2 else 0.0
-		objeto.caido.connect(_al_caer_tirable.bind(objeto))
+		objeto.tirable.caido.connect(_al_caer_tirable.bind(objeto))
 		add_child(objeto)
 		tirables.append(objeto)
 	for datos: Array in RATONES:
-		var raton := Raton.new(datos[1], datos[2])
+		var raton := Enemigo.crear(load(RUTA_RATON), datos[1], datos[2])
 		raton.position = datos[0]
 		add_child(raton)
+	# La caja de cartón suelta un snack al romperla (su pieza SueltaRecompensa).
 	var caja := CajaCarton.new()
 	caja.position = CAJA_CARTON
-	caja.rota.connect(_romper_caja)
 	add_child(caja)
 	_laser = Laser.new(LASER[1], LASER[2])
 	_laser.position = LASER[0]
@@ -701,11 +705,13 @@ func _crear_objetos() -> void:
 	# Detrás de Felipe: se acicala encima de la ropa, no detrás de la pila.
 	ropa.z_index = Capas.MUEBLES
 	add_child(ropa)
-	# Quien oye maullidos del otro lado de la puerta de la cocina (Valeria está adentro).
-	var oido := OidoPuerta.new()
-	oido.position = (puertas[PUERTA_COCINA] as Puerta).position + Vector2(0, -40)
-	oido.oido.connect(_maullido_en_la_puerta_de_la_cocina)
-	add_child(oido)
+	# La puerta de la cocina oye los maullidos de este lado (Valeria está adentro): su pieza OyeMaullido.
+	var oido := OyeMaullido.new()
+	oido.name = "Oido de la puerta"
+	oido.alcance_x = 140.0
+	oido.position = Vector2(0, -40)
+	oido.oyo.connect(_maullido_en_la_puerta_de_la_cocina)
+	(puertas[PUERTA_COCINA] as Puerta).add_child(oido)
 	# Bajo el balcón: la fachada y el toldo de la panadería (solo se ven en el salto final, G1).
 	var fachada := Node2D.new()
 	fachada.name = "Fachada"
@@ -750,16 +756,21 @@ func _crear_valeria() -> void:
 	valeria.poner(VALERIA_SOFA, "sala", 1.0, Valeria.Actividad.SENTADA)
 	valeria.fijar_casa()
 	valeria.perdono.connect(_al_perdonar)
+	# Su sombra de contacto solo de pie o caminando (sentada la tapa el sofá; fuera no está).
+	var sombra_valeria := SombraContacto.new(58.0, 0.4)
+	sombra_valeria.mostrar = func() -> bool: return not valeria.actividad in [Valeria.Actividad.SENTADA, Valeria.Actividad.FUERA]
+	valeria.add_child(sombra_valeria)
 	travesuras.anuncios.testigos.append(valeria)
 	# Si Valeria va a salir a reaccionar en el cuarto de Felipe, el cartel espera a que salga (G5).
 	travesuras.anuncios.reaccion_en_curso = func() -> bool: return _en_escena and habitacion == "recibidor" and _escenas_valeria_actual in ["bolsas", "maullido"] and not (valeria.cuarto == "recibidor" and valeria.visible)
 
 
 func _crear_aspi() -> void:
-	aspi = Aspi.new(ASPI[1], ASPI[2])
+	aspi = Enemigo.crear(load(RUTA_ASPI), ASPI[1], ASPI[2])
 	aspi.position = ASPI[0]
-	aspi.necesita_aturdir = true
-	aspi.apagado.connect(_abrir_balcon)
+	# La jefa: los zarpazos rebotan si no está aturdida (algo le cayó encima).
+	aspi.recibe_golpes.solo_aturdido = true
+	aspi.vida.murio.connect(_abrir_balcon)
 	add_child(aspi)
 	travesuras.anuncios.testigos.append(aspi)
 	if batalla_con_jefe:
@@ -1026,7 +1037,7 @@ func _decir(evento: String, urgente := false, una_vez := true) -> void:
 # --- Travesuras y reacciones (R18) -------------------------------------------------------------------------
 
 ## Algo cayó: el vaso de la sala hace saltar a Valeria; las llaves, que se asome; en el pasillo sale A.S.P.I.
-func _al_caer_tirable(donde: Vector2, objeto: Vaso) -> void:
+func _al_caer_tirable(donde: Vector2, objeto: Objeto) -> void:
 	var cuarto := habitacion_de(donde)
 	match objeto.tipo:
 		"vaso":
@@ -1122,11 +1133,6 @@ func _al_comer(comida: Comida) -> void:
 			valeria.reganar(felipe, "almuerzo", "almuerzo")
 		elif valeria.cuarto == "cocina":
 			travesuras.decir_valeria("almuerzo", true)
-
-
-func _romper_caja() -> void:
-	sonar("caja")
-	travesuras.soltar("snack", CAJA_CARTON + Vector2(0, -30), Vector2(30, -140))
 
 
 ## Popo táctico: agachado sobre la caja de arena recién limpiada (travesura secreta, con censura irónica).
@@ -1590,7 +1596,7 @@ func _dibujar_arte(c: Node2D, capa: String) -> void:
 			# Sombra de contacto sobre la cubierta: 1 px más ancha que la base a cada lado (Gemini, tanda 3F).
 			var base := _base_opaca(datos[0])
 			if not base.is_empty():
-				sombra(c, Vector2(datos[1].x + (base[0] + base[1]) / 2.0, datos[1].y), base[1] - base[0] + 2.0, 0.5)
+				ArteNivel.sombra(c, Vector2(datos[1].x + (base[0] + base[1]) / 2.0, datos[1].y), base[1] - base[0] + 2.0, 0.5)
 		ArteNivel.dibujar(c, datos[0], datos[1].x + textura.get_width() / 2.0, datos[1].y, datos[2])
 	if capa == "escalera":
 		_dibujar_armario_escalera(c)
@@ -1613,16 +1619,7 @@ func _dibujar_arte(c: Node2D, capa: String) -> void:
 ## y de Felipe. Los muebles adelantados (base bajo SUELO) la llevan en su base. La lámpara del recibidor además deja un
 ## charco de luz cálida en el piso.
 const SIN_SOMBRA := ["escalera_peldanos", "vano"]
-const COLOR_SOMBRA := Color(0.12, 0.05, 0.03)
-
-
-## Sombra de contacto de pixel (Gemini, pasada única): 2 px de alto, la fila de la base entera y la de delante 2 px más
-## angosta por lado (bordes redondeados), nada de manchas grandes.
-static func sombra(c: CanvasItem, centro: Vector2, ancho: float, alfa := 0.4) -> void:
-	var filas := [[-1.0, 1.0, 1.0], [0.0, 1.0, 0.7]]
-	for f: Array in filas:
-		var w := roundf(ancho * f[1] / 2.0) * 2.0 - (4.0 if f[0] == 0.0 else 0.0)
-		c.draw_rect(Rect2(roundf(centro.x - w / 2.0), roundf(centro.y) + f[0], w, 1.0), Color(COLOR_SOMBRA, alfa * f[2]))
+const COLOR_SOMBRA := ArteNivel.COLOR_SOMBRA
 
 
 func _dibujar_sombras_de_contacto(c: Node2D) -> void:
@@ -1642,7 +1639,7 @@ func _dibujar_sombras_de_contacto(c: Node2D) -> void:
 		var espejo: bool = datos.size() > 2 and datos[2]
 		var x0: float = x + (ancho - base[1] if espejo else base[0])
 		var x1: float = x + (ancho - base[0] if espejo else base[1])
-		sombra(c, Vector2((x0 + x1) / 2.0, y), x1 - x0 + 4.0, 0.3)
+		ArteNivel.sombra(c, Vector2((x0 + x1) / 2.0, y), x1 - x0 + 4.0, 0.3)
 		# Bajo cada pata, 2 px más oscuros del ancho de la pata.
 		for pata: Array in base[2]:
 			var centro: float = x + (ancho - pata[0] if espejo else pata[0])
@@ -1651,7 +1648,7 @@ func _dibujar_sombras_de_contacto(c: Node2D) -> void:
 		if x1 - x0 >= 80.0:
 			c.draw_rect(Rect2(roundf(x0), PARED_BASE + 1.0, roundf(x1 - x0), 1.0), Color(COLOR_SOMBRA, 0.4))
 	# Nido de Su Majestad (cesta de la sala) y armario bajo la escalera.
-	sombra(c, Vector2(70, SUELO), 64.0, 0.4)
+	ArteNivel.sombra(c, Vector2(70, SUELO), 64.0, 0.4)
 	c.draw_rect(Rect2(2400, SUELO - 2.0, 240, 4), Color(COLOR_SOMBRA, 0.3))
 	# Charco de luz de la lámpara de pie, en franjas (no un degradado suave), tendido en el piso.
 	var lampara := Vector2(1959, SUELO)
@@ -2062,7 +2059,7 @@ func _dibujar_teclado(c: Node2D) -> void:
 
 func _dibujar_ropa(c: Interactivo) -> void:
 	# El edredón se hunde bajo la pila: una sombra ancha y dos pliegues que salen hacia los lados.
-	sombra(c, Vector2(0, ROPA_HUNDIDA - 1.0), 58.0, 0.5)
+	ArteNivel.sombra(c, Vector2(0, ROPA_HUNDIDA - 1.0), 58.0, 0.5)
 	for lado: float in [-1.0, 1.0]:
 		c.draw_line(Vector2(lado * 27.0, ROPA_HUNDIDA - 2.0), Vector2(lado * 36.0, ROPA_HUNDIDA - 5.0), Color(0.35, 0.12, 0.08, 0.45), 1.0)
 		c.draw_line(Vector2(lado * 27.0, ROPA_HUNDIDA + 1.0), Vector2(lado * 34.0, ROPA_HUNDIDA + 3.0), Color(0.35, 0.12, 0.08, 0.35), 1.0)
@@ -2201,7 +2198,7 @@ func _dibujar_ambiente() -> void:
 
 
 ## Sombras de contacto de lo que se mueve. La de Felipe cae en la superficie que tiene debajo (también en el aire: se
-## achica y se aclara con la altura, así se lee dónde va a caer).
+## achica y se aclara con la altura, así se lee dónde va a caer). Las demás las piden sus piezas SombraContacto.
 func _dibujar_sombras_vivas() -> void:
 	var c := _sombras
 	var espacio := get_world_2d().direct_space_state
@@ -2211,20 +2208,10 @@ func _dibujar_sombras_vivas() -> void:
 	if not choque.is_empty() and felipe.visible:
 		var altura: float = choque.position.y - felipe.global_position.y
 		var cerca := clampf(1.0 - altura / 260.0, 0.35, 1.0)
-		sombra(c, Vector2(felipe.global_position.x, choque.position.y), 40.0 * cerca, 0.42 * cerca)
-	if valeria and valeria.visible and not valeria.actividad in [Valeria.Actividad.SENTADA, Valeria.Actividad.FUERA]:
-		sombra(c, valeria.global_position, 58.0, 0.4 * valeria.modulate.a)
-	for hijo in get_children():
-		if not (hijo is CanvasItem and (hijo as CanvasItem).visible):
-			continue
-		if hijo is Raton:
-			sombra(c, hijo.global_position, 44.0, 0.36)
-		elif hijo is Aspi:
-			sombra(c, hijo.global_position, (hijo as Aspi).ancho + 8.0, 0.45)
-		elif hijo is CajaCarton:
-			sombra(c, hijo.global_position, CajaCarton.LADO + 6.0, 0.4)
-		elif hijo is Comida:
-			sombra(c, hijo.global_position, 46.0, 0.38)
+		ArteNivel.sombra(c, Vector2(felipe.global_position.x, choque.position.y), 40.0 * cerca, 0.42 * cerca)
+	for pieza: SombraContacto in get_tree().get_nodes_in_group(SombraContacto.GRUPO):
+		if pieza.se_ve():
+			ArteNivel.sombra(c, pieza.centro(), pieza.ancho, pieza.alfa * (pieza.get_parent() as CanvasItem).modulate.a)
 
 
 ## Mechón de pelo de 3 a 5 px en los dos tonos de Felipe.

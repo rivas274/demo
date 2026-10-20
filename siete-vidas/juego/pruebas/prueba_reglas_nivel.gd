@@ -180,7 +180,7 @@ func _correr() -> void:
 			var imagen: Image = ArteNivel.textura(datos[0]).get_image()
 			_comprobar(_fila_opaca(imagen, imagen.get_height() - 1) > 0 and _fila_opaca(imagen, 0) > 0, "M1 %s no tiene margen transparente (se apoya en el piso)" % datos[0])
 	var cola := _filas_sin_cuerpo(ArteNivel.textura("raton").get_image())
-	_comprobar(absf(cola - Raton.COLA) <= 1.0, "G1 El ratón se apoya por el cuerpo (cola de %d px; el juego la baja %.0f)" % [cola, Raton.COLA])
+	_comprobar(absf(cola - (load(Sala.RUTA_RATON) as DatosEnemigo).apoyo) <= 1.0, "G1 El ratón se apoya por el cuerpo (cola de %d px; el juego la baja %.0f)" % [cola, (load(Sala.RUTA_RATON) as DatosEnemigo).apoyo])
 
 	# B3 y G10. Rectángulo sagrado: nada se cruza con una puerta, la escalera ni la meta.
 	var sagrados: Array = []
@@ -314,7 +314,7 @@ func _correr() -> void:
 	sala.mostrar_titulo = false
 	root.add_child(sala)
 	await process_frame
-	for nodo in sala.get_tree().get_nodes_in_group(Comida.GRUPO):
+	for nodo in sala.get_tree().get_nodes_in_group(Componentes.INTERACTUABLES):
 		# Las puertas se miden en su imagen (B2, más arriba).
 		if nodo is Felipe or nodo is Puerta:
 			continue

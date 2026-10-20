@@ -156,12 +156,12 @@ func _correr() -> void:
 	_comprobar(felipe.position.y > mesa.position.y + 40.0, "Agachado + saltar baja a través de la mesa")
 
 	# Con comida cerca, el botón de acción la come.
-	var platos := root.get_tree().get_nodes_in_group(Comida.GRUPO).size()
+	var platos := root.get_tree().get_nodes_in_group(Componentes.INTERACTUABLES).size()
 	await _poner_en(felipe, Vector2(2990, Sala.SUELO))
 	await _tocar("interactuar")
 	_comprobar(felipe.estado == Felipe.Estado.COMIENDO and felipe.sprite.animation == "comer", "Junto a la comida, el botón de acción la come")
 	await _esperar(60)
-	_comprobar(root.get_tree().get_nodes_in_group(Comida.GRUPO).size() == platos - 1, "La comida desaparece al comerla")
+	_comprobar(root.get_tree().get_nodes_in_group(Componentes.INTERACTUABLES).size() == platos - 1, "La comida desaparece al comerla")
 
 	# Ocio: sin tocar nada, se pone a acicalarse, jugar o dar vueltas; cualquier botón lo corta.
 	await _poner_en(felipe, Vector2(200, Sala.SUELO))

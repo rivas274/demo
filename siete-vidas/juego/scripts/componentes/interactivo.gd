@@ -28,7 +28,7 @@ func _init(nombre := "Interactivo", verbo_felipe := "Usar", rect := Rect2(-16, -
 
 
 func _ready() -> void:
-	add_to_group(Comida.GRUPO)
+	add_to_group(Componentes.INTERACTUABLES)
 
 
 func disponible(_felipe: Felipe) -> bool:

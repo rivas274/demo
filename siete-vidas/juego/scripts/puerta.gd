@@ -56,7 +56,7 @@ func _init(nombre_puerta: String, posicion: Vector2, puerta_destino: String, alt
 
 func _ready() -> void:
 	apertura = 0.0 if _objetivo_apertura() == 0.0 else 1.0
-	add_to_group(Comida.GRUPO)
+	add_to_group(Componentes.INTERACTUABLES)
 	_felipe = get_tree().get_first_node_in_group("felipe")
 
 

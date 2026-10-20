@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://b7felipe0001"]
+[gd_scene load_steps=5 format=3 uid="uid://b7felipe0001"]
 
 [ext_resource type="Script" path="res://scripts/felipe.gd" id="1_felipe"]
+[ext_resource type="Script" path="res://scripts/componentes/vida.gd" id="2_vida"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cuerpo"]
 size = Vector2(40, 52)
@@ -40,3 +41,8 @@ shape = SubResource("RectangleShape2D_cuerpo")
 position = Vector2(0, -43)
 position_smoothing_enabled = true
 position_smoothing_speed = 7.0
+
+[node name="Vida" type="Node" parent="."]
+script = ExtResource("2_vida")
+maximo = 5
+tiempo_invulnerable = 1.2

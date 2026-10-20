@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="DatosEnemigo" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/datos/datos_enemigo.gd" id="1_datos"]
+
+[resource]
+script = ExtResource("1_datos")
+nombre = "Raton"
+arte = "raton"
+arte_vencido = "raton_volcado"
+apoyo = 7.0
+alto_dibujo = 47.0
+llave_de_cuerda = true
+sombra = Vector2(44, 0.36)
+ancho = 48.0
+alto = 30.0
+golpes = 1
+sonido_al_vencer = "resorte"
+velocidad_patrulla = 55.0
+velocidad_persecucion = 80.0
+vision = 0.0
+dano = 1
+alcance_dano = 18.0
+oye_maullido = false
+asustable = true

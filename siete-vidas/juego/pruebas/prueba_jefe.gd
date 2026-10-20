@@ -20,14 +20,14 @@ func _correr() -> void:
 	sala.mostrar_titulo = false
 	root.add_child(sala)
 	felipe = sala.get_node("Felipe")
-	var aspi: Aspi = sala.aspi
+	var aspi: Enemigo = sala.aspi
 	var batalla: BatallaAspi = sala.batalla
 	var arena := Sala.rect_de("estudio")
 	await _esperar(30)
-	_comprobar(batalla != null and batalla.fase == BatallaAspi.Fase.ESPERANDO and aspi.quieta, "A.S.P.I. duerme en su base hasta que Felipe entra al estudio")
+	_comprobar(batalla != null and batalla.fase == BatallaAspi.Fase.ESPERANDO and aspi.patrulla.quieta, "A.S.P.I. duerme en su base hasta que Felipe entra al estudio")
 
 	# Entrada por la puerta: empieza DESPUÉS del fundido (B1) y sigue los 8 pasos de PresentacionJefe.
-	felipe._tiempo_invulnerable = 999.0
+	felipe.vida.restante_invulnerable = 999.0
 	await _poner_en(sala.puertas["pasillo>estudio"].global_position)
 	Input.action_press("interactuar")
 	await _esperar(2)
@@ -100,19 +100,19 @@ func _correr() -> void:
 	# Los zarpazos rebotan en la carcasa.
 	aspi.global_position = Vector2(arena.position.x + 360, Sala.SUELO)
 	await _zarpazo_a(aspi)
-	_comprobar(aspi.golpes == 0 and not aspi.apagada, "El zarpazo rebota en la carcasa")
+	_comprobar((aspi.vida.maximo - aspi.vida.actual) == 0 and not aspi.vida.muerto, "El zarpazo rebota en la carcasa")
 
 	# Embestida anunciada: retrocede, luz roja 0,5 s y recién después carga (y solo entonces hace daño).
 	await _poner_en(Vector2(arena.position.x + 200, Sala.SUELO))
 	await _esperar_que(func() -> bool: return batalla.ataque == BatallaAspi.Ataque.NINGUNO, 200)
-	felipe._tiempo_invulnerable = 0.0
+	felipe.vida.restante_invulnerable = 0.0
 	aspi.global_position = Vector2(arena.position.x + 330, Sala.SUELO)
 	batalla._espera_embestida = 0.0
 	await _esperar_que(func() -> bool: return batalla.ataque == BatallaAspi.Ataque.AVISO_EMBESTIDA, 120)
-	_comprobar(batalla.ataque == BatallaAspi.Ataque.AVISO_EMBESTIDA and aspi.luz_aviso.a > 0.0 and aspi.inofensiva, "Antes de embestir avisa: luz roja que parpadea, inofensiva")
+	_comprobar(batalla.ataque == BatallaAspi.Ataque.AVISO_EMBESTIDA and batalla.apariencia.luz_aviso.a > 0.0 and not aspi.dano.activo, "Antes de embestir avisa: luz roja que parpadea, inofensiva")
 	await _esperar_que(func() -> bool: return batalla.ataque == BatallaAspi.Ataque.EMBESTIDA, 60)
-	_comprobar(batalla.ataque == BatallaAspi.Ataque.EMBESTIDA and not aspi.inofensiva, "Después de 0,5 s carga y ahí sí duele")
-	felipe._tiempo_invulnerable = 999.0
+	_comprobar(batalla.ataque == BatallaAspi.Ataque.EMBESTIDA and aspi.dano.activo, "Después de 0,5 s carga y ahí sí duele")
+	felipe.vida.restante_invulnerable = 999.0
 	await _esperar(60)
 
 	# Ensuciar: una maceta rota deja una mancha y A.S.P.I. va a limpiarla (antes gira el cepillo).
@@ -147,11 +147,11 @@ func _correr() -> void:
 	await _esperar_que(func() -> bool: return batalla.deposito == 1, 300)
 	_comprobar(batalla.deposito == 1 and batalla.presentacion.escudo > 0.0 and "+1 · Glup." in sala.travesuras.jugo.palabras, "Limpiar le llena el depósito (barra azul, «+1» y «Glup.»)")
 	await _esperar(6 * 60 + 30)
-	_comprobar(maceta.visible and not maceta.roto, "Lo roto vuelve a su lugar de a uno (6 s)")
+	_comprobar(maceta.visible and not maceta.tirable.roto, "Lo roto vuelve a su lugar de a uno (6 s)")
 
 	# Lleno: se detiene inofensiva; si nadie la apaga, lo vacía.
 	await _llenar(batalla, aspi)
-	_comprobar(batalla.llena and aspi.inofensiva and "encima" in batalla.presentacion.pista_actual(), "Con el depósito lleno se detiene, inofensiva, y la pista dice que le salte encima")
+	_comprobar(batalla.llena and not aspi.dano.activo and "encima" in batalla.presentacion.pista_actual(), "Con el depósito lleno se detiene, inofensiva, y la pista dice que le salte encima")
 	await _esperar_que(func() -> bool: return not batalla.llena, 400)
 	_comprobar(not batalla.llena and batalla.deposito == 0 and batalla.apagados == 0, "Si nadie la apaga a tiempo, vacía el depósito y sigue")
 
@@ -161,7 +161,7 @@ func _correr() -> void:
 	_comprobar(batalla.apagados == 1 and not batalla.llena, "Caerle encima le aprieta el botón: fase 2")
 	_comprobar("¡CLIC!" in sala.travesuras.jugo.palabras, "Al apagarla: congelado, destello, sacudida y «¡CLIC!»")
 	await _esperar(100)
-	_comprobar(aspi.velocidad_persecucion > BatallaAspi.VELOCIDAD[0], "En la fase 2 es más rápida")
+	_comprobar(aspi.patrulla.velocidad_persecucion > BatallaAspi.VELOCIDAD[0], "En la fase 2 es más rápida")
 
 	# Contra el que acampa (G12): quieto en la repisa, A.S.P.I. lo saca en 4 s o menos, sin daño.
 	aspi.global_position = Vector2(arena.position.x + 70, Sala.SUELO)
@@ -173,7 +173,7 @@ func _correr() -> void:
 	while cuadros < 300 and batalla.soplidos == 0:
 		await physics_frame
 		cuadros += 1
-		aviso_amarillo = aviso_amarillo or (batalla.ataque == BatallaAspi.Ataque.AVISO_SOPLIDO and aspi.vibrando)
+		aviso_amarillo = aviso_amarillo or (batalla.ataque == BatallaAspi.Ataque.AVISO_SOPLIDO and batalla.apariencia.vibrando)
 	await _esperar_que(func() -> bool: return felipe.is_on_floor() and felipe.global_position.y > Sala.SUELO - 2.0, 120)
 	_comprobar(batalla.soplidos >= 1 and felipe.global_position.y > Sala.SUELO - 2.0 and cuadros <= 240, "Quieto en la repisa, A.S.P.I. lo saca de un soplido en %.1f s (≤ 4 s)" % (cuadros / 60.0))
 	_comprobar(aviso_amarillo, "Antes del soplido avisa 0,6 s: vibra con luz amarilla")
@@ -190,10 +190,10 @@ func _correr() -> void:
 	await _esperar_que(func() -> bool: return batalla._reinicio <= 0.0 and batalla.ataque == BatallaAspi.Ataque.NINGUNO, 300)
 	batalla.manchas.clear()
 	batalla.tipos_mancha.clear()
-	aspi.velocidad_patrulla = 0.0
+	aspi.patrulla.velocidad_patrulla = 0.0
 	aspi.global_position = Vector2(arena.position.x + 40, Sala.SUELO)
 	await _poner_en(Vector2(arena.position.x + 380, Sala.SUELO - 98), 2)
-	felipe._tiempo_invulnerable = 0.0
+	felipe.vida.restante_invulnerable = 0.0
 	corazones = felipe.corazones
 	var tosio := false
 	var alta := false
@@ -206,7 +206,7 @@ func _correr() -> void:
 			break
 	_comprobar(tosio and alta, "En furia tose y la bola de pelo va en arco hasta arriba")
 	_comprobar(felipe.corazones < corazones, "La bola de pelo quita un corazón aunque esté en el escritorio")
-	felipe._tiempo_invulnerable = 999.0
+	felipe.vida.restante_invulnerable = 999.0
 
 	# Perder una vida: reaparece en el cojín, A.S.P.I. conserva la fase y al volver la entrada es corta (1 s).
 	var cojin: Rect2 = Sala.DESCANSOS[1]
@@ -236,7 +236,7 @@ func _correr() -> void:
 	await _caerle_encima(aspi)
 	await _esperar_que(func() -> bool: return felipe.estado == Felipe.Estado.OCIO, 200)
 	_comprobar(felipe.estado == Felipe.Estado.OCIO and felipe.sprite.animation == "acicalarse", "Felipe se lame la pata como si nada")
-	_comprobar(aspi.apagada and batalla.fase == BatallaAspi.Fase.FIN, "Al tercer apagado, A.S.P.I. se apaga del todo")
+	_comprobar(aspi.vida.muerto and batalla.fase == BatallaAspi.Fase.FIN, "Al tercer apagado, A.S.P.I. se apaga del todo")
 	_comprobar(not sala.puertas[Sala.PUERTA_BALCON].cerrada and "Desenchufada" in sala.logros and sala.travesuras.agenda.esta_cumplida("desenchufar"), "Se abre la puerta del balcón (travesura «desenchufar» y logro)")
 	_comprobar(Engine.time_scale == 1.0 and not sala.puertas["estudio<pasillo"].cerrada, "Todo vuelve de golpe a la normalidad")
 	await _poner_en(Vector2(arena.position.x + 330, Sala.SUELO))
@@ -270,15 +270,15 @@ func _correr() -> void:
 	quit(1 if _fallos.size() > 0 else 0)
 
 
-func _maceta() -> Vaso:
+func _maceta() -> Objeto:
 	for hijo in sala.get_children():
-		if hijo is Vaso and hijo.tipo == "maceta" and not hijo.roto and hijo.visible:
+		if hijo is Objeto and hijo.tipo == "maceta" and not hijo.tirable.roto and hijo.visible:
 			return hijo
 	return null
 
 
 ## Le deja el depósito a una mancha de llenarse y le pone esa mancha al lado (más rápido que tirar macetas).
-func _llenar(batalla: BatallaAspi, aspi: Aspi) -> void:
+func _llenar(batalla: BatallaAspi, aspi: Enemigo) -> void:
 	await _poner_en(Vector2(Sala.rect_de("estudio").position.x + 60, Sala.SUELO), 2)
 	batalla.deposito = BatallaAspi.CAPACIDAD[batalla.apagados] - 1
 	batalla.agregar_mancha(aspi.global_position)
@@ -286,7 +286,7 @@ func _llenar(batalla: BatallaAspi, aspi: Aspi) -> void:
 
 
 ## Felipe cae sobre A.S.P.I. desde un poco más arriba que su tapa.
-func _caerle_encima(aspi: Aspi) -> void:
+func _caerle_encima(aspi: Enemigo) -> void:
 	await _esperar(20)
 	felipe.global_position = aspi.global_position + Vector2(0, -62)
 	felipe.velocity = Vector2.ZERO
@@ -295,7 +295,7 @@ func _caerle_encima(aspi: Aspi) -> void:
 
 ## Felipe cae sobre A.S.P.I. desde lo alto ya a la velocidad máxima de caída; devuelve la velocidad de caída del
 ## último cuadro antes de apagarla.
-func _caerle_encima_rapido(aspi: Aspi) -> float:
+func _caerle_encima_rapido(aspi: Enemigo) -> float:
 	await _esperar(20)
 	felipe.global_position = aspi.global_position + Vector2(0, -BatallaAspi.ALTO_ARRIBA - 140.0)
 	felipe.velocity = Vector2(0, felipe.caida_maxima)

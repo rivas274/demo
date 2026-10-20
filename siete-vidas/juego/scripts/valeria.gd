@@ -18,7 +18,7 @@ extends Node2D
 ## - Quieta respira (1 px) y cada tanto mira alrededor (M6).
 ##
 ## Cumple la interfaz de testigo del rascador (grupo Rascador.GRUPO_TESTIGOS: ve(punto), visita, perdonar) y la de
-## los maullidos (grupo Felipe.GRUPO_OYENTES: oir_maullido). Sus frases van por Travesuras.decir_valeria().
+## los maullidos (pieza OyeMaullido: oir_maullido). Sus frases van por Travesuras.decir_valeria().
 ## La posición son sus pies (al centro). Nunca se para en una puerta (destinos con lugar_seguro()). Solo sentada
 ## está sobre un mueble (el asiento del sofá): de pie siempre pisa el piso.
 
@@ -136,8 +136,11 @@ func _init(nombre := "Valeria") -> void:
 
 func _ready() -> void:
 	add_to_group(Rascador.GRUPO_TESTIGOS)
-	add_to_group(Felipe.GRUPO_OYENTES)
-	add_to_group(Comida.GRUPO)
+	# Oye los maullidos con su pieza OyeMaullido (pilar 2: maullar es llave).
+	var oido := OyeMaullido.new()
+	oido.oyo.connect(oir_maullido)
+	add_child(oido)
+	add_to_group(Componentes.INTERACTUABLES)
 	z_index = Capas.PERSONAJES
 	for pose_inicial in ["neutra", "enojada", "perdonando", "grabando", "serie", "caminar"]:
 		var ruta := RUTA % pose_inicial
@@ -485,7 +488,7 @@ func sacar_audifono(segundos := 3.0) -> void:
 	queue_redraw()
 
 
-## Interfaz de los maullidos. En el mismo cuarto lo mira; con audífonos no oye nada.
+## Oyó maullar (su OyeMaullido). En el mismo cuarto lo mira; con audífonos no oye nada.
 func oir_maullido(felipe: Felipe) -> void:
 	if audifonos or actividad == Actividad.FUERA:
 		return

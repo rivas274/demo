@@ -98,7 +98,7 @@ func _probar_maullar() -> void:
 			break
 	felipe.maullo.disconnect(al_maullar)
 	_comprobar(maullidos.size() == 1 and maullidos[0] == Felipe.CUADRO_MAULLIDO and not antes_de_tiempo, "El maullido sale en el cuadro de la boca abierta (%s)" % [maullidos])
-	_comprobar(int(cerca.get("oidos")) == 1 and int(lejos.get("oidos")) == 0, "Lo oye quien está cerca (grupo oyen_maullidos), no quien está lejos")
+	_comprobar(int(cerca.get_meta("oidos")) == 1 and int(lejos.get_meta("oidos")) == 0, "Lo oye quien está cerca (pieza OyeMaullido), no quien está lejos")
 	_comprobar(felipe.estado == Felipe.Estado.SUELO, "Después de maullar vuelve a quedar libre")
 	_comprobar("¡MIAU!" in sala.travesuras.jugo.palabras, "Al maullar salta la palabra ¡MIAU!")
 	cerca.queue_free()
@@ -158,7 +158,7 @@ func _probar_aranar() -> void:
 
 ## El vaso sale volando cuando la pata llega (cuadro 4 de zarpazo), no al apretar (hallazgo B5).
 func _probar_manotazo() -> void:
-	var vaso: Vaso = sala.get_node("Vaso")
+	var vaso: Objeto = sala.get_node("Vaso")
 	await _poner_en(Vector2(vaso.global_position.x - 30, vaso.global_position.y))
 	felipe.mirando = 1.0
 	var inicio := vaso.global_position
@@ -176,7 +176,7 @@ func _probar_manotazo() -> void:
 	_comprobar(not antes_de_tiempo and cuadro_al_moverse >= Felipe.CUADRO_IMPACTO_ZARPAZO, "El vaso no se mueve antes del cuadro de impacto (se movió en el cuadro %d)" % cuadro_al_moverse)
 	_comprobar(felipe.ultimo_impacto.get("animacion", "") == "zarpazo" and felipe.ultimo_impacto.get("cuadro", -1) == Felipe.CUADRO_IMPACTO_ZARPAZO, "El impacto quedó en el cuadro %d" % Felipe.CUADRO_IMPACTO_ZARPAZO)
 	await _esperar(60)
-	_comprobar(vaso.roto and "La Gravedad Funciona" in sala.logros, "El vaso cae, se rompe y da el logro")
+	_comprobar(vaso.tirable.roto and "La Gravedad Funciona" in sala.logros, "El vaso cae, se rompe y da el logro")
 
 
 ## Mantener la acción 0,6 s sin nada cerca come un snack del bolsillo: cura 1 corazón y suma 0,3 kg.
@@ -455,14 +455,14 @@ func _probar_indicador() -> void:
 	_comprobar(verbos.size() == 3 and verbos.has("Firmar") and verbos.has("Desordenar") and verbos.has("Arañar"), "M7 Sofá, ropa y puerta entornada tienen verbos distintos (%s)" % ", ".join(verbos.keys()))
 	# M5: el punto del láser mide 8 px o más.
 	_comprobar(Laser.RADIO_PUNTO * 2.0 >= 8.0, "M5 El punto del láser mide %.0f px (con halo que late)" % (Laser.RADIO_PUNTO * 2.0))
-	var vaso2: Vaso = null
+	var vaso2: Objeto = null
 	for hijo in sala.get_children():
-		if hijo is Vaso and not hijo.roto and hijo.tipo == "vaso":
+		if hijo is Objeto and not hijo.tirable.roto and hijo.tipo == "vaso":
 			vaso2 = hijo
 	if vaso2:
 		await _poner_en(vaso2.global_position + Vector2(-30, 0))
 		await _esperar(3)
-		_comprobar(indicador.objeto == vaso2 and indicador.verbo == "Liberar", "Junto a un vaso: «Liberar» con contorno del dibujo")
+		_comprobar(indicador.objeto == vaso2.tirable and indicador.verbo == "Liberar", "Junto a un vaso: «Liberar» con contorno del dibujo")
 	felipe.snacks = 2
 	await _poner_en(Vector2(120, Sala.SUELO))
 	Input.action_press("interactuar")
@@ -472,14 +472,11 @@ func _probar_indicador() -> void:
 	await _esperar(5)
 
 
-## Oyente falso del maullido (en el grupo oyen_maullidos).
+## Oyente de prueba del maullido: una pieza OyeMaullido suelta que cuenta lo que oye (meta «oidos»).
 func _oyente(posicion: Vector2) -> Node2D:
-	var script := GDScript.new()
-	script.source_code = "extends Node2D\nvar oidos := 0\nfunc oir_maullido(_felipe: Node) -> void:\n\toidos += 1\n"
-	script.reload()
-	var oyente := Node2D.new()
-	oyente.set_script(script)
-	oyente.add_to_group(Felipe.GRUPO_OYENTES)
+	var oyente := OyeMaullido.new()
+	oyente.set_meta("oidos", 0)
+	oyente.oyo.connect(func(_f: Felipe) -> void: oyente.set_meta("oidos", int(oyente.get_meta("oidos")) + 1))
 	sala.add_child(oyente)
 	oyente.global_position = posicion
 	return oyente

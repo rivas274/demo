@@ -1,10 +1,8 @@
 class_name Comida
 extends Node2D
 ## Comida que Felipe se come con el botón de acción (E / Y del mando).
-## Todo lo que esté en el grupo "interactuables" y tenga interactuar(felipe) responde a ese botón.
+## Todo lo que esté en el grupo Componentes.INTERACTUABLES y tenga interactuar(felipe) responde a ese botón.
 ## Arte provisional dibujado con código; (0, 0) es el punto donde la comida toca la superficie.
-
-const GRUPO := "interactuables"
 
 ## Se la comieron (cuando la boca llega): el nivel la usa para la Agenda (el pollo de Valeria).
 signal comido(comida: Comida)
@@ -16,15 +14,16 @@ var tipo: String
 func _init(tipo_comida: String) -> void:
 	tipo = tipo_comida
 	name = "Comida (%s)" % tipo
+	add_child(SombraContacto.new(46.0, 0.38))
 
 
 func _ready() -> void:
-	add_to_group(GRUPO)
+	add_to_group(Componentes.INTERACTUABLES)
 
 
 ## Felipe se pone a comer; la comida desaparece cuando la boca llega (cuadro de impacto: al_comido).
 func interactuar(felipe: Felipe) -> void:
-	remove_from_group(GRUPO)
+	remove_from_group(Componentes.INTERACTUABLES)
 	felipe.comer(self)
 
 

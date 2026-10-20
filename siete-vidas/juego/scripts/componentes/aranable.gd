@@ -35,7 +35,7 @@ func _init(nombre := "Arañable", ancho_zona := 120.0, alto_zona := 60.0) -> voi
 
 
 func _ready() -> void:
-	add_to_group(Comida.GRUPO)
+	add_to_group(Componentes.INTERACTUABLES)
 	z_index = Capas.MARCAS
 	_pelusa = CPUParticles2D.new()
 	_pelusa.emitting = false

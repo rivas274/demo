@@ -131,22 +131,22 @@ func _draw() -> void:
 	match modo:
 		Modo.TITULO:
 			draw_rect(Rect2(Vector2.ZERO, tam), Estilo.color(&"fondo_pantalla"))
-			Estilo.texto_centrado(self, tr("TITULO_JUEGO"), 92, Estilo.letra(&"titulo"), acento)
-			Estilo.texto_centrado(self, tr("TITULO_SUBTITULO"), 124, Estilo.letra(&"subtitulo"), claro)
-			Estilo.texto_centrado(self, tr("TITULO_DEMO"), 160, Estilo.letra(&"texto"), claro)
-			Estilo.texto_centrado(self, tr("UI_JUGAR") % aceptar, 250, Estilo.letra(&"texto"), acento)
+			Estilo.texto_centrado(self, tr("TITULO_JUEGO"), 92, &"titulo", acento)
+			Estilo.texto_centrado(self, tr("TITULO_SUBTITULO"), 124, &"subtitulo", claro)
+			Estilo.texto_centrado(self, tr("TITULO_DEMO"), 160, &"texto", claro)
+			Estilo.texto_centrado(self, tr("UI_JUGAR") % aceptar, 250, &"texto", acento)
 		Modo.INTRO:
 			draw_rect(Rect2(Vector2.ZERO, tam), Estilo.color(&"fondo_pantalla"))
 			for i in INTRO.size():
-				Estilo.texto_centrado(self, tr(INTRO[i]), 130 + i * 26, Estilo.letra(&"texto_chico"), claro if i < 2 else acento)
-			Estilo.texto_centrado(self, tr("UI_CONTINUAR_TECLA") % aceptar, 280, Estilo.letra(&"nota"), claro)
+				Estilo.texto_centrado(self, tr(INTRO[i]), 130 + i * 26, &"texto_chico", claro if i < 2 else acento)
+			Estilo.texto_centrado(self, tr("UI_CONTINUAR_TECLA") % aceptar, 280, &"nota", claro)
 		Modo.PAUSA:
 			draw_rect(Rect2(Vector2.ZERO, tam), Estilo.color(&"fondo_pantalla"))
-			Estilo.texto_centrado(self, tr("PAUSA_TITULO"), 52, Estilo.letra(&"pausa"), acento)
+			Estilo.texto_centrado(self, tr("PAUSA_TITULO"), 52, &"pausa", acento)
 		Modo.FIN:
 			draw_rect(Rect2(Vector2.ZERO, tam), Estilo.color(&"fondo_pantalla"))
-			Estilo.texto_centrado(self, tr("FIN_TITULO"), 80, Estilo.letra(&"fin"), acento)
-			Estilo.texto_centrado(self, tr("FIN_FRASE"), 112, Estilo.letra(&"nota"), claro)
+			Estilo.texto_centrado(self, tr("FIN_TITULO"), 80, &"fin", acento)
+			Estilo.texto_centrado(self, tr("FIN_FRASE"), 112, &"nota", claro)
 			var lineas := [
 				tr("FIN_TIEMPO") % datos_fin.get("tiempo", "—"),
 				tr("FIN_CALCETINES") % datos_fin.get("calcetines", "—"),
@@ -154,14 +154,13 @@ func _draw() -> void:
 				tr("FIN_VIDAS") % datos_fin.get("vidas", "—"),
 			]
 			for i in lineas.size():
-				Estilo.texto_centrado(self, lineas[i], 160 + i * 20, Estilo.letra(&"texto_chico"), claro)
-			Estilo.texto_centrado(self, tr("FIN_CONTINUARA") % aceptar, 290, Estilo.letra(&"nota"), acento)
+				Estilo.texto_centrado(self, lineas[i], 160 + i * 20, &"texto_chico", claro)
+			Estilo.texto_centrado(self, tr("FIN_CONTINUARA") % aceptar, 290, &"nota", acento)
 		Modo.JUGANDO:
 			var mostrado := aviso_fijo if aviso_fijo != "" else aviso
 			if mostrado != "":
 				var texto := etiquetar(mostrado)
-				var tamano := Estilo.letra(&"texto_chico")
-				var ancho := Estilo.fuente().get_string_size(texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano).x + 20.0
+				var ancho := Estilo.ancho(texto, &"texto_chico") + 20.0
 				var caja := Rect2((tam.x - ancho) / 2.0, tam.y - 44, ancho, 22)
 				draw_rect(caja, Estilo.color(&"fondo_aviso"))
-				draw_string(Estilo.fuente(), caja.position + Vector2(10, 15), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano, claro)
+				Estilo.escribir(self, caja.position + Vector2(10, 16), texto, &"texto_chico", claro)

@@ -26,7 +26,6 @@ signal primera_vez(objeto: Node2D, frase: String)
 ## sombra dura de 2 px. El interior es el del diálogo, para que todo el texto del juego se lea igual.
 ## Altura de la burbuja sobre los pies de Felipe (mide 67 px con la cola).
 const ALTURA_BURBUJA := 84.0
-const TAM_LETRA := 10
 
 var felipe: Felipe
 ## Objeto que se está anunciando (null si no hay).
@@ -179,10 +178,9 @@ func tiene_arte(cosa: Node2D) -> bool:
 func _draw() -> void:
 	if verbo == "" or felipe == null:
 		return
-	var fuente := Estilo.fuente()
 	var accion := "interactuar"
 	var ancho_icono := IconosBotones.ancho(accion, 14.0)
-	var ancho_texto := fuente.get_string_size(verbo, HORIZONTAL_ALIGNMENT_LEFT, -1, TAM_LETRA).x
+	var ancho_texto := Estilo.ancho(verbo, &"indicador")
 	var tam := Vector2(ancho_icono + ancho_texto + 12.0, 20.0)
 	var centro := (felipe.global_position + Vector2(0, -ALTURA_BURBUJA)).round()
 	# Aparece con un saltito (entero, para no emborronar los píxeles).
@@ -191,8 +189,8 @@ func _draw() -> void:
 	_dibujar_placa(caja, Vector2(centro.x, caja.end.y))
 	IconosBotones.dibujar(self, accion, caja.position + Vector2(4, 3), 14.0)
 	# Texto con sombra dura de 1 px, como el del diálogo y la libreta (misma letra).
-	draw_string(fuente, caja.position + Vector2(ancho_icono + 9.0, 15.0), verbo, HORIZONTAL_ALIGNMENT_LEFT, -1, TAM_LETRA, Estilo.color(&"indicador_sombra_texto"))
-	draw_string(fuente, caja.position + Vector2(ancho_icono + 8.0, 14.0), verbo, HORIZONTAL_ALIGNMENT_LEFT, -1, TAM_LETRA, Estilo.color(&"texto_claro"))
+	Estilo.escribir(self, caja.position + Vector2(ancho_icono + 9.0, 15.0), verbo, &"indicador", Estilo.color(&"indicador_sombra_texto"))
+	Estilo.escribir(self, caja.position + Vector2(ancho_icono + 8.0, 14.0), verbo, &"indicador", Estilo.color(&"texto_claro"))
 	var progreso := felipe.progreso_comer_snack()
 	if progreso > 0.0 and objeto == null:
 		draw_rect(Rect2(caja.position + Vector2(2, tam.y - 3), Vector2((tam.x - 4) * progreso, 2)), Estilo.color(&"indicador_verbo"))

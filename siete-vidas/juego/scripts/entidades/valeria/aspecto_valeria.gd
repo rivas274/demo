@@ -143,7 +143,7 @@ func dibujar() -> void:
 	if _v.actividad == Valeria.Actividad.GRABANDO and int(_v.tiempo * 3.0) % 2 == 0:
 		var rec := Vector2(_v.mirando * 26.0, arriba + 6.0)
 		_v.draw_circle(rec, 3.0, ROJO)
-		_v.draw_string(ThemeDB.fallback_font, rec + Vector2(5, 4), "REC", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, ROJO)
+		Estilo.escribir(_v, rec + Vector2(5, 4), "REC", &"rec", ROJO)
 
 
 func _audifonos(arriba: float) -> void:

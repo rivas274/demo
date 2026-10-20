@@ -35,9 +35,9 @@ static func crear(titulo: String, nombre: String, recompensa: String, secreta: b
 		fondo.size = rect.size
 		fondo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		caja.add_child(fondo)
-		caja.add_child(etiqueta(titulo, Estilo.letra(&"tarjeta_titulo"), color, Vector2(0, 2), rect.size.x))
-		caja.add_child(etiqueta(nombre.to_upper(), Estilo.letra(&"tarjeta_texto"), Estilo.color(&"cartel_nombre"), Vector2(6, 22), rect.size.x - 12))
-		caja.add_child(etiqueta(linea_recompensa, Estilo.letra(&"tarjeta_texto"), Estilo.color(&"cartel_recompensa_chica"), Vector2(6, 35), rect.size.x - 12))
+		caja.add_child(etiqueta(titulo, &"tarjeta_titulo", color, Vector2(0, 2), rect.size.x))
+		caja.add_child(etiqueta(nombre.to_upper(), &"tarjeta_texto", Estilo.color(&"cartel_nombre"), Vector2(6, 22), rect.size.x - 12))
+		caja.add_child(etiqueta(linea_recompensa, &"tarjeta_texto", Estilo.color(&"cartel_recompensa_chica"), Vector2(6, 35), rect.size.x - 12))
 	else:
 		var franja := Polygon2D.new()
 		franja.polygon = PackedVector2Array([Vector2(0, 12), Vector2(ANCHO_PANTALLA, 0), Vector2(ANCHO_PANTALLA, 84), Vector2(0, 96)])
@@ -49,9 +49,9 @@ static func crear(titulo: String, nombre: String, recompensa: String, secreta: b
 			borde.width = 3.0
 			borde.default_color = color
 			caja.add_child(borde)
-		caja.add_child(etiqueta(titulo, Estilo.letra(&"cartel_titulo"), color, Vector2(0, 12)))
-		caja.add_child(etiqueta(nombre.to_upper(), Estilo.letra(&"cartel_nombre"), Estilo.color(&"cartel_nombre"), Vector2(0, 45)))
-		caja.add_child(etiqueta(linea_recompensa, Estilo.letra(&"cartel_recompensa"), Estilo.color(&"cartel_recompensa"), Vector2(0, 67)))
+		caja.add_child(etiqueta(titulo, &"cartel_titulo", color, Vector2(0, 12)))
+		caja.add_child(etiqueta(nombre.to_upper(), &"cartel_nombre", Estilo.color(&"cartel_nombre"), Vector2(0, 45)))
+		caja.add_child(etiqueta(linea_recompensa, &"cartel_recompensa", Estilo.color(&"cartel_recompensa"), Vector2(0, 67)))
 	caja.scale = Vector2(1.6, 0.1) if not chico else Vector2(0.6, 0.6)
 	caja.modulate.a = 0.0
 	return caja
@@ -84,13 +84,15 @@ func ocultar() -> void:
 
 
 ## Etiqueta centrada con contorno, que nunca se sale de su caja (los nombres largos terminan en «…»).
-static func etiqueta(texto: String, tamano: int, color: Color, pos: Vector2, ancho := ANCHO_PANTALLA) -> Label:
+static func etiqueta(texto: String, estilo: StringName, color: Color, pos: Vector2, ancho := ANCHO_PANTALLA) -> Label:
+	var tamano := Estilo.letra(estilo)
 	var e := Label.new()
 	e.text = texto
 	e.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	e.position = pos
 	e.size = Vector2(ancho, tamano + 8)
 	e.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	e.add_theme_font_override("font", Estilo.fuente(estilo))
 	e.add_theme_font_size_override("font_size", tamano)
 	e.add_theme_color_override("font_color", color)
 	e.add_theme_color_override("font_outline_color", Estilo.color(&"cartel_contorno"))

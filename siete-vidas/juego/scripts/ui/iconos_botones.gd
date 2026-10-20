@@ -66,7 +66,7 @@ static func ancho(accion: String, alto := 16.0) -> float:
 	var t := textura(accion)
 	if t:
 		return t.get_size().x * alto / LADO
-	return maxf(alto, Estilo.fuente().get_string_size(texto(accion), HORIZONTAL_ALIGNMENT_LEFT, -1, int(alto * 0.6)).x + 6.0)
+	return maxf(alto, Estilo.ancho(texto(accion), &"tecla") + 6.0)
 
 
 ## Dibuja el ícono con la esquina de arriba a la izquierda en `pos`. Sin imagen, dibuja una tecla por código.
@@ -79,7 +79,6 @@ static func dibujar(c: CanvasItem, accion: String, pos: Vector2, alto := 16.0) -
 	c.draw_rect(caja, Estilo.color(&"tecla_borde"))
 	c.draw_rect(caja.grow(-1), Estilo.color(&"tecla_cara"))
 	c.draw_rect(Rect2(caja.position + Vector2(1, caja.size.y - 3), Vector2(caja.size.x - 2, 2)), Estilo.color(&"tecla_sombra"))
-	var tam := int(alto * 0.6)
 	var etiqueta := texto(accion)
-	var ancho_texto := Estilo.fuente().get_string_size(etiqueta, HORIZONTAL_ALIGNMENT_LEFT, -1, tam).x
-	c.draw_string(Estilo.fuente(), caja.position + Vector2((caja.size.x - ancho_texto) / 2.0, alto * 0.7), etiqueta, HORIZONTAL_ALIGNMENT_LEFT, -1, tam, Estilo.color(&"tecla_texto"))
+	var ancho_texto := Estilo.ancho(etiqueta, &"tecla")
+	Estilo.escribir(c, caja.position + Vector2((caja.size.x - ancho_texto) / 2.0, alto * 0.5 + 4.0), etiqueta, &"tecla", Estilo.color(&"tecla_texto"))

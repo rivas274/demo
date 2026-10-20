@@ -31,7 +31,6 @@ const VALERIA_DERRETIDA := 2
 const VALERIA_GRABANDO := 3
 ## Ancho del texto: con letra de 14 px caben unas 70 letras por línea; más de 2 líneas no se aceptan.
 const ANCHO_TEXTO := 548.0
-const TAM_LETRA := 14
 const MAX_LINEAS := 2
 const MAX_COLA := 3
 ## Posición del cuadro arriba (bajo el HUD) y abajo; y de la pantalla desde la que Felipe "está abajo".
@@ -139,7 +138,7 @@ static func lineas_de(texto: String) -> int:
 	for accion: String in Controles.ACCIONES:
 		limpio = limpio.replace("{%s}" % accion, "MM")
 	var parrafo := TextParagraph.new()
-	parrafo.add_string(limpio, Estilo.fuente(), TAM_LETRA)
+	parrafo.add_string(limpio, Estilo.fuente(&"dialogo_texto"), Estilo.letra(&"dialogo_texto"))
 	parrafo.width = ANCHO_TEXTO
 	parrafo.break_flags = TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE
 	return parrafo.get_line_count()

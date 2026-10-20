@@ -29,7 +29,7 @@ func dibujar_decorado(c: Node2D) -> void:
 	if guion.teclado_pisado:
 		c.draw_rect(PANTALLA_MONITOR, Color("dfe8f2"))
 		for fila in 3:
-			c.draw_string(ThemeDB.fallback_font, PANTALLA_MONITOR.position + Vector2(2, 9 + fila * 8), "jjjjjj", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color("2f2f6f"))
+			Estilo.escribir(c, PANTALLA_MONITOR.position + Vector2(2, 9 + fila * 8), "jjjjjj", &"etiqueta", Color("2f2f6f"))
 	_dibujar_teclado(c)
 	# Jirones del plástico del sofá (G4): tiras brillantes que giran y caen.
 	for j: Array in guion.arte.jirones:
@@ -176,9 +176,8 @@ func dibujar_fachada(c: Node2D) -> void:
 	c.draw_rect(Rect2(t.position.x, t.position.y, t.size.x, 3), Color("2e5a38"))
 	c.draw_rect(Rect2(faldon.position.x, faldon.position.y, faldon.size.x, 1), oscuro)
 	var letrero := "PANADERÍA"
-	var fuente := ThemeDB.fallback_font
-	var ancho := fuente.get_string_size(letrero, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
-	c.draw_string(fuente, Vector2(t.get_center().x - ancho / 2.0, faldon.end.y - 3), letrero, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("2e5a38"))
+	var ancho := roundf(Estilo.ancho(letrero, &"letrero"))
+	Estilo.escribir(c, Vector2(t.get_center().x - ancho / 2.0, faldon.end.y - 3), letrero, &"letrero", Color("2e5a38"))
 	c.draw_rect(Rect2(t.position.x, faldon.end.y + 10, t.size.x, 2), Color(0, 0, 0, 0.25))
 
 

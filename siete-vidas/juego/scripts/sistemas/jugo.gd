@@ -63,15 +63,19 @@ func palabra(texto: String, posicion: Vector2, color := Color(1.0, 0.9, 0.3), ta
 	palabras.append(texto)
 	var etiqueta := Label.new()
 	etiqueta.text = texto
-	etiqueta.add_theme_font_size_override("font_size", tamano)
+	# Letra pixel de títulos (Silkscreen) a su tamaño de diseño: 16 px, o 24 px para las palabras grandes (B1).
+	var estilo := &"palabra_grande" if tamano >= 20 else &"palabra"
+	etiqueta.add_theme_font_override("font", Estilo.fuente(estilo))
+	etiqueta.add_theme_font_size_override("font_size", Estilo.letra(estilo))
+	etiqueta.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	etiqueta.add_theme_color_override("font_color", color)
 	# Contorno grueso y sombra: se lee sobre cualquier pared o fondo (M1: el celeste se perdía en la pared beige).
 	etiqueta.add_theme_color_override("font_outline_color", Color(0.08, 0.04, 0.07))
-	etiqueta.add_theme_constant_override("outline_size", 8)
+	etiqueta.add_theme_constant_override("outline_size", 6)
 	etiqueta.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.75))
 	etiqueta.add_theme_constant_override("shadow_offset_x", 2)
 	etiqueta.add_theme_constant_override("shadow_offset_y", 2)
-	etiqueta.add_theme_constant_override("shadow_outline_size", 8)
+	etiqueta.add_theme_constant_override("shadow_outline_size", 6)
 	etiqueta.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(etiqueta)
 	var medida := etiqueta.get_minimum_size()
@@ -87,13 +91,20 @@ func palabra(texto: String, posicion: Vector2, color := Color(1.0, 0.9, 0.3), ta
 		if Rect2(Vector2(x, y), medida).intersects(felipe_ocupa):
 			y = maxf(34.0, felipe_ocupa.position.y - medida.y - 4.0)
 	etiqueta.position = Vector2(x, y).round()
-	etiqueta.scale = Vector2.ZERO
-	etiqueta.rotation = randf_range(-0.12, 0.12)
+	# Salta en escalones enteros (2× un instante y después 1×) y rebota unos px, sin girar: la letra pixel no se
+	# deforma (B1 de la revisión de consistencia).
+	etiqueta.visible = false
+	var abajo := etiqueta.position.y
 	var animar := create_tween()
 	animar.tween_interval(retraso)
-	animar.tween_property(etiqueta, "scale", Vector2.ONE * 1.35, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	animar.tween_property(etiqueta, "scale", Vector2.ONE, 0.4).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-	animar.tween_interval(0.55)
+	animar.tween_callback(func() -> void:
+		etiqueta.visible = true
+		etiqueta.scale = Vector2.ONE * 2.0)
+	animar.tween_interval(0.06)
+	animar.tween_callback(func() -> void: etiqueta.scale = Vector2.ONE)
+	animar.tween_property(etiqueta, "position:y", abajo - 6.0, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	animar.tween_property(etiqueta, "position:y", abajo, 0.3).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	animar.tween_interval(0.5)
 	animar.tween_property(etiqueta, "position:y", etiqueta.position.y - 18.0, 0.35).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	animar.parallel().tween_property(etiqueta, "modulate:a", 0.0, 0.35)
 	animar.tween_callback(etiqueta.queue_free)

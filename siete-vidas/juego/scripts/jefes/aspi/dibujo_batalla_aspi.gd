@@ -80,8 +80,9 @@ func encima(c: Node2D) -> void:
 		c.draw_rect(Rect2(barra.position, Vector2(barra.size.x * (1.0 - b.reinicio / b.datos.reinicio), barra.size.y)), Color("9fd8ff"))
 		if tiempo - b.tiempo_clic > BatallaAspi.DURA_CLIC:
 			var punto := b.aspi.global_position + Vector2(-34, -BatallaAspi.ALTO_ARRIBA - 22)
-			c.draw_string_outline(ThemeDB.fallback_font, punto, "REINICIANDO" + ".".repeat(int(tiempo * 3.0) % 4), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, 4, Color(0.05, 0.1, 0.15))
-			c.draw_string(ThemeDB.fallback_font, punto, "REINICIANDO" + ".".repeat(int(tiempo * 3.0) % 4), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("9fd8ff"))
+			var texto_reinicio := tr("JEFE_REINICIANDO") + ".".repeat(int(tiempo * 3.0) % 4)
+			c.draw_string_outline(Estilo.fuente(&"jefe_burbuja"), punto.round(), texto_reinicio, HORIZONTAL_ALIGNMENT_LEFT, -1, Estilo.letra(&"jefe_burbuja"), 4, Color(0.05, 0.1, 0.15))
+			Estilo.escribir(c, punto, texto_reinicio, &"jefe_burbuja", Color("9fd8ff"))
 	if b.limpiar.reloj_aviso > 0.0 and not b.limpiando:
 		# Anticipación de la succión: el cepillo gira y se ven líneas de aire.
 		for i in 6:
@@ -93,11 +94,10 @@ func encima(c: Node2D) -> void:
 		var arriba := b.aspi.global_position + Vector2(0, -BatallaAspi.ALTO_ARRIBA - 52)
 		if int(tiempo * 4.0) % 2 == 0:
 			c.draw_circle(b.aspi.global_position + Vector2(0, -BatallaAspi.ALTO_ARRIBA - 4), 5.0, Color("e0483b"))
-		var fuente := ThemeDB.fallback_font
-		var texto := "¡LLENO!"
-		var ancho := fuente.get_string_size(texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
+		var texto := tr("JEFE_LLENO")
+		var ancho := roundf(Estilo.ancho(texto, &"jefe_pista"))
 		c.draw_rect(Rect2(arriba.x - ancho / 2.0 - 6, arriba.y - 13, ancho + 12, 18), Color(0.1, 0.05, 0.07, 0.85))
-		c.draw_string(fuente, Vector2(arriba.x - ancho / 2.0, arriba.y), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("ffe066"))
+		Estilo.escribir(c, Vector2(arriba.x - ancho / 2.0, arriba.y + 1), texto, &"jefe_pista", Color("ffe066"))
 		# Flecha hacia abajo: hay que caerle encima.
 		c.draw_colored_polygon(PackedVector2Array([arriba + Vector2(-6, 8), arriba + Vector2(6, 8), arriba + Vector2(0, 16)]), Color("ffe066"))
 	if b.ataque == BatallaAspi.Ataque.SOPLIDO or b.ataque == BatallaAspi.Ataque.AVISO_SOPLIDO:

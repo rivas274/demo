@@ -14,17 +14,11 @@ var abierta := false
 ## Si es false, Tab no la abre (por ejemplo, durante el resumen del día).
 var habilitada := true
 var _hoja: Control
-var _letra: FontVariation
 
 
 func _ready() -> void:
 	layer = Capas.CAPA_LIBRETA
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_letra = FontVariation.new()
-	_letra.base_font = Estilo.fuente()
-	# Letra de Felipe: inclinada y un poco gruesa.
-	_letra.variation_transform = Transform2D(Vector2(1, 0), Vector2(-0.22, 1), Vector2.ZERO)
-	_letra.variation_embolden = 0.3
 	_hoja = Control.new()
 	_hoja.name = "Hoja"
 	_hoja.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -93,8 +87,8 @@ func _dibujar() -> void:
 		var x := hoja.position.x + 20 + i * 32
 		c.draw_circle(Vector2(x, hoja.position.y + 2), 4.0, Estilo.color(&"libreta_espiral"))
 		c.draw_circle(Vector2(x, hoja.position.y + 2), 2.0, Estilo.color(&"libreta_espiral_hueco"))
-	c.draw_string(_letra, Vector2(margen + 8, hoja.position.y + 30), tr("LIBRETA_TITULO"), HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Estilo.color(&"libreta_tinta"))
-	c.draw_string(_letra, Vector2(margen + 10, hoja.position.y + 46), tr("LIBRETA_SUBTITULO"), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Estilo.color(&"libreta_tinta").lightened(0.3))
+	Estilo.escribir(c, Vector2(margen + 8, hoja.position.y + 30), tr("LIBRETA_TITULO"), &"libreta_titulo", Estilo.color(&"libreta_tinta"))
+	Estilo.escribir(c, Vector2(margen + 10, hoja.position.y + 44), tr("LIBRETA_SUBTITULO"), &"libreta_subtitulo", Estilo.color(&"libreta_tinta").lightened(0.3))
 	# Firma: huellita en la esquina.
 	var huella := Vector2(hoja.end.x - 26, hoja.position.y + 28)
 	c.draw_circle(huella, 6.0, Estilo.color(&"libreta_huella"))
@@ -109,15 +103,15 @@ func _dibujar() -> void:
 		var cuarto := String(t.get("cuarto", ""))
 		if cuarto != cuarto_anterior:
 			cuarto_anterior = cuarto
-			c.draw_string(_letra, Vector2(hoja.position.x + 8, y + 15), _nombre_cuarto(cuarto), HORIZONTAL_ALIGNMENT_LEFT, 66, 11, Estilo.color(&"libreta_cuarto"))
+			Estilo.escribir(c, Vector2(hoja.position.x + 8, y + 15), _nombre_cuarto(cuarto), &"libreta_cuarto", Estilo.color(&"libreta_cuarto"), HORIZONTAL_ALIGNMENT_LEFT, 66)
 		_renglon(c, agenda, id, margen + 6, y)
 		y += ALTO_RENGLON
 	# Pie: cómo se cierra y cuántas van.
 	var x_pie := margen + 8
 	IconosBotones.dibujar(c, "agenda", Vector2(x_pie, hoja.end.y - 22), 14.0)
-	c.draw_string(Estilo.fuente(), Vector2(x_pie + IconosBotones.ancho("agenda", 14.0) + 4, hoja.end.y - 11), tr("LIBRETA_CERRAR"), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Estilo.color(&"libreta_pie"))
+	Estilo.escribir(c, Vector2(x_pie + IconosBotones.ancho("agenda", 14.0) + 4, hoja.end.y - 11), tr("LIBRETA_CERRAR"), &"libreta_pie", Estilo.color(&"libreta_pie"))
 	var cuenta := tr("LIBRETA_CUENTA") % [agenda.cumplidas(), agenda.total()]
-	c.draw_string(_letra, Vector2(hoja.end.x - 12 - _letra.get_string_size(cuenta, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x, hoja.end.y - 10), cuenta, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Estilo.color(&"libreta_rojo"))
+	Estilo.escribir(c, Vector2(hoja.end.x - 12 - Estilo.ancho(cuenta, &"libreta_cuenta"), hoja.end.y - 10), cuenta, &"libreta_cuenta", Estilo.color(&"libreta_rojo"))
 
 
 func _renglon(c: Control, datos: Agenda, id: String, x0: float, y: float) -> void:
@@ -129,15 +123,14 @@ func _renglon(c: Control, datos: Agenda, id: String, x0: float, y: float) -> voi
 	var nombre := datos.nombre_visible(id)
 	if datos.meta(id) > 1 and not hecha:
 		nombre += "  (%d/%d)" % [datos.avance[id], datos.meta(id)]
-	var tamano := 12
 	var ancho_max := HOJA.end.x - x0 - 30
-	c.draw_string(_letra, Vector2(x0 + 20, y + 15), nombre, HORIZONTAL_ALIGNMENT_LEFT, ancho_max, tamano, Estilo.color(&"libreta_oculta") if oculta else Estilo.color(&"libreta_tinta"))
+	Estilo.escribir(c, Vector2(x0 + 20, y + 16), nombre, &"libreta_renglon", Estilo.color(&"libreta_oculta") if oculta else Estilo.color(&"libreta_tinta"), HORIZONTAL_ALIGNMENT_LEFT, ancho_max)
 	var segunda := ""
 	var color_segunda := Estilo.color(&"libreta_tinta").lightened(0.35)
 	if hecha:
 		# Palomita roja y tachado.
 		c.draw_polyline(PackedVector2Array([casilla.position + Vector2(1, 6), casilla.position + Vector2(5, 11), casilla.position + Vector2(14, -3)]), Estilo.color(&"libreta_rojo"), 2.5)
-		var ancho := minf(_letra.get_string_size(nombre, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano).x, ancho_max)
+		var ancho := minf(Estilo.ancho(nombre, &"libreta_renglon"), ancho_max)
 		c.draw_line(Vector2(x0 + 18, y + 10), Vector2(x0 + 22 + ancho, y + 9), Estilo.color(&"libreta_tachado"), 2.0)
 		segunda = tr("LIBRETA_HECHO") % datos.texto_recompensa(id)
 		color_segunda = Estilo.color(&"libreta_hecho")
@@ -149,7 +142,7 @@ func _renglon(c: Control, datos: Agenda, id: String, x0: float, y: float) -> voi
 		var nota := String(datos.datos(id).get("nota", ""))
 		if nota != "":
 			segunda = "(" + nota + ")   " + segunda
-	c.draw_string(_letra, Vector2(x0 + 24, y + 27), segunda, HORIZONTAL_ALIGNMENT_LEFT, ancho_max, 9, color_segunda)
+	Estilo.escribir(c, Vector2(x0 + 24, y + 26), segunda, &"libreta_detalle", color_segunda, HORIZONTAL_ALIGNMENT_LEFT, ancho_max)
 
 
 ## Nombre del cuarto en pantalla (clave CUARTO_<id> en la traducción; si no hay, el id con mayúscula).

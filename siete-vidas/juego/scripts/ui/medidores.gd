@@ -115,20 +115,19 @@ func _draw() -> void:
 	if not felipe:
 		return
 	draw_rect(Rect2(6, 6, 92, 34), Estilo.color(&"fondo_medidor"))
-	draw_string(Estilo.fuente(), Vector2(12, 36), tr("UI_VIDAS") % felipe.vidas, HORIZONTAL_ALIGNMENT_LEFT, -1, Estilo.letra(&"medidor_vidas"), Estilo.color(&"texto_oscuro"))
+	Estilo.escribir(self, Vector2(12, 36), tr("UI_VIDAS") % felipe.vidas, &"medidor_vidas", Estilo.color(&"texto_oscuro"))
 	if felipe.tiene_collar:
-		draw_string(Estilo.fuente(), Vector2(104, 20), tr("UI_COLLAR"), HORIZONTAL_ALIGNMENT_LEFT, -1, Estilo.letra(&"medidor_collar"), Estilo.color(&"rojo"))
+		Estilo.escribir(self, Vector2(104, 20), tr("UI_COLLAR"), &"medidor_collar", Estilo.color(&"rojo"))
 
 
 func _dibujar_aviso() -> void:
 	if not mostrando_logro():
 		return
-	var fuente := Estilo.fuente()
 	var caja := rect_logro()
 	_aviso.draw_rect(caja, Estilo.color(&"fondo_medidor", 1.0))
 	_aviso.draw_rect(caja, Estilo.color(&"rojo"), false, 1.0)
-	_aviso.draw_string(fuente, caja.position + Vector2(8, 13), tr("UI_LOGRO_NUEVO"), HORIZONTAL_ALIGNMENT_LEFT, -1, Estilo.letra(&"logro_titulo"), Estilo.color(&"texto_apagado"))
-	_aviso.draw_string(fuente, caja.position + Vector2(8, 27), _notificacion, HORIZONTAL_ALIGNMENT_LEFT, -1, Estilo.letra(&"logro_nombre"), Estilo.color(&"texto_oscuro"))
+	Estilo.escribir(_aviso, caja.position + Vector2(8, 12), tr("UI_LOGRO_NUEVO"), &"logro_titulo", Estilo.color(&"texto_apagado"))
+	Estilo.escribir(_aviso, caja.position + Vector2(8, 28), _notificacion, &"logro_nombre", Estilo.color(&"texto_oscuro"))
 
 
 ## Peso con personalidad: el humor de Felipe según los kilos (no cambia su dibujo ni su movimiento).

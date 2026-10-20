@@ -391,7 +391,6 @@ func _en_felipe() -> Vector2:
 func _dibujar() -> void:
 	var c := _interfaz
 	var tam := c.get_viewport_rect().size
-	var fuente := Estilo.fuente()
 	if presentando and penumbra > 0.0:
 		c.draw_rect(Rect2(Vector2.ZERO, tam), Estilo.color(&"jefe_penumbra", 0.45 * penumbra))
 	if _barras > 0.0:
@@ -402,10 +401,9 @@ func _dibujar() -> void:
 	if subtitulo_en_pantalla != "":
 		var quien := String(frase_sin_vuelta[0]).to_upper()
 		var linea := "%s: %s" % [quien, subtitulo_en_pantalla]
-		var ancho_linea := fuente.get_string_size(linea, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
-		var pos := Vector2((tam.x - ancho_linea) / 2.0, tam.y - 16.0)
-		c.draw_string(fuente, pos + Vector2(1, 1), linea, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Estilo.color(&"negro"))
-		c.draw_string(fuente, pos, linea, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Estilo.color(&"jefe_subtitulo"))
+		var pos := Vector2((tam.x - Estilo.ancho(linea, &"jefe_subtitulo")) / 2.0, tam.y - 14.0)
+		Estilo.escribir(c, pos + Vector2(1, 1), linea, &"jefe_subtitulo", Estilo.color(&"negro"))
+		Estilo.escribir(c, pos, linea, &"jefe_subtitulo", Estilo.color(&"jefe_subtitulo"))
 	if _ola >= 0.0:
 		# Ola de polvo del rugido: cruza la pantalla de un lado al otro.
 		var x := _ola / 1.2 * (tam.x + 200.0) - 100.0
@@ -415,24 +413,25 @@ func _dibujar() -> void:
 	if texto_en_pantalla == TEXTO_INICIO:
 		var k := clampf((t - _rango("revelar")[0]) / 0.15, 0.0, 1.0)
 		_banda(c, tam, tam.y * 0.5, color_inicio, -1.0)
-		c.draw_set_transform(tam / 2.0 + Vector2(0, 10), -0.06, Vector2.ONE * lerpf(2.6, 1.0, k))
-		_texto_con_sombra(c, fuente, tr(TEXTO_INICIO), 30, Estilo.color(&"jefe_amarillo"), Estilo.color(&"negro"), Vector2(2, 2))
+		# El golpe de entrada va en escalones enteros (3×, 2×, 1×) y sin girar: la letra pixel no se deforma (B1, B3).
+		var escala := 3.0 if k < 0.34 else (2.0 if k < 0.67 else 1.0)
+		c.draw_set_transform((tam / 2.0 + Vector2(0, 10)).round(), 0.0, Vector2.ONE * escala)
+		_texto_con_sombra(c, tr(TEXTO_INICIO), &"jefe_inicio", Estilo.color(&"jefe_amarillo"), Estilo.color(&"negro"), Vector2(2, 2))
 		c.draw_set_transform(Vector2.ZERO)
-		c.draw_string(fuente, Vector2(20, tam.y - 56), tr(lema_felipe), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Estilo.color(&"blanco"))
+		Estilo.escribir(c, Vector2(20, tam.y - 56), tr(lema_felipe), &"jefe_lema", Estilo.color(&"blanco"))
 	elif presentando and texto_en_pantalla == nombre and nombre != "":
 		var k := clampf((t - _rango("nombre")[0]) / 0.2, 0.0, 1.0)
 		var desliza := (1.0 - ease(k, 0.3)) * tam.x
 		_banda(c, tam, tam.y * 0.68, color_nombre, 1.0, desliza)
-		c.draw_set_transform(Vector2(tam.x * 0.5 + desliza, tam.y * 0.68), 0.05)
-		_texto_con_sombra(c, fuente, nombre, 40, Estilo.color(&"jefe_amarillo"), color_inicio, Vector2(3, 3), Vector2(0, 3))
-		var sub := fuente.get_string_size(titulo, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
-		c.draw_string(fuente, Vector2(-sub / 2.0, 24), titulo, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Estilo.color(&"blanco"))
+		c.draw_set_transform(Vector2(tam.x * 0.5 + desliza, tam.y * 0.68).round())
+		_texto_con_sombra(c, nombre, &"jefe_nombre", Estilo.color(&"jefe_amarillo"), color_inicio, Vector2(3, 3), Vector2(0, 8))
+		Estilo.escribir(c, Vector2(-roundf(Estilo.ancho(titulo, &"jefe_titulo") / 2.0), 26), titulo, &"jefe_titulo", Estilo.color(&"blanco"))
 		c.draw_set_transform(Vector2.ZERO)
 	elif presentando and texto_rugido != "" and texto_en_pantalla == texto_rugido:
 		var temblor := Vector2(_azar.randf_range(-2, 2), _azar.randf_range(-2, 2)).round()
-		c.draw_set_transform(Vector2(tam.x * 0.5, tam.y * 0.3) + temblor, -0.03)
+		c.draw_set_transform((Vector2(tam.x * 0.5, tam.y * 0.3) + temblor).round())
 		# Caja oscura detrás: el rojo no se pierde en el fondo en llamas (M1).
-		var ancho_rugido := fuente.get_string_size(texto_rugido, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
+		var ancho_rugido := roundf(Estilo.ancho(texto_rugido, &"jefe_rugido"))
 		# Cartela de alerta (crítica de Gemini): fondo semitransparente con marco rojo de 1 px y esquinas marcadas,
 		# para que el texto no compita con el contorno del jefe.
 		var cartela := Rect2(-ancho_rugido / 2.0 - 12, -20, ancho_rugido + 24, 28)
@@ -441,19 +440,18 @@ func _dibujar() -> void:
 		c.draw_rect(cartela.grow(-2), Estilo.color(&"jefe_alerta"), false, 1.0)
 		for esquina: Vector2 in [cartela.position, Vector2(cartela.end.x - 5, cartela.position.y), Vector2(cartela.position.x, cartela.end.y - 5), cartela.end - Vector2(5, 5)]:
 			c.draw_rect(Rect2(esquina, Vector2(5, 5)), Estilo.color(&"jefe_alerta"))
-		c.draw_string_outline(fuente, Vector2(-ancho_rugido / 2.0, 0), texto_rugido, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, 5, Estilo.color(&"negro"))
-		_texto_con_sombra(c, fuente, texto_rugido, 18, Estilo.color(&"jefe_rugido"), Estilo.color(&"negro"), Vector2(2, 2))
+		_texto_con_sombra(c, texto_rugido, &"jefe_rugido", Estilo.color(&"jefe_rugido"), Estilo.color(&"negro"), Vector2(1, 1))
 		c.draw_set_transform(Vector2.ZERO)
 	if _cartel > 0.0 and _texto_cartel != "":
 		var alfa := minf(_cartel * 2.0, 1.0)
-		var ancho := fuente.get_string_size(_texto_cartel, HORIZONTAL_ALIGNMENT_LEFT, -1, 22).x
+		var ancho := Estilo.ancho(_texto_cartel, &"jefe_cartel")
 		var y := _y_cartel if _y_cartel >= 0.0 else tam.y * 0.38
-		c.draw_rect(Rect2(0, y - 22, tam.x, 30 + (18 if _pista != "" else 0)), Estilo.color(&"jefe_cartel_fondo", 0.8 * alfa))
-		c.draw_string(fuente, Vector2((tam.x - ancho) / 2.0, y), _texto_cartel, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Estilo.color(&"jefe_amarillo", alfa))
+		c.draw_rect(Rect2(0, y - 24, tam.x, 32 + (20 if _pista != "" else 0)), Estilo.color(&"jefe_cartel_fondo", 0.8 * alfa))
+		Estilo.escribir(c, Vector2((tam.x - ancho) / 2.0, y), _texto_cartel, &"jefe_cartel", Estilo.color(&"jefe_amarillo", alfa))
 		if _pista != "":
 			var texto := _etiquetar(_pista)
-			var ancho_pista := fuente.get_string_size(texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
-			c.draw_string(fuente, Vector2((tam.x - ancho_pista) / 2.0, y + 18), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Estilo.color(&"blanco", alfa))
+			var ancho_pista := Estilo.ancho(texto, &"jefe_pista")
+			Estilo.escribir(c, Vector2((tam.x - ancho_pista) / 2.0, y + 20), texto, &"jefe_pista", Estilo.color(&"blanco", alfa))
 
 
 func _dibujar_destello() -> void:
@@ -491,10 +489,10 @@ func _etiquetar(texto: String) -> String:
 	return Controles.etiquetar(texto)
 
 
-func _texto_con_sombra(c: Node2D, fuente: Font, texto: String, tamano: int, color: Color, sombra: Color, desfase: Vector2, base := Vector2.ZERO) -> void:
-	var ancho := fuente.get_string_size(texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano).x
-	c.draw_string(fuente, base + Vector2(-ancho / 2.0, 0) + desfase, texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano, sombra)
-	c.draw_string(fuente, base + Vector2(-ancho / 2.0, 0), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano, color)
+func _texto_con_sombra(c: Node2D, texto: String, estilo: StringName, color: Color, sombra: Color, desfase: Vector2, base := Vector2.ZERO) -> void:
+	var ancho := roundf(Estilo.ancho(texto, estilo))
+	Estilo.escribir(c, base + Vector2(-ancho / 2.0, 0) + desfase, texto, estilo, sombra)
+	Estilo.escribir(c, base + Vector2(-ancho / 2.0, 0), texto, estilo, color)
 
 
 ## Franja inclinada que cruza la pantalla.

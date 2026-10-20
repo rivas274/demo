@@ -103,7 +103,7 @@ func _dibujar_agenda() -> void:
 	for k in 3:
 		_barra.draw_line(Vector2(X0 + 6, 13 + k * 4), Vector2(X0 + 14 - (k / 2) * 2, 13 + k * 4), Estilo.color(&"hud_libreta_tinta"), 1.0)
 	var texto := tr("UI_AGENDA_CONTADOR") % [agenda.cumplidas(), agenda.total()]
-	Estilo.texto_con_contorno(_barra, Vector2(X0 + 20, 21), texto, Estilo.letra(&"hud") + int(g * 4), Estilo.color(&"hud_agenda").lerp(Estilo.color(&"blanco"), g))
+	Estilo.texto_con_contorno(_barra, Vector2(X0 + 20, 21 - roundf(g * 2.0)), texto, &"hud", Estilo.color(&"hud_agenda").lerp(Estilo.color(&"blanco"), g))
 	IconosBotones.dibujar(_barra, "agenda", Vector2(X0 + ANCHO_AGENDA - IconosBotones.ancho("agenda", 12.0) - 3, 11), 12.0)
 
 

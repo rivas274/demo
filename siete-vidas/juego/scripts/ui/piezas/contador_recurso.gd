@@ -54,4 +54,5 @@ func _draw() -> void:
 	if not tiene:
 		draw_rect(Rect2(1, 1, 24, 20), Estilo.color(&"apagado_hud"))
 	var color := Estilo.color(&"hud_numero").lerp(Estilo.color(&"hud_golpe"), golpe) if tiene else Estilo.color(&"hud_numero_vacio")
-	Estilo.texto_con_contorno(self, Vector2(27, 15), texto, Estilo.letra(&"hud") + int(golpe * 4), color)
+	# El golpe hace saltar el número 2 px (no lo agranda: la letra pixel va siempre a su tamaño).
+	Estilo.texto_con_contorno(self, Vector2(27, 15 - roundf(golpe * 2.0)), texto, &"hud", color)

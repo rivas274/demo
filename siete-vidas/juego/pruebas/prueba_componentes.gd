@@ -147,7 +147,7 @@ func _probar_tirable() -> void:
 	raton.recibe_golpes.aturdido.connect(func(s: float) -> void: aturdido[0] = s)
 	var cayo := [false]
 	vaso.tirable.caido.connect(func(_p: Vector2) -> void: cayo[0] = true)
-	_comprobar(vaso.tirable.is_in_group(Componentes.INTERACTUABLES) and vaso.tirable.verbo(felipe) == "Liberar", "Tirable se ofrece al botón de acción («Liberar»)")
+	_comprobar(vaso.tirable.is_in_group(Componentes.INTERACTUABLES) and tr(vaso.tirable.verbo(felipe)) == "Liberar", "Tirable se ofrece al botón de acción («Liberar»)")
 	felipe.mirando = 1.0
 	vaso.tirable.empujar(felipe)
 	_comprobar(vaso.tirable.cayendo and not vaso.tirable.is_in_group(Componentes.INTERACTUABLES), "Tirable: empujado empieza a caer y deja de ofrecerse")
@@ -277,12 +277,12 @@ func _probar_escenas() -> void:
 	_comprobar(caja.roto, "La caja se rompe de un zarpazo")
 	caja.queue_free()
 	var pollo := Comida.crear(load("res://datos/objetos/pollo.tres"))
-	_comprobar(pollo.tipo == "pollo" and pollo.verbo(felipe) == "Degustar" and Componentes.de(pollo, SombraContacto) != null, "comida.tscn: la comida toma sus datos y trae su sombra")
+	_comprobar(pollo.tipo == "pollo" and tr(pollo.verbo(felipe)) == "Degustar" and Componentes.de(pollo, SombraContacto) != null, "comida.tscn: la comida toma sus datos y trae su sombra")
 	pollo.free()
 	var llaves := Objeto.crear(load("res://datos/objetos/llaves.tres"), PISO)
 	var vaso := Objeto.crear(load("res://datos/objetos/vaso.tres"), PISO)
 	_comprobar(llaves.name == "Llaves" and llaves.tirable.sonido == "caja" and not llaves.datos.se_rompe, "Las llaves suenan a metal y no se rompen (sus datos)")
-	_comprobar(vaso.name == "Vaso" and not vaso.tirable.aturde and vaso.tirable.logro == "La Gravedad Funciona", "El vaso no aturde y da su logro (sus datos)")
+	_comprobar(vaso.name == "Vaso" and not vaso.tirable.aturde and tr(vaso.tirable.logro) == "La Gravedad Funciona", "El vaso no aturde y da su logro (sus datos)")
 	llaves.free()
 	vaso.free()
 	await _esperar(2)

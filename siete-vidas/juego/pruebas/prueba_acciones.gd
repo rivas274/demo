@@ -454,7 +454,7 @@ func _probar_indicador() -> void:
 	var verbos := {}
 	for nombre: String in ["Sofa arañable", "Ropa doblada", "Puerta entornada"]:
 		var cosa := sala.get_node(nombre)
-		verbos[String(cosa.call("verbo", felipe))] = nombre
+		verbos[TranslationServer.translate(String(cosa.call("verbo", felipe)))] = nombre
 	_comprobar(verbos.size() == 3 and verbos.has("Firmar") and verbos.has("Desordenar") and verbos.has("Arañar"), "M7 Sofá, ropa y puerta entornada tienen verbos distintos (%s)" % ", ".join(verbos.keys()))
 	# M5: el punto del láser mide 8 px o más.
 	_comprobar(Laser.RADIO_PUNTO * 2.0 >= 8.0, "M5 El punto del láser mide %.0f px (con halo que late)" % (Laser.RADIO_PUNTO * 2.0))

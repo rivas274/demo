@@ -327,7 +327,7 @@ func _correr() -> void:
 	await _poner_en(Vector2(Nivel1.ESCALERA_PIE.x, Nivel1.SUELO), 20)
 	_comprobar(felipe.objeto_cercano() != guion.cajas, "Adentro, en el piso, las cajas no se ofrecen (manda «Ascender»)")
 	await _poner_en(Nivel1.PELDANO_CAJAS, 20)
-	_comprobar(felipe.is_on_floor() and felipe.objeto_cercano() == guion.cajas and guion.cajas.verbo(felipe) == "Tirar", "Parado en el segundo peldaño (desde arriba), el botón de las cajas es «Tirar»")
+	_comprobar(felipe.is_on_floor() and felipe.objeto_cercano() == guion.cajas and tr(guion.cajas.verbo(felipe)) == "Tirar", "Parado en el segundo peldaño (desde arriba), el botón de las cajas es «Tirar»")
 	# El mundo reacciona (pilar 5): Valeria tiene los audífonos de la reunión puestos y aun así oye el ¡PUM!.
 	var con_audifonos := guion.valeria.audifonos
 	await _tocar("interactuar")

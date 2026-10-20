@@ -47,7 +47,7 @@ func _correr() -> void:
 			["{maullar}", Nivel1.PUERTAS[2][1], "maullar (puerta de la cocina)"]]:
 		var ensenada := false
 		for leccion: Array in lecciones:
-			if exigida[0] in leccion[1] and _antes_en_ruta(leccion[0].get_center(), exigida[1]):
+			if exigida[0] in TranslationServer.translate(String(leccion[1])) and _antes_en_ruta(leccion[0].get_center(), exigida[1]):
 				ensenada = true
 		_comprobar(ensenada, "R1 Se enseña %s antes de exigirlo" % exigida[2])
 	for i in lecciones.size():

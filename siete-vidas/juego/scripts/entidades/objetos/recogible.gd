@@ -15,6 +15,9 @@ const CAPAS_SUELO := 1 | 2
 ## Distancia (horizontal, vertical) a la que Felipe la recoge.
 @export var alcance := Vector2(26, 46)
 
+## Contorno que late: el ícono multiplicado por un tinte fuerte (queda casi crema, como el resalte del Indicador).
+const BRILLO := Color(6.0, 5.5, 3.6, 0.9)
+
 var velocidad := Vector2.ZERO
 var quieto := false
 var _vida := 0.0
@@ -76,12 +79,13 @@ func recoger() -> void:
 
 
 func _draw() -> void:
-	# Brillo para que se lea como "esto se recoge".
-	if not _recogido:
-		var brillo := 0.35 + 0.25 * sin(_vida * 6.0)
-		draw_circle(Vector2(0, -Recogible.tamano_icono(tipo).y / 2.0), 20.0, Color(1.0, 0.95, 0.6, brillo * 0.35))
+	# Se lee como "esto se recoge": un contorno de 1 px que late (escalones de pixel, sin halo suave: G5 y lección 26).
+	var centro := Vector2(0, -Recogible.tamano_icono(tipo).y / 2.0)
+	if not _recogido and sin(_vida * 6.0) > -0.2:
+		for lado: Vector2 in [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]:
+			Recogible.dibujar_icono(self, tipo, centro + lado, 1.0, BRILLO)
 	# Se apoya por su borde de abajo (ningún margen transparente: M1).
-	Recogible.dibujar_icono(self, tipo, Vector2(0, -Recogible.tamano_icono(tipo).y / 2.0), 1.0)
+	Recogible.dibujar_icono(self, tipo, centro, 1.0)
 
 
 ## Tamaño del dibujo de cada recompensa (lado menor ≥ 24 px, R8): calcetín y bolsita de premios de Gemini.
@@ -97,14 +101,18 @@ static func tamano_icono(que: String) -> Vector2:
 
 
 ## Dibuja el ícono centrado en `centro` (lo usan también el HUD y el resumen, a otra escala).
-static func dibujar_icono(lienzo: CanvasItem, que: String, centro: Vector2, escala: float) -> void:
+## Con `tinte`, la silueta pintada de ese color (el contorno que late).
+static func dibujar_icono(lienzo: CanvasItem, que: String, centro: Vector2, escala: float, tinte := Color.WHITE) -> void:
 	var e := escala
+	var silueta := tinte != Color.WHITE
 	match que:
 		"calcetin":
 			var arte := ArteNivel.textura("calcetin")
 			if arte:
 				var tam := arte.get_size() * e
-				lienzo.draw_texture_rect(arte, Rect2(centro - tam / 2.0, tam), false)
+				lienzo.draw_texture_rect(arte, Rect2((centro - tam / 2.0).round(), tam), false, tinte)
+				return
+			if silueta:
 				return
 			var blanco := Color(0.95, 0.95, 0.92)
 			var raya := Color(0.85, 0.25, 0.3)
@@ -119,7 +127,9 @@ static func dibujar_icono(lienzo: CanvasItem, que: String, centro: Vector2, esca
 			var bolsa := ArteNivel.textura("bolsita")
 			if bolsa:
 				var tam_bolsa := bolsa.get_size() * e
-				lienzo.draw_texture_rect(bolsa, Rect2(centro - tam_bolsa / 2.0, tam_bolsa), false)
+				lienzo.draw_texture_rect(bolsa, Rect2((centro - tam_bolsa / 2.0).round(), tam_bolsa), false, tinte)
+				return
+			if silueta:
 				return
 			var c := centro
 			var cuerpo := PackedVector2Array([c + Vector2(-14, 0) * e, c + Vector2(-4, -7) * e, c + Vector2(8, -5) * e, c + Vector2(14, 0) * e, c + Vector2(8, 6) * e, c + Vector2(-4, 7) * e])
@@ -128,6 +138,9 @@ static func dibujar_icono(lienzo: CanvasItem, que: String, centro: Vector2, esca
 			lienzo.draw_circle(c + Vector2(-8, -1) * e, 1.6 * e, Color(0.1, 0.1, 0.1))
 		"foto":
 			# Foto vergonzosa de Valeria (pijama de unicornio), 30 x 26 px.
+			if silueta:
+				lienzo.draw_rect(Rect2(centro + Vector2(-15, -13) * e, Vector2(30, 26) * e), tinte)
+				return
 			lienzo.draw_rect(Rect2(centro + Vector2(-15, -13) * e, Vector2(30, 26) * e), Color(0.98, 0.97, 0.93))
 			lienzo.draw_rect(Rect2(centro + Vector2(-12, -10) * e, Vector2(24, 17) * e), Color(0.6, 0.75, 0.95))
 			lienzo.draw_rect(Rect2(centro + Vector2(-6, -2) * e, Vector2(12, 9) * e), Color(0.98, 0.6, 0.8))

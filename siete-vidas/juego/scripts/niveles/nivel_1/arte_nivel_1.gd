@@ -385,6 +385,10 @@ func _dibujar_ventana_pasillo(c: Node2D) -> void:
 ## sobre el marco y la tela baja hasta el piso (lo que sobra del arte no se dibuja), detrás de la cama y la cómoda.
 ## Sin colisión: en el nivel 1 no se trepa (con Afilar Garras se subirá por la tela hasta la barra y, de ahí, a la
 ## repisa alta con la caja de recuerdos).
+## Alto del ruedo de la cortina que se mueve con la brisa.
+const RUEDO := 6.0
+
+
 func _dibujar_cortina(c: Node2D) -> void:
 	var textura := ArteNivel.textura("cortina")
 	if textura == null:
@@ -398,9 +402,10 @@ func _dibujar_cortina(c: Node2D) -> void:
 	if barra:
 		var desde := izquierda + ancho
 		c.draw_texture_rect(barra, Rect2(desde, arriba + 1.0, derecha - ancho - desde, barra.get_height()), false)
-	# Brisa (D-4): la mitad de abajo de cada paño se corre 1 px de forma alterna cada 0,5 s, con otra fase en cada
-	# paño (el derecho va en espejo).
-	var medio := roundf(alto * 0.55)
+	# Brisa (D-4): el ruedo (los últimos RUEDO px de cada paño) se corre 1 px de forma alterna cada 0,5 s, con otra
+	# fase en cada paño (el derecho va en espejo). Antes se corría la mitad de abajo y dejaba un escalón a media
+	# altura del paño (G10 de la revisión de consistencia).
+	var medio := alto - RUEDO
 	var paso := int(tiempo * 2.0)
 	for pano in 2:
 		var vaiven := 1.0 if (paso + pano) % 2 == 0 else 0.0
@@ -418,14 +423,23 @@ func _dibujar_sofa(c: Node2D) -> void:
 	var textura := ArteNivel.textura(nombre)
 	if textura:
 		ArteNivel.dibujar(c, nombre, Nivel1.ARTE_EXTRA[0][1].x + textura.get_width() / 2.0, Nivel1.SUELO)
-	if not guion.sofa_roto:
-		_etiqueta_nuevo(c, Vector2(262, Nivel1.SUELO - 66))
-	_etiqueta_nuevo(c, Vector2(Nivel1.RASCADOR_X + 22, Nivel1.SUELO - 130))
+	# «NUEVO» va escrito sobre las etiquetas de Gemini que ya cuelgan del rascador (G3 de la revisión de
+	# consistencia: antes era un rectángulo de código flotando al lado, y otro junto al sofá, que no trae etiqueta).
+	var rascador := Vector2(Nivel1.RASCADOR_X - 50.0, Nivel1.SUELO - 165.0)
+	for etiqueta: Rect2 in ETIQUETAS_RASCADOR:
+		_escribir_nuevo(c, Rect2(rascador + etiqueta.position, etiqueta.size))
 
 
-## Etiqueta "NUEVO" (rascador y sofá; el texto lo pone el código).
-func _etiqueta_nuevo(c: CanvasItem, pos: Vector2) -> void:
-	var caja := Rect2(pos, Vector2(30, 11))
-	c.draw_rect(caja.grow(1), Color(0.45, 0.12, 0.12))
-	c.draw_rect(caja, Color(0.98, 0.95, 0.85))
-	c.draw_string(ThemeDB.fallback_font, pos + Vector2(2, 9), "NUEVO", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0.75, 0.1, 0.1))
+## Etiquetas blancas que cuelgan en el arte del rascador (en px de su imagen de 100 × 165).
+const ETIQUETAS_RASCADOR := [Rect2(63, 29, 9, 14), Rect2(9, 78, 9, 14)]
+const TINTA_NUEVO := Color(0.75, 0.1, 0.1)
+
+
+## «NUEVO» en una etiqueta de 9 × 14 px: a ese tamaño no cabe la palabra con ninguna letra, así que se ve como una
+## etiqueta de precio a escala de gato: renglones rojos de pixel (el chiste del sofá nuevo lo cuentan el Indicador y
+## la agenda: «Arañar el sofá nuevo»).
+func _escribir_nuevo(c: CanvasItem, etiqueta: Rect2) -> void:
+	var x := etiqueta.position.x + 2.0
+	c.draw_rect(Rect2(x, etiqueta.position.y + 5.0, 5.0, 1.0), TINTA_NUEVO)
+	c.draw_rect(Rect2(x, etiqueta.position.y + 8.0, 3.0, 1.0), TINTA_NUEVO)
+	c.draw_rect(Rect2(x + 4.0, etiqueta.position.y + 8.0, 1.0, 1.0), TINTA_NUEVO)

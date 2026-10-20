@@ -50,8 +50,11 @@ const RADIO_PUNTO := 4.0
 func _draw() -> void:
 	if apagado:
 		return
-	var latido := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 1000.0 * 8.0)
-	draw_circle(Vector2(0, -3), RADIO_PUNTO + 4.0 + latido * 2.0, Color(1, 0.15, 0.15, 0.18 + 0.12 * latido))
-	draw_circle(Vector2(0, -3), RADIO_PUNTO + 1.5, Color(1, 0.2, 0.2, 0.45))
-	draw_circle(Vector2(0, -3), RADIO_PUNTO, Color("ff2a2a"))
-	draw_circle(Vector2(-1, -4), 1.5, Color(1, 0.85, 0.85))
+	# Punto de pixel: 3 × 3 rojo con una cruz de 1 px y un latido de 1 px (sin aros suaves: G5 y lección 26).
+	var latido := sin(Time.get_ticks_msec() / 1000.0 * 8.0) > 0.0
+	var centro := Vector2(-1, -4)
+	var largo := 3.0 if latido else 2.0
+	draw_rect(Rect2(centro + Vector2(1, -largo), Vector2(1, largo * 2.0 + 3.0)), Color(1, 0.25, 0.25, 0.7))
+	draw_rect(Rect2(centro + Vector2(-largo, 1), Vector2(largo * 2.0 + 3.0, 1)), Color(1, 0.25, 0.25, 0.7))
+	draw_rect(Rect2(centro, Vector2(3, 3)), Color("ff2a2a"))
+	draw_rect(Rect2(centro + Vector2(1, 1), Vector2(1, 1)), Color(1, 0.85, 0.85))

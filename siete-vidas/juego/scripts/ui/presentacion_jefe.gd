@@ -37,8 +37,10 @@ const PASOS_CORTOS := [["sin_vuelta_atras", 0.0, 0.3], ["nombre", 0.3, 1.0]]
 ## Dentro de "revelar": el golpe de cámara a Felipe con «¡BATALLA INICIADA!» dura esto; después sube por el jefe.
 const GOLPE := 0.4
 const EMPUJONES := [3.5, 3.75]
-const ZOOM_FELIPE := 2.6
-const ZOOM_JEFE := 3.0
+## Zooms siempre enteros (B3 de la revisión de consistencia): con 1,3 o 2,6 los pixeles quedaban de tamaños mezclados.
+## Entre pasos el zoom cambia con corte seco (estilo Broforce); el encuadre se hace moviendo la cámara.
+const ZOOM_FELIPE := 3
+const ZOOM_JEFE := 2
 const TEXTO_INICIO := "JEFE_BATALLA_INICIADA"
 ## Lo que se esconde durante la presentación (cada nodo implementa al_presentar_jefe(presentando: bool)).
 const GRUPO_OCULTAR := "ocultar_en_presentacion"
@@ -61,7 +63,7 @@ var color_nombre := Estilo.color(&"jefe_banda")
 var alto_jefe := 48.0
 ## Encuadre al final del momento del jefe (INF: sobre el jefe) y su zoom.
 var encuadre_momento := Vector2.INF
-var zoom_momento := 1.15
+var zoom_momento := 1
 ## El momento es imaginación de Felipe: se enmarca con una nube de pensamiento.
 var imaginacion := true
 ## Pantallas del nivel: al terminar, el juego sigue solo si no se abrió la pausa.
@@ -81,6 +83,8 @@ var paso_actual := ""
 var momento := 0.0
 var texto_en_pantalla := ""
 var zoom_maximo := 1.0
+## Zooms que usó la entrada (para las pruebas: todos enteros).
+var zooms_usados := {}
 ## Penumbra del paso "espera" (0 a 1).
 var penumbra := 0.0
 ## Barra de vida del jefe (0 a 1; negativa la oculta), escudo (0 a 1) y marcas entre golpes.
@@ -293,14 +297,14 @@ func _avanzar(delta: float) -> void:
 		subtitulo_en_pantalla = String(frase_sin_vuelta[1])
 	if _en("sin_vuelta_atras"):
 		_camara.global_position = _en_felipe()
-		_camara.zoom = Vector2.ONE * lerpf(1.0, 1.3, (t - _rango("sin_vuelta_atras")[0]) / 0.4)
+		_poner_zoom(1)
 		_barras = minf(1.0, _barras + delta * 4.0)
 	elif _en("espera"):
 		var r := _rango("espera")
 		var k: float = (t - r[0]) / (r[1] - r[0])
 		penumbra = k
 		_camara.global_position = _en_felipe().lerp(en_jefe, ease(k, 2.0) * 0.5)
-		_camara.zoom = Vector2.ONE * lerpf(1.3, 1.5, k)
+		_poner_zoom(2)
 		_sacudida = maxf(_sacudida, 0.03 + 0.1 * k)
 	elif _en("revelar"):
 		var r := _rango("revelar")
@@ -309,7 +313,7 @@ func _avanzar(delta: float) -> void:
 			# Golpe de cámara a la cara de Felipe con «¡BATALLA INICIADA!».
 			texto_en_pantalla = TEXTO_INICIO
 			_camara.global_position = _en_felipe()
-			_camara.zoom = Vector2.ONE * lerpf(1.5, ZOOM_FELIPE, ease(minf(dentro / 0.12, 1.0), 0.3))
+			_poner_zoom(ZOOM_FELIPE)
 		else:
 			# Revelar despacio: la cámara empieza en las ruedas y sube hasta el sensor; crece la imaginación.
 			var k: float = (dentro - GOLPE) / (r[1] - r[0] - GOLPE)
@@ -321,13 +325,13 @@ func _avanzar(delta: float) -> void:
 			var cara := _jefe.global_position + Vector2(0, -alto_jefe)
 			var destino := cara if encuadre_momento == Vector2.INF else encuadre_momento
 			_camara.global_position = ruedas.lerp(cara, ease(minf(k * 1.6, 1.0), 0.6)).lerp(destino, ease(maxf(0.0, k * 1.6 - 0.6), 1.0))
-			_camara.zoom = Vector2.ONE * lerpf(ZOOM_JEFE, zoom_momento, ease(k, 0.5))
+			_poner_zoom(ZOOM_JEFE if k < 0.5 else zoom_momento)
 	elif _en("nombre"):
 		texto_en_pantalla = nombre
 		momento = 1.0 if pasos == PASOS else 0.0
 		if pasos == PASOS_CORTOS:
 			_camara.global_position = en_jefe
-			_camara.zoom = Vector2.ONE * 1.3
+			_poner_zoom(1)
 	elif _en("barra") or _en("musica"):
 		momento = 1.0
 		var r := _rango("barra")
@@ -336,18 +340,19 @@ func _avanzar(delta: float) -> void:
 		momento = 1.0
 		# Cámara baja: el jefe se ve enorme.
 		_camara.global_position = _camara.global_position.lerp(en_jefe + Vector2(0, 26), 0.2)
-		_camara.zoom = Vector2.ONE * lerpf(_camara.zoom.x, 1.4, 0.2)
+		_poner_zoom(2)
 	elif _en("rugido"):
 		var r := _rango("rugido")
 		var k: float = (t - r[0]) / (r[1] - r[0])
 		texto_en_pantalla = texto_rugido
 		penumbra = 1.0 - k
 		_barras = 1.0 - k
-		_camara.zoom = Vector2.ONE * lerpf(1.4, 1.0, ease(k, 0.5))
+		_poner_zoom(1)
 		_camara.global_position = _camara.global_position.lerp(_en_felipe(), k)
 		_sacudida = maxf(_sacudida, 0.15)
 	zoom_maximo = maxf(zoom_maximo, _camara.zoom.x)
-	_camara.offset = Vector2(_azar.randf_range(-1, 1), _azar.randf_range(-1, 1)) * 6.0 * minf(_sacudida * 3.0, 1.0)
+	_camara.global_position = _camara.global_position.round()
+	_camara.offset = (Vector2(_azar.randf_range(-1, 1), _azar.randf_range(-1, 1)) * 6.0 * minf(_sacudida * 3.0, 1.0)).round()
 
 
 func _al_empezar_paso(paso: String) -> void:
@@ -409,7 +414,9 @@ func _dibujar() -> void:
 		var x := _ola / 1.2 * (tam.x + 200.0) - 100.0
 		for i in 18:
 			var y := tam.y - 40.0 - fmod(i * 37.0, 160.0)
-			c.draw_circle(Vector2(x - fmod(i * 53.0, 120.0), y), 10.0 + fmod(i * 7.0, 12.0), Estilo.color(&"jefe_polvo"))
+			# Granos de pixel en escalones (cuadrados de 4 a 8 px), no círculos difusos (G5, lección 26).
+			var lado := 4.0 + 2.0 * float(i % 3)
+			c.draw_rect(Rect2(Vector2(x - fmod(i * 53.0, 120.0), y).round(), Vector2(lado, lado)), Estilo.color(&"jefe_polvo"))
 	if texto_en_pantalla == TEXTO_INICIO:
 		var k := clampf((t - _rango("revelar")[0]) / 0.15, 0.0, 1.0)
 		_banda(c, tam, tam.y * 0.5, color_inicio, -1.0)
@@ -446,6 +453,8 @@ func _dibujar() -> void:
 		var alfa := minf(_cartel * 2.0, 1.0)
 		var ancho := Estilo.ancho(_texto_cartel, &"jefe_cartel")
 		var y := _y_cartel if _y_cartel >= 0.0 else tam.y * 0.38
+		# La franja de fase va siempre bajo la barra de arriba (HUD y barra del jefe), nunca encima (M4).
+		y = maxf(y, Anuncios.ALTO_BARRA + 4.0 + 24.0)
 		c.draw_rect(Rect2(0, y - 24, tam.x, 32 + (20 if _pista != "" else 0)), Estilo.color(&"jefe_cartel_fondo", 0.8 * alfa))
 		Estilo.escribir(c, Vector2((tam.x - ancho) / 2.0, y), _texto_cartel, &"jefe_cartel", Estilo.color(&"jefe_amarillo", alfa))
 		if _pista != "":
@@ -503,3 +512,9 @@ func _banda(c: Node2D, tam: Vector2, y: float, color: Color, inclinacion: float,
 		Vector2(desliza - 20, y - alto / 2.0 + caida), Vector2(tam.x + desliza + 20, y - alto / 2.0 - caida),
 		Vector2(tam.x + desliza + 20, y + alto / 2.0 - caida), Vector2(desliza - 20, y + alto / 2.0 + caida),
 	]), color)
+
+
+## Zoom entero (1, 2 o 3), con corte seco.
+func _poner_zoom(veces: int) -> void:
+	_camara.zoom = Vector2.ONE * float(maxi(veces, 1))
+	zooms_usados[maxi(veces, 1)] = true

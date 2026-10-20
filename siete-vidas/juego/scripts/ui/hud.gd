@@ -40,6 +40,8 @@ const DURACION_CARTEL := 2.45
 func _ready() -> void:
 	layer = Capas.CAPA_HUD
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# La barra se esconde mientras se presenta un jefe (M4: asomaba cortada bajo la franja de la imaginación).
+	add_to_group(PresentacionJefe.GRUPO_OCULTAR)
 	_barra = Control.new()
 	_barra.name = "Barra"
 	_barra.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -67,6 +69,11 @@ func _process(delta: float) -> void:
 	if _golpe_agenda <= 0.0:
 		set_process(false)
 	_barra.queue_redraw()
+
+
+func al_presentar_jefe(presentando: bool) -> void:
+	if _barra:
+		_barra.visible = not presentando
 
 
 ## Un recurso cambió ("calcetin", "snack", "foto" o "agenda"): muestra el valor nuevo y lo hace saltar.

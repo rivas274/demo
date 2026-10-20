@@ -451,30 +451,12 @@ func _dibujar_luz(c: Node2D) -> void:
 
 
 func _dibujar_primer_plano(c: Node2D) -> void:
-	# Siluetas oscuras delante de Felipe, a la altura de la planta baja: dan profundidad y enmarcan.
-	# Solo en el balcón (afuera): adentro taparían zonas de juego (M3).
-	for planta: Vector3 in [Vector3(10340, 560, 0.6)]:
-		_planta(c, Vector2(planta.x, planta.y), planta.z)
-
-
-func _planta(c: CanvasItem, base: Vector2, tamano: float) -> void:
-	c.draw_colored_polygon(PackedVector2Array([
-		base + Vector2(-24, -40) * tamano, base + Vector2(24, -40) * tamano,
-		base + Vector2(18, 20) * tamano, base + Vector2(-18, 20) * tamano,
-	]), SILUETA)
-	for hoja: Vector2 in [Vector2(-70, -110), Vector2(-25, -150), Vector2(20, -140), Vector2(65, -95), Vector2(-85, -60), Vector2(80, -50)]:
-		_hoja(c, base + Vector2(0, -40) * tamano, base + hoja * tamano, 14.0 * tamano)
-
-
-## Hoja alargada: un rombo curvo entre el tallo y la punta.
-func _hoja(c: CanvasItem, desde: Vector2, hacia: Vector2, ancho_hoja: float) -> void:
-	var largo := hacia - desde
-	var lado := largo.orthogonal().normalized() * ancho_hoja
-	var puntos := PackedVector2Array()
-	for i in 9:
-		var t := i / 8.0
-		puntos.append(desde + largo * t + lado * sin(t * PI))
-	for i in range(7, 0, -1):
-		var t := i / 8.0
-		puntos.append(desde + largo * t - lado * sin(t * PI) * 0.6)
-	c.draw_colored_polygon(puntos, SILUETA)
+	# Silueta oscura delante de Felipe, a la altura de la planta baja: da profundidad y enmarca. Solo en el balcón
+	# (afuera): adentro taparía zonas de juego (M3). Es la maceta grande de Gemini teñida de silueta, al doble (escala
+	# entera): antes eran polígonos lisos de código (G4 de la revisión de consistencia).
+	var maceta := ArteNivel.textura("maceta_grande")
+	if maceta == null:
+		return
+	for planta: Vector2 in [Vector2(10340, 560)]:
+		var tam := maceta.get_size() * 2.0
+		c.draw_texture_rect(maceta, Rect2((planta - Vector2(tam.x / 2.0, tam.y)).round(), tam), false, SILUETA)

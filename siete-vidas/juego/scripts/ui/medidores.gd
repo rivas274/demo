@@ -21,6 +21,7 @@ var pantallas: Pantallas:
 var dialogo: Dialogo
 ## Los corazones (pieza BarraVida).
 var corazones: BarraVida
+var _presentando := false
 var _notificacion := ""
 var _tiempo_notificacion := 0.0
 var _aviso: Control
@@ -40,6 +41,7 @@ func _ready() -> void:
 	corazones.position = Vector2(16, 16)
 	add_child(corazones)
 	_conectar_felipe()
+	add_to_group(PresentacionJefe.GRUPO_OCULTAR)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -87,8 +89,14 @@ func _redibujar(_valor: Variant = null) -> void:
 	queue_redraw()
 
 
+## Mientras se presenta un jefe, los corazones y las vidas no se ven (M4).
+func al_presentar_jefe(presentando: bool) -> void:
+	_presentando = presentando
+	_al_cambiar_modo(pantallas.modo if pantallas else Pantallas.Modo.JUGANDO)
+
+
 func _al_cambiar_modo(modo: Pantallas.Modo) -> void:
-	visible = modo == Pantallas.Modo.JUGANDO
+	visible = modo == Pantallas.Modo.JUGANDO and not _presentando
 	queue_redraw()
 
 

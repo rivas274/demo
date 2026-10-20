@@ -150,4 +150,4 @@ func _dibujar_provisional(b: Vector2) -> void:
 	var etiqueta := Rect2(Vector2(6, -ALTO + 16) + b, Vector2(30, 12))
 	draw_rect(etiqueta, Color(1.0, 0.98, 0.9))
 	draw_rect(etiqueta, Color(0.6, 0.15, 0.15), false, 1.0)
-	draw_string(ThemeDB.fallback_font, etiqueta.position + Vector2(2, 9), "NUEVO", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0.75, 0.1, 0.1))
+	Estilo.escribir(self, etiqueta.position + Vector2(2, 10), "NUEVO", &"etiqueta", Color(0.75, 0.1, 0.1))

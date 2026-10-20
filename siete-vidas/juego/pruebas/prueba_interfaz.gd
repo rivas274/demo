@@ -27,6 +27,7 @@ func _correr() -> void:
 	_probar_textos()
 	_probar_controles()
 	_probar_tema()
+	_probar_letras()
 
 	for fallo in _fallos:
 		print("FALLA: ", fallo)
@@ -257,6 +258,26 @@ func _probar_tema() -> void:
 		if "Color(" in FileAccess.get_file_as_string(ruta):
 			sueltos.append(ruta.get_file())
 	_comprobar(sueltos.is_empty(), "Tema: ningún script de la interfaz tiene colores sueltos %s" % [sueltos])
+
+
+## B1: letras pixel de licencia libre, sin suavizado, con tildes, eñe y signos de apertura, a su tamaño de diseño.
+func _probar_letras() -> void:
+	var estilos := [&"texto", &"nota", &"titulo", &"dialogo_texto", &"cartel_titulo", &"palabra", &"jefe_nombre", &"libreta_renglon"]
+	var bien := true
+	var detalle := []
+	for estilo: StringName in estilos:
+		var fuente := Estilo.fuente(estilo) as FontFile
+		var tamano := Estilo.letra(estilo)
+		var base := 8 if fuente != null and fuente.resource_path.ends_with("PixelOperator8.ttf") else 16 if fuente != null and fuente.resource_path.ends_with("PixelOperator.ttf") else 8
+		var ok := fuente != null and fuente.antialiasing == TextServer.FONT_ANTIALIASING_NONE and tamano % base == 0
+		for letra in "áéíóúñüÁÉÍÓÚÑ¿¡":
+			ok = ok and fuente != null and fuente.has_char(letra.unicode_at(0))
+		if not ok:
+			detalle.append(estilo)
+		bien = bien and ok
+	_comprobar(bien, "Letra: pixel, sin suavizado, con á é í ó ú ñ ü ¿ ¡ y a un múltiplo de su tamaño de diseño %s" % [detalle])
+	_comprobar(Estilo.fuente() != ThemeDB.fallback_font and Estilo.tema().default_font != null, "Letra: el tema trae su letra (ya no la de Godot)")
+	_comprobar(Estilo.recortar("A.S.P.I. — Devoradora de Pelos · Nivel 3", &"jefe_barra", 120.0).ends_with("…") and Estilo.ancho(Estilo.recortar("A.S.P.I. — Devoradora de Pelos · Nivel 3", &"jefe_barra", 120.0), &"jefe_barra") <= 120.0, "Letra: un texto que no cabe se recorta con «…»")
 
 
 func _scripts(carpeta: String) -> Array[String]:

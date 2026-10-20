@@ -89,6 +89,7 @@ func _correr() -> void:
 	_comprobar(textos.has(batalla.datos.nombre), "La entrada presenta a la jefa por su nombre")
 	_comprobar(textos.has(batalla.datos.rugido), "El rugido: «%s»" % batalla.datos.rugido)
 	_comprobar(batalla.presentacion.t < 5.0, "La entrada dura menos de 5 s (%.1f s)" % batalla.presentacion.t)
+	_comprobar(batalla.presentacion.zooms_usados.keys().all(func(z: Variant) -> bool: return z is int) and is_equal_approx(fmod(batalla.presentacion.zoom_maximo, 1.0), 0.0), "B3 La entrada usa solo zooms enteros (%s)" % [batalla.presentacion.zooms_usados.keys()])
 	_comprobar(batalla.presentacion.zoom_maximo >= 2.5, "La cámara se acerca como en Broforce (zoom %.1f)" % batalla.presentacion.zoom_maximo)
 	_comprobar(oculta and gigante_maximo >= 1.0, "En la imaginación de Felipe, A.S.P.I. se vuelve gigante")
 	_comprobar(sala.puertas["estudio<pasillo"].cerrada and subtitulos.has("…¿Quién cerró?"), "Sin vuelta atrás: la puerta se cierra sola («…¿Quién cerró?», como subtítulo de la presentación)")

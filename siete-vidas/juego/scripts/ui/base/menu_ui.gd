@@ -6,6 +6,12 @@ extends VBoxContainer
 ## Se arma en el editor (escenas/ui/menu_pausa.tscn); el texto de cada botón es una clave de traducción. Con
 ## `animar_entrada`, los botones (BotonMenu) caen desde arriba uno tras otro al mostrarse.
 
+## Hueco donde la pantalla de menú pone a Felipe asomado por un costado (nodo hijo `HuecoFelipe`, fuera del
+## acomodo de la columna: top_level). colocar_hueco(boton) lo lleva al costado de ese botón.
+var hueco_felipe: Control
+## Lado por el que asoma Felipe: -1 izquierda, 1 derecha.
+@export var lado_felipe := -1
+
 ## Al mostrarse, los botones caen desde arriba, escalonados (no con Opciones.reducir_movimiento).
 @export var animar_entrada := true
 
@@ -23,6 +29,7 @@ func _ready() -> void:
 		boton.focus_neighbor_top = boton.get_path_to(botones[(i - 1 + botones.size()) % botones.size()])
 		boton.focus_neighbor_bottom = boton.get_path_to(botones[(i + 1) % botones.size()])
 	visibility_changed.connect(_al_mostrarse)
+	hueco_felipe = get_node_or_null("HuecoFelipe")
 
 
 func _botones() -> Array[Button]:
@@ -69,3 +76,14 @@ func enfocado() -> Button:
 		if boton.has_focus():
 			return boton
 	return null
+
+
+## Lleva el hueco de Felipe al costado del botón (a su altura, pegado por fuera) y lo devuelve; la pantalla pone
+## ahí a Felipe y, cuando su pata llega (cuadro de impacto del zarpazo), llama boton.golpear().
+func colocar_hueco(boton: Button) -> Control:
+	if hueco_felipe == null:
+		return null
+	var r := boton.get_global_rect()
+	var x := r.position.x - hueco_felipe.size.x if lado_felipe < 0 else r.end.x
+	hueco_felipe.global_position = Vector2(x, r.position.y + (r.size.y - hueco_felipe.size.y) / 2.0).round()
+	return hueco_felipe

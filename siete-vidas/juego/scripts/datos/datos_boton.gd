@@ -18,6 +18,12 @@ extends Resource
 @export var vaiven_rampa := 0.4
 ## Lo que tarda el brillo en subir o bajar.
 @export var tiempo_brillo := 0.15
+@export_group("Manotazo")
+## golpear(fuerza): impulso de vaivén extra (grados por unidad de fuerza) que se apaga solo; período del columpio
+## y cuánto se amortigua por segundo (0 a 1: lo que queda después de un segundo).
+@export var golpe_grados := 14.0
+@export var golpe_periodo := 0.9
+@export var golpe_amortiguacion := 0.15
 @export_group("Entrada")
 ## Cae desde fuera del borde de arriba hasta su sitio (rebote), escalonado entre botones.
 @export var tiempo_entrada := 0.9

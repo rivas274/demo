@@ -122,6 +122,8 @@ func _probar_menu_y_pausa() -> void:
 	_comprobar(menu.enfocado() != null and menu.enfocado().name == &"Continuar", "MenuUI: al mostrarse, el foco va a la primera opción")
 	var abajo := menu.enfocado().find_valid_focus_neighbor(SIDE_BOTTOM)
 	var arriba := menu.get_node("Continuar").find_valid_focus_neighbor(SIDE_TOP) as Control
+	var hueco := menu.colocar_hueco(menu.get_node("Reiniciar"))
+	_comprobar(hueco != null and hueco.global_position.x + hueco.size.x <= (menu.get_node("Reiniciar") as Control).get_global_rect().position.x + 0.5, "MenuUI: el hueco de Felipe se pone al costado del botón elegido")
 	_comprobar(abajo != null and abajo.name == &"Reiniciar" and arriba != null and arriba.name == &"Salir", "MenuUI: se recorre hacia abajo y da la vuelta hacia arriba")
 	_comprobar((menu.get_node("Continuar") as Button).text == "MENU_CONTINUAR" and (menu.get_node("Continuar") as Button).auto_translate_mode != Node.AUTO_TRANSLATE_MODE_DISABLED, "MenuUI: el texto del botón es una clave que se traduce sola")
 	var elegidos: Array[StringName] = []
@@ -158,6 +160,14 @@ func _probar_boton() -> void:
 	boton.release_focus()
 	await _segundos(d.vaiven_rampa + 0.1)
 	_comprobar(is_equal_approx(boton.amplitud, 0.0), "BotonMenu: sin foco la amplitud vuelve a 0")
+	var golpes: Array[float] = []
+	boton.golpeado.connect(func(fuerza: float) -> void: golpes.append(fuerza))
+	boton.golpear(1.0)
+	await _segundos(0.1)
+	_comprobar(golpes == [1.0] and boton.columpio() > 0.0 and absf(boton.rotation) > 0.0, "BotonMenu: golpear() lo columpia y avisa con «golpeado»")
+	await _segundos(4.0)
+	_comprobar(boton.columpio() == 0.0, "BotonMenu: el columpio del manotazo se apaga solo")
+	_comprobar(boton.pivot_offset == (boton.size * boton.punto_cuelgue).round() and boton.pivot_offset.y == 0.0, "BotonMenu: cuelga de arriba al centro (pivote en el punto de cuelgue)")
 	Opciones.reducir_movimiento = true
 	boton.grab_focus()
 	await _segundos(d.vaiven_rampa + 0.1)

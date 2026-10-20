@@ -6,17 +6,24 @@ extends Button
 ## - con foco (teclado, mando) o con el mouse encima brilla y se mece como un péndulo colgado de arriba al centro;
 ##   la amplitud sube y baja con un tween (nunca de golpe);
 ## - entrada opcional: cae desde fuera del borde de arriba hasta su sitio, con rebote (MenuUI la escalona);
-## - `principal`: un pulso de brillo sutil para destacarlo.
+## - `principal`: un pulso de brillo sutil para destacarlo;
+## - golpear(fuerza): un manotazo (de Felipe, en el menú de estambre) suma un columpio fuerte que se apaga solo y
+##   avisa con `golpeado` (para soltar pelusa o un sonido). Cuelga de `punto_cuelgue` (el hilo, cuando llegue el arte).
 ## Con Opciones.reducir_movimiento no se mece ni entra cayendo.
 ##
 ## Pixel art: el juego se dibuja a 640×360 con snap a píxel, así que un giro se ve con dientes. Por eso el vaivén es
 ## chico (6°), solo existe en los menús (con el juego en pausa) y el pivote cae en un píxel entero. No se usó un
 ## SubViewport: también rendiría a 640×360 y no suavizaría nada.
 
+## Le dieron un manotazo (golpear): quien lo escucha suelta la pelusa, el sonido...
+signal golpeado(fuerza: float)
+
 const DATOS := "res://datos/ui/boton_menu.tres"
 
 ## Botón principal del menú (se destaca con un pulso).
 @export var principal := false
+## De dónde cuelga, como fracción del tamaño del botón (0,5; 0 = arriba al centro): pivote del balanceo.
+@export var punto_cuelgue := Vector2(0.5, 0.0)
 
 ## Grados de vaivén que se permiten ahora (0 sin foco; sube a vaiven_grados con foco).
 var amplitud := 0.0
@@ -30,6 +37,9 @@ var _tween_amplitud: Tween
 var _tween_brillo: Tween
 var _tween_escala: Tween
 var _brillo := 1.0
+## Columpio del último manotazo: amplitud en grados (se amortigua) y su reloj.
+var _golpe := 0.0
+var _t_golpe := 0.0
 
 
 func _ready() -> void:
@@ -49,13 +59,19 @@ func _ready() -> void:
 
 
 func _poner_pivote() -> void:
-	# Pivote arriba al centro, en un píxel entero.
-	pivot_offset = Vector2(roundf(size.x / 2.0), 0.0)
+	# Pivote en el punto de cuelgue (arriba al centro), en un píxel entero.
+	pivot_offset = (size * punto_cuelgue).round()
 
 
 func _process(delta: float) -> void:
 	_t += delta
 	var grados := 0.0 if Opciones.reducir_movimiento else amplitud * sin(_t * TAU / datos.vaiven_periodo)
+	if _golpe > 0.01:
+		_t_golpe += delta
+		_golpe *= pow(datos.golpe_amortiguacion, delta)
+		grados += _golpe * sin(_t_golpe * TAU / datos.golpe_periodo)
+	else:
+		_golpe = 0.0
 	rotation = deg_to_rad(grados)
 	var pulso := 0.0
 	if principal:
@@ -95,6 +111,20 @@ func _resaltar_si_no_hay_mouse() -> void:
 func _resaltar_si_no_hay_foco() -> void:
 	if not has_focus():
 		_resaltar(false)
+
+
+## Manotazo: suma un columpio de `fuerza` (1 = normal) que se apaga solo y emite `golpeado`. Con reducir
+## movimiento no se columpia, pero avisa igual (la pelusa y el sonido siguen).
+func golpear(fuerza := 1.0) -> void:
+	if not Opciones.reducir_movimiento:
+		_golpe += datos.golpe_grados * fuerza
+		_t_golpe = 0.0
+	golpeado.emit(fuerza)
+
+
+## Columpio que le queda al último manotazo (grados; 0 cuando ya paró).
+func columpio() -> float:
+	return _golpe
 
 
 ## Cae desde fuera del borde de arriba hasta su sitio (después de `retraso` s). Sin efecto con reducir movimiento.

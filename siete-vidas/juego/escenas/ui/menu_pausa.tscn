@@ -30,3 +30,10 @@ layout_mode = 2
 theme_type_variation = &"BotonMenu"
 text = "MENU_SALIR"
 script = ExtResource("2_boton")
+
+[node name="HuecoFelipe" type="Control" parent="."]
+top_level = true
+layout_mode = 0
+offset_right = 72.0
+offset_bottom = 72.0
+mouse_filter = 2

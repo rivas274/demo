@@ -576,6 +576,7 @@ func _correr() -> void:
 	felipe = sala.get_node("Felipe")
 	await _esperar(30)
 	await _barreras()
+	await _entrar_por_puerta()
 	sala.queue_free()
 	await process_frame
 
@@ -693,6 +694,26 @@ func _barreras() -> void:
 	await _poner_en(Vector2(100, Nivel1.SUELO), 20)
 
 
+## Cruzar una puerta (no la escalera): Felipe mira a la cámara, se da vuelta y entra (`entrar_puerta`, a su escala de
+## siempre) y recién al terminar empieza el negro; del otro lado vuelve a quieto.
+func _entrar_por_puerta() -> void:
+	await _poner_en(sala.puertas["sala>recibidor"].global_position, 20)
+	await _tocar("interactuar")
+	for i in 4:
+		await physics_frame
+	var animando := felipe.sprite.animation == &"entrar_puerta" and felipe.sprite.is_playing()
+	var negro_al_empezar := sala.fundido_alfa()
+	var escala_ok := is_equal_approx(felipe.sprite.scale.x, Felipe.ESCALA_SPRITE) and is_equal_approx(absf(felipe.sprite.scale.y), Felipe.ESCALA_SPRITE)
+	var cuadro_al_negro := -1
+	while sala.cruce_en_curso() and sala.fundido_alfa() < 0.05:
+		cuadro_al_negro = felipe.sprite.frame
+		await physics_frame
+	_comprobar(animando and negro_al_empezar < 0.01 and escala_ok, "Entrar por una puerta: Felipe hace «entrar_puerta» (a escala 0,72) antes del negro")
+	_comprobar(cuadro_al_negro >= 6, "Entrar por una puerta: el fundido empieza al final de la animación (cuadro %d)" % cuadro_al_negro)
+	await _esperar_que(func() -> bool: return not sala.cruce_en_curso(), 120)
+	_comprobar(sala.habitacion == "recibidor" and felipe.sprite.animation != &"entrar_puerta", "Entrar por una puerta: del otro lado ya no sigue de espaldas")
+
+
 func _ocupado(x: float, solidos: Array[Rect2]) -> bool:
 	var cuerpo := Rect2(x - 20.0, Nivel1.SUELO - 52.0, 40.0, 52.0)
 	for rect: Rect2 in solidos:
@@ -734,6 +755,11 @@ func _esperar_que(condicion: Callable, maximo: int) -> void:
 
 func _esperar(cuadros: int) -> void:
 	for i in cuadros:
+		await physics_frame
+		_vigilar_valeria()
+	# Si quedó cruzando una puerta (Felipe entra de espaldas con «entrar_puerta» antes del fundido), se espera a que
+	# termine: lo que se mira después es el otro lado.
+	while is_instance_valid(sala) and sala.is_inside_tree() and sala.cruce_en_curso():
 		await physics_frame
 		_vigilar_valeria()
 

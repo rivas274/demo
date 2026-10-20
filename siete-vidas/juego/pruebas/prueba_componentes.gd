@@ -361,6 +361,8 @@ func _probar_zoomies() -> void:
 	_comprobar(camara.offset.x > 0.0, "Zoomies: la cámara se adelanta hacia donde corre (sin zoom)")
 	await _hasta(func() -> bool: return felipe.estado != Felipe.Estado.ZOOMIES or estado.fase == EstadoZoomies.Fase.DERRAPA, 1.0)
 	_comprobar(estado.fase == EstadoZoomies.Fase.DERRAPA, "Zoomies: sin apretar nada, al terminar el impulso derrapa")
+	await physics_frame
+	_comprobar(felipe.sprite.animation == &"derrape", "Zoomies: al derrapar se ve la animación «derrape» (cuadros 3 a 6 de su hoja)")
 	var x_derrape := felipe.global_position.x
 	await physics_frame
 	var marcas := mundo.get_children().filter(func(n: Node) -> bool: return n is MarcaDerrape).size()

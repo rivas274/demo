@@ -1,6 +1,7 @@
 class_name EstadoOcio
 extends EstadoFelipe
-## OCIO: tras unos segundos quieto y sin tocar nada, se acicala, juega con estambre o da vueltas persiguiéndose la cola.
+## OCIO: tras unos segundos quieto y sin tocar nada, se acicala, juega con estambre, da vueltas persiguiéndose la cola
+## o se sienta.
 ## Cualquier acción lo corta (Felipe.ACCIONES). La bola de estambre es un objeto aparte (la animación es solo Felipe)
 ## que rueda frente a él.
 
@@ -8,7 +9,8 @@ var _tiempo := 0.0
 var _estambre: Sprite2D
 
 
-## datos: {"nombre": "acicalarse" | "jugar" | "vueltas"}.
+## datos: {"nombre": "acicalarse" | "jugar" | "vueltas" | "sentarse"}. «sentarse» es la transición y sigue con el bucle
+## «sentado» (la misma hoja desde Felipe A).
 func entrar(datos := {}) -> void:
 	var nombre: String = datos.get("nombre", "acicalarse")
 	var sprite := felipe.sprite
@@ -25,10 +27,27 @@ func entrar(datos := {}) -> void:
 		felipe.add_child(_estambre)
 		_rodar_estambre()
 	var frames := sprite.sprite_frames
-	_tiempo = frames.get_frame_count(nombre) / frames.get_animation_speed(nombre) * Felipe.OCIO[nombre]
+	if nombre == "sentarse":
+		if not sprite.animation_finished.is_connected(_quedar_sentado):
+			sprite.animation_finished.connect(_quedar_sentado)
+		_tiempo = _duracion(frames, "sentarse") + _duracion(frames, "sentado") * Felipe.OCIO[nombre]
+		return
+	_tiempo = _duracion(frames, nombre) * Felipe.OCIO[nombre]
+
+
+func _duracion(frames: SpriteFrames, nombre: String) -> float:
+	return frames.get_frame_count(nombre) / frames.get_animation_speed(nombre)
+
+
+## Terminó de sentarse: queda sentado en bucle.
+func _quedar_sentado() -> void:
+	if felipe.estado == Felipe.Estado.OCIO and felipe.sprite.animation == &"sentarse":
+		felipe.sprite.play("sentado")
 
 
 func salir() -> void:
+	if felipe.sprite.animation_finished.is_connected(_quedar_sentado):
+		felipe.sprite.animation_finished.disconnect(_quedar_sentado)
 	felipe.reiniciar_espera_ocio()
 	felipe.sprite.scale = felipe.efectos.escala_base()
 	felipe.sprite.position = felipe.posicion_sprite

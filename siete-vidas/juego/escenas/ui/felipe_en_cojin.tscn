@@ -8,3 +8,4 @@
 script = ExtResource("1_cojin")
 cojin = ExtResource("2_cojin")
 corona = ExtResource("3_corona")
+animacion = &"sentado"

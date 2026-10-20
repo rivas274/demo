@@ -1,8 +1,7 @@
 class_name FinalBalcon
 extends Node
 ## El balcón del nivel 1: alivio y final (M5, G1). Felipe sube por la maceta a la baranda (en el tramo libre de
-## macetas), se queda quieto y se acicala mientras la cámara se abre a la ciudad (no hay animación de sentarse todavía:
-## M6). Al saltar (salto real): cámara lenta con la cámara pegada a él, que baja hasta el toldo de la panadería de abajo;
+## macetas) y se sienta (M6) mientras la cámara se abre a la ciudad. Al saltar (salto real): cámara lenta con la cámara pegada a él, que baja hasta el toldo de la panadería de abajo;
 ## aterriza a la vista con el polvo grande y recién ahí sale el cartel "PODER NUEVO · CAER DE PIE", sin taparlo, y el
 ## resumen del día.
 
@@ -41,8 +40,8 @@ func _decir(evento: String, urgente := false) -> void:
 	nivel.decir(evento, urgente)
 
 
-## Felipe sube por la maceta a la baranda (en el tramo libre de macetas), se queda quieto y se acicala mientras la
-## cámara se abre a la ciudad, y suspira (no hay animación de sentarse todavía: M6). Al saltar (salto real): cámara
+## Felipe sube por la maceta a la baranda (en el tramo libre de macetas) y se sienta (animación `sentarse` →
+## `sentado`, M6) mientras la cámara se abre a la ciudad, y suspira. Al saltar (salto real): cámara
 ## lenta con la cámara pegada a él, que baja hasta el toldo de la panadería de abajo; aterriza a la vista con el
 ## polvo grande y recién ahí sale el cartel "PODER NUEVO · CAER DE PIE", sin taparlo, y el resumen del día.
 func cada_cuadro(delta: float) -> void:
@@ -57,7 +56,7 @@ func cada_cuadro(delta: float) -> void:
 		if _tiempo_baranda > 0.3:
 			sentado_en_baranda = true
 			_decir("balcon", true)
-			felipe.acicalarse()
+			felipe.acicalarse("sentarse")
 			var camara: Camera2D = felipe.get_node("Camara")
 			var abrir := create_tween()
 			abrir.tween_property(camara, "offset", Vector2(0, -70), 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)

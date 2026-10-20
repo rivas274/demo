@@ -9,7 +9,7 @@ extends Node2D
 @export var cojin: Texture2D
 @export var corona: Texture2D
 ## Animación de Felipe sobre el cojín (en bucle).
-@export var animacion := &"quieto"
+@export var animacion := &"sentado"
 ## Dónde apoya las patas, desde el centro de abajo del cojín (la parte de arriba del cojín se hunde un poco).
 @export var apoyo := Vector2(0, -34)
 ## Corona: cuánto baja su borde de abajo desde el tope del cráneo y cuánto se corre desde el centro de la cabeza

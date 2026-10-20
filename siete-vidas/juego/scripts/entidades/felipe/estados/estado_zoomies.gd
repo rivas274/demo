@@ -28,6 +28,7 @@ func entrar(datos := {}) -> void:
 	if direccion != 0.0:
 		felipe.mirando = signf(direccion)
 	felipe.velocity = Vector2.ZERO
+	felipe.sprite.play("correr")
 	fase = Fase.ANTICIPA
 	_tiempo = receta.datos.anticipacion
 	if _tiempo > 0.0:
@@ -87,6 +88,8 @@ func _terminar_impulso(direccion: float) -> void:
 		felipe.velocity.x = felipe.mirando * felipe.velocidad_correr
 		return
 	fase = Fase.DERRAPA
+	# La animación de derrape desde Felipe A (cuadros 3 a 6 de su hoja): clava las patas y se inclina.
+	felipe.sprite.play("derrape")
 	_tiempo = receta.datos.tiempo_derrape
 	_frenado = _velocidad_derrape / receta.datos.tiempo_derrape
 	felipe.velocity.x = felipe.mirando * _velocidad_derrape

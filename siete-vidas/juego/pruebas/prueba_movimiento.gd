@@ -182,6 +182,23 @@ func _correr() -> void:
 	Input.action_release("saltar")
 	await _esperar(2)
 	_comprobar(not felipe.get_children().any(func(n: Node) -> bool: return n is Sprite2D and n.texture == Felipe.BOLA_ESTAMBRE), "Al dejar de jugar la bola desaparece")
+	# Sentarse (hoja desde Felipe A): la transición y después el bucle sentado, a la escala de siempre.
+	await _poner_en(felipe, Vector2(200, Nivel1.SUELO))
+	felipe._empezar_ocio("sentarse")
+	await _esperar(2)
+	var sentandose := felipe.sprite.animation == &"sentarse"
+	await _esperar(70)
+	_comprobar(sentandose and felipe.estado == Felipe.Estado.OCIO and felipe.sprite.animation == &"sentado" and felipe.sprite.is_playing() and is_equal_approx(felipe.sprite.scale.x, Felipe.ESCALA_SPRITE), "Ocio: se sienta («sentarse») y queda «sentado» en bucle a escala 0,72")
+	Input.action_press("mover_derecha")
+	await _esperar(3)
+	Input.action_release("mover_derecha")
+	_comprobar(felipe.estado != Felipe.Estado.OCIO and felipe.sprite.animation == "caminar", "Sentado, al tocar un botón se para y camina")
+	# Las 3 hojas nuevas: 8 cuadros de 106 × 106 desde Felipe A, con los cuadros que se usan.
+	var hojas := {"derrape": 4, "sentarse": 5, "sentado": 3, "entrar_puerta": 8}
+	for nombre: String in hojas:
+		var marcos := felipe.sprite.sprite_frames
+		var cuadro := marcos.get_frame_texture(nombre, 0) if marcos.has_animation(nombre) else null
+		_comprobar(cuadro != null and marcos.get_frame_count(nombre) == hojas[nombre] and cuadro.get_size() == Vector2(106, 106), "Hoja «%s»: %d cuadros de 106 × 106" % [nombre, hojas[nombre]])
 	await _esperar(60)
 	# Proporciones: todas las hojas salen de Felipe A en cuadros de 106 px y se dibujan a la misma escala,
 	# así la cabeza mide siempre lo mismo. PENDIENTES_DE_REHACER son las que todavía no cumplen.

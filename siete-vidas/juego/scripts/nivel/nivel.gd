@@ -206,12 +206,15 @@ func cruzar(puerta: Puerta) -> void:
 	if puerta.escalera:
 		await _subir_escalera()
 	felipe.set_physics_process(false)
+	if not puerta.escalera:
+		await _entrar_por_la_puerta()
 	await _fundir(1.0, 0.15)
 	felipe.global_position = datos.escalera_cima if otra.escalera else otra.global_position
 	felipe.velocity = Vector2.ZERO
 	var centro := datos.rect_de(datos.habitacion_de(felipe.global_position)).get_center().x
 	felipe.mirando = -1.0 if otra.escalera else (1.0 if felipe.global_position.x < centro else -1.0)
 	felipe.sprite.flip_h = felipe.mirando < 0.0
+	felipe.sprite.play("quieto")
 	_actualizar_camara()
 	await _fundir(0.0, 0.2)
 	if otra.escalera:
@@ -220,6 +223,22 @@ func cruzar(puerta: Puerta) -> void:
 	felipe.set_physics_process(true)
 	_cruzando = false
 	fundido_terminado.emit()
+
+
+## Antes del fundido: Felipe mira a la cámara, se da vuelta y entra (animación `entrar_puerta`, desde Felipe A). El
+## negro empieza al terminar (con un tope por si la animación no avanza).
+func _entrar_por_la_puerta() -> void:
+	var sprite := felipe.sprite
+	if not sprite.sprite_frames.has_animation(&"entrar_puerta"):
+		return
+	felipe.velocity = Vector2.ZERO
+	# Se llama desde el cuadro de física de Felipe (al tocar la puerta): se espera a que termine ese cuadro, que
+	# todavía pone su animación de siempre.
+	await get_tree().physics_frame
+	sprite.play(&"entrar_puerta")
+	var tope := Time.get_ticks_msec() + 1500
+	while sprite.animation == &"entrar_puerta" and sprite.is_playing() and Time.get_ticks_msec() < tope:
+		await get_tree().process_frame
 
 
 ## Opacidad del negro de las puertas (0 a 1).

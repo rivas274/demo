@@ -35,7 +35,9 @@ func actualizar(direccion: float) -> void:
 		return
 	_sincronizar_pasos()
 	if estado == Felipe.Estado.ZOOMIES:
-		reproducir("correr")
+		# Al derrapar, EstadoZoomies pone «derrape» y se queda hasta salir del estado.
+		if sprite.animation != &"derrape":
+			reproducir("correr")
 	elif estado == Felipe.Estado.ATERRIZANDO:
 		# Primero tocan las delanteras, después baja la parte de atrás y se aplasta.
 		if felipe.tiempo_aterrizando > 0.16:

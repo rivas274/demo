@@ -63,6 +63,8 @@ const OCIO := {
 	"acicalarse": 3,
 	"jugar": 3,
 	"vueltas": 2,
+	## Se sienta (transición «sentarse») y queda «sentado» estas vueltas del bucle.
+	"sentarse": 4,
 }
 ## Bola de estambre del ocio "jugar": objeto aparte (la animación es solo Felipe) que rueda frente a él.
 const BOLA_ESTAMBRE := preload("res://assets/felipe/estambre-bola.png")
@@ -552,10 +554,10 @@ func gastar_garras() -> bool:
 	return true
 
 
-## Se lame la pata como si nada (al final de la pelea con A.S.P.I., en el balcón).
-func acicalarse() -> void:
+## Se lame la pata como si nada (al final de la pelea con A.S.P.I.) o se sienta a mirar (la baranda del balcón).
+func acicalarse(ocio := "acicalarse") -> void:
 	if is_on_floor() and estado == Estado.SUELO:
-		_empezar_ocio("acicalarse")
+		_empezar_ocio(ocio)
 
 
 ## Escalera: sube (o baja) un escalón hasta `destino` (los pies, en el mundo) con un saltito (EstadoEscalera).

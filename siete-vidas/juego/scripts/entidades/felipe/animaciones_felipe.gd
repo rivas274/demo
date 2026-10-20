@@ -43,6 +43,13 @@ const HOJAS := {
 	"aranar": ["felipe-aranar-sheet.png", 12.0, false],
 	## Subir un escalón: un ciclo por escalón; Felipe.subir_escalon() ajusta la velocidad al tiempo del escalón.
 	"subir_escalera": ["felipe-subir-escalera-sheet.png", 20.0, false],
+	## Zoomies: frena patinando (cuadros 3 a 6 de la hoja, los que clavan las patas).
+	"derrape": ["felipe-derrape-sheet.png", 12.0, false, 8, [3, 6]],
+	## Una sola hoja: 0 a 4 = se sienta (transición), 5 a 7 = sentado en bucle (ocio, baranda del balcón, cojín).
+	"sentarse": ["felipe-sentarse-sheet.png", 10.0, false, 8, [0, 4]],
+	"sentado": ["felipe-sentarse-sheet.png", 4.0, true, 8, [5, 7]],
+	## Cruzar una puerta: mira a la cámara, se da vuelta y se aleja; el fundido empieza al terminar (Nivel.cruzar).
+	"entrar_puerta": ["felipe-entrar-puerta-sheet.png", 12.0, false],
 }
 
 

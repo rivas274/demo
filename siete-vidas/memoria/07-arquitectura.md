@@ -96,7 +96,9 @@ pasamanos), luz, estela, imaginación, efectos, censura e Indicador.
   shader de borde. Otro humano futuro solo agrega la pieza.
 - Felipe va delante de Valeria cuando está parado en una superficie de `Nivel1.DELANTE_DE_HUMANOS` (hoy el asiento del
   sofá): `GuionNivel1._actualizar_capa_felipe()` lo decide por la pieza donde se apoya (`superficie_de_felipe()`), no
-  con casos sueltos; en el aire conserva la capa. La pelea con A.S.P.I. solo toca su capa mientras imagina.
+  con casos sueltos; en el aire conserva la capa. También va delante mientras se frota contra ella (estado `RONRONEANDO`,
+  `Nivel1.ESTADOS_DELANTE_DE_HUMANOS`). La pelea con A.S.P.I. solo toca su capa mientras imagina.
+- Las palabras del mundo no tapan la cara de Valeria (`Jugo.testigos`).
 
 **Zonas de texto** (`scripts/ui/base/zonas_texto.gd`, tabla única como `Capas`; pantalla de 640×360):
 
@@ -110,7 +112,8 @@ pasamanos), luz, estela, imaginación, efectos, censura e Indicador.
 
 - **Diálogo y carteles se turnan:** un anuncio espera a que termine la frase (hasta `Anuncios.ESPERA_MAXIMA`); mientras se
   ve un anuncio, las frases nuevas esperan en la cola sin envejecer (`Dialogo.esperar`); la fase del jefe (urgente) hace
-  ceder la frase (`Dialogo.ceder`), que vuelve después.
+  ceder la frase (`Dialogo.ceder`), que vuelve después; mientras dura la franja de fase, ni las frases urgentes salen
+  (`Dialogo.esperar_urgente`).
 - **En tiempo real:** carteles, logro, franja de fase y palabras no se estiran con la cámara lenta de una derrota.
 - **Letra:** los estilos de carteles y palabras (`ZonasTexto.ESTILOS_C_Y_D`) son de 16 px o más.
 - **Prueba:** `pruebas/prueba_zonas_texto.gd` (rectángulos de todos los anuncios y palabras, HUD, diálogo, nombre del

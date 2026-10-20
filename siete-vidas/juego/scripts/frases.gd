@@ -124,6 +124,7 @@ const VALERIA := {
 	"popo": [["¡ACABO DE LIMPIARLA! Voy por bolsas...", 1]],
 	"llaves": [["¿Mis llaves? ¿OTRA VEZ?", 1]],
 	"cajas": [["¡Mis cajas! ¡Estaban ORDENADAS!", 1]],
+	"cajas_audifonos": [["¡¿Qué fue ESO?! …Perdón, era el gato. ¡FELIPE, MIS CAJAS!", 1]],
 	"almuerzo": [["¡ESE ERA MI ALMUERZO! Esto va a mis historias.", 1]],
 	"audifonos": [["Reunión. Audífonos puestos. Pórtate bien, bebito.", 0]],
 	"maullido": [["¿Qué pasa, mi bebito gordito? Dieta, mi amor.", 2]],

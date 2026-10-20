@@ -79,3 +79,75 @@ Pedido del creador (aprobado): cocina más grande con el arte de Gemini de la ta
 - Bot `partida.gd`: **3 de 3** (agenda 8 de 8, 3 calcetines, 3 fotos, logros completos, ~262 s).
 - Entregables (fuera del repositorio): `cocina-escalera-antes-despues.png`, `cocina-escalera-detalles.png`, `nivel1-v4h.mp4`.
 - **Felipe:** cambió su tabla de acciones (verbo «Tirar»; la reja salió de «Acción» y «Subir escalera»): memoria 02 y ficha (plantilla y copia local) actualizadas; la ficha en línea queda por publicar (pedido del creador).
+
+## Segunda pasada: 3 puntos (2026-10-20)
+
+Pedido del creador (aprobado, una sola pasada, 0 créditos de SpriteCook): llenar la entrada de la cocina, que el poste del pasamanos no tape la pila de cajas y que el mundo reaccione al tirar la caja de arriba. Hoja antes/después: `tres-puntos-antes-despues.png` (fuera del repositorio).
+
+### Qué se hizo
+
+| # | Punto | Cómo |
+| --- | --- | --- |
+| 1 | Entrada de la cocina vacía (media pantalla de pared con solo el reloj) | Isla de pared con arte de Gemini que ya estaba en el repo (`segunda_pasada_cocina()` en `preparar_arte_nivel.py`): repisa con ménsulas de `muebles-extra` (`repisa_cocina` 120 × 35) con la tabla a 1,24 m sobre el rincón del gato; encima, la maceta con flores de Valeria y la **reserva de croquetas** al doble (`croquetas_reserva` 38 × 44, de `comida-grande`): Valeria la guarda en alto, lejos de Felipe, que la mira desde el tazón. El reloj queda arriba a la derecha (grupo en triángulo, no en fila). Objetos apoyados en el medio de la tabla con sombra; la repisa da sombra en la pared. Decorado sin colisión (no se alcanza sin doble salto). El piso y la mitad derecha de la pared quedan libres (espacio negativo donde se juega); nada tapa la puerta, el tazón ni la lata |
+| 2 | El poste del pasamanos tapaba el costado de la pila | Medido con máscaras de pixeles: entre el librero (hasta 2266; no se puede correr, lo limita el rectángulo de la puerta de la cocina, B3) y el poste (desde 2325) quedan 59 px y la pila medía 66: en ninguna x entraba sin cruzarse con uno de los dos. Se reescaló la pila a 0,32 (60 × 124, cajas de ~27 cm) y va en 2262, con 2 px de aire a cada lado. Colisión 58 × 122 (base 62). Sigue bloqueando (R6: 122 px, el salto llega a ~80), se pasa desde el librero y el atajo funciona (prueba de ida y vuelta) |
+| 3 | Al tirar la caja casi nadie reaccionaba | Al caer: congelado, «¡PUM! · MUDANZA: 0», sacudida corta (0,15 s), **nube de polvo** (`CajasMudanza`, en la capa del juego, nunca encima de la imaginación del jefe) y **dos calcetines** (`ropa_1`, `ropa_2`, de `arriba-extra`; distintos del calcetín rayado que se colecciona) que saltan en arco: uno al piso junto a la caja abierta y otro sobre las dos cajas (nada delante de la puerta). **Valeria lo oye aunque tenga audífonos**, desde donde esté: se saca uno 3 s (`Valeria.sacar_audifono`) y dice con su retrato «¡¿Qué fue ESO?! …Perdón, era el gato. ¡FELIPE, MIS CAJAS!» (de la reunión); sin audífonos, «¡Mis cajas! ¡Estaban ORDENADAS!». Cuando cierra su frase, Felipe sin culpa: «Mudanza terminada. De nada.» (espera a que se cierre: no se pisan ni caducan en la cola). El logro «Atajo de Gato» va por la cola de anuncios y sale al costado, sin tapar el diálogo ni el golpe |
+
+### Pruebas
+
+- `prueba_nivel`: con los audífonos puestos (la ruta normal), tirar la caja da polvo, ropa esparcida, sacudida, el audífono afuera, la frase de Valeria, y después la de Felipe; Valeria sigue con audífonos al terminar. Posiciones de las cajas por sus constantes (no cambiaron números en las pruebas).
+- `prueba_reglas_nivel`: B4 de las cajas (colisión contra el arte nuevo, ±2 px), R6 y B3 en 0 fallos.
+- `capturas_nivel.gd`: vistas nuevas 4e (el golpe), 4f (la reacción) y 4g (Valeria con un audífono afuera).
+
+### Checklist de lecciones (capturas ×2–×5)
+
+| # | ✔/✘ | Dónde se miró |
+| --- | --- | --- |
+| 1 | ✔ | Sin puertas nuevas |
+| 2 | ✔ | La isla no tapa la puerta ni el tazón; la ropa no cae delante de la puerta (primera prueba la dejaba en 2134, dentro del rectángulo de la puerta: se corrió) |
+| 3 | ✔ | Repisa, maceta y bolsa, cada una en su pieza |
+| 4 | ✔ | Cajas: colisión a ±2 px del arte nuevo; piezas recortadas al borde opaco |
+| 5 | ✔ | Bolsa de croquetas 38 × 44 (al doble) |
+| 6 | ✔ | La pila sigue explicándose sola |
+| 7 | ✔ | Sin desplazamientos nuevos |
+| 8 | ✔ | Polvo en la capa JUEGO (con EFECTOS quedaba encima de la imaginación de A.S.P.I.: `prueba_jefe` lo pilló) |
+| 9 | ✔ | Sin ciclos nuevos |
+| 10 | ✔ | Valeria no cambia de pose: solo el audífono |
+| 11 | ✔ | Diálogo arriba, logro al costado y «¡PUM!» en el mundo: no se montan; Valeria y Felipe hablan uno después del otro |
+| 12 | ✔ | Sin ventanas nuevas |
+| 13 | ✔ | Plantas y croquetas en la cocina; ropa en la caja de la mudanza |
+| 14 | ✔ | Maceta y bolsa en el medio de la tabla |
+| 15 | ✔ | La repisa se sostiene con sus ménsulas |
+| 16 | ✔ | Calcetines con su sombra en el piso y sobre las cajas |
+| 17 | ✔ | Sin superficies de código |
+| 18 | ✔ | Repisa a escala de la pared y del tazón |
+| 19 | ✔ | Sin rectángulos de depuración |
+| 20 | ✔ | Isla asimétrica (maceta, bolsa, reloj más alto); los dos calcetines son distintos |
+| 21 | ✔ | La cocina cuenta algo: la reserva escondida de Felipe |
+| 22 | ✔ | Sombra de contacto en los objetos de la repisa y en la ropa |
+| 23 | ✔ | La isla entra entera en pantalla |
+| 24 | ✔ | Piezas de Gemini con la luz por la izquierda |
+| 25 | ✔ | Sin aberturas nuevas |
+| 26 | ✔ | Sin halos |
+| 27 | ✔ | Resalte de la pila sigue su silueta |
+| 28 | ✔ | Nada patrulla delante de la isla (el ratón va por el piso, 75 px más abajo) |
+| 29 | ✔ | Objetos de la repisa apoyados, con sombra, al doble |
+| 30 | ✔ | Pocos objetos: dos en la repisa |
+| 31 | ✔ | Sin cambios de ancho |
+| 32 | ✔ | Nada dibujado por código junto al arte (el audífono ya era de código; solo se corre) |
+| 33 | ✔ | Prueba de barreras y empujes contra la pila en 0 fallos |
+| 34 | ✔ | La tabla de la repisa de pared casi no muestra cara de arriba: objetos hundidos 2 px |
+| 35 | ✔ | Puntos de captura en lugares libres |
+| 36 (nueva) | ✔ | El poste de primer plano tapaba la pila: el hueco se midió con máscaras antes de mover nada |
+
+**36 de 36 ✔.** Lo que se aceptó: la pila es un 8 % más chica que antes (cajas de ~27 cm en vez de 30); el audífono afuera se ve chico (lo cuenta el retrato y la frase).
+
+### Encargo opcional a Gemini (si el creador quiere más historia en la entrada)
+
+No hace falta para cerrar este punto, pero no hay en el repo una pizarrita ni un calendario. Texto sugerido: «Pixel art, misma paleta y contorno que `cocina-v2.png`, fondo blanco, piezas separadas y numeradas, vista frontal, luz desde la izquierda: 1) pizarrita de cocina con marco de madera y la nota a tiza "comprar croquetas!!" y un dibujo de un gato, 2) calendario de pared con un día marcado "VET Felipe" en rojo, 3) ganchos de pared con un delantal y una bolsa de tela». Tamaños en el juego: pizarrita ~50 × 40, calendario ~36 × 48, ganchos ~70 × 60.
+
+### Resultados
+
+- Pruebas: movimiento, escenario, mecánicas, nivel, reglas_nivel, jefe y acciones en **0 fallos**. Una corrida de `prueba_nivel` (de cuatro) falló en la pelea de A.S.P.I. (apagarla tres veces); las otras tres pasaron: es la inestabilidad conocida de esa parte, no de las cajas.
+- Bot `partida.gd`: **3 de 3** (agenda 8 de 8, ~263 s).
+- **Felipe no cambió:** no aplica la regla de los tres lugares (ni ficha ni tabla de acciones).
+

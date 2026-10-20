@@ -135,6 +135,11 @@ const ARTE := [
 	["escalera_peldanos", Vector2(2322, SUELO), true, "escalera"],
 	["vano", Vector2(2497, SUELO - 150), false, "escalera"],  # hueco cuadrado con el marco de las puertas (no un arco)
 	["reloj", Vector2(3210, DINTEL + 43.0), false, "pared"],  # 41 × 43, con segundero (C-8)
+	# Isla de la entrada (segunda pasada, 2026-10-20): repisa de pared a 1,24 m del piso (150 px sobre la pared) con la
+	# maceta de Valeria y la reserva de croquetas al doble, en alto y lejos de Felipe; el reloj arriba a la derecha.
+	["repisa_cocina", Vector2(3060, REPISA_COCINA_Y + 35.0), false, "pared"],
+	["maceta", Vector2(3074, REPISA_COCINA_Y + 2.0), false, "pared"],  # apoyadas en la tabla (2 px hundidas)
+	["croquetas_reserva", Vector2(3128, REPISA_COCINA_Y + 2.0), false, "pared"],
 	["lata", Vector2(3044, SUELO + 6.0), false, "mueble"],  # adelantada en el piso  # C-7: la lata de atún abierta, al otro lado del tazón
 	# Cocina v2 (tanda 3F, 2026-10-19; composición de Gemini a escala de gato): silla → estufa con olla → mesón largo
 	# con el fregadero embutido bajo la ventana → microondas con el pollo → refrigerador. Alacenas sobre la estufa.
@@ -175,6 +180,8 @@ const ALFOMBRAS := [["alfombra_sala", 232.0], ["alfombra_pasillo", 4750.0], ["al
 ## Fachada del edificio alrededor de la puerta del balcón (B-1): el hueco (x 89 a 221 del arte) queda detrás de la
 ## puerta-ventana.
 const FACHADA_BALCON := Vector2(7557, PARED_BASE)
+## Borde de arriba de la tabla de la repisa de la entrada de la cocina (decorado de pared, sin colisión).
+const REPISA_COCINA_Y := PARED_BASE - 150.0
 ## Cocina v2: x izquierda de cada mueble (el arte de Gemini, medido).
 const ALACENAS_X := 3458.0
 const ESTUFA_X := 3462.0
@@ -184,14 +191,14 @@ const REFRIGERADOR_X := 4046.0
 ## Boca del grifo de cuello de cisne del arte del mesón (columna 243, fila 44): de ahí cae la gota.
 const GRIFO := Vector2(MESON_X + 243.0, SUELO - 112.0)
 ## Lo que va encima de un mueble y lleva sombra de contacto (1 px más ancha que su base) sobre la cubierta.
-const APOYADOS := ["monitor", "libro", "microondas"]
+const APOYADOS := ["monitor", "libro", "microondas", "maceta", "croquetas_reserva"]
 ## Objetos de pared que proyectan sombra (G5): 2 px hacia abajo y 1 px a la derecha (la luz entra por el oeste).
 ## Fregadero de la cocina (pasada única, 2026-10-19: el de antes era una cajita pegada al borde, desproporcionada): cuba
 ## de acero embutida en la cubierta de azulejos (filas 3 a 19 del arte del mesón), de un tercio del mesón (62 de 188 px,
 ## unos 50 cm a escala de gato) y bien adentro del borde. El grifo es de código: cuello de cisne con el caño
 ## (GRIFO, la boca) sobre el centro de la cuba; el ratón del mesón patrulla por detrás de la cuba (sobre el borde de
 ## atrás de la cubierta), sin pisarla.
-const SOMBRA_PARED := ["retrato", "marco_foto", "marco_huella", "perchero", "marco_viral", "reloj", "alacenas", "retrato_familiar", "paisaje", "corcho"]
+const SOMBRA_PARED := ["retrato", "marco_foto", "marco_huella", "perchero", "marco_viral", "reloj", "alacenas", "retrato_familiar", "paisaje", "corcho", "repisa_cocina"]
 ## Arte que dibujan sus propios nodos (el sofá cambia de imagen; el rascador tiembla al arañarlo): [imagen, (x izquierda, base)].
 const ARTE_EXTRA := [["sofa_plastico", Vector2(240, SUELO)], ["rascador", Vector2(RASCADOR_X - 50.0, SUELO)]]
 ## El pasamanos de la escalera va delante de Felipe (baja a 70 % de opacidad mientras sube).
@@ -250,8 +257,8 @@ const PIEZAS := [
 ]
 ## Sofá cuando ya no tiene plástico (sofa_aranado: más bajo): asiento y respaldo se mueven a su arte.
 const SOFA_ARANADO := {"Asiento del sofá": SUELO - 45, "Respaldo del sofá": SUELO - 95}
-## Cajas de la mudanza al pie de la escalera, sobre el primer escalón (CajasMudanza): sólidas, 1,1 m con la cesta.
-const CAJAS := Rect2(2272, SUELO - CajasMudanza.ALTO_PILA, CajasMudanza.ANCHO, CajasMudanza.ALTO_PILA)
+## Cajas de la mudanza al pie de la escalera, sobre el primer escalón (CajasMudanza): sólidas, 1 m con la cesta (60 × 124: entran enteras entre el librero y el poste del pasamanos).
+const CAJAS := Rect2(2262, SUELO - CajasMudanza.ALTO_PILA, CajasMudanza.ANCHO, CajasMudanza.ALTO_PILA)
 ## Pies de Felipe en el segundo peldaño, desde donde tira la caja de arriba.
 const PELDANO_CAJAS := Vector2(2360, SUELO - 45)
 ## Juguetes que duelen al pisarlos: la sala v4 no tiene nada que haga daño.
@@ -1050,9 +1057,25 @@ func _al_tirar_cajas() -> void:
 	sonar("golpe", 0.8)
 	travesuras.anuncios.marcar_chiste(Rect2(donde.x - 50.0, SUELO - 140.0, 140.0, 140.0), 1.5)
 	desbloquear_logro("Atajo de Gato")
+	# El mundo reacciona (pilar 5): el ¡PUM! se oye en toda la casa, aunque Valeria tenga audífonos. Ella contesta
+	# primero, desde donde esté (con audífonos se saca uno: su frase es de la reunión); después Felipe, sin culpa.
+	if valeria.actividad != Valeria.Actividad.FUERA:
+		if valeria.audifonos:
+			valeria.sacar_audifono(3.0)
+			travesuras.decir_valeria("cajas_audifonos", true)
+		else:
+			travesuras.decir_valeria("cajas", true)
+		await _esperar_dialogo(5.0)
 	_decir("cajas_tiradas", true)
-	if valeria.cuarto in ["recibidor", "cocina"] and not valeria.audifonos:
-		travesuras.decir_valeria("cajas", true)
+
+
+## Espera a que se cierre la frase en pantalla (hasta `maximo` s): la respuesta va después, no se pisa ni caduca en la cola.
+func _esperar_dialogo(maximo: float) -> void:
+	var tiempo := 0.0
+	await get_tree().process_frame
+	while travesuras.dialogo.ocupado() and tiempo < maximo:
+		await get_tree().process_frame
+		tiempo += get_process_delta_time()
 
 
 func _al_perdonar(motivo: String) -> void:

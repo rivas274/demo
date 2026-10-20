@@ -55,9 +55,16 @@ func _correr() -> void:
 	felipe.global_position = Sala.PELDANO_CAJAS
 	await _esperar(20)
 	felipe.mirando = -1.0
+	# Valeria en su reunión (audífonos puestos): igual oye el ¡PUM! (segunda pasada, pilar 5).
+	sala.valeria.audifonos = true
 	sala.cajas.interactuar(felipe)
 	await _esperar(12)
 	await _capturar("4c-escalera-caja-cayendo")
+	await _esperar_que(func() -> bool: return sala.cajas.rect_borde_caja() != Rect2(), 120)
+	await _esperar(8)
+	await _capturar("4e-escalera-caja-pum")
+	await _esperar(40)
+	await _capturar("4f-escalera-valeria-reacciona")
 	await _esperar(80)
 	sala.travesuras.dialogo.limpiar()
 	felipe.global_position = Vector2(2400, Sala.SUELO)
@@ -65,7 +72,23 @@ func _correr() -> void:
 	sala.travesuras.dialogo.limpiar()
 	await _esperar(2)
 	await _capturar("4d-escalera-caja-tirada")
+	# Valeria con un audífono afuera (en la sala, para verla de cerca).
+	sala.travesuras.dialogo.limpiar()
+	felipe.global_position = Vector2(sala.valeria.global_position.x - 90.0, Sala.SUELO)
+	sala.valeria.audifonos = true
+	sala.valeria.sacar_audifono(5.0)
+	await _esperar(40)
+	sala.travesuras.dialogo.limpiar()
+	await _esperar(2)
+	await _capturar("4g-valeria-audifono-afuera")
 	quit()
+
+
+func _esperar_que(condicion: Callable, maximo: int) -> void:
+	for i in maximo:
+		if condicion.call():
+			return
+		await physics_frame
 
 
 func _esperar(cuadros: int) -> void:

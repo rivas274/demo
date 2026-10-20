@@ -325,10 +325,25 @@ func _correr() -> void:
 	_comprobar(felipe.objeto_cercano() != sala.cajas, "Adentro, en el piso, las cajas no se ofrecen (manda «Ascender»)")
 	await _poner_en(Sala.PELDANO_CAJAS, 20)
 	_comprobar(felipe.is_on_floor() and felipe.objeto_cercano() == sala.cajas and sala.cajas.verbo(felipe) == "Tirar", "Parado en el segundo peldaño (desde arriba), el botón de las cajas es «Tirar»")
+	# El mundo reacciona (pilar 5): Valeria tiene los audífonos de la reunión puestos y aun así oye el ¡PUM!.
+	var con_audifonos := sala.valeria.audifonos
 	await _tocar("interactuar")
-	await _esperar(90)
+	var polvo_salio := false
+	var audifono_afuera := false
+	var sacudio := false
+	for i in 90:
+		await physics_frame
+		sacudio = sacudio or t.jugo._sacudiendo
+		polvo_salio = polvo_salio or sala.cajas.polvo().emitting
+		audifono_afuera = audifono_afuera or sala.valeria.audifono_afuera > 0.0
 	_comprobar(sala.cajas.tirada_ya and "Atajo de Gato" in sala.logros and is_equal_approx(sala.cajas.rect_solido().size.y, CajasMudanza.ALTO_BASE), "Un manotazo desde el peldaño tira la caja de arriba: quedan dos cajas (atajo, logro)")
-	_comprobar(sala.cajas.rect_borde_caja() != Rect2() and _dijo("felipe", "Mudanza terminada"), "La caja de arriba queda abierta en el piso (su borde se pisa) y Felipe: «Mudanza terminada.»")
+	_comprobar(sala.cajas.rect_borde_caja() != Rect2() and "¡PUM! · MUDANZA: 0" in t.jugo.palabras, "La caja de arriba queda abierta en el piso (su borde se pisa), con «¡PUM! · MUDANZA: 0»")
+	_comprobar(polvo_salio and sala.cajas.ropa_esparcida(), "Al caer la caja: nube de polvo y la ropa se esparce por el piso")
+	_comprobar(sacudio, "Al caer la caja: sacudida corta de cámara")
+	_comprobar(con_audifonos and audifono_afuera and _dijo("valeria", "era el gato"), "Valeria, con audífonos, oye el ¡PUM!: se saca uno y reacciona («…Perdón, era el gato. ¡FELIPE, MIS CAJAS!»)")
+	await _esperar_que(func() -> bool: return _dijo("felipe", "Mudanza terminada"), 400)
+	_comprobar(_dijo("felipe", "Mudanza terminada") and _orden_dicho("era el gato", "Mudanza terminada"), "Después, Felipe sin culpa: «Mudanza terminada. De nada.» (no se pisan)")
+	_comprobar(sala.valeria.audifonos, "Valeria se vuelve a poner el audífono (sigue en su reunión)")
 	# Vuelta por el atajo: de adentro hacia afuera y otra vez adentro, saltando (sin el librero).
 	await _poner_en(Vector2(Sala.ESCALERA_PIE.x + 10.0, Sala.SUELO), 20)
 	Input.action_press("mover_izquierda")
@@ -563,6 +578,19 @@ func _correr() -> void:
 
 
 ## ¿Alguien dijo algo que contiene `texto`?
+## ¿La frase con `primero` salió antes que la frase con `despues`?
+func _orden_dicho(primero: String, despues: String) -> bool:
+	var i := -1
+	var j := -1
+	var historial: Array = sala.travesuras.dialogo.historial
+	for k in historial.size():
+		if i < 0 and primero in String(historial[k][1]):
+			i = k
+		if j < 0 and despues in String(historial[k][1]):
+			j = k
+	return i >= 0 and j > i
+
+
 func _dijo(quien: String, texto: String) -> bool:
 	return _contar(quien, texto) > 0
 

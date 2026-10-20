@@ -47,6 +47,7 @@ Léelas **antes** de diseñar, construir o revisar cualquier escenario. Cada una
 | 33 | La reja "PIPE: NO" se veía mal y Felipe la atravesaba aunque las pruebas pasaban | Toda barrera bloquea de verdad (una prueba empuja a Felipe contra ella) y se explica sola en el mundo |
 | 34 | Vaso, taza y monitor hundidos 1–2 px seguían viéndose en el borde de atrás del escritorio, cuya cubierta se ve de 16 px | Mide en el arte cuánto se ve la cara de arriba de cada mueble y apoya el objeto en su medio (escritorio 9 px, mesa 5, consola 4), con sombra 1 px más ancha que la base |
 | 35 | Una captura puso a Felipe dentro del mesón y salió hundido bajo el piso | Antes de revisar una captura, mira que cada personaje esté parado en algo (los puntos de captura y de prueba van en lugares libres, no dentro de un mueble sólido) |
+| 36 | El poste del pasamanos (primer plano) tapaba 6 px del costado de la pila de cajas, y la pila no cabía entre él y el librero | Al encajar una pieza entre otras, mide el hueco con las máscaras de pixeles del arte (no con rectángulos) antes de moverla; si no cabe, se cambia la pieza o el lugar, nunca se deja cruzada con algo de primer plano |
 
 ## Antes de dar por terminado un escenario
 

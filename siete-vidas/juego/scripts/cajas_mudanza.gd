@@ -2,7 +2,7 @@ class_name CajasMudanza
 extends StaticBody2D
 ## Cajas de la mudanza al pie de la escalera de fondo (decisión del creador, 2026-10-19; reemplazan la reja «PIPE: NO»):
 ## tres cajas apiladas con la cesta de ropa encima, sobre el primer escalón. Valeria lleva un año «ordenando». La pila
-## es SÓLIDA (alto de la cesta, 1,1 m): desde el piso no se pasa ni se salta; Felipe solo la empuja. Se pasa trepando
+## es SÓLIDA (alto de la cesta, 1 m): desde el piso no se pasa ni se salta; Felipe solo la empuja. Se pasa trepando
 ## el librero y bajando del otro lado. Desde la escalera (parado en el segundo peldaño, «desde arriba») un manotazo tira
 ## la caja de arriba: rueda por el piso y queda abierta con la ropa (caja_abierta), la pila baja a dos cajas y la caja
 ## abierta es un escalón: el atajo de vuelta (R6), que solo se abre desde adentro.
@@ -11,17 +11,24 @@ signal tirada
 ## Felipe la empujó desde afuera (para su frase).
 signal empujada
 
-## Pila entera (cajas_pila, 66 × 135): la colisión va de la fila 2 (el borde de la cesta) al piso.
-const ALTO_PILA := 133.0
-## Las dos cajas que quedan (cajas_base): 67 px.
-const ALTO_BASE := 67.0
-const ANCHO := 64.0
+## Pila entera (cajas_pila, 60 × 124 desde la segunda pasada: cabe entera entre el librero y el poste del pasamanos):
+## la colisión va de la fila 2 (el borde de la cesta) al piso.
+const ALTO_PILA := 122.0
+## Las dos cajas que quedan (cajas_base): 62 px.
+const ALTO_BASE := 62.0
+## Columnas 0 a 57 de la caja de abajo.
+const ANCHO := 58.0
 ## Dónde queda la caja abierta (centro de su base, a la izquierda de la pila, delante del librero) y el borde de la caja
 ## (la fila del contorno, a 33 px del piso) que se pisa.
 const CAIDA_X := -40.0
 const BORDE_CAJA := 33.0
 const ANCHO_BORDE_CAJA := 64.0
 const SEGUNDOS_CAIDA := 0.75
+## Ropa que salta de la caja al golpear el piso (segunda pasada, pilar 5): dos calcetines de arriba-extra (no son el
+## calcetín rayado que se colecciona). [imagen, dónde queda (x relativa a la pila), sobre qué (alto de su base: 0 el piso,
+## ALTO_BASE encima de las dos cajas), alto del arco, giro final]. Nada cae delante de la puerta de la cocina (lección 2).
+const ROPA := [["ropa_1", -86.0, 0.0, 30.0, -0.5], ["ropa_2", 22.0, ALTO_BASE, 34.0, 0.35]]
+const SEGUNDOS_ROPA := 0.45
 
 var rect: Rect2
 ## El peldaño desde donde se tira (pies de Felipe, en el mundo).
@@ -32,6 +39,9 @@ var _borde_caja: StaticBody2D
 ## Caja de arriba mientras cae: posición relativa, giro y si ya aterrizó.
 var _caida := 0.0
 var _abierta := false
+## Ropa en el aire: 0 al salir de la caja, 1 en el piso.
+var _vuelo_ropa := 0.0
+var _polvo: CPUParticles2D
 
 
 func _init(rectangulo: Rect2, peldano_golpe: Vector2) -> void:
@@ -48,6 +58,29 @@ func _ready() -> void:
 	_forma.shape = RectangleShape2D.new()
 	add_child(_forma)
 	_poner_alto(ALTO_PILA)
+	# Nube de polvo al golpear el piso (delante de las cajas, en la capa del juego: nunca encima de la imaginación).
+	_polvo = CPUParticles2D.new()
+	_polvo.name = "Polvo de la caja"
+	Capas.usar(_polvo, Capas.JUEGO)
+	_polvo.emitting = false
+	_polvo.one_shot = true
+	_polvo.amount = 34
+	_polvo.lifetime = 0.9
+	_polvo.explosiveness = 1.0
+	_polvo.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	_polvo.emission_rect_extents = Vector2(36, 2)
+	_polvo.direction = Vector2(0, -1)
+	_polvo.spread = 75.0
+	_polvo.gravity = Vector2(0, 90)
+	_polvo.initial_velocity_min = 40.0
+	_polvo.initial_velocity_max = 110.0
+	_polvo.damping_min = 40.0
+	_polvo.damping_max = 70.0
+	_polvo.scale_amount_min = 3.0
+	_polvo.scale_amount_max = 6.0
+	_polvo.color = Color(0.9, 0.85, 0.76, 0.9)
+	_polvo.position = Vector2(CAIDA_X, -4.0)
+	add_child(_polvo)
 
 
 func _poner_alto(alto: float) -> void:
@@ -130,6 +163,11 @@ func _tirar() -> void:
 func _aterrizar() -> void:
 	_abierta = true
 	queue_redraw()
+	_polvo.restart()
+	_polvo.emitting = true
+	var tween := create_tween()
+	tween.tween_property(self, "_vuelo_ropa", 1.0, SEGUNDOS_ROPA).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.parallel().tween_method(func(_v: float) -> void: queue_redraw(), 0.0, 1.0, SEGUNDOS_ROPA)
 	_borde_caja = StaticBody2D.new()
 	_borde_caja.name = "Borde de la caja abierta"
 	_borde_caja.collision_layer = 0
@@ -162,6 +200,7 @@ func _draw() -> void:
 	if _abierta:
 		Sala.sombra(self, Vector2(CAIDA_X, 0), 80.0, 0.45)
 		ArteNivel.dibujar(self, "caja_abierta", CAIDA_X, 0.0)
+		_dibujar_ropa()
 		return
 	# La caja de arriba se vuelca hacia afuera: cae en arco, gira media vuelta y rebota en el piso.
 	var arriba := ArteNivel.textura("caja_arriba")
@@ -174,3 +213,31 @@ func _draw() -> void:
 	draw_set_transform(centro, -t * PI, Vector2.ONE)
 	draw_texture(arriba, -arriba.get_size() / 2.0)
 	draw_set_transform(Vector2.ZERO)
+
+
+## ¿Ya saltó la ropa de la caja y quedó en el piso? (para las pruebas).
+func ropa_esparcida() -> bool:
+	return _abierta and _vuelo_ropa >= 1.0
+
+
+## Polvo de la caja (para las pruebas).
+func polvo() -> CPUParticles2D:
+	return _polvo
+
+
+## Los calcetines saltan de la boca de la caja en arco y quedan en el piso con su sombra.
+func _dibujar_ropa() -> void:
+	var boca := Vector2(CAIDA_X, -BORDE_CAJA - 4.0)
+	for ropa: Array in ROPA:
+		var textura := ArteNivel.textura(ropa[0])
+		if textura == null:
+			continue
+		var t := _vuelo_ropa
+		var base := -float(ropa[2])
+		var hasta := Vector2(ropa[1], base - textura.get_height() / 2.0 + 2.0)
+		var centro := boca.lerp(hasta, t) + Vector2(0, -sin(t * PI) * float(ropa[3]))
+		if t >= 1.0:
+			Sala.sombra(self, Vector2(ropa[1], base + 1.0), textura.get_width() + 2.0, 0.35)
+		draw_set_transform(centro, float(ropa[4]) * t, Vector2.ONE)
+		draw_texture(textura, -textura.get_size() / 2.0)
+		draw_set_transform(Vector2.ZERO)

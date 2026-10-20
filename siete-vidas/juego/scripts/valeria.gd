@@ -84,6 +84,9 @@ var mirando := 1.0
 ## Sube cada vez que Felipe vuelve a entrar al cuarto donde está ella (el bis del rascador no se cobra dos veces).
 var visita := 0
 var audifonos := false
+## Segundos que le quedan con un audífono afuera (un ruido tan fuerte que se lo saca para escuchar; después se lo
+## vuelve a poner: sigue sin oír lo de arriba).
+var audifono_afuera := 0.0
 var mascarilla := false:
 	set(valor):
 		mascarilla = valor
@@ -338,6 +341,7 @@ func lugar_seguro(x: float) -> float:
 func _physics_process(delta: float) -> void:
 	_tiempo += delta
 	_desde_giro += delta
+	audifono_afuera = maxf(0.0, audifono_afuera - delta)
 	_giro = minf(1.0, _giro + delta / GIRO)
 	_mezcla = minf(1.0, _mezcla + delta / TRANSICION)
 	_vano = move_toward(_vano, _vano_objetivo, delta / VANO)
@@ -473,6 +477,12 @@ func _grabar(felipe: Felipe) -> void:
 		if travesuras:
 			travesuras.decir_valeria("grabando"))
 	perdono.emit("rascador")
+
+
+## Un ruido que se oye aunque tenga audífonos (la caja de la mudanza contra el piso): se saca uno unos segundos.
+func sacar_audifono(segundos := 3.0) -> void:
+	audifono_afuera = segundos
+	queue_redraw()
 
 
 ## Interfaz de los maullidos. En el mismo cuarto lo mira; con audífonos no oye nada.
@@ -634,7 +644,9 @@ func _draw() -> void:
 	if audifonos:
 		draw_arc(Vector2(mirando * 2.0, arriba + 26.0), 15.0, PI, TAU, 10, Color(0.15, 0.15, 0.18), 3.0)
 		draw_rect(Rect2(Vector2(mirando * 2.0 - 18.0, arriba + 22.0), Vector2(6, 10)), Color(0.15, 0.15, 0.18))
-		draw_rect(Rect2(Vector2(mirando * 2.0 + 12.0, arriba + 22.0), Vector2(6, 10)), Color(0.15, 0.15, 0.18))
+		# El de adelante, afuera: corrido sobre la sien mientras escucha (sacar_audifono).
+		var afuera := Vector2(4.0, -10.0) if audifono_afuera > 0.0 else Vector2.ZERO
+		draw_rect(Rect2(Vector2(mirando * 2.0 + 12.0, arriba + 22.0) + afuera, Vector2(6, 10)), Color(0.15, 0.15, 0.18))
 	if actividad == Actividad.REGANANDO and motivo_regano != "":
 		_corazon_roto(Vector2(0, arriba - 14.0 + roundf(sin(_tiempo * 6.0) * 2.0)))
 	if actividad == Actividad.GRABANDO and int(_tiempo * 3.0) % 2 == 0:

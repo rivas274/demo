@@ -797,8 +797,11 @@ def cocina_v2():
     pieza(1, 109.0 / (estufa.height - 40)).save(DESTINO / "estufa.png")
     alacenas = recortar_opaco(imagen.crop(cajas[2]))
     pieza(2, 80.0 / alacenas.height).save(DESTINO / "alacenas.png")
-    # D: tres cajas de 36 px y la cesta encima; la caja de arriba (con la cesta) termina en la fila 194 de la pieza.
-    escala_cajas = 0.351
+    # D: tres cajas de 33 px y la cesta encima; la caja de arriba (con la cesta) termina en la fila 194 de la pieza.
+    # Segunda pasada (2026-10-20): 0,32 en vez de 0,351 (60 x 124 en vez de 66 x 135). Entre el librero (2162–2266) y
+    # el poste del pasamanos (desde 2325) quedan 59 px: así la pila entra entera con 2 px de aire a cada lado y el
+    # poste ya no le tapa el costado. Sigue sin saltarse desde el piso (1 m con la cesta).
+    escala_cajas = 0.32
     pila = pieza(3, escala_cajas)
     pila.save(DESTINO / "cajas_pila.png")
     corte = round(194 * escala_cajas)
@@ -813,6 +816,37 @@ def cocina_v2():
         print(f"Cocina v2: {nombre} {tam[0]} x {tam[1]}")
 
 
+def segunda_pasada_cocina():
+    """Segunda pasada de la cocina y la escalera (2026-10-20, 0 créditos, solo arte de Gemini que ya estaba en el repo):
+    - Isla de la entrada de la cocina: repisa de pared con ménsulas (muebles-extra, pieza 5) a 120 px de ancho y la
+      bolsa grande de croquetas (comida-grande, pieza 3) a 38 x 44, al doble de su tamaño real (escala de gato): la
+      reserva que Valeria guarda en alto, lejos de Felipe. La maceta con flores es la de objetos.png (ya preparada).
+    - Ropa que se esparce al caer la caja de la mudanza: los calcetines sueltos de arriba-extra (pieza 5), separados
+      uno por uno (ropa_1 café, ropa_2 blanco); no son el calcetín rayado que se colecciona."""
+    imagen, cajas = piezas("muebles-extra")
+    escalar(sin_huecos(imagen.crop(cajas[5])), (120, 35)).save(DESTINO / "repisa_cocina.png")
+    imagen, cajas = piezas("comida-grande")
+    escalar(imagen.crop(cajas[3]), (38, 44)).save(DESTINO / "croquetas_reserva.png")
+    imagen, cajas = piezas("arriba-extra")
+    grupo = recortar_opaco(imagen.crop(cajas[5]))
+    a = np.asarray(grupo)
+    etiquetas, _ = ndimage.label(a[:, :, 3] > 0)
+    calcetines = [s for s in ndimage.find_objects(etiquetas) if (s[0].stop - s[0].start) * (s[1].stop - s[1].start) > 400]
+    calcetines.sort(key=lambda s: s[1].start)
+    for nombre, s in zip(["ropa_1", "ropa_2"], calcetines[:2]):
+        # Solo el calcetín (su grupo de pixeles), sin la punta del vecino que cae en su rectángulo.
+        solo = a[s].copy()
+        propio = np.bincount(etiquetas[s][etiquetas[s] > 0]).argmax()
+        solo[etiquetas[s] != propio, 3] = 0
+        recorte = Image.fromarray(solo, "RGBA")
+        escala = 22.0 / recorte.height
+        tam = (round(recorte.width * escala), 22)
+        recortar_opaco(sin_sueltos(recorte.resize(tam, Image.NEAREST))).save(DESTINO / f"{nombre}.png")
+    for nombre in ["repisa_cocina", "croquetas_reserva", "ropa_1", "ropa_2"]:
+        tam = Image.open(DESTINO / f"{nombre}.png").size
+        print(f"Segunda pasada: {nombre} {tam[0]} x {tam[1]}")
+
+
 def ambientes():
     for nombre, (hoja, indice, tamano, fraccion) in PIEZAS_AMBIENTE.items():
         imagen, cajas = piezas(hoja)
@@ -825,6 +859,7 @@ def ambientes():
     tanda_3e()
     pisos_gemini()
     cocina_v2()
+    segunda_pasada_cocina()
 
 
 if __name__ == "__main__":

@@ -15,6 +15,8 @@ extends Resource
 @export var congelado := 0.05
 ## Sacudida de cámara: segundos y fuerza (0 = ninguna).
 @export var sacudida := Vector2(0.0, 0.0)
+## Vibración leve del mando: motor débil, fuerte (0 a 1) y segundos (RecetaJugo.vibrar; la apaga Opciones).
+@export var vibracion := Vector3.ZERO
 @export_group("2. Salir volando")
 ## Impulso hacia donde iba el zarpazo (x) y hacia arriba (y negativo), en px/s.
 @export var impulso := Vector2(170, -230)

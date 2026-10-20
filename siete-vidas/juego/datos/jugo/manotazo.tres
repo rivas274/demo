@@ -5,3 +5,4 @@
 [resource]
 script = ExtResource("1_jugo")
 pausa_impacto = 0.05
+vibracion = Vector3(0.25, 0.1, 0.08)

@@ -25,3 +25,4 @@ camara_lenta = 1.0
 fantasma = "derrota_resorte_alma"
 palabra_fantasma = "PALABRA_BOING"
 frase = "derrota_raton"
+vibracion = Vector3(0.3, 0.2, 0.12)

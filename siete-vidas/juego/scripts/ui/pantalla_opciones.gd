@@ -1,6 +1,7 @@
 class_name PantallaOpciones
 extends Control
-## Pantalla de opciones (se abre desde la pausa): cambiar la tecla o el botón de cada acción, «reducir movimiento» y
+## Pantalla de opciones (se abre desde la pausa): cambiar la tecla o el botón de cada acción, «reducir movimiento», la
+## vibración del mando y
 ## el volumen general. Va en la pila de pantallas (GestorPantallas): encima de la pausa y la tapa; al cerrarse vuelve
 ## a la pausa. Solo arma la lógica y la navegación con las piezas de siempre (MenuUI y botones del tema); su aspecto
 ## se cambia con el rediseño del menú (Decreto real).
@@ -67,6 +68,9 @@ func _al_elegir(opcion: StringName) -> void:
 		&"ReducirMovimiento":
 			Opciones.reducir_movimiento = not Opciones.reducir_movimiento
 			Opciones.guardar()
+		&"Vibracion":
+			Opciones.vibracion = not Opciones.vibracion
+			Opciones.guardar()
 		&"Volumen":
 			# Cada vez que se elige, baja un paso; de 0 vuelve al máximo (izquierda y derecha también lo cambian).
 			Opciones.volumen = 1.0 if Opciones.volumen <= 0.0 else snappedf(Opciones.volumen - Opciones.PASO_VOLUMEN, 0.01)
@@ -129,3 +133,4 @@ func _actualizar_textos() -> void:
 		boton.text = "%s: %s" % [tr("ACCION_" + accion.to_upper()), tecla]
 	(menu.get_node("ReducirMovimiento") as Button).text = tr("OPCIONES_REDUCIR") % (tr("OPCIONES_SI") if Opciones.reducir_movimiento else tr("OPCIONES_NO"))
 	(menu.get_node("Volumen") as Button).text = tr("OPCIONES_VOLUMEN") % roundi(Opciones.volumen * 100.0)
+	(menu.get_node("Vibracion") as Button).text = tr("OPCIONES_VIBRACION") % (tr("OPCIONES_SI") if Opciones.vibracion else tr("OPCIONES_NO"))

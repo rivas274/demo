@@ -79,6 +79,7 @@ func reaccionar() -> void:
 			jugo.congelar(datos.congelado)
 		if datos.sacudida.x > 0.0:
 			jugo.sacudir(datos.sacudida.x, datos.sacudida.y)
+	RecetaJugo.vibrar(datos.vibracion, get_tree())
 	if nivel and nivel.travesuras and datos.frase != "":
 		nivel.travesuras.decir_felipe(datos.frase)
 	if datos.congelado > 0.0:

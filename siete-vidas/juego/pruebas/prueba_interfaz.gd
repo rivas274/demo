@@ -28,6 +28,7 @@ func _correr() -> void:
 	await _probar_opciones()
 	_probar_textos()
 	_probar_controles()
+	await _probar_mandos()
 	_probar_tema()
 	_probar_letras()
 	_probar_claves()
@@ -289,7 +290,7 @@ func _probar_opciones() -> void:
 	var op := pantallas.opciones
 	_comprobar(gestor.arriba() == op and paused and op.visible, "Opciones: se abre encima de la pausa (pila de pantallas) y el juego sigue en pausa")
 	_comprobar(op.menu.enfocado() != null, "Opciones: se navega con foco (teclado y mando)")
-	_comprobar(op.menu.has_node("zarpazo") and op.menu.get_child_count() == Controles.ACCIONES.size() + 3, "Opciones: una fila por acción, más reducir movimiento, volumen y volver")
+	_comprobar(op.menu.has_node("zarpazo") and op.menu.get_child_count() == Controles.ACCIONES.size() + 4 and op.menu.has_node("Vibracion"), "Opciones: una fila por acción, más reducir movimiento, volumen, vibración y volver")
 	var antes := InputMap.action_get_events("zarpazo").duplicate()
 	op.empezar_remapeo("zarpazo")
 	var tecla := InputEventKey.new()
@@ -368,6 +369,69 @@ func _probar_controles() -> void:
 	for e: InputEvent in antes:
 		InputMap.action_add_event("zarpazo", e)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta))
+
+
+## Mandos (DetectorMando + Input Helper): el tipo de mando cambia los íconos y los textos; en Switch se confirma con el
+## botón de la derecha; conectar y desconectar no rompe nada y con el teclado vuelven las teclas.
+func _probar_mandos() -> void:
+	var detector := DetectorMando.de(self)
+	var ayudante := root.get_node_or_null("InputHelper")
+	_comprobar(detector != null and ayudante != null, "Mandos: los autoloads «Mandos» (DetectorMando) e «InputHelper» (addon MIT) están")
+	if detector == null:
+		return
+	var avisos: Array[StringName] = []
+	detector.mando_cambiado.connect(func(t: StringName) -> void: avisos.append(t))
+	var nombres := {"Xbox Wireless Controller": DetectorMando.XBOX, "PS5 Controller": DetectorMando.PLAYSTATION, "Nintendo Switch Pro Controller": DetectorMando.SWITCH, "Steam Deck": DetectorMando.STEAM_DECK, "USB Gamepad": DetectorMando.GENERICO}
+	var bien := true
+	for nombre: String in nombres:
+		bien = bien and detector.tipo_de_nombre(nombre) == nombres[nombre]
+	_comprobar(bien, "Mandos: reconoce Xbox, PlayStation, Switch, Steam Deck y genérico por el nombre")
+	# Cada tipo, como lo avisa Input Helper.
+	var esperado := {
+		DetectorMando.XBOX: ["A", "res://assets/kenney/input-prompts-pixel.png", Vector2(4, 0)],
+		DetectorMando.PLAYSTATION: ["Cruz", "res://assets/kenney/input-prompts-playstation-pixel.png", Vector2(0, 0)],
+		DetectorMando.SWITCH: ["B", "res://assets/kenney/input-prompts-pixel.png", Vector2(14, 0)],
+	}
+	for tipo: StringName in esperado:
+		var dispositivo: String = {DetectorMando.XBOX: "xbox", DetectorMando.PLAYSTATION: "playstation", DetectorMando.SWITCH: "switch"}[tipo]
+		ayudante.device_changed.emit(dispositivo, 0)
+		var icono := IconosBotones.textura("saltar") as AtlasTexture
+		var datos: Array = esperado[tipo]
+		_comprobar(detector.tipo == tipo and Controles.usa_mando and Controles.texto("saltar") == datos[0] and icono != null and icono.atlas.resource_path == datos[1] and icono.region.position == datos[2] * IconosBotones.LADO, "Mandos: con %s, «Saltar» es «%s» con su ícono" % [tipo, datos[0]])
+	ayudante.device_changed.emit("switch", 0)
+	var acepta := InputMap.action_get_events("ui_accept").filter(func(e: InputEvent) -> bool: return e is InputEventJoypadButton).map(func(e: InputEventJoypadButton) -> int: return e.button_index)
+	_comprobar(acepta == [JOY_BUTTON_B], "Mandos: en Switch se confirma con el botón de la derecha (diseño de Nintendo)")
+	ayudante.device_changed.emit("xbox", 0)
+	acepta = InputMap.action_get_events("ui_accept").filter(func(e: InputEvent) -> bool: return e is InputEventJoypadButton).map(func(e: InputEventJoypadButton) -> int: return e.button_index)
+	_comprobar(acepta == [JOY_BUTTON_A], "Mandos: en los demás, con el de abajo (estándar de Godot)")
+	# Eventos de verdad: una tecla vuelve al teclado; un botón, al mando.
+	var tecla := InputEventKey.new()
+	tecla.physical_keycode = KEY_SPACE
+	tecla.pressed = true
+	Controles.registrar_evento(tecla)
+	var icono_tecla := IconosBotones.textura("saltar") as AtlasTexture
+	_comprobar(detector.tipo == DetectorMando.TECLADO and not Controles.usa_mando and Controles.texto("saltar") == "Espacio" and icono_tecla != null and icono_tecla.region.position == Vector2(17, 4) * IconosBotones.LADO, "Mandos: con el teclado vuelven las teclas y sus íconos")
+	var boton := InputEventJoypadButton.new()
+	boton.button_index = JOY_BUTTON_A
+	boton.pressed = true
+	Controles.registrar_evento(boton)
+	_comprobar(detector.usa_mando() and Controles.usa_mando, "Mandos: un botón del mando cambia a íconos de mando")
+	# Conectar y desconectar en caliente.
+	detector.al_conectar(3, true)
+	detector.cambiar(DetectorMando.PLAYSTATION, 3)
+	detector.al_conectar(3, false)
+	_comprobar(detector.tipo == DetectorMando.TECLADO and not Controles.usa_mando and IconosBotones.textura("saltar") != null and not detector.conectados.has(3), "Mandos: si se desconecta el mando en uso, vuelve el teclado sin romper nada")
+	detector.vibrar(0.5, 0.5, 0.1)
+	_comprobar(avisos.size() >= 5 and avisos[-1] == DetectorMando.TECLADO, "Mandos: DetectorMando avisa cada cambio con «mando_cambiado»")
+	var antes := Opciones.vibracion
+	Opciones.vibracion = false
+	Opciones.guardar("user://opciones_prueba.cfg")
+	Opciones.vibracion = true
+	Opciones.cargar("user://opciones_prueba.cfg")
+	_comprobar(not Opciones.vibracion, "Opciones: la vibración del mando se apaga y se guarda")
+	Opciones.vibracion = antes
+	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://opciones_prueba.cfg"))
+	await process_frame
 
 
 ## Todo color, letra y medida que pide un script de la interfaz existe en el tema.

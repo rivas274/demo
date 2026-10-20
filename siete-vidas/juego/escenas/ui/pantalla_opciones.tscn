@@ -56,6 +56,12 @@ theme_type_variation = &"BotonOpcion"
 auto_translate_mode = 2
 text = "OPCIONES_VOLUMEN"
 
+[node name="Vibracion" type="Button" parent="Menu"]
+layout_mode = 2
+theme_type_variation = &"BotonOpcion"
+auto_translate_mode = 2
+text = "OPCIONES_VIBRACION"
+
 [node name="Volver" type="Button" parent="Menu"]
 layout_mode = 2
 theme_type_variation = &"BotonOpcion"

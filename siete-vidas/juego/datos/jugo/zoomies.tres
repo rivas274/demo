@@ -22,3 +22,4 @@ pelos = 6
 derrape = 16.0
 tiempo_derrape = 0.2
 marca_derrape = 0.8
+vibracion = Vector3(0.3, 0.4, 0.15)

@@ -5,6 +5,9 @@ class_name IconosBotones
 ## cada acción lo dice Controles (el InputMap): si el jugador las cambia, los íconos cambian solos.
 
 const HOJA := "res://assets/kenney/input-prompts-pixel.png"
+## Los botones de PlayStation que le faltan a esa hoja, hechos de su botón redondo (herramientas/preparar_iconos_mando.py,
+## colores del paquete «Input Prompts» 1.5 de Kenney, CC0): cruz, círculo, cuadrado y triángulo.
+const HOJA_PLAYSTATION := "res://assets/kenney/input-prompts-playstation-pixel.png"
 const LADO := 16
 
 ## Tecla (physical_keycode) -> rectángulo en la hoja (columna, fila, ancho en cuadros).
@@ -13,15 +16,34 @@ const TECLADO := {
 	KEY_SHIFT: [17, 7, 2], KEY_J: [24, 3, 1], KEY_E: [19, 2, 1], KEY_Q: [17, 2, 1], KEY_TAB: [19, 5, 2],
 	KEY_ESCAPE: [17, 0, 1], KEY_ENTER: [32, 3, 1],
 }
-## Botón del mando (Xbox) -> rectángulo en la hoja: A, B, X, Y, RB, LB, View y Menu.
+## Botón del mando (Xbox, genérico y Steam Deck) -> rectángulo en la hoja: A, B, X, Y, RB, LB, View y Menu.
 const MANDO := {
 	JOY_BUTTON_A: [4, 0, 1], JOY_BUTTON_B: [5, 0, 1], JOY_BUTTON_X: [6, 0, 1], JOY_BUTTON_Y: [7, 0, 1],
 	JOY_BUTTON_RIGHT_SHOULDER: [10, 16, 1], JOY_BUTTON_LEFT_SHOULDER: [9, 16, 1], JOY_BUTTON_BACK: [4, 18, 1],
 	JOY_BUTTON_START: [5, 18, 1],
 }
 
-static var _hoja: Texture2D
+## Por tipo de mando (DetectorMando), los botones que se ven distintos: [columna, fila, ancho, hoja] (hoja 1 =
+## HOJA_PLAYSTATION). Godot da los botones por posición: en Switch el de abajo (JOY_BUTTON_A) dice «B».
+const MANDO_POR_TIPO := {
+	&"playstation": {
+		JOY_BUTTON_A: [0, 0, 1, 1], JOY_BUTTON_B: [1, 0, 1, 1], JOY_BUTTON_X: [2, 0, 1, 1], JOY_BUTTON_Y: [3, 0, 1, 1],
+		JOY_BUTTON_LEFT_SHOULDER: [19, 18, 1], JOY_BUTTON_RIGHT_SHOULDER: [20, 18, 1],
+	},
+	&"switch": {
+		JOY_BUTTON_A: [14, 0, 1], JOY_BUTTON_B: [13, 0, 1], JOY_BUTTON_X: [16, 0, 1], JOY_BUTTON_Y: [15, 0, 1],
+		JOY_BUTTON_LEFT_SHOULDER: [15, 18, 1], JOY_BUTTON_RIGHT_SHOULDER: [16, 18, 1], JOY_BUTTON_BACK: [13, 20, 1],
+		JOY_BUTTON_START: [14, 20, 1],
+	},
+}
+
+static var _hojas := {}
 static var _cache := {}
+
+
+## DetectorMando avisa que cambió el mando: los íconos se vuelven a armar para ese tipo.
+static func al_cambiar_mando(_tipo: StringName) -> void:
+	_cache.clear()
 
 
 static func registrar_evento(evento: InputEvent) -> void:
@@ -39,18 +61,21 @@ static func textura(accion: String, mando: Variant = null) -> Texture2D:
 		clave = "t:%d" % codigo
 	elif e is InputEventJoypadButton:
 		var boton := (e as InputEventJoypadButton).button_index
-		datos = MANDO.get(boton)
-		clave = "m:%d" % boton
+		var propios: Dictionary = MANDO_POR_TIPO.get(Controles.tipo_mando, {})
+		datos = propios.get(boton, MANDO.get(boton))
+		clave = "m:%s:%d" % [Controles.tipo_mando, boton]
 	if datos == null:
 		return null
 	if _cache.has(clave):
 		return _cache[clave]
-	if _hoja == null:
-		_hoja = load(HOJA) if ResourceLoader.exists(HOJA) else null
-	if _hoja == null:
+	var ruta := HOJA_PLAYSTATION if datos.size() > 3 and int(datos[3]) == 1 else HOJA
+	if not _hojas.has(ruta):
+		_hojas[ruta] = load(ruta) if ResourceLoader.exists(ruta) else null
+	var hoja: Texture2D = _hojas[ruta]
+	if hoja == null:
 		return null
 	var cuadro := AtlasTexture.new()
-	cuadro.atlas = _hoja
+	cuadro.atlas = hoja
 	cuadro.region = Rect2(int(datos[0]) * LADO, int(datos[1]) * LADO, int(datos[2]) * LADO, LADO)
 	_cache[clave] = cuadro
 	return cuadro

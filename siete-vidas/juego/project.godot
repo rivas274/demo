@@ -15,6 +15,11 @@ config/description="Metroidvania satírico en pixel art protagonizado por Felipe
 run/main_scene="res://escenas/nivel_1.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 
+[autoload]
+
+InputHelper="*res://addons/input_helper/input_helper.gd"
+Mandos="*res://scripts/sistemas/detector_mando.gd"
+
 [display]
 
 window/size/viewport_width=640

@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="DatosJugo" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/datos/datos_jugo.gd" id="1_jugo"]
+
+[resource]
+script = ExtResource("1_jugo")
+vibracion = Vector3(0.2, 0.3, 0.1)
+fuerza_minima = 0.8

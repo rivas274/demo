@@ -46,7 +46,19 @@ static func impacto_de(accion: String, jugo: Jugo) -> String:
 		jugo.congelar(receta.pausa_impacto)
 	if receta.sacudida > 0.0:
 		jugo.sacudir(receta.sacudida, receta.fuerza_sacudida)
+	if jugo.is_inside_tree():
+		vibrar(receta.vibracion, jugo.get_tree())
 	return receta.frase_impacto
+
+
+## Vibración leve del mando en uso (DetectorMando), con [débil, fuerte, segundos]; no hace nada sin mando o si
+## Opciones la apaga.
+static func vibrar(vibracion: Vector3, arbol: SceneTree) -> void:
+	if vibracion.z <= 0.0:
+		return
+	var detector := DetectorMando.de(arbol)
+	if detector:
+		detector.vibrar(vibracion.x, vibracion.y, vibracion.z)
 
 
 ## Forma de la anticipación, siempre dentro de ±8 %.

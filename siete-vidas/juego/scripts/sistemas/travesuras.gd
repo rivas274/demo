@@ -70,6 +70,7 @@ func _ready() -> void:
 		jugo.camara = felipe.get_node_or_null("Camara")
 		jugo.evitar = felipe
 		felipe.impacto.connect(_al_impacto)
+		felipe.aterrizo.connect(_al_aterrizar)
 		felipe.maullo.connect(_al_maullar)
 		felipe.aranazo.connect(_al_aranar)
 		felipe.snack_comido.connect(_al_comer_snack)
@@ -177,6 +178,13 @@ func _al_impacto(tipo: String) -> void:
 	var frase := RecetaJugo.impacto_de(tipo, jugo)
 	if frase != "":
 		decir_felipe(frase, true)
+
+
+## Aterrizaje fuerte: vibración leve del mando (datos/jugo/aterrizar.tres, desde su fuerza mínima).
+func _al_aterrizar(fuerza: float) -> void:
+	var receta := RecetaJugo.datos_de("aterrizar")
+	if receta and fuerza >= receta.fuerza_minima and is_inside_tree():
+		RecetaJugo.vibrar(receta.vibracion, get_tree())
 
 
 func _al_maullar(boca: Vector2) -> void:

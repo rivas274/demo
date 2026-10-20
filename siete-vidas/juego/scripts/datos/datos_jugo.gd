@@ -25,6 +25,10 @@ extends Resource
 @export var sacudida := 0.0
 @export var fuerza_sacudida := 1.0
 @export var frase_impacto := ""
+## Vibración leve del mando en el impacto: motor débil y fuerte (0 a 1) y segundos (0 = no vibra). La apaga Opciones.
+@export var vibracion := Vector3.ZERO
+## Solo para aterrizar: desde qué fuerza de caída (0 a 1) vibra.
+@export var fuerza_minima := 0.0
 @export_group("Polvo y derrape")
 ## Granos de polvo y de pelos al frenar o chocar (con su empuje), cuánto patina (px) y en cuánto tiempo, y cuánto
 ## dura la marca del derrape en el piso.

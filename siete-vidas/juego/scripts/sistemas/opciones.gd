@@ -1,14 +1,16 @@
 class_name Opciones
 extends RefCounted
 ## Opciones del jugador que no son controles (los controles están en Controles): «reducir movimiento» (apaga el
-## vaivén y la entrada animada de los botones; el golpe al apretar se queda porque es respuesta, no adorno) y el
-## volumen general. Se guardan en user://opciones.cfg y se cargan al empezar el nivel.
+## vaivén y la entrada animada de los botones; el golpe al apretar se queda porque es respuesta, no adorno), el
+## volumen general y la vibración del mando. Se guardan en user://opciones.cfg y se cargan al empezar el nivel.
 
 const ARCHIVO := "user://opciones.cfg"
 ## Pasos del volumen general en la pantalla de opciones (0 a 1).
 const PASO_VOLUMEN := 0.1
 
 static var reducir_movimiento := false
+## Vibración leve del mando en golpes, derrotas y aterrizajes fuertes (DetectorMando.vibrar).
+static var vibracion := true
 ## Volumen general (0 a 1), en el bus Master.
 static var volumen := 1.0:
 	set(valor):
@@ -25,6 +27,7 @@ static func guardar(ruta := ARCHIVO) -> Error:
 	var archivo := ConfigFile.new()
 	archivo.set_value("accesibilidad", "reducir_movimiento", reducir_movimiento)
 	archivo.set_value("sonido", "volumen", volumen)
+	archivo.set_value("mando", "vibracion", vibracion)
 	return archivo.save(ruta)
 
 
@@ -34,4 +37,5 @@ static func cargar(ruta := ARCHIVO) -> bool:
 		return false
 	reducir_movimiento = bool(archivo.get_value("accesibilidad", "reducir_movimiento", false))
 	volumen = float(archivo.get_value("sonido", "volumen", 1.0))
+	vibracion = bool(archivo.get_value("mando", "vibracion", true))
 	return true

@@ -82,7 +82,7 @@ func _correr() -> void:
 	var luz: LuzCuarto = sala.get_node_or_null("LuzCuarto")
 	if guion.luz_activa:
 		var ambiente: CanvasModulate = luz.get_node("Ambiente del cuarto") if luz else null
-		_comprobar(ambiente != null and ambiente.color == LuzCuarto.AMBIENTE and t.hud is CanvasLayer and t.dialogo is CanvasLayer and t.jugo is CanvasLayer, "Luz: en la sala hay ambiente de atardecer y el HUD, el diálogo y las palabras van en CanvasLayer (no lo reciben)")
+		_comprobar(ambiente != null and ambiente.color == Nivel1.AMBIENTE_CUARTOS["sala"] and t.hud is CanvasLayer and t.dialogo is CanvasLayer and t.jugo is CanvasLayer, "Luz: en la sala hay ambiente de atardecer y el HUD, el diálogo y las palabras van en CanvasLayer (no lo reciben)")
 		var sin_sombra := t.indicador.material as CanvasItemMaterial
 		_comprobar(sin_sombra != null and sin_sombra.light_mode == CanvasItemMaterial.LIGHT_MODE_UNSHADED, "Luz: el Indicador (en el mundo) no recibe el ambiente ni las luces")
 
@@ -150,7 +150,7 @@ func _correr() -> void:
 	var camara: Camera2D = felipe.get_node("Camara")
 	_comprobar(sala.habitacion == "recibidor" and felipe.global_position.distance_to(sala.puertas["recibidor<sala"].global_position) < 4.0, "La puerta lleva de la sala al recibidor")
 	if luz:
-		_comprobar((luz.get_node("Ambiente del cuarto") as CanvasModulate).color == Color.WHITE and not (luz.get_node("Sol de la ventana") as PointLight2D).enabled, "Luz: fuera de la sala el ambiente vuelve a blanco y las luces se apagan")
+		_comprobar((luz.get_node("Ambiente del cuarto") as CanvasModulate).color == Nivel1.AMBIENTE_CUARTOS["recibidor"] and not (luz.get_node("Sol de la ventana") as PointLight2D).enabled, "Luz: en el recibidor, el atardecer de su lámpara y las luces de la sala apagadas")
 	_comprobar(camara.limit_left == int(recibidor.position.x) and camara.limit_right == int(recibidor.end.x), "La cámara queda dentro del recibidor")
 	# G3: Valeria no se teletransporta: camina hasta la puerta de la sala, sale por ella y recién entonces aparece en
 	# el recibidor (por la puerta, con la puerta abierta).

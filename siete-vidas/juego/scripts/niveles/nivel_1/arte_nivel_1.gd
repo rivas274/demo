@@ -160,7 +160,7 @@ const SIN_SOMBRA := ["escalera_peldanos", "vano"]
 
 
 ## Sombras de contacto de los muebles apoyados en el piso (ArteNivel.sombras_de_contacto) y las propias de esta casa:
-## el nido de Su Majestad, el armario bajo la escalera y el charco de luz de la lámpara de pie.
+## el nido de Su Majestad y el armario bajo la escalera (la luz de las lámparas es de LuzCuarto).
 func _dibujar_sombras_de_contacto(c: Node2D) -> void:
 	var piezas: Array = []
 	for datos: Array in Nivel1.ARTE:
@@ -171,10 +171,6 @@ func _dibujar_sombras_de_contacto(c: Node2D) -> void:
 	# Nido de Su Majestad (cesta de la sala) y armario bajo la escalera.
 	ArteNivel.sombra(c, Vector2(70, Nivel1.SUELO), 64.0, 0.4)
 	c.draw_rect(Rect2(2400, Nivel1.SUELO - 2.0, 240, 4), Color(ArteNivel.COLOR_SOMBRA, 0.3))
-	# Charco de luz de la lámpara de pie, en franjas (no un degradado suave), tendido en el piso.
-	var lampara := Vector2(1959, Nivel1.SUELO)
-	for franja: Vector3 in [Vector3(80, -6, 0.06), Vector3(60, -3, 0.07), Vector3(38, 0, 0.09)]:
-		c.draw_rect(Rect2(lampara.x - franja.x / 2.0, lampara.y + franja.y, franja.x, 12.0 - 2.0 * absf(franja.y) / 3.0), Color(1.0, 0.85, 0.5, franja.z))
 
 
 ## Alfombra tendida en el piso: el arte se estira en un trapecio que va de 12 px detrás de la línea de apoyo (más angosto,

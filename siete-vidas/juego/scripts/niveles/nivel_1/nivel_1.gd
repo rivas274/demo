@@ -28,6 +28,21 @@ const PARED_BASE := SUELO - FONDO_PISO
 const DINTEL := PARED_BASE - 248.0
 ## Mesita de la sala (S-2, tanda 3E): tablero a 58 px (48 cm), de la columna 6 a la 76 de su arte.
 const MESITA_X := 162.0
+## Luz de las lámparas encendidas (plan de estabilización 2026-10-20, decisión 4; lección 26: nada de halos redondos).
+## Cada una: [cuarto, arte, pantalla (rectángulo en la textura del arte), y del mundo donde cae la luz (tablero o piso),
+## ancho de la luz al llegar ahí]. LuzCuarto dibuja con estos datos la pantalla encendida (más clara, con contorno
+## claro), el cono en 3 escalones de bordes duros y la franja iluminada en lo que toca.
+const LAMPARAS := [
+	["sala", "mesita_sala", Rect2(5, 0, 35, 23), SUELO - 57.0, 66.0],
+	["recibidor", "lampara", Rect2(0, 16, 34, 34), SUELO, 120.0],
+]
+## Ambiente del atardecer por cuarto con lámpara (CanvasModulate, oscurecimiento suave para que la luz resalte; R14: lo
+## jugable se sigue leyendo). Los demás cuartos van en blanco.
+const AMBIENTE_CUARTOS := {"sala": Color(0.84, 0.75, 0.67), "recibidor": Color(0.86, 0.8, 0.74)}
+## Luz cálida de las lámparas, transparencia de cada escalón del cono (6 a 10 %) y anchos relativos de los escalones.
+const COLOR_LAMPARA := Color(1.0, 0.82, 0.5)
+const ALFA_CONO := [0.06, 0.07, 0.08]
+const ESCALONES_CONO := [1.0, 0.7, 0.42]
 const ALTO := SUELO + 30.0
 const ANCHO := 8260.0
 ## Medio ancho del rectángulo sagrado de cada puerta: medio vano (52 px) más 40 px libres a cada lado (B3).

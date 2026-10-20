@@ -193,9 +193,6 @@ const POLVO := Color(0.55, 0.49, 0.43, 0.75)
 
 
 func dibujar_ambiente(c: Node2D) -> void:
-	# Recibidor: halo de la lámpara junto a la caja de arena, que parpadea una vez cada 9 s.
-	var parpadeo := fmod(tiempo, 9.0) < 0.12
-	c.draw_circle(Vector2(1959, Nivel1.SUELO - 140), 30.0, Color(1.0, 0.9, 0.5, 0.05 if parpadeo else 0.15))
 	# Pelos de Felipe (crema y gris, nunca blanco): sofá, edredón, cojín y alfombras.
 	var asiento := nivel.pieza("Asiento del sofá")
 	var y_sofa := asiento.position.y if asiento else Nivel1.SUELO - 49.0

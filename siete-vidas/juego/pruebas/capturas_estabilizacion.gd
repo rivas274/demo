@@ -28,8 +28,29 @@ func _initialize() -> void:
 	DirAccess.make_dir_recursive_absolute(_carpeta)
 	if args.size() > 1 and args[1] == "textos":
 		_textos.call_deferred()
+	elif args.size() > 1 and args[1] == "luces":
+		_luces.call_deferred()
 	else:
 		_correr.call_deferred()
+
+
+## Las lámparas encendidas (decisión 4): la de la mesita de la sala y la de pie del recibidor.
+func _luces() -> void:
+	var sala: Nivel = load("res://escenas/nivel_1.tscn").instantiate()
+	sala.mostrar_titulo = false
+	(sala.guion as GuionNivel1).batalla_con_jefe = false
+	root.add_child(sala)
+	var felipe: Felipe = sala.get_node("Felipe")
+	await _esperar(30)
+	for punto: Array in [["l1-sala-lampara", Vector2(330, Nivel1.SUELO)], ["l2-recibidor-lampara", Vector2(1880, Nivel1.SUELO)]]:
+		sala.travesuras.dialogo.limpiar()
+		felipe.global_position = punto[1]
+		felipe.velocity = Vector2.ZERO
+		await _esperar(60)
+		sala.travesuras.dialogo.limpiar()
+		await _esperar(2)
+		await _capturar(punto[0])
+	quit()
 
 
 func _textos() -> void:

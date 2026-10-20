@@ -4,37 +4,37 @@ extends Node2D
 ## atardecer. Todo vive en este script y se prende con UNA bandera, `GuionNivel1.luz_activa`; para quitar la prueba basta con
 ## apagarla (o borrar este archivo, `assets/luz/` y las dos líneas de `GuionNivel1.al_terminar_de_armar`).
 ##
-## Qué pone, solo en la sala (en los demás cuartos el ambiente vuelve a blanco y las luces se apagan):
+## Qué pone en la sala (en los cuartos sin lámpara el ambiente vuelve a blanco y las luces se apagan):
 ## - Ambiente cálido algo más oscuro (CanvasModulate). Afecta solo al mundo: la interfaz, el diálogo, los carteles y
 ##   las pantallas van en CanvasLayer (Capas.CAPA_*) y no lo reciben. El Indicador (burbuja y contorno, en el mundo)
 ##   queda sin sombrear.
 ## - Luces puntuales (PointLight2D) con textura EN ESCALONES (assets/luz/, `herramientas/texturas_luz.py`): el rayo de la
 ##   ventana (luz principal, desde la izquierda), el portátil de Valeria (frío, leve) y el LED del cargador. Felipe y
 ##   Valeria las reciben al pasar. Sin normales ni sombras.
-## - La lámpara de la mesita NO es una luz redonda (pasada única, 2026-10-19, lección 26: el halo circular sobre el tapiz
-##   se veía como un filtro): su luz cae en el tablero de la mesita y en el piso, en escalones de tono plano.
-## - Brillo solo en lo que emite luz: el vidrio de la ventana, la pantalla de la lámpara y el LED se redibujan sin
-##   sombrear (con su color de siempre) sobre el cuarto oscurecido.
+## - Lámparas encendidas de toda la casa (Nivel1.LAMPARAS; plan de estabilización 2026-10-20, decisión 4): ninguna es
+##   una luz redonda (lección 26: el halo circular sobre el tapiz se veía como un filtro). Cada una tiene la pantalla
+##   encendida (más clara y cálida, con contorno claro de 1 px), un cono de luz en 3 escalones de bordes duros (6 a
+##   10 % cada uno) que baja de la pantalla y se abre, y una franja iluminada en escalones en lo que toca (tablero o
+##   piso). Los cuartos con lámpara se oscurecen un poco (Nivel1.AMBIENTE_CUARTOS) para que la luz resalte.
+## - Brillo solo en lo que emite luz: el vidrio de la ventana y el LED se redibujan sin sombrear (con su color de
+##   siempre) sobre el cuarto oscurecido.
 ## - Polvo en el rayo: motas de 1 px que suben y titilan dentro del rayo, en posiciones enteras.
 
 const CUARTO := "sala"
-## Ambiente del atardecer: cálido y algo más oscuro (R14: lo jugable se sigue leyendo).
-const AMBIENTE := Color(0.84, 0.75, 0.67)
 const RUTA := "res://assets/luz/%s.png"
 
 ## Ventana de la sala (arte `ventana_sala`): vidrio en coordenadas de la textura y del mundo.
 const VIDRIO_TEXTURA := Rect2(27, 26, 126, 111)
-## Pantalla de la lámpara en `mesita_sala` (coordenadas de la textura).
-const PANTALLA_LAMPARA := Rect2(5, 0, 35, 23)
 ## LED del cargador (el que dibuja DecoradoNivel1.dibujar_ambiente).
 const LED := Vector2(210, Nivel1.SUELO - 4)
 ## Entre la pantalla del portátil y la cara de Valeria sentada en el sofá, respecto de Nivel1.VALERIA_SOFA.
 const PORTATIL := Vector2(-6, -80)
-## Luz de la lámpara en escalones: [x izquierda, y, ancho, alto, alfa] en el tablero de la mesita (filas 38 a 57 de
-## su arte, coordenadas de la textura) y en el piso delante de ella (coordenadas del mundo).
-const LAMPARA_TABLERO := [[2, 39, 62, 13, 0.1], [9, 40, 46, 10, 0.1], [16, 41, 30, 7, 0.12]]
-const LAMPARA_PISO := [[140, Nivel1.SUELO + 1, 124, 8, 0.07], [156, Nivel1.SUELO + 1, 92, 6, 0.07], [172, Nivel1.SUELO + 1, 60, 4, 0.08]]
-const COLOR_LAMPARA := Color(1.0, 0.85, 0.55)
+## Alto de cada escalón de la franja iluminada (de afuera hacia adentro) en el piso y en un tablero.
+const FRANJA_PISO := [12.0, 8.0, 5.0]
+const FRANJA_TABLERO := [9.0, 6.0, 4.0]
+## Lo que se suma a la pantalla encendida (más clara y cálida) y su contorno claro.
+const PANTALLA_SUMA := Color(0.32, 0.24, 0.1)
+const CONTORNO_PANTALLA := Color(1.0, 0.93, 0.72, 0.9)
 ## Capa de luz propia de Valeria: la luz fría del portátil ilumina solo a ella (no la pared de atrás).
 const MASCARA_VALERIA := 2
 
@@ -53,7 +53,13 @@ var _luces := {}
 var _brillo_pared: Node2D
 var _brillo_mueble: Node2D
 var _polvo: Node2D
-var _luz_piso: Node2D
+var _conos: Node2D
+var _pantallas: Node2D
+var _pantallas_suma: Node2D
+var _apoyos_piso: Node2D
+var _apoyos_mueble: Node2D
+## Por lámpara: {"origen", "pantalla" (rect del mundo), "bordes" ([y, x izquierda, x derecha] por fila)}.
+var _lamparas: Array = []
 var _vidrio := Rect2()
 var _t := 0.0
 
@@ -98,8 +104,18 @@ func _ready() -> void:
 	_brillo_pared = _lienzo("Brillo de la ventana", Capas.ARTE_PARED, _dibujar_brillo_pared, sin_sombrear)
 	_brillo_mueble = _lienzo("Brillo de la lámpara", Capas.MUEBLES, _dibujar_brillo_mueble, sin_sombrear)
 	_polvo = _lienzo("Polvo del rayo", Capas.LUZ, _dibujar_polvo, sin_sombrear)
-	# Encima del piso y debajo de los muebles y de Felipe.
-	_luz_piso = _lienzo("Luz de la lámpara en el piso", Capas.ARTE_PARED, _dibujar_luz_piso, sin_sombrear)
+	# Lámparas: la luz suma (se ve como luz, no como pintura) y no la oscurece el ambiente.
+	var suma := CanvasItemMaterial.new()
+	suma.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+	suma.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	_armar_lamparas()
+	# El cono va detrás de los muebles y los personajes (sobre la pared); la franja del piso, encima del piso y debajo
+	# de los muebles; la del tablero y la pantalla, sobre el mueble.
+	_conos = _lienzo("Conos de las lámparas", Capas.ARTE_PARED, _dibujar_conos, suma)
+	_apoyos_piso = _lienzo("Luz de las lámparas en el piso", Capas.ARTE_PARED, _dibujar_apoyos.bind(false), suma)
+	_apoyos_mueble = _lienzo("Luz de las lámparas en el tablero", Capas.MUEBLES, _dibujar_apoyos.bind(true), suma)
+	_pantallas = _lienzo("Pantallas encendidas", Capas.MUEBLES, _dibujar_pantallas, sin_sombrear)
+	_pantallas_suma = _lienzo("Pantallas encendidas (brillo)", Capas.MUEBLES, _dibujar_pantallas_suma, suma)
 	# El Indicador está en el mundo (burbuja y contorno): no recibe ni el ambiente ni las luces.
 	if sala.travesuras and sala.travesuras.indicador:
 		_sin_sombrear(sala.travesuras.indicador, sin_sombrear)
@@ -135,15 +151,104 @@ static func _sin_sombrear(nodo: CanvasItem, material_nodo: Material) -> void:
 				item.use_parent_material = true
 
 
-## Solo en la sala: en otro cuarto el ambiente vuelve a blanco y todo se apaga (el negro de la puerta tapa el cambio).
+## Ambiente del cuarto (atardecer si tiene lámpara, blanco si no) y las luces de la sala solo en la sala (el negro de
+## la puerta tapa el cambio). Las lámparas se dibujan siempre: cada una está en su cuarto.
 func _al_cambiar_cuarto(cuarto: String) -> void:
 	var activa := cuarto == CUARTO
-	_ambiente.color = AMBIENTE if activa else Color.WHITE
+	_ambiente.color = Nivel1.AMBIENTE_CUARTOS.get(cuarto, Color.WHITE)
 	for luz: PointLight2D in _luces.values():
 		luz.enabled = activa
-	for lienzo: Node2D in [_brillo_pared, _brillo_mueble, _polvo, _luz_piso]:
+	for lienzo: Node2D in [_brillo_pared, _brillo_mueble, _polvo]:
 		lienzo.visible = activa
 	set_process(activa)
+
+
+## Lee de cada lámpara dónde está su pantalla en el mundo y su borde fila por fila (para el contorno claro).
+func _armar_lamparas() -> void:
+	for datos: Array in Nivel1.LAMPARAS:
+		var t := ArteNivel.textura(datos[1])
+		if t == null:
+			continue
+		var origen := Vector2.ZERO
+		for pieza: Array in Nivel1.ARTE:
+			if pieza[0] == datos[1]:
+				origen = Vector2(pieza[1].x, pieza[1].y - t.get_height())
+		var region: Rect2 = datos[2]
+		var imagen := t.get_image()
+		var bordes: Array = []
+		for y in range(int(region.position.y), int(region.end.y)):
+			var izquierda := -1
+			var derecha := -1
+			for x in range(int(region.position.x), int(region.end.x)):
+				if imagen.get_pixel(x, y).a > 0.5:
+					if izquierda < 0:
+						izquierda = x
+					derecha = x
+			if izquierda >= 0:
+				bordes.append([y, izquierda, derecha])
+		_lamparas.append({"textura": t, "origen": origen, "region": region, "bordes": bordes, "apoyo": datos[3], "ancho": datos[4]})
+
+
+## Cono de luz: 3 trapecios de bordes duros, de la boca de la pantalla al apoyo, cada uno más angosto y del 6 al 10 %.
+func _dibujar_conos() -> void:
+	for l: Dictionary in _lamparas:
+		var bordes: Array = l["bordes"]
+		if bordes.is_empty():
+			continue
+		var origen: Vector2 = l["origen"]
+		var boca: Array = bordes[-1]
+		var y0 := origen.y + float(boca[0]) + 1.0
+		var cx := origen.x + (float(boca[1]) + float(boca[2]) + 1.0) / 2.0
+		var arriba := float(boca[2]) - float(boca[1]) + 1.0
+		var y1: float = l["apoyo"]
+		for k in Nivel1.ESCALONES_CONO.size():
+			var e: float = Nivel1.ESCALONES_CONO[k]
+			var a := roundf(arriba * e / 2.0)
+			var b := roundf(float(l["ancho"]) * e / 2.0)
+			var puntos := PackedVector2Array([Vector2(cx - a, y0), Vector2(cx + a, y0), Vector2(cx + b, y1), Vector2(cx - b, y1)])
+			_conos.draw_colored_polygon(puntos, Color(Nivel1.COLOR_LAMPARA, Nivel1.ALFA_CONO[k]))
+
+
+## Franja iluminada donde cae la luz: escalones planos centrados bajo la lámpara (en el piso o en el tablero).
+func _dibujar_apoyos(en_mueble: bool) -> void:
+	var lienzo := _apoyos_mueble if en_mueble else _apoyos_piso
+	for l: Dictionary in _lamparas:
+		var y: float = l["apoyo"]
+		var sobre_mueble := y < Nivel1.SUELO - 1.0
+		if sobre_mueble != en_mueble:
+			continue
+		var bordes: Array = l["bordes"]
+		var boca: Array = bordes[-1]
+		var cx := (l["origen"] as Vector2).x + (float(boca[1]) + float(boca[2]) + 1.0) / 2.0
+		var altos: Array = FRANJA_TABLERO if sobre_mueble else FRANJA_PISO
+		for k in altos.size():
+			var ancho := roundf(float(l["ancho"]) * Nivel1.ESCALONES_CONO[k])
+			var alto: float = altos[k]
+			lienzo.draw_rect(Rect2(roundf(cx - ancho / 2.0), roundf(y - alto / 2.0), ancho, alto), Color(Nivel1.COLOR_LAMPARA, Nivel1.ALFA_CONO[k] + 0.02))
+
+
+## Pantalla encendida: contorno claro de 1 px por fuera de su borde y la pantalla sin sombrear (no la oscurece el
+## ambiente del cuarto).
+func _dibujar_pantallas() -> void:
+	for l: Dictionary in _lamparas:
+		var origen: Vector2 = l["origen"]
+		var bordes: Array = l["bordes"]
+		for fila: Array in bordes:
+			var y := origen.y + float(fila[0])
+			_pantallas.draw_rect(Rect2(origen.x + float(fila[1]) - 1.0, y, 1, 1), CONTORNO_PANTALLA)
+			_pantallas.draw_rect(Rect2(origen.x + float(fila[2]) + 1.0, y, 1, 1), CONTORNO_PANTALLA)
+		if not bordes.is_empty():
+			var primera: Array = bordes[0]
+			_pantallas.draw_rect(Rect2(origen.x + float(primera[1]), origen.y + float(primera[0]) - 1.0, float(primera[2]) - float(primera[1]) + 1.0, 1), CONTORNO_PANTALLA)
+		var region: Rect2 = l["region"]
+		_pantallas.draw_texture_rect_region(l["textura"], Rect2(origen + region.position, region.size), region)
+
+
+## Lo que se suma a la pantalla: más clara y cálida.
+func _dibujar_pantallas_suma() -> void:
+	for l: Dictionary in _lamparas:
+		var region: Rect2 = l["region"]
+		_pantallas_suma.draw_texture_rect_region(l["textura"], Rect2((l["origen"] as Vector2) + region.position, region.size), region, PANTALLA_SUMA)
 
 
 func _process(delta: float) -> void:
@@ -163,24 +268,11 @@ func _dibujar_brillo_pared() -> void:
 
 
 func _dibujar_brillo_mueble() -> void:
-	var mesita := ArteNivel.textura("mesita_sala")
-	if mesita:
-		var origen := Vector2(Nivel1.MESITA_X, Nivel1.SUELO - mesita.get_height())
-		_brillo_mueble.draw_texture_rect_region(mesita, Rect2(origen + PANTALLA_LAMPARA.position, PANTALLA_LAMPARA.size), PANTALLA_LAMPARA)
-		# La luz de la lámpara cae en el tablero, bajo la pantalla, en tres escalones.
-		for e: Array in LAMPARA_TABLERO:
-			_brillo_mueble.draw_rect(Rect2(origen + Vector2(e[0], e[1]), Vector2(e[2], e[3])), Color(COLOR_LAMPARA, e[4]))
 	# El LED con su color pleno (late como el de Sala) y un halo de 1 px a los lados.
 	var pulso := 0.5 + 0.5 * sin(sala.tiempo * 3.0)
 	_brillo_mueble.draw_rect(Rect2(LED, Vector2(2, 1)), Color(0.55, 1.0, 0.6, 0.55 + 0.45 * pulso))
 	_brillo_mueble.draw_rect(Rect2(LED + Vector2(-1, 0), Vector2(1, 1)), Color(0.4, 1.0, 0.5, 0.3 * pulso))
 	_brillo_mueble.draw_rect(Rect2(LED + Vector2(2, 0), Vector2(1, 1)), Color(0.4, 1.0, 0.5, 0.3 * pulso))
-
-
-## Charco de luz de la lámpara en el piso delante de la mesita: tres franjas planas (no un degradado).
-func _dibujar_luz_piso() -> void:
-	for e: Array in LAMPARA_PISO:
-		_luz_piso.draw_rect(Rect2(e[0], e[1], e[2], e[3]), Color(COLOR_LAMPARA, e[4]))
 
 
 ## Motas de 1 px que suben despacio dentro del rayo de la ventana y titilan en dos escalones (no un degradado).

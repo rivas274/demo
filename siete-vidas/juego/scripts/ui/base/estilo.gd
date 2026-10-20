@@ -38,9 +38,23 @@ static func medida(nombre: StringName) -> int:
 	return tema().get_constant(nombre, TIPO)
 
 
-## Fuente de la interfaz (la del tema; si no hay, la de Godot).
-static func fuente() -> Font:
+## Fuente pixel del estilo con ese nombre (la misma clave que su tamaño en letra()); sin nombre, la de por defecto
+## del tema. Letras (fuentes/, sin suavizado): Pixel Operator 8 a 8 px (chica), Pixel Operator a 16 px (textos) y
+## Silkscreen a 16, 24 o 32 px (títulos y carteles). Siempre a su tamaño de diseño o un múltiplo: nítidas a 640×360.
+static func fuente(nombre: StringName = &"") -> Font:
+	if nombre != &"" and tema().has_font(nombre, TIPO):
+		return tema().get_font(nombre, TIPO)
 	return tema().default_font if tema().default_font else ThemeDB.fallback_font
+
+
+## Dibuja un texto con la fuente y el tamaño del estilo `nombre` (atajo de draw_string).
+static func escribir(c: CanvasItem, pos: Vector2, texto: String, nombre: StringName, color: Color, alineacion := HORIZONTAL_ALIGNMENT_LEFT, ancho := -1.0) -> void:
+	c.draw_string(fuente(nombre), pos.round(), texto, alineacion, ancho, letra(nombre), color)
+
+
+## Ancho del texto con el estilo `nombre`.
+static func ancho(texto: String, nombre: StringName) -> float:
+	return fuente(nombre).get_string_size(texto, HORIZONTAL_ALIGNMENT_LEFT, -1, letra(nombre)).x
 
 
 ## ¿Existe ese color en el tema? (para las pruebas: ningún nombre pedido falta).
@@ -49,14 +63,13 @@ static func tiene_color(nombre: StringName) -> bool:
 
 
 ## Texto con contorno (el de los contadores y carteles): primero el borde, encima el color.
-static func texto_con_contorno(c: CanvasItem, pos: Vector2, texto: String, tamano: int, color: Color, contorno: StringName = &"contorno_hud", grosor := -1) -> void:
+static func texto_con_contorno(c: CanvasItem, pos: Vector2, texto: String, nombre: StringName, color: Color, contorno: StringName = &"contorno_hud", grosor := -1) -> void:
 	var borde := grosor if grosor >= 0 else medida(&"contorno_hud")
-	c.draw_string_outline(fuente(), pos, texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano, borde, Estilo.color(contorno))
-	c.draw_string(fuente(), pos, texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano, color)
+	c.draw_string_outline(fuente(nombre), pos.round(), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, letra(nombre), borde, Estilo.color(contorno))
+	c.draw_string(fuente(nombre), pos.round(), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, letra(nombre), color)
 
 
 ## Texto centrado en x (la pantalla, si `centro_x` < 0).
-static func texto_centrado(c: CanvasItem, texto: String, y: float, tamano: int, color: Color, centro_x := -1.0) -> void:
+static func texto_centrado(c: CanvasItem, texto: String, y: float, nombre: StringName, color: Color, centro_x := -1.0) -> void:
 	var cx := centro_x if centro_x >= 0.0 else c.get_viewport_rect().size.x / 2.0
-	var ancho := fuente().get_string_size(texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano).x
-	c.draw_string(fuente(), Vector2(cx - ancho / 2.0, y), texto, HORIZONTAL_ALIGNMENT_LEFT, -1, tamano, color)
+	escribir(c, Vector2(roundf(cx - ancho(texto, nombre) / 2.0), y), texto, nombre, color)

@@ -128,9 +128,14 @@ func _probar_menu_y_pausa() -> void:
 	_comprobar((menu.get_node("Continuar") as Button).text == "MENU_CONTINUAR" and (menu.get_node("Continuar") as Button).auto_translate_mode != Node.AUTO_TRANSLATE_MODE_DISABLED, "MenuUI: el texto del botón es una clave que se traduce sola")
 	var elegidos: Array[StringName] = []
 	menu.elegido.connect(func(opcion: StringName) -> void: elegidos.append(opcion))
+	var golpeados: Array[Button] = []
+	pantallas.felipe_asomado.golpeo.connect(func(b: Button) -> void: golpeados.append(b))
 	(menu.get_node("Continuar") as Button).pressed.emit()
-	await _esperar(1)
-	_comprobar(elegidos == [&"Continuar"] and pantallas.modo == Pantallas.Modo.JUGANDO and not paused and not menu.visible, "Pausa: «Continuar» vuelve al juego")
+	await _segundos(0.2)
+	_comprobar(pantallas.felipe_asomado.visible and pantallas.felipe_asomado.sprite.animation == &"zarpazo" and pantallas.modo == Pantallas.Modo.PAUSA, "Menú de estambre: al elegir, Felipe asoma y da el zarpazo antes de hacer lo elegido")
+	await _segundos(1.5)
+	_comprobar(golpeados == [menu.get_node("Continuar")] and (menu.get_node("Continuar") as BotonMenu).columpio() > 0.0, "Menú de estambre: el manotazo golpea el letrero elegido (se columpia)")
+	_comprobar(elegidos == [&"Continuar"] and pantallas.modo == Pantallas.Modo.JUGANDO and not paused and not menu.visible and not pantallas.felipe_asomado.visible, "Pausa: «Continuar» vuelve al juego")
 	pantallas.queue_free()
 	await _esperar(1)
 
@@ -167,7 +172,10 @@ func _probar_boton() -> void:
 	_comprobar(golpes == [1.0] and boton.columpio() > 0.0 and absf(boton.rotation) > 0.0, "BotonMenu: golpear() lo columpia y avisa con «golpeado»")
 	await _segundos(4.0)
 	_comprobar(boton.columpio() == 0.0, "BotonMenu: el columpio del manotazo se apaga solo")
-	_comprobar(boton.pivot_offset == (boton.size * boton.punto_cuelgue).round() and boton.pivot_offset.y == 0.0, "BotonMenu: cuelga de arriba al centro (pivote en el punto de cuelgue)")
+	_comprobar(boton.cuelga() and boton.pivot_offset == (boton.size * boton.punto_cuelgue).round() - Vector2(0, d.largo_hilo), "BotonMenu: cuelga de su hilo (pivote arriba del hilo, sobre la argolla)")
+	_comprobar(boton.size == Vector2(87, 39) and boton.theme_type_variation == &"BotonEstambre", "BotonMenu: es el letrero de madera del tema, a su tamaño (no se estira)")
+	var motas := boton.get_children().filter(func(n: Node) -> bool: return n is Sprite2D).size()
+	_comprobar(motas == 0, "BotonMenu: las motas de pelusa del manotazo se borran solas")
 	Opciones.reducir_movimiento = true
 	boton.grab_focus()
 	await _segundos(d.vaiven_rampa + 0.1)

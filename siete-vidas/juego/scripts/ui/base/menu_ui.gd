@@ -30,6 +30,31 @@ func _ready() -> void:
 		boton.focus_neighbor_bottom = boton.get_path_to(botones[(i + 1) % botones.size()])
 	visibility_changed.connect(_al_mostrarse)
 	hueco_felipe = get_node_or_null("HuecoFelipe")
+	# Menú de estambre: los letreros cuelgan en cadena (cada hilo mide lo que separa un letrero del de arriba) y la
+	# columna cuelga de un ovillo.
+	var primero := _primero_colgado()
+	if primero:
+		add_theme_constant_override(&"separation", int(primero.datos.largo_hilo))
+	sort_children.connect(queue_redraw)
+
+
+func _primero_colgado() -> BotonMenu:
+	for boton in _botones():
+		if boton is BotonMenu and (boton as BotonMenu).cuelga():
+			return boton
+	return null
+
+
+## El ovillo arriba de la columna, donde termina el hilo del primer letrero.
+func _draw() -> void:
+	var primero := _primero_colgado()
+	if primero == null or primero.datos.ovillo == null:
+		return
+	var ovillo := primero.datos.ovillo
+	var x := primero.position.x + roundf(primero.size.x * primero.punto_cuelgue.x)
+	# La columna empieza arriba (alignment BEGIN): el primer letrero está en y = 0 aunque esté cayendo.
+	var abajo := -primero.datos.largo_hilo + 4.0
+	draw_texture(ovillo, Vector2(roundf(x - ovillo.get_width() * 0.35), roundf(abajo - ovillo.get_height())))
 
 
 func _botones() -> Array[Button]:

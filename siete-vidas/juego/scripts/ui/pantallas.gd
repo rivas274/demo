@@ -27,6 +27,8 @@ var aviso_fijo := ""
 var datos_fin := {}
 ## Menú de la pausa (Continuar, Reiniciar, Salir), armado en escenas/ui/menu_pausa.tscn.
 var menu_pausa: MenuUI
+## Felipe que asoma y le da un manotazo al letrero elegido (después se hace lo elegido).
+var felipe_asomado: FelipeAsomado
 
 
 func _ready() -> void:
@@ -38,6 +40,8 @@ func _ready() -> void:
 	menu_pausa.visible = false
 	menu_pausa.elegido.connect(_al_elegir)
 	add_child(menu_pausa)
+	felipe_asomado = FelipeAsomado.new()
+	add_child(felipe_asomado)
 	_al_cambiar_modo()
 
 
@@ -97,6 +101,13 @@ func _process(_delta: float) -> void:
 
 
 func _al_elegir(opcion: StringName) -> void:
+	if felipe_asomado.ocupado:
+		return
+	var boton := menu_pausa.get_node_or_null(NodePath(opcion)) as Button
+	var hueco := menu_pausa.colocar_hueco(boton) if boton else null
+	if hueco:
+		var fuerza := (boton as BotonMenu).datos.fuerza_manotazo if boton is BotonMenu else 1.0
+		await felipe_asomado.manotazo(boton, hueco, menu_pausa.lado_felipe, fuerza)
 	match opcion:
 		&"Continuar":
 			modo = Modo.JUGANDO
@@ -131,7 +142,7 @@ func _draw() -> void:
 			Estilo.texto_centrado(self, tr("UI_CONTINUAR_TECLA") % aceptar, 280, Estilo.letra(&"nota"), claro)
 		Modo.PAUSA:
 			draw_rect(Rect2(Vector2.ZERO, tam), Estilo.color(&"fondo_pantalla"))
-			Estilo.texto_centrado(self, tr("PAUSA_TITULO"), 140, Estilo.letra(&"pausa"), acento)
+			Estilo.texto_centrado(self, tr("PAUSA_TITULO"), 52, Estilo.letra(&"pausa"), acento)
 		Modo.FIN:
 			draw_rect(Rect2(Vector2.ZERO, tam), Estilo.color(&"fondo_pantalla"))
 			Estilo.texto_centrado(self, tr("FIN_TITULO"), 80, Estilo.letra(&"fin"), acento)

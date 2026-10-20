@@ -1,9 +1,24 @@
-[gd_resource type="Resource" script_class="DatosBoton" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="DatosBoton" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/datos/datos_boton.gd" id="1_datos"]
+[ext_resource type="Texture2D" path="res://assets/ui/menu_hilo.png" id="2_hilo"]
+[ext_resource type="Texture2D" path="res://assets/ui/menu_ovillo.png" id="3_ovillo"]
+[ext_resource type="Texture2D" path="res://assets/ui/menu_pelusa_1.png" id="4_pelusa"]
+[ext_resource type="Texture2D" path="res://assets/ui/menu_pelusa_2.png" id="5_pelusa"]
+[ext_resource type="Texture2D" path="res://assets/ui/menu_pelusa_3.png" id="6_pelusa"]
 
 [resource]
 script = ExtResource("1_datos")
+hilo = ExtResource("2_hilo")
+ovillo = ExtResource("3_ovillo")
+pelusas = Array[Texture2D]([ExtResource("4_pelusa"), ExtResource("5_pelusa"), ExtResource("6_pelusa")])
+largo_hilo = 12.0
+pelusa_cantidad = 3
+pelusa_distancia = 34.0
+pelusa_caida = 46.0
+pelusa_tiempo = 0.9
+pelusa_escala = 0.5
+fuerza_manotazo = 1.6
 escala_apretado = 0.9
 tiempo_apretar = 0.07
 tiempo_soltar = 0.2

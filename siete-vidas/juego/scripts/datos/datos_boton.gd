@@ -3,6 +3,26 @@ extends Resource
 ## Números del comportamiento de los botones de menú (BotonMenu): golpe al apretar, brillo y vaivén con foco,
 ## entrada desde arriba y pulso del botón principal. Se cambian en el inspector (datos/ui/boton_menu.tres).
 
+@export_group("Arte (menú de estambre)")
+## Hilo que se repite hacia arriba desde la argolla, ovillo de donde cuelga la columna y motas de pelusa del
+## manotazo. Sin hilo, el botón no cuelga (se dibuja como un botón del tema, sin estambre).
+@export var hilo: Texture2D
+@export var ovillo: Texture2D
+@export var pelusas: Array[Texture2D] = []
+## Largo del hilo sobre la argolla (es también la separación entre letreros; la argolla es el punto_cuelgue del
+## botón).
+@export var largo_hilo := 12.0
+@export_group("Pelusa")
+## Motas que suelta un manotazo: cuántas, cuánto vuelan (px), cuánto caen (px) y cuánto duran (s).
+@export var pelusa_cantidad := 3
+@export var pelusa_distancia := 34.0
+@export var pelusa_caida := 46.0
+@export var pelusa_tiempo := 0.9
+## Escala de cada mota (las de la hoja miden unos 28 px: a la mitad se leen como pelusa, no como ovillos).
+@export var pelusa_escala := 0.5
+@export_group("Manotazo de Felipe")
+## Fuerza del golpe cuando Felipe elige un letrero (1 = un golpe normal).
+@export var fuerza_manotazo := 1.6
 @export_group("Al apretar")
 ## Escala a la que se encoge y cuánto tarda en encogerse y en volver (con rebote).
 @export var escala_apretado := 0.9

@@ -5,11 +5,10 @@
 
 [node name="MenuPausa" type="VBoxContainer"]
 offset_left = 260.0
-offset_top = 160.0
+offset_top = 120.0
 offset_right = 380.0
-offset_bottom = 236.0
+offset_bottom = 270.0
 theme_override_constants/separation = 4
-alignment = 1
 script = ExtResource("1_menu")
 
 [node name="Continuar" type="Button" parent="."]

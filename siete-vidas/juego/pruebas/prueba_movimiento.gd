@@ -87,7 +87,8 @@ func _correr() -> void:
 
 	var x_antes := felipe.position.x
 	Input.action_press("zoomies")
-	await _esperar(8)
+	# 0,05 s de anticipación (receta de jugo de los Zoomies) y después el impulso.
+	await _esperar(12)
 	Input.action_release("zoomies")
 	_comprobar(felipe.position.x - x_antes > 25.0, "Los Zoomies lo impulsan (%.0f px)" % (felipe.position.x - x_antes))
 

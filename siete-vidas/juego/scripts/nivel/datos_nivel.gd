@@ -35,6 +35,8 @@ var escalera_cima := Vector2.ZERO
 var lecciones: Array = []
 ## Puntos de descanso (caja de arena, cojín): ahí reaparece Felipe si pierde una vida.
 var descansos: Array = []
+## Snacks hasta los que rellena el bolsillo un punto de descanso al llegar (decisión del creador, 2026-10-20).
+var snacks_en_descanso := 3
 ## La meta que la cámara muestra al empezar (R4): cuarto y rótulo.
 var cuarto_meta := ""
 var rotulo_meta := ""

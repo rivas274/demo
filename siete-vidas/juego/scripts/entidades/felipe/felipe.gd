@@ -483,6 +483,17 @@ func _empezar_a_comer(alimento: Node2D, del_bolsillo: bool) -> void:
 	cambiar_estado(Estado.COMIENDO)
 
 
+## Deja el bolsillo con `hasta` snacks como mínimo (sin pasar de SNACKS_MAX): el plato de comida suma 1, un punto de
+## descanso rellena hasta 3 (decisión del creador, 2026-10-20). Devuelve cuántos sumó.
+func recargar_snacks(hasta: int) -> int:
+	var nuevos := clampi(hasta, snacks, SNACKS_MAX)
+	var sumados := nuevos - snacks
+	if sumados > 0:
+		snacks = nuevos
+		snacks_cambiados.emit(snacks)
+	return sumados
+
+
 ## Guarda un snack en el bolsillo. Devuelve false si ya tiene 5 (el bolsillo está lleno).
 func guardar_snack() -> bool:
 	if snacks >= SNACKS_MAX:

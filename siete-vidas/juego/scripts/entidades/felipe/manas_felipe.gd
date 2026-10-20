@@ -104,6 +104,8 @@ func _tragar() -> void:
 		felipe.snacks_cambiados.emit(felipe.snacks)
 		felipe.snack_comido.emit()
 	elif is_instance_valid(alimento) and alimento.has_method("al_comido"):
+		if alimento.has_method("snacks_que_recarga"):
+			felipe.recargar_snacks(felipe.snacks + int(alimento.call("snacks_que_recarga")))
 		alimento.call("al_comido")
 	alimento = null
 	comiendo_snack = false

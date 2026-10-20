@@ -224,6 +224,8 @@ func _correr() -> void:
 	var raton := _raton_en("cocina", Nivel1.SUELO)
 	await _zarpazo_a(raton)
 	_comprobar(raton.vida.muerto, "Un zarpazo voltea al ratón de cuerda")
+	# Con lugar en el bolsillo (el plato y los descansos ya pudieron llenarlo).
+	felipe.snacks = 2
 	var snacks_antes := felipe.snacks
 	var caja: CajaCarton = sala.get_node("Caja de carton")
 	await _zarpazo_a(caja)

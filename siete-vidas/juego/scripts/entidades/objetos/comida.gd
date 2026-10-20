@@ -43,6 +43,11 @@ func al_comido() -> void:
 	desaparecer.tween_callback(queue_free)
 
 
+## Snacks que recarga en el bolsillo de Felipe al comerla (sus datos).
+func snacks_que_recarga() -> int:
+	return datos.recarga_snacks if datos else 0
+
+
 func verbo(_felipe: Felipe) -> String:
 	return datos.verbo
 

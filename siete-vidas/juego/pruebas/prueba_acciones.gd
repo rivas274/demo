@@ -226,6 +226,30 @@ func _probar_snacks() -> void:
 	felipe.snacks = 2
 	_comprobar(recompensas.dar({"tipo": "snack", "cantidad": 2}) == 2 and felipe.snacks == 4, "Las recompensas de snack van al bolsillo")
 	await _esperar(10)
+	# Recarga (decisión del creador, 2026-10-20): el plato de Felipe suma 1 al comerlo; un punto de descanso rellena
+	# hasta 3 al llegar.
+	var descanso: Rect2 = Nivel1.DESCANSOS[0]
+	await _poner_en(Vector2(120, Nivel1.SUELO))
+	felipe.snacks = 1
+	await _poner_en(Vector2(descanso.get_center().x, Nivel1.SUELO))
+	await _esperar(5)
+	var en_descanso := felipe.snacks
+	await _poner_en(Vector2(120, Nivel1.SUELO))
+	felipe.snacks = 4
+	await _poner_en(Vector2(descanso.get_center().x, Nivel1.SUELO))
+	await _esperar(5)
+	_comprobar(en_descanso == 3 and felipe.snacks == 4, "Un punto de descanso rellena el bolsillo hasta 3 (con 4, no quita)")
+	await _poner_en(Vector2(120, Nivel1.SUELO))
+	felipe.snacks = 2
+	var plato := Comida.crear(load("res://datos/objetos/tazon.tres"))
+	plato.position = Vector2(150, Nivel1.SUELO)
+	sala.add_child(plato)
+	await _esperar(2)
+	felipe.comer(plato)
+	await _esperar_que(func() -> bool: return felipe.estado != Felipe.Estado.COMIENDO, 120)
+	_comprobar(felipe.snacks == 3, "El plato de comida de Felipe recarga 1 snack al comerlo (snacks %d)" % felipe.snacks)
+	_comprobar(load("res://datos/objetos/pollo.tres").recarga_snacks == 0, "El almuerzo de Valeria no recarga snacks (solo el plato de Felipe)")
+	await _esperar(10)
 
 
 ## API de la escalera: un ciclo de "subir_escalera" por escalón, con saltito, hasta el último peldaño.

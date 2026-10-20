@@ -38,6 +38,8 @@ var puertas := {}
 ## Sistemas reutilizables del nivel: agenda, libreta, HUD, diálogo, jugo e indicador.
 var travesuras: Travesuras
 
+## Felipe está en un punto de descanso (para rellenar el bolsillo solo al llegar).
+var _en_descanso := false
 var _piezas := {}
 var _sonidos: Array[AudioStreamPlayer] = []
 var _lecciones_vistas := {}
@@ -151,13 +153,18 @@ func _physics_process(delta: float) -> void:
 		return
 	tiempo += delta
 	_actualizar_camara()
-	# Puntos de descanso: ahí reaparece Felipe si pierde una vida.
+	# Puntos de descanso: ahí reaparece Felipe si pierde una vida, y al llegar rellenan el bolsillo hasta 3 snacks.
+	var en_descanso := false
 	for descanso: Rect2 in datos.descansos:
 		if descanso.has_point(felipe.global_position) and felipe.is_on_floor():
+			en_descanso = true
 			var punto := Vector2(descanso.get_center().x, descanso.position.y + 10)
 			if felipe.punto_reaparicion != punto:
 				felipe.punto_reaparicion = punto
 				sonar("logro")
+			if not _en_descanso:
+				felipe.recargar_snacks(datos.snacks_en_descanso)
+	_en_descanso = en_descanso
 	_actualizar_lecciones()
 	guion.cada_cuadro(delta)
 

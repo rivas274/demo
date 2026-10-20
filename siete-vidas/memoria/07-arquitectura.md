@@ -139,11 +139,16 @@ pantallas o avisar lo que eligió el jugador en un menú (señal `elegido`).
 | `GestorPantallas` | Pila: `abrir(pantalla, pausa)`, `cerrar(pantalla)`, `arriba()`, `es_la_de_arriba(pantalla)`; pausa mientras haya una que pausa | `Pantallas` (título, intro, pausa, fin), `Libreta`, `ResumenDia` |
 | `Estilo` | `color(&"nombre", alfa)`, `letra(&"nombre")`, `medida(&"nombre")`, `fuente()`, `texto_con_contorno`, `texto_centrado` | Todo lo que se dibuja con código |
 | `RecetaJugo` (`scripts/sistemas/receta_jugo.gd`, datos en `datos/jugo/`) | Jugo de una acción con datos: anticipación, líneas de velocidad (`LineasVelocidad`), cámara adelantada, pausa de impacto y sacudida, polvo, pelos, derrape y marca (`MarcaDerrape`) | Zoomies; pausa de impacto de zarpazo, manotazo y arañazo |
+| `PantallaOpciones` (`escenas/ui/pantalla_opciones.tscn`) | Opciones desde la pausa, en la pila de pantallas: una fila por acción para remapear (teclado y mando, Esc cancela), reducir movimiento y volumen (`Opciones`) | Pausa |
 | `Controles` | Qué tecla o botón tiene cada acción (leído del InputMap), `etiquetar("{saltar}")`, `remapear`, `guardar`, `cargar` (`user://controles.cfg`, se carga al empezar el nivel) | Avisos, pistas de jefe, íconos (`IconosBotones` busca el ícono por tecla, así sigue al remapeo) |
 
-Textos: toda la interfaz usa claves (`tr("PAUSA_TITULO")`) de `traducciones/textos.csv`. Las frases de Felipe y
-Valeria (`Frases`) y los textos de los niveles y jefes **están preparados, no traducidos**: el diálogo, los carteles
-y las pistas pasan por `tr()`, que hoy devuelve el mismo español; para traducirlos se mueve cada frase a una clave.
+Textos: todo lo que se lee es una clave de `traducciones/textos.csv` (interfaz `UI_`, frases `FELIPE_`/`VALERIA_`, agenda
+`AGENDA_`/`RECOMPENSA_`, primeras frases `LECCION_`, palabras `PALABRA_`, logros `LOGRO_`, verbos `VERBO_`, jefe
+`JEFE_`). El código y los datos guardan la clave y se traduce donde se muestra (diálogo, palabras, carteles, logros,
+indicador, agenda, presentación del jefe). `prueba_interfaz.gd` revisa que ninguna clave usada falte.
+
+Letra: `Estilo.fuente(&"estilo")` y `Estilo.letra(&"estilo")` dan la fuente pixel y su tamaño (siempre de diseño o
+múltiplo); `Estilo.escribir` dibuja con ellas y `Estilo.recortar` corta con «…» lo que no cabe.
 
 ## Recetas
 

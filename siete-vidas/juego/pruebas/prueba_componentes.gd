@@ -1,7 +1,8 @@
 extends SceneTree
 ## Prueba de las piezas (componentes) por separado, en un mundo mínimo (un piso y Felipe), sin el nivel: Vida,
 ## RecibeGolpes, HaceDano, MovimientoPatrulla, Tirable, OyeMaullido, Asustable, SombraContacto, el ayudante
-## Componentes.de y un enemigo nuevo armado SOLO con un recurso de datos (demostración de «armar piezas y llenar
+## Componentes.de, la máquina de estados de Felipe (patrón Estado), las conductas de un jefe (patrón Estrategia) y un
+## enemigo nuevo armado SOLO con un recurso de datos (demostración de «armar piezas y llenar
 ## datos, no programar»). Sin ventana:
 ##   godot --headless --path siete-vidas/juego --script res://pruebas/prueba_componentes.gd
 ## Termina con código 0 si todo pasa y 1 si algo falla.
@@ -43,6 +44,8 @@ func _correr() -> void:
 	await _probar_enemigo_solo_con_datos()
 	await _probar_datos_del_juego()
 	await _probar_escenas()
+	await _probar_estados_felipe()
+	_probar_conductas_jefe()
 
 	for fallo in _fallos:
 		print("FALLA: ", fallo)
@@ -282,6 +285,68 @@ func _probar_escenas() -> void:
 	llaves.free()
 	vaso.free()
 	await _esperar(2)
+
+
+## Felipe: cada Estado tiene su objeto (EstadoFelipe) y cambiar de estado llama salir() del viejo y entrar() del nuevo.
+func _probar_estados_felipe() -> void:
+	felipe.position = Vector2(1400, PISO)
+	felipe.velocity = Vector2.ZERO
+	await _esperar(5)
+	var todos := true
+	for valor: int in Felipe.Estado.values():
+		todos = todos and felipe._estados.has(valor) and (felipe._estados[valor] as EstadoFelipe).id == valor
+	_comprobar(todos, "Estado: cada estado de Felipe tiene su objeto con su id")
+	_comprobar(felipe.estado == Felipe.Estado.SUELO and felipe._estado is EstadoLibre, "Estado: quieto en el piso está en SUELO (EstadoLibre)")
+	felipe.estado = Felipe.Estado.ZARPAZO
+	_comprobar(felipe._estado is EstadoAccion and felipe.sprite.animation == (felipe._estado as EstadoAccion).animacion, "Estado: asignar ZARPAZO entra a EstadoAccion y pone su animación")
+	felipe._estado.animacion_terminada()
+	_comprobar(felipe.estado == Felipe.Estado.SUELO, "Estado: al terminar la animación del zarpazo vuelve a SUELO")
+	await _esperar(5)
+
+
+## Jefe: las conductas se prueban en orden de prioridad, desde su fase, y el ataque en curso se queda con los cuadros
+## hasta que termina (sin nivel ni jefe: solo la pelea y sus datos).
+func _probar_conductas_jefe() -> void:
+	var datos := DatosJefe.new()
+	var primera := ConductaPrueba.new()
+	primera.clave = "primera"
+	primera.desde_fase = 1
+	var segunda := ConductaPrueba.new()
+	segunda.clave = "segunda"
+	datos.conductas = [primera, segunda]
+	var pelea := PeleaJefe.new(datos, null, null, null, Rect2())
+	var copia_primera := pelea.conducta("primera") as ConductaPrueba
+	var copia_segunda := pelea.conducta("segunda") as ConductaPrueba
+	_comprobar(copia_primera != primera and copia_primera.pelea == pelea, "Jefe: cada pelea usa copias de sus conductas (los datos no cambian)")
+	pelea.correr_conductas(0.1)
+	_comprobar(copia_primera.intentos == 0 and copia_segunda.intentos == 1 and pelea.activa == copia_segunda, "Jefe: en la fase 0 la conducta «desde la fase 1» no se usa y ataca la siguiente")
+	pelea.correr_conductas(0.1)
+	pelea.correr_conductas(0.1)
+	_comprobar(copia_segunda.intentos == 1 and copia_segunda.cuadros == 2 and pelea.activa == null, "Jefe: el ataque en curso se queda con los cuadros hasta terminar")
+	pelea.vencidas = 1
+	pelea.correr_conductas(0.1)
+	_comprobar(copia_primera.intentos == 1 and pelea.activa == copia_primera, "Jefe: desde su fase, la primera en la lista tiene prioridad")
+	_comprobar(DatosJefe.por_fase([1, 2, 3], 1) == 2 and DatosJefe.por_fase([1, 2, 3], 7) == 3, "Jefe: los números por fase usan el último si faltan fases")
+	pelea.free()
+
+
+## Conducta de prueba: ataca siempre que se la deja y dura dos cuadros.
+class ConductaPrueba extends ConductaJefe:
+	@export var clave := ""
+	var intentos := 0
+	var cuadros := 0
+
+	func nombre() -> String:
+		return clave
+
+	func intentar(_delta: float) -> bool:
+		intentos += 1
+		pelea.empezar_ataque(self)
+		return true
+
+	func actualizar(_delta: float) -> bool:
+		cuadros += 1
+		return cuadros < 2
 
 
 func _esperar(cuadros: int) -> void:

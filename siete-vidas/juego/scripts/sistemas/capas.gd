@@ -13,10 +13,12 @@ extends RefCounted
 ##   ESCALERA        -2        peldaños, vano y descanso de la escalera de fondo
 ##   PUERTAS         -2        puertas (y su luz)
 ##   MUEBLES         -1        arte de muebles, sofá, rascador, cajas de la mudanza, decorado, nido, piezas dibujadas
-##   PERSONAJES      -1        Valeria (va después de los muebles en el árbol: queda delante de ellos)
+##   TRAS_FELIPE     -1        lo que deja Felipe detrás de sí: estela de fantasmas, líneas de velocidad, polvo del jugo
 ##   JUEGO            0        Felipe, A.S.P.I., ratones, vasos, comida, recompensas, manchas del piso
 ##   MARCAS           1        arañazos sobre lo arañable
-##   PRIMER_PLANO     2        pasamanos de la escalera (delante de Felipe)
+##   PERSONAJES       2        SOLO los humanos (Valeria): 200 px, más cerca de la cámara que el escenario. Felipe pasa
+##                             DETRÁS de ella y se ve su silueta (SiluetaTapada) en la parte que ella tapa (plan 2026-10-20)
+##   PRIMER_PLANO     3        pasamanos de la escalera (delante de Felipe y de Valeria)
 ##   LUZ              5        rayos de luz de las ventanas
 ##   ESTELA          10        estela de Felipe (Zoomies), palabras del ensayo de A.S.P.I.
 ##   PRIMER_PLANO_LEJOS 20     siluetas del primer plano con parallax (balcón)
@@ -38,10 +40,11 @@ const ARTE_PARED := -3
 const ESCALERA := -2
 const PUERTAS := -2
 const MUEBLES := -1
-const PERSONAJES := -1
+const TRAS_FELIPE := -1
 const JUEGO := 0
 const MARCAS := 1
-const PRIMER_PLANO := 2
+const PERSONAJES := 2
+const PRIMER_PLANO := 3
 const LUZ := 5
 const ESTELA := 10
 const PRIMER_PLANO_LEJOS := 20
@@ -65,7 +68,8 @@ const CAPA_PANTALLAS := 40
 ## La tabla del mundo en orden (para la prueba y la memoria): [nombre, z].
 const MUNDO := [
 	["PARED", PARED], ["FACHADA", FACHADA], ["ARTE_PARED", ARTE_PARED], ["ESCALERA", ESCALERA], ["PUERTAS", PUERTAS],
-	["MUEBLES", MUEBLES], ["PERSONAJES", PERSONAJES], ["JUEGO", JUEGO], ["MARCAS", MARCAS], ["PRIMER_PLANO", PRIMER_PLANO],
+	["MUEBLES", MUEBLES], ["TRAS_FELIPE", TRAS_FELIPE], ["JUEGO", JUEGO], ["MARCAS", MARCAS], ["PERSONAJES", PERSONAJES],
+	["PRIMER_PLANO", PRIMER_PLANO],
 	["LUZ", LUZ], ["ESTELA", ESTELA], ["PRIMER_PLANO_LEJOS", PRIMER_PLANO_LEJOS], ["IMAGINACION", IMAGINACION],
 	["FELIPE_IMAGINANDO", FELIPE_IMAGINANDO], ["EFECTOS", EFECTOS], ["CENSURA", CENSURA], ["INDICADOR", INDICADOR],
 ]

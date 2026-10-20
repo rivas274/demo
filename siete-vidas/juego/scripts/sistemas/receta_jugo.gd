@@ -118,7 +118,7 @@ func marca(direccion: float) -> void:
 
 func _soltar(particulas: CPUParticles2D, donde: Vector2, hacia: float) -> void:
 	particulas.direction = Vector2(hacia * 0.6, -1).normalized()
-	particulas.z_index = Capas.PERSONAJES
+	particulas.z_index = Capas.TRAS_FELIPE
 	particulas.global_position = donde
 	actor.get_parent().add_child(particulas)
 	particulas.restart()

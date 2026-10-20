@@ -104,7 +104,7 @@ func actualizar_estela(delta: float) -> void:
 	fantasma.scale = sprite.scale
 	fantasma.flip_h = sprite.flip_h
 	fantasma.modulate.a = 0.28
-	fantasma.z_index = Capas.PERSONAJES
+	fantasma.z_index = Capas.TRAS_FELIPE
 	felipe.get_parent().add_child(fantasma)
 	var desvanecer := fantasma.create_tween()
 	desvanecer.tween_property(fantasma, "modulate:a", 0.0, 0.22)

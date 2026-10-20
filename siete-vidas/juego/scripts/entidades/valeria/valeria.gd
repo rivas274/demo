@@ -137,6 +137,18 @@ func _ready() -> void:
 	z_index = Capas.PERSONAJES
 	aspecto.cargar()
 	_felipe = get_tree().get_first_node_in_group("felipe")
+	_poner_silueta.call_deferred()
+
+
+## Valeria va delante de Felipe (Capas.PERSONAJES): donde lo tapa se ve su contorno (pieza SiluetaTapada).
+func _poner_silueta() -> void:
+	if _felipe == null:
+		_felipe = get_tree().get_first_node_in_group("felipe")
+	if _felipe == null or has_node("SiluetaTapada"):
+		return
+	var silueta := SiluetaTapada.new()
+	add_child(silueta)
+	silueta.seguir(_felipe.sprite)
 
 
 ## Se pone en un lugar sin caminar (al empezar, o en las pruebas). En el juego, de un cuarto a otro se pasa con

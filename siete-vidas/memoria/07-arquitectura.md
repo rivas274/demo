@@ -134,6 +134,7 @@ pantallas o avisar lo que eligió el jugador en un menú (señal `elegido`).
 | `Cartel` (`Cartel.crear`) | Franja o tarjeta con título, nombre y recompensa; entra, espera y sale | Carteles de travesura y «PODER NUEVO» (la cola es `Anuncios`) |
 | `MenuUI` (`menu_pausa.tscn`) | Columna de botones `BotonMenu` con foco: flechas, W/S, cruceta o palanca; Enter o A elige; el foco da la vuelta. Avisa `elegido(nombre)` | Menú de pausa (Continuar, Reiniciar, Salir) |
 | Cuadro de diálogo (`cuadro_dialogo.tscn`) | Panel con marco, retrato, nombre y texto, con el estilo del tema; `Dialogo` pone las frases | Diálogos de Felipe, Valeria y A.S.P.I. |
+| `BotonMenu` (`scripts/ui/base/boton_menu.gd`, números en `datos/ui/boton_menu.tres`, `DatosBoton`) | Botón base: al apretar se encoge a 0,9 y vuelve con rebote; con foco o el mouse encima brilla (1,2) y se mece como péndulo colgado de arriba al centro (hasta 6°, la amplitud sube y baja con tween, nunca de golpe); entrada opcional cayendo desde arriba con rebote, escalonada por `MenuUI`; `principal` con pulso sutil. Preparado para el menú de estambre (decisión del creador): `punto_cuelgue` (pivote), `golpear(fuerza)` suma un columpio que se apaga solo y emite `golpeado`; `MenuUI.colocar_hueco(boton)` pone el nodo `HuecoFelipe` al costado del botón para que la pantalla asome a Felipe con su `zarpazo`. El arte (hilo, letreros, pelusa) llega de Gemini: no se dibuja estambre por código | Menú de pausa |
 | `GestorPantallas` | Pila: `abrir(pantalla, pausa)`, `cerrar(pantalla)`, `arriba()`, `es_la_de_arriba(pantalla)`; pausa mientras haya una que pausa | `Pantallas` (título, intro, pausa, fin), `Libreta`, `ResumenDia` |
 | `Estilo` | `color(&"nombre", alfa)`, `letra(&"nombre")`, `medida(&"nombre")`, `fuente()`, `texto_con_contorno`, `texto_centrado` | Todo lo que se dibuja con código |
 | `Controles` | Qué tecla o botón tiene cada acción (leído del InputMap), `etiquetar("{saltar}")`, `remapear`, `guardar`, `cargar` (`user://controles.cfg`, se carga al empezar el nivel) | Avisos, pistas de jefe, íconos (`IconosBotones` busca el ícono por tecla, así sigue al remapeo) |
@@ -219,3 +220,8 @@ Cada etapa terminó con todas las pruebas en 0 fallos, el bot `partida.gd` compl
 capturas de cada cuarto (`pruebas/capturas_nivel.gd`) comparadas píxel a píxel contra cinco tandas del código
 original. Cambios visibles a propósito (2026-10-20): la pausa ahora es un menú con botones (antes, una línea de
 texto con las teclas R y Q).
+
+**Giro en pixel art:** el juego se dibuja a 640×360 con snap a píxel (`2d/snap/*`) y se agranda entero; rotar un
+botón se ve con dientes (no a saltos de posición: el pivote cae en un píxel entero). Se eligió lo más simple: giro
+chico (6°), solo en los menús (con el juego en pausa) y apagable con **reducir movimiento** (`Opciones`, guardado en
+`user://opciones.cfg`). Un SubViewport no ayudaba: también rendiría a 640×360.

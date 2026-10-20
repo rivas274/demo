@@ -447,11 +447,11 @@ func interactuar(felipe: Felipe) -> void:
 
 
 func verbo(_felipe_que_pregunta: Felipe) -> String:
-	return "Encantar"
+	return "VERBO_ENCANTAR"
 
 
 func primera_frase() -> String:
-	return "{interactuar} Cara de bebito. Funciona siempre."
+	return "PRIMERA_INTERACTUAR_CARA_DE_BEBITO"
 
 
 ## Contorno del Indicador con la silueta de la pose que se ve.

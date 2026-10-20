@@ -157,7 +157,7 @@ func _draw() -> void:
 				Estilo.texto_centrado(self, lineas[i], 160 + i * 20, &"texto_chico", claro)
 			Estilo.texto_centrado(self, tr("FIN_CONTINUARA") % aceptar, 290, &"nota", acento)
 		Modo.JUGANDO:
-			var mostrado := aviso_fijo if aviso_fijo != "" else aviso
+			var mostrado := tr(aviso_fijo) if aviso_fijo != "" else tr(aviso)
 			if mostrado != "":
 				var texto := etiquetar(mostrado)
 				var ancho := Estilo.ancho(texto, &"texto_chico") + 20.0

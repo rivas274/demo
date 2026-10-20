@@ -35,7 +35,7 @@ func intentar(delta: float) -> bool:
 	b.jefe.patrulla.quieta = true
 	b.jefe.patrulla.destino = INF
 	b.apariencia.vibrando = true
-	b.nivel.travesuras.jugo.palabra_en_mundo("¡COF!", b.jefe.global_position + Vector2(0, -58), Color(0.9, 0.9, 0.9), 13)
+	b.nivel.travesuras.jugo.palabra_en_mundo("PALABRA_COF", b.jefe.global_position + Vector2(0, -58), Color(0.9, 0.9, 0.9), 13)
 	return true
 
 

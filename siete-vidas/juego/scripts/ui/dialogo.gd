@@ -85,6 +85,8 @@ func _ready() -> void:
 ## Pone una frase en la cola. `animo` es el cuadro del retrato (ver PERSONAJES). Urgente: corta lo que se dice.
 ## No repite la misma frase seguida. Devuelve false si se descartó.
 func decir(quien: String, texto: String, animo := 0, urgente := false) -> bool:
+	# Las frases llegan como claves de traducciones/textos.csv (FELIPE_..., VALERIA_...): aquí pasan a texto.
+	texto = tr(texto)
 	if _en_presentacion or texto == "" or texto == _ultima or (_caja.visible and texto == texto_actual):
 		return false
 	for pendiente: Array in _cola:
@@ -134,7 +136,7 @@ func lugar() -> float:
 
 ## Cuántas líneas ocupa la frase en el cuadro (las frases deben caber en 1 o 2).
 static func lineas_de(texto: String) -> int:
-	var limpio := texto
+	var limpio := TranslationServer.translate(texto)
 	for accion: String in Controles.ACCIONES:
 		limpio = limpio.replace("{%s}" % accion, "MM")
 	var parrafo := TextParagraph.new()
@@ -151,7 +153,7 @@ func _mostrar(quien: String, texto: String, animo: int) -> void:
 	historial.append([quien, texto])
 	_caja.visible = true
 	# Las frases pasan por la traducción (hoy en español; mañana, una clave por frase en traducciones/).
-	_escribir(tr(texto))
+	_escribir(texto)
 	_visibles = 0.0
 	_texto.visible_characters = 0
 	_espera = espera_base + espera_por_letra * texto.length()

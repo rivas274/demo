@@ -139,7 +139,7 @@ func _renglon(c: Control, datos: Agenda, id: String, x0: float, y: float) -> voi
 		color_segunda = Estilo.color(&"libreta_secreta")
 	else:
 		segunda = tr("LIBRETA_RECOMPENSA") % datos.texto_recompensa(id)
-		var nota := String(datos.datos(id).get("nota", ""))
+		var nota := tr(String(datos.datos(id).get("nota", "")))
 		if nota != "":
 			segunda = "(" + nota + ")   " + segunda
 	Estilo.escribir(c, Vector2(x0 + 24, y + 26), segunda, &"libreta_detalle", color_segunda, HORIZONTAL_ALIGNMENT_LEFT, ancho_max)

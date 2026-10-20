@@ -8,7 +8,7 @@ extends Resource
 ## Nombre del nodo en el nivel ("" = el tipo con mayúscula; las pruebas buscan algunos por nombre, como «Vaso»).
 @export var nombre := ""
 ## Verbo de Felipe en la burbuja del Indicador.
-@export var verbo := "Liberar"
+@export var verbo := "VERBO_LIBERAR"
 @export_group("Si se tira (Tirable)")
 ## Al caer aturde a lo que tenga debajo (la taza y la maceta sí; el vaso no).
 @export var aturde := true

@@ -114,8 +114,8 @@ func _aterrizar_en_el_toldo(_fuerza: float) -> void:
 	sonar("golpe")
 	# El cartel sale después de verlo aterrizar y a una altura que no lo tapa.
 	await get_tree().create_timer(0.35).timeout
-	travesuras.hud.cartel("PODER NUEVO", "CAER DE PIE", "Siempre aterrizas con estilo", false)
-	nivel.desbloquear_logro("Caer de Pie")
+	travesuras.hud.cartel("CARTEL_PODER_NUEVO", "CARTEL_CAER_DE_PIE", "CARTEL_SIEMPRE_ATERRIZAS_CON_ESTILO", false)
+	nivel.desbloquear_logro("LOGRO_CAER_DE_PIE")
 	_decir("aterrice", true)
 	await get_tree().create_timer(1.2).timeout
 	nivel.terminado = true

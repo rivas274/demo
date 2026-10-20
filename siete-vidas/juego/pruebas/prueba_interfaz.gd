@@ -28,6 +28,7 @@ func _correr() -> void:
 	_probar_controles()
 	_probar_tema()
 	_probar_letras()
+	_probar_claves()
 
 	for fallo in _fallos:
 		print("FALLA: ", fallo)
@@ -278,6 +279,44 @@ func _probar_letras() -> void:
 	_comprobar(bien, "Letra: pixel, sin suavizado, con á é í ó ú ñ ü ¿ ¡ y a un múltiplo de su tamaño de diseño %s" % [detalle])
 	_comprobar(Estilo.fuente() != ThemeDB.fallback_font and Estilo.tema().default_font != null, "Letra: el tema trae su letra (ya no la de Godot)")
 	_comprobar(Estilo.recortar("A.S.P.I. — Devoradora de Pelos · Nivel 3", &"jefe_barra", 120.0).ends_with("…") and Estilo.ancho(Estilo.recortar("A.S.P.I. — Devoradora de Pelos · Nivel 3", &"jefe_barra", 120.0), &"jefe_barra") <= 120.0, "Letra: un texto que no cabe se recorta con «…»")
+
+
+## Etapa 4: todo texto del juego es una clave de traducciones/textos.csv, y ninguna clave usada en el código o en los
+## datos falta (tr(clave) != clave). Frases de Felipe y Valeria, agenda, primeras frases, palabras, logros, verbos,
+## carteles y datos del jefe.
+func _probar_claves() -> void:
+	var prefijos := "(FELIPE|VALERIA|AGENDA|RECOMPENSA|LECCION|PALABRA|LOGRO|JEFE|CARTEL|VERBO|PRIMERA|ENSAYO|N1|UI|MENU|PAUSA|FIN|TITULO|INTRO|LIBRETA|RESUMEN|NOMBRE|CUARTO|TECLA)_[A-Z0-9_]+"
+	var expresion := RegEx.create_from_string("\"(" + prefijos + ")\"")
+	var faltan: Array[String] = []
+	var usadas := 0
+	var archivos := _scripts("res://scripts")
+	for carpeta in ["res://datos/jefes", "res://datos/objetos", "res://datos/enemigos"]:
+		for archivo in DirAccess.get_files_at(carpeta):
+			if archivo.ends_with(".tres"):
+				archivos.append(carpeta.path_join(archivo))
+	for ruta in archivos:
+		# La tabla de capas nombra sus capas en mayúsculas (FELIPE_IMAGINANDO): no son textos.
+		if ruta.ends_with("capas.gd"):
+			continue
+		for m in expresion.search_all(FileAccess.get_file_as_string(ruta)):
+			usadas += 1
+			if TranslationServer.translate(m.get_string(1)) == m.get_string(1):
+				faltan.append("%s (%s)" % [m.get_string(1), ruta.get_file()])
+	_comprobar(usadas > 200 and faltan.is_empty(), "Claves: las %d claves del código y los datos tienen su texto %s" % [usadas, faltan])
+	var sueltas: Array[String] = []
+	for tabla: Dictionary in [Frases.FELIPE, Frases.VALERIA]:
+		for evento: String in tabla:
+			for frase: Array in tabla[evento]:
+				if not RegEx.create_from_string("^" + prefijos + "$").search(String(frase[0])):
+					sueltas.append(String(frase[0]))
+	for t: Dictionary in Agenda.NIVEL_1:
+		for texto: String in [String(t["nombre"]), String(t["frase"][0]), String((t["recompensa"] as Dictionary)["texto"])]:
+			if not RegEx.create_from_string("^" + prefijos + "$").search(texto):
+				sueltas.append(texto)
+	for leccion: Array in Nivel1.LECCIONES:
+		if not RegEx.create_from_string("^" + prefijos + "$").search(String(leccion[1])):
+			sueltas.append(String(leccion[1]))
+	_comprobar(sueltas.is_empty(), "Claves: las frases de Felipe y Valeria, la agenda y las primeras frases van por clave %s" % [sueltas])
 
 
 func _scripts(carpeta: String) -> Array[String]:

@@ -53,7 +53,7 @@ func intentar(_delta: float) -> bool:
 		b.apariencia.vibrando = true
 		b.apariencia.luz_aviso = Color("ffd23f")
 		b.nivel.sonar("succion")
-		b.nivel.travesuras.jugo.palabra_en_mundo("¡FUUU!", b.jefe.global_position + Vector2(0, -60), Color(1.0, 0.9, 0.4), 14)
+		b.nivel.travesuras.jugo.palabra_en_mundo("PALABRA_FUUU", b.jefe.global_position + Vector2(0, -60), Color(1.0, 0.9, 0.4), 14)
 	return true
 
 
@@ -85,7 +85,7 @@ func _soplar() -> void:
 	felipe.velocity = Vector2(_hacia * empuje, -300.0)
 	felipe.empuje = Vector2(_hacia * empuje * 0.6, 0.0)
 	b.presentacion.sacudir(0.2)
-	b.nivel.travesuras.jugo.palabra_en_mundo("¡FIUUU!", felipe.global_position + Vector2(0, -80), Color(0.8, 0.95, 1.0), 16)
+	b.nivel.travesuras.jugo.palabra_en_mundo("PALABRA_FIUUU", felipe.global_position + Vector2(0, -80), Color(0.8, 0.95, 1.0), 16)
 	for objeto in b.municion:
 		if objeto.tipo == "maceta" and not objeto.tirable.roto and objeto.visible:
 			objeto.tirable.caer_sin_romper(_hacia)

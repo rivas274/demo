@@ -6,4 +6,4 @@
 script = ExtResource("1_datos")
 tipo = "tazon"
 nombre = "Comida (tazon)"
-verbo = "Degustar"
+verbo = "VERBO_DEGUSTAR"

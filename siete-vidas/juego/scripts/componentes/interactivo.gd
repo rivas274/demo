@@ -8,7 +8,7 @@ extends Node2D
 signal usado(objeto: Interactivo)
 
 ## Verbo de Felipe en la burbuja del Indicador.
-@export var verbo_indicador := "Usar"
+@export var verbo_indicador := "VERBO_USAR"
 ## Rectángulo del contorno, relativo a la posición.
 @export var rect_local := Rect2(-16, -24, 32, 24)
 ## Se puede usar una sola vez.

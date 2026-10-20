@@ -59,8 +59,8 @@ func _init(datos_jefe: DatosJefe, el_jefe: Enemigo, gato: Felipe, de_nivel: Nive
 func _ready() -> void:
 	# Sin jefe no hay pelea (algunas pruebas lo quitan).
 	jefe.tree_exiting.connect(queue_free)
-	presentacion = PresentacionJefe.new(datos.nombre, datos.titulo)
-	presentacion.texto_rugido = datos.rugido
+	presentacion = PresentacionJefe.new(tr(datos.nombre), tr(datos.titulo))
+	presentacion.texto_rugido = tr(datos.rugido)
 	presentacion.alto_jefe = jefe.datos.alto + datos.alto_extra
 	presentacion.terminada.connect(_al_terminar_presentacion)
 	add_child(presentacion)

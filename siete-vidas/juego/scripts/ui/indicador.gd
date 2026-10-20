@@ -99,16 +99,16 @@ func _physics_process(delta: float) -> void:
 		_aparecer = 0.0
 		if objeto and objeto.has_method("primera_frase") and not _vistos.has(objeto.get_instance_id()):
 			_vistos[objeto.get_instance_id()] = true
-			var frase := String(objeto.call("primera_frase"))
+			var frase := tr(String(objeto.call("primera_frase")))
 			if frase != "":
 				primera_vez.emit(objeto, frase)
 		if objeto and tiene_arte(objeto):
 			_contorno.z_index = int((objeto.call("arte_indicador") as Dictionary).get("z", Capas.ARTE_PARED))
 	verbo = ""
 	if objeto:
-		verbo = String(objeto.call("verbo", felipe)) if objeto.has_method("verbo") else "Usar"
+		verbo = tr(String(objeto.call("verbo", felipe))) if objeto.has_method("verbo") else tr("VERBO_USAR")
 	elif felipe and felipe.progreso_comer_snack() > 0.0:
-		verbo = "Degustar snack"
+		verbo = tr("VERBO_DEGUSTAR_SNACK")
 	_aparecer = minf(1.0, _aparecer + delta * 8.0)
 	queue_redraw()
 	_contorno.queue_redraw()

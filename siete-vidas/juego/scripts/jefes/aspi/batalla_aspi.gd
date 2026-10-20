@@ -327,7 +327,7 @@ func llenar_deposito() -> void:
 	if deposito >= DatosJefe.por_fase(datos.capacidad, vencidas):
 		_llenar()
 	else:
-		nivel.travesuras.jugo.palabra_en_mundo("+1 · Glup.", jefe.global_position + Vector2(0, -60), Color(0.5, 0.85, 1.0), 14)
+		nivel.travesuras.jugo.palabra_en_mundo("PALABRA_1_GLUP", jefe.global_position + Vector2(0, -60), Color(0.5, 0.85, 1.0), 14)
 
 
 ## Depósito lleno: se detiene pitando, inofensiva, y espera a que se lo vacíen... o a que Felipe la apague.
@@ -340,7 +340,7 @@ func _llenar() -> void:
 	jefe.dano.activo = false
 	apariencia.abrir_tapa()
 	nivel.sonar("logro")
-	presentacion.cartel("¡DEPÓSITO LLENO!", 1.6, datos.pista_vulnerable)
+	presentacion.cartel("JEFE_DEPOSITO_LLENO", 1.6, datos.pista_vulnerable)
 	# Nunca queda justo bajo la repisa: sale disparada unos 80 px hacia adelante.
 	var repisa := nivel.pieza("Repisa de las macetas")
 	var patrulla := jefe.patrulla
@@ -364,7 +364,7 @@ func _actualizar_llena(delta: float) -> void:
 		llena = false
 		jefe.patrulla.quieta = false
 		apariencia.cerrar_tapa()
-		presentacion.cartel("¡LO VACIÓ!", 1.2, DatosJefe.por_fase(datos.pistas, vencidas))
+		presentacion.cartel("JEFE_LO_VACIO", 1.2, DatosJefe.por_fase(datos.pistas, vencidas))
 
 
 ## ¡CLIC!: congelado, destello, sacudida, polvo y sonido en capas.
@@ -374,7 +374,7 @@ func _apagar() -> void:
 	nivel.travesuras.jugo.congelar(0.1)
 	presentacion.destello(0.7)
 	presentacion.sacudir(0.2)
-	nivel.travesuras.jugo.palabra_en_mundo("¡CLIC!", jefe.global_position + Vector2(0, -70), Color(1.0, 0.95, 0.5), 22)
+	nivel.travesuras.jugo.palabra_en_mundo("PALABRA_CLIC", jefe.global_position + Vector2(0, -70), Color(1.0, 0.95, 0.5), 22)
 	tiempo_clic = Time.get_ticks_msec() / 1000.0
 	_soltar_polvo(jefe.global_position + Vector2(0, -20))
 	nivel.sonar("golpe")
@@ -392,7 +392,7 @@ func _apagar() -> void:
 func _al_oir_maullido(_felipe_que_maulla: Felipe) -> void:
 	if fase != Fase.PELEA or llena or activa != null or ausente:
 		return
-	nivel.travesuras.jugo.palabra_en_mundo("¿Gato detectado?", jefe.global_position + Vector2(0, -64), Color(1.0, 0.6, 0.6), 11)
+	nivel.travesuras.jugo.palabra_en_mundo("PALABRA_GATO_DETECTADO", jefe.global_position + Vector2(0, -64), Color(1.0, 0.6, 0.6), 11)
 	jefe.patrulla.destino = felipe.global_position.x
 
 
@@ -418,7 +418,7 @@ func _terminar() -> void:
 		puerta.queue_redraw()
 	Engine.time_scale = 0.3
 	presentacion.destello(1.0)
-	presentacion.cartel("¡APAGADA!", 1.6)
+	presentacion.cartel("JEFE_APAGADA", 1.6)
 	nivel.sonar("puf")
 	await get_tree().create_timer(0.5 * 0.3, true, false, false).timeout
 	Engine.time_scale = 1.0

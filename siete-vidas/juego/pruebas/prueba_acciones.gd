@@ -497,7 +497,7 @@ func _testigo() -> Node2D:
 
 
 func _dijo(quien: String, lista: Array) -> bool:
-	var textos := lista.map(func(f: Array) -> String: return String(f[0]))
+	var textos := lista.map(func(f: Array) -> String: return TranslationServer.translate(String(f[0])))
 	for linea: Array in sala.travesuras.dialogo.historial:
 		if linea[0] == quien and textos.has(linea[1]):
 			return true

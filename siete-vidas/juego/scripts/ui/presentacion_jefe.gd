@@ -206,6 +206,8 @@ func saltar() -> void:
 
 ## Cartel de fase con su pista de una línea debajo (R16).
 func cartel(texto: String, segundos := 1.4, pista := "") -> void:
+	texto = tr(texto)
+	pista = tr(pista) if pista != "" else ""
 	if anuncios:
 		var alto := 30.0 + (18.0 if pista != "" else 0.0) + 6.0
 		anuncios.anunciar("fase", texto, Vector2(640, alto), Vector2(640, alto), func(rect: Rect2, _chico: bool) -> float:
@@ -294,7 +296,7 @@ func _avanzar(delta: float) -> void:
 	texto_en_pantalla = ""
 	subtitulo_en_pantalla = ""
 	if frase_sin_vuelta.size() >= 2 and (_en("sin_vuelta_atras") or _en("espera")) and pasos == PASOS:
-		subtitulo_en_pantalla = String(frase_sin_vuelta[1])
+		subtitulo_en_pantalla = tr(String(frase_sin_vuelta[1]))
 	if _en("sin_vuelta_atras"):
 		_camara.global_position = _en_felipe()
 		_poner_zoom(1)

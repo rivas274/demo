@@ -129,7 +129,7 @@ func _dibujar() -> void:
 		var cara := Rect2(animo % 3 * LADO_RETRATO, animo / 3 * LADO_RETRATO, LADO_RETRATO, LADO_RETRATO)
 		c.draw_texture_rect_region(RETRATOS, Rect2(130, 278, 42, 42), cara, Estilo.color(&"blanco", a))
 		Estilo.escribir(c, Vector2(180, 288), tr("NOMBRE_felipe"), &"resumen_nombre", Estilo.color(&"nombre_hablante", a))
-		c.draw_multiline_string(Estilo.fuente(&"resumen_frase"), Vector2(180, 302), String(frase[0]), HORIZONTAL_ALIGNMENT_LEFT, 326, Estilo.letra(&"resumen_frase"), 2, Estilo.color(&"texto_claro", a))
+		c.draw_multiline_string(Estilo.fuente(&"resumen_frase"), Vector2(180, 302), tr(String(frase[0])), HORIZONTAL_ALIGNMENT_LEFT, 326, Estilo.letra(&"resumen_frase"), 2, Estilo.color(&"texto_claro", a))
 		if terminado and fmod(_tiempo, 1.0) < 0.7:
 			IconosBotones.dibujar(c, "saltar_dialogo", Vector2(268, 330), 12.0)
 			_texto(c, Vector2(286, 340), tr("RESUMEN_SEGUIR"), &"resumen_pista", Estilo.color(&"resumen_pista"), false)

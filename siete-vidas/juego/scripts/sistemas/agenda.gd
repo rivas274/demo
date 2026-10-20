@@ -16,30 +16,30 @@ signal progreso(travesura: Dictionary)
 
 ## Nivel 1, "La Gran Fuga" (propuesta v4, sección 3): 8 líneas, 3 secretas.
 const NIVEL_1 := [
-	{"id": "perdon", "nombre": "Romper algo y que me perdone igual", "cuarto": "sala", "secreta": false,
-		"recompensa": {"tipo": "snack", "cantidad": 1, "texto": "Snack guardado"},
-		"frase": ["Carisma: 1. Consecuencias: 0.", 7]},
-	{"id": "sofa", "nombre": "Arañar el sofá nuevo (todavía tiene el plástico)", "cuarto": "sala", "secreta": false,
-		"recompensa": {"tipo": "calcetin", "cantidad": 1, "texto": "Calcetín"},
-		"frase": ["Ahora sí parece nuestro.", 4]},
-	{"id": "popo", "nombre": "Popo táctico en la arena recién limpiada", "cuarto": "recibidor", "secreta": true,
-		"recompensa": {"tipo": "foto", "cantidad": 1, "texto": "Foto vergonzosa"},
-		"frase": ["Arte conceptual. Ella no lo entiende.", 7]},
-	{"id": "almuerzo", "nombre": "Robar el almuerzo de Valeria", "cuarto": "cocina", "secreta": false,
-		"recompensa": {"tipo": "snack", "cantidad": 2, "texto": "2 snacks"},
-		"frase": ["Dieta cancelada por fuerza mayor.", 6]},
-	{"id": "laser", "nombre": "Ignorar el láser", "cuarto": "pasillo", "secreta": true,
-		"recompensa": {"tipo": "foto", "cantidad": 1, "texto": "Foto vergonzosa"},
-		"frase": ["No persigo puntitos. Los puntitos me persiguen.", 0]},
-	{"id": "cajon", "nombre": "Saquear el cajón de calcetines", "cuarto": "dormitorio", "secreta": false,
-		"recompensa": {"tipo": "calcetin", "cantidad": 1, "texto": "Calcetín"},
-		"frase": ["Inventario.", 7]},
-	{"id": "teclado", "nombre": "Pisar el teclado de Valeria", "cuarto": "estudio", "secreta": true,
-		"recompensa": {"tipo": "foto", "cantidad": 1, "texto": "Manchas extra en la pelea + foto"},
-		"frase": ["jjjjjjjjjj. Mi mejor obra.", 7]},
-	{"id": "desenchufar", "nombre": "Desenchufar a A.S.P.I.", "cuarto": "estudio", "secreta": false,
-		"recompensa": {"tipo": "camino", "id": "balcon", "texto": "Camino: el balcón"},
-		"frase": ["Limpieza cancelada.", 7]},
+	{"id": "perdon", "nombre": "AGENDA_ROMPER_ALGO_Y_QUE", "cuarto": "sala", "secreta": false,
+		"recompensa": {"tipo": "snack", "cantidad": 1, "texto": "RECOMPENSA_SNACK_GUARDADO"},
+		"frase": ["FELIPE_AGENDA_CARISMA_1_CONSECUENCIAS_0", 7]},
+	{"id": "sofa", "nombre": "AGENDA_ARANAR_EL_SOFA_NUEVO", "cuarto": "sala", "secreta": false,
+		"recompensa": {"tipo": "calcetin", "cantidad": 1, "texto": "RECOMPENSA_CALCETIN"},
+		"frase": ["FELIPE_AGENDA_AHORA_SI_PARECE_NUESTRO", 4]},
+	{"id": "popo", "nombre": "AGENDA_POPO_TACTICO_EN_LA", "cuarto": "recibidor", "secreta": true,
+		"recompensa": {"tipo": "foto", "cantidad": 1, "texto": "RECOMPENSA_FOTO_VERGONZOSA"},
+		"frase": ["FELIPE_AGENDA_ARTE_CONCEPTUAL_ELLA_NO", 7]},
+	{"id": "almuerzo", "nombre": "AGENDA_ROBAR_EL_ALMUERZO_DE", "cuarto": "cocina", "secreta": false,
+		"recompensa": {"tipo": "snack", "cantidad": 2, "texto": "RECOMPENSA_2_SNACKS"},
+		"frase": ["FELIPE_AGENDA_DIETA_CANCELADA_POR_FUERZA", 6]},
+	{"id": "laser", "nombre": "AGENDA_IGNORAR_EL_LASER", "cuarto": "pasillo", "secreta": true,
+		"recompensa": {"tipo": "foto", "cantidad": 1, "texto": "RECOMPENSA_FOTO_VERGONZOSA"},
+		"frase": ["FELIPE_AGENDA_NO_PERSIGO_PUNTITOS_LOS", 0]},
+	{"id": "cajon", "nombre": "AGENDA_SAQUEAR_EL_CAJON_DE", "cuarto": "dormitorio", "secreta": false,
+		"recompensa": {"tipo": "calcetin", "cantidad": 1, "texto": "RECOMPENSA_CALCETIN"},
+		"frase": ["FELIPE_AGENDA_INVENTARIO", 7]},
+	{"id": "teclado", "nombre": "AGENDA_PISAR_EL_TECLADO_DE", "cuarto": "estudio", "secreta": true,
+		"recompensa": {"tipo": "foto", "cantidad": 1, "texto": "RECOMPENSA_MANCHAS_EXTRA_EN_LA"},
+		"frase": ["FELIPE_AGENDA_JJJJJJJJJJ_MI_MEJOR_OBRA", 7]},
+	{"id": "desenchufar", "nombre": "AGENDA_DESENCHUFAR_A_A_S", "cuarto": "estudio", "secreta": false,
+		"recompensa": {"tipo": "camino", "id": "balcon", "texto": "RECOMPENSA_CAMINO_EL_BALCON"},
+		"frase": ["FELIPE_AGENDA_LIMPIEZA_CANCELADA", 7]},
 ]
 
 var travesuras: Array = []
@@ -78,13 +78,13 @@ func meta(id: String) -> int:
 func nombre_visible(id: String) -> String:
 	if es_secreta(id) and not esta_cumplida(id):
 		return "???"
-	return String(datos(id).get("nombre", ""))
+	return TranslationServer.translate(String(datos(id).get("nombre", "")))
 
 
 func texto_recompensa(id: String) -> String:
 	if es_secreta(id) and not esta_cumplida(id):
 		return "???"
-	return String((datos(id).get("recompensa", {}) as Dictionary).get("texto", ""))
+	return TranslationServer.translate(String((datos(id).get("recompensa", {}) as Dictionary).get("texto", "")))
 
 
 ## Suma un paso a la travesura. Devuelve true si con esto se cumplió (solo la primera vez).

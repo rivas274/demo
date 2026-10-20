@@ -87,12 +87,12 @@ func _physics_process(delta: float) -> void:
 				felipe.empuje = Vector2(signf(distancia) * SUCCION, 0.0)
 				if not _dijo_ancla:
 					_dijo_ancla = true
-					sala.travesuras.dialogo.decir("felipe", "Mantén {agacharse}. Uñas: modo ancla.", 1, true)
+					sala.travesuras.dialogo.decir("felipe", "ENSAYO_MANTEN_AGACHARSE_UNAS_MODO", 1, true)
 			if _reloj >= TIEMPO_LIMPIEZA:
 				felipe.empuje = Vector2.ZERO
 				paso = Paso.VUELVE
 				aspi.patrulla.destino = _puerta.x
-				sala.travesuras.dialogo.decir("aspi", "Suciedad eliminada. Gato… registrado.", 1, true)
+				sala.travesuras.dialogo.decir("aspi", "ENSAYO_SUCIEDAD_ELIMINADA_GATO_REGISTRADO", 1, true)
 		Paso.VUELVE:
 			if absf(aspi.global_position.x - _puerta.x) < 6.0:
 				paso = Paso.LISTO

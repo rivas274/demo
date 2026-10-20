@@ -23,7 +23,7 @@ const ANCHO := 60.0
 const ALTO := 160.0
 
 ## Verbo de Felipe en el Indicador.
-@export var verbo_indicador := "Actuar"
+@export var verbo_indicador := "VERBO_ACTUAR"
 @export var frase_primera_vez := ""
 
 ## Funciones que hizo (con y sin público) y premios cobrados.

@@ -118,6 +118,9 @@ func _dibujar_agenda() -> void:
 ## cuando le toca, donde no tapa a Felipe, al diálogo ni a quien reacciona; si no hay hueco, en chico en una esquina.
 ## `y_cartel` solo se usa sin cola de anuncios (pruebas sueltas del HUD).
 func cartel(titulo: String, nombre: String, recompensa: String, secreta: bool, y_cartel := -1.0) -> void:
+	titulo = tr(titulo)
+	nombre = tr(nombre)
+	recompensa = tr(recompensa)
 	carteles.append([titulo, nombre])
 	golpear("agenda")
 	var datos := [titulo, nombre, recompensa, secreta]

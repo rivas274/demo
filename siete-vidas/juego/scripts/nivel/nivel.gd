@@ -325,6 +325,7 @@ func sonar(nombre: String, tono := 1.0) -> void:
 
 
 func desbloquear_logro(titulo: String) -> void:
+	titulo = tr(titulo)
 	if titulo in logros:
 		return
 	logros.append(titulo)

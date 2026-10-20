@@ -112,7 +112,7 @@ func disponible(felipe: Felipe) -> bool:
 
 
 func verbo(felipe: Felipe) -> String:
-	return "Tirar" if en_el_peldano(felipe) else "Empujar"
+	return "VERBO_TIRAR" if en_el_peldano(felipe) else "VERBO_EMPUJAR"
 
 
 ## Afuera se alcanza al pie; en el peldaño, a la altura de la caja de arriba (a la par de Felipe).

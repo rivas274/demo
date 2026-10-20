@@ -76,8 +76,8 @@ func disponible(_felipe_que_pregunta: Felipe) -> bool:
 ## Verbo de Felipe para el Indicador: la escalera se "asciende", las puertas se "pasan".
 func verbo(_felipe: Felipe) -> String:
 	if escalera:
-		return "Ascender"
-	return "Probar" if cerrada else "Pasar"
+		return "VERBO_ASCENDER"
+	return "VERBO_PROBAR" if cerrada else "VERBO_PASAR"
 
 
 ## Nombre de la imagen según el estado.

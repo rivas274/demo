@@ -135,7 +135,7 @@ func _al_recoger(objeto: Recogible) -> void:
 func _al_ganar_ranura(_total: int) -> void:
 	decir_felipe("ranura", true)
 	if felipe:
-		jugo.palabra_en_mundo("¡RANURA DE MAÑA!", felipe.global_position + Vector2(0, -90), Color(0.7, 1.0, 0.7), 16)
+		jugo.palabra_en_mundo("PALABRA_RANURA_DE_MANA", felipe.global_position + Vector2(0, -90), Color(0.7, 1.0, 0.7), 16)
 
 
 func contar_perdon() -> void:
@@ -156,13 +156,13 @@ func conectar_aranable(objeto: Aranable, id_agenda := "", donde := Vector2.INF) 
 
 func _al_actuar(rascador: Rascador, con_publico: bool, premio: bool, _testigo: Node) -> void:
 	var arriba := rascador.global_position + Vector2(0, -Rascador.ALTO - 16)
-	jugo.palabra_en_mundo("¡GARRAS AFILADAS!", arriba, Color(0.7, 0.95, 1.0), 13, 0.9 if con_publico else 0.2)
+	jugo.palabra_en_mundo("PALABRA_GARRAS_AFILADAS", arriba, Color(0.7, 0.95, 1.0), 13, 0.9 if con_publico else 0.2)
 	if not con_publico:
 		decir_felipe("rascador_solo", true)
 		return
 	if premio:
 		contar_perdon()
-		jugo.palabra_en_mundo("¡OVACIÓN!", arriba + Vector2(0, -24), Color(1.0, 0.55, 0.75), 22)
+		jugo.palabra_en_mundo("PALABRA_OVACION", arriba + Vector2(0, -24), Color(1.0, 0.55, 0.75), 22)
 		jugo.destello(0.35, Color(1, 1, 1))
 		decir_valeria("rascador", true)
 		decir_felipe("rascador_publico")
@@ -180,7 +180,7 @@ func _al_impacto(tipo: String) -> void:
 
 
 func _al_maullar(boca: Vector2) -> void:
-	jugo.palabra_en_mundo("¡MIAU!", boca + Vector2(felipe.mirando * 14.0, -18.0), Color(1.0, 0.95, 0.6), 16)
+	jugo.palabra_en_mundo("PALABRA_MIAU", boca + Vector2(felipe.mirando * 14.0, -18.0), Color(1.0, 0.95, 0.6), 16)
 	if not dialogo.ocupado() and randf() < 0.5:
 		decir_felipe("maullar")
 
@@ -191,13 +191,13 @@ func _al_aranar(_objetivo: Node2D, critico: bool) -> void:
 	jugo.congelar(0.09)
 	jugo.sacudir(0.2, 0.8)
 	jugo.destello(0.3)
-	jugo.palabra_en_mundo("¡CRÍTICO!", felipe.global_position + Vector2(felipe.mirando * 30.0, -80.0), Color(1.0, 0.4, 0.3), 22)
+	jugo.palabra_en_mundo("PALABRA_CRITICO", felipe.global_position + Vector2(felipe.mirando * 30.0, -80.0), Color(1.0, 0.4, 0.3), 22)
 	decir_felipe("aranar_critico", true)
 
 
 func _al_comer_snack() -> void:
 	if felipe:
-		jugo.palabra_en_mundo("¡ÑAM!", felipe.global_position + Vector2(0, -80), Color(1.0, 0.8, 0.5), 15)
+		jugo.palabra_en_mundo("PALABRA_NAM", felipe.global_position + Vector2(0, -80), Color(1.0, 0.8, 0.5), 15)
 	decir_felipe("snack")
 
 
@@ -218,7 +218,7 @@ func decir_valeria(evento: String, urgente := false) -> void:
 func mostrar_resumen(frase_final: Array = []) -> ResumenDia:
 	libreta.cerrar()
 	libreta.habilitada = false
-	var frase := frase_final if not frase_final.is_empty() else (Frases.FELIPE["agenda_completa"][0] if agenda.completa() else ["Mañana, más. Hoy ya hice demasiado.", 0])
+	var frase := frase_final if not frase_final.is_empty() else (Frases.FELIPE["agenda_completa"][0] if agenda.completa() else ["FELIPE_MANANA_MAS_HOY_YA", 0])
 	var resumen := ResumenDia.new()
 	resumen.mostrar(ResumenDia.filas_de(agenda, recompensas, perdones), frase)
 	resumen.cerrado.connect(func() -> void:

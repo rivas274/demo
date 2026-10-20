@@ -16,7 +16,7 @@ signal roto(objeto: Aranable)
 ## Arañazos que aguanta antes de romperse (0 = nunca se rompe, se puede arañar siempre).
 @export var aranazos_para_romper := 3
 ## Verbo de Felipe en el Indicador ("Firmar" el sofá, "Arañar" la puerta).
-@export var verbo_indicador := "Firmar"
+@export var verbo_indicador := "VERBO_FIRMAR"
 ## Línea de Felipe la primera vez que se acerca ({interactuar} es el ícono del botón); "" para ninguna.
 @export var frase_primera_vez := ""
 

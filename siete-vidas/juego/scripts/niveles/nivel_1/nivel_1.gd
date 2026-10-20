@@ -346,21 +346,21 @@ const TIEMPO_IGNORAR_LASER := 5.0
 ## Primeras frases de Felipe (reemplazan los avisos de abajo, M2): [zona, línea con {acción}, ánimo del retrato].
 ## Salen una sola vez, la primera vez que entra a la zona (R1–R3 se miden sobre esto).
 const LECCIONES := [
-	[Rect2(0, TECHO, 200, SUELO - TECHO), "{saltar} Los muebles son mi escalera.", 0],
-	[Rect2(240, TECHO, 200, SUELO - TECHO), "{interactuar} Ese sofá tiene plástico. Por ahora.", 7],
-	[Rect2(500, TECHO, 150, SUELO - TECHO), "{interactuar} Un rascador. Necesito público.", 0],
-	[Rect2(680, TECHO, 220, SUELO - TECHO), "{interactuar} Ese vaso está muy cerca del borde. Aún.", 4],
-	[Rect2(1600, TECHO, 160, SUELO - TECHO), "Mantén {agacharse}. Es estrategia, no humildad.", 0],
-	[Rect2(1820, TECHO, 130, SUELO - TECHO), "Mi trono. Aquí vuelvo si algo sale mal.", 0],
-	[Rect2(1980, TECHO, 140, SUELO - TECHO), "{maullar} Servidumbre: abran.", 6],
-	[Rect2(2140, TECHO, 140, SUELO - TECHO), "{saltar} El librero es mi escalera.", 7],
-	[Rect2(2300, TECHO, 120, SUELO - TECHO), "{interactuar} Escalones. Mi única pasión.", 0],
-	[Rect2(2950, TECHO, 130, SUELO - TECHO), "{interactuar} Comida a la vista. Me sacrifico.", 6],
-	[Rect2(3110, TECHO, 140, SUELO - TECHO), "{zarpazo} Un ratón de cuerda. Qué insolencia.", 1],
-	[Rect2(4840, TECHO, 140, SUELO - TECHO), "{interactuar} Puerta entornada. Qué invitación.", 7],
-	[Rect2(5880, TECHO, 140, SUELO - TECHO), "{saltar} Banquito, cama, cómoda. Escalera real.", 0],
-	[Rect2(6180, TECHO, 150, SUELO - TECHO), "{interactuar} El cajón de los calcetines. Botín.", 7],
-	[Rect2(7860, TECHO, 140, SUELO - TECHO), "{saltar} La maceta, la baranda… y la libertad.", 0],
+	[Rect2(0, TECHO, 200, SUELO - TECHO), "LECCION_SALTAR_LOS_MUEBLES_SON", 0],
+	[Rect2(240, TECHO, 200, SUELO - TECHO), "LECCION_INTERACTUAR_ESE_SOFA_TIENE", 7],
+	[Rect2(500, TECHO, 150, SUELO - TECHO), "LECCION_INTERACTUAR_UN_RASCADOR_NECESITO", 0],
+	[Rect2(680, TECHO, 220, SUELO - TECHO), "LECCION_INTERACTUAR_ESE_VASO_ESTA", 4],
+	[Rect2(1600, TECHO, 160, SUELO - TECHO), "LECCION_MANTEN_AGACHARSE_ES_ESTRATEGIA", 0],
+	[Rect2(1820, TECHO, 130, SUELO - TECHO), "LECCION_MI_TRONO_AQUI_VUELVO", 0],
+	[Rect2(1980, TECHO, 140, SUELO - TECHO), "LECCION_MAULLAR_SERVIDUMBRE_ABRAN", 6],
+	[Rect2(2140, TECHO, 140, SUELO - TECHO), "LECCION_SALTAR_EL_LIBRERO_ES", 7],
+	[Rect2(2300, TECHO, 120, SUELO - TECHO), "LECCION_INTERACTUAR_ESCALONES_MI_UNICA", 0],
+	[Rect2(2950, TECHO, 130, SUELO - TECHO), "LECCION_INTERACTUAR_COMIDA_A_LA", 6],
+	[Rect2(3110, TECHO, 140, SUELO - TECHO), "LECCION_ZARPAZO_UN_RATON_DE", 1],
+	[Rect2(4840, TECHO, 140, SUELO - TECHO), "LECCION_INTERACTUAR_PUERTA_ENTORNADA_QUE", 7],
+	[Rect2(5880, TECHO, 140, SUELO - TECHO), "LECCION_SALTAR_BANQUITO_CAMA_COMODA", 0],
+	[Rect2(6180, TECHO, 150, SUELO - TECHO), "LECCION_INTERACTUAR_EL_CAJON_DE", 7],
+	[Rect2(7860, TECHO, 140, SUELO - TECHO), "LECCION_SALTAR_LA_MACETA_LA", 0],
 ]
 ## Dónde pasa cada travesura de la Agenda y su reacción (R18).
 const AGENDA_SITIOS := {
@@ -398,7 +398,7 @@ const PUERTAS_BALCON := [PUERTA_BALCON]
 const ADORNOS_DE_PIEZAS := {"Repisa alta": "caja_recuerdos"}
 ## La meta que se muestra al empezar (R4).
 const CUARTO_META := "balcon"
-const ROTULO_META := "EL BALCÓN · ARRIBA, AL FONDO"
+const ROTULO_META := "N1_EL_BALCON_ARRIBA_AL"
 
 ## Lo que el constructor (Nivel) necesita para armar este nivel.
 static func datos() -> DatosNivel:

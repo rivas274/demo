@@ -60,6 +60,8 @@ func palabra_en_mundo(texto: String, posicion: Vector2, color := Color(1.0, 0.9,
 
 ## Palabra que salta, rebota y se va (posición en pantalla).
 func palabra(texto: String, posicion: Vector2, color := Color(1.0, 0.9, 0.3), tamano := 18, retraso := 0.0) -> void:
+	# Llega como clave (PALABRA_...) o texto suelto: se muestra traducido.
+	texto = tr(texto)
 	palabras.append(texto)
 	var etiqueta := Label.new()
 	etiqueta.text = texto

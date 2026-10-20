@@ -66,3 +66,181 @@ JEFE_BATALLA_INICIADA,¡BATALLA INICIADA!
 JEFE_LEMA_FELIPE,FELIPE · 8 kg de furia
 JEFE_REINICIANDO,REINICIANDO
 JEFE_LLENO,¡LLENO!
+FELIPE_ZOOMIES_CHOQUE_1,El mueble se movió. Yo no.
+FELIPE_ZOOMIES_CHOQUE_2,Frenos: pendiente de instalar.
+FELIPE_ZOOMIES_CHOQUE_3,Lo hice a propósito. Para medir la sala.
+FELIPE_TIRAR_1,Arte.
+FELIPE_TIRAR_2,La mesa se veía mejor así. De nada.
+FELIPE_TIRAR_3,Yo no lo empujé. Lo liberé.
+FELIPE_TIRAR_4,Física aplicada. Me deben un doctorado.
+FELIPE_ARANAR_1,No es daño. Es firma de autor.
+FELIPE_ARANAR_2,Mantenimiento de garras. Un servicio público.
+FELIPE_ARANAR_3,Estaba demasiado... intacto.
+FELIPE_ARANAR_CRITICO_1,Afiladas y certeras. Como mis opiniones.
+FELIPE_COMER_1,Aceptable. Apenas.
+FELIPE_COMER_2,Diré que estaba rico solo por educación.
+FELIPE_SNACK_1,El tributo ha sido aceptado.
+FELIPE_SNACK_2,Un snack. Lo mínimo para un rey.
+FELIPE_SIN_SNACKS_1,El bolsillo está vacío. Esto es un escándalo.
+FELIPE_SIN_SNACKS_2,Cero snacks. Exijo hablar con la gerencia.
+FELIPE_BOLSILLO_LLENO_1,Cinco snacks. Ni un rey carga más.
+FELIPE_MAULLAR_1,MIAU. Traducción: atiéndanme.
+FELIPE_MAULLAR_2,Mi voz es un regalo. Úsenla con cuidado.
+FELIPE_MAULLAR_3,Anuncio real: vengan. Ahora.
+FELIPE_RECOGER_CALCETIN_1,Un calcetín. Mío ahora. Así funcionan las cosas.
+FELIPE_RECOGER_CALCETIN_2,Otro calcetín para el nido real.
+FELIPE_RECOGER_CALCETIN_3,Huele a pie humano. Perfecto.
+FELIPE_RECOGER_SNACK_1,Lo guardo. Un rey planifica.
+FELIPE_RECOGER_SNACK_2,Snack confiscado.
+FELIPE_RECOGER_FOTO_1,Una foto vergonzosa. Esto vale oro.
+FELIPE_RASCADOR_PUBLICO_1,Función de gala. Se aceptan aplausos y snacks.
+FELIPE_RASCADOR_PUBLICO_2,Lo uso cuando miran. Eso se llama talento.
+FELIPE_RASCADOR_SOLO_1,¿Para quién actúo?
+FELIPE_RASCADOR_SOLO_2,Sin público no hay función.
+FELIPE_RASCADOR_SOLO_3,Arte desperdiciado. Nadie miró.
+FELIPE_RASCADOR_BIS_1,El bis no se cobra. Qué público más tacaño.
+FELIPE_GARRAS_AFILADAS_1,Afiladas. El sofá no sabe lo que viene.
+FELIPE_RANURA_1,Diez calcetines. El nido me concede una maña más.
+FELIPE_AGENDA_COMPLETA_1,Agenda completa. Hoy fui un genio. Como ayer.
+FELIPE_META_1,La libertad está allá arriba.
+FELIPE_INICIO_1,Día 1 de la dieta. Último día de esta casa.
+FELIPE_CAJAS_1,Cajas de la mudanza. Llevan un año «ordenándose».
+FELIPE_CAJAS_ARRIBA_1,"Desde aquí arriba, esas cajas se ven… empujables."
+FELIPE_CAJAS_TIRADAS_1,Mudanza terminada. De nada.
+FELIPE_TAZON_1,Tres croquetas. Esto es un crimen.
+FELIPE_COCINA_CERRADA_1,Cerrada. Y adentro huele a café.
+FELIPE_BALCON_CERRADO_1,Cerrada. Esa aspiradora tiene la llave.
+FELIPE_ROBOT_1,"Arriba manda el robot. Abajo, la servidumbre."
+FELIPE_ROBOT_REGISTRA_1,Ese robot cree que me registra. Yo lo registro a él.
+FELIPE_PUERTA_ABIERTA_1,Puerta entornada. Invitación aceptada.
+FELIPE_ROPA_1,Doblada era aburrida. Ahora tiene pelo de rey.
+FELIPE_PIZZA_1,Esa pizza es mía. Algún día.
+FELIPE_BANO_1,El trono de porcelana. Algún día será mío.
+FELIPE_BANO_MANIJA_1,Esa manija me mira raro.
+FELIPE_LASER_VISTO_1,No. No voy a caer.
+FELIPE_COJIN_1,Tiene mi forma. Obviamente.
+FELIPE_CORTINA_1,Mis garras no están a la altura. Todavía.
+FELIPE_QUIEN_CERRO_1,…¿Quién cerró?
+FELIPE_BALCON_1,Soy un gato de interior. Mi cardio es mirar por la ventana.
+FELIPE_ATERRICE_1,No me caí. Aterricé con estilo.
+FELIPE_LIMPIEZA_1,Limpieza cancelada.
+VALERIA_RASCADOR_1,"¡Mira, sí lo usa! ¡Valió cada centavo!"
+VALERIA_RASCADOR_2,"¡Lo está usando! ¿Alguien está grabando? Ah, sí, yo."
+VALERIA_RASCADOR_BIS_1,"Sí, mi amor, ya te vi. Muy lindo. Igual no hay más snacks."
+VALERIA_PERDONA_1,"Ay, no, esa carita... ¿Quién es el bebito más gordito? ¡TÚ!"
+VALERIA_PERDONA_2,"Ya, ya. Te perdono porque tengo que subirte a mis historias."
+VALERIA_REGANA_1,¡PIPE! Estoy en una reunión...
+VALERIA_REGANA_2,Felipe Ron con Pasas Primero. Nombre completo. Estás en problemas.
+VALERIA_VASO_1,¡PIPE! ¡Ese vaso era de mi abuela!
+VALERIA_SOFA_ATRAPADO_1,"¡Ahí no, bebito, AQUÍ!"
+VALERIA_SOFA_ROTO_1,¡El sofá! ¡Lo estoy pagando en 12 cuotas!
+VALERIA_GRABANDO_1,¡Miren! ¡Usa su rascador! #GatoFit #BebitoGordito
+VALERIA_COCINA_DIETA_1,Voy por un café. Y tú no entras: dieta.
+VALERIA_COCINA_ABRE_1,"Ya, entra, pero no hay nada para ti."
+VALERIA_POPO_1,¡ACABO DE LIMPIARLA! Voy por bolsas...
+VALERIA_LLAVES_1,¿Mis llaves? ¿OTRA VEZ?
+VALERIA_CAJAS_1,¡Mis cajas! ¡Estaban ORDENADAS!
+VALERIA_CAJAS_AUDIFONOS_1,"¡¿Qué fue ESO?! …Perdón, era el gato. ¡FELIPE, MIS CAJAS!"
+VALERIA_ALMUERZO_1,¡ESE ERA MI ALMUERZO! Esto va a mis historias.
+VALERIA_AUDIFONOS_1,"Reunión. Audífonos puestos. Pórtate bien, bebito."
+VALERIA_MAULLIDO_1,"¿Qué pasa, mi bebito gordito? Dieta, mi amor."
+AGENDA_ROMPER_ALGO_Y_QUE,Romper algo y que me perdone igual
+AGENDA_ARANAR_EL_SOFA_NUEVO,Arañar el sofá nuevo (todavía tiene el plástico)
+AGENDA_POPO_TACTICO_EN_LA,Popo táctico en la arena recién limpiada
+AGENDA_ROBAR_EL_ALMUERZO_DE,Robar el almuerzo de Valeria
+AGENDA_IGNORAR_EL_LASER,Ignorar el láser
+AGENDA_SAQUEAR_EL_CAJON_DE,Saquear el cajón de calcetines
+AGENDA_PISAR_EL_TECLADO_DE,Pisar el teclado de Valeria
+AGENDA_DESENCHUFAR_A_A_S,Desenchufar a A.S.P.I.
+RECOMPENSA_SNACK_GUARDADO,Snack guardado
+RECOMPENSA_CALCETIN,Calcetín
+RECOMPENSA_FOTO_VERGONZOSA,Foto vergonzosa
+RECOMPENSA_2_SNACKS,2 snacks
+RECOMPENSA_MANCHAS_EXTRA_EN_LA,Manchas extra en la pelea + foto
+RECOMPENSA_CAMINO_EL_BALCON,Camino: el balcón
+FELIPE_AGENDA_CARISMA_1_CONSECUENCIAS_0,Carisma: 1. Consecuencias: 0.
+FELIPE_AGENDA_AHORA_SI_PARECE_NUESTRO,Ahora sí parece nuestro.
+FELIPE_AGENDA_ARTE_CONCEPTUAL_ELLA_NO,Arte conceptual. Ella no lo entiende.
+FELIPE_AGENDA_DIETA_CANCELADA_POR_FUERZA,Dieta cancelada por fuerza mayor.
+FELIPE_AGENDA_NO_PERSIGO_PUNTITOS_LOS,No persigo puntitos. Los puntitos me persiguen.
+FELIPE_AGENDA_INVENTARIO,Inventario.
+FELIPE_AGENDA_JJJJJJJJJJ_MI_MEJOR_OBRA,jjjjjjjjjj. Mi mejor obra.
+FELIPE_AGENDA_LIMPIEZA_CANCELADA,Limpieza cancelada.
+LECCION_SALTAR_LOS_MUEBLES_SON,{saltar} Los muebles son mi escalera.
+LECCION_INTERACTUAR_ESE_SOFA_TIENE,{interactuar} Ese sofá tiene plástico. Por ahora.
+LECCION_INTERACTUAR_UN_RASCADOR_NECESITO,{interactuar} Un rascador. Necesito público.
+LECCION_INTERACTUAR_ESE_VASO_ESTA,{interactuar} Ese vaso está muy cerca del borde. Aún.
+LECCION_MANTEN_AGACHARSE_ES_ESTRATEGIA,"Mantén {agacharse}. Es estrategia, no humildad."
+LECCION_MI_TRONO_AQUI_VUELVO,Mi trono. Aquí vuelvo si algo sale mal.
+LECCION_MAULLAR_SERVIDUMBRE_ABRAN,{maullar} Servidumbre: abran.
+LECCION_SALTAR_EL_LIBRERO_ES,{saltar} El librero es mi escalera.
+LECCION_INTERACTUAR_ESCALONES_MI_UNICA,{interactuar} Escalones. Mi única pasión.
+LECCION_INTERACTUAR_COMIDA_A_LA,{interactuar} Comida a la vista. Me sacrifico.
+LECCION_ZARPAZO_UN_RATON_DE,{zarpazo} Un ratón de cuerda. Qué insolencia.
+LECCION_INTERACTUAR_PUERTA_ENTORNADA_QUE,{interactuar} Puerta entornada. Qué invitación.
+LECCION_SALTAR_BANQUITO_CAMA_COMODA,"{saltar} Banquito, cama, cómoda. Escalera real."
+LECCION_INTERACTUAR_EL_CAJON_DE,{interactuar} El cajón de los calcetines. Botín.
+LECCION_SALTAR_LA_MACETA_LA,"{saltar} La maceta, la baranda… y la libertad."
+N1_EL_BALCON_ARRIBA_AL,"EL BALCÓN · ARRIBA, AL FONDO"
+PALABRA_GRAVEDAD_1_VASO_0,¡GRAVEDAD: 1 · VASO: 0!
+PALABRA_CLINK_CRITICO,¡CLINK CRÍTICO!
+PALABRA_PUM_MUDANZA_0,¡PUM! · MUDANZA: 0
+PALABRA_PLASTICO_0,¡PLÁSTICO: 0!
+PALABRA_EN_SU_CARA,¡EN SU CARA!
+PALABRA_CONTENIDO_SENSIBLE,CONTENIDO SENSIBLE
+PALABRA_SE_APAGA_DE_VERGUENZA,*se apaga de vergüenza*
+PALABRA_JJJJJJJJJJ,jjjjjjjjjj
+PALABRA_FIUU,¡FIUU!
+LOGRO_ATAJO_DE_GATO,Atajo de Gato
+LOGRO_COLECCIONISTA_DE_CALCETINES,Coleccionista de Calcetines
+LOGRO_GALERIA_VIRAL,Galería Viral
+LOGRO_DESENCHUFADA,Desenchufada
+PALABRA_1_GLUP,+1 · Glup.
+PALABRA_CLIC,¡CLIC!
+PALABRA_GATO_DETECTADO,¿Gato detectado?
+JEFE_DEPOSITO_LLENO,¡DEPÓSITO LLENO!
+JEFE_LO_VACIO,¡LO VACIÓ!
+JEFE_APAGADA,¡APAGADA!
+PALABRA_RANURA_DE_MANA,¡RANURA DE MAÑA!
+PALABRA_GARRAS_AFILADAS,¡GARRAS AFILADAS!
+PALABRA_OVACION,¡OVACIÓN!
+PALABRA_MIAU,¡MIAU!
+PALABRA_CRITICO,¡CRÍTICO!
+PALABRA_NAM,¡ÑAM!
+PALABRA_FUUU,¡FUUU!
+PALABRA_FIUUU,¡FIUUU!
+PALABRA_COF,¡COF!
+LOGRO_CAER_DE_PIE,Caer de Pie
+CARTEL_PODER_NUEVO,PODER NUEVO
+CARTEL_CAER_DE_PIE,CAER DE PIE
+CARTEL_SIEMPRE_ATERRIZAS_CON_ESTILO,Siempre aterrizas con estilo
+FELIPE_MANANA_MAS_HOY_YA,"Mañana, más. Hoy ya hice demasiado."
+ENSAYO_MANTEN_AGACHARSE_UNAS_MODO,Mantén {agacharse}. Uñas: modo ancla.
+ENSAYO_SUCIEDAD_ELIMINADA_GATO_REGISTRADO,Suciedad eliminada. Gato… registrado.
+VERBO_ENCANTAR,Encantar
+PRIMERA_INTERACTUAR_CARA_DE_BEBITO,{interactuar} Cara de bebito. Funciona siempre.
+JEFE_ASPI_A_S_P_I,A.S.P.I.
+JEFE_ASPI_DEVORADORA_DE_PELOS_NIVEL,Devoradora de Pelos · Nivel 99
+JEFE_ASPI_DETECTANDO_SUCIEDAD_DETECTANDO_GATO,DETECTANDO SUCIEDAD. DETECTANDO… GATO.
+JEFE_ASPI_SALTALE_ENCIMA_Y_APRIETA,Sáltale encima y aprieta el botón
+JEFE_ASPI_FASE_1_LLENALE_EL,FASE 1: ¡LLÉNALE EL DEPÓSITO!
+JEFE_ASPI_FASE_2_SE_REINICIO,FASE 2: ¡SE REINICIÓ!
+JEFE_ASPI_FASE_3_FURIA,FASE 3: ¡FURIA!
+JEFE_ASPI_TIRA_COSAS_AL_PISO,Tira cosas al piso: limpiar le llena el depósito
+JEFE_ASPI_SI_TE_ASPIRA_MANTEN,"Si te aspira, mantén {agacharse}. Y no acampes arriba"
+JEFE_ASPI_BOLAS_DE_PELO_SALTA,¡Bolas de pelo! Salta y no te quedes quieto
+VERBO_TIRAR,Tirar
+VERBO_EMPUJAR,Empujar
+VERBO_ASCENDER,Ascender
+VERBO_PROBAR,Probar
+VERBO_PASAR,Pasar
+VERBO_ARANAR,Arañar
+VERBO_SAQUEAR,Saquear
+VERBO_DESORDENAR,Desordenar
+VERBO_DEGUSTAR_SNACK,Degustar snack
+VERBO_ACTUAR,Actuar
+VERBO_LIBERAR,Liberar
+VERBO_USAR,Usar
+VERBO_FIRMAR,Firmar
+VERBO_DEGUSTAR,Degustar
+LOGRO_LA_GRAVEDAD_FUNCIONA,La Gravedad Funciona

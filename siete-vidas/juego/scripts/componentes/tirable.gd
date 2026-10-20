@@ -21,7 +21,7 @@ const RADIO_IMPACTO := 44.0
 ## Imagen de quien la lleva (para el contorno del Indicador y el rectángulo de las reglas).
 @export var arte := "vaso"
 ## Verbo de Felipe en la burbuja del Indicador.
-@export var verbo_indicador := "Liberar"
+@export var verbo_indicador := "VERBO_LIBERAR"
 ## Si la pieza hace caer a su padre (false: la caída la anima la entidad).
 @export var cae := true
 ## Si se ofrece sola al botón de acción (false: la entidad decide cuándo y llama a `empujar`).

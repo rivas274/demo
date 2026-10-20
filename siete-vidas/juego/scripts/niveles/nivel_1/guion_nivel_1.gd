@@ -144,7 +144,7 @@ func _crear_puertas_del_nivel() -> void:
 	var entornada := Aranable.new("Puerta entornada", 70.0, 200.0)
 	entornada.position = (puertas[Nivel1.PUERTA_DORMITORIO] as Puerta).position
 	entornada.aranazos_para_romper = 1
-	entornada.verbo_indicador = "Arañar"
+	entornada.verbo_indicador = "VERBO_ARANAR"
 	var cara_dormitorio: Puerta = puertas[Nivel1.PUERTA_DORMITORIO]
 	entornada.arte = cara_dormitorio.arte_indicador
 	entornada.roto.connect(func(_o: Aranable) -> void:
@@ -203,14 +203,14 @@ func _crear_objetos() -> void:
 	travesuras.conectar_aranable(sofa, "sofa", Nivel1.AGENDA_SITIOS["sofa"][0] + Vector2(0, -20))
 	sofa.roto.connect(_romper_plastico)
 	# Cajón de los calcetines (cómoda) y ropa doblada (cama).
-	var cajon := Interactivo.new("Cajon", "Saquear", Nivel1.RECT_CAJON)
+	var cajon := Interactivo.new("Cajon", "VERBO_SAQUEAR", Nivel1.RECT_CAJON)
 	cajon.position = Nivel1.CAJON
 	# El contorno sigue la cómoda entera (el cajón es parte de su arte).
 	cajon.arte = func() -> Dictionary: return ArteNivel.arte_en(nivel, "comoda", 6230.0 + ArteNivel.textura("comoda").get_width() / 2.0, Nivel1.SUELO)
 	cajon.al_usar = func(f: Felipe) -> void: f.dar_manotazo(_abrir_cajon.bind(cajon))
 	nivel.add_child(cajon)
 	# La ropa se desordena (Felipe se acicala encima): un verbo distinto del sofá («Firmar») y de la puerta («Arañar»), M7.
-	var ropa := Interactivo.new("Ropa doblada", "Desordenar", Nivel1.RECT_ROPA)
+	var ropa := Interactivo.new("Ropa doblada", "VERBO_DESORDENAR", Nivel1.RECT_ROPA)
 	ropa.position = Nivel1.ROPA
 	ropa.al_usar = func(f: Felipe) -> void:
 		f.acicalarse()
@@ -302,14 +302,14 @@ func _al_caer_tirable(donde: Vector2, objeto: Objeto) -> void:
 			if cuarto == "sala":
 				travesuras.jugo.congelar(0.08)
 				# Sobre la mesa de donde cayó (no a la altura del mueble), en un celeste fuerte con contorno (M1).
-				travesuras.jugo.palabra_en_mundo("¡GRAVEDAD: 1 · VASO: 0!", Vector2(donde.x, Nivel1.SUELO - 120), Color(0.45, 0.85, 1.0), 15)
+				travesuras.jugo.palabra_en_mundo("PALABRA_GRAVEDAD_1_VASO_0", Vector2(donde.x, Nivel1.SUELO - 120), Color(0.45, 0.85, 1.0), 15)
 				if valeria.cuarto == "sala":
 					valeria.reganar(felipe, "rotura", "vaso")
 			elif cuarto == "pasillo":
 				ensayo.empezar(donde.x)
 			_decir("tirar", false, false)
 		"llaves":
-			travesuras.jugo.palabra_en_mundo("¡CLINK CRÍTICO!", donde + Vector2(0, -50), Color(1.0, 0.9, 0.4), 16)
+			travesuras.jugo.palabra_en_mundo("PALABRA_CLINK_CRITICO", donde + Vector2(0, -50), Color(1.0, 0.9, 0.4), 16)
 			travesuras.jugo.sacudir(0.12, 0.5)
 			if valeria.cuarto == "cocina" and not valeria.audifonos:
 				travesuras.decir_valeria("llaves", true)
@@ -320,12 +320,12 @@ func _al_tirar_cajas() -> void:
 	travesuras.jugo.congelar(0.06)
 	await get_tree().create_timer(CajasMudanza.SEGUNDOS_CAIDA, false).timeout
 	var donde := Nivel1.CAJAS.position + Vector2(CajasMudanza.CAIDA_X, Nivel1.CAJAS.size.y)
-	travesuras.jugo.palabra_en_mundo("¡PUM! · MUDANZA: 0", Vector2(donde.x + 20.0, Nivel1.SUELO - 150.0), Color(1.0, 0.75, 0.4), 15)
+	travesuras.jugo.palabra_en_mundo("PALABRA_PUM_MUDANZA_0", Vector2(donde.x + 20.0, Nivel1.SUELO - 150.0), Color(1.0, 0.75, 0.4), 15)
 	travesuras.jugo.sacudir(0.15, 0.6)
 	sonar("caja")
 	sonar("golpe", 0.8)
 	travesuras.anuncios.marcar_chiste(Rect2(donde.x - 50.0, Nivel1.SUELO - 140.0, 140.0, 140.0), 1.5)
-	desbloquear_logro("Atajo de Gato")
+	desbloquear_logro("LOGRO_ATAJO_DE_GATO")
 	# El mundo reacciona (pilar 5): el ¡PUM! se oye en toda la casa, aunque Valeria tenga audífonos. Ella contesta
 	# primero, desde donde esté (con audífonos se saca uno: su frase es de la reunión); después Felipe, sin culpa.
 	if valeria.actividad != Valeria.Actividad.FUERA:
@@ -355,7 +355,7 @@ func _al_aranar_sofa(objeto: Aranable, critico: bool) -> void:
 
 func _romper_plastico(_objeto: Aranable) -> void:
 	sofa_roto = true
-	travesuras.jugo.palabra_en_mundo("¡PLÁSTICO: 0!", Nivel1.SOFA_ARANABLE[0] + Vector2(0, -120), Color(1.0, 0.6, 0.4), 18)
+	travesuras.jugo.palabra_en_mundo("PALABRA_PLASTICO_0", Nivel1.SOFA_ARANABLE[0] + Vector2(0, -120), Color(1.0, 0.6, 0.4), 18)
 	for nombre: String in Nivel1.SOFA_ARANADO:
 		pieza(nombre).position.y = Nivel1.SOFA_ARANADO[nombre]
 	if valeria.cuarto == "sala":
@@ -374,7 +374,7 @@ func _al_comer(comida: Comida) -> void:
 		# Los snacks caen en el mesón, al lado del microondas: no sobre la cara de Felipe (M2).
 		travesuras.cumplir("almuerzo", Vector2(Nivel1.POLLO.x - 70.0, Nivel1.SUELO - 120.0))
 		if en_su_cara:
-			travesuras.jugo.palabra_en_mundo("¡EN SU CARA!", comida.global_position + Vector2(0, -70), Color(1.0, 0.4, 0.5), 20)
+			travesuras.jugo.palabra_en_mundo("PALABRA_EN_SU_CARA", comida.global_position + Vector2(0, -70), Color(1.0, 0.4, 0.5), 20)
 			valeria.reganar(felipe, "almuerzo", "almuerzo")
 		elif valeria.cuarto == "cocina":
 			travesuras.decir_valeria("almuerzo", true)
@@ -399,7 +399,7 @@ func _actualizar_popo(delta: float) -> void:
 
 func _censura_ironica() -> void:
 	travesuras.anuncios.marcar_chiste(Rect2(felipe.global_position + Vector2(-40, -110), Vector2(80, 110)), 2.0)
-	travesuras.jugo.palabra_en_mundo("CONTENIDO SENSIBLE", felipe.global_position + Vector2(0, -70), Color(1.0, 1.0, 1.0), 14)
+	travesuras.jugo.palabra_en_mundo("PALABRA_CONTENIDO_SENSIBLE", felipe.global_position + Vector2(0, -70), Color(1.0, 1.0, 1.0), 14)
 	var pegatina := Node2D.new()
 	pegatina.name = "Censura"
 	pegatina.z_index = Capas.CENSURA
@@ -429,7 +429,7 @@ func _actualizar_laser(delta: float) -> void:
 		_tiempo_laser = 0.0
 	if _tiempo_laser >= Nivel1.TIEMPO_IGNORAR_LASER:
 		_laser.apagar()
-		travesuras.jugo.palabra_en_mundo("*se apaga de vergüenza*", _laser.global_position + Vector2(0, -24), Color(1.0, 0.5, 0.5), 11)
+		travesuras.jugo.palabra_en_mundo("PALABRA_SE_APAGA_DE_VERGUENZA", _laser.global_position + Vector2(0, -24), Color(1.0, 0.5, 0.5), 11)
 		# La foto vergonzosa se cae del cajón de la consola.
 		travesuras.cumplir("laser", Vector2(4710, Nivel1.SUELO - 97))
 
@@ -501,14 +501,14 @@ func _actualizar_teclado(delta: float) -> void:
 	if not teclado_pisado:
 		teclado_pisado = true
 		arte.decorado.queue_redraw()
-		travesuras.jugo.palabra_en_mundo("jjjjjjjjjj", Vector2(7190, Nivel1.SUELO - 150), Color(0.7, 0.9, 1.0), 14)
+		travesuras.jugo.palabra_en_mundo("PALABRA_JJJJJJJJJJ", Vector2(7190, Nivel1.SUELO - 150), Color(0.7, 0.9, 1.0), 14)
 		# La pantalla con «jjjjjj» es el chiste: el cartel no la tapa (G5).
 		travesuras.anuncios.marcar_chiste(Rect2(7110, Nivel1.SUELO - 160, 110, 70), 3.0)
 		travesuras.cumplir("teclado", Vector2(7146, Nivel1.SUELO - 120))
 	if batalla and batalla.fase == BatallaAspi.Fase.PELEA and _espera_papel <= 0.0:
 		_espera_papel = 4.0
 		var papel := Vector2(7097 + randf_range(-40, 60), Nivel1.SUELO)
-		travesuras.jugo.palabra_en_mundo("¡FIUU!", Vector2(7097, Nivel1.SUELO - 110), Color(1, 1, 1), 11)
+		travesuras.jugo.palabra_en_mundo("PALABRA_FIUU", Vector2(7097, Nivel1.SUELO - 110), Color(1, 1, 1), 11)
 		batalla.agregar_mancha(papel, "papel")
 
 
@@ -558,9 +558,9 @@ func _al_cambiar_recompensas(tipo: String) -> void:
 	if tipo == "calcetin":
 		arte.nido.queue_redraw()
 		if nivel.calcetines >= Nivel1.TOTAL_CALCETINES:
-			desbloquear_logro("Coleccionista de Calcetines")
+			desbloquear_logro("LOGRO_COLECCIONISTA_DE_CALCETINES")
 	elif tipo == "foto" and travesuras.recompensas.fotos >= Nivel1.TOTAL_FOTOS:
-		desbloquear_logro("Galería Viral")
+		desbloquear_logro("LOGRO_GALERIA_VIRAL")
 
 
 func _abrir_balcon() -> void:
@@ -569,4 +569,4 @@ func _abrir_balcon() -> void:
 		for cara: Puerta in [puerta, puerta.par]:
 			cara.cerrada = false
 			cara.queue_redraw()
-	desbloquear_logro("Desenchufada")
+	desbloquear_logro("LOGRO_DESENCHUFADA")

@@ -46,16 +46,16 @@ multiplicador_velocidad = 3.0
 
 [resource]
 script = ExtResource("1_datos")
-nombre = "A.S.P.I."
-titulo = "Devoradora de Pelos · Nivel 99"
-rugido = "DETECTANDO SUCIEDAD. DETECTANDO… GATO."
+nombre = "JEFE_ASPI_A_S_P_I"
+titulo = "JEFE_ASPI_DEVORADORA_DE_PELOS_NIVEL"
+rugido = "JEFE_ASPI_DETECTANDO_SUCIEDAD_DETECTANDO_GATO"
 alto_extra = 20.0
 fases = 3
-carteles = PackedStringArray("FASE 1: ¡LLÉNALE EL DEPÓSITO!", "FASE 2: ¡SE REINICIÓ!", "FASE 3: ¡FURIA!")
-pistas = PackedStringArray("Tira cosas al piso: limpiar le llena el depósito", "Si te aspira, mantén {agacharse}. Y no acampes arriba", "¡Bolas de pelo! Salta y no te quedes quieto")
+carteles = PackedStringArray("JEFE_ASPI_FASE_1_LLENALE_EL", "JEFE_ASPI_FASE_2_SE_REINICIO", "JEFE_ASPI_FASE_3_FURIA")
+pistas = PackedStringArray("JEFE_ASPI_TIRA_COSAS_AL_PISO", "JEFE_ASPI_SI_TE_ASPIRA_MANTEN", "JEFE_ASPI_BOLAS_DE_PELO_SALTA")
 velocidad = PackedFloat32Array(55, 70, 85)
 capacidad = PackedInt32Array(2, 3, 3)
 tiempo_vulnerable = PackedFloat32Array(4, 3.5, 3)
-pista_vulnerable = "Sáltale encima y aprieta el botón"
+pista_vulnerable = "JEFE_ASPI_SALTALE_ENCIMA_Y_APRIETA"
 reinicio = 1.5
 conductas = Array[ExtResource("2_conducta")]([SubResource("Resource_bola"), SubResource("Resource_soplido"), SubResource("Resource_limpiar"), SubResource("Resource_embestida")])

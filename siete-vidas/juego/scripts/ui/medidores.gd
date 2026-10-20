@@ -28,11 +28,16 @@ var _aviso: Control
 ## La cola única de anuncios (G5): el logro espera su turno y su lugar (nunca al mismo tiempo que un cartel).
 var anuncios: Anuncios
 var _rect_aviso := Rect2()
-const DURACION_LOGRO := 2.6
+const DURACION_LOGRO := 2.2
 
 ## Capa del aviso de logro: por encima del diálogo (capa 7) y del HUD (capa 6).
 const CAPA_AVISO := Capas.CAPA_AVISOS
 const TAM_AVISO := Vector2(300, 44)
+## Panel de los corazones y las vidas, en una sola fila dentro de la zona A del HUD (ZonasTexto.HUD, y 0–26).
+const PANEL := Rect2(6, 4, 130, 22)
+const POS_CORAZONES := Vector2(15, 15)
+const PASO_CORAZONES := 14.0
+const X_VIDAS := 88.0
 ## Donde empieza el texto en la etiqueta de logro (después del sello).
 const X_TEXTO_LOGRO := 52.0
 
@@ -40,7 +45,8 @@ const X_TEXTO_LOGRO := 52.0
 func _ready() -> void:
 	name = "Medidores"
 	corazones = (load(ESCENA_BARRA) as PackedScene).instantiate()
-	corazones.position = Vector2(16, 16)
+	corazones.position = POS_CORAZONES
+	corazones.paso = PASO_CORAZONES
 	add_child(corazones)
 	_conectar_felipe()
 	add_to_group(PresentacionJefe.GRUPO_OCULTAR)
@@ -61,12 +67,11 @@ func _ready() -> void:
 
 func mostrar_logro(titulo: String) -> void:
 	if anuncios:
-		anuncios.anunciar("logro", titulo, TAM_AVISO, TAM_AVISO, func(rect: Rect2, _chico: bool) -> float:
+		anuncios.anunciar("logro", titulo, TAM_AVISO, func(rect: Rect2) -> float:
 			_notificacion = titulo
 			_rect_aviso = rect
 			_tiempo_notificacion = DURACION_LOGRO
-			return DURACION_LOGRO, func() -> void: _tiempo_notificacion = 0.0, false, 0.0, true,
-			func(rect: Rect2) -> void: _rect_aviso = rect)
+			return DURACION_LOGRO, func() -> void: _tiempo_notificacion = 0.0)
 		return
 	_notificacion = titulo
 	_tiempo_notificacion = 3.5
@@ -107,27 +112,21 @@ func mostrando_logro() -> bool:
 	return _tiempo_notificacion > 0.0 and felipe != null and (pantallas == null or pantallas.modo == Pantallas.Modo.JUGANDO)
 
 
-## Dónde va el aviso: arriba a la derecha, bajo la barra del jefe (M4 de la revisión 1); si el diálogo está arriba,
-## justo debajo de él (M3).
+## Dónde va el aviso: en la zona C de ZonasTexto (arriba al centro), donde lo puso la cola de anuncios.
 func rect_logro() -> Rect2:
-	if _rect_aviso.has_area():
-		return _rect_aviso
-	var ancho_pantalla := get_viewport_rect().size.x
-	var caja := Rect2(Vector2(ancho_pantalla - TAM_AVISO.x - 8, 44), TAM_AVISO)
-	if dialogo and is_instance_valid(dialogo):
-		var ocupa := dialogo.rect_en_pantalla()
-		if ocupa.has_area() and ocupa.intersects(caja):
-			caja.position.y = ocupa.end.y + 4.0
-	return caja
+	return _rect_aviso if _rect_aviso.has_area() else ZonasTexto.cartel(TAM_AVISO)
 
 
 func _draw() -> void:
 	if not felipe:
 		return
-	Estilo.panel(self, Rect2(6, 6, 92, 36), &"panel")
-	Estilo.escribir(self, Vector2(13, 36), tr("UI_VIDAS") % felipe.vidas, &"medidor_vidas", Estilo.color(&"tinta_decreto"))
+	Estilo.panel(self, PANEL, &"panel")
+	var ancho := PANEL.end.x - X_VIDAS - 4.0
+	# Con el Collar de la Vergüenza, su nombre (en rojo) va donde iban las vidas: todo queda en la zona A.
 	if felipe.tiene_collar:
-		Estilo.escribir(self, Vector2(104, 20), tr("UI_COLLAR"), &"medidor_collar", Estilo.color(&"rojo"))
+		Estilo.escribir(self, Vector2(X_VIDAS, 19), Estilo.recortar(tr("UI_COLLAR"), &"medidor_collar", ancho), &"medidor_collar", Estilo.color(&"rojo"))
+	else:
+		Estilo.escribir(self, Vector2(X_VIDAS, 19), tr("UI_VIDAS") % felipe.vidas, &"medidor_vidas", Estilo.color(&"tinta_decreto"))
 
 
 func _dibujar_aviso() -> void:
@@ -138,5 +137,5 @@ func _dibujar_aviso() -> void:
 	Estilo.panel(_aviso, caja, &"etiqueta_logro")
 	var x := caja.position.x + X_TEXTO_LOGRO
 	var ancho := caja.size.x - X_TEXTO_LOGRO - 30.0
-	Estilo.escribir(_aviso, Vector2(x, caja.position.y + 18), Estilo.recortar(tr("UI_LOGRO_NUEVO"), &"logro_titulo", ancho), &"logro_titulo", Estilo.color(&"tinta_decreto_suave"))
-	Estilo.escribir(_aviso, Vector2(x, caja.position.y + 33), Estilo.recortar(_notificacion, &"logro_nombre", ancho), &"logro_nombre", Estilo.color(&"tinta_decreto"))
+	# Una sola línea (zonas de texto, 2026-10-20): el sello ya dice «logro»; el nombre, a 16 px, centrado en la cinta.
+	Estilo.escribir(_aviso, Vector2(x, caja.position.y + 27), Estilo.recortar(tr(_notificacion), &"logro_nombre", ancho), &"logro_nombre", Estilo.color(&"tinta_decreto"))

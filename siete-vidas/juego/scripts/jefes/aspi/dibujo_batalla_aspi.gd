@@ -79,10 +79,10 @@ func encima(c: Node2D) -> void:
 		c.draw_rect(barra.grow(1), Color(0.05, 0.1, 0.15, 0.9))
 		c.draw_rect(Rect2(barra.position, Vector2(barra.size.x * (1.0 - b.reinicio / b.datos.reinicio), barra.size.y)), Color("9fd8ff"))
 		if tiempo - b.tiempo_clic > BatallaAspi.DURA_CLIC:
-			var punto := b.aspi.global_position + Vector2(-34, -BatallaAspi.ALTO_ARRIBA - 22)
+			# Zonas de texto (2026-10-20): letra de 16 px con contorno de 1 px, no la chica de 8.
 			var texto_reinicio := tr("JEFE_REINICIANDO") + ".".repeat(int(tiempo * 3.0) % 4)
-			c.draw_string_outline(Estilo.fuente(&"jefe_burbuja"), punto.round(), texto_reinicio, HORIZONTAL_ALIGNMENT_LEFT, -1, Estilo.letra(&"jefe_burbuja"), 4, Color(0.05, 0.1, 0.15))
-			Estilo.escribir(c, punto, texto_reinicio, &"jefe_burbuja", Color("9fd8ff"))
+			var punto := b.aspi.global_position + Vector2(-roundf(Estilo.ancho(tr("JEFE_REINICIANDO"), &"jefe_pista") / 2.0), -BatallaAspi.ALTO_ARRIBA - 18)
+			Estilo.texto_con_contorno(c, punto, texto_reinicio, &"jefe_pista", Color("9fd8ff"), &"contorno_palabra", 2)
 	if b.limpiar.reloj_aviso > 0.0 and not b.limpiando:
 		# Anticipación de la succión: el cepillo gira y se ven líneas de aire.
 		for i in 6:

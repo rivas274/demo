@@ -204,7 +204,7 @@ func _correr() -> void:
 	Input.action_press("agacharse")
 	await _esperar(90)
 	Input.action_release("agacharse")
-	_comprobar(t.agenda.esta_cumplida("popo") and "CONTENIDO SENSIBLE" in t.jugo.palabras, "Agachado en la arena: popo táctico con censura irónica")
+	_comprobar(t.agenda.esta_cumplida("popo") and guion.censura_mostrada, "Agachado en la arena: popo táctico con la pegatina de censura irónica")
 	await _esperar_que(func() -> bool: return guion.valeria.cuarto == "recibidor" and guion.valeria.visible and _dijo("valeria", "LIMPIARLA"), 1200)
 	_comprobar(guion.valeria.mascarilla and guion.valeria.cuarto == "recibidor", "Valeria sale con mascarilla: «¡ACABO DE LIMPIARLA!»")
 	_comprobar(t.agenda.texto_recompensa("popo") == "Foto vergonzosa" and _foto_suelta("recibidor") != null, "G6 El popo táctico da una foto vergonzosa (no un camino ya abierto)")

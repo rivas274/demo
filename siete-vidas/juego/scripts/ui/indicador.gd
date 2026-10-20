@@ -175,6 +175,15 @@ func tiene_arte(cosa: Node2D) -> bool:
 	return cosa.has_method("arte_indicador") and not (cosa.call("arte_indicador") as Dictionary).is_empty()
 
 
+## Rectángulo de la burbuja en el mundo (zona E de ZonasTexto; vacío si no hay): las palabras del mundo la esquivan.
+func rect_burbuja() -> Rect2:
+	if verbo == "" or felipe == null or not visible:
+		return Rect2()
+	var tam := Vector2(IconosBotones.ancho("interactuar", 14.0) + Estilo.ancho(verbo, &"indicador") + 12.0, 20.0)
+	var centro := (felipe.global_position + Vector2(0, -ALTURA_BURBUJA)).round()
+	return Rect2((centro - tam / 2.0).round(), tam)
+
+
 func _draw() -> void:
 	if verbo == "" or felipe == null:
 		return

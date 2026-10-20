@@ -2,7 +2,9 @@ extends SceneTree
 ## Capturas del plan de estabilización (2026-10-20) para revisarlas ampliadas: cada lugar donde Felipe y Valeria
 ## coinciden (decisión 1: Valeria delante y la silueta de Felipe donde ella lo tapa) y Felipe sentado en la baranda
 ## del balcón (decisión 2: al lado de la maceta, no encima).
-##   xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/capturas_estabilizacion.gd -- <carpeta>
+## Con «textos» después de la carpeta, en cambio, cada texto en su zona (decisión 3): HUD y diálogo, cartel, logro,
+## palabras sobre Felipe, la pegatina del plástico y la de la censura.
+##   xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/capturas_estabilizacion.gd -- <carpeta> [textos]
 
 var _carpeta := "user://cruces"
 
@@ -24,7 +26,50 @@ func _initialize() -> void:
 	if args.size() > 0:
 		_carpeta = args[0]
 	DirAccess.make_dir_recursive_absolute(_carpeta)
-	_correr.call_deferred()
+	if args.size() > 1 and args[1] == "textos":
+		_textos.call_deferred()
+	else:
+		_correr.call_deferred()
+
+
+func _textos() -> void:
+	var sala: Nivel = load("res://escenas/nivel_1.tscn").instantiate()
+	var guion: GuionNivel1 = sala.guion
+	sala.mostrar_titulo = false
+	guion.batalla_con_jefe = false
+	root.add_child(sala)
+	var felipe: Felipe = sala.get_node("Felipe")
+	var t := sala.travesuras
+	await _esperar(30)
+	felipe.global_position = Vector2(560, Nivel1.SUELO)
+	await _esperar(40)
+	t.dialogo.decir("felipe", "FELIPE_BALCON_1", 0, true)
+	await _esperar(90)
+	await _capturar("t1-hud-dialogo")
+	t.dialogo.limpiar()
+	t.hud.cartel("UI_TRAVESURA_CUMPLIDA", "AGENDA_ROBAR_EL_ALMUERZO_DE", false)
+	await _esperar(60)
+	await _capturar("t2-cartel")
+	t.anuncios.limpiar()
+	await _esperar(20)
+	sala.desbloquear_logro("LOGRO_COLECCIONISTA_DE_CALCETINES")
+	await _esperar(30)
+	await _capturar("t3-logro")
+	t.anuncios.limpiar()
+	t.jugo.palabra_en_mundo("PALABRA_CRITICO", felipe.global_position + Vector2(30, -80), Color(1.0, 0.4, 0.3), 22)
+	await _esperar(12)
+	await _capturar("t4-palabra-critico")
+	felipe.global_position = Vector2(Nivel1.SOFA_ARANABLE[0].x - 60.0, Nivel1.SUELO)
+	await _esperar(40)
+	t.jugo.palabra_en_mundo("PALABRA_PLASTICO_0", Nivel1.SOFA_ARANABLE[0] + Vector2(-80, -110), Color(1.0, 0.6, 0.4), 18, 0.0, true)
+	await _esperar(14)
+	await _capturar("t5-plastico")
+	felipe.global_position = Vector2(Nivel1.DESCANSOS[0].get_center().x, Nivel1.SUELO)
+	await _esperar(40)
+	guion.call("_censura_ironica")
+	await _esperar(10)
+	await _capturar("t6-censura")
+	quit()
 
 
 func _correr() -> void:

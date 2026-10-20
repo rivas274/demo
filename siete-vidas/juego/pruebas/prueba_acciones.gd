@@ -432,12 +432,13 @@ func _probar_dialogo() -> void:
 	dialogo.decir("felipe", "Una frase arriba.", 0, true)
 	sala.desbloquear_logro("Logro de prueba")
 	# El logro sale cuando le toca en la cola única de anuncios (G5 de la revisión 3).
-	for i in 400:
+	for i in 900:
 		if medidores.mostrando_logro():
 			break
 		await process_frame
 	var cuadro := dialogo.rect_en_pantalla()
-	_comprobar(medidores.mostrando_logro() and cuadro.has_area() and not medidores.rect_logro().intersects(cuadro), "M3 Con el diálogo en pantalla, el aviso de logro sale fuera de su cuadro")
+	# Zonas de texto (2026-10-20): el logro va en la zona C, la misma franja que el diálogo: espera a que termine.
+	_comprobar(medidores.mostrando_logro() and not cuadro.has_area() and ZonasTexto.en_zona_c(medidores.rect_logro()), "M3 El aviso de logro espera a que termine el diálogo y sale en la zona C (nunca encima del cuadro)")
 	_comprobar(Medidores.CAPA_AVISO > dialogo.layer, "M3 El aviso de logro va en una capa por encima del diálogo")
 	dialogo.limpiar()
 

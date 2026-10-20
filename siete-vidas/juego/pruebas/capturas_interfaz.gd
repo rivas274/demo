@@ -31,11 +31,11 @@ func _correr() -> void:
 	await _segundos(2.5)
 	await _capturar("i1-hud-dialogo")
 	t.dialogo.limpiar()
-	t.hud.cartel(tr("UI_TRAVESURA_CUMPLIDA"), "AGENDA_ROBAR_EL_ALMUERZO_DE", "RECOMPENSA_SNACK_GUARDADO", false, t.altura_cartel())
+	t.hud.cartel(tr("UI_TRAVESURA_CUMPLIDA"), "AGENDA_ROBAR_EL_ALMUERZO_DE", false)
 	await _segundos(0.8)
 	await _capturar("i2-cartel")
 	# La franja completa (la cola decide si cabe; aquí se pone a mano para verla).
-	var franja := Cartel.crear(tr("UI_TRAVESURA_SECRETA"), tr("AGENDA_ROBAR_EL_ALMUERZO_DE"), tr("RECOMPENSA_SNACK_GUARDADO"), true, Rect2(0, 130, 640, 96), false)
+	var franja := Cartel.crear(tr("UI_TRAVESURA_SECRETA"), tr("AGENDA_ROBAR_EL_ALMUERZO_DE"), true, ZonasTexto.cartel(Hud.TAM_CARTEL))
 	t.hud.add_child(franja)
 	franja.scale = Vector2.ONE
 	franja.modulate.a = 1.0

@@ -25,6 +25,11 @@ enum Forma { CORAZONES, BARRA }
 	set(valor):
 		titulo = valor
 		queue_redraw()
+## Si el título no cabe entero en la barra, se escribe este (el nombre a secas): nunca se corta con «…».
+@export var titulo_corto := "":
+	set(valor):
+		titulo_corto = valor
+		queue_redraw()
 ## Ancho y alto de la barra (solo forma BARRA): el ancho del relleno; el marco del kit la rodea.
 @export var tam_barra := Vector2(220, 9)
 ## Relleno de la vida y del escudo (kit «Decreto real», assets/ui/decreto/relleno_*.png).
@@ -88,12 +93,12 @@ const HUECO_ARRIBA := 5.0
 const HUECO_ALTO := 14.0
 
 
-## La barra de un jefe: el título arriba (con contorno, sobre el juego) y debajo el marco del kit; el relleno va
-## dentro del hueco del marco (se dibuja antes, así el marco tapa sus bordes).
+## La barra de un jefe: el marco del kit con el relleno en su hueco (se dibuja antes, así el marco tapa sus bordes) y
+## el título ENCIMA del relleno, centrado y con contorno. Todo en 25 px de alto: cabe en la zona A del HUD
+## (ZonasTexto.HUD, y 0–26; plan de estabilización 2026-10-20).
 func _dibujar_barra() -> void:
-	var marco := Rect2(0, 14, tam_barra.x + HUECO_LADO * 2.0, ALTO_MARCO)
+	var marco := Rect2(0, 0, tam_barra.x + HUECO_LADO * 2.0, ALTO_MARCO)
 	var hueco := Rect2(marco.position + Vector2(HUECO_LADO, HUECO_ARRIBA), Vector2(tam_barra.x, HUECO_ALTO))
-	Estilo.texto_con_contorno(self, Vector2(HUECO_LADO, 10), Estilo.recortar(titulo, &"jefe_barra", marco.size.x - HUECO_LADO), &"jefe_barra", Estilo.color(&"jefe_texto_barra"))
 	draw_rect(hueco, Estilo.color(&"jefe_fondo_barra"))
 	# El relleno a su alto de pixel (tam_barra.y), centrado en el hueco.
 	var alto := minf(tam_barra.y, HUECO_ALTO)
@@ -112,6 +117,17 @@ func _dibujar_barra() -> void:
 		else:
 			draw_rect(franja, Estilo.color(&"jefe_escudo"))
 	Estilo.panel(self, marco, &"marco_barra_jefe")
+	var texto := titulo_visible()
+	var x := roundf(hueco.position.x + (hueco.size.x - Estilo.ancho(texto, &"jefe_barra")) / 2.0)
+	Estilo.texto_con_contorno(self, Vector2(x, hueco.position.y + 10), texto, &"jefe_barra", Estilo.color(&"jefe_texto_barra"))
+
+
+## El título que se ve: entero si cabe en el hueco; si no, el corto; nunca cortado con «…».
+func titulo_visible() -> String:
+	var cabe := tam_barra.x - 8.0
+	if Estilo.ancho(titulo, &"jefe_barra") <= cabe or titulo_corto == "":
+		return titulo if Estilo.ancho(titulo, &"jefe_barra") <= cabe else Estilo.recortar(titulo, &"jefe_barra", cabe)
+	return titulo_corto
 
 
 func _corazon(centro: Vector2, color: Color) -> void:

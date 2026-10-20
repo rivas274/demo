@@ -69,6 +69,7 @@ func _ready() -> void:
 	if felipe:
 		jugo.camara = felipe.get_node_or_null("Camara")
 		jugo.evitar = felipe
+		jugo.indicador = indicador
 		felipe.impacto.connect(_al_impacto)
 		felipe.aterrizo.connect(_al_aterrizar)
 		felipe.maullo.connect(_al_maullar)
@@ -90,7 +91,7 @@ func _al_cumplir(t: Dictionary) -> void:
 	var id := String(t["id"])
 	var secreta := bool(t.get("secreta", false))
 	var recompensa: Dictionary = t.get("recompensa", {})
-	hud.cartel(tr("UI_TRAVESURA_SECRETA") if secreta else tr("UI_TRAVESURA_CUMPLIDA"), String(t["nombre"]), String(recompensa.get("texto", "")), secreta, altura_cartel())
+	hud.cartel(tr("UI_TRAVESURA_SECRETA") if secreta else tr("UI_TRAVESURA_CUMPLIDA"), String(t["nombre"]), secreta)
 	var frase: Array = t.get("frase", [])
 	if frase.size() >= 2:
 		dialogo.decir("felipe", String(frase[0]), int(frase[1]))
@@ -241,26 +242,3 @@ func mostrar_interfaz(visible_ahora: bool) -> void:
 	for capa: CanvasLayer in [hud, dialogo, jugo]:
 		if capa:
 			capa.visible = visible_ahora
-
-
-## Altura del cartel que no tapa a Felipe (sus 67 px sobre los pies) ni al cuadro de diálogo.
-func altura_cartel() -> float:
-	if felipe == null:
-		return Hud.Y_CARTEL
-	var pies := _en_pantalla(felipe.global_position).y
-	var felipe_ocupa := Vector2(pies - 72.0, pies)
-	var dialogo_ocupa := Vector2(dialogo.lugar(), dialogo.lugar() + 56.0)
-	for y: float in Hud.ALTURAS_CARTEL:
-		var cartel := Vector2(y, y + Hud.ALTO_CARTEL)
-		if not _se_cruzan(cartel, felipe_ocupa) and not _se_cruzan(cartel, dialogo_ocupa):
-			return y
-	return Hud.Y_CARTEL
-
-
-func _se_cruzan(a: Vector2, b: Vector2) -> bool:
-	return a.x < b.y and b.x < a.y
-
-
-func _en_pantalla(posicion: Vector2) -> Vector2:
-	var vista := get_viewport()
-	return vista.get_canvas_transform() * posicion if vista else posicion

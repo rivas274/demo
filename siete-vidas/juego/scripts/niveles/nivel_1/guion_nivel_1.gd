@@ -34,6 +34,8 @@ var sofa_roto := false
 var teclado_pisado := false
 var cajon_abierto := false
 var ropa_firmada := false
+## Salió la pegatina «CONTENIDO SENSIBLE» del popo táctico (para las pruebas).
+var censura_mostrada := false
 ## Calcetines que vuelan del cajón: (x, y, fase).
 var calcetines_volando: Array[Vector3] = []
 
@@ -249,7 +251,6 @@ func _crear_valeria() -> void:
 	var sombra_valeria := SombraContacto.new(58.0, 0.4)
 	sombra_valeria.mostrar = func() -> bool: return not valeria.actividad in [Valeria.Actividad.SENTADA, Valeria.Actividad.FUERA]
 	valeria.add_child(sombra_valeria)
-	travesuras.anuncios.testigos.append(valeria)
 	# Si Valeria va a salir a reaccionar en el cuarto de Felipe, el cartel espera a que salga (G5).
 	travesuras.anuncios.reaccion_en_curso = func() -> bool: return valeria_por_la_casa.en_escena and habitacion == "recibidor" and valeria_por_la_casa.actual in ["bolsas", "maullido"] and not (valeria.cuarto == "recibidor" and valeria.visible)
 
@@ -261,7 +262,6 @@ func _crear_aspi() -> void:
 	aspi.recibe_golpes.solo_aturdido = true
 	aspi.vida.murio.connect(_abrir_balcon)
 	nivel.add_child(aspi)
-	travesuras.anuncios.testigos.append(aspi)
 	if batalla_con_jefe:
 		batalla = BatallaAspi.new(aspi, felipe, nivel)
 		nivel.add_child(batalla)
@@ -324,7 +324,6 @@ func _al_tirar_cajas() -> void:
 	travesuras.jugo.sacudir(0.15, 0.6)
 	sonar("caja")
 	sonar("golpe", 0.8)
-	travesuras.anuncios.marcar_chiste(Rect2(donde.x - 50.0, Nivel1.SUELO - 140.0, 140.0, 140.0), 1.5)
 	desbloquear_logro("LOGRO_ATAJO_DE_GATO")
 	# El mundo reacciona (pilar 5): el ¡PUM! se oye en toda la casa, aunque Valeria tenga audífonos. Ella contesta
 	# primero, desde donde esté (con audífonos se saca uno: su frase es de la reunión); después Felipe, sin culpa.
@@ -355,12 +354,12 @@ func _al_aranar_sofa(objeto: Aranable, critico: bool) -> void:
 
 func _romper_plastico(_objeto: Aranable) -> void:
 	sofa_roto = true
-	travesuras.jugo.palabra_en_mundo("PALABRA_PLASTICO_0", Nivel1.SOFA_ARANABLE[0] + Vector2(0, -120), Color(1.0, 0.6, 0.4), 18)
+	# Pegatina de pergamino (plan de estabilización 2026-10-20): se lee sobre el sofá y la ventana.
+	travesuras.jugo.palabra_en_mundo("PALABRA_PLASTICO_0", Nivel1.SOFA_ARANABLE[0] + Vector2(-80, -110), Color(1.0, 0.6, 0.4), 18, 0.0, true)
 	for nombre: String in Nivel1.SOFA_ARANADO:
 		pieza(nombre).position.y = Nivel1.SOFA_ARANADO[nombre]
 	if valeria.cuarto == "sala":
 		travesuras.decir_valeria("sofa_roto", true)
-	travesuras.anuncios.marcar_chiste(Rect2(240, Nivel1.SUELO - 130, 240, 130), 1.5)
 	# El sofá se redibuja sin plástico ni etiqueta (G4) y los jirones del plástico salen volando.
 	arte.redibujar_muebles()
 	arte.soltar_jirones(Nivel1.SOFA_ARANABLE[0])
@@ -398,21 +397,30 @@ func _actualizar_popo(delta: float) -> void:
 
 
 func _censura_ironica() -> void:
-	travesuras.anuncios.marcar_chiste(Rect2(felipe.global_position + Vector2(-40, -110), Vector2(80, 110)), 2.0)
-	travesuras.jugo.palabra_en_mundo("PALABRA_CONTENIDO_SENSIBLE", felipe.global_position + Vector2(0, -70), Color(1.0, 1.0, 1.0), 14)
+	# Plan de estabilización (2026-10-20): ya no hay palabra chica encima; la pegatina ES el aviso, grande y legible
+	# (Silkscreen 16 en dos líneas, contorno oscuro), tapando a Felipe como una censura de verdad.
+	censura_mostrada = true
+	var lineas := tr("PALABRA_CONTENIDO_SENSIBLE").split(" ", false)
 	var pegatina := Node2D.new()
 	pegatina.name = "Censura"
 	pegatina.z_index = Capas.CENSURA
-	pegatina.global_position = felipe.global_position + Vector2(0, -20)
+	pegatina.global_position = (felipe.global_position + Vector2(0, -34)).round()
 	pegatina.draw.connect(func() -> void:
-		# Pegatina de pescadito y un aviso que muestra... una papa.
-		pegatina.draw_rect(Rect2(-22, -20, 44, 24), Color(0.2, 0.55, 0.85))
-		pegatina.draw_colored_polygon(PackedVector2Array([Vector2(-12, -8), Vector2(6, -14), Vector2(12, -8), Vector2(6, -2)]), Color(1.0, 0.65, 0.35))
-		pegatina.draw_colored_polygon(PackedVector2Array([Vector2(12, -8), Vector2(18, -13), Vector2(18, -3)]), Color(1.0, 0.55, 0.3))
-		pegatina.draw_circle(Vector2(-14, -40), 9.0, Color(0.72, 0.55, 0.32)))
+		var alto := 16.0 * lineas.size() + 8.0
+		var ancho := 12.0
+		for linea: String in lineas:
+			ancho = maxf(ancho, Estilo.ancho(linea, &"censura") + 12.0)
+		var caja := Rect2(Vector2(-ancho / 2.0, -alto / 2.0), Vector2(ancho, alto)).abs()
+		caja = Rect2(caja.position.round(), caja.size.round())
+		pegatina.draw_rect(caja.grow(1), Estilo.color(&"contorno_palabra"))
+		pegatina.draw_rect(caja, Estilo.color(&"censura_fondo"))
+		pegatina.draw_rect(caja.grow(-2), Estilo.color(&"censura_borde"), false, 1.0)
+		for k in lineas.size():
+			var x := roundf(-Estilo.ancho(lineas[k], &"censura") / 2.0)
+			Estilo.texto_con_contorno(pegatina, Vector2(x, caja.position.y + 16.0 + 16.0 * k), lineas[k], &"censura", Estilo.color(&"censura_texto"), &"contorno_palabra", 2))
 	nivel.add_child(pegatina)
 	var irse := pegatina.create_tween()
-	irse.tween_interval(1.4)
+	irse.tween_interval(1.6)
 	irse.tween_property(pegatina, "modulate:a", 0.0, 0.3)
 	irse.tween_callback(pegatina.queue_free)
 
@@ -501,9 +509,6 @@ func _actualizar_teclado(delta: float) -> void:
 	if not teclado_pisado:
 		teclado_pisado = true
 		arte.decorado.queue_redraw()
-		travesuras.jugo.palabra_en_mundo("PALABRA_JJJJJJJJJJ", Vector2(7190, Nivel1.SUELO - 150), Color(0.7, 0.9, 1.0), 14)
-		# La pantalla con «jjjjjj» es el chiste: el cartel no la tapa (G5).
-		travesuras.anuncios.marcar_chiste(Rect2(7110, Nivel1.SUELO - 160, 110, 70), 3.0)
 		travesuras.cumplir("teclado", Vector2(7146, Nivel1.SUELO - 120))
 	if batalla and batalla.fase == BatallaAspi.Fase.PELEA and _espera_papel <= 0.0:
 		_espera_papel = 4.0
@@ -514,7 +519,6 @@ func _actualizar_teclado(delta: float) -> void:
 
 func _abrir_cajon(cajon: Interactivo) -> void:
 	cajon_abierto = true
-	travesuras.anuncios.marcar_chiste(Rect2(Nivel1.CAJON.x - 60, Nivel1.CAJON.y - 110, 160, 120), 1.8)
 	cajon.marcar_usado()
 	sonar("caja")
 	for i in 7:

@@ -1,9 +1,7 @@
 class_name Cartel
 extends Control
-## Pieza de interfaz: un cartel de anuncio, con el kit «Decreto real» (la misma familia que la pausa). Dos formas:
-## - franja: la cinta de terciopelo con el título grande y, colgando debajo, un pergamino con el nombre y la
-##   recompensa (como la franja de un jefe, en chico);
-## - tarjeta: un pergamino chico (cuando no hay hueco para la franja sin tapar el chiste).
+## Pieza de interfaz: un cartel de anuncio, con el kit «Decreto real» (la misma familia que la pausa): la cinta de
+## terciopelo con el título grande y, colgando debajo, un pergamino con una línea (el nombre de la travesura).
 ## Entra con un golpe de escala, se queda `duracion` s y sale deslizándose a la izquierda. No sabe de colas ni de
 ## travesuras: quien lo crea (Hud, a través de Anuncios) decide cuándo y dónde. Colores y letras salen del tema.
 
@@ -19,8 +17,10 @@ const ANCHO_PAPEL := 360.0
 var animacion: Tween
 
 
-## Arma el cartel en `rect`. `secreta` lo pinta de rosa en vez de dorado.
-static func crear(titulo: String, nombre: String, recompensa: String, secreta: bool, rect: Rect2, chico: bool) -> Cartel:
+## Arma el cartel en `rect` (la zona C de ZonasTexto: 640 × 60 arriba). `secreta` lo pinta de rosa en vez de dorado.
+## Título grande en la cinta y UNA línea corta debajo (plan de estabilización 2026-10-20: la línea «RECOMPENSA: …»
+## se quitó; la recompensa se ve volar al HUD y está en la libreta).
+static func crear(titulo: String, nombre: String, secreta: bool, rect: Rect2) -> Cartel:
 	var caja := Cartel.new()
 	caja.name = "Cartel"
 	caja.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -28,22 +28,13 @@ static func crear(titulo: String, nombre: String, recompensa: String, secreta: b
 	caja.position = rect.position
 	caja.pivot_offset = rect.size / 2.0
 	var color := Estilo.color(&"cartel_secreto") if secreta else Estilo.color(&"cartel_dorado")
-	var linea_recompensa := TranslationServer.translate("UI_RECOMPENSA") % recompensa.to_upper()
-	var tinta := Estilo.color(&"tinta_decreto")
-	if chico:
-		caja.add_child(panel(&"panel", Rect2(Vector2.ZERO, rect.size)))
-		caja.add_child(etiqueta(titulo, &"tarjeta_titulo", Estilo.color(&"lacre") if not secreta else color, Vector2(0, 3), rect.size.x, false))
-		caja.add_child(etiqueta(nombre.to_upper(), &"tarjeta_texto", tinta, Vector2(8, 22), rect.size.x - 16, false))
-		caja.add_child(etiqueta(linea_recompensa, &"tarjeta_texto", Estilo.color(&"tinta_decreto_suave"), Vector2(8, 34), rect.size.x - 16, false))
-	else:
-		var x_papel := roundf((ANCHO_PANTALLA - ANCHO_PAPEL) / 2.0)
-		caja.add_child(panel(&"panel", Rect2(x_papel, 34, ANCHO_PAPEL, 60)))
-		var x_cinta := roundf((ANCHO_PANTALLA - ANCHO_CINTA) / 2.0)
-		caja.add_child(panel(&"cinta", Rect2(x_cinta, 0, ANCHO_CINTA, ALTO_CINTA)))
-		caja.add_child(etiqueta(titulo, &"cartel_titulo", color, Vector2(x_cinta + 32, 5), ANCHO_CINTA - 64))
-		caja.add_child(etiqueta(nombre.to_upper(), &"cartel_nombre", tinta, Vector2(x_papel + 10, 48), ANCHO_PAPEL - 20, false))
-		caja.add_child(etiqueta(linea_recompensa, &"cartel_recompensa", Estilo.color(&"lacre"), Vector2(x_papel + 10, 68), ANCHO_PAPEL - 20, false))
-	caja.scale = Vector2(1.6, 0.1) if not chico else Vector2(0.6, 0.6)
+	var x_papel := roundf((rect.size.x - ANCHO_PAPEL) / 2.0)
+	caja.add_child(panel(&"panel", Rect2(x_papel, ALTO_CINTA - 10.0, ANCHO_PAPEL, rect.size.y - ALTO_CINTA + 10.0)))
+	var x_cinta := roundf((rect.size.x - ANCHO_CINTA) / 2.0)
+	caja.add_child(panel(&"cinta", Rect2(x_cinta, 0, ANCHO_CINTA, ALTO_CINTA)))
+	caja.add_child(etiqueta(titulo, &"cartel_titulo", color, Vector2(x_cinta + 32, 5), ANCHO_CINTA - 64))
+	caja.add_child(etiqueta(nombre.to_upper(), &"cartel_nombre", Estilo.color(&"tinta_decreto"), Vector2(x_papel + 10, ALTO_CINTA - 1.0), ANCHO_PAPEL - 20, false))
+	caja.scale = Vector2(1.6, 0.1)
 	caja.modulate.a = 0.0
 	return caja
 
@@ -56,13 +47,6 @@ func animar(duracion: float) -> void:
 	animacion.tween_interval(duracion - ENTRADA - SALIDA)
 	animacion.tween_property(self, "position:x", -size.x - 20.0, SALIDA).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	animacion.tween_callback(queue_free)
-
-
-## Se corre a otro lugar (alguien entró a cuadro y el cartel lo tapaba).
-func mover_a(rect: Rect2) -> void:
-	create_tween().tween_property(self, "position:y", rect.position.y, 0.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	if rect.size.x < ANCHO_PANTALLA:
-		position.x = rect.position.x
 
 
 ## Sale rápido (algo urgente pidió la pantalla).

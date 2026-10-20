@@ -10,6 +10,11 @@ extends CanvasLayer
 var camara: Camera2D
 ## Lo que las palabras no tapan (Felipe): si una cae encima, sube por sobre su cabeza (M1).
 var evitar: Node2D
+## La burbuja del Indicador (zona E): si una palabra coincide con ella, la palabra va más arriba.
+var indicador: Indicador
+## Caja en pantalla de la última palabra (para las pruebas de zonas).
+var ultima_caja := Rect2()
+var _palabra_actual: Control
 ## Palabras que saltaron (para las pruebas).
 var palabras: Array[String] = []
 
@@ -50,20 +55,34 @@ func destello(fuerza := 0.5, color := Color.WHITE) -> void:
 
 
 ## Palabra que salta sobre un punto del mundo (se pasa a la pantalla con la cámara actual).
-func palabra_en_mundo(texto: String, posicion: Vector2, color := Color(1.0, 0.9, 0.3), tamano := 18, retraso := 0.0) -> void:
+## `pegatina`: la palabra va sobre una etiqueta de pergamino del kit, en tinta (se lee sobre cualquier fondo).
+func palabra_en_mundo(texto: String, posicion: Vector2, color := Color(1.0, 0.9, 0.3), tamano := 18, retraso := 0.0, pegatina := false) -> void:
 	var en_pantalla := posicion
 	var vista := get_viewport()
 	if vista:
 		en_pantalla = vista.get_canvas_transform() * posicion
-	palabra(texto, en_pantalla, color, tamano, retraso)
+	palabra(texto, en_pantalla, color, tamano, retraso, pegatina)
 
 
-## Palabra que salta, rebota y se va (posición en pantalla).
-func palabra(texto: String, posicion: Vector2, color := Color(1.0, 0.9, 0.3), tamano := 18, retraso := 0.0) -> void:
+## Palabra que salta, rebota y se va (posición en pantalla). Zona D de ZonasTexto (plan de estabilización 2026-10-20):
+## una sola a la vez (la nueva reemplaza a la que se veía), 0,9 s en total, Silkscreen de 16 o 24 px con contorno
+## oscuro de 1 px, fuera del HUD, del diálogo y de los carteles, dentro de la pantalla, sin tapar a Felipe y más
+## arriba que la burbuja del Indicador si coinciden.
+func palabra(texto: String, posicion: Vector2, color := Color(1.0, 0.9, 0.3), tamano := 18, retraso := 0.0, pegatina := false) -> void:
 	# Llega como clave (PALABRA_...) o texto suelto: se muestra traducido.
 	texto = tr(texto)
 	palabras.append(texto)
+	if retraso > 0.0:
+		get_tree().create_timer(retraso, true, false, true).timeout.connect(func() -> void: _saltar(texto, posicion, color, tamano, pegatina))
+	else:
+		_saltar(texto, posicion, color, tamano, pegatina)
+
+
+func _saltar(texto: String, posicion: Vector2, color: Color, tamano: int, pegatina: bool) -> void:
+	if is_instance_valid(_palabra_actual):
+		_palabra_actual.queue_free()
 	var etiqueta := Label.new()
+	etiqueta.name = "Palabra"
 	etiqueta.text = texto
 	# Letra pixel de títulos (Silkscreen) a su tamaño de diseño: 16 px, o 24 px para las palabras grandes (B1).
 	var estilo := &"palabra_grande" if tamano >= 20 else &"palabra"
@@ -71,45 +90,66 @@ func palabra(texto: String, posicion: Vector2, color := Color(1.0, 0.9, 0.3), ta
 	etiqueta.add_theme_font_size_override("font_size", Estilo.letra(estilo))
 	etiqueta.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	etiqueta.add_theme_color_override("font_color", color)
-	# Contorno grueso y sombra: se lee sobre cualquier pared o fondo (M1: el celeste se perdía en la pared beige).
-	etiqueta.add_theme_color_override("font_outline_color", Color(0.08, 0.04, 0.07))
-	etiqueta.add_theme_constant_override("outline_size", 6)
-	etiqueta.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.75))
-	etiqueta.add_theme_constant_override("shadow_offset_x", 2)
-	etiqueta.add_theme_constant_override("shadow_offset_y", 2)
-	etiqueta.add_theme_constant_override("shadow_outline_size", 6)
+	# Contorno oscuro de 1 px (outline_size 2 = 1 px a cada lado): se lee sobre cualquier pared, sin sombra borrosa.
+	etiqueta.add_theme_color_override("font_outline_color", Estilo.color(&"contorno_palabra"))
+	etiqueta.add_theme_constant_override("outline_size", 2)
 	etiqueta.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(etiqueta)
+	# Con pegatina, la palabra va dentro de una etiqueta de pergamino del kit (6 px de margen), en tinta.
+	var nodo: Control = etiqueta
+	if pegatina:
+		var panel := Panel.new()
+		panel.add_theme_stylebox_override("panel", Estilo.caja(&"panel"))
+		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		etiqueta.add_theme_color_override("font_color", Estilo.color(&"tinta_decreto"))
+		etiqueta.add_theme_constant_override("outline_size", 0)
+		etiqueta.position = Vector2(6, 4)
+		panel.add_child(etiqueta)
+		nodo = panel
+	nodo.name = "Palabra"
+	add_child(nodo)
+	_palabra_actual = nodo
+	# Se mide ya en el árbol (con su letra): fuera del árbol la medida sale chica y la caja no la contiene.
 	var medida := etiqueta.get_minimum_size()
 	etiqueta.size = medida
-	etiqueta.pivot_offset = medida / 2.0
-	# Dentro de la pantalla y debajo del HUD.
-	var x := clampf(posicion.x - medida.x / 2.0, 4.0, 636.0 - medida.x)
-	var y := clampf(posicion.y - medida.y / 2.0, 34.0, 352.0 - medida.y)
-	# Nunca encima de Felipe: si lo tapa, sube por sobre su cabeza.
-	if evitar and is_instance_valid(evitar) and evitar.is_inside_tree() and get_viewport():
-		var pies := get_viewport().get_canvas_transform() * evitar.global_position
-		var felipe_ocupa := Rect2(pies + Vector2(-38, -74), Vector2(76, 76))
-		if Rect2(Vector2(x, y), medida).intersects(felipe_ocupa):
-			y = maxf(34.0, felipe_ocupa.position.y - medida.y - 4.0)
-	etiqueta.position = Vector2(x, y).round()
+	if pegatina:
+		medida += Vector2(12, 8)
+		nodo.size = medida
+	nodo.pivot_offset = medida / 2.0
+	var caja := ZonasTexto.colocar_palabra(Rect2(posicion - medida / 2.0, medida), _evitar_en_pantalla())
+	nodo.position = caja.position
+	ultima_caja = caja
 	# Salta en escalones enteros (2× un instante y después 1×) y rebota unos px, sin girar: la letra pixel no se
-	# deforma (B1 de la revisión de consistencia).
-	etiqueta.visible = false
-	var abajo := etiqueta.position.y
-	var animar := create_tween()
-	animar.tween_interval(retraso)
-	animar.tween_callback(func() -> void:
-		etiqueta.visible = true
-		etiqueta.scale = Vector2.ONE * 2.0)
-	animar.tween_interval(0.06)
-	animar.tween_callback(func() -> void: etiqueta.scale = Vector2.ONE)
-	animar.tween_property(etiqueta, "position:y", abajo - 6.0, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	animar.tween_property(etiqueta, "position:y", abajo, 0.3).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
-	animar.tween_interval(0.5)
-	animar.tween_property(etiqueta, "position:y", etiqueta.position.y - 18.0, 0.35).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
-	animar.parallel().tween_property(etiqueta, "modulate:a", 0.0, 0.35)
-	animar.tween_callback(etiqueta.queue_free)
+	# deforma (B1 de la revisión de consistencia). Rebota hacia abajo para no subir a la zona C.
+	var abajo := nodo.position.y
+	# El golpe al doble solo si el doble también respeta las zonas (si no, entra a 1×).
+	if ZonasTexto.palabra_valida(caja.grow_individual(medida.x / 2.0, medida.y / 2.0, medida.x / 2.0, medida.y / 2.0)):
+		nodo.scale = Vector2.ONE * 2.0
+	# El tween es de la palabra: si otra la reemplaza, se va con ella.
+	var animar := nodo.create_tween()
+	animar.tween_interval(0.05)
+	animar.tween_callback(func() -> void: nodo.scale = Vector2.ONE)
+	animar.tween_property(nodo, "position:y", abajo + 4.0, 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	animar.tween_property(nodo, "position:y", abajo, 0.25).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	animar.tween_interval(ZonasTexto.DURACION_PALABRA - 0.6)
+	animar.tween_property(nodo, "modulate:a", 0.0, 0.2)
+	animar.tween_callback(nodo.queue_free)
+
+
+## Lo que una palabra no tapa, en pantalla: Felipe y la burbuja del Indicador (zona E).
+func _evitar_en_pantalla() -> Array[Rect2]:
+	var zonas: Array[Rect2] = []
+	var vista := get_viewport()
+	if vista == null:
+		return zonas
+	var lienzo := vista.get_canvas_transform()
+	if indicador and is_instance_valid(indicador):
+		var burbuja: Rect2 = indicador.rect_burbuja()
+		if burbuja.has_area():
+			zonas.append(Rect2(lienzo * burbuja.position, burbuja.size * lienzo.get_scale()).grow(2.0))
+	if evitar and is_instance_valid(evitar) and evitar.is_inside_tree():
+		var pies := lienzo * evitar.global_position
+		zonas.append(Rect2(pies + Vector2(-38, -74), Vector2(76, 76)))
+	return zonas
 
 
 func _process(delta: float) -> void:

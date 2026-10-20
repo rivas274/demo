@@ -4,9 +4,9 @@
 
 [node name="CuadroDialogo" type="Panel"]
 offset_left = 8.0
-offset_top = 44.0
+offset_top = 30.0
 offset_right = 632.0
-offset_bottom = 100.0
+offset_bottom = 80.0
 mouse_filter = 2
 theme_type_variation = &"CuadroDialogo"
 
@@ -14,10 +14,10 @@ theme_type_variation = &"CuadroDialogo"
 [node name="Retrato" type="TextureRect" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 48.0
-offset_bottom = 48.0
+offset_left = 7.0
+offset_top = 7.0
+offset_right = 43.0
+offset_bottom = 43.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 0
@@ -25,38 +25,38 @@ stretch_mode = 0
 [node name="RetratoCodigo" type="Control" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 48.0
-offset_bottom = 48.0
+offset_left = 7.0
+offset_top = 7.0
+offset_right = 43.0
+offset_bottom = 43.0
 mouse_filter = 2
 script = ExtResource("1_retrato")
 
 [node name="Marco" type="Panel" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 4.0
-offset_top = 4.0
-offset_right = 52.0
-offset_bottom = 52.0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = 47.0
+offset_bottom = 47.0
 mouse_filter = 2
 theme_type_variation = &"MarcoRetrato"
 
 [node name="Nombre" type="Label" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 60.0
-offset_top = 6.0
+offset_left = 56.0
+offset_top = 5.0
 auto_translate_mode = 2
 theme_type_variation = &"NombreDialogo"
 
 [node name="Texto" type="RichTextLabel" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 60.0
-offset_top = 18.0
-offset_right = 608.0
-offset_bottom = 54.0
+offset_left = 56.0
+offset_top = 16.0
+offset_right = 612.0
+offset_bottom = 49.0
 mouse_filter = 2
 auto_translate_mode = 2
 theme_type_variation = &"TextoDialogo"

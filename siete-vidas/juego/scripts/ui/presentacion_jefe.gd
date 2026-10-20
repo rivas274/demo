@@ -46,7 +46,7 @@ const TEXTO_INICIO := "JEFE_BATALLA_INICIADA"
 const GRUPO_OCULTAR := "ocultar_en_presentacion"
 const ESCENA_BARRA := "res://escenas/ui/barra_jefe.tscn"
 ## Barra del jefe arriba a la derecha, lejos de los corazones y del HUD de la Agenda.
-const POS_BARRA := Vector2(402, 4)
+const POS_BARRA := Vector2(436, 1)
 
 ## Datos del jefe.
 var nombre := ""
@@ -142,6 +142,7 @@ func _ready() -> void:
 	capa.add_child(_interfaz)
 	barra = (load(ESCENA_BARRA) as PackedScene).instantiate()
 	barra.titulo = "%s — %s" % [nombre, titulo]
+	barra.titulo_corto = nombre
 	barra.position = POS_BARRA
 	barra.visible = false
 	capa.add_child(barra)
@@ -209,12 +210,16 @@ func cartel(texto: String, segundos := 1.4, pista := "") -> void:
 	texto = tr(texto)
 	pista = tr(pista) if pista != "" else ""
 	if anuncios:
-		var alto := 30.0 + (18.0 if pista != "" else 0.0) + 6.0
-		anuncios.anunciar("fase", texto, Vector2(640, alto), Vector2(640, alto), func(rect: Rect2, _chico: bool) -> float:
-			_mostrar_cartel(texto, segundos, pista, rect.position.y + 22.0)
+		anuncios.anunciar("fase", texto, Vector2(640, _alto_cartel(pista)), func(rect: Rect2) -> float:
+			_mostrar_cartel(texto, segundos, pista, rect.position.y)
 			return segundos, func() -> void: _cartel = 0.0, true)
 		return
-	_mostrar_cartel(texto, segundos, pista, -1.0)
+	_mostrar_cartel(texto, segundos, pista, ZonasTexto.CARTELES.position.y)
+
+
+## Alto de la franja de fase: el título (Silkscreen 24) y, si hay, la pista de una línea. Cabe en la zona C.
+func _alto_cartel(pista: String) -> float:
+	return 32.0 + (20.0 if pista != "" else 0.0)
 
 
 func _mostrar_cartel(texto: String, segundos: float, pista: String, y: float) -> void:
@@ -454,10 +459,10 @@ func _dibujar() -> void:
 	if _cartel > 0.0 and _texto_cartel != "":
 		var alfa := minf(_cartel * 2.0, 1.0)
 		var ancho := Estilo.ancho(_texto_cartel, &"jefe_cartel")
-		var y := _y_cartel if _y_cartel >= 0.0 else tam.y * 0.38
-		# La franja de fase va siempre bajo la barra de arriba (HUD y barra del jefe), nunca encima (M4).
-		y = maxf(y, Anuncios.ALTO_BARRA + 4.0 + 24.0)
-		c.draw_rect(Rect2(0, y - 24, tam.x, 32 + (20 if _pista != "" else 0)), Estilo.color(&"jefe_cartel_fondo", 0.8 * alfa))
+		# La franja de fase va en la zona C (ZonasTexto: y 30–90), nunca sobre el HUD ni la barra del jefe (M4).
+		var arriba := maxf(_y_cartel, ZonasTexto.CARTELES.position.y)
+		var y := arriba + 24.0
+		c.draw_rect(Rect2(0, arriba, tam.x, _alto_cartel(_pista)), Estilo.color(&"jefe_cartel_fondo", 0.8 * alfa))
 		Estilo.escribir(c, Vector2((tam.x - ancho) / 2.0, y), _texto_cartel, &"jefe_cartel", Estilo.color(&"jefe_amarillo", alfa))
 		if _pista != "":
 			var texto := _etiquetar(_pista)

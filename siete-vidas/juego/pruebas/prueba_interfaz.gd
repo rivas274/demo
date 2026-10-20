@@ -75,12 +75,12 @@ func _probar_contador_y_cartel() -> void:
 	contador.fijar("0", false, false)
 	_comprobar(not contador.tiene and contador.golpe == 1.0, "ContadorRecurso: sin golpe al armar la interfaz")
 	contador.queue_free()
-	var cartel := Cartel.crear("TÍTULO", "nombre", "premio", false, Rect2(0, 100, 640, 96), false)
+	var cartel := Cartel.crear("TÍTULO", "nombre", false, ZonasTexto.cartel(Hud.TAM_CARTEL))
 	var textos: Array[String] = []
 	for hijo in cartel.get_children():
 		if hijo is Label:
 			textos.append((hijo as Label).text)
-	_comprobar(textos == ["TÍTULO", "NOMBRE", "RECOMPENSA: PREMIO"], "Cartel: franja con título, nombre y recompensa")
+	_comprobar(textos == ["TÍTULO", "NOMBRE"], "Cartel: franja con título y una sola línea (sin «RECOMPENSA: …»)")
 	cartel.free()
 
 

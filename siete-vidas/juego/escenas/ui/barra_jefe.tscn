@@ -8,6 +8,6 @@
 mouse_filter = 2
 script = ExtResource("1_barra")
 forma = 1
-tam_barra = Vector2(196, 10)
+tam_barra = Vector2(160, 10)
 relleno = ExtResource("2_rojo")
 relleno_escudo = ExtResource("3_azul")

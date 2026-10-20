@@ -3,7 +3,7 @@ extends CanvasLayer
 ## Arriba, discreto y sin báscula: la agenda (cuántas van y el ícono de Tab), calcetines del nido, fotos de la
 ## galería y snacks del bolsillo (x/5). Al centro, los carteles épicos "¡TRAVESURA CUMPLIDA!" y
 ## "¡TRAVESURA SECRETA!" en cola (como la franja de un jefe, en chico). Nada de puntos.
-## Va a la derecha de los corazones y las vidas (Medidores, 6 a 98 px).
+## Va a la derecha de los corazones y las vidas (Medidores, 6 a 136 px), todo en la zona A (y 0–26).
 
 ## Carteles que se mostraron (para las pruebas): [título, nombre].
 var carteles: Array = []
@@ -26,15 +26,14 @@ var _golpe_agenda := 0.0
 const ESCENA_CONTADOR := "res://escenas/ui/contador_recurso.tscn"
 ## Contadores de recursos: [clave, ancho, ícono del kit (vacío: lo dibuja Recogible)].
 const CONTADORES := [["calcetin", 52.0, &"hud_calcetin"], ["foto", 52.0, &"hud_foto"], ["snack", 60.0, &""]]
-const X0 := 104.0
+## Todo en la zona A (ZonasTexto.HUD, y 0–26): los paneles van de y 4 a 26, a la derecha de los corazones (6 a 136).
+const X0 := 140.0
+const Y0 := 4.0
 const ANCHO_AGENDA := 116.0
-## Alto del cartel y alturas posibles (bajo el diálogo de arriba, al medio, abajo).
-const ALTO_CARTEL := 96.0
-const Y_CARTEL := 104.0
-const ALTURAS_CARTEL := [104.0, 180.0, 252.0]
-## Versión chica del cartel (cuando no hay hueco para la franja sin tapar el chiste): una tarjeta en una esquina.
-const TAM_CHICO := Vector2(260, 54)
-const DURACION_CARTEL := 2.45
+## Tamaño del cartel: toda la zona C de ZonasTexto (arriba, y 30–90).
+const TAM_CARTEL := Vector2(640, 60)
+## Entre 1,5 y 2,5 s (Gemini, 2026-10-20).
+const DURACION_CARTEL := 2.2
 
 
 func _ready() -> void:
@@ -45,7 +44,7 @@ func _ready() -> void:
 	_barra = Control.new()
 	_barra.name = "Barra"
 	_barra.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_barra.size = Vector2(640, 40)
+	_barra.size = ZonasTexto.HUD.size
 	_barra.draw.connect(_dibujar_agenda)
 	add_child(_barra)
 	# Recursos: una pieza ContadorRecurso por cada uno, a la derecha de la agenda.
@@ -55,7 +54,7 @@ func _ready() -> void:
 		contador.name = "Contador " + String(datos[0])
 		contador.clave = datos[0]
 		contador.ancho = datos[1]
-		contador.position = Vector2(x, 6)
+		contador.position = Vector2(x, Y0)
 		contador.dibujar_icono = Recogible.dibujar_icono
 		if datos[2] != &"":
 			contador.icono = Estilo.icono(datos[2])
@@ -107,31 +106,28 @@ func _dibujar_agenda() -> void:
 	if agenda == null:
 		return
 	var g := _golpe_agenda
-	Estilo.panel(_barra, Rect2(X0, 6, ANCHO_AGENDA, Estilo.medida(&"alto_hud")), &"panel")
-	_barra.draw_texture(Estilo.icono(&"hud_libreta"), Vector2(X0 + 1, 7 - roundf(g * 2.0)))
+	Estilo.panel(_barra, Rect2(X0, Y0, ANCHO_AGENDA, Estilo.medida(&"alto_hud")), &"panel")
+	_barra.draw_texture(Estilo.icono(&"hud_libreta"), Vector2(X0 + 1, Y0 + 1 - roundf(g * 2.0)))
 	var texto := tr("UI_AGENDA_CONTADOR") % [agenda.cumplidas(), agenda.total()]
-	Estilo.escribir(_barra, Vector2(X0 + 24, 22 - roundf(g * 2.0)), texto, &"hud", Estilo.color(&"tinta_decreto").lerp(Estilo.color(&"lacre"), g))
-	IconosBotones.dibujar(_barra, "agenda", Vector2(X0 + ANCHO_AGENDA - IconosBotones.ancho("agenda", 12.0) - 3, 11), 12.0)
+	Estilo.escribir(_barra, Vector2(X0 + 24, Y0 + 16 - roundf(g * 2.0)), texto, &"hud", Estilo.color(&"tinta_decreto").lerp(Estilo.color(&"lacre"), g))
+	IconosBotones.dibujar(_barra, "agenda", Vector2(X0 + ANCHO_AGENDA - IconosBotones.ancho("agenda", 12.0) - 3, Y0 + 5), 12.0)
 
 
-## Cartel épico: título grande, nombre de la travesura y la recompensa. Pasa por la cola única de anuncios (G5): sale
-## cuando le toca, donde no tapa a Felipe, al diálogo ni a quien reacciona; si no hay hueco, en chico en una esquina.
-## `y_cartel` solo se usa sin cola de anuncios (pruebas sueltas del HUD).
-func cartel(titulo: String, nombre: String, recompensa: String, secreta: bool, y_cartel := -1.0) -> void:
+## Cartel épico: título grande y el nombre de la travesura en una línea. Pasa por la cola única de anuncios (G5): sale
+## en la zona C cuando le toca (después del diálogo). Sin cola de anuncios (pruebas sueltas del HUD), sale enseguida.
+func cartel(titulo: String, nombre: String, secreta: bool) -> void:
 	titulo = tr(titulo)
 	nombre = tr(nombre)
-	recompensa = tr(recompensa)
 	carteles.append([titulo, nombre])
 	golpear("agenda")
-	var datos := [titulo, nombre, recompensa, secreta]
+	var datos := [titulo, nombre, secreta]
 	if anuncios:
-		anuncios.anunciar("cartel", titulo, Vector2(640, ALTO_CARTEL), TAM_CHICO,
-			func(rect: Rect2, chico: bool) -> float: return _mostrar_cartel(datos, rect, chico),
-			_ocultar_cartel, false, retraso_cartel, false, _mover_cartel)
+		anuncios.anunciar("cartel", titulo, TAM_CARTEL, func(rect: Rect2) -> float: return _mostrar_cartel(datos, rect),
+			_ocultar_cartel, false, retraso_cartel)
 		return
 	_mostrando = true
 	create_tween().tween_callback(func() -> void:
-		_mostrar_cartel(datos, Rect2(0, y_cartel if y_cartel >= 0.0 else Y_CARTEL, 640, ALTO_CARTEL), false)
+		_mostrar_cartel(datos, ZonasTexto.cartel(TAM_CARTEL))
 		create_tween().tween_callback(func() -> void: _mostrando = false).set_delay(DURACION_CARTEL)).set_delay(retraso_cartel)
 
 
@@ -142,17 +138,12 @@ func ocupado() -> bool:
 var _actual: Cartel
 
 
-## Muestra el cartel en ese rectángulo (franja completa o tarjeta chica) y devuelve cuánto dura.
-func _mostrar_cartel(datos: Array, rect: Rect2, chico: bool) -> float:
-	_actual = Cartel.crear(datos[0], datos[1], datos[2], datos[3], rect, chico)
+## Muestra el cartel en ese rectángulo de la zona C y devuelve cuánto dura.
+func _mostrar_cartel(datos: Array, rect: Rect2) -> float:
+	_actual = Cartel.crear(datos[0], datos[1], datos[2], rect)
 	add_child(_actual)
 	_actual.animar(DURACION_CARTEL)
 	return DURACION_CARTEL
-
-
-func _mover_cartel(rect: Rect2) -> void:
-	if is_instance_valid(_actual):
-		_actual.mover_a(rect)
 
 
 func _ocultar_cartel() -> void:

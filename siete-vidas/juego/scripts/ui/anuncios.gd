@@ -1,39 +1,35 @@
 class_name Anuncios
 extends Node
-## UNA sola cola para todo lo que se anuncia en pantalla (G5 y M3 de la revisión 3): carteles de travesura del HUD,
-## avisos de logro, franjas de fase del jefe y «PODER NUEVO». Antes cada uno tenía su cola y se apilaban (cuatro capas
-## de texto al ganar) o tapaban el chiste.
-## - Se muestra uno a la vez; nada se monta sobre otro.
-## - El lugar se decide AL MOSTRAR (no al encolar): no tapa a Felipe, al cuadro de diálogo, a la barra de arriba ni a
-##   los testigos (Valeria, A.S.P.I.: quien reacciona es el chiste). Si no hay hueco, espera la reacción hasta
-##   ESPERA_MAXIMA s y después sale en su versión chica, en una esquina libre.
-## - Lo urgente (la franja de fase del jefe) pasa adelante y apura la salida del que se está viendo.
-## Cada anuncio trae cómo mostrarse: mostrar(rect_en_pantalla, chico) -> duración, y ocultar() (salida rápida).
+## UNA sola cola para todo lo que se anuncia en pantalla (G5 y M3 de la revisión 3): carteles de travesura, avisos de
+## logro, franjas de fase del jefe («¡DEPÓSITO LLENO!») y «PODER NUEVO».
+## Plan de estabilización (2026-10-20, decisión 3): todos salen en la ZONA C (ZonasTexto.CARTELES, arriba al centro,
+## y 30–90), la misma franja que el diálogo:
+## - Uno a la vez; nada se monta sobre otro ni sobre el HUD.
+## - Si hay diálogo, el anuncio espera su turno. Si espera más de ESPERA_MAXIMA s, sale igual y la frase cede (vuelve
+##   a la cola del diálogo). Si llega una frase urgente mientras se ve un anuncio, el anuncio se acorta.
+## - Lo urgente (la franja de fase del jefe) pasa adelante, apura al que se está viendo y hace ceder al diálogo.
+## - Mientras se ve un anuncio, el diálogo espera (Dialogo.esperar).
+## Cada anuncio trae cómo mostrarse: mostrar(rect_en_pantalla) -> duración, y ocultar() (salida rápida).
 
-## Segundos que un anuncio espera un hueco libre antes de salir en chico.
-const ESPERA_MAXIMA := 1.5
+## Segundos que un anuncio espera a que termine el diálogo antes de salir igual.
+const ESPERA_MAXIMA := 4.0
 ## Pausa entre un anuncio y el siguiente (que se lea el cambio).
 const ENTRE := 0.15
-## Margen alrededor de lo que no se tapa.
-const MARGEN := 4.0
-## Barra de arriba (HUD y barra del jefe): nada se pone encima.
-const ALTO_BARRA := 40.0
-const PANTALLA := Vector2(640, 360)
 
 var felipe: Felipe
-var dialogo: Dialogo
-## Nodos que reaccionan (testigos): se tapan solo si no queda otra. Cada uno da rect_dibujado() o rect_indicador().
-var testigos: Array[Node2D] = []
+var dialogo: Dialogo:
+	set(valor):
+		dialogo = valor
+		if dialogo:
+			dialogo.esperar = func() -> bool: return not actual.is_empty()
 ## Mientras devuelva true, hay una reacción en camino (Valeria va a salir a ver): los anuncios esperan (hasta
-## ESPERA_MAXIMA, después salen en chico en una esquina).
+## ESPERA_MAXIMA).
 var reaccion_en_curso := Callable()
-## Lo que se mostró: [tipo, texto, rectángulo en pantalla, chico] (para las pruebas).
+## Lo que se mostró: [tipo, texto, rectángulo en pantalla] (para las pruebas).
 var mostrados: Array = []
 ## Lo que se está viendo ahora (vacío si nada): {"tipo", "texto", "rect", ...}.
 var actual := {}
 
-## Chistes en curso (lo que no se tapa mientras pasa): [rectángulo en el mundo, segundos que quedan].
-var _chistes: Array = []
 var _cola: Array = []
 var _restante := 0.0
 var _pausa := 0.0
@@ -47,15 +43,12 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
-## Encola un anuncio. `tamano` y `tamano_chico` son su caja en pantalla (el ancho 640 = franja completa).
-## `mostrar` recibe (rect, chico) y devuelve los segundos que dura; `ocultar` lo saca antes de tiempo.
+## Encola un anuncio. `tamano` es su caja en pantalla (se centra arriba en la zona C; su alto, como mucho el de la
+## zona). `mostrar` recibe el rectángulo y devuelve los segundos que dura; `ocultar` lo saca antes de tiempo.
 ## `urgente` pasa adelante de la cola y apura al que se está viendo. `retraso`: espera antes de poder salir.
-## `en_esquina`: prueba primero las esquinas (avisos de logro), no el centro.
-## `mover` (opcional) recibe un rectángulo nuevo: si lo que se ve empieza a tapar a alguien (Valeria entra por una
-## puerta), el anuncio se corre a un lugar libre.
-func anunciar(tipo: String, texto: String, tamano: Vector2, tamano_chico: Vector2, mostrar: Callable, ocultar := Callable(), urgente := false, retraso := 0.0, en_esquina := false, mover := Callable()) -> void:
-	var anuncio := {"tipo": tipo, "texto": texto, "tamano": tamano, "chico": tamano_chico, "mostrar": mostrar,
-		"ocultar": ocultar, "listo": retraso, "esperando": 0.0, "esquina": en_esquina, "mover": mover}
+func anunciar(tipo: String, texto: String, tamano: Vector2, mostrar: Callable, ocultar := Callable(), urgente := false, retraso := 0.0) -> void:
+	var anuncio := {"tipo": tipo, "texto": texto, "tamano": tamano, "mostrar": mostrar, "ocultar": ocultar,
+		"listo": retraso, "esperando": 0.0, "urgente": urgente}
 	if urgente:
 		_cola.push_front(anuncio)
 		if not actual.is_empty() and actual.get("tipo", "") != "fase":
@@ -77,27 +70,22 @@ func limpiar() -> void:
 	_pausa = 0.0
 
 
-## Lo que pasa en ese rectángulo del mundo es el chiste: ningún anuncio lo tapa durante `segundos`.
-func marcar_chiste(rect_mundo: Rect2, segundos := 2.5) -> void:
-	_chistes.append([rect_mundo, segundos])
-
-
 ## ¿Hay algo en pantalla o esperando?
 func ocupado() -> bool:
 	return not actual.is_empty() or not _cola.is_empty()
 
 
+func _hay_dialogo() -> bool:
+	return dialogo != null and is_instance_valid(dialogo) and dialogo.ocupado()
+
+
 func _process(delta: float) -> void:
 	var real := delta / maxf(Engine.time_scale, 0.001)
-	for chiste: Array in _chistes:
-		chiste[1] -= real
-	_chistes = _chistes.filter(func(c: Array) -> bool: return c[1] > 0.0)
 	if not actual.is_empty():
 		_restante -= real
-		if _restante <= 0.0:
-			_terminar_actual(false)
-		else:
-			_reubicar_actual()
+		# Una frase urgente entró mientras se veía el anuncio (no una fase del jefe): el anuncio se acorta.
+		if _restante <= 0.0 or (_hay_dialogo() and actual.get("tipo", "") != "fase"):
+			_terminar_actual(_restante > 0.0)
 		return
 	if _pausa > 0.0:
 		_pausa -= real
@@ -109,41 +97,18 @@ func _process(delta: float) -> void:
 	if siguiente["listo"] > 0.0:
 		return
 	siguiente["esperando"] += real
-	var esperando_reaccion: bool = reaccion_en_curso.is_valid() and reaccion_en_curso.call() and siguiente["tipo"] != "fase"
-	var rect := Rect2() if esperando_reaccion else lugar_libre(siguiente["tamano"], siguiente["esquina"])
-	var chico := false
-	if rect == Rect2() and siguiente["esperando"] >= ESPERA_MAXIMA:
-		chico = true
-		rect = lugar_libre(siguiente["chico"], true)
-		if rect == Rect2():
-			rect = _esquina_menos_tapada(siguiente["chico"])
-	if rect == Rect2():
+	var urgente: bool = siguiente["urgente"]
+	var esperar: bool = _hay_dialogo() or (reaccion_en_curso.is_valid() and bool(reaccion_en_curso.call()))
+	if esperar and not urgente and siguiente["esperando"] < ESPERA_MAXIMA:
 		return
+	if _hay_dialogo():
+		dialogo.ceder()
 	_cola.pop_front()
+	var rect := ZonasTexto.cartel(siguiente["tamano"])
 	actual = siguiente
 	actual["rect"] = rect
-	actual["es_chico"] = chico
-	mostrados.append([siguiente["tipo"], siguiente["texto"], rect, chico])
-	_restante = float((siguiente["mostrar"] as Callable).call(rect, chico))
-
-
-## Si lo que se ve ahora tapa a alguien (alguien entró a cuadro), se corre a un lugar libre del mismo tamaño.
-func _reubicar_actual() -> void:
-	var mover: Callable = actual.get("mover", Callable())
-	if not mover.is_valid():
-		return
-	var rect: Rect2 = actual["rect"]
-	var tapa := false
-	for zona in zonas_ocupadas().slice(1):
-		if rect.intersects(zona):
-			tapa = true
-			break
-	if not tapa:
-		return
-	var nuevo := lugar_libre(rect.size, rect.size.x < PANTALLA.x)
-	if nuevo != Rect2() and nuevo != rect:
-		actual["rect"] = nuevo
-		mover.call(nuevo)
+	mostrados.append([siguiente["tipo"], siguiente["texto"], rect])
+	_restante = float((siguiente["mostrar"] as Callable).call(rect))
 
 
 func _terminar_actual(apurar := true) -> void:
@@ -154,75 +119,3 @@ func _terminar_actual(apurar := true) -> void:
 		ocultar.call()
 	actual = {}
 	_pausa = ENTRE
-
-
-## Rectángulos de pantalla que un anuncio no debe tapar: Felipe, el diálogo, la barra de arriba y los testigos
-## visibles (Valeria, A.S.P.I.).
-func zonas_ocupadas() -> Array[Rect2]:
-	var zonas: Array[Rect2] = [Rect2(0, 0, PANTALLA.x, ALTO_BARRA)]
-	var vista := get_viewport()
-	if vista == null:
-		return zonas
-	var lienzo := vista.get_canvas_transform()
-	if felipe and is_instance_valid(felipe) and felipe.is_inside_tree():
-		var pies := lienzo * felipe.global_position
-		zonas.append(Rect2(pies + Vector2(-40, -76), Vector2(80, 80)).grow(MARGEN))
-	if dialogo and is_instance_valid(dialogo):
-		var cuadro := dialogo.rect_en_pantalla()
-		if cuadro.has_area():
-			zonas.append(cuadro.grow(MARGEN))
-	for chiste: Array in _chistes:
-		var r: Rect2 = chiste[0]
-		zonas.append(Rect2(lienzo * r.position, r.size * lienzo.get_scale()).grow(MARGEN))
-	for testigo in testigos:
-		if not is_instance_valid(testigo) or not testigo.is_visible_in_tree():
-			continue
-		var r: Rect2 = testigo.call("rect_dibujado") if testigo.has_method("rect_dibujado") else testigo.call("rect_indicador")
-		var en_pantalla := Rect2(lienzo * r.position, r.size * lienzo.get_scale())
-		if en_pantalla.intersects(Rect2(Vector2.ZERO, PANTALLA)):
-			zonas.append(en_pantalla.grow(MARGEN))
-	return zonas
-
-
-## Primer lugar libre (de arriba hacia abajo) para una caja de ese tamaño; Rect2() si no hay. Las franjas de 640 de
-## ancho solo cambian de altura; las chicas prueban también las esquinas (derecha e izquierda).
-func lugar_libre(tamano: Vector2, esquinas := false) -> Rect2:
-	var zonas := zonas_ocupadas()
-	var xs: Array[float] = []
-	if tamano.x >= PANTALLA.x:
-		xs.append(0.0)
-	else:
-		if not esquinas:
-			xs.append((PANTALLA.x - tamano.x) / 2.0)
-		xs.append(PANTALLA.x - tamano.x - 8.0)
-		xs.append(8.0)
-	var y := ALTO_BARRA + 4.0
-	while y + tamano.y <= PANTALLA.y - 4.0:
-		for x in xs:
-			var caja := Rect2(Vector2(x, y), tamano)
-			var libre := true
-			for zona in zonas:
-				if caja.intersects(zona):
-					libre = false
-					break
-			if libre:
-				return caja
-		y += 8.0
-	return Rect2()
-
-
-## Si ni la versión chica cabe: la esquina de arriba (bajo la barra) que tape menos.
-func _esquina_menos_tapada(tamano: Vector2) -> Rect2:
-	var zonas := zonas_ocupadas()
-	var mejor := Rect2()
-	var menos := INF
-	for x: float in [PANTALLA.x - tamano.x - 8.0, 8.0]:
-		for y: float in [ALTO_BARRA + 4.0, PANTALLA.y - tamano.y - 8.0]:
-			var caja := Rect2(Vector2(x, y), tamano)
-			var tapa := 0.0
-			for zona in zonas.slice(1):
-				tapa += caja.intersection(zona).get_area()
-			if tapa < menos:
-				menos = tapa
-				mejor = caja
-	return mejor

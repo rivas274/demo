@@ -33,10 +33,11 @@ const VALERIA_GRABANDO := 3
 const ANCHO_TEXTO := 548.0
 const MAX_LINEAS := 2
 const MAX_COLA := 3
-## Posición del cuadro arriba (bajo el HUD) y abajo; y de la pantalla desde la que Felipe "está abajo".
-const Y_ARRIBA := 44.0
-const Y_ABAJO := 300.0
-const FELIPE_ABAJO_DESDE := 190.0
+## Posición del cuadro: arriba, en la zona B de ZonasTexto (y 30–80, bajo el HUD). Solo si Felipe está tan arriba en
+## la pantalla que el cuadro lo taparía (su cabeza dentro de la zona), sale abajo.
+const Y_ARRIBA := 30.0
+const Y_ABAJO := 304.0
+const FELIPE_ABAJO_DESDE := 160.0
 
 ## Letras por segundo.
 @export var velocidad_texto := 55.0
@@ -48,6 +49,9 @@ const FELIPE_ABAJO_DESDE := 190.0
 
 ## Personaje al que el cuadro no debe tapar (Felipe). Sin él, el cuadro va arriba.
 var seguir: Node2D
+## Mientras devuelva true (hay un cartel en la zona C, la misma franja), las frases nuevas esperan en la cola sin
+## envejecer. Lo pone Anuncios.
+var esperar := Callable()
 var hablando := ""
 var texto_actual := ""
 ## Frases que se mostraron, en orden: [quien, texto] (para las pruebas y el resumen).
@@ -63,6 +67,7 @@ var _largo := 0
 var _espera := 0.0
 var _reloj := 0.0
 var _ultima := ""
+var _animo := 0
 var _hojas := {}
 var _en_presentacion := false
 
@@ -92,7 +97,7 @@ func decir(quien: String, texto: String, animo := 0, urgente := false) -> bool:
 	for pendiente: Array in _cola:
 		if pendiente[1] == texto:
 			return false
-	if urgente or not _caja.visible:
+	if urgente or (not _caja.visible and not _debe_esperar()):
 		_mostrar(quien, texto, animo)
 	else:
 		_cola.append([quien, texto, animo, _reloj])
@@ -112,6 +117,21 @@ func limpiar() -> void:
 ## Hay una frase en pantalla.
 func ocupado() -> bool:
 	return _caja.visible
+
+
+## Un cartel urgente pide la franja: la frase que se dice vuelve a la cola (primera) y el cuadro se esconde.
+func ceder() -> void:
+	if not _caja.visible:
+		return
+	_cola.push_front([hablando, texto_actual, _animo, _reloj])
+	_ultima = ""
+	_caja.visible = false
+	hablando = ""
+	texto_actual = ""
+
+
+func _debe_esperar() -> bool:
+	return esperar.is_valid() and esperar.call()
 
 
 ## La presentación de un jefe esconde el diálogo y lo que estaba en cola (M4); mientras dura, no se habla.
@@ -150,6 +170,7 @@ func _mostrar(quien: String, texto: String, animo: int) -> void:
 	hablando = quien
 	texto_actual = texto
 	_ultima = texto
+	_animo = animo
 	historial.append([quien, texto])
 	_caja.visible = true
 	# Las frases pasan por la traducción (hoy en español; mañana, una clave por frase en traducciones/).
@@ -231,6 +252,12 @@ func _cerrar() -> void:
 	_caja.visible = false
 	hablando = ""
 	texto_actual = ""
+	_siguiente()
+
+
+func _siguiente() -> void:
+	if _debe_esperar():
+		return
 	while not _cola.is_empty():
 		var siguiente: Array = _cola.pop_front()
 		if _reloj - float(siguiente[3]) > caducidad_cola:
@@ -246,6 +273,13 @@ func _process(delta: float) -> void:
 	if InputMap.has_action("saltar_dialogo") and Input.is_action_just_pressed("saltar_dialogo"):
 		saltar()
 	if not _caja.visible:
+		if not _cola.is_empty():
+			if _debe_esperar():
+				# Mientras espera un cartel, lo que está en la cola no envejece.
+				for pendiente: Array in _cola:
+					pendiente[3] = float(pendiente[3]) + delta
+			else:
+				_siguiente()
 		return
 	if _visibles < _largo:
 		_visibles += velocidad_texto * delta

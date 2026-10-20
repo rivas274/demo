@@ -40,7 +40,7 @@ Decisiones de criterio (sin sobreingeniería):
 | Carpeta o archivo | Qué hay |
 | --- | --- |
 | `escenas/nivel_1.tscn` | El nivel 1 (escena principal): raíz `Nivel` + `Felipe` + `Interfaz` + `Guion` (`GuionNivel1`) |
-| `escenas/felipe.tscn` | Felipe, con su pieza `Vida` |
+| `escenas/entidades/felipe.tscn` | Felipe, con su pieza `Vida` |
 | `escenas/entidades/` | `raton.tscn`, `aspi.tscn`, `caja_carton.tscn`, `comida.tscn`, `objeto_tirable.tscn` |
 | `datos/enemigos/` | `raton.tres`, `aspi.tres` (`DatosEnemigo`) |
 | `datos/objetos/` | `vaso`, `taza`, `maceta`, `llaves`, `tazon`, `pollo` (`.tres`, `DatosObjeto`) |
@@ -49,7 +49,7 @@ Decisiones de criterio (sin sobreingeniería):
 | `scripts/datos/` | `DatosEnemigo`, `DatosObjeto` |
 | `scripts/nivel/` | Lo que sirve para todo nivel: `Nivel` (constructor), `DatosNivel`, `GuionNivel` (base del guion), `SombrasVivas` |
 | `scripts/niveles/nivel_1/` | Lo propio del nivel 1: `Nivel1` (solo datos), `GuionNivel1` (eventos y reacciones), `ValeriaPorLaCasa` (sus escenas en cola), `FinalBalcon`, `ArteNivel1` (lienzos y arte por capas), `DecoradoNivel1` (decorado sin colisión) |
-| `scripts/felipe.gd` + `scripts/felipe/` | Felipe: estados, movimiento y acciones en `felipe.gd`; sus partes `EfectosFelipe` (estirar, polvo, estela), `AnimadorFelipe` (qué animación toca) y `ManasFelipe` (lo que pasa en el cuadro de impacto) |
+| `scripts/entidades/felipe/felipe.gd` + `scripts/felipe/` | Felipe: estados, movimiento y acciones en `felipe.gd`; sus partes `EfectosFelipe` (estirar, polvo, estela), `AnimadorFelipe` (qué animación toca) y `ManasFelipe` (lo que pasa en el cuadro de impacto) |
 | `scripts/` (resto) | Sistemas y personajes: `Valeria`, `BatallaAspi` + `DibujoBatallaAspi`, `PresentacionJefe`, `EnsayoAspi`, `CajaCarton`, `CajasMudanza`, `Comida`, `Puerta`, `Rascador`, `Laser`, `Recogible`, `Travesuras`, `Agenda`, `Anuncios`, `Dialogo`, `Indicador`, `Capas`, `ArteNivel` (cargar y dibujar arte, sombras y capas), `FondoApartamento`, `LuzCuarto`... |
 | `pruebas/` | Pruebas automáticas (entre ellas `prueba_componentes.gd`), el bot `partida.gd` y las capturas |
 

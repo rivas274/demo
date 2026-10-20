@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="DatosEnemigo" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/datos/datos_enemigo.gd" id="1_datos"]
-[ext_resource type="Script" path="res://scripts/entidades/apariencia_aspi.gd" id="2_apariencia"]
+[ext_resource type="Script" path="res://scripts/jefes/aspi/apariencia_aspi.gd" id="2_apariencia"]
 
 [resource]
 script = ExtResource("1_datos")

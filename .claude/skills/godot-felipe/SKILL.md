@@ -6,7 +6,7 @@ user-invocable: true
 
 # Godot para Felipe (guía práctica)
 
-Antes de tocar nada, lee `siete-vidas/juego/scripts/felipe.gd` en la parte que vas a cambiar y `siete-vidas/juego/README.md` (Reglas de código). Esta guía resume cómo está armado y las recetas que conviene seguir; si algo aquí contradice el código, manda el código y se corrige la guía.
+Antes de tocar nada, lee `siete-vidas/juego/scripts/entidades/felipe/felipe.gd` en la parte que vas a cambiar y `siete-vidas/juego/README.md` (Reglas de código). Esta guía resume cómo está armado y las recetas que conviene seguir; si algo aquí contradice el código, manda el código y se corrige la guía.
 
 ## 0. Arquitectura: piezas y datos (regla desde el 2026-10-20)
 
@@ -111,7 +111,7 @@ Durante la pelea: **anticipación** antes de cada ataque (se echa atrás, vibra,
 
 ## 6c. Capas, anuncios y transiciones (revisión 3 del nivel 1)
 
-- **Capas:** todo z_index y todo `layer` sale de `Capas` (`scripts/capas.gd`, tabla única; también en la memoria 03). Un hijo que usa una capa de la tabla va con `Capas.usar(nodo, Capas.X)` (z absoluto). La imaginación de un jefe va en `Capas.IMAGINACION` (tapa todo el escenario) y Felipe sube a `FELIPE_IMAGINANDO` mientras dura. `prueba_jefe` comprueba que nada del nivel quede encima.
+- **Capas:** todo z_index y todo `layer` sale de `Capas` (`scripts/sistemas/capas.gd`, tabla única; también en la memoria 03). Un hijo que usa una capa de la tabla va con `Capas.usar(nodo, Capas.X)` (z absoluto). La imaginación de un jefe va en `Capas.IMAGINACION` (tapa todo el escenario) y Felipe sube a `FELIPE_IMAGINANDO` mientras dura. `prueba_jefe` comprueba que nada del nivel quede encima.
 - **Anuncios:** carteles, logros y franjas de fase pasan por `Anuncios` (una sola cola): uno a la vez, ubicado al mostrarse sin tapar a Felipe, al diálogo ni a los testigos, y corrido si alguien entra a cuadro. Lo que es el chiste se marca con `anuncios.marcar_chiste(rect, segundos)`.
 - **Todo cambio de pose de un personaje tiene transición** (animación, fundido cruzado o, como mínimo, sin cambiar de tamaño ni de lugar en un cuadro). El fundido se decide al dibujar (el cambio puede llegar por una señal). Un personaje no cambia de cuarto sin cruzar una puerta que se ve abrirse con él adentro.
 - **Un ciclo de caminar es una medida:** el pie apoyado retrocede lo que avanza el personaje por cuadro (`pruebas/medir_pasos.gd`); el ritmo de la animación sale de la velocidad (`AnimacionesFelipe.PASO`, `Valeria.PASO_CUADRO`).

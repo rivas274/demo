@@ -483,14 +483,14 @@ func _correr() -> void:
 	await _esperar(10)
 	_comprobar(t.agenda.esta_cumplida("teclado"), "Pisar el teclado: «jjjjjjjjjj» (secreta)")
 	var batalla := guion.batalla
-	for i in BatallaAspi.APAGADOS_TOTALES:
+	for i in batalla.datos.fases:
 		var apagados_antes := batalla.apagados
 		for intento in 3:
 			if batalla.apagados > apagados_antes or batalla.fase != BatallaAspi.Fase.PELEA:
 				break
 			await _poner_en(Vector2(6880, Nivel1.SUELO), 20)
 			if not batalla.llena:
-				batalla.deposito = BatallaAspi.CAPACIDAD[batalla.apagados] - 1
+				batalla.deposito = batalla.datos.capacidad[batalla.apagados] - 1
 				batalla.agregar_mancha(guion.aspi.global_position)
 				await _esperar_que(func() -> bool: return batalla.llena, 600)
 			await _esperar(25)

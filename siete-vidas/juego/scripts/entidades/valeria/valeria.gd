@@ -57,21 +57,9 @@ const DE_REOJO := 30.0
 const SIENTE_SOFA := 170.0
 ## Grabando, solo ve lo que tiene enfrente del celular.
 const VISTA_CELULAR := 150.0
-## Fila del arte "serie" que queda sobre el asiento. Crítica de Gemini (2026-10-19): con 148 se veía flotando sobre
-## el cojín (los muslos 18 px sobre el asiento y los pies 10 px sobre el piso). Con 139 los pies tocan el piso (la
-## última fila del arte cae en SUELO) y el muslo queda sobre el cojín, que se hunde (sombra en _draw).
-const FILA_CADERA := 139
 ## Distancia a la que se para para regañar (no encima de Felipe).
 const DISTANCIA_REGANO := 58.0
 const ALTO := 200.0
-## Mascarilla (G6): rectángulo de nariz y boca en la imagen de cada pose mirando a la derecha y la oreja donde se
-## engancha el elástico. El caminar sube y baja la cabeza: CABEZA_CAMINAR da el desfase de cada cuadro.
-const MASCARILLA := {
-	"neutra": [Rect2(27, 47, 26, 10), Vector2(19, 45)],
-	"caminar": [Rect2(54, 50, 26, 10), Vector2(46, 47)],
-}
-const CABEZA_CAMINAR := [0, -4, -2, 0, -1, -3, -1, -1]
-
 var actividad := Actividad.DE_PIE:
 	set(valor):
 		if valor != actividad:
@@ -104,29 +92,34 @@ var recorrido := 0.0
 ## Veces que cambió de lugar sin caminar (al cruzar una puerta o al ponerla): las pruebas los cuentan aparte.
 var cruces := 0
 
-var _texturas := {}
+## Giro: de qué lado venía y cuánto va (0 a 1). Opacidad en el vano de una puerta (0 a 1) y hacia dónde va.
+## Los lee su aspecto (AspectoValeria) y los mueve su ruta (RutaValeria).
+var giro := 1.0
+var mirando_antes := 1.0
+var vano := 1.0
+var vano_objetivo := 1.0
+## Reloj para respirar, el corazón y el "REC".
+var tiempo := 0.0
+## Cómo se ve (poses, fundidos, accesorios) y cómo cruza puertas.
+var aspecto := AspectoValeria.new(self)
+var ruta := RutaValeria.new(self)
+## Pose y lugar con que se dibujó por última vez (las pruebas comparan con el estado: nada se dibuja viejo).
+var pose_dibujada: String:
+	get:
+		return aspecto.pose_dibujada
+var pos_dibujada: Vector2:
+	get:
+		return aspecto.pos_dibujada
+
 var _destino := Vector2.INF
 var _al_llegar := Callable()
 var _reloj := 0.0
-var _tiempo := 0.0
 var _felipe: Felipe
 var _ultimo_maullido := -10.0
-## Pose dibujada antes del último cambio: {"pose", "pos", "mirando", "cuadro"} y cuánto va del fundido (0 a 1).
-var _previa := {}
-var _mezcla := 1.0
-var _pose_actual := ""
-var _cuadro_actual := 0
-var _ultima_pos := Vector2.ZERO
-var _ultimo_mirando := 1.0
 ## Espera antes de moverse (pararse del sofá, sentarse).
 var _espera := 0.0
-## Giro: de qué lado venía y cuánto va (0 a 1); tiempo desde el último giro.
-var _giro := 1.0
-var _mirando_antes := 1.0
+## Tiempo desde el último giro.
 var _desde_giro := 10.0
-## Opacidad en el vano de una puerta (0 a 1) y hacia dónde va.
-var _vano := 1.0
-var _vano_objetivo := 1.0
 var _tiempo_quieta := 0.0
 
 
@@ -142,32 +135,33 @@ func _ready() -> void:
 	add_child(oido)
 	add_to_group(Componentes.INTERACTUABLES)
 	z_index = Capas.PERSONAJES
-	for pose_inicial in ["neutra", "enojada", "perdonando", "grabando", "serie", "caminar"]:
-		var ruta := RUTA % pose_inicial
-		_texturas[pose_inicial] = load(ruta) if ResourceLoader.exists(ruta) else null
+	aspecto.cargar()
 	_felipe = get_tree().get_first_node_in_group("felipe")
 
 
 ## Se pone en un lugar sin caminar (al empezar, o en las pruebas). En el juego, de un cuarto a otro se pasa con
 ## salir_por() y entrar_por().
 func poner(lugar: Vector2, en_cuarto: String, hacia := 1.0, que := Actividad.DE_PIE) -> void:
-	global_position = lugar
-	cuarto = en_cuarto
-	mirando = hacia
-	_mirando_antes = hacia
-	_giro = 1.0
-	actividad = que
+	aparecer_en(lugar, en_cuarto, hacia, que)
 	visible = que != Actividad.FUERA
-	_vano = 1.0
-	_vano_objetivo = 1.0
+	vano = 1.0
+	vano_objetivo = 1.0
 	_pies_en_el_piso()
+	queue_redraw()
+
+
+## Cambia de lugar sin caminar, sin fundido desde la pose anterior (lo usan poner() y la ruta al entrar por una puerta).
+func aparecer_en(lugar: Vector2, en_cuarto: String, hacia: float, que := Actividad.PUERTA) -> void:
 	_destino = Vector2.INF
 	_al_llegar = Callable()
-	_previa = {}
-	_mezcla = 1.0
-	_pose_actual = pose()
+	global_position = lugar
+	cuarto = en_cuarto
 	cruces += 1
-	queue_redraw()
+	mirando = hacia
+	mirando_antes = hacia
+	giro = 1.0
+	actividad = que
+	aspecto.reiniciar()
 
 
 ## Guarda el lugar actual como "su casa": ahí vuelve después de regañar, perdonar o grabar.
@@ -219,89 +213,24 @@ func caminar_a(x: float, al_llegar := Callable()) -> void:
 ## vuelve a quedar como estaba. Al terminar queda FUERA (invisible), emite cruzo_puerta y llama `al_salir`.
 ## Con `soltar` en false la puerta queda abierta (va a entrar enseguida por la otra cara de la misma puerta).
 func salir_por(puerta: Puerta, al_salir := Callable(), soltar := true) -> void:
-	caminar_a(puerta.global_position.x, func() -> void:
-		# Solo esta cara: la del otro cuarto se abre cuando ella aparece allá (nunca sola y vacía, G2).
-		puerta.abrir_para_paso(false)
-		actividad = Actividad.PUERTA
-		await _esperar_que(func() -> bool: return puerta.abierta_del_todo(), 1.0)
-		_vano_objetivo = 0.0
-		await _esperar_que(func() -> bool: return _vano <= 0.0, 1.0)
-		if soltar:
-			puerta.soltar_paso()
-		actividad = Actividad.FUERA
-		visible = false
-		cruzo_puerta.emit()
-		if al_salir.is_valid():
-			al_salir.call())
-	# Se abre un poco antes de que llegue (la mano en la manilla), no cuando ya está encima.
-	_abrir_al_acercarse(puerta)
+	ruta.salir_por(puerta, al_salir, soltar)
 
 
 ## Entra a `en_cuarto` por esa puerta: la puerta se abre, aparece en el vano (desde la oscuridad) y queda de pie
 ## delante del vano. La puerta se cierra detrás cuando ella ya se alejó (si era una puerta cerrada).
 func entrar_por(puerta: Puerta, en_cuarto: String, hacia := 1.0, al_entrar := Callable(), quedarse_en_vano := false) -> void:
-	_destino = Vector2.INF
-	_al_llegar = Callable()
-	global_position = Vector2(puerta.global_position.x, Nivel1.SUELO)
-	cuarto = en_cuarto
-	cruces += 1
-	mirando = hacia
-	_mirando_antes = hacia
-	_giro = 1.0
-	_previa = {}
-	_mezcla = 1.0
-	actividad = Actividad.PUERTA
-	_pose_actual = pose()
-	# La puerta se abre con ella ya en el vano: aparece desde la oscuridad mientras la hoja gira (G2).
-	puerta.abrir_para_paso()
-	_vano = 0.0
-	_vano_objetivo = 1.0
-	visible = true
-	await _esperar_que(func() -> bool: return _vano >= 1.0 and puerta.abierta_del_todo(), 1.0)
-	if quedarse_en_vano:
-		return
-	actividad = Actividad.DE_PIE
-	cruzo_puerta.emit()
-	_cerrar_al_alejarse(puerta)
-	if al_entrar.is_valid():
-		al_entrar.call()
+	await ruta.entrar_por(puerta, en_cuarto, hacia, al_entrar, quedarse_en_vano)
 
 
 ## Se asoma en el vano de esa puerta (desde el otro lado): la puerta se abre con ella adentro y queda ahí, en el vano
 ## (actividad PUERTA), hasta volver_adentro().
 func asomarse(puerta: Puerta, en_cuarto: String, hacia := 1.0) -> void:
-	await entrar_por(puerta, en_cuarto, hacia, Callable(), true)
+	await ruta.entrar_por(puerta, en_cuarto, hacia, Callable(), true)
 
 
 ## Vuelve a meterse por la puerta en la que está asomada (se desvanece en el vano) y queda FUERA.
 func volver_adentro(puerta: Puerta) -> void:
-	actividad = Actividad.PUERTA
-	puerta.abrir_para_paso()
-	_vano_objetivo = 0.0
-	await _esperar_que(func() -> bool: return _vano <= 0.0, 1.0)
-	puerta.soltar_paso()
-	actividad = Actividad.FUERA
-	visible = false
-	cruzo_puerta.emit()
-
-
-func _abrir_al_acercarse(puerta: Puerta) -> void:
-	await _esperar_que(func() -> bool: return absf(global_position.x - puerta.global_position.x) < 60.0 or actividad != Actividad.CAMINANDO, 30.0)
-	if actividad in [Actividad.CAMINANDO, Actividad.PUERTA]:
-		puerta.abrir_para_paso(false)
-
-
-func _cerrar_al_alejarse(puerta: Puerta) -> void:
-	await _esperar_que(func() -> bool: return absf(global_position.x - puerta.global_position.x) > 70.0 or not visible or actividad == Actividad.PUERTA, 8.0)
-	if actividad != Actividad.PUERTA:
-		puerta.soltar_paso()
-
-
-func _esperar_que(condicion: Callable, maximo: float) -> void:
-	var t := 0.0
-	while t < maximo and not condicion.call():
-		await get_tree().physics_frame
-		t += get_physics_process_delta_time()
+	await ruta.volver_adentro(puerta)
 
 
 ## Gira hacia `hacia` con su transición (la figura se angosta y se da vuelta). Sin `ya`, respeta la espera entre
@@ -311,9 +240,9 @@ func girar(hacia: float, ya := false) -> void:
 		return
 	if not ya and _desde_giro < ESPERA_GIRO:
 		return
-	_mirando_antes = mirando
+	mirando_antes = mirando
 	mirando = hacia
-	_giro = 0.0
+	giro = 0.0
 	_desde_giro = 0.0
 	queue_redraw()
 
@@ -329,25 +258,16 @@ func _girar_hacia_felipe() -> void:
 
 ## Una x donde pararse que no esté en ninguna puerta (rectángulo sagrado) ni fuera del cuarto.
 func lugar_seguro(x: float) -> float:
-	var rect := Nivel1.rect_de(cuarto)
-	x = clampf(x, rect.position.x + 40.0, rect.end.x - 40.0)
-	for centro in puertas_x:
-		if absf(x - centro) < Nivel1.MEDIO_RECT_PUERTA + 34.0 and Nivel1.habitacion_de(Vector2(centro, Nivel1.SUELO)) == cuarto:
-			var izquierda := centro - Nivel1.MEDIO_RECT_PUERTA - 36.0
-			var derecha := centro + Nivel1.MEDIO_RECT_PUERTA + 36.0
-			x = izquierda if absf(x - izquierda) < absf(x - derecha) else derecha
-			if x < rect.position.x + 40.0 or x > rect.end.x - 40.0:
-				x = derecha if x == izquierda else izquierda
-	return x
+	return ruta.lugar_seguro(x)
 
 
 func _physics_process(delta: float) -> void:
-	_tiempo += delta
+	tiempo += delta
 	_desde_giro += delta
 	audifono_afuera = maxf(0.0, audifono_afuera - delta)
-	_giro = minf(1.0, _giro + delta / GIRO)
-	_mezcla = minf(1.0, _mezcla + delta / TRANSICION)
-	_vano = move_toward(_vano, _vano_objetivo, delta / VANO)
+	giro = minf(1.0, giro + delta / GIRO)
+	aspecto.avanzar(delta)
+	vano = move_toward(vano, vano_objetivo, delta / VANO)
 	_pies_en_el_piso()
 	queue_redraw()
 	if _espera > 0.0:
@@ -391,20 +311,6 @@ func _physics_process(delta: float) -> void:
 				girar(-mirando)
 	if actividad != Actividad.DE_PIE:
 		_tiempo_quieta = 0.0
-
-
-## Si cambió la pose desde el último dibujo, empieza el fundido cruzado desde la anterior, en el lugar donde SE DIBUJÓ
-## (no donde está ahora: así la pose sentada nunca se dibuja bajada al piso, G1). Se decide al dibujar, porque el
-## cambio puede llegar por una señal en cualquier momento del cuadro.
-func _seguir_pose(nueva: String) -> void:
-	if nueva == _pose_actual:
-		return
-	# Entre estar de pie y caminar no hay fundido: es la misma figura, el ciclo empieza en el cuadro de contacto.
-	var de_pie := ["neutra", "caminar"]
-	if _pose_actual != "" and visible and not (_pose_actual in de_pie and nueva in de_pie):
-		_previa = {"pose": _pose_actual, "pos": _ultima_pos, "mirando": _ultimo_mirando, "cuadro": _cuadro_actual}
-		_mezcla = 0.0
-	_pose_actual = nueva
 
 
 ## De pie (regañando, caminando, grabando...) nunca queda encima de un mueble: los pies van al piso (G2).
@@ -548,16 +454,9 @@ func primera_frase() -> String:
 	return "{interactuar} Cara de bebito. Funciona siempre."
 
 
-## Contorno del Indicador con la silueta de la pose que se ve (el cuadro de la hoja, volteado si mira a la izquierda).
+## Contorno del Indicador con la silueta de la pose que se ve.
 func arte_indicador() -> Dictionary:
-	if pose_dibujada == "":
-		return {}
-	var datos := _datos_pose(pose_dibujada, _cuadro_actual)
-	if datos.is_empty():
-		return {}
-	var region: Rect2 = datos["region"]
-	var pos := pos_dibujada + Vector2(-region.size.x / 2.0, -region.size.y - float(datos["base"]))
-	return {"textura": datos["textura"], "rect": Rect2(pos, region.size), "region": region, "espejo": mirando < 0.0}
+	return aspecto.arte_indicador()
 
 
 func rect_indicador() -> Rect2:
@@ -588,140 +487,8 @@ func cuadro_caminar() -> int:
 
 ## Rectángulo (en el mundo) que ocupa la pose actual: sus pies nunca quedan bajo el piso (G1).
 func rect_dibujado() -> Rect2:
-	var datos := _datos_pose(pose())
-	if datos.is_empty():
-		return Rect2(global_position + Vector2(-14, -ALTO), Vector2(28, ALTO))
-	var tam: Vector2 = (datos["region"] as Rect2).size
-	return Rect2(global_position + Vector2(-tam.x / 2.0, -tam.y - float(datos["base"])), tam)
-
-
-func _datos_pose(nombre: String, cuadro := -1) -> Dictionary:
-	var textura: Texture2D = _texturas.get(nombre)
-	if textura == null:
-		return {}
-	var region := Rect2(Vector2.ZERO, textura.get_size())
-	if nombre == "caminar":
-		var ancho := textura.get_width() / float(CUADROS_CAMINAR)
-		var i := cuadro if cuadro >= 0 else cuadro_caminar()
-		region = Rect2(i * ancho, 0, ancho, textura.get_height())
-	var base := 0.0 if nombre != "serie" else -region.size.y + FILA_CADERA
-	return {"textura": textura, "region": region, "base": base}
-
-
-## Pose y lugar con que se dibujó por última vez (las pruebas comparan con el estado: nada se dibuja viejo).
-var pose_dibujada := ""
-var pos_dibujada := Vector2.ZERO
+	return aspecto.rect_dibujado()
 
 
 func _draw() -> void:
-	pose_dibujada = ""
-	pos_dibujada = global_position
-	if actividad == Actividad.FUERA:
-		_pose_actual = ""
-		return
-	var nombre := pose()
-	_seguir_pose(nombre)
-	_ultima_pos = global_position
-	_ultimo_mirando = mirando
-	pose_dibujada = nombre
-	_cuadro_actual = cuadro_caminar()
-	var alfa := _vano
-	if nombre == "serie" and _mezcla >= 1.0:
-		_cojin_hundido(alfa)
-	var hay_previa := _mezcla < 1.0 and not _previa.is_empty()
-	if hay_previa:
-		var desplazado: Vector2 = _previa["pos"] - global_position
-		_dibujar_pose(_previa["pose"], desplazado, _previa["mirando"], 1.0, alfa * (1.0 - _mezcla), _previa["cuadro"])
-	# Al girar, la figura se angosta hasta casi una línea y se abre del otro lado.
-	var ancho := absf(cos(_giro * PI)) if _giro < 1.0 else 1.0
-	var lado := mirando if _giro >= 0.5 else _mirando_antes
-	# Respira: 1 px de alto (bien dentro de ±8 %) cuando está quieta.
-	var respira := 1.0
-	if actividad in [Actividad.DE_PIE, Actividad.SENTADA]:
-		respira = 1.0 + 0.005 * sin(_tiempo * 2.4)
-	_dibujar_pose(nombre, Vector2.ZERO, lado, maxf(ancho, 0.12), alfa * (_mezcla if hay_previa else 1.0), _cuadro_actual, respira)
-	var datos := _datos_pose(nombre)
-	var arriba := -ALTO
-	if not datos.is_empty():
-		arriba = -(datos["region"] as Rect2).size.y - float(datos["base"])
-	if audifonos:
-		draw_arc(Vector2(mirando * 2.0, arriba + 26.0), 15.0, PI, TAU, 10, Color(0.15, 0.15, 0.18), 3.0)
-		draw_rect(Rect2(Vector2(mirando * 2.0 - 18.0, arriba + 22.0), Vector2(6, 10)), Color(0.15, 0.15, 0.18))
-		# El de adelante, afuera: corrido sobre la sien mientras escucha (sacar_audifono).
-		var afuera := Vector2(4.0, -10.0) if audifono_afuera > 0.0 else Vector2.ZERO
-		draw_rect(Rect2(Vector2(mirando * 2.0 + 12.0, arriba + 22.0) + afuera, Vector2(6, 10)), Color(0.15, 0.15, 0.18))
-	if actividad == Actividad.REGANANDO and motivo_regano != "":
-		_corazon_roto(Vector2(0, arriba - 14.0 + roundf(sin(_tiempo * 6.0) * 2.0)))
-	if actividad == Actividad.GRABANDO and int(_tiempo * 3.0) % 2 == 0:
-		var rec := Vector2(mirando * 26.0, arriba + 6.0)
-		draw_circle(rec, 3.0, Color("e0483b"))
-		draw_string(ThemeDB.fallback_font, rec + Vector2(5, 4), "REC", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("e0483b"))
-
-
-func _dibujar_pose(nombre: String, desplazado: Vector2, lado: float, ancho: float, alfa: float, cuadro: int, alto := 1.0) -> void:
-	if alfa <= 0.0:
-		return
-	var datos := _datos_pose(nombre, cuadro)
-	if datos.is_empty():
-		_dibujar_provisional()
-		return
-	var region: Rect2 = datos["region"]
-	var tam := region.size
-	var base: float = datos["base"]
-	# Los pies quedan en el origen: estirar o girar no los mueve.
-	draw_set_transform(desplazado + Vector2(0, -base), 0.0, Vector2((-1.0 if lado < 0.0 else 1.0) * ancho, alto))
-	# Al aparecer o desaparecer en un vano se ve desde la oscuridad (más oscura cuanto más adentro).
-	var tinte := Color(1, 1, 1, alfa).lerp(Color(0.15, 0.1, 0.1, alfa), (1.0 - _vano) * 0.7)
-	draw_texture_rect_region(datos["textura"], Rect2(Vector2(-tam.x / 2.0, -tam.y), tam), region, tinte)
-	if mascarilla and MASCARILLA.has(nombre):
-		_dibujar_mascarilla(nombre, tam, cuadro, alfa)
-	draw_set_transform(Vector2.ZERO)
-
-
-## Mascarilla quirúrgica sobre nariz y boca, con pliegues y el elástico a la oreja (G6). Va dentro de la transformación
-## de la pose: sigue la cara, el espejo y el giro.
-func _dibujar_mascarilla(nombre: String, tam: Vector2, cuadro: int, alfa: float) -> void:
-	var datos: Array = MASCARILLA[nombre]
-	var cara: Rect2 = datos[0]
-	var oreja: Vector2 = datos[1]
-	var dy := float(CABEZA_CAMINAR[cuadro % CABEZA_CAMINAR.size()]) if nombre == "caminar" else 0.0
-	var origen := Vector2(-tam.x / 2.0, -tam.y + dy)
-	var r := Rect2(origen + cara.position, cara.size)
-	var tela := Color(0.80, 0.91, 0.96, alfa)
-	var borde := Color(0.30, 0.42, 0.52, alfa)
-	var forma := PackedVector2Array([
-		r.position + Vector2(0, 2), r.position + Vector2(r.size.x * 0.5, 0), r.position + Vector2(r.size.x, 1),
-		r.end + Vector2(-1, -3), r.position + Vector2(r.size.x * 0.62, r.size.y + 1), r.position + Vector2(3, r.size.y - 2),
-	])
-	draw_line(origen + oreja, r.position + Vector2(1, 3), borde, 1.0)
-	draw_line(origen + oreja + Vector2(0, 3), r.position + Vector2(2, r.size.y - 3), borde, 1.0)
-	draw_colored_polygon(forma, tela)
-	draw_polyline(forma + PackedVector2Array([forma[0]]), borde, 1.0)
-	for pliegue in 2:
-		var y := r.position.y + 4.0 + pliegue * 3.0
-		draw_line(Vector2(r.position.x + 3, y), Vector2(r.end.x - 3, y), Color(0.55, 0.68, 0.76, alfa), 1.0)
-
-
-## Sombra del cojín hundido bajo Valeria sentada (crítica de Gemini: que no flote sobre el sofá). En pixeles: dos
-## franjas, la de abajo más oscura, sin degradado suave.
-func _cojin_hundido(alfa: float) -> void:
-	var lado := mirando
-	draw_rect(Rect2(-24.0 + lado * 4.0, -9.0, 50.0, 4.0), Color(0.25, 0.08, 0.06, 0.18 * alfa))
-	draw_rect(Rect2(-20.0 + lado * 4.0, -5.0, 42.0, 5.0), Color(0.25, 0.08, 0.06, 0.30 * alfa))
-
-
-## Corazón roto sobre la cabeza: lo que se arregla frotándose (propuesta v4, sección 5).
-func _corazon_roto(centro: Vector2) -> void:
-	var rojo := Color("e0483b")
-	var oscuro := Color("6e1a22")
-	for lado in [-1.0, 1.0]:
-		var desplazado := centro + Vector2(lado * 2.0, 0)
-		draw_circle(desplazado + Vector2(lado * 4.0, -3), 5.0, oscuro)
-		draw_colored_polygon(PackedVector2Array([desplazado + Vector2(0, -6), desplazado + Vector2(lado * 9.5, -3), desplazado + Vector2(0, 9)]), oscuro)
-		draw_circle(desplazado + Vector2(lado * 4.0, -3), 4.0, rojo)
-		draw_colored_polygon(PackedVector2Array([desplazado + Vector2(0, -5), desplazado + Vector2(lado * 8.0, -3), desplazado + Vector2(0, 7)]), rojo)
-
-
-func _dibujar_provisional() -> void:
-	draw_rect(Rect2(-14, -ALTO, 28, ALTO), Color("3e7c7a"))
-	draw_circle(Vector2(0, -ALTO + 14), 13.0, Color("d9a27c"))
+	aspecto.dibujar()

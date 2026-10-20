@@ -11,7 +11,7 @@ extends GuionNivel
 @export var batalla_con_jefe := true
 ## Las piezas de juguete hacen daño (la prueba de movimiento las apaga; en la v4 no hay).
 @export var peligros_activos := true
-## PRUEBA de luz y efectos en la sala (LuzCuarto, scripts/luz_cuarto.gd): false la quita entera.
+## PRUEBA de luz y efectos en la sala (LuzCuarto, scripts/niveles/nivel_1/luz_cuarto.gd): false la quita entera.
 @export var luz_activa := true
 
 var batalla: BatallaAspi

@@ -1,9 +1,10 @@
 class_name Felipe
 extends CharacterBody2D
-## Controlador de Felipe: movimiento de plataformas con sensación moderna
-## (margen de salto, salto recordado, altura variable, doble salto, zoomies, agacharse y gatear),
-## mañas de gato (maullar, arañar, tirar de un manotazo, comer un snack del bolsillo, subir escalones)
-## y efectos de caricatura (estirar, aplastar y aterrizar con las patas delanteras).
+## Controlador de Felipe: movimiento de plataformas con sensación moderna (margen de salto, salto recordado, altura
+## variable, doble salto, zoomies), mañas de gato (maullar, arañar, tirar de un manotazo, comer, frotarse, subir
+## escalones) y efectos de caricatura. Máquina de estados con el patrón Estado: un estado por clase en
+## scripts/entidades/felipe/estados/ (entrar, fisica, salir); este script lee los controles, mueve y cambia de estado.
+## Sus partes (scripts/felipe/): EfectosFelipe, AnimadorFelipe, ManasFelipe, AgachadoFelipe y TreparFelipe.
 ## Regla de las acciones: el efecto sale en el cuadro de impacto (frame_changed), nunca al apretar el botón.
 
 signal aterrizo(fuerza: float)
@@ -142,11 +143,18 @@ const DURACION_RONRONEO := 1.0
 ## Segundos quieto y sin tocar nada antes de ponerse a acicalarse, jugar o dar vueltas.
 @export var espera_ocio := 8.0
 
-var estado := Estado.SUELO
+## Estado actual (su valor de Estado). Asignarlo cambia de estado con entrar y salir (`cambiar_estado`).
+var estado: Estado:
+	get:
+		return _estado.id if _estado else Estado.SUELO
+	set(nuevo):
+		cambiar_estado(nuevo)
 var mirando := 1.0
 ## El doble salto de este salto todavía no se usó (se recupera al tocar el piso). Requiere tiene_doble_salto.
 var doble_salto_disponible := true
+## Posturas que conviven con los estados (se puede estar en SUELO y agachado): las manejan AgachadoFelipe y TreparFelipe.
 var agachado := false
+var trepando := false
 ## Corazones que le quedan (atajo a su pieza Vida).
 var corazones: int:
 	get:
@@ -159,10 +167,8 @@ var peso := PESO_INICIAL
 var tiene_collar := false
 ## Poder que gana al escapar por el balcón (fin del tutorial).
 var tiene_caer_de_pie := false
-## Zonas donde puede trepar (cortinas), en coordenadas del mundo. Las pone la sala.
+## Zonas donde puede trepar (cortinas), en coordenadas del mundo. Las pone el nivel.
 var zonas_trepables: Array[Rect2] = []
-var trepando := false
-var _tiempo_sin_trepar := 0.0
 var punto_reaparicion: Vector2
 ## Arrastre de afuera en px/s (la succión de A.S.P.I.); agachado se aferra con las uñas y no lo mueve.
 var empuje := Vector2.ZERO
@@ -172,37 +178,29 @@ var snacks := SNACKS_INICIALES
 var garras_afiladas := 0.0
 ## Último impacto que salió (para las pruebas): {"animacion": String, "cuadro": int}.
 var ultimo_impacto := {}
-
-var _tiempo_fuera_del_suelo := 0.0
-var _tiempo_salto_pedido := 99.0
-var _tiempo_zoomies := 0.0
-var _espera_zoomies := 0.0
-var _velocidad_al_caer := 0.0
+## Segundos desde el último salto y lo que le queda al aterrizaje (los lee el animador).
 var tiempo_desde_salto := 99.0
 var tiempo_aterrizando := 0.0
-var _tiempo_bajando := 0.0
-var _tiempo_sin_tocar := 0.0
-var _tiempo_ocio := 0.0
-var _parpadeando := false
-var _tiempo_desmayado := 0.0
-var _estambre: Sprite2D
-## Sus partes (scripts/felipe/): los efectos de caricatura (estirar, polvo, estela), la elección de la animación y las
-## mañas en el cuadro de impacto (qué pasa cuando la pata, la boca o las garras llegan).
+## Dónde va el dibujo dentro de Felipe (el ocio lo devuelve ahí).
+var posicion_sprite: Vector2
+## Sus partes (scripts/felipe/).
 var efectos: EfectosFelipe
 var animador: AnimadorFelipe
 var manas: ManasFelipe
-var _posicion_sprite: Vector2
+var agachado_felipe: AgachadoFelipe
+var trepar: TreparFelipe
+
+var _estado: EstadoFelipe
+var _estados := {}
+var _tiempo_fuera_del_suelo := 0.0
+var _tiempo_salto_pedido := 99.0
+var _espera_zoomies := 0.0
+var _velocidad_al_caer := 0.0
+var _tiempo_sin_tocar := 0.0
+var _parpadeando := false
 ## Segundos manteniendo el botón de acción sin nada cerca (-1: ya se usó, hay que soltarlo).
 var _tiempo_manteniendo := 0.0
-var _peldanos: Array[Vector2] = []
-var _escalon_desde := Vector2.ZERO
-var _escalon_hasta := Vector2.ZERO
-var _tiempo_escalon := 0.0
-var _duracion_escalon := DURACION_ESCALON
-var _escalones_subidos := 0
 var _chispas: Chispas
-var _tiempo_ronroneo := 0.0
-var _ronroneando_a: Node2D
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 @onready var polvo: CPUParticles2D = $Polvo
@@ -214,10 +212,13 @@ var _ronroneando_a: Node2D
 func _ready() -> void:
 	sprite.sprite_frames = AnimacionesFelipe.crear()
 	sprite.scale = Vector2.ONE * ESCALA_SPRITE
-	_posicion_sprite = sprite.position
+	posicion_sprite = sprite.position
 	efectos = EfectosFelipe.new(self)
 	animador = AnimadorFelipe.new(self)
 	manas = ManasFelipe.new(self)
+	agachado_felipe = AgachadoFelipe.new(self)
+	trepar = TreparFelipe.new(self)
+	_crear_estados()
 	cuerpo.shape = cuerpo.shape.duplicate()
 	# El tiempo invulnerable lo descuenta Felipe al empezar su cuadro (_actualizar_invulnerable): así se congela mientras
 	# cruza una puerta o sube la escalera, cuando su física está apagada.
@@ -226,7 +227,7 @@ func _ready() -> void:
 	# Felipe va en su propia capa (3): los enemigos no chocan con él; el daño se calcula por distancia.
 	collision_layer = 0
 	set_collision_layer_value(3, true)
-	sprite.animation_finished.connect(_al_terminar_animacion)
+	sprite.animation_finished.connect(func() -> void: _estado.animacion_terminada())
 	sprite.frame_changed.connect(manas.al_cambiar_cuadro)
 	_chispas = Chispas.new()
 	_chispas.name = "Chispas"
@@ -236,6 +237,28 @@ func _ready() -> void:
 	sprite.play("quieto")
 
 
+func _crear_estados() -> void:
+	var libre_suelo := EstadoLibre.new(self, Estado.SUELO)
+	for nuevo: EstadoFelipe in [
+		libre_suelo, EstadoLibre.new(self, Estado.AIRE), EstadoAterrizando.new(self, Estado.ATERRIZANDO),
+		EstadoZoomies.new(self, Estado.ZOOMIES), EstadoAccion.new(self, Estado.ZARPAZO, "zarpazo"),
+		EstadoAccion.new(self, Estado.COMIENDO, "comer"), EstadoAccion.new(self, Estado.ARANANDO, "aranar"),
+		EstadoAccion.new(self, Estado.MAULLANDO, "maullar"), EstadoOcio.new(self, Estado.OCIO),
+		EstadoDesmayado.new(self, Estado.DESMAYADO), EstadoEscalera.new(self, Estado.SUBIENDO_ESCALON),
+		EstadoRonroneando.new(self, Estado.RONRONEANDO),
+	]:
+		_estados[nuevo.id] = nuevo
+	_estado = libre_suelo
+
+
+## Sale del estado actual y entra al nuevo (con `datos` para su entrar). Volver a entrar al mismo también vale.
+func cambiar_estado(nuevo: Estado, datos := {}) -> void:
+	if _estado:
+		_estado.salir()
+	_estado = _estados[nuevo]
+	_estado.entrar(datos)
+
+
 func _physics_process(delta: float) -> void:
 	var direccion := Input.get_axis("mover_izquierda", "mover_derecha")
 	_tiempo_salto_pedido += delta
@@ -243,51 +266,20 @@ func _physics_process(delta: float) -> void:
 	_espera_zoomies = maxf(0.0, _espera_zoomies - delta)
 	if Input.is_action_just_pressed("saltar"):
 		_tiempo_salto_pedido = 0.0
-	_actualizar_bajada(delta)
+	agachado_felipe.actualizar_bajada(delta)
 	_actualizar_invulnerable(delta)
 	garras_afiladas = maxf(0.0, garras_afiladas - delta)
 	_chispas.restante = garras_afiladas
 	_chispas.lado = mirando
 	if estado == Estado.SUBIENDO_ESCALON:
-		_actualizar_escalon(delta)
+		# Escalón por escalón: no lo mueve la física.
+		_estado.fisica(delta, direccion)
 		return
-	if _actualizar_trepar(direccion):
+	if trepar.actualizar(direccion):
 		return
 	_actualizar_ocio(delta)
-	_actualizar_agachado()
-
-	match estado:
-		Estado.ZOOMIES:
-			_actualizar_zoomies(delta)
-		Estado.ZARPAZO, Estado.COMIENDO, Estado.OCIO, Estado.ARANANDO, Estado.MAULLANDO:
-			_frenar(delta)
-			_aplicar_gravedad(delta)
-		Estado.RONRONEANDO:
-			_frenar(delta)
-			_aplicar_gravedad(delta)
-			_tiempo_ronroneo -= delta
-			if _tiempo_ronroneo <= 0.0:
-				_terminar_ronroneo()
-		Estado.DESMAYADO:
-			_frenar(delta)
-			_aplicar_gravedad(delta)
-			_tiempo_desmayado -= delta
-			if _tiempo_desmayado <= 0.0:
-				_reaparecer()
-		Estado.ATERRIZANDO:
-			_mover(direccion, delta)
-			_aplicar_gravedad(delta)
-			_intentar_saltar()
-			if estado == Estado.ATERRIZANDO:
-				_intentar_acciones(direccion, delta)
-			tiempo_aterrizando -= delta
-			if tiempo_aterrizando <= 0.0 and estado == Estado.ATERRIZANDO:
-				estado = Estado.SUELO
-		_:
-			_mover(direccion, delta)
-			_aplicar_gravedad(delta)
-			_intentar_saltar()
-			_intentar_acciones(direccion, delta)
+	agachado_felipe.actualizar()
+	_estado.fisica(delta, direccion)
 
 	var estaba_en_suelo := is_on_floor()
 	_velocidad_al_caer = velocity.y
@@ -300,7 +292,9 @@ func _physics_process(delta: float) -> void:
 	efectos.actualizar_estela(delta)
 
 
-func _mover(direccion: float, delta: float) -> void:
+# --- Movimiento (lo usan los estados) ------------------------------------------------------------------------------
+
+func mover(direccion: float, delta: float) -> void:
 	var maxima := velocidad_correr if Input.is_action_pressed("zoomies") else velocidad_caminar
 	if agachado:
 		maxima = velocidad_gatear
@@ -308,14 +302,14 @@ func _mover(direccion: float, delta: float) -> void:
 		mirando = signf(direccion)
 		velocity.x = move_toward(velocity.x, direccion * maxima, aceleracion * delta)
 	else:
-		_frenar(delta)
+		frenar(delta)
 
 
-func _frenar(delta: float) -> void:
+func frenar(delta: float) -> void:
 	velocity.x = move_toward(velocity.x, 0.0, friccion * delta)
 
 
-func _aplicar_gravedad(delta: float) -> void:
+func aplicar_gravedad(delta: float) -> void:
 	if is_on_floor():
 		return
 	var g := gravedad_cayendo if velocity.y > 0.0 else gravedad
@@ -325,59 +319,53 @@ func _aplicar_gravedad(delta: float) -> void:
 		velocity.y *= corte_salto
 
 
-func _intentar_saltar() -> void:
+func intentar_saltar() -> void:
 	if _tiempo_salto_pedido > salto_recordado:
 		return
 	if agachado:
 		_tiempo_salto_pedido = 99.0
-		if _sobre_mueble_atravesable():
-			_bajar_por_mueble()
+		if agachado_felipe.sobre_mueble_atravesable():
+			agachado_felipe.bajar_por_mueble()
 			return
-		if not _cabe_de_pie():
+		if not agachado_felipe.cabe_de_pie():
 			return
-		_poner_agachado(false)
+		agachado_felipe.poner(false)
 	if is_on_floor() or _tiempo_fuera_del_suelo < margen_salto:
-		_saltar(velocidad_salto)
+		saltar(velocidad_salto)
 		efectos.soltar_polvo(10)
 		# Despegue: se ve agachado un instante y sale estirado (sin retrasar el salto).
 		efectos.estirar(Vector2(0.94, 1.06), 0.2)
 	elif tiene_doble_salto and doble_salto_disponible:
 		doble_salto_disponible = false
-		_saltar(velocidad_doble_salto)
+		saltar(velocidad_doble_salto)
 		efectos.soltar_polvo(8)
 		efectos.inclinar(INCLINACION_DOBLE_SALTO, 0.28)
 
 
-func _saltar(fuerza: float) -> void:
+func saltar(fuerza: float) -> void:
 	sonido.emit("salto")
 	velocity.y = fuerza
 	tiempo_desde_salto = 0.0
 	sprite.rotation = 0.0
 	_tiempo_salto_pedido = 99.0
 	_tiempo_fuera_del_suelo = 99.0
-	estado = Estado.AIRE
+	cambiar_estado(Estado.AIRE)
 
 
-func _intentar_acciones(direccion: float, delta: float) -> void:
+## Las acciones de los controles (zoomies, zarpazo, maullar, usar lo cercano o mantener para comer un snack).
+func intentar_acciones(direccion: float, delta: float) -> void:
 	if agachado:
 		_tiempo_manteniendo = 0.0
 		return
 	if tiene_zoomies and Input.is_action_just_pressed("zoomies") and _espera_zoomies == 0.0:
-		estado = Estado.ZOOMIES
-		_tiempo_zoomies = duracion_zoomies
 		_espera_zoomies = espera_zoomies
-		if direccion != 0.0:
-			mirando = signf(direccion)
-		velocity = Vector2(mirando * velocidad_zoomies, 0.0)
-		efectos.estirar(Vector2(1.06, 0.95), duracion_zoomies)
+		cambiar_estado(Estado.ZOOMIES, {"direccion": direccion})
 	elif Input.is_action_just_pressed("zarpazo"):
 		# El golpe sale cuando la pata llega (cuadro de impacto), no al apretar.
-		estado = Estado.ZARPAZO
-		velocity.x = 0.0
 		manas.preparar_zarpazo()
-		animador.reiniciar("zarpazo")
+		cambiar_estado(Estado.ZARPAZO)
 	elif Input.is_action_just_pressed("maullar") and is_on_floor():
-		_empezar_maullido()
+		cambiar_estado(Estado.MAULLANDO)
 	elif Input.is_action_pressed("interactuar") and is_on_floor():
 		if Input.is_action_just_pressed("interactuar"):
 			_tiempo_manteniendo = 0.0
@@ -391,8 +379,56 @@ func _intentar_acciones(direccion: float, delta: float) -> void:
 		_tiempo_manteniendo = 0.0
 
 
-## Mantener el botón de acción sin nada cerca come un snack del bolsillo (Felipe queda quieto: en la pelea
-## es un riesgo que se elige, como curarse en Hollow Knight). Sin snacks, avisa con sin_snacks.
+func _actualizar_suelo(estaba_en_suelo: bool, delta: float) -> void:
+	if is_on_floor():
+		_tiempo_fuera_del_suelo = 0.0
+		doble_salto_disponible = true
+		if not estaba_en_suelo:
+			_aterrizar()
+	else:
+		_tiempo_fuera_del_suelo += delta
+		if estado in [Estado.SUELO, Estado.ATERRIZANDO]:
+			cambiar_estado(Estado.AIRE)
+
+
+## Un gato aterriza primero con las patas delanteras: llega inclinado con la nariz hacia abajo, se endereza sobre ellas
+## y después se aplasta (EfectosFelipe).
+func _aterrizar() -> void:
+	var fuerza := clampf(_velocidad_al_caer / caida_maxima, 0.0, 1.0)
+	aterrizo.emit(fuerza)
+	if estado == Estado.AIRE:
+		cambiar_estado(Estado.ATERRIZANDO)
+	efectos.aterrizar(fuerza)
+
+
+## Ocio: tras unos segundos quieto y sin tocar nada, elige al azar acicalarse, jugar con estambre o dar vueltas. Cualquier
+## acción lo corta y vuelve a contar desde cero (EstadoOcio).
+func _actualizar_ocio(delta: float) -> void:
+	var tocando := ACCIONES.any(func(accion: String) -> bool: return Input.is_action_pressed(accion))
+	if estado == Estado.OCIO:
+		(_estado as EstadoOcio).seguir(delta, tocando)
+		return
+	if tocando or estado != Estado.SUELO or agachado or not is_on_floor() or absf(velocity.x) > 1.0:
+		_tiempo_sin_tocar = 0.0
+		return
+	_tiempo_sin_tocar += delta
+	if _tiempo_sin_tocar >= espera_ocio:
+		_empezar_ocio(OCIO.keys().pick_random())
+
+
+func _empezar_ocio(nombre: String) -> void:
+	cambiar_estado(Estado.OCIO, {"nombre": nombre})
+
+
+## La espera del ocio vuelve a contar desde cero (al terminar uno).
+func reiniciar_espera_ocio() -> void:
+	_tiempo_sin_tocar = 0.0
+
+
+# --- Mañas y acciones que piden otros (objetos, el nivel, Valeria) -------------------------------------------------
+
+## Mantener el botón de acción sin nada cerca come un snack del bolsillo (Felipe queda quieto: en la pelea es un riesgo
+## que se elige, como curarse en Hollow Knight). Sin snacks, avisa con sin_snacks.
 func _mantener_para_comer(delta: float) -> void:
 	if _tiempo_manteniendo < 0.0:
 		return
@@ -433,11 +469,9 @@ func comer_snack() -> bool:
 
 
 func _empezar_a_comer(alimento: Node2D, del_bolsillo: bool) -> void:
-	estado = Estado.COMIENDO
-	velocity.x = 0.0
 	manas.alimento = alimento
 	manas.comiendo_snack = del_bolsillo
-	animador.reiniciar("comer")
+	cambiar_estado(Estado.COMIENDO)
 
 
 ## Guarda un snack en el bolsillo. Devuelve false si ya tiene 5 (el bolsillo está lleno).
@@ -449,14 +483,12 @@ func guardar_snack() -> bool:
 	return true
 
 
-## Tirar algo de un manotazo (el vaso de la mesa, la caja de la mudanza): usa la animación del zarpazo y
-## `al_impacto` se llama cuando la pata llega (cuadro de impacto), no al apretar.
+## Tirar algo de un manotazo (el vaso de la mesa, la caja de la mudanza): usa la animación del zarpazo y `al_impacto`
+## se llama cuando la pata llega (cuadro de impacto), no al apretar.
 func dar_manotazo(al_impacto := Callable()) -> void:
-	estado = Estado.ZARPAZO
-	velocity.x = 0.0
 	manas.es_manotazo = true
 	manas.al_impacto = al_impacto
-	animador.reiniciar("zarpazo")
+	cambiar_estado(Estado.ZARPAZO)
 
 
 ## Araña algo (sofá, rascador, puerta entornada) de pie en dos patas. En cada cuadro de impacto se le llama
@@ -464,15 +496,13 @@ func dar_manotazo(al_impacto := Callable()) -> void:
 func aranar(objetivo: Node2D) -> void:
 	if not is_on_floor():
 		return
-	estado = Estado.ARANANDO
-	velocity.x = 0.0
 	manas.objetivo = objetivo
 	if objetivo:
 		var punto: Vector2 = objetivo.call("punto_para", global_position) if objetivo.has_method("punto_para") else objetivo.global_position
 		if absf(punto.x - global_position.x) > 2.0:
 			mirando = signf(punto.x - global_position.x)
 	sprite.flip_h = mirando < 0.0
-	animador.reiniciar("aranar")
+	cambiar_estado(Estado.ARANANDO)
 
 
 ## Se frota ronroneando contra las piernas de alguien (Valeria enojada): un ciclo de "ronronear" y, al terminar,
@@ -480,26 +510,7 @@ func aranar(objetivo: Node2D) -> void:
 func frotarse(objetivo: Node2D) -> void:
 	if not is_on_floor() or estado == Estado.DESMAYADO:
 		return
-	estado = Estado.RONRONEANDO
-	velocity.x = 0.0
-	_ronroneando_a = objetivo
-	_tiempo_ronroneo = DURACION_RONRONEO
-	if objetivo and absf(objetivo.global_position.x - global_position.x) > 2.0:
-		mirando = signf(objetivo.global_position.x - global_position.x)
-	sprite.flip_h = mirando < 0.0
-	animador.reiniciar("ronronear")
-	sonido.emit("ronroneo")
-
-
-func _terminar_ronroneo() -> void:
-	var objetivo := _ronroneando_a
-	_ronroneando_a = null
-	estado = Estado.SUELO if is_on_floor() else Estado.AIRE
-	sprite.play("quieto")
-	if is_instance_valid(objetivo):
-		if objetivo.has_method("perdonar"):
-			objetivo.call("perdonar", self, "frotarse")
-		ronroneo_terminado.emit(objetivo)
+	cambiar_estado(Estado.RONRONEANDO, {"objetivo": objetivo})
 
 
 ## Rascador: deja las garras afiladas unos segundos (chispitas en las patas).
@@ -516,38 +527,23 @@ func gastar_garras() -> bool:
 	return true
 
 
-func _empezar_maullido() -> void:
-	estado = Estado.MAULLANDO
-	velocity.x = 0.0
-	animador.reiniciar("maullar")
+## Se lame la pata como si nada (al final de la pelea con A.S.P.I., en el balcón).
+func acicalarse() -> void:
+	if is_on_floor() and estado == Estado.SUELO:
+		_empezar_ocio("acicalarse")
 
 
-## Escalera: sube (o baja) un escalón hasta `destino` (los pies, en el mundo) con un saltito,
-## en un ciclo de la animación "subir_escalera". Mientras sube no lo mueve la física.
+## Escalera: sube (o baja) un escalón hasta `destino` (los pies, en el mundo) con un saltito (EstadoEscalera).
 func subir_escalon(destino: Vector2, duracion := DURACION_ESCALON) -> void:
 	var peldanos: Array[Vector2] = [destino]
 	subir_escalera(peldanos, duracion)
 
 
 ## Sube escalón por escalón por la lista de peldaños (posiciones de los pies). Al terminar emite escalera_terminada.
-## Bajando (peldaño más abajo) usa los cuadros de saltar y caer, sin animación nueva (propuesta v4, sección 4).
 func subir_escalera(peldanos: Array[Vector2], duracion := DURACION_ESCALON) -> void:
 	if peldanos.is_empty() or estado == Estado.DESMAYADO:
 		return
-	if estado == Estado.OCIO:
-		_terminar_ocio()
-	if agachado:
-		_poner_agachado(false)
-	trepando = false
-	_peldanos = peldanos.duplicate()
-	_duracion_escalon = maxf(duracion, 0.05)
-	_escalones_subidos = 0
-	estado = Estado.SUBIENDO_ESCALON
-	velocity = Vector2.ZERO
-	efectos.detener()
-	sprite.rotation = 0.0
-	sprite.scale = efectos.escala_base()
-	_siguiente_escalon()
+	cambiar_estado(Estado.SUBIENDO_ESCALON, {"peldanos": peldanos, "duracion": duracion})
 
 
 ## ¿Está subiendo o bajando escalones?
@@ -555,227 +551,35 @@ func en_escalera() -> bool:
 	return estado == Estado.SUBIENDO_ESCALON
 
 
-func _siguiente_escalon() -> void:
-	_escalon_desde = global_position
-	_escalon_hasta = _peldanos.pop_front()
-	_tiempo_escalon = 0.0
-	if absf(_escalon_hasta.x - _escalon_desde.x) > 0.5:
-		mirando = signf(_escalon_hasta.x - _escalon_desde.x)
-	sprite.flip_h = mirando < 0.0
-	if _escalon_hasta.y > _escalon_desde.y:
-		sprite.speed_scale = 1.0
-		animador.poner_cuadro("saltar", CUADRO_ARRIBA)
-		return
-	var frames := sprite.sprite_frames
-	sprite.speed_scale = frames.get_frame_count("subir_escalera") / (frames.get_animation_speed("subir_escalera") * _duracion_escalon)
-	animador.reiniciar("subir_escalera")
-
-
-func _actualizar_escalon(delta: float) -> void:
-	_tiempo_escalon += delta
-	var t := clampf(_tiempo_escalon / _duracion_escalon, 0.0, 1.0)
-	var posicion := _escalon_desde.lerp(_escalon_hasta, t)
-	posicion.y -= sin(t * PI) * SALTITO_ESCALON
-	global_position = posicion
-	if _escalon_hasta.y > _escalon_desde.y and t > 0.6:
-		animador.poner_cuadro("caer", CUADRO_CONTACTO)
-	if t < 1.0:
-		return
-	_escalones_subidos += 1
-	escalon_subido.emit(_escalones_subidos)
-	if _peldanos.is_empty():
-		_terminar_escalera()
-	else:
-		_siguiente_escalon()
-
-
-func _terminar_escalera() -> void:
-	sprite.speed_scale = 1.0
-	_peldanos.clear()
+func terminar_escalera() -> void:
 	velocity = Vector2.ZERO
-	estado = Estado.SUELO
+	cambiar_estado(Estado.SUELO)
 	sprite.play("quieto")
 	escalera_terminada.emit()
 
 
-func _actualizar_zoomies(delta: float) -> void:
-	_tiempo_zoomies -= delta
-	velocity.y = 0.0
-	if _tiempo_zoomies <= 0.0:
-		estado = Estado.SUELO if is_on_floor() else Estado.AIRE
-		velocity.x = mirando * velocidad_correr
-
-
-func _actualizar_suelo(estaba_en_suelo: bool, delta: float) -> void:
-	if is_on_floor():
-		_tiempo_fuera_del_suelo = 0.0
-		doble_salto_disponible = true
-		if not estaba_en_suelo:
-			_aterrizar()
-	else:
-		_tiempo_fuera_del_suelo += delta
-		if estado in [Estado.SUELO, Estado.ATERRIZANDO]:
-			estado = Estado.AIRE
-
-
-## Un gato aterriza primero con las patas delanteras: llega inclinado con la nariz
-## hacia abajo, se endereza sobre ellas y después se aplasta.
-func _aterrizar() -> void:
-	var fuerza := clampf(_velocidad_al_caer / caida_maxima, 0.0, 1.0)
-	aterrizo.emit(fuerza)
-	if estado == Estado.AIRE:
-		estado = Estado.ATERRIZANDO
-		tiempo_aterrizando = 0.24
-	# Polvo según la caída; las patas delanteras tocan primero: el cuerpo gira sobre ellas hasta enderezarse y
-	# después se aplasta con un rebote (EfectosFelipe).
-	efectos.aterrizar(fuerza)
-
-
-func _al_terminar_animacion() -> void:
-	if estado in [Estado.ZARPAZO, Estado.COMIENDO, Estado.ARANANDO, Estado.MAULLANDO]:
-		manas.limpiar()
-		estado = Estado.SUELO if is_on_floor() else Estado.AIRE
-
-
-## Agacharse: solo en el piso. Bajo un mueble no se puede parar aunque se suelte el botón.
-func _actualizar_agachado() -> void:
-	var quiere := Input.is_action_pressed("agacharse") and is_on_floor() and estado in [Estado.SUELO, Estado.ATERRIZANDO]
-	if quiere and not agachado:
-		_poner_agachado(true)
-	elif agachado and not quiere and _cabe_de_pie():
-		_poner_agachado(false)
-
-
-func _poner_agachado(valor: bool) -> void:
-	agachado = valor
-	var caja := cuerpo.shape as RectangleShape2D
-	var alto := ALTO_AGACHADO if valor else ALTO_DE_PIE
-	caja.size.y = alto
-	cuerpo.position.y = -alto / 2.0
-	efectos.detener()
-	sprite.rotation = 0.0
-	sprite.scale = efectos.escala_base()
-	# Transición dibujada (cuadros 0 a 2 de la hoja de gatear): al bajar hacia adelante, al pararse al revés.
-	if valor:
-		sprite.play("agacharse")
-	elif is_on_floor():
-		animador.levantarse()
-
-
-## ¿Hay espacio arriba para pararse? (Los muebles que se atraviesan desde abajo no estorban.)
-func _cabe_de_pie() -> bool:
-	return not test_move(global_transform, Vector2(0, -(ALTO_DE_PIE - ALTO_AGACHADO)))
-
-
-func _sobre_mueble_atravesable() -> bool:
-	for i in get_slide_collision_count():
-		var choque := get_slide_collision(i)
-		var objeto := choque.get_collider() as CollisionObject2D
-		if choque.get_normal().y < -0.5 and objeto and objeto.get_collision_layer_value(CAPA_ATRAVESABLE):
-			return true
-	return false
-
-
-## Agachado + saltar sobre una repisa: deja de chocar con los muebles atravesables un instante y cae.
-func _bajar_por_mueble() -> void:
-	set_collision_mask_value(CAPA_ATRAVESABLE, false)
-	_tiempo_bajando = 0.25
-	_poner_agachado(false)
-	position.y += 2.0
-
-
-func _actualizar_bajada(delta: float) -> void:
-	if _tiempo_bajando <= 0.0:
-		return
-	_tiempo_bajando -= delta
-	if _tiempo_bajando <= 0.0:
-		set_collision_mask_value(CAPA_ATRAVESABLE, true)
-
-
-## Ocio: tras unos segundos quieto y sin tocar nada, elige al azar acicalarse, jugar con estambre
-## o dar vueltas persiguiéndose la cola. Cualquier acción lo corta y vuelve a contar desde cero.
-func _actualizar_ocio(delta: float) -> void:
-	var tocando := ACCIONES.any(func(accion: String) -> bool: return Input.is_action_pressed(accion))
-	if estado == Estado.OCIO:
-		_tiempo_ocio -= delta
-		_rodar_estambre()
-		if tocando or _tiempo_ocio <= 0.0 or not is_on_floor():
-			_terminar_ocio()
-		return
-	if tocando or estado != Estado.SUELO or agachado or not is_on_floor() or absf(velocity.x) > 1.0:
-		_tiempo_sin_tocar = 0.0
-		return
-	_tiempo_sin_tocar += delta
-	if _tiempo_sin_tocar >= espera_ocio:
-		_empezar_ocio(OCIO.keys().pick_random())
-
-
-func _empezar_ocio(nombre: String) -> void:
-	estado = Estado.OCIO
-	efectos.detener()
-	sprite.rotation = 0.0
-	sprite.scale = efectos.escala_base()
-	sprite.position = _posicion_sprite
-	sprite.play(nombre)
-	if nombre == "jugar":
-		_estambre = Sprite2D.new()
-		_estambre.name = "Estambre"
-		_estambre.texture = BOLA_ESTAMBRE
-		_estambre.scale = Vector2.ONE * ESCALA_SPRITE
-		add_child(_estambre)
-		_rodar_estambre()
-	var frames := sprite.sprite_frames
-	_tiempo_ocio = frames.get_frame_count(nombre) / frames.get_animation_speed(nombre) * OCIO[nombre]
-
-
-## Se lame la pata como si nada (al final de la pelea con A.S.P.I.).
-func acicalarse() -> void:
-	if is_on_floor() and estado == Estado.SUELO:
-		_empezar_ocio("acicalarse")
-
-
-func _terminar_ocio() -> void:
-	estado = Estado.SUELO if is_on_floor() else Estado.AIRE
-	_tiempo_sin_tocar = 0.0
-	sprite.scale = efectos.escala_base()
-	sprite.position = _posicion_sprite
-	sprite.play("quieto")
-	if _estambre:
-		remove_child(_estambre)
-		_estambre.queue_free()
-		_estambre = null
-
-
-## El estambre va y viene frente a Felipe al ritmo de los golpes de la pata, girando al rodar.
-func _rodar_estambre() -> void:
-	if not _estambre:
-		return
-	var vaiven := sin(Time.get_ticks_msec() * 0.006) * 6.0
-	_estambre.position = Vector2(mirando * (DISTANCIA_ESTAMBRE + vaiven), -BOLA_ESTAMBRE.get_height() * 0.3)
-	_estambre.rotation = vaiven / 7.0
-
+# --- Daño ----------------------------------------------------------------------------------------------------------
 
 ## Daño (lo llaman las piezas HaceDano): quita corazones de su Vida, empuja lejos de quien golpea y deja un rato
-## invulnerable (parpadea). Sin corazones, se desmaya y pierde una vida.
+## invulnerable (parpadea). Sin corazones, se desmaya y pierde una vida (EstadoDesmayado).
 func recibir_dano(cantidad: int, desde_x: float) -> void:
 	if not vida.puede_recibir() or estado == Estado.DESMAYADO:
 		return
 	if estado == Estado.SUBIENDO_ESCALON:
-		_terminar_escalera()
+		terminar_escalera()
 	if estado == Estado.OCIO:
-		_terminar_ocio()
-	_ronroneando_a = null
+		cambiar_estado(Estado.SUELO if is_on_floor() else Estado.AIRE)
 	if agachado:
-		_poner_agachado(false)
+		agachado_felipe.poner(false)
 	vida.danar(cantidad)
 	trepando = false
 	sonido.emit("golpe")
 	if vida.muerto:
-		_desmayarse()
+		cambiar_estado(Estado.DESMAYADO)
 		return
 	var lado := signf(global_position.x - desde_x)
 	velocity = Vector2((lado if lado != 0.0 else -mirando) * 220.0, -220.0)
-	estado = Estado.AIRE
+	cambiar_estado(Estado.AIRE)
 
 
 func _actualizar_invulnerable(delta: float) -> void:
@@ -788,85 +592,3 @@ func _actualizar_invulnerable(delta: float) -> void:
 		return
 	_parpadeando = true
 	sprite.modulate.a = 0.35 if int(resta * 12.0) % 2 == 0 else 1.0
-
-
-func _desmayarse() -> void:
-	estado = Estado.DESMAYADO
-	_tiempo_desmayado = TIEMPO_DESMAYO
-	vidas -= 1
-	velocity.x = 0.0
-	sprite.modulate.a = 1.0
-	sprite.play("desmayo")
-	# Una de sus nueve vidas sube como gatito fantasma.
-	var fantasma := Sprite2D.new()
-	fantasma.texture = sprite.sprite_frames.get_frame_texture("quieto", 0)
-	fantasma.scale = Vector2.ONE * ESCALA_SPRITE * 0.6
-	fantasma.global_position = sprite.global_position
-	fantasma.modulate = Color(1, 1, 1, 0.7)
-	fantasma.z_index = Capas.ESTELA
-	get_parent().add_child(fantasma)
-	var subir := fantasma.create_tween().set_parallel()
-	subir.tween_property(fantasma, "global_position:y", fantasma.global_position.y - 70.0, 1.4)
-	subir.tween_property(fantasma, "modulate:a", 0.0, 1.4)
-	subir.chain().tween_callback(fantasma.queue_free)
-
-
-## Reaparece en el último punto de descanso. Sin vidas, vuelven las nueve pero con el Collar de la Vergüenza.
-func _reaparecer() -> void:
-	if vidas <= 0:
-		vidas = VIDAS_MAX
-		tiene_collar = true
-	vida.llenar()
-	global_position = punto_reaparicion
-	velocity = Vector2.ZERO
-	estado = Estado.SUELO
-	sprite.play("quieto")
-	vida.restante_invulnerable = TIEMPO_INVULNERABLE
-
-
-## Trepar: dentro de una zona trepable (cortina), mantener arriba sube y abajo baja; saltar se suelta.
-## Al llegar arriba da un saltito para pasar al otro lado. Devuelve true si este cuadro estuvo trepando.
-## Animación "trepar" desde Felipe A (quieto en la cortina, se queda en su primer cuadro).
-func _actualizar_trepar(direccion: float) -> bool:
-	_tiempo_sin_trepar = maxf(0.0, _tiempo_sin_trepar - get_physics_process_delta_time())
-	var zona := _zona_trepable()
-	if not puede_trepar or zona == Rect2() or agachado or estado in [Estado.DESMAYADO, Estado.OCIO, Estado.ZARPAZO, Estado.COMIENDO, Estado.ARANANDO, Estado.MAULLANDO, Estado.RONRONEANDO]:
-		trepando = false
-		return false
-	if not trepando:
-		if _tiempo_sin_trepar > 0.0 or not Input.is_action_pressed("mover_arriba"):
-			return false
-		trepando = true
-	if Input.is_action_just_pressed("saltar"):
-		trepando = false
-		_saltar(velocidad_salto)
-		return false
-	var vertical := Input.get_axis("mover_arriba", "agacharse")
-	if direccion != 0.0:
-		mirando = signf(direccion)
-	# Colgado de la cortina se mantiene centrado en ella (así pasa limpio por huecos angostos).
-	velocity = Vector2((zona.get_center().x - global_position.x) * 8.0, vertical * velocidad_trepar)
-	estado = Estado.AIRE
-	doble_salto_disponible = true
-	move_and_slide()
-	if global_position.y - 20.0 < zona.position.y + 4.0:
-		# Llegó arriba: se pasa hacia el lado al que mira y se suelta un momento de la cortina.
-		trepando = false
-		_tiempo_sin_trepar = 0.5
-		move_and_collide(Vector2(mirando * 40.0, 0.0))
-		velocity = Vector2(mirando * 60.0, -120.0)
-	elif is_on_floor() and vertical > 0.0:
-		trepando = false
-	sprite.flip_h = mirando < 0.0
-	if vertical != 0.0:
-		animador.reproducir("trepar")
-	else:
-		animador.poner_cuadro("trepar", 0)
-	return true
-
-
-func _zona_trepable() -> Rect2:
-	for zona in zonas_trepables:
-		if zona.grow_individual(12, 0, 12, 0).has_point(global_position + Vector2(0, -20)):
-			return zona
-	return Rect2()

@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://b7aparta0001"]
 
 [ext_resource type="Script" path="res://scripts/nivel/nivel.gd" id="1_nivel"]
-[ext_resource type="PackedScene" uid="uid://b7felipe0001" path="res://escenas/felipe.tscn" id="2_felipe"]
+[ext_resource type="PackedScene" uid="uid://b7felipe0001" path="res://escenas/entidades/felipe.tscn" id="2_felipe"]
 [ext_resource type="Script" path="res://scripts/niveles/nivel_1/guion_nivel_1.gd" id="3_guion"]
 
 [node name="Nivel1" type="Node2D"]

@@ -29,7 +29,7 @@ func _correr() -> void:
 	forma.position = Vector2(1000, PISO + 20.0)
 	piso.add_child(forma)
 	mundo.add_child(piso)
-	felipe = load("res://escenas/felipe.tscn").instantiate()
+	felipe = load("res://escenas/entidades/felipe.tscn").instantiate()
 	felipe.position = Vector2(1400, PISO)
 	mundo.add_child(felipe)
 	await _esperar(10)

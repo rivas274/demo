@@ -59,26 +59,13 @@ func _ready() -> void:
 	add_child(_forma)
 	_poner_alto(ALTO_PILA)
 	# Nube de polvo al golpear el piso (delante de las cajas, en la capa del juego: nunca encima de la imaginación).
-	_polvo = CPUParticles2D.new()
+	_polvo = Particulas.polvo(34, 0.9, Vector2(0, 90), Vector2(40, 110), Vector2(3, 6), Color(0.9, 0.85, 0.76, 0.9), 75.0)
 	_polvo.name = "Polvo de la caja"
 	Capas.usar(_polvo, Capas.JUEGO)
-	_polvo.emitting = false
-	_polvo.one_shot = true
-	_polvo.amount = 34
-	_polvo.lifetime = 0.9
-	_polvo.explosiveness = 1.0
 	_polvo.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
 	_polvo.emission_rect_extents = Vector2(36, 2)
-	_polvo.direction = Vector2(0, -1)
-	_polvo.spread = 75.0
-	_polvo.gravity = Vector2(0, 90)
-	_polvo.initial_velocity_min = 40.0
-	_polvo.initial_velocity_max = 110.0
 	_polvo.damping_min = 40.0
 	_polvo.damping_max = 70.0
-	_polvo.scale_amount_min = 3.0
-	_polvo.scale_amount_max = 6.0
-	_polvo.color = Color(0.9, 0.85, 0.76, 0.9)
 	_polvo.position = Vector2(CAIDA_X, -4.0)
 	add_child(_polvo)
 

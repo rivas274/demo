@@ -86,8 +86,8 @@ func _correr() -> void:
 		orden.append(paso[0])
 	_comprobar(pasos == orden, "La entrada recorre los 8 pasos en orden (%s)" % ", ".join(pasos))
 	_comprobar(textos.has(PresentacionJefe.TEXTO_INICIO), "La entrada muestra «¡BATALLA INICIADA!»")
-	_comprobar(textos.has(BatallaAspi.NOMBRE), "La entrada presenta a la jefa por su nombre")
-	_comprobar(textos.has(BatallaAspi.RUGIDO), "El rugido: «%s»" % BatallaAspi.RUGIDO)
+	_comprobar(textos.has(batalla.datos.nombre), "La entrada presenta a la jefa por su nombre")
+	_comprobar(textos.has(batalla.datos.rugido), "El rugido: «%s»" % batalla.datos.rugido)
 	_comprobar(batalla.presentacion.t < 5.0, "La entrada dura menos de 5 s (%.1f s)" % batalla.presentacion.t)
 	_comprobar(batalla.presentacion.zoom_maximo >= 2.5, "La cámara se acerca como en Broforce (zoom %.1f)" % batalla.presentacion.zoom_maximo)
 	_comprobar(oculta and gigante_maximo >= 1.0, "En la imaginación de Felipe, A.S.P.I. se vuelve gigante")
@@ -110,7 +110,7 @@ func _correr() -> void:
 	await _esperar_que(func() -> bool: return batalla.ataque == BatallaAspi.Ataque.NINGUNO, 200)
 	felipe.vida.restante_invulnerable = 0.0
 	aspi.global_position = Vector2(arena.position.x + 330, Nivel1.SUELO)
-	batalla._espera_embestida = 0.0
+	(batalla.conducta("embestida") as AtaqueEmbestida).reloj_espera = 0.0
 	await _esperar_que(func() -> bool: return batalla.ataque == BatallaAspi.Ataque.AVISO_EMBESTIDA, 120)
 	_comprobar(batalla.ataque == BatallaAspi.Ataque.AVISO_EMBESTIDA and batalla.apariencia.luz_aviso.a > 0.0 and not aspi.dano.activo, "Antes de embestir avisa: luz roja que parpadea, inofensiva")
 	await _esperar_que(func() -> bool: return batalla.ataque == BatallaAspi.Ataque.EMBESTIDA, 60)
@@ -127,8 +127,8 @@ func _correr() -> void:
 	await _esperar_que(func() -> bool: return not batalla.manchas.is_empty(), 90)
 	_comprobar(batalla.manchas.size() == 1, "La maceta rota deja una mancha en el piso")
 	await _poner_en(Vector2(arena.position.x + 60, Nivel1.SUELO))
-	await _esperar_que(func() -> bool: return batalla._aviso_succion > 0.0, 400)
-	_comprobar(batalla._aviso_succion > 0.0 and not batalla.limpiando, "Antes de aspirar, el cepillo gira 0,6 s (anticipación)")
+	await _esperar_que(func() -> bool: return batalla.limpiar.reloj_aviso > 0.0, 400)
+	_comprobar(batalla.limpiar.reloj_aviso > 0.0 and not batalla.limpiando, "Antes de aspirar, el cepillo gira 0,6 s (anticipación)")
 	await _esperar_que(func() -> bool: return batalla.limpiando, 100)
 	_comprobar(batalla.limpiando and absf(aspi.global_position.x - batalla.manchas[0]) < 8.0, "A.S.P.I. va a limpiar la mancha")
 
@@ -164,7 +164,7 @@ func _correr() -> void:
 	_comprobar(batalla.apagados == 1 and not batalla.llena, "Caerle encima le aprieta el botón: fase 2")
 	_comprobar("¡CLIC!" in sala.travesuras.jugo.palabras, "Al apagarla: congelado, destello, sacudida y «¡CLIC!»")
 	await _esperar(100)
-	_comprobar(aspi.patrulla.velocidad_persecucion > BatallaAspi.VELOCIDAD[0], "En la fase 2 es más rápida")
+	_comprobar(aspi.patrulla.velocidad_persecucion > batalla.datos.velocidad[0], "En la fase 2 es más rápida")
 
 	# Contra el que acampa (G12): quieto en la repisa, A.S.P.I. lo saca en 4 s o menos, sin daño.
 	aspi.global_position = Vector2(arena.position.x + 70, Nivel1.SUELO)
@@ -190,7 +190,7 @@ func _correr() -> void:
 	# Fase 3: tose y escupe bolas de pelo en arco que llegan arriba (al escritorio).
 	# M8: sin azar ni carreras. Felipe queda en el escritorio, lejos del teclado (pisarlo suelta papeles en lugares al
 	# azar) y A.S.P.I. lejos; se espera el ESTADO (tos y bola alta), no un tiempo fijo.
-	await _esperar_que(func() -> bool: return batalla._reinicio <= 0.0 and batalla.ataque == BatallaAspi.Ataque.NINGUNO, 300)
+	await _esperar_que(func() -> bool: return batalla.reinicio <= 0.0 and batalla.ataque == BatallaAspi.Ataque.NINGUNO, 300)
 	batalla.manchas.clear()
 	batalla.tipos_mancha.clear()
 	aspi.patrulla.velocidad_patrulla = 0.0
@@ -228,8 +228,8 @@ func _correr() -> void:
 	# Maullar: gira hacia Felipe ("¿Gato detectado?").
 	await _poner_en(Vector2(arena.position.x + 120, Nivel1.SUELO))
 	aspi.global_position = Vector2(arena.position.x + 400, Nivel1.SUELO)
-	batalla._espera_embestida = 99.0
-	batalla._espera_bola = 99.0
+	(batalla.conducta("embestida") as AtaqueEmbestida).reloj_espera = 99.0
+	(batalla.conducta("bola") as AtaqueBolaPelo).reloj_espera = 99.0
 	await _tocar("maullar")
 	await _esperar(30)
 	_comprobar("¿Gato detectado?" in sala.travesuras.jugo.palabras, "Al maullar, A.S.P.I. gira hacia Felipe: «¿Gato detectado?»")
@@ -283,7 +283,7 @@ func _maceta() -> Objeto:
 ## Le deja el depósito a una mancha de llenarse y le pone esa mancha al lado (más rápido que tirar macetas).
 func _llenar(batalla: BatallaAspi, aspi: Enemigo) -> void:
 	await _poner_en(Vector2(Nivel1.rect_de("estudio").position.x + 60, Nivel1.SUELO), 2)
-	batalla.deposito = BatallaAspi.CAPACIDAD[batalla.apagados] - 1
+	batalla.deposito = batalla.datos.capacidad[batalla.apagados] - 1
 	batalla.agregar_mancha(aspi.global_position)
 	await _esperar_que(func() -> bool: return batalla.llena, 400)
 

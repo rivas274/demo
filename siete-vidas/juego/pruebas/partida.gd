@@ -358,7 +358,7 @@ func _ensuciar() -> void:
 	for vuelta in 3:
 		if _fuera_de_pelea():
 			return
-		var falta: int = BatallaAspi.CAPACIDAD[mini(batalla.apagados, 2)] - batalla.deposito - batalla.manchas.size()
+		var falta: int = batalla.datos.capacidad[mini(batalla.apagados, 2)] - batalla.deposito - batalla.manchas.size()
 		if falta <= 0 or batalla.llena or batalla.fase != BatallaAspi.Fase.PELEA:
 			break
 		var objetivo := _municion()

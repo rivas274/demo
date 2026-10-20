@@ -37,20 +37,7 @@ func _init(nombre := "Arañable", ancho_zona := 120.0, alto_zona := 60.0) -> voi
 func _ready() -> void:
 	add_to_group(Componentes.INTERACTUABLES)
 	z_index = Capas.MARCAS
-	_pelusa = CPUParticles2D.new()
-	_pelusa.emitting = false
-	_pelusa.one_shot = true
-	_pelusa.amount = 10
-	_pelusa.lifetime = 0.8
-	_pelusa.explosiveness = 0.9
-	_pelusa.direction = Vector2(0, -1)
-	_pelusa.spread = 70.0
-	_pelusa.gravity = Vector2(0, 150)
-	_pelusa.initial_velocity_min = 30.0
-	_pelusa.initial_velocity_max = 80.0
-	_pelusa.scale_amount_min = 1.0
-	_pelusa.scale_amount_max = 2.0
-	_pelusa.color = Color(0.95, 0.92, 0.85)
+	_pelusa = Particulas.polvo(10, 0.8, Vector2(0, 150), Vector2(30, 80), Vector2(1, 2), Color(0.95, 0.92, 0.85), 70.0, 0.9)
 	add_child(_pelusa)
 
 

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://scripts/comida.gd" id="1_comida"]
+[ext_resource type="Script" path="res://scripts/entidades/objetos/comida.gd" id="1_comida"]
 [ext_resource type="Script" path="res://scripts/componentes/sombra_contacto.gd" id="2_sombra"]
 
 [node name="Comida" type="Node2D"]

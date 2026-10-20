@@ -26,8 +26,8 @@ func imaginacion(c: Node2D) -> void:
 	if b.transformacion > 0.0:
 		var a := b.transformacion
 		c.draw_texture_rect(ArteNivel.textura("fin_del_mundo"), b.arena, false, Color(1, 1, 1, a))
-		if b._rayo > 0.0:
-			c.draw_rect(b.arena, Color(1, 0.9, 0.9, 0.18 * b._rayo * a))
+		if b.rayo > 0.0:
+			c.draw_rect(b.arena, Color(1, 0.9, 0.9, 0.18 * b.rayo * a))
 	if b.gigante > 0.0:
 		var arte := ArteNivel.textura("aspi_gigante")
 		var tam := arte.get_size()
@@ -35,8 +35,8 @@ func imaginacion(c: Node2D) -> void:
 		var escala := lerpf(b.aspi.datos.ancho / tam.x, 1.0, k)
 		# Desde (y hacia) donde está la A.S.P.I. real ahora: los empujones la movieron.
 		var origen := b.aspi.global_position + Vector2(0, -tam.y * escala / 2.0)
-		var centro := origen.lerp(b._centro_gigante + Vector2(0, sin(tiempo * 2.0) * 5.0), k)
-		if b.fase == BatallaAspi.Fase.ENTRADA and b.gigante < 1.0 and not b._desvaneciendo:
+		var centro := origen.lerp(b.centro_gigante + Vector2(0, sin(tiempo * 2.0) * 5.0), k)
+		if b.fase == BatallaAspi.Fase.ENTRADA and b.gigante < 1.0 and not b.desvaneciendo:
 			# Temblor de sueño mientras crece.
 			centro += Vector2(sin(tiempo * 40.0), cos(tiempo * 33.0)) * 2.0
 		var mira := 1.0 if b.felipe.global_position.x >= centro.x else -1.0
@@ -67,22 +67,22 @@ func manchas(c: Node2D) -> void:
 ## Delante de todo: el viento de la succión, el cepillo que gira, papeles que vuelan y el aviso del depósito lleno.
 func encima(c: Node2D) -> void:
 	var tiempo := Time.get_ticks_msec() / 1000.0
-	for p in b._papeles:
+	for p in b.papeles:
 		var x := p.x + p.y * 160.0
 		var y := Nivel1.SUELO - 40.0 - sin(p.y * 3.0 + p.z * 6.0) * 60.0 - p.y * 40.0
 		c.draw_set_transform(Vector2(x, y), p.y * 6.0 + p.z)
 		ArteNivel.dibujar(c, "papel_arrugado", 0.0, 10.0)
 		c.draw_set_transform(Vector2.ZERO)
-	if b._reinicio > 0.0 and b.fase == BatallaAspi.Fase.PELEA:
+	if b.reinicio > 0.0 and b.fase == BatallaAspi.Fase.PELEA:
 		# Barra de reinicio sobre la carcasa (no es un rótulo: no pisa al «¡CLIC!»); el texto sale cuando el «¡CLIC!» ya se fue.
 		var barra := Rect2(b.aspi.global_position + Vector2(-18, -BatallaAspi.ALTO_ARRIBA - 12), Vector2(36, 4))
 		c.draw_rect(barra.grow(1), Color(0.05, 0.1, 0.15, 0.9))
-		c.draw_rect(Rect2(barra.position, Vector2(barra.size.x * (1.0 - b._reinicio / BatallaAspi.REINICIO), barra.size.y)), Color("9fd8ff"))
-		if tiempo - b._tiempo_clic > BatallaAspi.DURA_CLIC:
+		c.draw_rect(Rect2(barra.position, Vector2(barra.size.x * (1.0 - b.reinicio / b.datos.reinicio), barra.size.y)), Color("9fd8ff"))
+		if tiempo - b.tiempo_clic > BatallaAspi.DURA_CLIC:
 			var punto := b.aspi.global_position + Vector2(-34, -BatallaAspi.ALTO_ARRIBA - 22)
 			c.draw_string_outline(ThemeDB.fallback_font, punto, "REINICIANDO" + ".".repeat(int(tiempo * 3.0) % 4), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, 4, Color(0.05, 0.1, 0.15))
 			c.draw_string(ThemeDB.fallback_font, punto, "REINICIANDO" + ".".repeat(int(tiempo * 3.0) % 4), HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("9fd8ff"))
-	if b._aviso_succion > 0.0 and not b.limpiando:
+	if b.limpiar.reloj_aviso > 0.0 and not b.limpiando:
 		# Anticipación de la succión: el cepillo gira y se ven líneas de aire.
 		for i in 6:
 			var angulo := tiempo * 18.0 + i * TAU / 6.0
@@ -108,7 +108,7 @@ func encima(c: Node2D) -> void:
 	if not b.succionando:
 		return
 	var x_jefa := b.aspi.global_position.x
-	var radio: float = BatallaAspi.RADIO_SUCCION[mini(b.apagados, 2)]
+	var radio: float = DatosJefe.por_fase(b.limpiar.radio_succion, b.vencidas)
 	for i in 16:
 		var lado := -1.0 if i % 2 == 0 else 1.0
 		var avance := fmod(tiempo * 1.4 + i * 0.37, 1.0)

@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3]
 
-[ext_resource type="Script" path="res://scripts/caja_carton.gd" id="1_caja"]
+[ext_resource type="Script" path="res://scripts/entidades/objetos/caja_carton.gd" id="1_caja"]
 [ext_resource type="Script" path="res://scripts/componentes/vida.gd" id="2_vida"]
 [ext_resource type="Script" path="res://scripts/componentes/recibe_golpes.gd" id="3_golpes"]
 [ext_resource type="Script" path="res://scripts/componentes/suelta_recompensa.gd" id="4_suelta"]

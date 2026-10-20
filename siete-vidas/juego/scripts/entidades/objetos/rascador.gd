@@ -44,20 +44,7 @@ func _init(nombre := "Rascador") -> void:
 
 func _ready() -> void:
 	add_to_group(Componentes.INTERACTUABLES)
-	_fibras = CPUParticles2D.new()
-	_fibras.emitting = false
-	_fibras.one_shot = true
-	_fibras.amount = 12
-	_fibras.lifetime = 0.9
-	_fibras.explosiveness = 0.9
-	_fibras.direction = Vector2(0, -1)
-	_fibras.spread = 80.0
-	_fibras.gravity = Vector2(0, 160)
-	_fibras.initial_velocity_min = 40.0
-	_fibras.initial_velocity_max = 100.0
-	_fibras.scale_amount_min = 1.5
-	_fibras.scale_amount_max = 3.0
-	_fibras.color = Color(0.85, 0.72, 0.45)
+	_fibras = Particulas.polvo(12, 0.9, Vector2(0, 160), Vector2(40, 100), Vector2(1.5, 3.0), Color(0.85, 0.72, 0.45), 80.0, 0.9)
 	add_child(_fibras)
 
 

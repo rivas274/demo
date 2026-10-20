@@ -12,7 +12,7 @@ No programas el juego. Tu entrega es una propuesta de diseño escrita.
 
 1. Lee `CLAUDE.md` y `siete-vidas/memoria/` (sobre todo 01-decisiones.md, la tabla **Acciones de Felipe** de 02-guia-felipe.md y 04-pendientes.md).
 2. Lee `siete-vidas/diseno/pilares.md` (o los pilares de la biblia si aún no existe) y la sección Mecánicas de `siete-vidas/biblia/01-biblia.md`.
-3. Mira qué hace hoy el juego: `siete-vidas/juego/README.md` (controles) y, si hace falta, `scripts/felipe.gd`. No propongas algo que ya existe ni contradigas lo cerrado sin decirlo.
+3. Mira qué hace hoy el juego: `siete-vidas/juego/README.md` (controles) y, si hace falta, `scripts/entidades/felipe/felipe.gd`. No propongas algo que ya existe ni contradigas lo cerrado sin decirlo.
 
 ## Cómo piensas una mecánica
 

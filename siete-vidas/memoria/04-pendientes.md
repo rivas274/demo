@@ -100,3 +100,9 @@ Idea tomada de un video sobre cómo hacer que un dash se sienta bien (5 pasos). 
 - [ ] **Zoomies, resto de la receta:** anticipación de 0,05 s (aplastar y estirar dentro de ±8 %), líneas de velocidad pixel art, pausa corta y sacudida si choca con un mueble (con frase de Felipe). Ya tiene estela. Sin zoom de cámara (deforma el pixel art): adelantar la cámara hacia donde corre.
 - [ ] **Pieza reutilizable `RecetaJugo`** (anticipación, estela, líneas, pausa de impacto, polvo) con sus números por acción, y revisar con ella salto, zarpazo, tirar y arañar del nivel 1.
 - Cuándo: los Zoomies están apagados en el nivel 1 (se ganan en Downtown); se hace al terminar el reordenamiento del código, no antes.
+
+## Menú con estambre (aprobado por el creador, 2026-10-20)
+
+- [ ] **Botones colgando de estambre:** cada botón es un letrero que cuelga de un hilo y se balancea (comportamiento ya pedido en el botón base: apretar 90 % con rebote, balanceo hasta 6° con foco, entrada que cae con rebote, opción «reducir movimiento»).
+- [ ] **Manotazo de Felipe:** al elegir un botón, Felipe asoma por el costado del menú y le da un manotazo con la animación `zarpazo` (sin créditos); el letrero se columpia más fuerte y suelta pelusa.
+- [ ] **Arte:** encargo a Gemini en `siete-vidas/diseno/encargo-gemini-menu-estambre.md` (letreros, letrero principal con coronita, hilo, ovillo, pelusa).

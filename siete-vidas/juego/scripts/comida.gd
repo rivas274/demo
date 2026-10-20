@@ -3,18 +3,27 @@ extends Node2D
 ## Comida que Felipe se come con el botón de acción (E / Y del mando).
 ## Todo lo que esté en el grupo Componentes.INTERACTUABLES y tenga interactuar(felipe) responde a ese botón.
 ## Arte provisional dibujado con código; (0, 0) es el punto donde la comida toca la superficie.
+## Escena: escenas/entidades/comida.tscn (con su SombraContacto); qué comida es lo dicen sus datos (datos/objetos/).
+
+const ESCENA := "res://escenas/entidades/comida.tscn"
 
 ## Se la comieron (cuando la boca llega): el nivel la usa para la Agenda (el pollo de Valeria).
 signal comido(comida: Comida)
 
+@export var datos: DatosObjeto
+
 ## "tazon" (croquetas en el piso de la cocina) o "pollo" (el almuerzo de Valeria, en el mesón).
-var tipo: String
+var tipo: String:
+	get:
+		return datos.tipo if datos else ""
 
 
-func _init(tipo_comida: String) -> void:
-	tipo = tipo_comida
-	name = "Comida (%s)" % tipo
-	add_child(SombraContacto.new(46.0, 0.38))
+## Fábrica: la escena de la comida con estos datos (datos/objetos/tazon.tres, pollo.tres...).
+static func crear(datos_comida: DatosObjeto) -> Comida:
+	var comida: Comida = load(ESCENA).instantiate()
+	comida.datos = datos_comida
+	comida.name = datos_comida.nombre_de_nodo()
+	return comida
 
 
 func _ready() -> void:
@@ -35,7 +44,7 @@ func al_comido() -> void:
 
 
 func verbo(_felipe: Felipe) -> String:
-	return "Degustar"
+	return datos.verbo
 
 
 func arte_indicador() -> Dictionary:

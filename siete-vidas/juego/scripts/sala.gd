@@ -261,11 +261,16 @@ const SOFA_ARANADO := {"Asiento del sofá": SUELO - 45, "Respaldo del sofá": SU
 const CAJAS := Rect2(2262, SUELO - CajasMudanza.ALTO_PILA, CajasMudanza.ANCHO, CajasMudanza.ALTO_PILA)
 ## Pies de Felipe en el segundo peldaño, desde donde tira la caja de arriba.
 const PELDANO_CAJAS := Vector2(2360, SUELO - 45)
-## Datos de los enemigos (datos/enemigos/): el ratón de cuerda y A.S.P.I. son el mismo Enemigo con otros números. Se
-## cargan al armar el nivel con load(), nunca con preload() en una constante: precargar un .tres con script desde un
-## script que se compila como dependencia de otro deja dos copias de su clase (DatosEnemigo) y fallan los tipos.
+## Enemigos (escenas/entidades/ con sus datos en datos/enemigos/): el ratón de cuerda y A.S.P.I. son el mismo Enemigo
+## con otros números. Escenas y datos se cargan al armar el nivel con load(), nunca con preload() en una constante:
+## precargar un .tres con script desde un script que se compila como dependencia de otro deja dos copias de su clase
+## (DatosEnemigo) y fallan los tipos.
+const ESCENA_RATON := "res://escenas/entidades/raton.tscn"
+const ESCENA_ASPI := "res://escenas/entidades/aspi.tscn"
 const RUTA_RATON := "res://datos/enemigos/raton.tres"
 const RUTA_ASPI := "res://datos/enemigos/aspi.tres"
+## Objetos y comida: datos/objetos/<tipo>.tres.
+const DATOS_OBJETO := "res://datos/objetos/%s.tres"
 ## Juguetes que duelen al pisarlos: la sala v4 no tiene nada que haga daño.
 const PELIGROS: Array[Rect2] = []
 ## Nada se trepa en el nivel 1 (trepar se gana con Afilar Garras): la cortina es un lugar visto.
@@ -643,22 +648,22 @@ func _crear_objetos() -> void:
 	cajas.empujada.connect(func() -> void: _decir("cajas", true))
 	add_child(cajas)
 	for comida: Array in COMIDA:
-		var objeto := Comida.new(comida[1])
+		var objeto := Comida.crear(load(DATOS_OBJETO % comida[1]))
 		objeto.position = comida[0]
 		objeto.comido.connect(_al_comer)
 		add_child(objeto)
 	for tirable: Array in TIRABLES:
-		var objeto := Objeto.crear(tirable[1], SUELO, tirable[2] if tirable.size() > 2 else 0.0)
+		var objeto := Objeto.crear(load(DATOS_OBJETO % tirable[1]), SUELO, tirable[2] if tirable.size() > 2 else 0.0)
 		objeto.position = tirable[0]
 		objeto.tirable.caido.connect(_al_caer_tirable.bind(objeto))
 		add_child(objeto)
 		tirables.append(objeto)
 	for datos: Array in RATONES:
-		var raton := Enemigo.crear(load(RUTA_RATON), datos[1], datos[2])
+		var raton := Enemigo.desde_escena(ESCENA_RATON, datos[1], datos[2])
 		raton.position = datos[0]
 		add_child(raton)
 	# La caja de cartón suelta un snack al romperla (su pieza SueltaRecompensa).
-	var caja := CajaCarton.new()
+	var caja := CajaCarton.crear()
 	caja.position = CAJA_CARTON
 	add_child(caja)
 	_laser = Laser.new(LASER[1], LASER[2])
@@ -766,7 +771,7 @@ func _crear_valeria() -> void:
 
 
 func _crear_aspi() -> void:
-	aspi = Enemigo.crear(load(RUTA_ASPI), ASPI[1], ASPI[2])
+	aspi = Enemigo.desde_escena(ESCENA_ASPI, ASPI[1], ASPI[2])
 	aspi.position = ASPI[0]
 	# La jefa: los zarpazos rebotan si no está aturdida (algo le cayó encima).
 	aspi.recibe_golpes.solo_aturdido = true

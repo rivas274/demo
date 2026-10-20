@@ -5,28 +5,37 @@ extends Node2D
 ## pieza Tirable; este nodo solo lo dibuja: apoyado en el medio de la cubierta con su sombra de contacto, cayendo
 ## (gira) o roto en el piso. En la pelea lo roto vuelve a su lugar de a uno (Tirable.reponer, lo decide BatallaAspi).
 ## Escala de gato: vaso, taza, maceta y llaves al doble de su tamaño real (lado menor ≥ 24 px, R8).
+## Escena: escenas/entidades/objeto_tirable.tscn; qué objeto es lo dicen sus datos (datos/objetos/vaso.tres...).
 
-## Qué es: "vaso", "taza", "maceta" o "llaves" (también la imagen de assets/nivel1/).
-var tipo: String
+const ESCENA := "res://escenas/entidades/objeto_tirable.tscn"
+
+@export var datos: DatosObjeto
 var tirable: Tirable
 
+## Qué es: "vaso", "taza", "maceta" o "llaves" (también la imagen de assets/nivel1/).
+var tipo: String:
+	get:
+		return datos.tipo if datos else ""
 
-## Fábrica: un objeto tirable apoyado `hundido` px dentro de la cubierta, que cae hasta `piso`.
-static func crear(tipo_objeto: String, piso: float, hundido := 0.0) -> Objeto:
-	var objeto := Objeto.new()
-	objeto.tipo = tipo_objeto
-	objeto.name = "Vaso" if tipo_objeto == "vaso" else tipo_objeto.capitalize()
-	var pieza := Tirable.new()
-	pieza.arte = tipo_objeto
-	pieza.piso = piso
-	pieza.hundido = hundido
-	# El vaso se rompe y da su logro; lo demás aturde a lo que tenga debajo. Las llaves suenan a metal, no a vidrio.
-	pieza.aturde = tipo_objeto != "vaso"
-	pieza.logro = "La Gravedad Funciona" if tipo_objeto == "vaso" else ""
-	pieza.sonido = "caja" if tipo_objeto == "llaves" else "vidrio"
-	objeto.tirable = pieza
-	objeto.add_child(pieza)
+
+## Fábrica: un objeto tirable con estos datos, apoyado `hundido` px dentro de la cubierta, que cae hasta `piso`.
+static func crear(datos_objeto: DatosObjeto, piso: float, hundido := 0.0) -> Objeto:
+	var objeto: Objeto = load(ESCENA).instantiate()
+	objeto.datos = datos_objeto
+	objeto.name = datos_objeto.nombre_de_nodo()
+	objeto.tirable = Componentes.de(objeto, Tirable) as Tirable
+	objeto.tirable.piso = piso
+	objeto.tirable.hundido = hundido
+	objeto.tirable.configurar(datos_objeto)
 	return objeto
+
+
+## Puesto a mano en el editor (sin la fábrica): toma su pieza y sus datos al entrar.
+func _ready() -> void:
+	if tirable == null:
+		tirable = Componentes.de(self, Tirable) as Tirable
+		if datos:
+			tirable.configurar(datos)
 
 
 func _draw() -> void:
@@ -43,7 +52,7 @@ func _draw() -> void:
 			ArteNivel.sombra(self, Vector2(0, hundido), ancho + 2.0, 0.5)
 			ArteNivel.dibujar(self, tipo, 0.0, hundido - (1.0 if tipo == "vaso" else 0.0))
 			return
-	if (not roto or tipo == "llaves") and ArteNivel.dibujar(self, tipo, 0.0, 0.0):
+	if (not roto or not datos.se_rompe) and ArteNivel.dibujar(self, tipo, 0.0, 0.0):
 		return
 	match tipo:
 		"taza":

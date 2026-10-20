@@ -30,7 +30,7 @@ func _init(nivel: Sala, puerta: Vector2) -> void:
 
 func _ready() -> void:
 	var cuarto := Sala.rect_de("pasillo")
-	aspi = Enemigo.crear(load(Sala.RUTA_ASPI), cuarto.position.x + 40.0, cuarto.end.x - 40.0)
+	aspi = Enemigo.desde_escena(Sala.ESCENA_ASPI, cuarto.position.x + 40.0, cuarto.end.x - 40.0)
 	aspi.name = "ASPI del ensayo"
 	aspi.dano.activo = false
 	aspi.patrulla.vision = 0.0

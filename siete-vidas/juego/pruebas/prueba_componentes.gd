@@ -42,6 +42,7 @@ func _correr() -> void:
 	await _probar_asustable()
 	await _probar_enemigo_solo_con_datos()
 	await _probar_datos_del_juego()
+	await _probar_escenas()
 
 	for fallo in _fallos:
 		print("FALLA: ", fallo)
@@ -130,7 +131,7 @@ func _probar_hace_dano() -> void:
 
 
 func _probar_tirable() -> void:
-	var vaso := Objeto.crear("taza", PISO, 0.0)
+	var vaso := Objeto.crear(load("res://datos/objetos/taza.tres"), PISO, 0.0)
 	vaso.position = Vector2(300, PISO - 90.0)
 	mundo.add_child(vaso)
 	var raton := Enemigo.crear(load("res://datos/enemigos/raton.tres"), 200.0, 400.0)
@@ -254,6 +255,33 @@ func _probar_datos_del_juego() -> void:
 	_comprobar(aspi.oido != null and raton.oido == null and aspi.apariencia is AparienciaAspi and raton.apariencia is Apariencia, "A.S.P.I. oye maullidos y tiene su propia apariencia; el ratón, la de siempre")
 	raton.free()
 	aspi.free()
+
+
+## Las escenas de las entidades (escenas/entidades/) se arman solas con sus datos.
+func _probar_escenas() -> void:
+	var raton := Enemigo.desde_escena("res://escenas/entidades/raton.tscn", 10.0, 90.0)
+	var aspi := Enemigo.desde_escena("res://escenas/entidades/aspi.tscn")
+	_comprobar(raton.name == "Raton" and raton.patrulla.limite_derecho == 90.0 and raton.dano != null, "raton.tscn: el ratón sale de su escena con sus piezas y sus límites")
+	_comprobar(aspi.name == "ASPI" and aspi.apariencia is AparienciaAspi and aspi.oido != null, "aspi.tscn: A.S.P.I. sale de su escena con su apariencia y su oído")
+	raton.free()
+	aspi.free()
+	var caja := CajaCarton.crear()
+	caja.position = Vector2(900, PISO)
+	mundo.add_child(caja)
+	_comprobar(caja.vida != null and Componentes.de(caja, RecibeGolpes) != null and Componentes.de(caja, SueltaRecompensa) != null, "caja_carton.tscn: la caja trae Vida, RecibeGolpes y SueltaRecompensa")
+	(Componentes.de(caja, RecibeGolpes) as RecibeGolpes).recibir_zarpazo(felipe)
+	_comprobar(caja.roto, "La caja se rompe de un zarpazo")
+	caja.queue_free()
+	var pollo := Comida.crear(load("res://datos/objetos/pollo.tres"))
+	_comprobar(pollo.tipo == "pollo" and pollo.verbo(felipe) == "Degustar" and Componentes.de(pollo, SombraContacto) != null, "comida.tscn: la comida toma sus datos y trae su sombra")
+	pollo.free()
+	var llaves := Objeto.crear(load("res://datos/objetos/llaves.tres"), PISO)
+	var vaso := Objeto.crear(load("res://datos/objetos/vaso.tres"), PISO)
+	_comprobar(llaves.name == "Llaves" and llaves.tirable.sonido == "caja" and not llaves.datos.se_rompe, "Las llaves suenan a metal y no se rompen (sus datos)")
+	_comprobar(vaso.name == "Vaso" and not vaso.tirable.aturde and vaso.tirable.logro == "La Gravedad Funciona", "El vaso no aturde y da su logro (sus datos)")
+	llaves.free()
+	vaso.free()
+	await _esperar(2)
 
 
 func _esperar(cuadros: int) -> void:

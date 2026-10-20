@@ -1,25 +1,21 @@
 class_name CajaCarton
 extends StaticBody2D
-## Caja de cartón (40 cm a escala de gato): se rompe de un zarpazo y suelta un snack. Armada con piezas: Vida (1 golpe),
-## RecibeGolpes (el zarpazo), SueltaRecompensa (el snack) y SombraContacto. Este nodo solo es el cuerpo sólido y el
-## dibujo; al romperse deja de ser sólida y queda en trozos.
+## Caja de cartón (40 cm a escala de gato): se rompe de un zarpazo y suelta un snack. Escena con sus piezas
+## (escenas/entidades/caja_carton.tscn): Vida (1 golpe), RecibeGolpes (el zarpazo), SueltaRecompensa (el snack) y
+## SombraContacto. Este nodo solo es el cuerpo sólido y el dibujo; al romperse deja de ser sólida y queda en trozos.
 
 signal rota
 
 const LADO := 60.0
+const ESCENA := "res://escenas/entidades/caja_carton.tscn"
 
 var roto := false
 var vida: Vida
 
 
-func _init() -> void:
-	name = "Caja de carton"
-	vida = Vida.new(1)
-	vida.murio.connect(_al_romperse)
-	add_child(vida)
-	add_child(RecibeGolpes.new())
-	add_child(SueltaRecompensa.new())
-	add_child(SombraContacto.new(LADO + 6.0, 0.4))
+## Fábrica: la caja con sus piezas, lista para poner en el nivel.
+static func crear() -> CajaCarton:
+	return load(ESCENA).instantiate()
 
 
 ## Tamaño de la colisión: el del arte (la colisión calza con el dibujo, hallazgo B4).
@@ -29,6 +25,8 @@ func tamano() -> Vector2:
 
 
 func _ready() -> void:
+	vida = Componentes.de(self, Vida) as Vida
+	vida.murio.connect(_al_romperse)
 	add_to_group(Componentes.ENEMIGOS)
 	var forma := CollisionShape2D.new()
 	var caja := RectangleShape2D.new()

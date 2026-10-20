@@ -44,6 +44,15 @@ static func crear(datos_enemigo: DatosEnemigo, izquierda := -INF, derecha := INF
 	return enemigo
 
 
+## Fábrica desde una escena (escenas/entidades/raton.tscn, aspi.tscn): la instancia con sus datos y sus piezas.
+static func desde_escena(ruta: String, izquierda := -INF, derecha := INF) -> Enemigo:
+	var enemigo: Enemigo = load(ruta).instantiate()
+	enemigo.limite_izquierdo = izquierda
+	enemigo.limite_derecho = derecha
+	enemigo.armar()
+	return enemigo
+
+
 func _ready() -> void:
 	armar()
 	add_to_group(Componentes.ENEMIGOS)

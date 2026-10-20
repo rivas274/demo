@@ -48,6 +48,15 @@ func _init() -> void:
 	name = "Tirable"
 
 
+## Toma lo que dicen los datos del objeto (imagen, verbo, si aturde, logro y sonido).
+func configurar(datos: DatosObjeto) -> void:
+	arte = datos.tipo
+	verbo_indicador = datos.verbo
+	aturde = datos.aturde
+	logro = datos.logro
+	sonido = datos.sonido
+
+
 func _ready() -> void:
 	_inicio = _cuerpo().position
 	if ofrecer:

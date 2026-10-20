@@ -51,6 +51,9 @@ jobs:
       - name: Acciones de Felipe y sistemas del nivel (agenda, diálogo, indicador, rascador)
         run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_acciones.gd
 
+      - name: Piezas del juego (componentes y un enemigo armado solo con datos)
+        run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_componentes.gd
+
       - name: Partida completa (un bot termina el nivel 1 sin doble salto, Zoomies ni trepar)
         run: godot --headless --path siete-vidas/juego --fixed-fps 60 --script res://pruebas/partida.gd
 

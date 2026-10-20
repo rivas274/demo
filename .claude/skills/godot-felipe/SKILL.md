@@ -8,9 +8,20 @@ user-invocable: true
 
 Antes de tocar nada, lee `siete-vidas/juego/scripts/felipe.gd` en la parte que vas a cambiar y `siete-vidas/juego/README.md` (Reglas de código). Esta guía resume cómo está armado y las recetas que conviene seguir; si algo aquí contradice el código, manda el código y se corrige la guía.
 
+## 0. Arquitectura: piezas y datos (regla desde el 2026-10-20)
+
+Mapa, lista de piezas y recetas en `siete-vidas/memoria/07-arquitectura.md`. Reglas:
+
+- **Lo nuevo se arma con piezas y datos.** Un enemigo, objeto o nivel nuevo junta componentes de `scripts/componentes/` (Vida, RecibeGolpes, HaceDano, MovimientoPatrulla, Tirable, Aranable, OyeMaullido, Asustable, SueltaRecompensa, SombraContacto) y llena un recurso de `datos/` (`DatosEnemigo`, `DatosObjeto`) o las constantes de su nivel. Una maña nueva trabaja con la pieza (todo lo `Tirable`, todo lo `Asustable`), no con cada objeto.
+- **No heredar entidades.** El ratón y A.S.P.I. son el mismo `Enemigo` con otros datos; si algo necesita otro comportamiento, es una pieza nueva (o una apariencia), no una subclase. Solo se extienden las bases pensadas para eso (`GuionNivel`).
+- **Pedir piezas con `Componentes.de(nodo, Tipo)`**, no con `has_method`. Las piezas hablan por señales y no se conocen entre sí: las conecta quien las junta.
+- **Niveles:** el constructor `Nivel` (`scripts/nivel/`) arma cuartos, piezas, puertas, cámara y escalera desde `DatosNivel`; lo propio de cada nivel va en `scripts/niveles/nivel_N/` (datos, guion, arte).
+- **Nunca `preload()` de un `.tres` con script en una constante** (Godot 4.3 duplica la clase): `load()` al armar.
+- **Tope de tamaño:** ningún archivo pasa de ~600 líneas si se puede evitar; si crece, se separa lo que es claramente aparte (como el dibujo) sin partir una máquina de estados.
+
 ## 1. Cómo está armado Felipe
 
-- `Felipe` es un `CharacterBody2D`. Todo el movimiento va en `_physics_process`: leer entrada → `match estado` → ajustar `velocity` → `move_and_slide()` → `_actualizar_suelo()` → `_actualizar_animacion()`.
+- `Felipe` es un `CharacterBody2D`. Sus estados, el movimiento y el inicio de cada acción viven en `felipe.gd`; sus partes en `scripts/felipe/`: `EfectosFelipe` (`felipe.efectos`: estirar, inclinar, aterrizar, polvo, estela), `AnimadorFelipe` (`felipe.animador`: elige la animación sin cambiar el estado) y `ManasFelipe` (`felipe.manas`: lo que pasa en el cuadro de impacto y qué tiene al alcance). Sus corazones son la pieza `Vida` (nodo de `felipe.tscn`). Todo el movimiento va en `_physics_process`: leer entrada → `match estado` → ajustar `velocity` → `move_and_slide()` → `_actualizar_suelo()` → `_actualizar_animacion()`.
 - **Estado principal:** `enum Estado { SUELO, AIRE, ZOOMIES, ZARPAZO, COMIENDO, ATERRIZANDO, OCIO, DESMAYADO, ARANANDO, MAULLANDO, SUBIENDO_ESCALON, RONRONEANDO }` (12: el tope de la sección 3 antes de pensar en una máquina por nodos).
 - **Habilidades por nivel:** `tiene_doble_salto`, `tiene_zoomies` y `puede_trepar` (`@export`, apagadas por defecto: en el nivel 1 no están). Las pruebas que las usan las prenden explícitamente.
 - **Estados paralelos como booleanos:** `agachado` y `trepando` conviven con el enum (se puede estar en SUELO y agachado). Es la forma barata de una máquina paralela: no crees `Estado.AGACHADO`.
@@ -53,9 +64,9 @@ var _objeto_pendiente: Node2D
 
 func _ready() -> void:
 	# ...
-	sprite.frame_changed.connect(_al_cambiar_cuadro)
+	sprite.frame_changed.connect(manas.al_cambiar_cuadro)
 
-func _al_cambiar_cuadro() -> void:
+func al_cambiar_cuadro() -> void:  # en ManasFelipe
 	if sprite.animation == "zarpazo" and sprite.frame == CUADRO_IMPACTO_ZARPAZO:
 		_golpear()
 		if is_instance_valid(_objeto_pendiente):
@@ -64,15 +75,15 @@ func _al_cambiar_cuadro() -> void:
 		sonido.emit("zarpazo")
 ```
 
-Así está hecho desde el 2026-10-19 (`Felipe._al_cambiar_cuadro`): zarpazo y manotazo en el cuadro 4 (`dar_manotazo(al_impacto)` recibe lo que pasa cuando la pata llega), comer en el 3 (la comida desaparece con `al_comido()`), arañar en el 3 y el 5 (`al_aranar(felipe)` del objetivo) y maullar en el 3. La señal `impacto(tipo)` sirve para el congelado del `Jugo`. `prueba_acciones.gd` comprueba que nada pase antes de su cuadro.
+Así está hecho desde el 2026-10-19 (`ManasFelipe.al_cambiar_cuadro`): zarpazo y manotazo en el cuadro 4 (`dar_manotazo(al_impacto)` recibe lo que pasa cuando la pata llega), comer en el 3 (la comida desaparece con `al_comido()`), arañar en el 3 y el 5 (`al_aranar(felipe)` del objetivo) y maullar en el 3. La señal `impacto(tipo)` sirve para el congelado del `Jugo`. `prueba_acciones.gd` comprueba que nada pase antes de su cuadro.
 
-Otras reglas: `animation_finished` solo para animaciones sin bucle; no llames `play()` cada cuadro (usa `_reproducir()`, que ya lo evita); para poses sueltas, `_poner_cuadro()`.
+Otras reglas: `animation_finished` solo para animaciones sin bucle; no llames `play()` cada cuadro (usa `animador.reproducir()`, que ya lo evita); para poses sueltas, `animador.poner_cuadro()`.
 
 ## 5. Tweens (estirar, aplastar, inclinar)
 
-- Hay un solo tween de efectos, `_efecto`: **mátalo antes de crear otro** (`if _efecto: _efecto.kill()`), o dos tweens pelean por `scale` y Felipe tiembla.
+- Hay un solo tween de efectos, `efectos.tween` (EfectosFelipe): **mátalo antes de crear otro** (`efectos.detener()`), o dos tweens pelean por `scale` y Felipe tiembla.
 - Toda deformación pasa por el límite: `forma.clamp(Vector2.ONE * (1.0 - DEFORMACION_MAXIMA), Vector2.ONE * (1.0 + DEFORMACION_MAXIMA))`. Más de ±8 % deforma la cabeza.
-- Multiplica por `_escala_base()` (incluye 0.72), nunca por 1.
+- Multiplica por `efectos.escala_base()` (incluye 0.72), nunca por 1.
 - Movimiento natural: `set_trans(Tween.TRANS_BACK)` o `TRANS_CUBIC` con `set_ease(Tween.EASE_OUT)`; lineal se ve robótico.
 - En pausa: los nodos con `PROCESS_MODE_ALWAYS` (pantallas, medidores, `PresentacionJefe`) siguen animando; si un tween debe correr en pausa, créalo desde uno de ellos.
 - Para hacer algo al terminar, `tween_callback()` en vez de `await` si el nodo puede desaparecer antes.
@@ -93,7 +104,7 @@ Durante la pelea: **anticipación** antes de cada ataque (se echa atrás, vibra,
 
 ## 6. Cámara
 
-- `Camara` (`Camera2D`) es hija de Felipe, con suavizado (`position_smoothing_speed = 7`). `Sala` le pone los límites de cada habitación al cruzar una puerta: la cámara nunca muestra otro cuarto.
+- `Camara` (`Camera2D`) es hija de Felipe, con suavizado (`position_smoothing_speed = 7`). El `Nivel` le pone los límites de cada habitación al cruzar una puerta: la cámara nunca muestra otro cuarto.
 - Los jefes usan la cámara y la sacudida de `PresentacionJefe` (`sacudir(segundos)`); no hagas otra presentación ni otra sacudida por jefe (`CLAUDE.md`).
 - Si una acción pide temblor (un objeto pesado que cae), suma una sacudida corta y pequeña (pocos px, menos de 0,3 s); en pixel art, desplazamientos enteros para no emborronar.
 - Mirar adelante (*look-ahead*): desplazar `offset.x` hacia donde mira Felipe, en `_process`, con un tope pequeño. Proponlo antes; cambia cómo se leen los saltos.
@@ -116,6 +127,7 @@ Mismas recetas, pero en `siete-vidas/prototipos/<nombre>/` con archivos copiados
 godot --headless --path siete-vidas/juego --import
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_movimiento.gd
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_mecanicas.gd
+godot --headless --path siete-vidas/juego --script res://pruebas/prueba_componentes.gd
 godot --headless --path siete-vidas/juego --fixed-fps 60 --script res://pruebas/partida.gd
 ```
 

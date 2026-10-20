@@ -66,3 +66,5 @@ Todo jefe se presenta con el componente reutilizable `PresentacionJefe` (`siete-
 ## Juego en Godot
 
 El proyecto está en `siete-vidas/juego/` (Godot 4.3, GDScript con tipos). Antes de subir cambios al juego, corre la prueba de movimiento (ver `siete-vidas/juego/README.md`). Si Godot no está instalado en la sesión, instálalo como indica `siete-vidas/memoria/03-arte-y-herramientas.md`.
+
+**Arquitectura (regla):** lo nuevo se arma con piezas (componentes) y datos, sin heredar entidades y sin archivos de más de ~600 líneas; cómo y recetas en `siete-vidas/memoria/07-arquitectura.md`.

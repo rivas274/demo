@@ -12,6 +12,7 @@ Esta carpeta guarda lo que ya se decidió, para que cualquier sesión nueva reto
 | [02-guia-felipe.md](02-guia-felipe.md) | Guía del personaje principal (model sheet en texto) |
 | [03-arte-y-herramientas.md](03-arte-y-herramientas.md) | Resolución, estilo visual, SpriteCook, créditos y assets generados |
 | [04-pendientes.md](04-pendientes.md) | Qué falta y en qué orden |
+| [07-arquitectura.md](07-arquitectura.md) | **Cómo está armado el juego:** piezas (componentes), datos y escenas; recetas para un enemigo, un objeto o el nivel 2 |
 | [../diseno/pilares.md](../diseno/pilares.md) | **Fantasía y pilares del juego** (aprobados): desempatan toda decisión |
 | [../diseno/reglas-de-niveles.md](../diseno/reglas-de-niveles.md) | Reglas para diseñar niveles (se validan con `prueba_reglas_nivel.gd`) |
 

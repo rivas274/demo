@@ -31,7 +31,9 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [x] `caminar` nuevo de Felipe con pasos largos (2026-10-19, SpriteCook `pixel-engine-v1.5` desde Felipe A, 26 créditos): pie apoyado 3,6 px del juego por cuadro, el ciclo va a 33 cuadros/s a 120 px/s (antes 1,8 px y tope de 34; G9). La hoja vieja (`felipe-walk-sheet.png`) queda en reserva por pedido del creador.
 - [ ] Opcional (Gemini o SpriteCook): transiciones de Valeria (pararse del sofá, agacharse) y "tomar café"; hoy son fundidos cruzados de 0,2 s y respiración por código.
 - [ ] Animación `entrar_puerta` (G8): el creador decidió no pedirla todavía; las puertas siguen con fundido.
-- [ ] Intimidar (G9): queda para el Barrio Viejo (decisión del creador).
+- [ ] Intimidar (G9): queda para el Barrio Viejo (decisión del creador). La pieza `Asustable` ya está lista en el ratón y A.S.P.I. (`07-arquitectura.md`): la maña solo tiene que llamar `asustar(felipe)` a las que estén cerca.
+- [x] Arquitectura por piezas y datos (2026-10-20, `07-arquitectura.md`).
+- [ ] Opcional: partir `valeria.gd` (727 líneas: su dibujo decide su pose y separarlo sin cambiar nada pide cuidado) y `batalla_aspi.gd` (739: sus ataques) para quedar bajo ~600.
 - [ ] Opcional: animación `sentarse` desde Felipe A (SpriteCook, 20 créditos) para la baranda del balcón (M6; hoy se queda quieto y se acicala).
 - [ ] Sonidos finales (hoy sintetizados con `sonidos_demo.py`, incluidos maullido, arañar, ronroneo y resorte) y sonido de casa (G13); música de la pelea.
 - [ ] Ajustar la dificultad de la fase 3 con una persona (el bot llega con 1 a 5 corazones).

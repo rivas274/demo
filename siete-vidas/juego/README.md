@@ -29,16 +29,22 @@ Demo jugable de **Felipe: Nueve Vidas, Cero Disculpas**: el primer nivel, **"La 
 
 ## Estructura
 
+Arquitectura por piezas y datos (2026-10-20): mapa completo, lista de piezas y recetas en `siete-vidas/memoria/07-arquitectura.md`.
+
 | Carpeta | Contenido |
 | --- | --- |
-| `escenas/` | `apartamento.tscn` (apartamento de prueba de 1920×454, escena principal) y `felipe.tscn` |
-| `scripts/` | `felipe.gd` (movimiento y efectos), `animaciones_felipe.gd` (arma las animaciones desde las hojas), `sala.gd` (sala armada desde datos, con muebles provisionales), `fondo_apartamento.gd` (fondo provisional en capas con parallax), `comida.gd` (comida que se come con el botón de acción), `vaso.gd` (se tira de la mesa: logro), `aspi.gd` (A.S.P.I., primer enemigo), `medidores.gd` (corazones, vidas, báscula y logros), `pantallas.gd` (título, intro, pausa, final y avisos del tutorial), `raton.gd`, `caja_carton.gd`, `calcetin.gd`, `laser.gd` |
-| `assets/sonidos/` | Sonidos provisionales generados con `siete-vidas/herramientas/sonidos_demo.py` |
-| `assets/felipe/` | Hojas de animación de Felipe (8 cuadros de 106×106) |
-| `scripts/` (nivel 1 v4) | `sala.gd` (datos y armado del nivel: cuartos, puertas, arte medido, colisiones, lecciones, agenda, escalera, balcón), `valeria.gd` (Valeria: poses, caminar, regaña, perdona, graba; testigo y oyente), `ensayo_aspi.gd` (A.S.P.I. limpia el vaso del pasillo sin hacer daño), `batalla_aspi.gd` y `presentacion_jefe.gd` (pelea y entrada de 8 pasos reutilizable), `reja.gd` (reja anti-fuga con pestillo), `puerta.gd` (puertas abierta, cerrada, entornada, vano y balcón), `interactivo.gd` (cajón, ropa), `oido_puerta.gd` (Valeria oye maullar del otro lado de la puerta) |
-| `scripts/` (sistemas del nivel) | `travesuras.gd` (los junta y conecta con Felipe), `agenda.gd` (Agenda de Su Majestad, datos del nivel 1), `recompensas.gd` (nido, galería, bolsillo, caminos), `libreta.gd`, `hud.gd` (contadores y carteles), `resumen_dia.gd`, `dialogo.gd` y `frases.gd` (retratos, una sola cola), `retrato_valeria.gd` (provisional), `jugo.gd`, `indicador.gd` e `iconos_botones.gd` (Kenney), `recogible.gd`, `aranable.gd` (sofá, puerta entornada), `rascador.gd` (teatro para Valeria; interfaz de testigo), `chispas.gd` (garras afiladas) |
-| `assets/kenney/`, `assets/personajes/` | Íconos de botones (Kenney, CC0; ver `assets/CREDITOS.md`), retratos de Valeria y A.S.P.I., y las poses y el caminar de Valeria (`valeria_*.png`) |
-| `pruebas/` | Pruebas automáticas (movimiento, escenario, mecánicas, nivel, reglas de diseño, jefe, acciones y sistemas del nivel), `partida.gd` (un bot que juega el nivel completo con los botones de una persona, sin habilidades extra, y sirve para grabar video), `demo_salto.gd` (tramo corto de la sala con entrada fija para grabar el salto antes y después de un ajuste) y capturas (`capturas.gd`, `capturas_sistemas.gd`, `capturas_nivel.gd`) |
+| `escenas/` | `nivel_1.tscn` (escena principal: raíz `Nivel`, `Felipe`, `Interfaz` y el `Guion` del nivel 1) y `felipe.tscn` (con su pieza `Vida`) |
+| `escenas/entidades/` | `raton.tscn`, `aspi.tscn`, `caja_carton.tscn`, `comida.tscn`, `objeto_tirable.tscn` |
+| `datos/` | Datos en recursos `.tres`: `enemigos/` (ratón, A.S.P.I.) y `objetos/` (vaso, taza, maceta, llaves, tazón, pollo) |
+| `scripts/componentes/` | Piezas con un solo trabajo: `Vida`, `RecibeGolpes`, `HaceDano`, `MovimientoPatrulla`, `Tirable`, `Aranable`, `OyeMaullido`, `Asustable`, `SueltaRecompensa`, `SombraContacto`, `Interactivo` y el ayudante `Componentes` |
+| `scripts/entidades/` | `Enemigo` (ratón y A.S.P.I.: el mismo script con otros datos), `Apariencia`, `AparienciaAspi`, `Objeto` (lo que se tira) |
+| `scripts/datos/` | `DatosEnemigo`, `DatosObjeto` |
+| `scripts/nivel/` | Constructor genérico de niveles (`Nivel`), `DatosNivel`, `GuionNivel` (base del guion de cada nivel), `SombrasVivas` |
+| `scripts/niveles/nivel_1/` | Nivel 1: `Nivel1` (datos), `GuionNivel1` (eventos y reacciones), `ValeriaPorLaCasa`, `FinalBalcon`, `ArteNivel1`, `DecoradoNivel1` |
+| `scripts/felipe.gd`, `scripts/felipe/` | Felipe (estados, movimiento, acciones) y sus partes: `EfectosFelipe`, `AnimadorFelipe`, `ManasFelipe`; `animaciones_felipe.gd` arma las animaciones desde las hojas |
+| `scripts/` (resto) | Personajes y sistemas: `valeria.gd`, `batalla_aspi.gd` y `dibujo_batalla_aspi.gd`, `presentacion_jefe.gd`, `ensayo_aspi.gd`, `cajas_mudanza.gd`, `caja_carton.gd`, `comida.gd`, `puerta.gd`, `rascador.gd`, `laser.gd`, `recogible.gd`, `travesuras.gd`, `agenda.gd`, `recompensas.gd`, `libreta.gd`, `hud.gd`, `resumen_dia.gd`, `dialogo.gd`, `frases.gd`, `jugo.gd`, `indicador.gd`, `iconos_botones.gd`, `anuncios.gd`, `capas.gd`, `arte_nivel.gd`, `fondo_apartamento.gd`, `luz_cuarto.gd`, `medidores.gd`, `pantallas.gd` |
+| `assets/` | Sonidos provisionales, hojas de Felipe, arte del nivel 1 (`nivel1/`), personajes, luz y Kenney (créditos en `assets/CREDITOS.md`) |
+| `pruebas/` | Pruebas automáticas (movimiento, escenario, mecánicas, nivel, reglas de diseño, jefe, acciones, componentes), el bot `partida.gd`, `demo_salto.gd` y capturas (`capturas.gd`, `capturas_sistemas.gd`, `capturas_nivel.gd`, `capturas_luz.gd`) |
 
 ## Comandos
 
@@ -51,6 +57,7 @@ godot --headless --path siete-vidas/juego --script res://pruebas/prueba_nivel.gd
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_reglas_nivel.gd  # reglas de siete-vidas/diseno/reglas-de-niveles.md
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_jefe.gd  # pelea con A.S.P.I.
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_acciones.gd  # maullar, arañar, snacks, escalera, rascador, agenda, diálogo, indicador
+godot --headless --path siete-vidas/juego --script res://pruebas/prueba_componentes.gd  # las piezas por separado y un enemigo armado solo con datos
 # Capturas a 640×360 del Indicador, el diálogo, la libreta, los carteles y el resumen:
 xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/capturas_sistemas.gd -- /tmp/capturas
 # Capturas de cada cuarto (agregar --debug-collisions para ver las colisiones sobre el arte):
@@ -65,10 +72,10 @@ ffmpeg -framerate 30 -i /tmp/video/c%08d.png -i /tmp/video/c.wav -vf scale=1280:
 ## Reglas de código
 
 - GDScript con tipos en todo (`var x := 1.0`, `-> void`), nombres en español.
-- Datos separados de la lógica: animaciones en `AnimacionesFelipe.HOJAS`, salas en `Sala.PIEZAS`, valores de movimiento como `@export`.
+- **Piezas y datos:** lo nuevo se arma con componentes y datos (`.tres` o constantes del nivel), sin heredar entidades y sin archivos de más de ~600 líneas (`siete-vidas/memoria/07-arquitectura.md`). Animaciones en `AnimacionesFelipe.HOJAS`, niveles en `Nivel1.PIEZAS` y compañía, valores de movimiento como `@export`.
 - Resolución base 640×360 con escala entera y filtro nítido; nada de suavizado en sprites.
 - Cada cambio de movimiento debe pasar `prueba_movimiento.gd`; si se agrega una mecánica, se agrega su comprobación.
 - **El salto del juego debe seguir las reglas de la ficha de concepto** (fases y cuadros en las constantes `CUADRO_*` de `felipe.gd`): sube estirado, arriba recoge las patas, cae en picada con la pose "caer" (delanteras estiradas hacia el suelo), toca primero con las delanteras (pose de contacto), después baja la parte de atrás y se aplasta, con polvo y estela. `prueba_movimiento.gd` comprueba estas reglas; no las quites.
-- **Arte provisional:** el escenario es una prueba de concepto dibujada con código. El arte final se cambia después en `FondoApartamento` y en `Sala._dibujar_mueble`, sin tocar colisiones ni lógica.
+- **Arte provisional:** el escenario es una prueba de concepto dibujada con código. El arte final se cambia después en `FondoApartamento` y en el arte de cada nivel (`ArteNivel1`), sin tocar colisiones ni lógica.
 - **Parallax:** el fondo va en capas `Parallax2D` definidas en `FondoApartamento.CAPAS` (cielo 0.05, ciudad lejana 0.2, ciudad cercana 0.45, pared y juego 1.0, primer plano 1.3). `prueba_escenario.gd` comprueba que cada capa siga a la cámara en su proporción y que todos los muebles se puedan alcanzar saltando; al mover muebles, debe seguir pasando.
-- **Proporciones:** Felipe mide 67 px de alto (`Felipe.ESCALA_SPRITE` = 0.72) y el mundo va a 1,21 px por cm con muebles de medidas reales (ver los comentarios de `Sala.PIEZAS`). Si cambia el tamaño de Felipe, escalar en la misma proporción su colisión, cámara, velocidades y gravedad. `prueba_movimiento.gd` comprueba su altura.
+- **Proporciones:** Felipe mide 67 px de alto (`Felipe.ESCALA_SPRITE` = 0.72) y el mundo va a 1,21 px por cm con muebles de medidas reales (ver los comentarios de `Nivel1.PIEZAS`). Si cambia el tamaño de Felipe, escalar en la misma proporción su colisión, cámara, velocidades y gravedad. `prueba_movimiento.gd` comprueba su altura.

@@ -4,7 +4,9 @@ extends SceneTree
 ##   xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/capturas_sistemas.gd -- <carpeta>
 
 var _carpeta := "user://capturas"
-var sala: Sala
+var sala: Nivel
+## Lo propio del nivel 1 (Valeria, A.S.P.I., la pelea, las cajas...).
+var guion: GuionNivel1
 var felipe: Felipe
 
 
@@ -17,15 +19,16 @@ func _initialize() -> void:
 
 
 func _correr() -> void:
-	sala = load("res://escenas/apartamento.tscn").instantiate()
+	sala = load("res://escenas/nivel_1.tscn").instantiate()
+	guion = sala.guion
 	sala.mostrar_titulo = false
-	sala.peligros_activos = false
+	guion.peligros_activos = false
 	root.add_child(sala)
 	felipe = sala.get_node("Felipe")
 	var t := sala.travesuras
 	await _esperar(40)
 	# 1. Junto al sofá: contorno, burbuja "Firmar" y la primera línea de Felipe con el ícono del botón.
-	await _poner_en(Vector2(300, Sala.SUELO))
+	await _poner_en(Vector2(300, Nivel1.SUELO))
 	await _esperar(40)
 	await _capturar("1-indicador-sofa-y-dialogo")
 	# 2. En la mesa, junto al vaso: contorno con la forma del dibujo y "Liberar".
@@ -42,7 +45,7 @@ func _correr() -> void:
 	await _capturar("3-cartel-y-valeria")
 	# 4. Maullido: cuadro de boca abierta y ¡MIAU!
 	t.dialogo.limpiar()
-	await _poner_en(Vector2(120, Sala.SUELO))
+	await _poner_en(Vector2(120, Nivel1.SUELO))
 	await _esperar(150)
 	Input.action_press("maullar")
 	await _esperar(2)

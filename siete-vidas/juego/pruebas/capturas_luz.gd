@@ -5,7 +5,7 @@ extends SceneTree
 var _carpeta := "user://capturas_luz"
 var _con_luz := true
 
-const PUNTOS := [["sofa", Vector2(300, Sala.SUELO)], ["comedor", Vector2(1000, Sala.SUELO)]]
+const PUNTOS := [["sofa", Vector2(300, Nivel1.SUELO)], ["comedor", Vector2(1000, Nivel1.SUELO)]]
 
 
 func _initialize() -> void:
@@ -19,11 +19,12 @@ func _initialize() -> void:
 
 
 func _correr() -> void:
-	var sala: Sala = load("res://escenas/apartamento.tscn").instantiate()
+	var sala: Nivel = load("res://escenas/nivel_1.tscn").instantiate()
+	var guion: GuionNivel1 = sala.guion
 	sala.mostrar_titulo = false
-	sala.batalla_con_jefe = false
+	guion.batalla_con_jefe = false
 	if "luz_activa" in sala:
-		sala.set("luz_activa", _con_luz)
+		guion.luz_activa = _con_luz
 	root.add_child(sala)
 	var felipe: Felipe = sala.get_node("Felipe")
 	await _esperar(30)

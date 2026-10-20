@@ -77,7 +77,7 @@ var actividad := Actividad.DE_PIE:
 		if valor != actividad:
 			actividad = valor
 			queue_redraw()
-## Habitación donde está (Sala.habitacion_de no sirve cuando está FUERA).
+## Habitación donde está (Nivel1.habitacion_de no sirve cuando está FUERA).
 var cuarto := ""
 ## Hacia dónde mira (1 derecha, -1 izquierda). Para girar con transición, girar().
 var mirando := 1.0
@@ -203,8 +203,8 @@ func caminar_a(x: float, al_llegar := Callable()) -> void:
 	# lugar (fundido) y recién después echa a andar: el fundido nunca se arrastra detrás de ella.
 	if actividad not in [Actividad.CAMINANDO, Actividad.DE_PIE, Actividad.PUERTA, Actividad.FUERA]:
 		_espera = maxf(_espera, TRANSICION)
-	global_position.y = Sala.SUELO
-	_destino = Vector2(x, Sala.SUELO)
+	global_position.y = Nivel1.SUELO
+	_destino = Vector2(x, Nivel1.SUELO)
 	_al_llegar = al_llegar
 	if actividad != Actividad.CAMINANDO:
 		recorrido = 0.0
@@ -242,7 +242,7 @@ func salir_por(puerta: Puerta, al_salir := Callable(), soltar := true) -> void:
 func entrar_por(puerta: Puerta, en_cuarto: String, hacia := 1.0, al_entrar := Callable(), quedarse_en_vano := false) -> void:
 	_destino = Vector2.INF
 	_al_llegar = Callable()
-	global_position = Vector2(puerta.global_position.x, Sala.SUELO)
+	global_position = Vector2(puerta.global_position.x, Nivel1.SUELO)
 	cuarto = en_cuarto
 	cruces += 1
 	mirando = hacia
@@ -329,12 +329,12 @@ func _girar_hacia_felipe() -> void:
 
 ## Una x donde pararse que no esté en ninguna puerta (rectángulo sagrado) ni fuera del cuarto.
 func lugar_seguro(x: float) -> float:
-	var rect := Sala.rect_de(cuarto)
+	var rect := Nivel1.rect_de(cuarto)
 	x = clampf(x, rect.position.x + 40.0, rect.end.x - 40.0)
 	for centro in puertas_x:
-		if absf(x - centro) < Sala.MEDIO_RECT_PUERTA + 34.0 and Sala.habitacion_de(Vector2(centro, Sala.SUELO)) == cuarto:
-			var izquierda := centro - Sala.MEDIO_RECT_PUERTA - 36.0
-			var derecha := centro + Sala.MEDIO_RECT_PUERTA + 36.0
+		if absf(x - centro) < Nivel1.MEDIO_RECT_PUERTA + 34.0 and Nivel1.habitacion_de(Vector2(centro, Nivel1.SUELO)) == cuarto:
+			var izquierda := centro - Nivel1.MEDIO_RECT_PUERTA - 36.0
+			var derecha := centro + Nivel1.MEDIO_RECT_PUERTA + 36.0
 			x = izquierda if absf(x - izquierda) < absf(x - derecha) else derecha
 			if x < rect.position.x + 40.0 or x > rect.end.x - 40.0:
 				x = derecha if x == izquierda else izquierda
@@ -410,14 +410,14 @@ func _seguir_pose(nueva: String) -> void:
 ## De pie (regañando, caminando, grabando...) nunca queda encima de un mueble: los pies van al piso (G2).
 func _pies_en_el_piso() -> void:
 	if actividad != Actividad.SENTADA and actividad != Actividad.FUERA:
-		global_position.y = Sala.SUELO
+		global_position.y = Nivel1.SUELO
 
 
 ## ¿Está mirando ese punto? (interfaz de testigo del rascador; también la usa el nivel para el sofá).
 func ve(punto: Vector2) -> bool:
 	if actividad in [Actividad.FUERA, Actividad.PERDONANDO, Actividad.PUERTA] or not visible:
 		return false
-	if Sala.habitacion_de(punto) != cuarto:
+	if Nivel1.habitacion_de(punto) != cuarto:
 		return false
 	var dx := punto.x - global_position.x
 	if actividad == Actividad.GRABANDO:
@@ -496,7 +496,7 @@ func oir_maullido(felipe: Felipe) -> void:
 	if ahora - _ultimo_maullido < 4.0:
 		return
 	_ultimo_maullido = ahora
-	if Sala.habitacion_de(felipe.global_position) == cuarto and actividad in [Actividad.SENTADA, Actividad.DE_PIE]:
+	if Nivel1.habitacion_de(felipe.global_position) == cuarto and actividad in [Actividad.SENTADA, Actividad.DE_PIE]:
 		_girar_hacia_felipe()
 		if travesuras:
 			travesuras.decir_valeria("maullido")
@@ -515,7 +515,7 @@ func llevar_al_rascador(felipe: Felipe, x_rascador: float) -> void:
 	felipe.set_physics_process(false)
 	var vuelo := felipe.create_tween()
 	var desde := felipe.global_position
-	var hasta := Vector2(x_rascador, Sala.SUELO)
+	var hasta := Vector2(x_rascador, Nivel1.SUELO)
 	vuelo.tween_method(func(t: float) -> void:
 		felipe.global_position = desde.lerp(hasta, t) + Vector2(0, -sin(t * PI) * 60.0), 0.0, 1.0, 0.55)
 	vuelo.tween_callback(func() -> void:
@@ -533,7 +533,7 @@ func disponible(_felipe_que_pregunta: Felipe) -> bool:
 
 
 func punto_para(desde: Vector2) -> Vector2:
-	return Vector2(global_position.x, Sala.SUELO) if desde.y > Sala.SUELO - 40.0 else Vector2(global_position.x, -9999)
+	return Vector2(global_position.x, Nivel1.SUELO) if desde.y > Nivel1.SUELO - 40.0 else Vector2(global_position.x, -9999)
 
 
 func interactuar(felipe: Felipe) -> void:

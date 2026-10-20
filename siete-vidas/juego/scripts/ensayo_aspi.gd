@@ -16,21 +16,21 @@ enum Paso { ESPERANDO, VA, LIMPIA, VUELVE, LISTO }
 var paso := Paso.ESPERANDO
 var aspi: Enemigo
 var mancha_x := INF
-var sala: Sala
+var sala: Nivel
 var _puerta: Vector2
 var _reloj := 0.0
 var _dijo_ancla := false
 
 
-func _init(nivel: Sala, puerta: Vector2) -> void:
+func _init(nivel: Nivel, puerta: Vector2) -> void:
 	sala = nivel
 	_puerta = puerta
 	name = "Ensayo de A.S.P.I."
 
 
 func _ready() -> void:
-	var cuarto := Sala.rect_de("pasillo")
-	aspi = Enemigo.desde_escena(Sala.ESCENA_ASPI, cuarto.position.x + 40.0, cuarto.end.x - 40.0)
+	var cuarto := Nivel1.rect_de("pasillo")
+	aspi = Enemigo.desde_escena(Nivel1.ESCENA_ASPI, cuarto.position.x + 40.0, cuarto.end.x - 40.0)
 	aspi.name = "ASPI del ensayo"
 	aspi.dano.activo = false
 	aspi.patrulla.vision = 0.0
@@ -44,14 +44,14 @@ func _ready() -> void:
 	dibujo.z_index = Capas.MUEBLES
 	dibujo.draw.connect(func() -> void:
 		if mancha_x != INF and paso in [Paso.ESPERANDO, Paso.VA, Paso.LIMPIA]:
-			ArteNivel.dibujar(dibujo, "mancha", mancha_x, Sala.SUELO + 2.0)
+			ArteNivel.dibujar(dibujo, "mancha", mancha_x, Nivel1.SUELO + 2.0)
 		if paso == Paso.LIMPIA:
 			var t := Time.get_ticks_msec() / 1000.0
 			for i in 10:
 				var lado := -1.0 if i % 2 == 0 else 1.0
 				var avance := fmod(t * 1.4 + i * 0.37, 1.0)
 				var x := aspi.global_position.x + lado * (1.0 - avance) * RADIO
-				var y := Sala.SUELO - 6.0 - fmod(i * 23.0, 60.0)
+				var y := Nivel1.SUELO - 6.0 - fmod(i * 23.0, 60.0)
 				dibujo.draw_line(Vector2(x, y), Vector2(x + lado * 16.0, y), Color(Color("dff3ff"), 0.7 * avance), 1.5))
 	add_child(dibujo)
 

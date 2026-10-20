@@ -146,7 +146,7 @@ func _objetivo_apertura() -> float:
 func arte_indicador() -> Dictionary:
 	if escalera:
 		return {}
-	return ArteNivel.arte_en(self, arte(), 0.0, -Sala.FONDO_PISO)
+	return ArteNivel.arte_en(self, arte(), 0.0, -Nivel.FONDO_PISO)
 
 
 func _physics_process(delta: float) -> void:
@@ -198,9 +198,9 @@ func _dibujar_grosor_muro(fondo: float, alto_arte: float) -> void:
 func _draw() -> void:
 	if escalera:
 		return
-	# Piso con profundidad: la puerta está en la pared (su umbral en Sala.PARED_BASE, FONDO_PISO px más arriba que el
+	# Piso con profundidad: la puerta está en la pared (su umbral en Nivel1.PARED_BASE, FONDO_PISO px más arriba que el
 	# nodo, que queda en la línea de apoyo) y el piso se ve delante de ella.
-	var fondo := -Sala.FONDO_PISO
+	var fondo := -Nivel.FONDO_PISO
 	var nombre := arte()
 	var textura := ArteNivel.textura(nombre)
 	var alto_arte := textura.get_size().y if textura else ALTO_MAXIMO

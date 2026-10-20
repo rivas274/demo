@@ -20,9 +20,10 @@ func _initialize() -> void:
 
 
 func _correr() -> void:
-	var sala: Node2D = load("res://escenas/apartamento.tscn").instantiate()
+	var sala: Node2D = load("res://escenas/nivel_1.tscn").instantiate()
+	var guion: GuionNivel1 = sala.guion
 	sala.mostrar_titulo = false
-	sala.batalla_con_jefe = false
+	guion.batalla_con_jefe = false
 	root.add_child(sala)
 	var felipe: Felipe = sala.get_node("Felipe")
 	var fondo: Node = sala.get_node("Fondo")
@@ -42,7 +43,7 @@ func _correr() -> void:
 
 	var antes := _posiciones_en_pantalla(sala, capas)
 	# Arriba del librero del recibidor: la cámara cambia de habitación y sube.
-	felipe.position = Vector2(2214, Sala.SUELO - 218)
+	felipe.position = Vector2(2214, Nivel1.SUELO - 218)
 	await _esperar(180)
 	var despues := _posiciones_en_pantalla(sala, capas)
 	var movimiento_juego: Vector2 = despues[0] - antes[0]
@@ -97,16 +98,16 @@ func _posiciones_en_pantalla(sala: Node2D, capas: Array[Parallax2D]) -> Array[Ve
 ## Desde el piso, cada superficie donde Felipe puede pararse debe quedar a menos de un doble salto de otra ya alcanzada.
 func _comprobar_alcanzables() -> void:
 	var superficies: Array[Rect2] = []
-	for pieza: Array in Sala.PIEZAS:
+	for pieza: Array in Nivel1.PIEZAS:
 		if not pieza[3] in SIN_ALCANZAR:
 			superficies.append(pieza[0])
 	# El piso de cada habitación (se llega por sus puertas).
 	var alcanzadas: Array[Rect2] = []
-	for habitacion: Array in Sala.HABITACIONES:
+	for habitacion: Array in Nivel1.HABITACIONES:
 		var cuarto: Rect2 = habitacion[0]
-		alcanzadas.append(Rect2(cuarto.position.x, Sala.SUELO, cuarto.size.x, 0))
+		alcanzadas.append(Rect2(cuarto.position.x, Nivel1.SUELO, cuarto.size.x, 0))
 	# En el nivel 1 no se trepa nada (Felipe.puede_trepar apagado).
-	_comprobar(Sala.TREPABLES.is_empty(), "No hay nada que trepar en el nivel 1 (se gana con Afilar Garras)")
+	_comprobar(Nivel1.TREPABLES.is_empty(), "No hay nada que trepar en el nivel 1 (se gana con Afilar Garras)")
 	var hubo_cambio := true
 	while hubo_cambio:
 		hubo_cambio = false
@@ -116,12 +117,12 @@ func _comprobar_alcanzables() -> void:
 			for desde in alcanzadas:
 				var subida := desde.position.y - superficie.position.y
 				var hueco := maxf(0.0, maxf(superficie.position.x - desde.end.x, desde.position.x - superficie.end.x))
-				var misma_habitacion := Sala.habitacion_de(superficie.get_center()) == Sala.habitacion_de(desde.get_center())
+				var misma_habitacion := Nivel1.habitacion_de(superficie.get_center()) == Nivel1.habitacion_de(desde.get_center())
 				if misma_habitacion and subida <= SUBIDA_MAXIMA and hueco <= HUECO_MAXIMO:
 					alcanzadas.append(superficie)
 					hubo_cambio = true
 					break
-	for pieza: Array in Sala.PIEZAS:
+	for pieza: Array in Nivel1.PIEZAS:
 		if not pieza[3] in SIN_ALCANZAR:
 			_comprobar(pieza[0] in alcanzadas, "Se puede llegar sin doble salto a: %s" % pieza[2])
 		elif pieza[3] == "lugar_visto":
@@ -132,31 +133,31 @@ func _comprobar_alcanzables() -> void:
 ## (sin doble salto ni trepar). La reja no cuenta como pared: desde adentro se abre (atajo) y desde afuera se salta.
 func _comprobar_sin_trampas() -> void:
 	var superficies: Array[Rect2] = []
-	for habitacion: Array in Sala.HABITACIONES:
+	for habitacion: Array in Nivel1.HABITACIONES:
 		var cuarto: Rect2 = habitacion[0]
 		var cortes: Array[Vector2] = []
-		for pieza: Array in Sala.PIEZAS:
+		for pieza: Array in Nivel1.PIEZAS:
 			var r: Rect2 = pieza[0]
 			if pieza[1] or pieza[3] == "invisible" or not cuarto.grow(1).intersects(r):
 				continue
-			if Sala.SUELO - r.end.y < 36.0:
+			if Nivel1.SUELO - r.end.y < 36.0:
 				cortes.append(Vector2(r.position.x, r.end.x))
 		cortes.sort_custom(func(a: Vector2, b: Vector2) -> bool: return a.x < b.x)
 		var x := cuarto.position.x
 		for corte in cortes:
 			if corte.x - x >= 40.0:
-				superficies.append(Rect2(x, Sala.SUELO, corte.x - x, 0))
+				superficies.append(Rect2(x, Nivel1.SUELO, corte.x - x, 0))
 			x = maxf(x, corte.y)
 		if cuarto.end.x - x >= 40.0:
-			superficies.append(Rect2(x, Sala.SUELO, cuarto.end.x - x, 0))
-	for pieza: Array in Sala.PIEZAS:
+			superficies.append(Rect2(x, Nivel1.SUELO, cuarto.end.x - x, 0))
+	for pieza: Array in Nivel1.PIEZAS:
 		if not pieza[3] in SIN_ALCANZAR:
 			superficies.append(Rect2(pieza[0].position, Vector2(pieza[0].size.x, 0)))
 	var vecinos := {}
 	for i in superficies.size():
 		vecinos[i] = []
 		for j in superficies.size():
-			if i == j or Sala.habitacion_de(superficies[i].position + Vector2(1, -1)) != Sala.habitacion_de(superficies[j].position + Vector2(1, -1)):
+			if i == j or Nivel1.habitacion_de(superficies[i].position + Vector2(1, -1)) != Nivel1.habitacion_de(superficies[j].position + Vector2(1, -1)):
 				continue
 			var a := superficies[i]
 			var b := superficies[j]
@@ -164,7 +165,7 @@ func _comprobar_sin_trampas() -> void:
 			var subida := a.position.y - b.position.y
 			if (subida <= SUBIDA_MAXIMA and subida > 0.5 and hueco <= HUECO_MAXIMO) or (subida <= 0.5 and hueco <= HUECO_MAXIMO):
 				vecinos[i].append(j)
-	for datos: Array in Sala.PUERTAS:
+	for datos: Array in Nivel1.PUERTAS:
 		var puerta: Vector2 = datos[1]
 		var inicio := -1
 		for i in superficies.size():

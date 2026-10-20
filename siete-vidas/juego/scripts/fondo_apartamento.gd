@@ -1,8 +1,8 @@
 class_name FondoApartamento
 extends Node2D
 ## Fondo del dúplex, en capas con parallax (como Silksong): lo lejano se mueve menos que la cámara
-## y el primer plano, más. La pared es una imagen armada por habitación (Sala.HABITACIONES) con las
-## ventanas recortadas (Sala.VENTANAS); por los huecos y el balcón se ve la ciudad.
+## y el primer plano, más. La pared es una imagen armada por habitación (Nivel1.HABITACIONES) con las
+## ventanas recortadas (Nivel1.VENTANAS); por los huecos y el balcón se ve la ciudad.
 ## Arte provisional: cada estilo de pared se reemplaza por su textura final sin tocar el resto.
 
 ## nombre -> [cuánto sigue a la cámara (1 = igual que el juego), z_index, función que la dibuja]
@@ -133,12 +133,12 @@ func _repetir(destino: Image, mosaico: Image, rect: Rect2i) -> void:
 func _crear_pared() -> Image:
 	var imagen := Image.create(int(ancho), int(alto), false, Image.FORMAT_RGBA8)
 	imagen.fill(MURO)
-	for habitacion: Array in Sala.HABITACIONES:
-		# La pared termina en la unión con el piso (Sala.PARED_BASE), FONDO_PISO px sobre la línea de apoyo.
+	for habitacion: Array in Nivel1.HABITACIONES:
+		# La pared termina en la unión con el piso (Nivel1.PARED_BASE), FONDO_PISO px sobre la línea de apoyo.
 		var rect: Rect2i = Rect2i(habitacion[0])
-		rect.size.y = int(Sala.PARED_BASE) - rect.position.y
+		rect.size.y = int(Nivel1.PARED_BASE) - rect.position.y
 		if habitacion[2] == "exterior":
-			imagen.fill_rect(Rect2i(rect.position.x, 0, rect.size.x, int(Sala.PARED_BASE)), Color(0, 0, 0, 0))
+			imagen.fill_rect(Rect2i(rect.position.x, 0, rect.size.x, int(Nivel1.PARED_BASE)), Color(0, 0, 0, 0))
 			continue
 		var estilo: Array = PAREDES[habitacion[2]]
 		var mosaico := _imagen(estilo[0])
@@ -158,7 +158,7 @@ func _crear_pared() -> Image:
 		else:
 			_repetir(imagen, mosaico, rect)
 		_molduras(imagen, rect)
-	for ventana: Rect2 in Sala.VENTANAS:
+	for ventana: Rect2 in Nivel1.VENTANAS:
 		imagen.fill_rect(Rect2i(ventana), Color(0, 0, 0, 0))
 	return imagen
 
@@ -297,17 +297,17 @@ func _dibujar_ciudad(c: Node2D, nombre: String, arriba: float, base: Color) -> b
 
 func _dibujar_pared(c: Node2D) -> void:
 	c.draw_texture(_textura_pared, Vector2.ZERO)
-	for ventana: Rect2 in Sala.VENTANAS:
+	for ventana: Rect2 in Nivel1.VENTANAS:
 		_dibujar_ventana(c, ventana)
 	# Piso: la franja de Gemini, desde la unión con la pared hasta el borde de abajo.
 	if _textura_piso == null:
 		_textura_piso = ImageTexture.create_from_image(_crear_piso())
-	c.draw_texture(_textura_piso, Vector2(0, Sala.PARED_BASE))
-	for habitacion: Array in Sala.HABITACIONES:
+	c.draw_texture(_textura_piso, Vector2(0, Nivel1.PARED_BASE))
+	for habitacion: Array in Nivel1.HABITACIONES:
 		if habitacion[2] != "exterior":
 			var rect: Rect2 = habitacion[0]
 			# Sombra de 1 px donde el zócalo choca con el piso (Gemini).
-			c.draw_rect(Rect2(rect.position.x, Sala.PARED_BASE, rect.size.x, 1), Color(0.1, 0.04, 0.02, 0.45))
+			c.draw_rect(Rect2(rect.position.x, Nivel1.PARED_BASE, rect.size.x, 1), Color(0.1, 0.04, 0.02, 0.45))
 
 
 static var _piso_en_cache: Image
@@ -321,10 +321,10 @@ static var _piso_en_cache: Image
 func _crear_piso() -> Image:
 	if _piso_en_cache:
 		return _piso_en_cache
-	var alto_piso := int(Sala.ALTO - Sala.PARED_BASE)
+	var alto_piso := int(Nivel1.ALTO - Nivel1.PARED_BASE)
 	var imagen := Image.create(int(ancho), alto_piso, false, Image.FORMAT_RGBA8)
-	for i in Sala.HABITACIONES.size():
-		var habitacion: Array = Sala.HABITACIONES[i]
+	for i in Nivel1.HABITACIONES.size():
+		var habitacion: Array = Nivel1.HABITACIONES[i]
 		var rect := Rect2i(habitacion[0])
 		var mosaico := _imagen(PISOS.get(habitacion[2], "piso_parquet"))
 		var mw := mosaico.get_width()
@@ -340,7 +340,7 @@ func _crear_piso() -> Image:
 ## Ventana recortada (cocina, dormitorio, estudio), la misma ventana de la casa (G3): el marco de la ventana de la sala
 ## en 9 partes (`ventana_marco`), parante en cruz de 4 px con bisel, vidrio con tinte y dos reflejos, y el alféizar a
 ## 90 cm. La cocina lleva un visillo (C-3); el estudio, dos paños cortos (E-1); el dormitorio, la cortina larga de
-## Gemini (Sala._dibujar_cortina, delante de la pared y detrás de los muebles).
+## Gemini (ArteNivel1._dibujar_cortina, delante de la pared y detrás de los muebles).
 func _dibujar_ventana(c: Node2D, ventana: Rect2) -> void:
 	# Vidrio: tinte frío del 8 % y dos reflejos diagonales de pixel.
 	c.draw_rect(ventana, Color(0.75, 0.88, 1.0, 0.08))
@@ -364,16 +364,16 @@ func _dibujar_ventana(c: Node2D, ventana: Rect2) -> void:
 	c.draw_rect(alfeizar.grow(1), Color("2b1712"))
 	c.draw_rect(alfeizar, MADERA)
 	c.draw_rect(Rect2(alfeizar.position, Vector2(alfeizar.size.x, 2)), CANTO)
-	if ventana == Sala.VENTANA_DORMITORIO:
+	if ventana == Nivel1.VENTANA_DORMITORIO:
 		return
-	if ventana == Sala.VENTANA_COCINA:
+	if ventana == Nivel1.VENTANA_COCINA:
 		# Visillo: cortina corta crema con franja terracota, de su propia barra, sobre el tercio de abajo del vidrio.
 		var visillo := ArteNivel.textura("visillo_cocina")
 		if visillo:
 			ArteNivel.dibujar(c, "visillo_cocina", centro.x, ventana.end.y + 2.0)
 		return
 	# Estudio: barra con remates y dos paños cortos oliva (las cortinas cortas de Gemini) a los lados, hasta el alféizar.
-	var barra := Rect2(ventana.position.x - 30, ventana.position.y - 3 - Sala.CORTINA_SOBRE_VENTANA, ventana.size.x + 60, 5)
+	var barra := Rect2(ventana.position.x - 30, ventana.position.y - 3 - Nivel1.CORTINA_SOBRE_VENTANA, ventana.size.x + 60, 5)
 	c.draw_rect(barra.grow(1), Color("2b1712"))
 	c.draw_rect(barra, MADERA)
 	for punta: float in [barra.position.x, barra.end.x]:
@@ -415,13 +415,13 @@ static func vidrios() -> Array:
 	var sala := ArteNivel.textura("ventana_sala")
 	var lista: Array = []
 	if sala:
-		var arte: Array = Sala.ARTE[0]
+		var arte: Array = Nivel1.ARTE[0]
 		var arriba: float = arte[1].y - sala.get_height()
 		lista.append([Rect2(arte[1].x + 27, arriba + 26, 126, 111), "sala"])
-	lista.append([Rect2(Sala.VIDRIO_PASILLO.position.x, Sala.VENTANA_PASILLO_ARRIBA.position.y + 5, Sala.VIDRIO_PASILLO.size.x, Sala.VIDRIO_PASILLO.end.y - Sala.VENTANA_PASILLO_ARRIBA.position.y - 5), "pasillo"])
-	lista.append([Sala.VENTANA_COCINA, "cocina"])
-	lista.append([Sala.VENTANA_DORMITORIO, "dormitorio"])
-	lista.append([Sala.VENTANA_ESTUDIO, "estudio"])
+	lista.append([Rect2(Nivel1.VIDRIO_PASILLO.position.x, Nivel1.VENTANA_PASILLO_ARRIBA.position.y + 5, Nivel1.VIDRIO_PASILLO.size.x, Nivel1.VIDRIO_PASILLO.end.y - Nivel1.VENTANA_PASILLO_ARRIBA.position.y - 5), "pasillo"])
+	lista.append([Nivel1.VENTANA_COCINA, "cocina"])
+	lista.append([Nivel1.VENTANA_DORMITORIO, "dormitorio"])
+	lista.append([Nivel1.VENTANA_ESTUDIO, "estudio"])
 	return lista
 
 
@@ -430,7 +430,7 @@ static func vidrios() -> Array:
 func _dibujar_luz(c: Node2D) -> void:
 	var t := Time.get_ticks_msec() / 1000.0
 	# Los rayos llegan al piso un poco delante de la línea de apoyo.
-	var piso := Sala.SUELO + 8.0
+	var piso := Nivel1.SUELO + 8.0
 	for datos: Array in vidrios():
 		var v: Rect2 = datos[0]
 		var tono: Color = TONO_LUZ[datos[1]]

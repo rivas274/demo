@@ -27,10 +27,10 @@ static func de(nodo: Node, tipo: Script) -> Node:
 
 
 ## El nivel que contiene a `nodo` (el que suena, da logros y suelta recompensas); null fuera de un nivel.
-static func nivel(nodo: Node) -> Sala:
+static func nivel(nodo: Node) -> Nivel:
 	var actual := nodo
 	while actual != null:
-		if actual is Sala:
+		if actual is Nivel:
 			return actual
 		actual = actual.get_parent()
 	return null

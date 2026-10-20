@@ -14,9 +14,10 @@ func _initialize() -> void:
 
 
 func _correr() -> void:
-	var sala: Node = load("res://escenas/apartamento.tscn").instantiate()
+	var sala: Node = load("res://escenas/nivel_1.tscn").instantiate()
+	var guion: GuionNivel1 = sala.guion
 	sala.mostrar_titulo = false
-	sala.peligros_activos = false
+	guion.peligros_activos = false
 	root.add_child(sala)
 	var felipe: Felipe = sala.get_node("Felipe")
 	# En el nivel 1 el doble salto, los Zoomies y trepar vienen apagados (decisión del creador): aquí se prenden
@@ -98,7 +99,7 @@ func _correr() -> void:
 
 	# Botón de acción: solo hace algo si hay un objeto cerca (lejos del sofá arañable).
 	await _esperar(40)
-	await _poner_en(felipe, Vector2(120, Sala.SUELO))
+	await _poner_en(felipe, Vector2(120, Nivel1.SUELO))
 	await _tocar("interactuar")
 	_comprobar(felipe.estado != Felipe.Estado.COMIENDO, "Sin comida cerca, el botón de acción no hace nada")
 
@@ -110,7 +111,7 @@ func _correr() -> void:
 	await _esperar(40)
 	_comprobar(absf(felipe.velocity.x) <= felipe.velocidad_gatear + 1.0, "Agachado gatea más lento (%.0f px/s)" % absf(felipe.velocity.x))
 	_comprobar(felipe.sprite.animation == "gatear" and felipe.sprite.is_playing(), "Agachado y en movimiento usa la animación de gatear")
-	var hueco := Sala.SUELO - _pieza("Zapatero").end.y
+	var hueco := Nivel1.SUELO - _pieza("Zapatero").end.y
 	var alto_gateando := 0.0
 	for i in felipe.sprite.sprite_frames.get_frame_count("gatear"):
 		alto_gateando = maxf(alto_gateando, _alto_visible(felipe.sprite.sprite_frames.get_frame_texture("gatear", i).get_image()) * Felipe.ESCALA_SPRITE)
@@ -124,7 +125,7 @@ func _correr() -> void:
 
 	# Debajo del zapatero (33 cm libres) solo se pasa agachado.
 	var aparador := _pieza("Zapatero")
-	await _poner_en(felipe, Vector2(aparador.position.x - 60, Sala.SUELO))
+	await _poner_en(felipe, Vector2(aparador.position.x - 60, Nivel1.SUELO))
 	Input.action_press("mover_derecha")
 	await _esperar(60)
 	_comprobar(felipe.position.x < aparador.position.x, "De pie no cabe bajo el zapatero")
@@ -157,14 +158,14 @@ func _correr() -> void:
 
 	# Con comida cerca, el botón de acción la come.
 	var platos := root.get_tree().get_nodes_in_group(Componentes.INTERACTUABLES).size()
-	await _poner_en(felipe, Vector2(2990, Sala.SUELO))
+	await _poner_en(felipe, Vector2(2990, Nivel1.SUELO))
 	await _tocar("interactuar")
 	_comprobar(felipe.estado == Felipe.Estado.COMIENDO and felipe.sprite.animation == "comer", "Junto a la comida, el botón de acción la come")
 	await _esperar(60)
 	_comprobar(root.get_tree().get_nodes_in_group(Componentes.INTERACTUABLES).size() == platos - 1, "La comida desaparece al comerla")
 
 	# Ocio: sin tocar nada, se pone a acicalarse, jugar o dar vueltas; cualquier botón lo corta.
-	await _poner_en(felipe, Vector2(200, Sala.SUELO))
+	await _poner_en(felipe, Vector2(200, Nivel1.SUELO))
 	felipe.espera_ocio = 1.0
 	await _esperar(80)
 	_comprobar(felipe.estado == Felipe.Estado.OCIO and felipe.sprite.animation in Felipe.OCIO.keys(), "Sin tocar nada se entretiene solo (%s)" % felipe.sprite.animation)
@@ -203,7 +204,7 @@ func _probar_ajuste_del_salto(felipe: Felipe) -> void:
 	_comprobar(proporcion > 1.6 and proporcion < 1.8, "Cae con más peso que sube (gravedad de caída %.2f × la de subida)" % proporcion)
 
 	# Salto completo en el piso: altura y tiempos de subida y bajada.
-	await _poner_en(felipe, Vector2(200, Sala.SUELO))
+	await _poner_en(felipe, Vector2(200, Nivel1.SUELO))
 	var y_suelo := felipe.position.y
 	var y_arriba := y_suelo
 	var cuadros_subida := 0
@@ -244,7 +245,7 @@ func _probar_ajuste_del_salto(felipe: Felipe) -> void:
 	await _esperar(60)
 
 	# Salto recordado: apretar 8 cuadros antes de tocar el piso (se lee 7 antes: 0,133 s al saltar) salta al llegar.
-	var desde := Vector2(200, Sala.SUELO - 150.0)
+	var desde := Vector2(200, Nivel1.SUELO - 150.0)
 	var cuadros_cayendo := 0
 	felipe.position = desde
 	felipe.velocity = Vector2.ZERO
@@ -269,7 +270,7 @@ func _probar_ajuste_del_salto(felipe: Felipe) -> void:
 
 	# Polvo: una caída desde alto (2 m) levanta más que un saltito, y el aplastado sigue en ±8 %.
 	var polvo_de := func(altura_caida: float) -> Array:
-		felipe.position = Vector2(200, Sala.SUELO - altura_caida)
+		felipe.position = Vector2(200, Nivel1.SUELO - altura_caida)
 		felipe.velocity = Vector2.ZERO
 		var deformacion := 0.0
 		var velocidad := 0.0
@@ -311,7 +312,7 @@ func _probar_patas_sin_patinar(felipe: Felipe) -> void:
 	_comprobar(medidas.size() >= 5 and absf(paso_hoja - AnimacionesFelipe.PASO["caminar"]) <= 0.2, "G9 El pie apoyado de caminar adelanta %.1f px del juego por cuadro (AnimacionesFelipe.PASO: %.1f)" % [paso_hoja, AnimacionesFelipe.PASO["caminar"]])
 	for datos: Array in [["caminar", felipe.velocidad_caminar, false], ["correr", felipe.velocidad_correr, true]]:
 		var nombre: String = datos[0]
-		_poner_en(felipe, Vector2(300, Sala.SUELO))
+		_poner_en(felipe, Vector2(300, Nivel1.SUELO))
 		await _esperar(20)
 		if datos[2]:
 			Input.action_press("zoomies")
@@ -371,7 +372,7 @@ func _alto_visible(imagen: Image) -> float:
 
 
 func _pieza(nombre: String) -> Rect2:
-	for pieza: Array in Sala.PIEZAS:
+	for pieza: Array in Nivel1.PIEZAS:
 		if pieza[2] == nombre:
 			return pieza[0]
 	return Rect2()

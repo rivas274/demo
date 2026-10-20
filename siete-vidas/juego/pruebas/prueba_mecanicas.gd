@@ -10,9 +10,10 @@ func _initialize() -> void:
 
 
 func _correr() -> void:
-	var sala: Sala = load("res://escenas/apartamento.tscn").instantiate()
+	var sala: Nivel = load("res://escenas/nivel_1.tscn").instantiate()
+	var guion: GuionNivel1 = sala.guion
 	sala.mostrar_titulo = false
-	sala.batalla_con_jefe = false
+	guion.batalla_con_jefe = false
 	root.add_child(sala)
 	var felipe: Felipe = sala.get_node("Felipe")
 	var aspi: Enemigo = sala.get_node("ASPI")
@@ -36,7 +37,7 @@ func _correr() -> void:
 
 	# Comer cura y suma peso.
 	var peso_antes := felipe.peso
-	await _poner_en(felipe, Vector2(2990, Sala.SUELO))
+	await _poner_en(felipe, Vector2(2990, Nivel1.SUELO))
 	await _tocar("interactuar")
 	# Cura cuando la boca llega a la comida (cuadro de impacto de "comer").
 	await _esperar(30)
@@ -64,8 +65,8 @@ func _correr() -> void:
 
 	# A.S.P.I.: persigue y hace daño al tocar.
 	await _esperar(90)
-	aspi.global_position = Vector2(7140, Sala.SUELO)
-	await _poner_en(felipe, Vector2(7020, Sala.SUELO))
+	aspi.global_position = Vector2(7140, Nivel1.SUELO)
+	await _poner_en(felipe, Vector2(7020, Nivel1.SUELO))
 	var corazones_antes := felipe.corazones
 	for i in 180:
 		await physics_frame

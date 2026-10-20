@@ -42,7 +42,7 @@ const GUION := [
 ]
 const DURACION := 17.0
 
-var sala: Sala
+var sala: Nivel
 var felipe: Felipe
 
 
@@ -53,11 +53,11 @@ func _initialize() -> void:
 func _correr() -> void:
 	var fps := float(Engine.physics_ticks_per_second)
 	var detalle := OS.get_cmdline_user_args().has("--detalle")
-	sala = load("res://escenas/apartamento.tscn").instantiate()
+	sala = load("res://escenas/nivel_1.tscn").instantiate()
 	sala.mostrar_titulo = false
 	root.add_child(sala)
 	felipe = sala.get_node("Felipe")
-	felipe.position = Vector2(150, Sala.SUELO)
+	felipe.position = Vector2(150, Nivel1.SUELO)
 	var siguiente := 0
 	var en_suelo := true
 	var y_mas_alto := felipe.position.y
@@ -75,7 +75,7 @@ func _correr() -> void:
 			y_mas_alto = minf(y_mas_alto, felipe.position.y)
 			if felipe.is_on_floor() and not en_suelo:
 				print("%5.2f s  aterriza en (%.0f, %.0f) desde %.0f px más arriba (velocidad %.0f)" % [
-					segundo, felipe.position.x, Sala.SUELO - felipe.position.y, felipe.position.y - y_mas_alto, felipe._velocidad_al_caer])
+					segundo, felipe.position.x, Nivel1.SUELO - felipe.position.y, felipe.position.y - y_mas_alto, felipe._velocidad_al_caer])
 				y_mas_alto = felipe.position.y
 			elif felipe.is_on_floor():
 				y_mas_alto = felipe.position.y

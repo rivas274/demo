@@ -75,7 +75,7 @@ var aspi: Enemigo
 ## El dibujo de A.S.P.I. (luz de aviso, vibración y tapa del depósito).
 var apariencia: AparienciaAspi
 var felipe: Felipe
-var sala: Sala
+var sala: Nivel
 var apagados := 0
 var deposito := 0
 var llena := false
@@ -126,14 +126,14 @@ var _tiempo_clic := -10.0
 const DURA_CLIC := 1.3
 
 
-func _init(jefa: Enemigo, gato: Felipe, nivel: Sala) -> void:
+func _init(jefa: Enemigo, gato: Felipe, nivel: Nivel) -> void:
 	aspi = jefa
 	apariencia = jefa.apariencia as AparienciaAspi
 	felipe = gato
 	sala = nivel
 	name = "Batalla"
-	arena = Sala.rect_de("estudio")
-	_centro_gigante = Vector2(arena.get_center().x, Sala.SUELO - 160)
+	arena = Nivel1.rect_de("estudio")
+	_centro_gigante = Vector2(arena.get_center().x, Nivel1.SUELO - 160)
 	# La batalla en sí no dibuja nada: cada parte va en su capa de la tabla única (Capas, B1 de la revisión 3).
 	z_index = Capas.JUEGO
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -269,10 +269,10 @@ func empezar() -> void:
 	presentacion.divisiones = APAGADOS_TOTALES
 	presentacion.pantallas = sala.pantallas
 	presentacion.frase_sin_vuelta = ["Felipe", Frases.FELIPE["quien_cerro"][0][0]]
-	presentacion.presentar(felipe, aspi, Rect2(arena.position.x, 0, arena.size.x, Sala.ALTO))
+	presentacion.presentar(felipe, aspi, Rect2(arena.position.x, 0, arena.size.x, Nivel1.ALTO))
 	# En la pelea las puertas cerradas del estudio no se ofrecen: "Probar" pisaba a A.S.P.I. llena (M3) y, junto a la
 	# puerta de entrada, mantener la acción probaba la puerta en vez de comer un snack del bolsillo.
-	for nombre: String in [Sala.PUERTA_BALCON, "estudio<pasillo"]:
+	for nombre: String in [Nivel1.PUERTA_BALCON, "estudio<pasillo"]:
 		var puerta: Puerta = sala.puertas.get(nombre)
 		if puerta:
 			puerta.ofrecer_cerrada = false
@@ -364,7 +364,7 @@ func _salir() -> void:
 	apariencia.cerrar_tapa()
 	aspi.patrulla.quieta = true
 	aspi.dano.activo = false
-	aspi.global_position = Sala.ASPI[0]
+	aspi.global_position = Nivel1.ASPI[0]
 	for bola in bolas.duplicate():
 		_quitar_bola(bola)
 
@@ -372,7 +372,7 @@ func _salir() -> void:
 ## Vuelve a la pelea: entrada corta (portazo y nombre, 1 s) y sigue en la fase a la que llegó.
 func _volver() -> void:
 	_volviendo = true
-	presentacion.presentar_corta(felipe, aspi, Rect2(arena.position.x, 0, arena.size.x, Sala.ALTO))
+	presentacion.presentar_corta(felipe, aspi, Rect2(arena.position.x, 0, arena.size.x, Nivel1.ALTO))
 
 
 func _cambiar_fase() -> void:
@@ -445,9 +445,9 @@ func _actualizar_pelea(delta: float) -> void:
 
 
 func _contar_acampada(delta: float) -> void:
-	if felipe.is_on_floor() and Sala.SUELO - felipe.global_position.y > ALTURA_ACAMPAR:
+	if felipe.is_on_floor() and Nivel1.SUELO - felipe.global_position.y > ALTURA_ACAMPAR:
 		acampando += delta
-	elif felipe.is_on_floor() or felipe.global_position.y > Sala.SUELO - ALTURA_ACAMPAR:
+	elif felipe.is_on_floor() or felipe.global_position.y > Nivel1.SUELO - ALTURA_ACAMPAR:
 		acampando = 0.0
 
 
@@ -686,7 +686,7 @@ func _mover_bolas(delta: float) -> void:
 		if distancia.length() < 22.0:
 			felipe.recibir_dano(1, bola.global_position.x)
 			_quitar_bola(bola)
-		elif bola.global_position.y > Sala.SUELO - 6.0 or not arena.grow(20).has_point(bola.global_position) or fase == Fase.FIN:
+		elif bola.global_position.y > Nivel1.SUELO - 6.0 or not arena.grow(20).has_point(bola.global_position) or fase == Fase.FIN:
 			_quitar_bola(bola)
 
 
@@ -776,14 +776,14 @@ func _dibujar_manchas() -> void:
 	var c := _manchas_dibujo
 	for i in manchas.size():
 		if tipos_mancha[i] == "papel":
-			ArteNivel.dibujar(c, "papel", manchas[i], Sala.SUELO + 1.0)
+			ArteNivel.dibujar(c, "papel", manchas[i], Nivel1.SUELO + 1.0)
 		else:
-			ArteNivel.dibujar(c, "mancha", manchas[i], Sala.SUELO + 2.0)
+			ArteNivel.dibujar(c, "mancha", manchas[i], Nivel1.SUELO + 2.0)
 	if fase == Fase.ENTRADA and presentacion.paso_actual in ["espera", "revelar", "nombre", "barra", "musica", "tamano"]:
 		var t := Time.get_ticks_msec() / 1000.0
 		for i in 12:
 			var x := arena.position.x + 60.0 + i * 46.0
-			c.draw_circle(Vector2(x + sin(t * 30.0 + i) * 1.5, Sala.SUELO - 3), 3.0, Color(0.88, 0.85, 0.8, 0.9))
+			c.draw_circle(Vector2(x + sin(t * 30.0 + i) * 1.5, Nivel1.SUELO - 3), 3.0, Color(0.88, 0.85, 0.8, 0.9))
 
 
 ## Delante de todo: el viento de la succión, el cepillo que gira, papeles que vuelan y el aviso del depósito lleno.
@@ -792,7 +792,7 @@ func _dibujar_encima() -> void:
 	var tiempo := Time.get_ticks_msec() / 1000.0
 	for p in _papeles:
 		var x := p.x + p.y * 160.0
-		var y := Sala.SUELO - 40.0 - sin(p.y * 3.0 + p.z * 6.0) * 60.0 - p.y * 40.0
+		var y := Nivel1.SUELO - 40.0 - sin(p.y * 3.0 + p.z * 6.0) * 60.0 - p.y * 40.0
 		c.draw_set_transform(Vector2(x, y), p.y * 6.0 + p.z)
 		ArteNivel.dibujar(c, "papel_arrugado", 0.0, 10.0)
 		c.draw_set_transform(Vector2.ZERO)
@@ -836,6 +836,6 @@ func _dibujar_encima() -> void:
 		var lado := -1.0 if i % 2 == 0 else 1.0
 		var avance := fmod(tiempo * 1.4 + i * 0.37, 1.0)
 		var x := x_jefa + lado * (1.0 - avance) * radio
-		var y := Sala.SUELO - 6.0 - fmod(i * 23.0, 70.0)
+		var y := Nivel1.SUELO - 6.0 - fmod(i * 23.0, 70.0)
 		if arena.has_point(Vector2(x, y)):
 			c.draw_line(Vector2(x, y), Vector2(x + lado * 18.0, y), Color(Color("dff3ff"), 0.7 * avance), 1.5)

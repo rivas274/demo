@@ -12,7 +12,9 @@ extends SceneTree
 
 const LIMITE_SEGUNDOS := 480.0
 
-var sala: Sala
+var sala: Nivel
+## Lo propio del nivel 1 (Valeria, A.S.P.I., la pelea, las cajas...).
+var guion: GuionNivel1
 var felipe: Felipe
 var _cuadros := 0
 var _fps := 60.0
@@ -25,7 +27,8 @@ func _initialize() -> void:
 
 func _correr() -> void:
 	_fps = float(Engine.physics_ticks_per_second)
-	sala = load("res://escenas/apartamento.tscn").instantiate()
+	sala = load("res://escenas/nivel_1.tscn").instantiate()
+	guion = sala.guion
 	root.add_child(sala)
 	felipe = sala.get_node("Felipe")
 	# Título, introducción y la meta.
@@ -65,23 +68,23 @@ func _correr() -> void:
 # --- Cuartos ------------------------------------------------------------------------------------------------
 
 func _sala() -> void:
-	var valeria := sala.valeria
+	var valeria := guion.valeria
 	# Arañar el sofá delante de Valeria: lo deja frente al rascador.
 	await _ir_a(330)
 	await _tocar("interactuar")
-	await _hasta(func() -> bool: return absf(felipe.global_position.x - (Sala.RASCADOR_X - 46.0)) < 8.0, 3.0)
+	await _hasta(func() -> bool: return absf(felipe.global_position.x - (Nivel1.RASCADOR_X - 46.0)) < 8.0, 3.0)
 	await _segundos(1.4)
 	_paso("Araña el sofá delante de Valeria: lo deja en el rascador")
 	# El rascador con público: snack y Valeria graba de espaldas al sofá.
-	await _ir_a(Sala.RASCADOR_X - 40.0)
+	await _ir_a(Nivel1.RASCADOR_X - 40.0)
 	await _tocar("interactuar")
 	await _hasta(func() -> bool: return valeria.actividad == Valeria.Actividad.GRABANDO, 4.0)
 	_paso("Rascador con público: Valeria graba (snacks %d)" % felipe.snacks)
 	# Garras afiladas: el sofá, crítico.
 	await _ir_a(300)
 	await _tocar("interactuar")
-	await _hasta(func() -> bool: return sala.sofa.esta_roto, 2.0)
-	_paso("Rompe el plástico del sofá (crítico)" if sala.sofa.esta_roto else "No rompió el plástico")
+	await _hasta(func() -> bool: return guion.sofa.esta_roto, 2.0)
+	_paso("Rompe el plástico del sofá (crítico)" if guion.sofa.esta_roto else "No rompió el plástico")
 	await _segundos(1.0)
 	await _ir_a(372)
 	await _segundos(0.6)
@@ -89,8 +92,8 @@ func _sala() -> void:
 	# Espera a que Valeria vuelva a su serie y sube a la mesa por la silla.
 	await _hasta(func() -> bool: return valeria.actividad == Valeria.Actividad.SENTADA, 10.0)
 	await _ir_a(700)
-	await _subir_a(713, Sala.SUELO - 55)
-	await _subir_a(800, Sala.SUELO - 91)
+	await _subir_a(713, Nivel1.SUELO - 55)
+	await _subir_a(800, Nivel1.SUELO - 91)
 	await _ir_a(884)
 	felipe.mirando = 1.0
 	await _tocar("interactuar")
@@ -121,16 +124,16 @@ func _recibidor() -> void:
 	_paso("Pasa agachado bajo el zapatero")
 	# Maullar a la puerta de la cocina: Valeria abre.
 	# Valeria camina de verdad (sala → puerta → recibidor → puerta de la cocina): se espera a que esté adentro y quieta.
-	await _hasta(func() -> bool: return sala.valeria.cuarto == "cocina" and not sala.valeria_en_escena(), 25.0)
+	await _hasta(func() -> bool: return guion.valeria.cuarto == "cocina" and not guion.valeria_en_escena(), 25.0)
 	await _ir_a(2060)
 	await _tocar("maullar")
 	# Ella va a la puerta, la abre y se asoma: se espera la puerta abierta.
-	await _hasta(func() -> bool: return not sala.puertas[Sala.PUERTA_COCINA].cerrada, 6.0)
+	await _hasta(func() -> bool: return not sala.puertas[Nivel1.PUERTA_COCINA].cerrada, 6.0)
 	await _segundos(0.6)
-	_paso("Maúlla a la puerta de la cocina: %s" % ("abierta" if not sala.puertas[Sala.PUERTA_COCINA].cerrada else "cerrada"))
+	_paso("Maúlla a la puerta de la cocina: %s" % ("abierta" if not sala.puertas[Nivel1.PUERTA_COCINA].cerrada else "cerrada"))
 	# Caja de arena: descanso y popo táctico (Valeria sale con mascarilla).
 	await _ir_a(1960)
-	await _subir_a(1890, Sala.SUELO - 45)
+	await _subir_a(1890, Nivel1.SUELO - 45)
 	await _segundos(0.6)
 	Input.action_press("agacharse")
 	await _hasta(func() -> bool: return sala.travesuras.agenda.esta_cumplida("popo"), 3.0)
@@ -144,18 +147,18 @@ func _recibidor() -> void:
 		var ref: WeakRef = weakref(foto)
 		await _hasta(func() -> bool: return ref.get_ref() == null, 1.5)
 		await _ir_a(1960, 2.0)
-		await _subir_a(1890, Sala.SUELO - 45)
+		await _subir_a(1890, Nivel1.SUELO - 45)
 	_paso("Recoge la foto del popo (fotos %d)" % sala.travesuras.recompensas.fotos)
 	# Desde el borde de la caja, al zapatero: las llaves.
 	await _ir_a(1846, 2.0)
-	await _subir_a(1770, Sala.SUELO - 97)
+	await _subir_a(1770, Nivel1.SUELO - 97)
 	await _ir_a(1748)
 	felipe.mirando = 1.0
 	await _tocar("interactuar")
 	await _segundos(1.2)
 	_paso("Tira las llaves")
-	await _hasta(func() -> bool: return sala.valeria.cuarto == "cocina" and not sala.valeria_en_escena(), 20.0)
-	await _entrar(Sala.PUERTA_COCINA)
+	await _hasta(func() -> bool: return guion.valeria.cuarto == "cocina" and not guion.valeria_en_escena(), 20.0)
+	await _entrar(Nivel1.PUERTA_COCINA)
 
 
 func _cocina() -> void:
@@ -173,20 +176,20 @@ func _cocina() -> void:
 	_paso("Rompe la caja de cartón (snacks %d)" % felipe.snacks)
 	# Silla → estufa → mesón (cocina v2): el ratón que cuida el microondas, y el pollo en la cara de Valeria.
 	await _ir_a(3433)
-	await _subir_a(3433, Sala.SUELO - 55)
-	await _subir_a(3500, Sala.SUELO - 109)
+	await _subir_a(3433, Nivel1.SUELO - 55)
+	await _subir_a(3500, Nivel1.SUELO - 109)
 	await _ir_a(3800, 6.0)
 	await _cazar_raton(3790, 3925)
 	# El pollo espera sobre el microondas, fuera de la patrulla del ratón.
 	await _ir_a(3905)
-	await _subir_a(3950, Sala.SUELO - 163)
-	await _ir_a(Sala.POLLO.x + 30.0)
+	await _subir_a(3950, Nivel1.SUELO - 163)
+	await _ir_a(Nivel1.POLLO.x + 30.0)
 	felipe.mirando = -1.0
 	await _tocar("interactuar")
 	await _segundos(1.2)
 	_paso("Roba el pollo de Valeria" if sala.travesuras.agenda.esta_cumplida("almuerzo") else "No pudo con el pollo")
 	# Microondas → refrigerador: el calcetín.
-	await _subir_a(Sala.CALCETIN_REFRIGERADOR.x, Sala.SUELO - 216)
+	await _subir_a(Nivel1.CALCETIN_REFRIGERADOR.x, Nivel1.SUELO - 216)
 	await _segundos(0.5)
 	_paso("Calcetín del refrigerador (%d)" % sala.calcetines)
 	await _ir_a(3900, 4.0)
@@ -201,44 +204,44 @@ func _librero_y_escalera() -> void:
 	# El librero es la escalera del gato: tres repisas de ~50 px y, desde la de arriba, se pasa por encima de las cajas
 	# de la mudanza (sólidas: desde el piso no se pasan).
 	await _ir_a(2240)
-	await _subir_a(2240, Sala.SUELO - 48)
-	await _subir_a(2240, Sala.SUELO - 103)
-	await _subir_a(2240, Sala.SUELO - 155)
+	await _subir_a(2240, Nivel1.SUELO - 48)
+	await _subir_a(2240, Nivel1.SUELO - 103)
+	await _subir_a(2240, Nivel1.SUELO - 155)
 	await _ir_a(2252)
 	await _saltar(1.0, INF)
-	await _hasta(func() -> bool: return felipe.is_on_floor() and felipe.global_position.y > Sala.SUELO - 2.0, 3.0)
-	await _ir_a(Sala.CAJAS.end.x + 40.0, 2.0)
+	await _hasta(func() -> bool: return felipe.is_on_floor() and felipe.global_position.y > Nivel1.SUELO - 2.0, 3.0)
+	await _ir_a(Nivel1.CAJAS.end.x + 40.0, 2.0)
 	_paso("Pasa las cajas de la mudanza desde el librero (x %.0f)" % felipe.global_position.x)
 	# Desde el segundo peldaño («desde arriba»), un manotazo tira la caja de arriba: atajo de vuelta.
-	await _subir_a(Sala.PELDANO_CAJAS.x, Sala.PELDANO_CAJAS.y)
-	if felipe.objeto_cercano() == sala.cajas:
+	await _subir_a(Nivel1.PELDANO_CAJAS.x, Nivel1.PELDANO_CAJAS.y)
+	if felipe.objeto_cercano() == guion.cajas:
 		felipe.mirando = -1.0
 		await _tocar("interactuar")
 		await _segundos(1.4)
-	_paso("Tira la caja de arriba (atajo)" if sala.cajas.tirada_ya else "No tiró la caja")
+	_paso("Tira la caja de arriba (atajo)" if guion.cajas.tirada_ya else "No tiró la caja")
 	# Baja del peldaño al piso, al pie de la escalera.
-	await _ir_a(Sala.ESCALERA_PIE.x + 44.0, 2.0)
-	await _hasta(func() -> bool: return felipe.is_on_floor() and felipe.global_position.y > Sala.SUELO - 2.0, 1.5)
-	await _entrar(Sala.PUERTA_ESCALERA)
+	await _ir_a(Nivel1.ESCALERA_PIE.x + 44.0, 2.0)
+	await _hasta(func() -> bool: return felipe.is_on_floor() and felipe.global_position.y > Nivel1.SUELO - 2.0, 1.5)
+	await _entrar(Nivel1.PUERTA_ESCALERA)
 
 
 func _pasillo() -> void:
 	# Baúl → consola: el vaso; sale A.S.P.I. a limpiar y Felipe se aferra.
 	await _ir_a(4548)
-	await _subir_a(4600, Sala.SUELO - 47)
-	await _subir_a(4680, Sala.SUELO - 97)
+	await _subir_a(4600, Nivel1.SUELO - 47)
+	await _subir_a(4680, Nivel1.SUELO - 97)
 	await _ir_a(4762)
 	felipe.mirando = 1.0
 	await _tocar("interactuar")
 	await _segundos(1.0)
 	await _ir_a(4850, 3.0)
 	await _hasta(func() -> bool: return felipe.is_on_floor(), 1.0)
-	await _hasta(func() -> bool: return sala.ensayo.paso == EnsayoAspi.Paso.LIMPIA, 10.0)
+	await _hasta(func() -> bool: return guion.ensayo.paso == EnsayoAspi.Paso.LIMPIA, 10.0)
 	Input.action_press("agacharse")
-	await _hasta(func() -> bool: return sala.ensayo.paso != EnsayoAspi.Paso.LIMPIA, 6.0)
+	await _hasta(func() -> bool: return guion.ensayo.paso != EnsayoAspi.Paso.LIMPIA, 6.0)
 	Input.action_release("agacharse")
 	_paso("Ensayo: A.S.P.I. aspira el vaso y Felipe se aferra")
-	await _hasta(func() -> bool: return sala.ensayo.paso == EnsayoAspi.Paso.LISTO, 8.0)
+	await _hasta(func() -> bool: return guion.ensayo.paso == EnsayoAspi.Paso.LISTO, 8.0)
 	# El láser: quieto, sin perseguirlo.
 	await _ir_a(5190)
 	await _hasta(func() -> bool: return sala.travesuras.agenda.esta_cumplida("laser"), 8.0)
@@ -251,8 +254,8 @@ func _pasillo() -> void:
 	Input.action_release("agacharse")
 	await _segundos(0.3)
 	await _ir_a(4548)
-	await _subir_a(4600, Sala.SUELO - 47)
-	await _subir_a(4680, Sala.SUELO - 97)
+	await _subir_a(4600, Nivel1.SUELO - 47)
+	await _subir_a(4680, Nivel1.SUELO - 97)
 	await _ir_a(4715, 2.0)
 	await _segundos(0.4)
 	_paso("Recoge la foto vergonzosa (fotos %d)" % sala.travesuras.recompensas.fotos)
@@ -263,22 +266,22 @@ func _pasillo() -> void:
 	await _tocar("interactuar")
 	await _segundos(1.0)
 	_paso("Araña la puerta entornada")
-	await _entrar(Sala.PUERTA_DORMITORIO)
+	await _entrar(Nivel1.PUERTA_DORMITORIO)
 
 
 func _dormitorio() -> void:
 	await _ir_a(5992)
-	await _subir_a(5992, Sala.SUELO - 53)
-	await _subir_a(6050, Sala.SUELO - 65)
-	await _ir_a(Sala.ROPA.x)
+	await _subir_a(5992, Nivel1.SUELO - 53)
+	await _subir_a(6050, Nivel1.SUELO - 65)
+	await _ir_a(Nivel1.ROPA.x)
 	await _tocar("interactuar")
 	await _segundos(1.0)
-	_paso("Desordena la ropa doblada" if sala._ropa_firmada else "No pudo desordenar la ropa")
+	_paso("Desordena la ropa doblada" if guion.ropa_firmada else "No pudo desordenar la ropa")
 	await _ir_a(6206)
 	felipe.mirando = 1.0
 	await _tocar("interactuar")
 	await _segundos(1.5)
-	await _subir_a(6272, Sala.SUELO - 96)
+	await _subir_a(6272, Nivel1.SUELO - 96)
 	await _segundos(0.6)
 	_paso("Saquea el cajón (calcetines %d)" % sala.calcetines)
 	await _ir_a(6180, 4.0)
@@ -286,7 +289,7 @@ func _dormitorio() -> void:
 	await _ir_a(6000, 4.0)
 	await _hasta(func() -> bool: return felipe.is_on_floor(), 1.0)
 	await _entrar("dormitorio<pasillo")
-	await _ir_a(Sala.DESCANSOS[1].get_center().x)
+	await _ir_a(Nivel1.DESCANSOS[1].get_center().x)
 	await _segundos(0.5)
 	_paso("Descansa en el cojín")
 	await _entrar("pasillo>estudio")
@@ -295,7 +298,7 @@ func _dormitorio() -> void:
 ## Pelea: ensuciar (vaso, taza, macetas o los papeles del teclado), bajar cuando se llena y caerle encima desde el
 ## piso. Esquiva las embestidas saltando y se aferra cuando aspira cerca.
 func _pelea() -> void:
-	var batalla := sala.batalla
+	var batalla := guion.batalla
 	await _hasta(func() -> bool: return batalla.fase == BatallaAspi.Fase.PELEA, 12.0)
 	_paso("Entrada de la jefa (8 pasos)")
 	var limite := _cuadros + int(240.0 * _fps)
@@ -318,14 +321,14 @@ func _pelea() -> void:
 
 
 func _balcon() -> void:
-	if felipe.global_position.y < Sala.SUELO - 2.0:
+	if felipe.global_position.y < Nivel1.SUELO - 2.0:
 		await _bajar()
-	await _entrar(Sala.PUERTA_BALCON)
+	await _entrar(Nivel1.PUERTA_BALCON)
 	await _ir_a(7890)
-	await _subir_a(7930, Sala.SUELO - 32)
-	await _subir_a(8020, Sala.SUELO - 89)
+	await _subir_a(7930, Nivel1.SUELO - 32)
+	await _subir_a(8020, Nivel1.SUELO - 89)
 	await _ir_a(8060)
-	await _hasta(func() -> bool: return sala.sentado_en_baranda, 3.0)
+	await _hasta(func() -> bool: return guion.balcon.sentado_en_baranda, 3.0)
 	_paso("Se sienta en la baranda y mira la ciudad")
 	await _segundos(2.4)
 	Input.action_press("mover_derecha")
@@ -343,14 +346,14 @@ func _balcon() -> void:
 ## Tira al piso lo que haga falta para llenarle el depósito: lo del escritorio (vaso, taza de café), una maceta de la repisa
 ## o, si no queda nada, pisa el teclado (los apuntes vuelan). Después baja atravesando el mueble.
 func _ensuciar() -> void:
-	var batalla := sala.batalla
-	if felipe.global_position.y > Sala.SUELO - 50.0:
+	var batalla := guion.batalla
+	if felipe.global_position.y > Nivel1.SUELO - 50.0:
 		# Al escritorio por la silla.
 		await _ir_a(7000, 4.0)
 		if _fuera_de_pelea():
 			return
-		await _subir_a(7035, Sala.SUELO - 55)
-		await _subir_a(7105, Sala.SUELO - 98)
+		await _subir_a(7035, Nivel1.SUELO - 55)
+		await _subir_a(7105, Nivel1.SUELO - 98)
 	var tiro := false
 	for vuelta in 3:
 		if _fuera_de_pelea():
@@ -361,9 +364,9 @@ func _ensuciar() -> void:
 		var objetivo := _municion()
 		if objetivo == null:
 			break
-		if objetivo.position.y < Sala.SUELO - 120.0 and felipe.global_position.y > Sala.SUELO - 120.0:
+		if objetivo.position.y < Nivel1.SUELO - 120.0 and felipe.global_position.y > Nivel1.SUELO - 120.0:
 			await _ir_a(7195, 2.0)
-			await _subir_a(7230, Sala.SUELO - 151)
+			await _subir_a(7230, Nivel1.SUELO - 151)
 		if _fuera_de_pelea():
 			return
 		var lado := 1.0 if objetivo.position.x > 7140.0 else -1.0
@@ -375,7 +378,7 @@ func _ensuciar() -> void:
 		_paso("Ensucia con %s (depósito %d, apagados %d)" % [objetivo.tipo, batalla.deposito, batalla.apagados])
 	if not tiro and batalla.manchas.is_empty():
 		# Sin nada que tirar: pisa el teclado hasta que salga un papel.
-		await _ir_a(Sala.TECLADO.get_center().x, 2.0)
+		await _ir_a(Nivel1.TECLADO.get_center().x, 2.0)
 		await _hasta(func() -> bool: return not batalla.manchas.is_empty(), 4.5)
 		_paso("Pisa el teclado: vuelan los apuntes (depósito %d)" % batalla.deposito)
 	await _bajar_al_piso()
@@ -383,15 +386,15 @@ func _ensuciar() -> void:
 
 ## Perdió una vida (reaparece en el cojín) o la pelea terminó: hay que dejar lo que estaba haciendo.
 func _fuera_de_pelea() -> bool:
-	var batalla := sala.batalla
-	return batalla.ausente or batalla.fase != BatallaAspi.Fase.PELEA or felipe.estado == Felipe.Estado.DESMAYADO or Sala.habitacion_de(felipe.global_position) != "estudio"
+	var batalla := guion.batalla
+	return batalla.ausente or batalla.fase != BatallaAspi.Fase.PELEA or felipe.estado == Felipe.Estado.DESMAYADO or Nivel1.habitacion_de(felipe.global_position) != "estudio"
 
 
 ## Lo que se puede tirar ahora en el estudio, de más fácil a más difícil (escritorio antes que la repisa).
 func _municion() -> Objeto:
 	var mejor: Objeto = null
 	for hijo in sala.get_children():
-		if hijo is Objeto and Sala.habitacion_de(hijo.position) == "estudio" and hijo.visible and not hijo.tirable.roto and hijo.position.y < Sala.SUELO - 10.0:
+		if hijo is Objeto and Nivel1.habitacion_de(hijo.position) == "estudio" and hijo.visible and not hijo.tirable.roto and hijo.position.y < Nivel1.SUELO - 10.0:
 			if mejor == null or hijo.position.y > mejor.position.y:
 				mejor = hijo
 	return mejor
@@ -400,7 +403,7 @@ func _municion() -> Objeto:
 ## Del escritorio, la repisa o la silla al piso: los atraviesa hacia abajo (agachado + saltar).
 func _bajar_al_piso() -> void:
 	for intento in 3:
-		if felipe.is_on_floor() and felipe.global_position.y > Sala.SUELO - 2.0:
+		if felipe.is_on_floor() and felipe.global_position.y > Nivel1.SUELO - 2.0:
 			return
 		await _hasta(func() -> bool: return felipe.is_on_floor(), 1.0)
 		await _bajar()
@@ -409,8 +412,8 @@ func _bajar_al_piso() -> void:
 ## Mientras ella limpia: en el piso, cerca de la mancha pero sin dejarse arrastrar (si aspira, se aferra), listo para
 ## saltarle encima apenas se llene. Las embestidas las esquiva el reflejo (_reflejos).
 func _esperar_en_el_piso() -> void:
-	var batalla := sala.batalla
-	var aspi := sala.aspi
+	var batalla := guion.batalla
+	var aspi := guion.aspi
 	var dx := felipe.global_position.x - aspi.global_position.x
 	if batalla.succionando and absf(dx) < 270.0:
 		Input.action_press("agacharse")
@@ -436,7 +439,7 @@ func _esperar_en_el_piso() -> void:
 func _hasta_que_aspi_se_detenga() -> void:
 	var anterior := INF
 	for i in int(1.0 * _fps):
-		var x := sala.aspi.global_position.x
+		var x := guion.aspi.global_position.x
 		if absf(x - anterior) < 0.1:
 			return
 		anterior = x
@@ -445,7 +448,7 @@ func _hasta_que_aspi_se_detenga() -> void:
 
 ## Depósito lleno: al piso, junto a ella, y salta para caerle encima.
 func _apagar_de_un_salto() -> void:
-	var batalla := sala.batalla
+	var batalla := guion.batalla
 	var antes := batalla.apagados
 	await _bajar_al_piso()
 	for intento in 4:
@@ -454,7 +457,7 @@ func _apagar_de_un_salto() -> void:
 		# Al llenarse bajo la repisa sale disparada unos 80 px (EMPUJE_LLENA, 0,3 s): hay que esperar a que se quede
 		# quieta antes de elegir el lado. Si no, va adonde estaba, queda del otro lado y salta alejándose de ella.
 		await _hasta_que_aspi_se_detenga()
-		var x := sala.aspi.global_position.x
+		var x := guion.aspi.global_position.x
 		var lado := -1.0 if felipe.global_position.x < x else 1.0
 		# A media carcasa de distancia (ella es sólida: más cerca, Felipe choca y el bot salta solo y pierde tiempo).
 		# Si está lejos (se alejó para comer un snack), corre (Shift): llena espera solo 3 a 4 s.
@@ -464,7 +467,7 @@ func _apagar_de_un_salto() -> void:
 		await _ir_a(x + lado * 44.0, 3.0)
 		Input.action_release("zoomies")
 		# Lado y blanco se miden de nuevo justo antes de saltar; si no quedó a tiro, se acerca otra vez.
-		x = sala.aspi.global_position.x
+		x = guion.aspi.global_position.x
 		var dx := x - felipe.global_position.x
 		if absf(dx) > 64.0:
 			continue
@@ -494,7 +497,7 @@ func _bajar() -> void:
 	Input.action_press("agacharse")
 	await _tocar("saltar")
 	Input.action_release("agacharse")
-	await _hasta(func() -> bool: return felipe.is_on_floor() and felipe.global_position.y > Sala.SUELO - 2.0, 1.5)
+	await _hasta(func() -> bool: return felipe.is_on_floor() and felipe.global_position.y > Nivel1.SUELO - 2.0, 1.5)
 
 
 func _cazar_raton(desde: float, hasta: float) -> void:
@@ -588,9 +591,9 @@ func _saltar(lado: float, x_objetivo := INF) -> void:
 
 
 func _esquivar_bolas() -> void:
-	if sala.batalla == null:
+	if guion.batalla == null:
 		return
-	for bola in sala.batalla.bolas:
+	for bola in guion.batalla.bolas:
 		var dx := bola.global_position.x - felipe.global_position.x
 		if absf(dx) < 60.0 and felipe.is_on_floor():
 			Input.action_press("saltar")
@@ -606,7 +609,7 @@ func _soltar_direcciones() -> void:
 ## Una recompensa suelta de ese tipo en ese cuarto (null si no hay).
 func _recogible_en(tipo: String, cuarto: String) -> Recogible:
 	for hijo in sala.get_children():
-		if hijo is Recogible and hijo.tipo == tipo and Sala.habitacion_de(hijo.global_position) == cuarto:
+		if hijo is Recogible and hijo.tipo == tipo and Nivel1.habitacion_de(hijo.global_position) == cuarto:
 			return hijo
 	return null
 
@@ -676,7 +679,7 @@ var _saltando_embestida := 0
 
 
 func _reflejos() -> void:
-	var batalla := sala.batalla if sala else null
+	var batalla := guion.batalla if sala else null
 	if _saltando_embestida > 0:
 		_saltando_embestida -= 1
 		if _saltando_embestida == 0:
@@ -684,7 +687,7 @@ func _reflejos() -> void:
 		return
 	if batalla == null or batalla.fase != BatallaAspi.Fase.PELEA or not felipe.is_on_floor() or felipe.agachado:
 		return
-	var aspi := sala.aspi
+	var aspi := guion.aspi
 	var dx := felipe.global_position.x - aspi.global_position.x
 	var en_el_piso := absf(felipe.global_position.y - aspi.global_position.y) < 30.0
 	var viene := signf(aspi.velocity.x) == signf(dx) and absf(aspi.velocity.x) > 1.0

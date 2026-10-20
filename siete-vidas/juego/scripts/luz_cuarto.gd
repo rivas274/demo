@@ -1,8 +1,8 @@
 class_name LuzCuarto
 extends Node2D
 ## PRUEBA de luz y efectos (decisión "Luz y efectos" de la memoria 01, aprobada como prueba el 2026-10-19): la sala al
-## atardecer. Todo vive en este script y se prende con UNA bandera, `Sala.luz_activa`; para quitar la prueba basta con
-## apagarla (o borrar este archivo, `assets/luz/` y las dos líneas de `Sala._ready`).
+## atardecer. Todo vive en este script y se prende con UNA bandera, `GuionNivel1.luz_activa`; para quitar la prueba basta con
+## apagarla (o borrar este archivo, `assets/luz/` y las dos líneas de `GuionNivel1.al_terminar_de_armar`).
 ##
 ## Qué pone, solo en la sala (en los demás cuartos el ambiente vuelve a blanco y las luces se apagan):
 ## - Ambiente cálido algo más oscuro (CanvasModulate). Afecta solo al mundo: la interfaz, el diálogo, los carteles y
@@ -26,14 +26,14 @@ const RUTA := "res://assets/luz/%s.png"
 const VIDRIO_TEXTURA := Rect2(27, 26, 126, 111)
 ## Pantalla de la lámpara en `mesita_sala` (coordenadas de la textura).
 const PANTALLA_LAMPARA := Rect2(5, 0, 35, 23)
-## LED del cargador (el que dibuja Sala._dibujar_ambiente).
-const LED := Vector2(210, Sala.SUELO - 4)
-## Entre la pantalla del portátil y la cara de Valeria sentada en el sofá, respecto de Sala.VALERIA_SOFA.
+## LED del cargador (el que dibuja DecoradoNivel1.dibujar_ambiente).
+const LED := Vector2(210, Nivel1.SUELO - 4)
+## Entre la pantalla del portátil y la cara de Valeria sentada en el sofá, respecto de Nivel1.VALERIA_SOFA.
 const PORTATIL := Vector2(-6, -80)
 ## Luz de la lámpara en escalones: [x izquierda, y, ancho, alto, alfa] en el tablero de la mesita (filas 38 a 57 de
 ## su arte, coordenadas de la textura) y en el piso delante de ella (coordenadas del mundo).
 const LAMPARA_TABLERO := [[2, 39, 62, 13, 0.1], [9, 40, 46, 10, 0.1], [16, 41, 30, 7, 0.12]]
-const LAMPARA_PISO := [[140, Sala.SUELO + 1, 124, 8, 0.07], [156, Sala.SUELO + 1, 92, 6, 0.07], [172, Sala.SUELO + 1, 60, 4, 0.08]]
+const LAMPARA_PISO := [[140, Nivel1.SUELO + 1, 124, 8, 0.07], [156, Nivel1.SUELO + 1, 92, 6, 0.07], [172, Nivel1.SUELO + 1, 60, 4, 0.08]]
 const COLOR_LAMPARA := Color(1.0, 0.85, 0.55)
 ## Capa de luz propia de Valeria: la luz fría del portátil ilumina solo a ella (no la pared de atrás).
 const MASCARA_VALERIA := 2
@@ -46,7 +46,8 @@ const LUCES := [
 ]
 const MOTAS := 14
 
-var sala: Sala
+var sala: Nivel
+var valeria: Valeria
 var _ambiente: CanvasModulate
 var _luces := {}
 var _brillo_pared: Node2D
@@ -57,8 +58,9 @@ var _vidrio := Rect2()
 var _t := 0.0
 
 
-func _init(de: Sala) -> void:
+func _init(de: Nivel, con_valeria: Valeria = null) -> void:
 	sala = de
+	valeria = con_valeria
 	name = "LuzCuarto"
 
 
@@ -67,7 +69,7 @@ func _ready() -> void:
 	_ambiente.name = "Ambiente del cuarto"
 	add_child(_ambiente)
 	var ventana := ArteNivel.textura("ventana_sala")
-	var arte: Array = Sala.ARTE[0]
+	var arte: Array = Nivel1.ARTE[0]
 	var origen := Vector2(arte[1].x, arte[1].y - (ventana.get_height() if ventana else 0))
 	_vidrio = Rect2(origen + VIDRIO_TEXTURA.position, VIDRIO_TEXTURA.size)
 	var rayo := _textura("luz_rayo")
@@ -85,7 +87,7 @@ func _ready() -> void:
 		if datos[1] == "luz_rayo" and rayo:
 			donde = _vidrio.position + rayo.get_size() / 2.0
 		elif donde == Vector2.INF:
-			donde = Sala.VALERIA_SOFA + PORTATIL
+			donde = Nivel1.VALERIA_SOFA + PORTATIL
 		luz.position = donde
 		if datos[0] == "Portátil de Valeria":
 			luz.range_item_cull_mask = MASCARA_VALERIA
@@ -101,8 +103,8 @@ func _ready() -> void:
 	# El Indicador está en el mundo (burbuja y contorno): no recibe ni el ambiente ni las luces.
 	if sala.travesuras and sala.travesuras.indicador:
 		_sin_sombrear(sala.travesuras.indicador, sin_sombrear)
-	if sala.valeria:
-		sala.valeria.light_mask |= MASCARA_VALERIA
+	if valeria:
+		valeria.light_mask |= MASCARA_VALERIA
 	sala.habitacion_cambiada.connect(_al_cambiar_cuarto)
 	_al_cambiar_cuarto(sala.habitacion)
 
@@ -149,7 +151,6 @@ func _process(delta: float) -> void:
 	var led: PointLight2D = _luces["LED del cargador"]
 	led.energy = 0.3 + 0.3 * sin(sala.tiempo * 3.0)
 	var portatil: PointLight2D = _luces["Portátil de Valeria"]
-	var valeria := sala.valeria
 	portatil.enabled = valeria != null and valeria.visible and valeria.cuarto == CUARTO and valeria.actividad == Valeria.Actividad.SENTADA
 	_polvo.queue_redraw()
 	_brillo_mueble.queue_redraw()
@@ -164,7 +165,7 @@ func _dibujar_brillo_pared() -> void:
 func _dibujar_brillo_mueble() -> void:
 	var mesita := ArteNivel.textura("mesita_sala")
 	if mesita:
-		var origen := Vector2(Sala.MESITA_X, Sala.SUELO - mesita.get_height())
+		var origen := Vector2(Nivel1.MESITA_X, Nivel1.SUELO - mesita.get_height())
 		_brillo_mueble.draw_texture_rect_region(mesita, Rect2(origen + PANTALLA_LAMPARA.position, PANTALLA_LAMPARA.size), PANTALLA_LAMPARA)
 		# La luz de la lámpara cae en el tablero, bajo la pantalla, en tres escalones.
 		for e: Array in LAMPARA_TABLERO:
@@ -184,7 +185,7 @@ func _dibujar_luz_piso() -> void:
 
 ## Motas de 1 px que suben despacio dentro del rayo de la ventana y titilan en dos escalones (no un degradado).
 func _dibujar_polvo() -> void:
-	var piso := Sala.SUELO + 8.0
+	var piso := Nivel1.SUELO + 8.0
 	for m in MOTAS:
 		var subida := fmod(_t * (0.03 + 0.004 * (m % 4)) + m * 0.137, 1.0)
 		var y := lerpf(piso - 10.0, _vidrio.position.y + 8.0, subida)

@@ -11,12 +11,13 @@ func _initialize() -> void:
 
 
 func _correr() -> void:
-	var sala: Sala = load("res://escenas/apartamento.tscn").instantiate()
+	var sala: Nivel = load("res://escenas/nivel_1.tscn").instantiate()
+	var guion: GuionNivel1 = sala.guion
 	sala.mostrar_titulo = false
-	sala.batalla_con_jefe = false
+	guion.batalla_con_jefe = false
 	root.add_child(sala)
 	var felipe: Felipe = sala.get_node("Felipe")
-	felipe.global_position = Vector2(560, Sala.SUELO)
+	felipe.global_position = Vector2(560, Nivel1.SUELO)
 	for paso: Array in GUION:
 		if paso[0] != "":
 			Input.action_press(paso[0])

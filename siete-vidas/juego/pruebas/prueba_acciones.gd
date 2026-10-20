@@ -7,7 +7,9 @@ extends SceneTree
 ## Termina con código 0 si todo pasa y 1 si algo falla.
 
 var _fallos: Array[String] = []
-var sala: Sala
+var sala: Nivel
+## Lo propio del nivel 1 (Valeria, A.S.P.I., la pelea, las cajas...).
+var guion: GuionNivel1
 var felipe: Felipe
 
 
@@ -16,16 +18,17 @@ func _initialize() -> void:
 
 
 func _correr() -> void:
-	sala = load("res://escenas/apartamento.tscn").instantiate()
+	sala = load("res://escenas/nivel_1.tscn").instantiate()
+	guion = sala.guion
 	sala.mostrar_titulo = false
-	sala.peligros_activos = false
-	sala.batalla_con_jefe = false
+	guion.peligros_activos = false
+	guion.batalla_con_jefe = false
 	root.add_child(sala)
 	felipe = sala.get_node("Felipe")
 	for enemigo in root.get_tree().get_nodes_in_group("enemigos"):
 		enemigo.queue_free()
 	# Valeria (la del nivel) se va a la cocina: aquí los testigos son de prueba (su escena tiene prueba_nivel).
-	sala.valeria.poner(Sala.VALERIA_COCINA, "cocina", -1.0, Valeria.Actividad.DE_PIE)
+	guion.valeria.poner(Nivel1.VALERIA_COCINA, "cocina", -1.0, Valeria.Actividad.DE_PIE)
 	await _esperar(30)
 
 	await _probar_habilidades()
@@ -49,7 +52,7 @@ func _correr() -> void:
 ## Doble salto, Zoomies y trepar vienen apagados en el nivel 1 (decisión del creador, 2026-10-19).
 func _probar_habilidades() -> void:
 	_comprobar(not felipe.tiene_doble_salto and not felipe.tiene_zoomies and not felipe.puede_trepar, "En el nivel 1 el doble salto, los Zoomies y trepar vienen apagados")
-	await _poner_en(Vector2(120, Sala.SUELO))
+	await _poner_en(Vector2(120, Nivel1.SUELO))
 	var y_suelo := felipe.global_position.y
 	Input.action_press("saltar")
 	await _esperar(8)
@@ -71,7 +74,7 @@ func _probar_habilidades() -> void:
 	await _esperar(6)
 	_comprobar(felipe.estado != Felipe.Estado.ZOOMIES and absf(felipe.global_position.x - x_antes) < 10.0, "Sin Zoomies, tocar Shift no da el impulso")
 	# La cortina del dormitorio es un lugar visto: sin Afilar Garras no se trepa.
-	await _poner_en(Vector2(6355, Sala.SUELO))
+	await _poner_en(Vector2(6355, Nivel1.SUELO))
 	Input.action_press("mover_arriba")
 	await _esperar(30)
 	Input.action_release("mover_arriba")
@@ -79,9 +82,9 @@ func _probar_habilidades() -> void:
 
 
 func _probar_maullar() -> void:
-	await _poner_en(Vector2(120, Sala.SUELO))
-	var cerca := _oyente(Vector2(220, Sala.SUELO))
-	var lejos := _oyente(Vector2(120 + Felipe.RADIO_MAULLIDO + 60, Sala.SUELO))
+	await _poner_en(Vector2(120, Nivel1.SUELO))
+	var cerca := _oyente(Vector2(220, Nivel1.SUELO))
+	var lejos := _oyente(Vector2(120 + Felipe.RADIO_MAULLIDO + 60, Nivel1.SUELO))
 	var maullidos: Array[int] = []
 	var al_maullar := func(_boca: Vector2) -> void: maullidos.append(felipe.sprite.frame)
 	felipe.maullo.connect(al_maullar)
@@ -108,7 +111,7 @@ func _probar_maullar() -> void:
 ## Arañar el sofá: las marcas salen en los cuadros de impacto, no al apretar. Con las garras afiladas, crítico.
 func _probar_aranar() -> void:
 	var sofa: Aranable = sala.get_node("Sofa arañable")
-	await _poner_en(Vector2(300, Sala.SUELO))
+	await _poner_en(Vector2(300, Nivel1.SUELO))
 	_comprobar(felipe.objeto_cercano() == sofa, "Frente al sofá, el botón de acción lo araña")
 	await _tocar("interactuar")
 	_comprobar(felipe.estado == Felipe.Estado.ARANANDO and felipe.sprite.animation == "aranar", "Arañar usa su animación (de pie en dos patas)")
@@ -181,7 +184,7 @@ func _probar_manotazo() -> void:
 
 ## Mantener la acción 0,6 s sin nada cerca come un snack del bolsillo: cura 1 corazón y suma 0,3 kg.
 func _probar_snacks() -> void:
-	await _poner_en(Vector2(120, Sala.SUELO))
+	await _poner_en(Vector2(120, Nivel1.SUELO))
 	_comprobar(felipe.objeto_cercano() == null, "Lejos de todo no hay nada que usar")
 	felipe.snacks = 3
 	felipe.corazones = 3
@@ -227,10 +230,10 @@ func _probar_snacks() -> void:
 
 ## API de la escalera: un ciclo de "subir_escalera" por escalón, con saltito, hasta el último peldaño.
 func _probar_escalera() -> void:
-	await _poner_en(Vector2(120, Sala.SUELO))
+	await _poner_en(Vector2(120, Nivel1.SUELO))
 	var peldanos: Array[Vector2] = []
 	for i in 3:
-		peldanos.append(Vector2(120 + 20 * (i + 1), Sala.SUELO - 21 * (i + 1)))
+		peldanos.append(Vector2(120 + 20 * (i + 1), Nivel1.SUELO - 21 * (i + 1)))
 	var subidos: Array[int] = []
 	var terminadas := [0]
 	var al_subir := func(n: int) -> void: subidos.append(n)
@@ -249,7 +252,7 @@ func _probar_escalera() -> void:
 		if subidos.is_empty() and felipe.sprite.animation == "subir_escalera":
 			cuadros_primer_escalon[felipe.sprite.frame] = true
 			# Por encima de la recta entre el piso y el primer peldaño: el saltito.
-			var en_linea := Sala.SUELO - 21.0 * clampf((felipe.global_position.x - 120.0) / 20.0, 0.0, 1.0)
+			var en_linea := Nivel1.SUELO - 21.0 * clampf((felipe.global_position.x - 120.0) / 20.0, 0.0, 1.0)
 			if felipe.global_position.y < en_linea - 3.0:
 				mas_alto_que_la_linea = true
 		if terminadas[0] > 0:
@@ -263,9 +266,9 @@ func _probar_escalera() -> void:
 	_comprobar(posicion_al_terminar[0].distance_to(peldanos[-1]) < 1.0, "Termina en el último peldaño")
 	_comprobar(not felipe.en_escalera() and felipe.sprite.speed_scale == 1.0, "Al terminar vuelve a moverse normal")
 	# Bajar un escalón: mismos saltitos con los cuadros de saltar y caer.
-	await _poner_en(Vector2(120, Sala.SUELO))
-	felipe.global_position = Vector2(120, Sala.SUELO - 21)
-	felipe.subir_escalon(Vector2(140, Sala.SUELO))
+	await _poner_en(Vector2(120, Nivel1.SUELO))
+	felipe.global_position = Vector2(120, Nivel1.SUELO - 21)
+	felipe.subir_escalon(Vector2(140, Nivel1.SUELO))
 	await _esperar(9)
 	_comprobar(felipe.sprite.animation in ["saltar", "caer"], "Bajando usa los cuadros de saltar y caer")
 	await _esperar(20)
@@ -275,12 +278,12 @@ func _probar_escalera() -> void:
 ## Rascador: con público, perdón + snack una vez por visita; sin público, queja; siempre afila las garras.
 func _probar_rascador() -> void:
 	var rascador := Rascador.new()
-	rascador.position = Vector2(1010, Sala.SUELO)
+	rascador.position = Vector2(1010, Nivel1.SUELO)
 	sala.add_child(rascador)
 	sala.travesuras.conectar_rascador(rascador)
 	var funciones: Array = []
 	rascador.funcion.connect(func(_r: Rascador, publico: bool, premio: bool, _t: Node) -> void: funciones.append([publico, premio]))
-	await _poner_en(Vector2(1040, Sala.SUELO))
+	await _poner_en(Vector2(1040, Nivel1.SUELO))
 	felipe.snacks = 2
 	_comprobar(felipe.objeto_cercano() == rascador, "Junto al rascador, el botón de acción lo usa (verbo «%s»)" % rascador.verbo(felipe))
 	await _usar_rascador()
@@ -289,7 +292,7 @@ func _probar_rascador() -> void:
 	_comprobar(_dijo("felipe", Frases.FELIPE["rascador_solo"]), "Sin público Felipe se queja («¿Para quién actúo?»)")
 	var testigo := _testigo()
 	sala.add_child(testigo)
-	testigo.global_position = Vector2(1100, Sala.SUELO)
+	testigo.global_position = Vector2(1100, Nivel1.SUELO)
 	await _usar_rascador()
 	_comprobar(funciones.size() == 2 and funciones[1] == [true, true], "Con un testigo mirando: perdón y premio")
 	_comprobar(felipe.snacks == 3 and int(testigo.get("perdones")) == 1, "El premio es un snack al bolsillo y el testigo lo perdona")
@@ -401,7 +404,7 @@ func _probar_dialogo() -> void:
 	dialogo.limpiar()
 	sala.travesuras.anuncios.limpiar()
 	await _esperar(2)
-	sala.felipe.global_position = Vector2(120, Sala.SUELO)
+	sala.felipe.global_position = Vector2(120, Nivel1.SUELO)
 	dialogo.decir("felipe", "Una frase arriba.", 0, true)
 	sala.desbloquear_logro("Logro de prueba")
 	# El logro sale cuando le toca en la cola única de anuncios (G5 de la revisión 3).
@@ -419,8 +422,8 @@ func _probar_dialogo() -> void:
 func _probar_frotarse() -> void:
 	var testigo := _testigo()
 	sala.add_child(testigo)
-	testigo.global_position = Vector2(160, Sala.SUELO)
-	await _poner_en(Vector2(130, Sala.SUELO))
+	testigo.global_position = Vector2(160, Nivel1.SUELO)
+	await _poner_en(Vector2(130, Nivel1.SUELO))
 	var terminados: Array[Node2D] = []
 	felipe.ronroneo_terminado.connect(func(o: Node2D) -> void: terminados.append(o))
 	felipe.frotarse(testigo)
@@ -437,14 +440,14 @@ func _probar_indicador() -> void:
 	var indicador := sala.travesuras.indicador
 	_comprobar(IconosBotones.textura("interactuar", false) != null and IconosBotones.textura("interactuar", true) != null, "Los íconos de teclado y mando salen del paquete de Kenney")
 	_comprobar(IconosBotones.texto("maullar", false) == "Q" and IconosBotones.texto("maullar", true) == "B", "Maullar: Q en el teclado, B en el mando")
-	await _poner_en(Vector2(300, Sala.SUELO))
+	await _poner_en(Vector2(300, Nivel1.SUELO))
 	await _esperar(3)
 	_comprobar(indicador.objeto == sala.get_node("Sofa arañable") or indicador.objeto == null, "Frente al sofá roto ya no se ofrece si no se puede arañar más")
 	var puerta: Puerta = sala.puertas["sala>recibidor"]
 	await _poner_en(puerta.global_position + Vector2(-20, 0))
 	await _esperar(3)
 	_comprobar(indicador.objeto == puerta and indicador.verbo == "Pasar", "Junto a una puerta aparece la burbuja «Pasar» (%s)" % indicador.verbo)
-	await _poner_en(Vector2(120, Sala.SUELO))
+	await _poner_en(Vector2(120, Nivel1.SUELO))
 	await _esperar(3)
 	_comprobar(indicador.objeto == null and indicador.verbo == "", "Lejos de todo, el indicador se va")
 	# M7: un verbo por acción (sofá «Firmar», ropa «Desordenar», puerta entornada «Arañar»).
@@ -464,7 +467,7 @@ func _probar_indicador() -> void:
 		await _esperar(3)
 		_comprobar(indicador.objeto == vaso2.tirable and indicador.verbo == "Liberar", "Junto a un vaso: «Liberar» con contorno del dibujo")
 	felipe.snacks = 2
-	await _poner_en(Vector2(120, Sala.SUELO))
+	await _poner_en(Vector2(120, Nivel1.SUELO))
 	Input.action_press("interactuar")
 	await _esperar(12)
 	_comprobar(indicador.verbo == "Degustar snack", "Manteniendo la acción sin nada cerca, la burbuja carga «Degustar snack»")

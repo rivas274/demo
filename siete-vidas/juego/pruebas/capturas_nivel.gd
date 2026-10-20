@@ -8,22 +8,22 @@ var _carpeta := "user://capturas"
 
 ## [nombre, posición de Felipe (al pie)].
 const PUNTOS := [
-	["1-sala-sofa", Vector2(300, Sala.SUELO)],
-	["2-sala-comedor", Vector2(1000, Sala.SUELO)],
-	["3-recibidor-entrada", Vector2(1700, Sala.SUELO)],
-	["4-recibidor-escalera", Vector2(2200, Sala.SUELO)],
-	["4b-escalera-adentro", Vector2(2390, Sala.SUELO)],
-	["5-cocina-entrada", Vector2(3050, Sala.SUELO)],
-	["6-cocina-estufa", Vector2(3433, Sala.SUELO - 55)],
-	["6b-cocina-fregadero", Vector2(3640, Sala.SUELO - 109)],
-	["6c-cocina-refrigerador", Vector2(3900, Sala.SUELO - 109)],
-	["7-pasillo-consola", Vector2(4530, Sala.SUELO)],
-	["8-pasillo-estudio", Vector2(5300, Sala.SUELO)],
-	["9-dormitorio-cama", Vector2(5910, Sala.SUELO)],
-	["10-dormitorio-ropero", Vector2(6360, Sala.SUELO)],
-	["11-estudio", Vector2(6980, Sala.SUELO)],
-	["12-balcon", Vector2(7830, Sala.SUELO)],
-	["13-pasillo-bano", Vector2(Sala.BANO.x, Sala.SUELO)],
+	["1-sala-sofa", Vector2(300, Nivel1.SUELO)],
+	["2-sala-comedor", Vector2(1000, Nivel1.SUELO)],
+	["3-recibidor-entrada", Vector2(1700, Nivel1.SUELO)],
+	["4-recibidor-escalera", Vector2(2200, Nivel1.SUELO)],
+	["4b-escalera-adentro", Vector2(2390, Nivel1.SUELO)],
+	["5-cocina-entrada", Vector2(3050, Nivel1.SUELO)],
+	["6-cocina-estufa", Vector2(3433, Nivel1.SUELO - 55)],
+	["6b-cocina-fregadero", Vector2(3640, Nivel1.SUELO - 109)],
+	["6c-cocina-refrigerador", Vector2(3900, Nivel1.SUELO - 109)],
+	["7-pasillo-consola", Vector2(4530, Nivel1.SUELO)],
+	["8-pasillo-estudio", Vector2(5300, Nivel1.SUELO)],
+	["9-dormitorio-cama", Vector2(5910, Nivel1.SUELO)],
+	["10-dormitorio-ropero", Vector2(6360, Nivel1.SUELO)],
+	["11-estudio", Vector2(6980, Nivel1.SUELO)],
+	["12-balcon", Vector2(7830, Nivel1.SUELO)],
+	["13-pasillo-bano", Vector2(Nivel1.BANO.x, Nivel1.SUELO)],
 ]
 
 
@@ -36,9 +36,10 @@ func _initialize() -> void:
 
 
 func _correr() -> void:
-	var sala: Sala = load("res://escenas/apartamento.tscn").instantiate()
+	var sala: Nivel = load("res://escenas/nivel_1.tscn").instantiate()
+	var guion: GuionNivel1 = sala.guion
 	sala.mostrar_titulo = false
-	sala.batalla_con_jefe = false
+	guion.batalla_con_jefe = false
 	root.add_child(sala)
 	var felipe: Felipe = sala.get_node("Felipe")
 	await _esperar(30)
@@ -52,31 +53,31 @@ func _correr() -> void:
 		await _capturar(punto[0])
 	# La escalera después del atajo: la caja de arriba tirada desde el peldaño, abierta en el piso.
 	sala.travesuras.dialogo.limpiar()
-	felipe.global_position = Sala.PELDANO_CAJAS
+	felipe.global_position = Nivel1.PELDANO_CAJAS
 	await _esperar(20)
 	felipe.mirando = -1.0
 	# Valeria en su reunión (audífonos puestos): igual oye el ¡PUM! (segunda pasada, pilar 5).
-	sala.valeria.audifonos = true
-	sala.cajas.interactuar(felipe)
+	guion.valeria.audifonos = true
+	guion.cajas.interactuar(felipe)
 	await _esperar(12)
 	await _capturar("4c-escalera-caja-cayendo")
-	await _esperar_que(func() -> bool: return sala.cajas.rect_borde_caja() != Rect2(), 120)
+	await _esperar_que(func() -> bool: return guion.cajas.rect_borde_caja() != Rect2(), 120)
 	await _esperar(8)
 	await _capturar("4e-escalera-caja-pum")
 	await _esperar(40)
 	await _capturar("4f-escalera-valeria-reacciona")
 	await _esperar(80)
 	sala.travesuras.dialogo.limpiar()
-	felipe.global_position = Vector2(2400, Sala.SUELO)
+	felipe.global_position = Vector2(2400, Nivel1.SUELO)
 	await _esperar(40)
 	sala.travesuras.dialogo.limpiar()
 	await _esperar(2)
 	await _capturar("4d-escalera-caja-tirada")
 	# Valeria con un audífono afuera (en la sala, para verla de cerca).
 	sala.travesuras.dialogo.limpiar()
-	felipe.global_position = Vector2(sala.valeria.global_position.x - 90.0, Sala.SUELO)
-	sala.valeria.audifonos = true
-	sala.valeria.sacar_audifono(5.0)
+	felipe.global_position = Vector2(guion.valeria.global_position.x - 90.0, Nivel1.SUELO)
+	guion.valeria.audifonos = true
+	guion.valeria.sacar_audifono(5.0)
 	await _esperar(40)
 	sala.travesuras.dialogo.limpiar()
 	await _esperar(2)

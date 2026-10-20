@@ -89,7 +89,8 @@ func soltar_polvo(cantidad: int, empuje := 1.0) -> void:
 
 ## Estela de imágenes fantasma mientras está en el aire o haciendo Zoomies.
 func actualizar_estela(delta: float) -> void:
-	if felipe.is_on_floor() and felipe.estado != Felipe.Estado.ZOOMIES:
+	# En el piso, solo a velocidad de Zoomies (no mientras se prepara ni mientras derrapa).
+	if felipe.is_on_floor() and (felipe.estado != Felipe.Estado.ZOOMIES or absf(felipe.velocity.x) <= felipe.velocidad_correr):
 		return
 	_tiempo_estela += delta
 	if _tiempo_estela < 0.035:

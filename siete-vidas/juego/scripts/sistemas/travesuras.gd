@@ -172,9 +172,11 @@ func _al_actuar(rascador: Rascador, con_publico: bool, premio: bool, _testigo: N
 
 
 func _al_impacto(tipo: String) -> void:
-	# Dos o tres cuadros de congelado al pegar la pata (hallazgo B5).
-	if tipo in ["zarpazo", "manotazo", "aranar"]:
-		jugo.congelar(0.05)
+	# La receta de jugo de cada acción (datos/jugo/<tipo>.tres): pausa de impacto, sacudida y frase. Zarpazo,
+	# manotazo y arañazo: dos o tres cuadros de congelado al pegar la pata (hallazgo B5).
+	var frase := RecetaJugo.impacto_de(tipo, jugo)
+	if frase != "":
+		decir_felipe(frase, true)
 
 
 func _al_maullar(boca: Vector2) -> void:

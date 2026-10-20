@@ -5,6 +5,11 @@ extends RefCounted
 ## Cada frase: [texto, ánimo del retrato] (ver Dialogo.PERSONAJES). Todas caben en 1 o 2 líneas (la prueba lo mide).
 
 const FELIPE := {
+	"zoomies_choque": [
+		["El mueble se movió. Yo no.", 1],
+		["Frenos: pendiente de instalar.", 5],
+		["Lo hice a propósito. Para medir la sala.", 7],
+	],
 	"tirar": [
 		["Arte.", 7],
 		["La mesa se veía mejor así. De nada.", 4],

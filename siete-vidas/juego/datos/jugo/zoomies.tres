@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="DatosJugo" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/datos/datos_jugo.gd" id="1_jugo"]
+
+[resource]
+script = ExtResource("1_jugo")
+anticipacion = 0.05
+forma_anticipacion = Vector2(1.06, 0.94)
+lineas_cada = 0.04
+lineas_cantidad = 3
+lineas_largo = Vector2(14, 28)
+lineas_vida = 0.12
+adelanto_camara = 28.0
+tiempo_camara = 0.18
+pausa_impacto = 0.06
+sacudida = 0.18
+fuerza_sacudida = 1.0
+frase_impacto = "zoomies_choque"
+polvo = 14
+empuje_polvo = 1.2
+pelos = 6
+derrape = 16.0
+tiempo_derrape = 0.2
+marca_derrape = 0.8

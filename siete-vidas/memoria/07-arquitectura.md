@@ -111,7 +111,7 @@ objeto por estado (`EstadoFelipe`, en `scripts/entidades/felipe/estados/`):
 | `estado_libre.gd` | `SUELO`, `AIRE` | Moverse, gravedad, saltar, empezar acciones |
 | `estado_aterrizando.gd` | `ATERRIZANDO` | La pausa corta al caer fuerte |
 | `estado_accion.gd` | `ZARPAZO`, `COMIENDO`, `ARANANDO`, `MAULLANDO` | Frena, su animación desde el cuadro 0, vuelve al terminar (un estado por dato) |
-| `estado_zoomies.gd` | `ZOOMIES` | La carrera (datos `{"direccion"}`) |
+| `estado_zoomies.gd` | `ZOOMIES` | La carrera en tres fases (anticipa, corre, derrapa) con su receta de jugo (datos `{"direccion"}`) |
 | `estado_ronroneando.gd` | `RONRONEANDO` | Frotarse con Valeria (datos `{"objetivo"}`; al salir lo suelta) |
 | `estado_desmayado.gd` | `DESMAYADO` | Pierde una vida y reaparece |
 | `estado_ocio.gd` | `OCIO` | Se lame o juega con el estambre (datos `{"nombre"}`; al salir quita el estambre) |
@@ -138,6 +138,7 @@ pantallas o avisar lo que eligió el jugador en un menú (señal `elegido`).
 | `FelipeAsomado` (`scripts/ui/piezas/felipe_asomado.gd`) | Felipe asoma por el costado del menú (en `HuecoFelipe`), hace su `zarpazo` y en su cuadro de impacto llama `golpear` del letrero elegido; la pantalla espera `manotazo()` y después hace lo elegido | Menú de pausa |
 | `GestorPantallas` | Pila: `abrir(pantalla, pausa)`, `cerrar(pantalla)`, `arriba()`, `es_la_de_arriba(pantalla)`; pausa mientras haya una que pausa | `Pantallas` (título, intro, pausa, fin), `Libreta`, `ResumenDia` |
 | `Estilo` | `color(&"nombre", alfa)`, `letra(&"nombre")`, `medida(&"nombre")`, `fuente()`, `texto_con_contorno`, `texto_centrado` | Todo lo que se dibuja con código |
+| `RecetaJugo` (`scripts/sistemas/receta_jugo.gd`, datos en `datos/jugo/`) | Jugo de una acción con datos: anticipación, líneas de velocidad (`LineasVelocidad`), cámara adelantada, pausa de impacto y sacudida, polvo, pelos, derrape y marca (`MarcaDerrape`) | Zoomies; pausa de impacto de zarpazo, manotazo y arañazo |
 | `Controles` | Qué tecla o botón tiene cada acción (leído del InputMap), `etiquetar("{saltar}")`, `remapear`, `guardar`, `cargar` (`user://controles.cfg`, se carga al empezar el nivel) | Avisos, pistas de jefe, íconos (`IconosBotones` busca el ícono por tecla, así sigue al remapeo) |
 
 Textos: toda la interfaz usa claves (`tr("PAUSA_TITULO")`) de `traducciones/textos.csv`. Las frases de Felipe y
@@ -182,6 +183,20 @@ y las pistas pasan por `tr()`, que hoy devuelve el mismo español; para traducir
    propia: regla de CLAUDE.md). Para bajar la barra: `vencidas += 1` (la Vida del jefe se ajusta sola).
 5. **Nivel:** el guion crea la pelea con `TuPelea.new(datos, jefe, felipe, nivel, arena)` y la agrega al nivel.
 6. Prueba: copia lo que hace `prueba_jefe.gd` con A.S.P.I. y la prueba de conductas de `prueba_componentes.gd`.
+
+### Cómo agregar jugo a una acción
+
+1. **Datos:** en `datos/jugo/` → *Nuevo recurso* → `DatosJugo`, con el nombre de la acción (`zoomies.tres`, `zarpazo.tres`):
+   anticipación (segundos y forma, siempre dentro de ±8 %), líneas de velocidad, adelanto de cámara (sin zoom), pausa
+   de impacto, sacudida y frase, polvo, pelos, derrape y marca. Lo que quede en 0 no se hace.
+2. **Pasos:** en el estado o la pieza que hace la acción, `var receta := RecetaJugo.de(actor, "accion")` y llama sus
+   pasos en su momento: `forma_anticipacion()` al entrar (con `felipe.efectos.estirar`), `correr(delta, direccion)`
+   mientras va rápido, `adelantar_camara(camara, direccion)`, `polvo_y_pelos(direccion)` y `marca(direccion)` al
+   frenar. Ejemplo completo: `scripts/entidades/felipe/estados/estado_zoomies.gd`.
+3. **Impacto:** el actor emite su señal `impacto("accion")`; `Travesuras` llama `RecetaJugo.impacto_de(accion, jugo)`
+   (pausa y sacudida del sistema `Jugo`) y dice la frase si la receta trae una.
+4. **Medida:** sin sobrecargar (pilar 5, pero se tiene que leer): mira una tira de cuadros ampliada
+   (`pruebas/capturas_zoomies.gd` es el modelo) y agrega una comprobación en `prueba_componentes.gd`.
 
 ### Cómo agregar una pantalla de menú
 

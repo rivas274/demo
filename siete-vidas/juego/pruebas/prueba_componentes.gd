@@ -46,6 +46,7 @@ func _correr() -> void:
 	await _probar_escenas()
 	await _probar_estados_felipe()
 	_probar_conductas_jefe()
+	await _probar_zoomies()
 
 	for fallo in _fallos:
 		print("FALLA: ", fallo)
@@ -328,6 +329,94 @@ func _probar_conductas_jefe() -> void:
 	_comprobar(copia_primera.intentos == 1 and pelea.activa == copia_primera, "Jefe: desde su fase, la primera en la lista tiene prioridad")
 	_comprobar(DatosJefe.por_fase([1, 2, 3], 1) == 2 and DatosJefe.por_fase([1, 2, 3], 7) == 3, "Jefe: los números por fase usan el último si faltan fases")
 	pelea.free()
+
+
+## Zoomies con su receta de jugo (datos/jugo/zoomies.tres): anticipación dentro de ±8 % sin moverse, salida con
+## líneas de velocidad y la cámara adelantada, derrape de unos px con polvo, pelos y marca, y choque con pausa,
+## sacudida y frase (señal impacto). En la casa de prueba: los Zoomies están apagados en el nivel 1.
+func _probar_zoomies() -> void:
+	var receta := RecetaJugo.datos_de("zoomies")
+	_comprobar(receta != null and receta.anticipacion == 0.05 and receta.derrape > 0.0, "Jugo: los Zoomies tienen su receta en datos/jugo/zoomies.tres")
+	felipe.tiene_zoomies = true
+	felipe.global_position = Vector2(900, PISO)
+	felipe.velocity = Vector2.ZERO
+	felipe.mirando = 1.0
+	await _esperar(20)
+	var x0 := felipe.global_position.x
+	Input.action_press("zoomies")
+	await physics_frame
+	Input.action_release("zoomies")
+	await physics_frame
+	var estado := felipe._estado as EstadoZoomies
+	var base := Felipe.ESCALA_SPRITE
+	var forma := felipe.sprite.scale / base
+	_comprobar(felipe.estado == Felipe.Estado.ZOOMIES and estado.fase == EstadoZoomies.Fase.ANTICIPA and absf(felipe.global_position.x - x0) < 1.0, "Zoomies: se prepara un instante sin moverse (anticipación)")
+	_comprobar(absf(forma.x - 1.0) <= Felipe.DEFORMACION_MAXIMA + 0.001 and absf(forma.y - 1.0) <= Felipe.DEFORMACION_MAXIMA + 0.001, "Zoomies: la anticipación queda dentro de ±8 %")
+	await _segundos_fisica(0.08)
+	_comprobar(estado.fase == EstadoZoomies.Fase.CORRE and felipe.velocity.x == felipe.velocidad_zoomies, "Zoomies: después de 0,05 s sale disparado")
+	await _segundos_fisica(0.06)
+	var lineas := mundo.get_children().filter(func(n: Node) -> bool: return n is LineasVelocidad).size()
+	var camara := felipe.get_node("Camara") as Camera2D
+	_comprobar(lineas > 0, "Zoomies: deja líneas de velocidad detrás")
+	_comprobar(camara.offset.x > 0.0, "Zoomies: la cámara se adelanta hacia donde corre (sin zoom)")
+	await _hasta(func() -> bool: return felipe.estado != Felipe.Estado.ZOOMIES or estado.fase == EstadoZoomies.Fase.DERRAPA, 1.0)
+	_comprobar(estado.fase == EstadoZoomies.Fase.DERRAPA, "Zoomies: sin apretar nada, al terminar el impulso derrapa")
+	var x_derrape := felipe.global_position.x
+	await physics_frame
+	var marcas := mundo.get_children().filter(func(n: Node) -> bool: return n is MarcaDerrape).size()
+	var polvos := mundo.get_children().filter(func(n: Node) -> bool: return n is CPUParticles2D and (n as CPUParticles2D).emitting).size()
+	_comprobar(marcas == 1 and polvos >= 2, "Zoomies: al derrapar suelta polvo y pelos y deja una marca en el piso")
+	await _hasta(func() -> bool: return felipe.estado != Felipe.Estado.ZOOMIES, 1.0)
+	await _esperar(2)
+	var patino := felipe.global_position.x - x_derrape
+	_comprobar(absf(patino - receta.derrape) <= 5.0 and absf(felipe.velocity.x) < 1.0, "Zoomies: patina unos %d px y se queda quieto (patinó %.1f)" % [receta.derrape, patino])
+	await _segundos_fisica(receta.marca_derrape + 0.2)
+	marcas = mundo.get_children().filter(func(n: Node) -> bool: return n is MarcaDerrape).size()
+	_comprobar(marcas == 0, "Zoomies: la marca del derrape se borra sola")
+	# Choque con un mueble: pausa, sacudida y frase vienen por la señal impacto("zoomies").
+	var mueble := StaticBody2D.new()
+	var forma_mueble := CollisionShape2D.new()
+	var caja := RectangleShape2D.new()
+	caja.size = Vector2(20, 80)
+	forma_mueble.shape = caja
+	mueble.position = Vector2(felipe.global_position.x + 70, PISO - 40)
+	mueble.add_child(forma_mueble)
+	mundo.add_child(mueble)
+	await _segundos_fisica(0.5)
+	var impactos: Array[String] = []
+	var anotar := func(tipo: String) -> void: impactos.append(tipo)
+	felipe.impacto.connect(anotar)
+	Input.action_press("zoomies")
+	await physics_frame
+	Input.action_release("zoomies")
+	await physics_frame
+	await _hasta(func() -> bool: return not impactos.is_empty() or felipe.estado != Felipe.Estado.ZOOMIES, 1.0)
+	_comprobar(impactos == ["zoomies"] and absf(felipe.velocity.x) < 1.0, "Zoomies: al chocar con un mueble se detiene y avisa el impacto (pausa, sacudida y frase)")
+	var jugo := Jugo.new()
+	mundo.add_child(jugo)
+	var frase := RecetaJugo.impacto_de("zoomies", jugo)
+	_comprobar(frase == "zoomies_choque" and jugo.congelado() and Frases.FELIPE.has(frase), "Zoomies: el choque congela un instante, sacude y trae su frase")
+	await _segundos_fisica(0.3)
+	Engine.time_scale = 1.0
+	felipe.impacto.disconnect(anotar)
+	mueble.queue_free()
+	jugo.queue_free()
+	felipe.tiene_zoomies = false
+	await _esperar(5)
+
+
+func _segundos_fisica(segundos: float) -> void:
+	var t := 0.0
+	while t < segundos:
+		await physics_frame
+		t += 1.0 / Engine.physics_ticks_per_second
+
+
+func _hasta(condicion: Callable, maximo: float) -> void:
+	var t := 0.0
+	while t < maximo and not condicion.call():
+		await physics_frame
+		t += 1.0 / Engine.physics_ticks_per_second
 
 
 ## Conducta de prueba: ataca siempre que se la deja y dura dos cuadros.

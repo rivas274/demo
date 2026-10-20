@@ -53,8 +53,8 @@ const TONO_LUZ := {
 	"sala": Color(1.0, 0.74, 0.42), "cocina": Color(1.0, 0.93, 0.78), "pasillo": Color(0.74, 0.82, 0.95),
 	"dormitorio": Color(1.0, 0.76, 0.78), "estudio": Color(1.0, 0.84, 0.45),
 }
-## Bordes del marco de ventana (`ventana_marco`, recortado de la ventana de la sala): izquierda, derecha, arriba, abajo.
-const MARCO := [18, 18, 26, 8]
+## Dónde empieza el hueco del vidrio en el marco de la casa (`ventana_casa`, 215 × 170; hueco de 150 × 120).
+const HUECO_VENTANA := Vector2(32, 23)
 
 ## Entre habitaciones: muro (no se ve, la cámara queda dentro de cada cuarto).
 const MURO := Color("2a1d1a")
@@ -337,10 +337,10 @@ func _crear_piso() -> Image:
 	return imagen
 
 
-## Ventana recortada (cocina, dormitorio, estudio), la misma ventana de la casa (G3): el marco de la ventana de la sala
-## en 9 partes (`ventana_marco`), parante en cruz de 4 px con bisel, vidrio con tinte y dos reflejos, y el alféizar a
-## 90 cm. La cocina lleva un visillo (C-3); el estudio, dos paños cortos (E-1); el dormitorio, la cortina larga de
-## Gemini (ArteNivel1._dibujar_cortina, delante de la pared y detrás de los muebles).
+## Ventana recortada (cocina, dormitorio, estudio): el mismo marco de la casa que el pasillo (`ventana_casa`, G2: madera,
+## parante en cruz y alféizar de Gemini), con el hueco de 150 × 120 justo sobre el vidrio. Detrás, tinte y dos
+## reflejos de pixel. La cocina lleva un visillo (C-3); el estudio, dos paños cortos (E-1); el dormitorio, la cortina
+## larga de Gemini (ArteNivel1._dibujar_cortina, delante de la pared y detrás de los muebles).
 func _dibujar_ventana(c: Node2D, ventana: Rect2) -> void:
 	# Vidrio: tinte frío del 8 % y dos reflejos diagonales de pixel.
 	c.draw_rect(ventana, Color(0.75, 0.88, 1.0, 0.08))
@@ -350,20 +350,10 @@ func _dibujar_ventana(c: Node2D, ventana: Rect2) -> void:
 			Vector2(x0, ventana.position.y), Vector2(x0 + 8, ventana.position.y),
 			Vector2(x0 - 28, ventana.end.y), Vector2(x0 - 36, ventana.end.y),
 		]), Color(1, 1, 1, 0.1))
-	# Parante en cruz: 4 px en dos tonos con un bisel claro.
 	var centro := ventana.get_center()
-	c.draw_rect(Rect2(centro.x - 2, ventana.position.y, 4, ventana.size.y), MADERA_OSCURA)
-	c.draw_rect(Rect2(centro.x - 2, ventana.position.y, 2, ventana.size.y), MADERA)
-	c.draw_rect(Rect2(ventana.position.x, centro.y - 2, ventana.size.x, 4), MADERA_OSCURA)
-	c.draw_rect(Rect2(ventana.position.x, centro.y - 2, ventana.size.x, 2), MADERA)
-	c.draw_rect(Rect2(ventana.position.x, centro.y - 2, ventana.size.x, 1), CANTO)
-	_marco_9(c, ventana)
-	# Alféizar: una tabla que sobresale del marco, con la luz arriba y su sombra en la pared.
-	var alfeizar := Rect2(ventana.position.x - 12, ventana.end.y + 3, ventana.size.x + 24, 7)
-	c.draw_rect(Rect2(alfeizar.position.x + 2, alfeizar.end.y + 1, alfeizar.size.x - 4, 4), Color(0, 0, 0, 0.18))
-	c.draw_rect(alfeizar.grow(1), Color("2b1712"))
-	c.draw_rect(alfeizar, MADERA)
-	c.draw_rect(Rect2(alfeizar.position, Vector2(alfeizar.size.x, 2)), CANTO)
+	var marco := ArteNivel.textura("ventana_casa")
+	if marco:
+		c.draw_texture(marco, ventana.position - HUECO_VENTANA)
 	if ventana == Nivel1.VENTANA_DORMITORIO:
 		return
 	if ventana == Nivel1.VENTANA_COCINA:
@@ -385,31 +375,6 @@ func _dibujar_ventana(c: Node2D, ventana: Rect2) -> void:
 		ArteNivel.dibujar(c, "panos_estudio", ventana.end.x + 8.0, base, true)
 
 
-## Marco de la ventana en 9 partes alrededor del vidrio: esquinas del arte y lados estirados (G3).
-func _marco_9(c: Node2D, ventana: Rect2) -> void:
-	var marco := ArteNivel.textura("ventana_marco")
-	if marco == null:
-		c.draw_rect(ventana.grow(3), MADERA_OSCURA, false, 6)
-		return
-	var l: float = MARCO[0]
-	var r: float = MARCO[1]
-	var t: float = MARCO[2]
-	var b: float = MARCO[3]
-	var tam := marco.get_size()
-	var fuera := Rect2(ventana.position - Vector2(l, t), ventana.size + Vector2(l + r, t + b))
-	var xs_origen := [0.0, l, tam.x - r, tam.x]
-	var ys_origen := [0.0, t, tam.y - b, tam.y]
-	var xs_destino := [fuera.position.x, fuera.position.x + l, fuera.end.x - r, fuera.end.x]
-	var ys_destino := [fuera.position.y, fuera.position.y + t, fuera.end.y - b, fuera.end.y]
-	for i in 3:
-		for j in 3:
-			if i == 1 and j == 1:
-				continue
-			var origen := Rect2(xs_origen[i], ys_origen[j], xs_origen[i + 1] - xs_origen[i], ys_origen[j + 1] - ys_origen[j])
-			var destino := Rect2(xs_destino[i], ys_destino[j], xs_destino[i + 1] - xs_destino[i], ys_destino[j + 1] - ys_destino[j])
-			c.draw_texture_rect_region(marco, destino, origen)
-
-
 ## Vidrios de las 5 ventanas: [rectángulo, cuarto].
 static func vidrios() -> Array:
 	var sala := ArteNivel.textura("ventana_sala")
@@ -418,7 +383,7 @@ static func vidrios() -> Array:
 		var arte: Array = Nivel1.ARTE[0]
 		var arriba: float = arte[1].y - sala.get_height()
 		lista.append([Rect2(arte[1].x + 27, arriba + 26, 126, 111), "sala"])
-	lista.append([Rect2(Nivel1.VIDRIO_PASILLO.position.x, Nivel1.VENTANA_PASILLO_ARRIBA.position.y + 5, Nivel1.VIDRIO_PASILLO.size.x, Nivel1.VIDRIO_PASILLO.end.y - Nivel1.VENTANA_PASILLO_ARRIBA.position.y - 5), "pasillo"])
+	lista.append([Nivel1.VIDRIO_PASILLO, "pasillo"])
 	lista.append([Nivel1.VENTANA_COCINA, "cocina"])
 	lista.append([Nivel1.VENTANA_DORMITORIO, "dormitorio"])
 	lista.append([Nivel1.VENTANA_ESTUDIO, "estudio"])

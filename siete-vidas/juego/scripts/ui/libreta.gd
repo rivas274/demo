@@ -1,6 +1,6 @@
 class_name Libreta
 extends CanvasLayer
-## La Agenda de Su Majestad en una libreta con la letra de Felipe (inclinada, tinta azul), agrupada por cuarto.
+## La Agenda de Su Majestad en un pergamino del kit «Decreto real», con la letra de Felipe, agrupada por cuarto.
 ## Tab (mando: View/Select) la abre y la cierra; abierta, el juego queda en pausa. Las secretas dicen "???"
 ## hasta cumplirlas; las cumplidas se tachan con una palomita roja y muestran su recompensa.
 
@@ -75,25 +75,18 @@ func cerrar() -> void:
 func _dibujar() -> void:
 	var c := _hoja
 	c.draw_rect(Rect2(0, 0, 640, 360), Estilo.color(&"libreta_velo"))
-	# Hoja de libreta: papel crema, renglones azules, margen rojo y espiral arriba.
+	# Hoja de la agenda en el pergamino del kit «Decreto real» (la misma familia que la pausa): renglones suaves,
+	# margen de lacre y la foto vergonzosa del unicornio prendida en la esquina.
 	var hoja := HOJA
-	c.draw_rect(hoja.grow(3), Estilo.color(&"libreta_tapa"))
-	c.draw_rect(hoja, Estilo.color(&"libreta_papel"))
+	Estilo.panel(c, hoja.grow(4), &"panel")
 	for y in range(int(hoja.position.y) + 58, int(hoja.end.y) - 4, 16):
-		c.draw_line(Vector2(hoja.position.x + 2, y), Vector2(hoja.end.x - 2, y), Estilo.color(&"libreta_renglon"), 1.0)
+		c.draw_line(Vector2(hoja.position.x + 4, y), Vector2(hoja.end.x - 4, y), Estilo.color(&"libreta_renglon"), 1.0)
 	var margen := hoja.position.x + 78
-	c.draw_line(Vector2(margen, hoja.position.y), Vector2(margen, hoja.end.y), Estilo.color(&"libreta_margen"), 1.0)
-	for i in 14:
-		var x := hoja.position.x + 20 + i * 32
-		c.draw_circle(Vector2(x, hoja.position.y + 2), 4.0, Estilo.color(&"libreta_espiral"))
-		c.draw_circle(Vector2(x, hoja.position.y + 2), 2.0, Estilo.color(&"libreta_espiral_hueco"))
+	c.draw_line(Vector2(margen, hoja.position.y + 4), Vector2(margen, hoja.end.y - 4), Estilo.color(&"libreta_margen"), 1.0)
 	Estilo.escribir(c, Vector2(margen + 8, hoja.position.y + 30), tr("LIBRETA_TITULO"), &"libreta_titulo", Estilo.color(&"libreta_tinta"))
 	Estilo.escribir(c, Vector2(margen + 10, hoja.position.y + 44), tr("LIBRETA_SUBTITULO"), &"libreta_subtitulo", Estilo.color(&"libreta_tinta").lightened(0.3))
-	# Firma: huellita en la esquina.
-	var huella := Vector2(hoja.end.x - 26, hoja.position.y + 28)
-	c.draw_circle(huella, 6.0, Estilo.color(&"libreta_huella"))
-	for k in 4:
-		c.draw_circle(huella + Vector2(-7 + k * 4.6, -9 + absf(k - 1.5) * 2.0), 2.4, Estilo.color(&"libreta_huella"))
+	var foto := Estilo.icono(&"foto_unicornio")
+	c.draw_texture(foto, Vector2(hoja.end.x - foto.get_width() + 14, hoja.position.y - 12))
 	if agenda == null:
 		return
 	var y := hoja.position.y + 56

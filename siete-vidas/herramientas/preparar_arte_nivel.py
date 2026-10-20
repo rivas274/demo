@@ -860,7 +860,64 @@ def ambientes():
     pisos_gemini()
     cocina_v2()
     segunda_pasada_cocina()
+    consistencia()
+
+
+
+
+# --- Consistencia (2026-10-20): consistencia-casa.png y correccion-estilo.png --------------------------------------
+
+# nombre -> (hoja, índice, tamaño en el juego, recorte en fracciones o None).
+PIEZAS_CONSISTENCIA = {
+    "ventana_casa": ("consistencia-casa", 0, (215, 170), None),  # G2: el mismo marco en las 4 ventanas (hueco de 150 × 120)
+    "vista_pasillo": ("consistencia-casa", 1, (150, 120), (0.012, 0.17, 0.988, 0.988)),  # B2: 1,25 : 1 sin cortar el toldo
+    "armario_escalera": ("consistencia-casa", 2, (318, 150), None),
+    "teclado": ("consistencia-casa", 3, (52, 24), None),
+    "monitor": ("correccion-estilo", 0, (44, 48), None),
+    "microondas": ("correccion-estilo", 1, (98, 54), None),
+    "vaso": ("correccion-estilo", 2, (24, 32), None),
+    "pollo": ("correccion-estilo", 3, (64, 50), None),  # de 1,6 : 1 a 1,28 : 1 (más alto, se lee como pollo)
+}
+# El toldo del pasillo, un poco más oscuro (B2): sus rayas terracota y crema bajan este factor de luz.
+OSCURECER_TOLDO = 0.85
+
+
+def sin_blanco_puro(nombre):
+    """Tiñe de crema (#EDE4D6) el blanco casi puro que quedó en una pieza ya guardada."""
+    a = abrir(nombre)
+    blanco = (a[:, :, :3].min(axis=2) >= 245) & (a[:, :, 3] > 0)
+    a[blanco, 0], a[blanco, 1], a[blanco, 2] = (237, 228, 214)
+    guardar(a, nombre)
+    return int(blanco.sum())
+
+
+def consistencia():
+    for nombre, (hoja, indice, tamano, fraccion) in PIEZAS_CONSISTENCIA.items():
+        imagen, cajas = piezas(hoja)
+        recorte = recortar(imagen, cajas[indice], fraccion)
+        if nombre in ("ventana_casa", "armario_escalera"):
+            recorte = sin_huecos(recorte)
+        if nombre == "vista_pasillo":
+            # Lleno: un rectángulo opaco entero (detrás del vidrio), sin recortar al borde opaco.
+            a = np.asarray(recorte.convert("RGBA")).copy()
+            a[:, :, 3] = 255
+            final = Image.fromarray(a, "RGBA").resize(tamano, Image.NEAREST)
+            a = np.asarray(final).copy().astype(float)
+            toldo = np.zeros(a.shape[:2], bool)
+            toldo[int(tamano[1] * 0.52):, :] = True
+            a[toldo, :3] *= OSCURECER_TOLDO
+            final = Image.fromarray(a.astype(np.uint8), "RGBA")
+        else:
+            final = escalar(recorte, tamano)
+        final.save(DESTINO / f"{nombre}.png")
+    for nombre in list(PIEZAS_CONSISTENCIA) + ["aranazo_2", "balcon_mini"]:
+        cambiados = sin_blanco_puro(nombre)
+        print(f"Consistencia: {nombre} {Image.open(DESTINO / f'{nombre}.png').size} ({cambiados} px de blanco teñidos)")
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    if sys.argv[1:] == ["consistencia"]:
+        consistencia()
+    else:
+        main()

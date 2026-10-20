@@ -66,11 +66,9 @@ const VENTANAS := [VENTANA_COCINA, VENTANA_DORMITORIO, VENTANA_ESTUDIO]
 const CORTINA_ADENTRO := 9.0
 const CORTINA_FIN_TELA := 42.0
 const CORTINA_SOBRE_VENTANA := 18.0
-## Vidrio de la ventana del pasillo (en el mundo): la caja de pizza del lugar visto queda detrás, sobre el toldo (G3).
-## El arte trae el alféizar y el toldo; la ventana se alarga por arriba con código (M7) hasta la altura de las demás.
-const VIDRIO_PASILLO := Rect2(4717, SUELO - 224, 86, 106)
-## Lo que se agrega arriba del arte de la ventana (marco, panel y vidrio), hasta la fila de arriba del arte.
-const VENTANA_PASILLO_ARRIBA := Rect2(4640, SUELO - 229, 180, 80)
+## Vidrio de la ventana del pasillo (en el mundo): el hueco de 150 × 120 del marco de la casa (`ventana_casa`, G2),
+## con la vista del toldo y la caja de pizza detrás (`vista_pasillo`, B2). El alféizar del marco queda a 90 cm.
+const VIDRIO_PASILLO := Rect2(4655, ALFEIZAR_PASILLO - 132, 150, 120)
 ## Puertas: [nombre, posición (al pie, al centro), puerta a la que lleva]. Van de a pares.
 const PUERTAS := [
 	["sala>recibidor", Vector2(1188, SUELO), "recibidor<sala"],
@@ -152,7 +150,7 @@ const ARTE := [
 	["baul", Vector2(4566, SUELO), false, "mueble"],
 	["aparador", Vector2(4636, SUELO), false, "mueble"],
 	["retrato_familiar", Vector2(5280, DINTEL + 80.0), false, "pared"],  # P-4: el trono (cojín) con su retrato
-	["ventana_pasillo", Vector2(4640, ALFEIZAR_PASILLO + 12.0), false, "pared"],  # apoyada en la consola; alféizar 12 px sobre su base
+	["ventana_casa", Vector2(4623, ALFEIZAR_PASILLO + 15.0), false, "pared"],  # el marco de la casa; alféizar 15 px sobre su base
 	["cojin", Vector2(5364, SUELO), false, "mueble"],
 	["paisaje", Vector2(6323, SUELO - 145 - FONDO_PISO + 6.0), false, "pared"],  # D-1: apoyado contra la pared, al fondo de la repisa
 	["banquito", Vector2(5966, SUELO), false, "mueble"],
@@ -234,7 +232,7 @@ const PIEZAS := [
 	# Pasillo de arriba.
 	[Rect2(4566, SUELO - 47, 70, 47), true, "Baúl", "arte", "baul"],  # 40 cm (arriba-extra); se pasa por delante
 	[Rect2(4638, SUELO - 97, 152, 50), false, "Consola", "arte", "aparador"],  # 80 cm, 47 px libres debajo
-	[Rect2(4644, ALFEIZAR_PASILLO, 172, 6), true, "Alféizar", "arte", "ventana_pasillo"],  # 90 cm, sobre la consola
+	[Rect2(4644, ALFEIZAR_PASILLO, 172, 6), true, "Alféizar", "arte", "ventana_casa"],  # 90 cm, sobre la consola
 	# Dormitorio.
 	[Rect2(5971, SUELO - 53, 42, 6), true, "Banquito", "arte", "banquito"],
 	[Rect2(6024, SUELO - 65, 197, 65), false, "Cama", "arte", "cama"],  # colchón a 54 cm
@@ -379,8 +377,8 @@ const LUGARES_VISTOS := [
 	["Caja de recuerdos de Valeria (repisa alta del dormitorio)", Rect2(6315, SUELO - 284, 80, 10), "Afilar Garras"],
 ]
 ## La caja de pizza, sobre el toldo del vecino, del otro lado del vidrio (dentro de VIDRIO_PASILLO).
-## Escala de gato (M7): 34 × 24 con la tapa abierta, grasa y vapor; se lee desde el pasillo.
-const PIZZA := Rect2(4752, SUELO - 167, 34, 24)
+## Es la caja del arte de la vista (`vista_pasillo`), con la tapa abierta y la grasa; el vapor lo pone el código.
+const PIZZA := Rect2(VIDRIO_PASILLO.position.x + 58, VIDRIO_PASILLO.position.y + 9, 84, 82)
 ## Atajos (R6): [qué, dónde, desde dónde se abre].
 const ATAJOS := [["Caja de arriba de la pila de la mudanza", CAJAS, "escalera"]]
 ## Cada maña que el nivel enseña abre un camino y molesta a alguien (R19): maña -> [camino, a quién molesta].

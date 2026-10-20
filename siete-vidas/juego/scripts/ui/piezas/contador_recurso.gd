@@ -52,7 +52,7 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	var alto := float(Estilo.medida(&"alto_hud"))
 	Estilo.panel(self, Rect2(0, 0, ancho, alto), &"panel")
-	var apagado := Color(1, 1, 1, 1.0 if tiene else 0.45)
+	var apagado := Estilo.color(&"blanco", 1.0 if tiene else 0.45)
 	if icono:
 		draw_texture(icono, Vector2(1, roundf((alto - icono.get_height()) / 2.0) - roundf(golpe * 2.0)), apagado)
 	elif dibujar_icono.is_valid():

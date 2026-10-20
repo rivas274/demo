@@ -34,9 +34,19 @@ func _correr() -> void:
 	t.hud.cartel(tr("UI_TRAVESURA_CUMPLIDA"), "AGENDA_ROBAR_EL_ALMUERZO_DE", "RECOMPENSA_SNACK_GUARDADO", false, t.altura_cartel())
 	await _segundos(0.8)
 	await _capturar("i2-cartel")
+	# La franja completa (la cola decide si cabe; aquí se pone a mano para verla).
+	var franja := Cartel.crear(tr("UI_TRAVESURA_SECRETA"), tr("AGENDA_ROBAR_EL_ALMUERZO_DE"), tr("RECOMPENSA_SNACK_GUARDADO"), true, Rect2(0, 130, 640, 96), false)
+	t.hud.add_child(franja)
+	franja.scale = Vector2.ONE
+	franja.modulate.a = 1.0
+	await _segundos(0.1)
+	await _capturar("i2b-franja")
+	franja.queue_free()
 	await _segundos(3.0)
-	sala.desbloquear_logro("LOGRO_ATAJO_DE_GATO")
-	await _segundos(0.6)
+	t.anuncios.limpiar()
+	await _segundos(0.2)
+	sala.desbloquear_logro("LOGRO_COLECCIONISTA_DE_CALCETINES")
+	await _segundos(1.0)
 	await _capturar("i3-logro")
 	await _segundos(3.0)
 	t.libreta.abrir()

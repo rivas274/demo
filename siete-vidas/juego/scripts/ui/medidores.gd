@@ -32,7 +32,7 @@ const DURACION_LOGRO := 2.6
 
 ## Capa del aviso de logro: por encima del diálogo (capa 7) y del HUD (capa 6).
 const CAPA_AVISO := Capas.CAPA_AVISOS
-const TAM_AVISO := Vector2(232, 44)
+const TAM_AVISO := Vector2(300, 44)
 ## Donde empieza el texto en la etiqueta de logro (después del sello).
 const X_TEXTO_LOGRO := 52.0
 

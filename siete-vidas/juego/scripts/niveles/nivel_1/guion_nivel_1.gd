@@ -252,6 +252,8 @@ func _crear_valeria() -> void:
 	var sombra_valeria := SombraContacto.new(58.0, 0.4)
 	sombra_valeria.mostrar = func() -> bool: return not valeria.actividad in [Valeria.Actividad.SENTADA, Valeria.Actividad.FUERA]
 	valeria.add_child(sombra_valeria)
+	# Las palabras del mundo no le tapan la cara a Valeria (zona D).
+	travesuras.jugo.testigos.append(valeria)
 	# Si Valeria va a salir a reaccionar en el cuarto de Felipe, el cartel espera a que salga (G5).
 	travesuras.anuncios.reaccion_en_curso = func() -> bool: return valeria_por_la_casa.en_escena and habitacion == "recibidor" and valeria_por_la_casa.actual in ["bolsas", "maullido"] and not (valeria.cuarto == "recibidor" and valeria.visible)
 

@@ -40,20 +40,31 @@ static func prohibidas_palabra() -> Array[Rect2]:
 	return [HUD, DIALOGO, CARTELES]
 
 
-## Recoloca la caja de una palabra: dentro de la pantalla y fuera de A, B y C; si pisa algo de `evitar` (Felipe, la
-## burbuja del Indicador), sube por encima, y si arriba no cabe (entraría en C), baja por debajo.
+## Recoloca la caja de una palabra: dentro de la pantalla y fuera de A, B y C, sin pisar nada de `evitar` (Felipe, la
+## burbuja del Indicador, la cara de Valeria). Prueba el lugar pedido y, si choca, arriba, a los lados y abajo de lo
+## que pisa; se queda con el lugar libre más cercano al pedido (si no hay ninguno, el pedido, dentro de la pantalla).
 static func colocar_palabra(caja: Rect2, evitar: Array[Rect2] = []) -> Rect2:
 	var piso := CARTELES.end.y + BORDE
-	var r := _dentro(caja, piso)
+	var pedido := _dentro(caja, piso)
+	var candidatos: Array[Rect2] = [pedido]
 	for zona in evitar:
-		if not r.intersects(zona):
-			continue
-		var arriba := Rect2(Vector2(r.position.x, zona.position.y - r.size.y - 2.0), r.size)
-		if arriba.position.y >= piso:
-			r = arriba
-		else:
-			r = _dentro(Rect2(Vector2(r.position.x, zona.end.y + 2.0), r.size), piso)
-	return Rect2(r.position.round(), r.size)
+		for p: Vector2 in [Vector2(pedido.position.x, zona.position.y - caja.size.y - 2.0),
+				Vector2(zona.position.x - caja.size.x - 2.0, pedido.position.y),
+				Vector2(zona.end.x + 2.0, pedido.position.y),
+				Vector2(pedido.position.x, zona.end.y + 2.0)]:
+			candidatos.append(_dentro(Rect2(p, caja.size), piso))
+	var mejor := pedido
+	var distancia := INF
+	for c in candidatos:
+		var libre := true
+		for zona in evitar:
+			if c.intersects(zona):
+				libre = false
+				break
+		if libre and c.position.distance_to(pedido.position) < distancia:
+			distancia = c.position.distance_to(pedido.position)
+			mejor = c
+	return Rect2(mejor.position.round(), mejor.size)
 
 
 static func _dentro(caja: Rect2, piso: float) -> Rect2:

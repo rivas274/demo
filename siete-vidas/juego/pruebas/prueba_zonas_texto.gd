@@ -250,6 +250,16 @@ func _probar_palabras(sala: Nivel) -> void:
 	j.palabra_en_mundo("PALABRA_NAM", burbuja.get_center(), Color.WHITE, 15)
 	_comprobar(not j.ultima_caja.intersects(burbuja_pantalla) and ZonasTexto.palabra_valida(j.ultima_caja), "Zona E: una palabra que cae en la burbuja del Indicador se mueve (%s, burbuja %s)" % [j.ultima_caja, burbuja_pantalla])
 	indicador.verbo = ""
+	# Una palabra que cae en la cara de Valeria (el chiste es su reacción) se corre.
+	var valeria: Valeria = (sala.guion as GuionNivel1).valeria
+	felipe.global_position = Vector2(300, Nivel1.SUELO)
+	await _esperar(30)
+	lienzo = root.get_viewport().get_canvas_transform()
+	var cara := valeria.rect_dibujado()
+	cara.size.y = minf(cara.size.y, 90.0)
+	var cara_pantalla := Rect2(lienzo * cara.position, cara.size)
+	j.palabra_en_mundo("PALABRA_GARRAS_AFILADAS", cara.get_center(), Color.WHITE, 13)
+	_comprobar(valeria.visible and not j.ultima_caja.intersects(cara_pantalla) and ZonasTexto.palabra_valida(j.ultima_caja), "Zona D: una palabra no le tapa la cara a Valeria (%s, cara %s)" % [j.ultima_caja, cara_pantalla])
 
 
 func _probar_barra_jefe() -> void:

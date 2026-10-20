@@ -12,6 +12,8 @@ var camara: Camera2D
 var evitar: Node2D
 ## La burbuja del Indicador (zona E): si una palabra coincide con ella, la palabra va más arriba.
 var indicador: Indicador
+## Quienes reaccionan (Valeria): una palabra no les tapa la cara. Cada uno da rect_dibujado() en el mundo.
+var testigos: Array[Node2D] = []
 ## Caja en pantalla de la última palabra (para las pruebas de zonas).
 var ultima_caja := Rect2()
 var _palabra_actual: Control
@@ -149,6 +151,12 @@ func _evitar_en_pantalla() -> Array[Rect2]:
 		var burbuja: Rect2 = indicador.rect_burbuja()
 		if burbuja.has_area():
 			zonas.append(Rect2(lienzo * burbuja.position, burbuja.size * lienzo.get_scale()).grow(2.0))
+	for testigo in testigos:
+		if is_instance_valid(testigo) and testigo.is_visible_in_tree() and testigo.has_method("rect_dibujado"):
+			var r: Rect2 = testigo.call("rect_dibujado")
+			# Solo la parte de arriba (cabeza y manos): es donde está el chiste de su reacción.
+			r.size.y = minf(r.size.y, 90.0)
+			zonas.append(Rect2(lienzo * r.position, r.size * lienzo.get_scale()))
 	if evitar and is_instance_valid(evitar) and evitar.is_inside_tree():
 		var pies := lienzo * evitar.global_position
 		zonas.append(Rect2(pies + Vector2(-38, -74), Vector2(76, 76)))

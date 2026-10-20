@@ -94,13 +94,13 @@ func _correr() -> void:
 	_comprobar(guion.superficie_de_felipe() == "Asiento del sofá" and Capas.z_efectivo(felipe.sprite) > Capas.z_efectivo(guion.valeria) and not silueta_sofa.dibujando(), "Capas: sobre el asiento del sofá junto a Valeria, Felipe va delante de ella (sin silueta) [%s, z %d, piso %s, y %.0f]" % [guion.superficie_de_felipe(), felipe.z_index, felipe.is_on_floor(), felipe.global_position.y])
 	await _poner_en(Vector2(420, Nivel1.SUELO))
 	await _esperar(20)
-	_comprobar(Capas.z_efectivo(felipe.sprite) < Capas.z_efectivo(guion.valeria) and silueta_sofa.dibujando(), "Capas: en el piso, delante del sofá, Felipe pasa detrás de Valeria y se ve su silueta")
+	_comprobar(Capas.z_efectivo(felipe.sprite) > Capas.z_efectivo(guion.valeria) and not silueta_sofa.dibujando(), "Capas: con Valeria sentada en el sofá, Felipe en el piso va delante de ella (decisión del creador)")
 	felipe.cambiar_estado(Felipe.Estado.RONRONEANDO, {"objetivo": null})
 	await _esperar(3)
 	_comprobar(Capas.z_efectivo(felipe.sprite) > Capas.z_efectivo(guion.valeria), "Capas: frotándose (Encantar), Felipe va delante de Valeria aunque esté en el piso")
 	await _esperar_que(func() -> bool: return felipe.estado != Felipe.Estado.RONRONEANDO, 300)
 	await _esperar(3)
-	_comprobar(Capas.z_efectivo(felipe.sprite) < Capas.z_efectivo(guion.valeria), "Capas: al terminar de frotarse vuelve detrás de Valeria")
+	_comprobar(Capas.z_efectivo(felipe.sprite) > Capas.z_efectivo(guion.valeria), "Capas: al terminar de frotarse, con Valeria sentada, sigue delante de ella")
 
 	# Arañar el sofá delante de Valeria: a los dos arañazos lo deja frente al rascador y el plástico aguanta.
 	await _poner_en(Vector2(330, Nivel1.SUELO))

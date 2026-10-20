@@ -88,7 +88,7 @@ Tamaños: el más grande es `felipe.gd` (603 líneas), luego `guion_nivel_1.gd` 
 
 **Capas del mundo** (`scripts/sistemas/capas.gd`, tabla única): de atrás hacia adelante, pared, arte de pared, puertas,
 muebles y `TRAS_FELIPE` (−1), `JUEGO` (0: Felipe, enemigos, objetos), `MARCAS` (1), **`PERSONAJES` (2: solo los
-humanos)**, `JUEGO_DELANTE` (3: Felipe parado sobre algo que queda delante de los humanos), `PRIMER_PLANO` (4:
+humanos)**, `JUEGO_DELANTE` (3: Felipe parado sobre algo que queda delante de los humanos, frotándose, o con Valeria sentada: `Nivel1.ACTIVIDADES_HUMANO_DETRAS`), `PRIMER_PLANO` (4:
 pasamanos), luz, estela, imaginación, efectos, censura e Indicador.
 
 - Valeria va **delante** de Felipe. Donde lo tapa se dibuja su contorno de 1 px: pieza `SiluetaTapada`

@@ -124,3 +124,5 @@ Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md` (recorrido, agenda
 - **Arte con IA:** declararlo en Steam. El arte final debe estar retocado o unificado a mano; la IA sirve para bocetos y bases.
 - Pregunta abierta: ¿Valeria está basada en una persona real? Si sí, cambiar nombre o pedir permiso escrito.
 - **Sistema de la casa (2026-10-19, plan de ambientes):** un solo marco de puerta (140 × 248) en todos los estados, una sola ventana (el marco de madera de `consistencia-casa.png`, con hueco de 150 × 120, en cocina, dormitorio, estudio y pasillo), zócalo y cornisa iguales en los 6 cuartos, cuadros con el borde de arriba en el dintel (`Nivel1.DINTEL`), luz del oeste hacia la derecha con el tono de cada cuarto, y la regla de islas para la decoración (pegada a un mueble, fuera de los rectángulos sagrados, menos de 24 px si no se pisa).
+
+- **Capas con Valeria sentada (2026-10-20, creador):** cuando Valeria está sentada en el sofá, Felipe se dibuja siempre delante de ella, también en el piso: ella queda hundida en el mueble y el gato se ve encima. De pie o caminando, Felipe pasa detrás con su contorno, salvo al frotarse o sobre el asiento del sofá.

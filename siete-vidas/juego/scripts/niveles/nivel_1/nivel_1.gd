@@ -35,6 +35,9 @@ const DELANTE_DE_HUMANOS := ["Asiento del sofá"]
 ## Estados de Felipe en los que va delante de los humanos aunque esté en el piso: frotarse contra las piernas de
 ## Valeria («Encantar») es cariño hacia el jugador y tiene que leerse claro.
 const ESTADOS_DELANTE_DE_HUMANOS := [Felipe.Estado.RONRONEANDO]
+## Actividades de Valeria en las que Felipe va delante de ella esté donde esté (decisión del creador, 2026-10-20):
+## sentada en el sofá queda hundida en el mueble, así que el gato se ve sobre ella, en el piso o en el cojín.
+const ACTIVIDADES_HUMANO_DETRAS := [Valeria.Actividad.SENTADA]
 ## Luz de las lámparas encendidas (plan de estabilización 2026-10-20, decisión 4; lección 26: nada de halos redondos).
 ## Cada una: [cuarto, arte, pantalla (rectángulo en la textura del arte), y del mundo donde cae la luz (tablero o piso),
 ## ancho de la luz al llegar ahí]. LuzCuarto dibuja con estos datos la pantalla encendida (más clara, con contorno

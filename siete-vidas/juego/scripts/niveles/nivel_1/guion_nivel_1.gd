@@ -382,13 +382,14 @@ func _al_comer(comida: Comida) -> void:
 			travesuras.decir_valeria("almuerzo", true)
 
 
-## Felipe delante o detrás de Valeria según dónde está parado (Nivel1.DELANTE_DE_HUMANOS) o lo que hace (frotarse:
-## Nivel1.ESTADOS_DELANTE_DE_HUMANOS): solo cambia al apoyarse en
+## Felipe delante o detrás de Valeria según dónde está parado (Nivel1.DELANTE_DE_HUMANOS), lo que hace (frotarse:
+## Nivel1.ESTADOS_DELANTE_DE_HUMANOS) o lo que hace ella (sentada: Nivel1.ACTIVIDADES_HUMANO_DETRAS): solo cambia al apoyarse en
 ## algo (en el aire conserva la capa, así no salta de un lado al otro a mitad de un salto).
 func _actualizar_capa_felipe() -> void:
 	if not felipe.is_on_floor():
 		return
-	var delante := superficie_de_felipe() in Nivel1.DELANTE_DE_HUMANOS or felipe.estado in Nivel1.ESTADOS_DELANTE_DE_HUMANOS
+	var delante := superficie_de_felipe() in Nivel1.DELANTE_DE_HUMANOS or felipe.estado in Nivel1.ESTADOS_DELANTE_DE_HUMANOS \
+		or (valeria != null and valeria.actividad in Nivel1.ACTIVIDADES_HUMANO_DETRAS)
 	if delante and felipe.z_index == Capas.JUEGO:
 		felipe.z_index = Capas.JUEGO_DELANTE
 	elif not delante and felipe.z_index == Capas.JUEGO_DELANTE:

@@ -103,7 +103,7 @@ func _dibujar() -> void:
 		var cuarto := String(t.get("cuarto", ""))
 		if cuarto != cuarto_anterior:
 			cuarto_anterior = cuarto
-			Estilo.escribir(c, Vector2(hoja.position.x + 8, y + 15), _nombre_cuarto(cuarto), &"libreta_cuarto", Estilo.color(&"libreta_cuarto"), HORIZONTAL_ALIGNMENT_LEFT, 66)
+			Estilo.escribir(c, Vector2(hoja.position.x + 8, y + 15), _nombre_cuarto(cuarto), &"libreta_cuarto", Estilo.color(&"libreta_cuarto"), HORIZONTAL_ALIGNMENT_LEFT, 72)
 		_renglon(c, agenda, id, margen + 6, y)
 		y += ALTO_RENGLON
 	# Pie: cómo se cierra y cuántas van.
@@ -131,7 +131,7 @@ func _renglon(c: Control, datos: Agenda, id: String, x0: float, y: float) -> voi
 		# Palomita roja y tachado.
 		c.draw_polyline(PackedVector2Array([casilla.position + Vector2(1, 6), casilla.position + Vector2(5, 11), casilla.position + Vector2(14, -3)]), Estilo.color(&"libreta_rojo"), 2.5)
 		var ancho := minf(Estilo.ancho(nombre, &"libreta_renglon"), ancho_max)
-		c.draw_line(Vector2(x0 + 18, y + 10), Vector2(x0 + 22 + ancho, y + 9), Estilo.color(&"libreta_tachado"), 2.0)
+		c.draw_line(Vector2(x0 + 18, y + 12), Vector2(x0 + 22 + ancho, y + 11), Estilo.color(&"libreta_tachado"), 2.0)
 		segunda = tr("LIBRETA_HECHO") % datos.texto_recompensa(id)
 		color_segunda = Estilo.color(&"libreta_hecho")
 	elif oculta:

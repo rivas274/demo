@@ -494,7 +494,16 @@ func _correr() -> void:
 			# Cae sobre ella desde un poco más arriba que su tapa (por debajo del escritorio, que se atraviesa desde abajo).
 			felipe.global_position = sala.aspi.global_position + Vector2(0, -62)
 			felipe.velocity = Vector2.ZERO
-			await _esperar(80)
+			await _esperar(20)
+			# Si se llenó justo bajo la silla, Felipe cae sobre el asiento (55 px), por encima de la franja donde la pisa
+			# (de 54 a 4 px sobre ella), y nunca la apaga: esa era la falla de 1 de cada 4 veces. Baja a través de la
+			# silla como lo haría un jugador (agachado + saltar).
+			if felipe.is_on_floor() and felipe.global_position.y < sala.aspi.global_position.y - BatallaAspi.ALTO_ARRIBA - 14.0:
+				Input.action_press("agacharse")
+				await _esperar(6)
+				await _tocar("saltar")
+				Input.action_release("agacharse")
+			await _esperar(60)
 	await _esperar(60)
 	_comprobar(sala.aspi.apagada and t.agenda.esta_cumplida("desenchufar") and "Desenchufada" in sala.logros, "Apagada tres veces: «Desenchufar a A.S.P.I.» y el logro")
 	await _poner_en(sala.puertas[Sala.PUERTA_BALCON].global_position)

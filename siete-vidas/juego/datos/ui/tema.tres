@@ -311,3 +311,5 @@ Felipe/font_sizes/tecla = 8
 Felipe/fonts/tecla = ExtResource("4_chica")
 Felipe/font_sizes/letrero = 16
 Felipe/fonts/letrero = ExtResource("6_titulo")
+BotonOpcion/base_type = &"BotonMenu"
+BotonOpcion/font_sizes/font_size = 16

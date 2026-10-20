@@ -24,6 +24,7 @@ func _correr() -> void:
 	await _probar_gestor_pantallas()
 	await _probar_menu_y_pausa()
 	await _probar_boton()
+	await _probar_opciones()
 	_probar_textos()
 	_probar_controles()
 	_probar_tema()
@@ -126,7 +127,7 @@ func _probar_menu_y_pausa() -> void:
 	var arriba := menu.get_node("Continuar").find_valid_focus_neighbor(SIDE_TOP) as Control
 	var hueco := menu.colocar_hueco(menu.get_node("Reiniciar"))
 	_comprobar(hueco != null and hueco.global_position.x + hueco.size.x <= (menu.get_node("Reiniciar") as Control).get_global_rect().position.x + 0.5, "MenuUI: el hueco de Felipe se pone al costado del botón elegido")
-	_comprobar(abajo != null and abajo.name == &"Reiniciar" and arriba != null and arriba.name == &"Salir", "MenuUI: se recorre hacia abajo y da la vuelta hacia arriba")
+	_comprobar(abajo != null and abajo.name == &"Opciones" and arriba != null and arriba.name == &"Salir", "MenuUI: se recorre hacia abajo y da la vuelta hacia arriba")
 	_comprobar((menu.get_node("Continuar") as Button).text == "MENU_CONTINUAR" and (menu.get_node("Continuar") as Button).auto_translate_mode != Node.AUTO_TRANSLATE_MODE_DISABLED, "MenuUI: el texto del botón es una clave que se traduce sola")
 	var elegidos: Array[StringName] = []
 	menu.elegido.connect(func(opcion: StringName) -> void: elegidos.append(opcion))
@@ -154,8 +155,14 @@ func _probar_boton() -> void:
 	var d := boton.datos
 	_comprobar(d != null and d.escala_apretado == 0.9 and d.vaiven_grados == 6.0, "BotonMenu: sus números salen de datos/ui/boton_menu.tres")
 	boton.button_down.emit()
-	await _segundos(d.tiempo_apretar + 0.05)
-	_comprobar(is_equal_approx(boton.scale.x, d.escala_apretado), "BotonMenu: al apretar se encoge a 0,9")
+	# Se mira cuadro a cuadro (sin depender del reloj de la máquina): la escala llega a 0,9 y no baja de ahí.
+	var minima := 1.0
+	var reloj := 0.0
+	while reloj < d.tiempo_apretar + 0.15:
+		await process_frame
+		reloj += get_root().get_process_delta_time()
+		minima = minf(minima, boton.scale.x)
+	_comprobar(is_equal_approx(minima, d.escala_apretado) and is_equal_approx(boton.scale.x, d.escala_apretado), "BotonMenu: al apretar se encoge a 0,9")
 	boton.button_up.emit()
 	await _segundos(d.tiempo_soltar + 0.1)
 	_comprobar(is_equal_approx(boton.scale.x, 1.0), "BotonMenu: al soltar vuelve a escala 1")
@@ -197,6 +204,63 @@ func _probar_boton() -> void:
 
 func _segundos(s: float) -> void:
 	await create_timer(s, true).timeout
+
+
+## Etapa 5: opciones desde la pausa (por la pila de pantallas): remapear con teclado y mando, reducir movimiento y
+## volumen general, guardados.
+func _probar_opciones() -> void:
+	var pantallas := Pantallas.new()
+	mundo.add_child(pantallas)
+	await _esperar(2)
+	pantallas.modo = Pantallas.Modo.PAUSA
+	await _esperar(2)
+	var gestor := GestorPantallas.de(pantallas)
+	_comprobar(pantallas.menu_pausa.has_node("Opciones"), "Opciones: la pausa tiene su letrero «Opciones»")
+	pantallas.opciones.abrir()
+	await _esperar(2)
+	var op := pantallas.opciones
+	_comprobar(gestor.arriba() == op and paused and op.visible, "Opciones: se abre encima de la pausa (pila de pantallas) y el juego sigue en pausa")
+	_comprobar(op.menu.enfocado() != null, "Opciones: se navega con foco (teclado y mando)")
+	_comprobar(op.menu.has_node("zarpazo") and op.menu.get_child_count() == Controles.ACCIONES.size() + 3, "Opciones: una fila por acción, más reducir movimiento, volumen y volver")
+	var antes := InputMap.action_get_events("zarpazo").duplicate()
+	op.empezar_remapeo("zarpazo")
+	var tecla := InputEventKey.new()
+	tecla.physical_keycode = KEY_K
+	tecla.pressed = true
+	op.recibir_tecla(tecla)
+	var boton := InputEventJoypadButton.new()
+	boton.button_index = JOY_BUTTON_Y
+	boton.pressed = true
+	op.empezar_remapeo("zarpazo")
+	op.recibir_tecla(boton)
+	_comprobar(Controles.texto("zarpazo", false) == "K" and Controles.texto("zarpazo", true) == "Y" and op.esperando == "", "Opciones: remapear con el teclado (K) y con el mando (Y)")
+	_comprobar(IconosBotones.texto("zarpazo", false) == "K" and "K / Y" in (op.menu.get_node("zarpazo") as Button).text, "Opciones: los íconos y la fila siguen el cambio")
+	var cancelar := InputEventKey.new()
+	cancelar.physical_keycode = KEY_ESCAPE
+	cancelar.pressed = true
+	op.empezar_remapeo("zarpazo")
+	op.recibir_tecla(cancelar)
+	_comprobar(Controles.texto("zarpazo", false) == "K" and op.esperando == "", "Opciones: Esc cancela el remapeo sin cambiar nada")
+	InputMap.action_erase_events("zarpazo")
+	for e: InputEvent in antes:
+		InputMap.action_add_event("zarpazo", e)
+	Controles.guardar()
+	var reducir := Opciones.reducir_movimiento
+	(op.menu.get_node("ReducirMovimiento") as Button).pressed.emit()
+	_comprobar(Opciones.reducir_movimiento != reducir, "Opciones: «reducir movimiento» se prende y se apaga")
+	(op.menu.get_node("ReducirMovimiento") as Button).pressed.emit()
+	Opciones.volumen = 1.0
+	(op.menu.get_node("Volumen") as Button).pressed.emit()
+	_comprobar(is_equal_approx(Opciones.volumen, 0.9) and AudioServer.get_bus_volume_db(0) < -0.5, "Opciones: el volumen general baja y se aplica al bus de sonido")
+	Opciones.volumen = 1.0
+	Opciones.guardar()
+	(op.menu.get_node("Volver") as Button).pressed.emit()
+	await _esperar(2)
+	_comprobar(gestor.arriba() == pantallas and paused and not op.visible, "Opciones: «Volver» regresa a la pausa")
+	pantallas.modo = Pantallas.Modo.JUGANDO
+	pantallas.queue_free()
+	await _esperar(2)
+	paused = false
 
 
 func _probar_textos() -> void:

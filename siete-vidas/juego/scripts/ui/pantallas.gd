@@ -29,6 +29,8 @@ var datos_fin := {}
 var menu_pausa: MenuUI
 ## Felipe que asoma y le da un manotazo al letrero elegido (después se hace lo elegido).
 var felipe_asomado: FelipeAsomado
+## Opciones (controles, reducir movimiento, volumen), encima de la pausa.
+var opciones: PantallaOpciones
 
 
 func _ready() -> void:
@@ -42,6 +44,12 @@ func _ready() -> void:
 	add_child(menu_pausa)
 	felipe_asomado = FelipeAsomado.new()
 	add_child(felipe_asomado)
+	opciones = PantallaOpciones.crear()
+	opciones.visible = false
+	opciones.cerrada.connect(func() -> void:
+		menu_pausa.visible = modo == Modo.PAUSA
+		menu_pausa.enfocar(&"Opciones"))
+	add_child(opciones)
 	_al_cambiar_modo()
 
 
@@ -78,6 +86,10 @@ func _input(evento: InputEvent) -> void:
 
 
 func _process(_delta: float) -> void:
+	# Con otra pantalla encima (opciones, libreta), las teclas son de ella.
+	var arriba := GestorPantallas.de(self).arriba()
+	if arriba != null and arriba != self:
+		return
 	var aceptar := Input.is_action_just_pressed("ui_accept")
 	match modo:
 		Modo.TITULO:
@@ -111,6 +123,9 @@ func _al_elegir(opcion: StringName) -> void:
 	match opcion:
 		&"Continuar":
 			modo = Modo.JUGANDO
+		&"Opciones":
+			menu_pausa.visible = false
+			opciones.abrir()
 		&"Reiniciar":
 			_reiniciar()
 		&"Salir":

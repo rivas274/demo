@@ -20,14 +20,7 @@ signal elegido(opcion: StringName)
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	var botones := _botones()
-	for i in botones.size():
-		var boton := botones[i]
-		boton.focus_mode = Control.FOCUS_ALL
-		boton.pressed.connect(func() -> void: elegido.emit(boton.name))
-		# El foco da la vuelta (de la última a la primera y al revés).
-		boton.focus_neighbor_top = boton.get_path_to(botones[(i - 1 + botones.size()) % botones.size()])
-		boton.focus_neighbor_bottom = boton.get_path_to(botones[(i + 1) % botones.size()])
+	preparar()
 	visibility_changed.connect(_al_mostrarse)
 	hueco_felipe = get_node_or_null("HuecoFelipe")
 	# Menú de estambre: los letreros cuelgan en cadena (cada hilo mide lo que separa un letrero del de arriba) y la
@@ -36,6 +29,21 @@ func _ready() -> void:
 	if primero:
 		add_theme_constant_override(&"separation", int(primero.datos.largo_hilo))
 	sort_children.connect(queue_redraw)
+
+
+## Conecta cada botón (avisa `elegido` con su nombre) y arma el foco que da la vuelta. Llamarla de nuevo si se
+## agregan botones por código (por ejemplo, una fila por acción en las opciones).
+func preparar() -> void:
+	var botones := _botones()
+	for i in botones.size():
+		var boton := botones[i]
+		boton.focus_mode = Control.FOCUS_ALL
+		if not boton.has_meta(&"menu_conectado"):
+			boton.set_meta(&"menu_conectado", true)
+			boton.pressed.connect(func() -> void: elegido.emit(boton.name))
+		# El foco da la vuelta (de la última a la primera y al revés).
+		boton.focus_neighbor_top = boton.get_path_to(botones[(i - 1 + botones.size()) % botones.size()])
+		boton.focus_neighbor_bottom = boton.get_path_to(botones[(i + 1) % botones.size()])
 
 
 func _primero_colgado() -> BotonMenu:

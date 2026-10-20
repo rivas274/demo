@@ -18,6 +18,12 @@ text = "MENU_CONTINUAR"
 script = ExtResource("2_boton")
 principal = true
 
+[node name="Opciones" type="Button" parent="."]
+layout_mode = 2
+theme_type_variation = &"BotonMenu"
+text = "MENU_OPCIONES"
+script = ExtResource("2_boton")
+
 [node name="Reiniciar" type="Button" parent="."]
 layout_mode = 2
 theme_type_variation = &"BotonMenu"

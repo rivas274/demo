@@ -73,3 +73,13 @@ static func texto_con_contorno(c: CanvasItem, pos: Vector2, texto: String, nombr
 static func texto_centrado(c: CanvasItem, texto: String, y: float, nombre: StringName, color: Color, centro_x := -1.0) -> void:
 	var cx := centro_x if centro_x >= 0.0 else c.get_viewport_rect().size.x / 2.0
 	escribir(c, Vector2(roundf(cx - ancho(texto, nombre) / 2.0), y), texto, nombre, color)
+
+
+## El texto, recortado con «…» si con el estilo `nombre` no cabe en `ancho_maximo` px (nada se sale de su caja).
+static func recortar(texto: String, nombre: StringName, ancho_maximo: float) -> String:
+	if ancho(texto, nombre) <= ancho_maximo:
+		return texto
+	var corto := texto
+	while corto.length() > 1 and ancho(corto + "…", nombre) > ancho_maximo:
+		corto = corto.substr(0, corto.length() - 1)
+	return corto.strip_edges() + "…"

@@ -82,7 +82,7 @@ func _draw() -> void:
 func _dibujar_barra() -> void:
 	var caja := Rect2(Vector2(6, 18), tam_barra)
 	draw_rect(Rect2(0, 0, tam_barra.x + 12, 34), Estilo.color(&"jefe_fondo_barra"))
-	Estilo.escribir(self, Vector2(6, 12), titulo, &"jefe_barra", Estilo.color(&"jefe_texto_barra"))
+	Estilo.escribir(self, Vector2(6, 12), Estilo.recortar(titulo, &"jefe_barra", tam_barra.x), &"jefe_barra", Estilo.color(&"jefe_texto_barra"))
 	draw_rect(caja.grow(2), Estilo.color(&"jefe_marco_barra"))
 	draw_rect(Rect2(caja.position, Vector2(caja.size.x * clampf(fraccion, 0.0, 1.0), caja.size.y)), Estilo.color(&"jefe_rojo"))
 	for i in range(1, maximo):

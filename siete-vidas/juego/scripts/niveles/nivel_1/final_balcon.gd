@@ -40,7 +40,7 @@ func _decir(evento: String, urgente := false) -> void:
 	nivel.decir(evento, urgente)
 
 
-## Felipe sube por la maceta a la baranda (en el tramo libre de macetas) y se sienta (animación `sentarse` →
+## Felipe sube por la maceta a la baranda y se sienta al lado de su maceta (Nivel1.ASIENTO_BARANDA; animación `sentarse` →
 ## `sentado`, M6) mientras la cámara se abre a la ciudad, y suspira. Al saltar (salto real): cámara
 ## lenta con la cámara pegada a él, que baja hasta el toldo de la panadería de abajo; aterriza a la vista con el
 ## polvo grande y recién ahí sale el cartel "PODER NUEVO · CAER DE PIE", sin taparlo, y el resumen del día.
@@ -50,7 +50,8 @@ func cada_cuadro(delta: float) -> void:
 	if salto_final:
 		_actualizar_caida(delta)
 		return
-	var en_baranda := felipe.is_on_floor() and absf(felipe.global_position.y - (Nivel1.SUELO - 89.0)) < 3.0
+	var en_baranda := felipe.is_on_floor() and absf(felipe.global_position.y - (Nivel1.SUELO - 89.0)) < 3.0 \
+			and felipe.global_position.x >= Nivel1.ASIENTO_BARANDA.x and felipe.global_position.x <= Nivel1.ASIENTO_BARANDA.y
 	if not sentado_en_baranda:
 		_tiempo_baranda = _tiempo_baranda + delta if en_baranda and absf(felipe.velocity.x) < 1.0 else 0.0
 		if _tiempo_baranda > 0.3:

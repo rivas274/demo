@@ -33,13 +33,14 @@ func _correr() -> void:
 	for hijo in fondo.get_children():
 		if hijo is Parallax2D:
 			capas.append(hijo)
-	_comprobar(capas.size() >= 4, "El fondo tiene al menos 4 capas de parallax (%d)" % capas.size())
+	# Sin primer plano con parallax: la planta borrosa del balcón se quitó (plan de estabilización 2026-10-20).
+	_comprobar(capas.size() >= 3, "El fondo tiene al menos 3 capas de parallax (%d)" % capas.size())
 	var lejos := 1.0
 	var cerca := 0.0
 	for capa in capas:
 		lejos = minf(lejos, capa.scroll_scale.x)
 		cerca = maxf(cerca, capa.scroll_scale.x)
-	_comprobar(lejos < 0.3 and cerca > 1.0, "Hay capas lejanas (más lentas) y de primer plano (más rápidas)")
+	_comprobar(lejos < 0.3 and cerca < 1.0, "Hay capas lejanas (más lentas) y ninguna de primer plano borrosa")
 
 	var antes := _posiciones_en_pantalla(sala, capas)
 	# Arriba del librero del recibidor: la cámara cambia de habitación y sube.

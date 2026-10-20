@@ -1,7 +1,8 @@
 extends SceneTree
-## Capturas de cada lugar donde Felipe y Valeria coinciden (plan de estabilización 2026-10-20, decisión 1): Valeria
-## va delante y Felipe se ve con su silueta donde ella lo tapa. Se revisan ampliadas.
-##   xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/capturas_cruces.gd -- <carpeta>
+## Capturas del plan de estabilización (2026-10-20) para revisarlas ampliadas: cada lugar donde Felipe y Valeria
+## coinciden (decisión 1: Valeria delante y la silueta de Felipe donde ella lo tapa) y Felipe sentado en la baranda
+## del balcón (decisión 2: al lado de la maceta, no encima).
+##   xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/capturas_estabilizacion.gd -- <carpeta>
 
 var _carpeta := "user://cruces"
 
@@ -47,6 +48,17 @@ func _correr() -> void:
 		sala.travesuras.dialogo.limpiar()
 		await _esperar(2)
 		await _capturar(punto[0])
+	# Balcón: sube a la baranda donde la sube el bot y se sienta.
+	valeria.poner(Nivel1.VALERIA_SOFA, "sala", 1.0, Valeria.Actividad.SENTADA)
+	sala.travesuras.dialogo.limpiar()
+	felipe.global_position = Vector2(7890, Nivel1.SUELO)
+	await _esperar(30)
+	felipe.global_position = Vector2(8095, Nivel1.SUELO - 90)
+	felipe.velocity = Vector2.ZERO
+	await _esperar(150)
+	sala.travesuras.dialogo.limpiar()
+	await _esperar(2)
+	await _capturar("9-balcon-sentado")
 	quit()
 
 

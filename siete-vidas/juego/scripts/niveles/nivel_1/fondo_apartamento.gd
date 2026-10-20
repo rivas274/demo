@@ -10,7 +10,6 @@ const CAPAS := {
 	"Cielo": [0.05, -40, "_dibujar_cielo"],
 	"CiudadLejana": [0.2, -35, "_dibujar_ciudad_lejana"],
 	"CiudadCercana": [0.45, -30, "_dibujar_ciudad_cercana"],
-	"PrimerPlano": [1.3, Capas.PRIMER_PLANO_LEJOS, "_dibujar_primer_plano"],
 }
 ## Paleta del Barrio Viejo: terracota y atardecer.
 const CIELO := [Color("3b2a5a"), Color("c8576b"), Color("f2a65a"), Color("ffd58a")]
@@ -24,7 +23,6 @@ const MADERA_OSCURA := Color("6e3a26")
 const CORTINA := Color("c46a5a")
 ## Paños del estudio: verde oliva apagado, contra la pared mostaza.
 const TELA_ESTUDIO := Color("6f7a4a")
-const SILUETA := Color(0.17, 0.1, 0.13, 0.94)
 const LUZ := Color(1.0, 0.85, 0.55, 0.09)
 ## Estilo de pared -> [mosaico de Gemini (assets/nivel1/), tinte]. Cada habitación tiene el suyo (hito, regla R9).
 const PAREDES := {
@@ -413,15 +411,3 @@ func _dibujar_luz(c: Node2D) -> void:
 			var derecha := v.end.x + 140.0 * avance
 			var x := lerpf(izquierda, derecha, fmod(m * 0.37 + 0.15, 0.8) + 0.1) + sin(t * 0.7 + m) * 3.0
 			c.draw_rect(Rect2(roundf(x), roundf(y), 1, 1), Color(1.0, 0.95, 0.8, 0.55 * sin(subida * PI)))
-
-
-func _dibujar_primer_plano(c: Node2D) -> void:
-	# Silueta oscura delante de Felipe, a la altura de la planta baja: da profundidad y enmarca. Solo en el balcón
-	# (afuera): adentro taparía zonas de juego (M3). Es la maceta grande de Gemini teñida de silueta, al doble (escala
-	# entera): antes eran polígonos lisos de código (G4 de la revisión de consistencia).
-	var maceta := ArteNivel.textura("maceta_grande")
-	if maceta == null:
-		return
-	for planta: Vector2 in [Vector2(10340, 560)]:
-		var tam := maceta.get_size() * 2.0
-		c.draw_texture_rect(maceta, Rect2((planta - Vector2(tam.x / 2.0, tam.y)).round(), tam), false, SILUETA)

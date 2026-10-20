@@ -305,6 +305,9 @@ const ASPI := [Vector2(7217, SUELO), 6870.0, 7410.0]
 const DESCANSOS := [Rect2(1852, SUELO - 60, 71, 70), Rect2(5364, SUELO - 40, 70, 50)]
 ## La meta: la baranda del balcón (sentarse y saltar da Caer de Pie), en el tramo sin maceta (M6).
 const SALIDA := 8070.0
+## Tramo de la baranda donde Felipe se sienta: a la derecha de la única maceta de la baranda (8002–8040), con aire
+## para su cola. Fuera de este tramo no se sienta (plan de estabilización 2026-10-20: al lado de la maceta, no encima).
+const ASIENTO_BARANDA := Vector2(8068, 8150)
 ## Lo que se ve al saltar del balcón (G1): la cámara baja CAIDA_BALCON px y Felipe aterriza en el toldo de la
 ## panadería de abajo (solo existe durante el salto final).
 const CAIDA_BALCON := 230.0

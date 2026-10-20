@@ -21,7 +21,6 @@ extends RefCounted
 ##   PRIMER_PLANO     3        pasamanos de la escalera (delante de Felipe y de Valeria)
 ##   LUZ              5        rayos de luz de las ventanas
 ##   ESTELA          10        estela de Felipe (Zoomies), palabras del ensayo de A.S.P.I.
-##   PRIMER_PLANO_LEJOS 20     siluetas del primer plano con parallax (balcón)
 ##   IMAGINACION     25        la imaginación de Felipe (estudio en llamas y A.S.P.I. gigante): tapa TODO el escenario
 ##   FELIPE_IMAGINANDO 26      Felipe mientras imagina (queda delante de su propia imaginación)
 ##   EFECTOS         30        viento de la succión, «¡LLENO!», papeles que vuelan, bolas de pelo, polvo
@@ -47,7 +46,6 @@ const PERSONAJES := 2
 const PRIMER_PLANO := 3
 const LUZ := 5
 const ESTELA := 10
-const PRIMER_PLANO_LEJOS := 20
 const IMAGINACION := 25
 const FELIPE_IMAGINANDO := 26
 const EFECTOS := 30
@@ -70,7 +68,7 @@ const MUNDO := [
 	["PARED", PARED], ["FACHADA", FACHADA], ["ARTE_PARED", ARTE_PARED], ["ESCALERA", ESCALERA], ["PUERTAS", PUERTAS],
 	["MUEBLES", MUEBLES], ["TRAS_FELIPE", TRAS_FELIPE], ["JUEGO", JUEGO], ["MARCAS", MARCAS], ["PERSONAJES", PERSONAJES],
 	["PRIMER_PLANO", PRIMER_PLANO],
-	["LUZ", LUZ], ["ESTELA", ESTELA], ["PRIMER_PLANO_LEJOS", PRIMER_PLANO_LEJOS], ["IMAGINACION", IMAGINACION],
+	["LUZ", LUZ], ["ESTELA", ESTELA], ["IMAGINACION", IMAGINACION],
 	["FELIPE_IMAGINANDO", FELIPE_IMAGINANDO], ["EFECTOS", EFECTOS], ["CENSURA", CENSURA], ["INDICADOR", INDICADOR],
 ]
 ## La tabla de la pantalla en orden: [nombre, capa].

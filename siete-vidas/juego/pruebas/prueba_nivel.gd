@@ -132,6 +132,11 @@ func _correr() -> void:
 	_comprobar(guion.valeria.actividad == Valeria.Actividad.REGANANDO and guion.valeria.motivo_regano == "rotura", "Valeria se para y lo regaña (corazón roto)")
 	await _poner_en(Vector2(guion.valeria.global_position.x + 30.0 * signf(felipe.global_position.x - guion.valeria.global_position.x + 0.1), Nivel1.SUELO), 10)
 	_comprobar(felipe.objeto_cercano() == guion.valeria, "Junto a Valeria enojada, el botón de acción es «Encantar»")
+	# Plan de estabilización (decisión 1): Valeria va delante de Felipe y, donde lo tapa, se ve su contorno.
+	var silueta := guion.valeria.get_node_or_null("SiluetaTapada") as SiluetaTapada
+	_comprobar(Capas.z_efectivo(guion.valeria) > Capas.z_efectivo(felipe.sprite) and guion.valeria.clip_children == CanvasItem.CLIP_CHILDREN_AND_DRAW, "Capas: Valeria (humana) se dibuja delante de Felipe y recorta su silueta")
+	await process_frame
+	_comprobar(silueta != null and silueta.dibujando(), "Capas: junto a Valeria se dibuja la silueta de Felipe (solo donde ella lo tapa)")
 	await _tocar("interactuar")
 	_comprobar(felipe.estado == Felipe.Estado.RONRONEANDO and felipe.sprite.animation == "ronronear", "Felipe se frota ronroneando")
 	await _esperar(80)
@@ -526,7 +531,7 @@ func _correr() -> void:
 	await _poner_en(Vector2(Nivel1.SALIDA, Nivel1.SUELO - 89))
 	await _esperar(40)
 	_comprobar(guion.balcon.sentado_en_baranda and _dijo("felipe", "gato de interior"), "En la baranda se sienta y suspira")
-	_comprobar(not _maceta_en(felipe.global_position.x), "M6 Felipe se queda en un tramo de la baranda sin maceta")
+	_comprobar(not _maceta_en(felipe.global_position.x), "M6 Felipe se sienta AL LADO de la maceta de la baranda, no encima (x %.0f)" % felipe.global_position.x)
 	Input.action_press("saltar")
 	Input.action_press("mover_derecha")
 	await _esperar(14)
@@ -799,9 +804,12 @@ func _foto_suelta(cuarto: String) -> Recogible:
 func _maceta_en(x: float) -> bool:
 	var imagen: Image = ArteNivel.textura("baranda").get_image()
 	var columna := int(x - 7980.0)
-	for dx in range(-12, 13):
+	# Solo la maceta que se dibuja (columnas 0–94; la de la derecha del arte se quitó) y todo el ancho de Felipe sentado.
+	for dx in range(-28, 29):
 		var cx := clampi(columna + dx, 0, imagen.get_width() - 1)
-		for y in range(0, 36):
+		if cx >= 95:
+			continue
+		for y in range(0, 30):
 			if imagen.get_pixel(cx, y).a > 0.5:
 				return true
 	return false

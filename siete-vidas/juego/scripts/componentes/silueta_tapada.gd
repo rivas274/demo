@@ -26,6 +26,8 @@ void fragment() {
 	vec2 p = TEXTURE_PIXEL_SIZE * grosor;
 	float v = min(min(texture(TEXTURE, UV + vec2(p.x, 0.0)).a, texture(TEXTURE, UV - vec2(p.x, 0.0)).a),
 			min(texture(TEXTURE, UV + vec2(0.0, p.y)).a, texture(TEXTURE, UV - vec2(0.0, p.y)).a));
+	v = min(v, min(min(texture(TEXTURE, UV + p).a, texture(TEXTURE, UV - p).a),
+			min(texture(TEXTURE, UV + vec2(p.x, -p.y)).a, texture(TEXTURE, UV + vec2(-p.x, p.y)).a)));
 	float borde = step(0.5, a) * (1.0 - step(0.5, v));
 	COLOR = vec4(color.rgb, color.a * borde);
 }

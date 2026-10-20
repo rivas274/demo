@@ -169,7 +169,7 @@ func _correr() -> void:
 	await _poner_en(felipe, Vector2(200, Nivel1.SUELO))
 	felipe.espera_ocio = 1.0
 	await _esperar(80)
-	_comprobar(felipe.estado == Felipe.Estado.OCIO and felipe.sprite.animation in Felipe.OCIO.keys(), "Sin tocar nada se entretiene solo (%s)" % felipe.sprite.animation)
+	_comprobar(felipe.estado == Felipe.Estado.OCIO and (felipe.sprite.animation in Felipe.OCIO.keys() or felipe.sprite.animation == &"sentado"), "Sin tocar nada se entretiene solo (%s)" % felipe.sprite.animation)
 	Input.action_press("mover_derecha")
 	await _esperar(3)
 	Input.action_release("mover_derecha")

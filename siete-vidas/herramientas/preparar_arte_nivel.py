@@ -110,9 +110,10 @@ PATAS = {"zapatero": (0.80, 38)}
 
 # Rectángulos a borrar después de escalar (x0, y0, x1, y1 en la imagen final): el pasamanos trae dibujado el contorno
 # de la escalera (una línea vertical y la del piso) que en el juego no calza con los peldaños de atrás.
-# La baranda trae tres macetas encima: se borra la del medio para que Felipe se siente en la baranda sin meterse en
-# ella (M6 de la revisión 2); RELLENOS repone la baranda que tapaba la maceta.
-BORRAR = {"escalera_baranda": [(0, 80, 4, 217), (0, 202, 186, 217)], "baranda": [(70, 0, 121, 36)]}
+# La baranda trae tres macetas encima: se borran la del medio y la de la derecha para que Felipe se siente al lado de
+# la única que queda, no encima (M6 de la revisión 2 y plan de estabilización 2026-10-20); RELLENOS y PARCHES reponen
+# la baranda que tapaban.
+BORRAR = {"escalera_baranda": [(0, 80, 4, 217), (0, 202, 186, 217)], "baranda": [(70, 0, 121, 36), (118, 0, 184, 36)]}
 
 # Rellenos después de escalar: (x0, y0, x1, y1, desde, periodo) repite en ese rectángulo las columnas que van de
 # `desde` a `desde + periodo` (un tramo limpio del mismo dibujo).
@@ -120,7 +121,7 @@ RELLENOS = {"baranda": [(70, 36, 121, 62, 58, 18)]}
 
 # Parches después de escalar: (x0, y0, x1, y1, dx) copia en ese rectángulo los pixeles que están dx a la izquierda
 # en la imagen original.
-PARCHES = {}
+PARCHES = {"baranda": [(118, 36, 178, 75, 52)]}
 
 # Valeria (tanda 3B): poses a una sola escala (de pie mide 200 px, 3 Felipes). Su caminar es de SpriteCook
 # (revisión 3, B2: las piernas sí alternan), 8 cuadros de 224 × 224 ya a escala 1:1.
@@ -492,6 +493,9 @@ def main():
             for x0, y0, x1, y1, dx in PARCHES[nombre]:
                 a[y0:y1, x0:x1] = original[y0:y1, x0 - dx:x1 - dx]
             final = Image.fromarray(a, "RGBA")
+        if nombre == "baranda":
+            # Sin la maceta de la derecha, arriba quedan filas vacías: se recorta al borde opaco (M1).
+            final = final.crop((0, final.getbbox()[1], final.width, final.height))
         final.save(DESTINO / f"{nombre}.png")
     for nombre, (hoja, indice, tamano, suavizado) in MOSAICOS.items():
         if hoja not in hojas:

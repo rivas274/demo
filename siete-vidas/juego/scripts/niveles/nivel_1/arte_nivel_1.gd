@@ -206,18 +206,18 @@ func _dibujar_grifo() -> void:
 		c.draw_rect(Rect2(gota.x, gota.y + 1.0 + t * t * caida_total, 1, 2), Color(0.6, 0.85, 1.0))
 
 
-## Baranda del balcón con sus plantas que se mecen 1 px (B-4), cada maceta con su fase.
+## Baranda del balcón con UNA planta que se mece 1 px (B-4), a la izquierda: la de la derecha del arte se quitó para
+## que Felipe se siente al lado de la maceta y no encima (plan de estabilización 2026-10-20; Nivel1.ASIENTO_BARANDA).
 func _dibujar_baranda(c: Node2D, pos: Vector2) -> void:
 	var t := ArteNivel.textura("baranda")
 	if t == null:
 		return
 	var arriba := pos.y - t.get_height()
-	var corte := 38.0
+	var corte := 32.0
 	var paso := int(tiempo * 2.0)
 	c.draw_texture_rect_region(t, Rect2(pos.x, arriba + corte, t.get_width(), t.get_height() - corte), Rect2(0, corte, t.get_width(), t.get_height() - corte))
-	for maceta: Vector3 in [Vector3(0, 95, 0), Vector3(95, t.get_width() - 95, 1)]:
-		var vaiven := 1.0 if (paso + int(maceta.z)) % 2 == 0 else 0.0
-		c.draw_texture_rect_region(t, Rect2(pos.x + maceta.x + vaiven, arriba, maceta.y, corte), Rect2(maceta.x, 0, maceta.y, corte))
+	var vaiven := 1.0 if paso % 2 == 0 else 0.0
+	c.draw_texture_rect_region(t, Rect2(pos.x + vaiven, arriba, 95, corte), Rect2(0, 0, 95, corte))
 
 
 ## Armario bajo la escalera (pedido del creador, 2026-10-19: el faldón con una puertita no se entendía). Tablas

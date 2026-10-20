@@ -22,6 +22,7 @@ var dialogo: Dialogo:
 		dialogo = valor
 		if dialogo:
 			dialogo.esperar = func() -> bool: return not actual.is_empty()
+			dialogo.esperar_urgente = func() -> bool: return actual.get("tipo", "") == "fase"
 ## Mientras devuelva true, hay una reacción en camino (Valeria va a salir a ver): los anuncios esperan (hasta
 ## ESPERA_MAXIMA).
 var reaccion_en_curso := Callable()

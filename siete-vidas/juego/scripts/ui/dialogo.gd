@@ -52,6 +52,9 @@ var seguir: Node2D
 ## Mientras devuelva true (hay un cartel en la zona C, la misma franja), las frases nuevas esperan en la cola sin
 ## envejecer. Lo pone Anuncios.
 var esperar := Callable()
+## Mientras devuelva true (una franja de fase del jefe, urgente, ocupa la zona C), ni las frases urgentes salen: van
+## primeras en la cola. Lo pone Anuncios.
+var esperar_urgente := Callable()
 var hablando := ""
 var texto_actual := ""
 ## Frases que se mostraron, en orden: [quien, texto] (para las pruebas y el resumen).
@@ -97,7 +100,11 @@ func decir(quien: String, texto: String, animo := 0, urgente := false) -> bool:
 	for pendiente: Array in _cola:
 		if pendiente[1] == texto:
 			return false
-	if urgente or (not _caja.visible and not _debe_esperar()):
+	if urgente and esperar_urgente.is_valid() and esperar_urgente.call():
+		_cola.push_front([quien, texto, animo, _reloj])
+		if _caja.visible:
+			ceder()
+	elif urgente or (not _caja.visible and not _debe_esperar()):
 		_mostrar(quien, texto, animo)
 	else:
 		_cola.append([quien, texto, animo, _reloj])

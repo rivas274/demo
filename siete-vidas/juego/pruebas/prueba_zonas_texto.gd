@@ -166,6 +166,37 @@ func _probar_anuncios(sala: Nivel) -> void:
 			malos.append("%s %s" % [m[1], m[2]])
 	_comprobar(malos.is_empty() and tipos.size() == 3, "Zona C: carteles, logro y fase (%s) salen todos en y 30–90, sin tocar el HUD %s" % [tipos.keys(), malos])
 	_comprobar(a_la_vez <= 1, "Zona C: uno a la vez (máximo visto: %d)" % a_la_vez)
+	# El final de un jefe (lo que se vio mal en el video): franja de fase urgente («¡APAGADA!») con cámara lenta y una
+	# frase urgente de Felipe al mismo tiempo, y después un cartel de travesura. Nunca dos textos en la franja a la vez y
+	# la cámara lenta no estira la franja (antes no se probaba con frases urgentes ni con cámara lenta).
+	t.dialogo.limpiar()
+	a.limpiar()
+	await _esperar(2)
+	t.dialogo.decir("felipe", "Una frase que estaba en pantalla.", 0, true)
+	a.anunciar("fase", "¡APAGADA!", Vector2(640, 32), func(_r: Rect2) -> float: return 1.2, Callable(), true)
+	Engine.time_scale = 0.3
+	var montados := 0
+	var reloj := 0
+	var dijo_despues := false
+	for i in 900:
+		await process_frame
+		if not a.actual.is_empty() and a.actual.get("tipo", "") == "fase":
+			reloj = i
+			if i == 5:
+				t.dialogo.decir("felipe", "Una frase urgente durante la franja.", 0, true)
+			if i == 8:
+				t.hud.cartel("UI_TRAVESURA_CUMPLIDA", "AGENDA_ROBAR_EL_ALMUERZO_DE", false)
+		if not a.actual.is_empty() and t.dialogo.ocupado():
+			montados += 1
+		if a.actual.is_empty() and t.dialogo.texto_actual == "Una frase urgente durante la franja.":
+			dijo_despues = true
+		if i > 30 and not a.ocupado() and not t.dialogo.ocupado():
+			break
+	Engine.time_scale = 1.0
+	_comprobar(montados == 0, "Zona C: con la franja de fase del jefe, en cámara lenta y con frases urgentes, nunca se ven diálogo y cartel a la vez (%d cuadros montados)" % montados)
+	_comprobar(dijo_despues, "Zona C: la frase urgente que llegó durante la franja sale después (no se pierde)")
+	t.dialogo.limpiar()
+	a.limpiar()
 	# El cartel dibujado (cinta, pergamino y letras) queda dentro de su rectángulo.
 	var cartel := Cartel.crear("¡TRAVESURA CUMPLIDA!", "Coleccionista de calcetines", false, ZonasTexto.cartel(Hud.TAM_CARTEL))
 	var dentro := true

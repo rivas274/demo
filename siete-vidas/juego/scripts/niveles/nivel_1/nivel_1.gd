@@ -32,6 +32,9 @@ const MESITA_X := 162.0
 ## del sofá, junto a Valeria o en su regazo) se dibuja delante de ella (Capas.JUEGO_DELANTE); en el piso pasa detrás con
 ## su silueta (plan de estabilización 2026-10-20).
 const DELANTE_DE_HUMANOS := ["Asiento del sofá"]
+## Estados de Felipe en los que va delante de los humanos aunque esté en el piso: frotarse contra las piernas de
+## Valeria («Encantar») es cariño hacia el jugador y tiene que leerse claro.
+const ESTADOS_DELANTE_DE_HUMANOS := [Felipe.Estado.RONRONEANDO]
 ## Luz de las lámparas encendidas (plan de estabilización 2026-10-20, decisión 4; lección 26: nada de halos redondos).
 ## Cada una: [cuarto, arte, pantalla (rectángulo en la textura del arte), y del mundo donde cae la luz (tablero o piso),
 ## ancho de la luz al llegar ahí]. LuzCuarto dibuja con estos datos la pantalla encendida (más clara, con contorno

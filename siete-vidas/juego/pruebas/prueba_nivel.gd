@@ -95,6 +95,12 @@ func _correr() -> void:
 	await _poner_en(Vector2(420, Nivel1.SUELO))
 	await _esperar(20)
 	_comprobar(Capas.z_efectivo(felipe.sprite) < Capas.z_efectivo(guion.valeria) and silueta_sofa.dibujando(), "Capas: en el piso, delante del sofá, Felipe pasa detrás de Valeria y se ve su silueta")
+	felipe.cambiar_estado(Felipe.Estado.RONRONEANDO, {"objetivo": null})
+	await _esperar(3)
+	_comprobar(Capas.z_efectivo(felipe.sprite) > Capas.z_efectivo(guion.valeria), "Capas: frotándose (Encantar), Felipe va delante de Valeria aunque esté en el piso")
+	await _esperar_que(func() -> bool: return felipe.estado != Felipe.Estado.RONRONEANDO, 300)
+	await _esperar(3)
+	_comprobar(Capas.z_efectivo(felipe.sprite) < Capas.z_efectivo(guion.valeria), "Capas: al terminar de frotarse vuelve detrás de Valeria")
 
 	# Arañar el sofá delante de Valeria: a los dos arañazos lo deja frente al rascador y el plástico aguanta.
 	await _poner_en(Vector2(330, Nivel1.SUELO))
@@ -494,7 +500,8 @@ func _correr() -> void:
 	# En la pelea la puerta cerrada no se ofrece en la burbuja (M3), pero arriba se prueba igual.
 	_comprobar(felipe.objeto_cercano() != sala.puertas[Nivel1.PUERTA_BALCON], "M3 En la pelea, la burbuja no ofrece «Probar» en la puerta cerrada del balcón")
 	await _tocar("mover_arriba")
-	await _esperar(30)
+	# La frase puede esperar a que termine la franja de fase (zonas de texto: nunca dos textos en la franja).
+	await _esperar_que(func() -> bool: return _dijo("felipe", "aspiradora tiene la llave"), 300)
 	_comprobar(sala.habitacion == "estudio" and _dijo("felipe", "aspiradora tiene la llave"), "Con A.S.P.I. encendida, la puerta del balcón no abre")
 	await _poner_en(Vector2(Nivel1.TECLADO.get_center().x, Nivel1.SUELO - 98))
 	await _esperar(10)

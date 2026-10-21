@@ -349,6 +349,11 @@ func _correr() -> void:
 	_comprobar(felipe.global_position.x > Nivel1.ESCALERA_PIE.x + 10.0, "Después de bajar se puede caminar")
 	await _poner_en(Vector2(Nivel1.ESCALERA_PIE.x, Nivel1.SUELO), 20)
 	_comprobar(felipe.objeto_cercano() != guion.cajas, "Adentro, en el piso, las cajas no se ofrecen (manda «Ascender»)")
+	# Estudio v3: la caja de los libros mide casi lo que el peldaño (48 px); parado ahí, las cajas de la mudanza (en otro
+	# piso) no se ofrecen.
+	var caja_libros := Nivel1.rect_pieza("Caja de los libros")
+	await _poner_en(Vector2(caja_libros.get_center().x, caja_libros.position.y), 20)
+	_comprobar(felipe.is_on_floor() and absf(felipe.global_position.y - caja_libros.position.y) < 2.0 and felipe.objeto_cercano() != guion.cajas and not guion.cajas.en_el_peldano(felipe), "Parado en la caja de los libros del estudio, las cajas de la mudanza no ofrecen «Tirar»")
 	await _poner_en(Nivel1.PELDANO_CAJAS, 20)
 	_comprobar(felipe.is_on_floor() and felipe.objeto_cercano() == guion.cajas and tr(guion.cajas.verbo(felipe)) == "Tirar", "Parado en el segundo peldaño (desde arriba), el botón de las cajas es «Tirar»")
 	# El mundo reacciona (pilar 5): Valeria tiene los audífonos de la reunión puestos y aun así oye el ¡PUM!.

@@ -988,21 +988,26 @@ ROTOS = [
 CONTORNO_ROTO = (43, 29, 26, 255)
 
 
-def rotos():
+def pedazo(nombre, origen, poligono):
+    """Recorta un pedazo (polígono) del arte ya preparado `origen` y le pone su contorno de 1 px."""
     from PIL import ImageDraw
+    base = Image.open(DESTINO / f"{origen}.png").convert("RGBA")
+    mascara = Image.new("L", base.size, 0)
+    ImageDraw.Draw(mascara).polygon(poligono, fill=255)
+    a = np.asarray(base).copy()
+    m = (np.asarray(mascara) > 0) & (a[:, :, 3] > 0)
+    a[~m] = 0
+    # Contorno de 1 px: el borde de adentro de la pieza (lo cortado también lleva línea, como el resto del arte).
+    borde = m & ~ndimage.binary_erosion(m)
+    a[borde] = CONTORNO_ROTO
+    pieza = recortar_opaco(Image.fromarray(a, "RGBA"))
+    pieza.save(DESTINO / f"{nombre}.png")
+    print(f"Rotos: {nombre} {pieza.size}")
+
+
+def rotos():
     for nombre, origen, poligono in ROTOS:
-        base = Image.open(DESTINO / f"{origen}.png").convert("RGBA")
-        mascara = Image.new("L", base.size, 0)
-        ImageDraw.Draw(mascara).polygon(poligono, fill=255)
-        a = np.asarray(base).copy()
-        m = (np.asarray(mascara) > 0) & (a[:, :, 3] > 0)
-        a[~m] = 0
-        # Contorno de 1 px: el borde de adentro de la pieza (lo cortado también lleva línea, como el resto del arte).
-        borde = m & ~ndimage.binary_erosion(m)
-        a[borde] = CONTORNO_ROTO
-        pieza = recortar_opaco(Image.fromarray(a, "RGBA"))
-        pieza.save(DESTINO / f"{nombre}.png")
-        print(f"Rotos: {nombre} {pieza.size}")
+        pedazo(nombre, origen, poligono)
     vaso_esquirlas()
     maceta = Image.open(DESTINO / "maceta.png").convert("RGBA")
     # La planta (filas 0 a 17 del arte, sin la maceta), entera: queda caída sobre su tierra en el piso. Acostada de lado
@@ -1279,21 +1284,56 @@ def estudio_v3():
     imagen, _ = piezas("librero-gato")
     planta = np.asarray(sin_huecos(imagen.crop(PLANTA_CAJA))).copy()
     planta[:, :6, 3] = 0
-    planta[177:, :40, 3] = 0
-    planta[177:, 128:, 3] = 0
+    # Desde la fila 175 la tabla cruza todo el ancho: se queda solo la maceta, que se angosta hacia abajo (trapecio de
+    # x 38–124 a x 50–116 en la fila 203).
+    for y in range(175, planta.shape[0]):
+        t = (y - 175) / 28.0
+        planta[y, :round(35 + 12 * t), 3] = 0
+        planta[y, round(127 - 8 * t) + 1:, 3] = 0
     etiquetas, _ = ndimage.label(planta[:, :, 3] > 0)
     tamanos = ndimage.sum(planta[:, :, 3] > 0, etiquetas, range(1, etiquetas.max() + 1))
     planta[etiquetas != int(np.argmax(tamanos)) + 1, 3] = 0
     planta = recortar_opaco(Image.fromarray(planta, "RGBA"))
     k = ALTO_PLANTA / planta.height
-    final = maceta_contrastada(escalar(planta, (round(planta.width * k), ALTO_PLANTA)))
-    final.save(DESTINO / "planta.png")
+    final = np.asarray(maceta_contrastada(escalar(planta, (round(planta.width * k), ALTO_PLANTA)))).copy()
+    # Halo gris del JPEG en las puntas de las hojas: fuera (pixeles claros y sin color).
+    rgb = final[:, :, :3].astype(int)
+    gris = (rgb.min(axis=2) > 85) & (rgb.max(axis=2) - rgb.min(axis=2) < 36)
+    final[gris, 3] = 0
+    recortar_opaco(sin_sueltos(Image.fromarray(final, "RGBA"))).save(DESTINO / "planta.png")
     imagen, cajas = piezas("cuadros")
     retrato = recortar_opaco(imagen.crop(cajas[0]))
     k = ALTO_PORTARRETRATOS / retrato.height
-    escalar(retrato, (round(retrato.width * k), ALTO_PORTARRETRATOS)).save(DESTINO / "portarretratos.png")
+    sin_halo_gris(escalar(retrato, (round(retrato.width * k), ALTO_PORTARRETRATOS))).save(DESTINO / "portarretratos.png")
+    sin_halo_gris(Image.open(DESTINO / "caja_libros.png").convert("RGBA")).save(DESTINO / "caja_libros.png")
     for nombre in ["librero_bajo", "caja_libros", "planta", "portarretratos"]:
         print("Estudio v3:", nombre, Image.open(DESTINO / f"{nombre}.png").size, sin_blanco_puro(nombre))
+    # Lo que queda al romperse la planta (lección 42): tres pedazos de la maceta (filas 22 a 38) y las hojas enteras,
+    # caídas sobre la tierra.
+    for nombre, poligono in ROTOS_PLANTA:
+        pedazo(nombre, "planta", poligono)
+    hojas = recortar_opaco(Image.open(DESTINO / "planta.png").convert("RGBA").crop((0, 0, 30, 22)))
+    hojas.save(DESTINO / "planta_hojas.png")
+    print("Rotos: planta_hojas", hojas.size)
+
+
+def sin_halo_gris(imagen, pasadas=2):
+    """Quita el halo gris del JPEG que queda en el borde de una pieza: los pixeles grises (claros y sin color) que tocan
+    lo transparente, de afuera hacia adentro (`pasadas` px). El gris de adentro (el gato del retrato) no se toca."""
+    a = np.asarray(imagen).copy()
+    for _ in range(pasadas):
+        rgb = a[:, :, :3].astype(int)
+        gris = (rgb.min(axis=2) > 85) & (rgb.max(axis=2) - rgb.min(axis=2) < 36) & (a[:, :, 3] > 0)
+        afuera = ndimage.binary_dilation(a[:, :, 3] == 0) | np.pad(np.zeros((a.shape[0] - 2, a.shape[1] - 2), bool), 1, constant_values=True)
+        a[gris & afuera, 3] = 0
+    return recortar_opaco(Image.fromarray(a, "RGBA"))
+
+
+ROTOS_PLANTA = [
+    ["roto_planta_1", [(4, 22), (14, 22), (12, 31), (5, 29)]],
+    ["roto_planta_2", [(14, 22), (25, 22), (22, 33), (13, 31)]],
+    ["roto_planta_3", [(7, 32), (16, 33), (15, 38), (8, 38)]],
+]
 
 
 if __name__ == "__main__":

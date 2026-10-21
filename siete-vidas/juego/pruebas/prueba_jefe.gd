@@ -28,6 +28,11 @@ func _correr() -> void:
 	var arena := Nivel1.rect_de("estudio")
 	await _esperar(30)
 	_comprobar(batalla != null and batalla.fase == BatallaAspi.Fase.ESPERANDO and aspi.patrulla.quieta, "A.S.P.I. duerme en su base hasta que Felipe entra al estudio")
+	# Estudio v3 (la pelea en todo el cuarto): A.S.P.I. llega a los dos lados y lo de la isla de la derecha es munición.
+	_comprobar(aspi.patrulla.limite_izquierdo - arena.position.x <= 60.0 and arena.end.x - aspi.patrulla.limite_derecho <= 60.0, "A.S.P.I. recorre el estudio entero (%.0f a %.0f de %.0f a %.0f)" % [aspi.patrulla.limite_izquierdo, aspi.patrulla.limite_derecho, arena.position.x, arena.end.x])
+	var librero := Nivel1.rect_pieza("Librero bajo")
+	var de_la_derecha := batalla.municion.filter(func(o: Objeto) -> bool: return o.position.x > librero.position.x and o.position.x < librero.end.x)
+	_comprobar(de_la_derecha.size() == 2 and aspi.patrulla.limite_derecho > librero.end.x, "Lo que está sobre el librero bajo (planta y portarretratos) le llena el depósito en la fase 1 y ella llega a limpiarlo")
 
 	# Entrada por la puerta: empieza DESPUÉS del fundido (B1) y sigue los 8 pasos de PresentacionJefe.
 	felipe.vida.restante_invulnerable = 999.0

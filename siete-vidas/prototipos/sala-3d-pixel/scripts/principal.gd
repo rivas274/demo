@@ -7,6 +7,7 @@ extends Node
 
 const PX_POR_METRO := 121.0  # Valeria 1,65 m = 200 px, como en el juego.
 const PALETA := [
+	"d6b088", "c79c74", "e9c9a0",
 	# Madera, pared y sombras (de la sala del juego).
 	"210c0a", "3e1b10", "572c1d", "7c4127", "905535", "a15e35", "b66a42", "ae7857",
 	"be926c", "d9a06e", "f0c38f", "ffe2b0", "5e3c2b", "6e5641",
@@ -17,13 +18,15 @@ const PALETA := [
 	# Valeria: sudadera, pantalón, piel, pelo, zapatos.
 	"1f3b3a", "2c524e", "3f6f68", "5d8f86", "2a282e", "3d3a40", "57535a",
 	"9c6448", "c3845f", "d9a07a", "f0c09a", "5a3220", "3a1e14", "e8dccb",
+	# Sombras frías (violeta).
+	"2b2238", "3d3150", "56486a", "6f6585", "8a6f80",
 	# Plantas.
 	"3f5a2a", "6e8a3a", "93a95a",
 	# Felipe (sacados de su hoja).
 	"ede8de", "dacbbf", "c1afa4", "ac9188", "8d7f73", "7c6f67", "605350", "4d4143", "31262f",
 ]
 
-@export var inclinacion_grados := 14.0
+@export var inclinacion_grados := 18.0
 @export var paleta_activa := true
 @export var contorno_activo := true
 @export var escalones_activos := true
@@ -114,7 +117,7 @@ func _process(delta: float) -> void:
 ## La cámara solo se mueve en x y en múltiplos exactos de un píxel: nada tiembla.
 func _colocar_camara() -> void:
 	var x := roundf(_cam_x * PX_POR_METRO) / PX_POR_METRO
-	var y_centro := 1.32
+	var y_centro := 1.22
 	var dist := 12.0
 	var a := deg_to_rad(inclinacion_grados)
 	camara.position = Vector3(x, y_centro + dist * sin(a), dist * cos(a))

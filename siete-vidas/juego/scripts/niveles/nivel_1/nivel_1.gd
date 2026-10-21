@@ -194,6 +194,12 @@ const ARTE := [
 	["laptop", Vector2(7110, SUELO - 89), false, "mueble"],
 	["base_carga", Vector2(7240, SUELO), false, "mueble"],  # bajo la pizarra; A.S.P.I. se acopla de frente, a su izquierda
 	["pizarra", Vector2(7236, SUELO - 72.0), false, "pared"],
+	# Estudio v3 (pedido del creador, 2026-10-21: «la batalla no se centre en un solo pedazo de la pantalla»): la segunda
+	# isla de juego, a la derecha, contra la pared y sin tapar la puerta del balcón. El librero bajo de Valeria (80 cm) con
+	# su planta y el portarretratos de Su Majestad (se tiran), y delante la caja de la mudanza con los libros que todavía
+	# no desempaca: el escalón del piso al librero. Arriba, la repisa del gato une las dos islas a media altura.
+	["caja_libros", Vector2(CAJA_LIBROS_X, SUELO), false, "mueble"],
+	["librero_bajo", Vector2(LIBRERO_BAJO_X, SUELO), false, "mueble"],
 	["regadera", Vector2(8110, SUELO + 8.0), false, "mueble"],  # B-3: isla de jardinería
 	["saco_tierra", Vector2(8142, SUELO + 4.0), false, "mueble"],
 	["maceta_rota", Vector2(8170, SUELO + 11.0), false, "mueble"],
@@ -223,6 +229,9 @@ const APOYADOS := ["laptop", "libro", "microondas", "maceta", "croquetas_reserva
 ## unos 50 cm a escala de gato) y bien adentro del borde. El grifo es de código: cuello de cisne con el caño
 ## (GRIFO, la boca) sobre el centro de la cuba; el ratón del mesón patrulla por detrás de la cuba (sobre el borde de
 ## atrás de la cubierta), sin pisarla.
+## Estudio v3: x izquierda del librero bajo (113 × 97) y de la caja de los libros (82 × 48), medidos en su arte.
+const LIBRERO_BAJO_X := 7452.0
+const CAJA_LIBROS_X := 7364.0
 const SOMBRA_PARED := ["retrato", "marco_foto", "marco_huella", "perchero", "marco_viral", "reloj", "alacenas", "retrato_familiar", "paisaje", "pizarra", "repisa_cocina"]
 ## Arte que dibujan sus propios nodos (el sofá cambia de imagen; el rascador tiembla al arañarlo): [imagen, (x izquierda, base)].
 const ARTE_EXTRA := [["sofa_plastico", Vector2(240, SUELO)], ["rascador", Vector2(RASCADOR_X - 50.0, SUELO)]]
@@ -275,6 +284,10 @@ const PIEZAS := [
 	[Rect2(7017, SUELO - 55, 40, 6), true, "Silla del estudio", "arte", "silla_v2"],
 	[Rect2(7085, SUELO - 98, 126, 6), true, "Escritorio", "arte", "escritorio"],  # 81 cm
 	[Rect2(7266, SUELO - 170, 60, 6), true, "Repisa de las macetas", "repisa", ""],  # 1,40 m, sobre la pizarra
+	# Estudio v3: la segunda isla. Todo se pasa por delante (A.S.P.I. anda por el piso, delante de los muebles).
+	[Rect2(CAJA_LIBROS_X + 2, SUELO - 48, 78, 6), true, "Caja de los libros", "arte", "caja_libros"],  # 40 cm: escalón del piso al librero
+	[Rect2(LIBRERO_BAJO_X + 2, SUELO - 97, 109, 6), true, "Librero bajo", "arte", "librero_bajo"],  # 80 cm
+	[Rect2(7372, SUELO - 138, 60, 6), true, "Repisa del gato", "repisa", ""],  # 1,14 m: de la repisa de las macetas al librero, por arriba de A.S.P.I.
 	# Balcón.
 	[Rect2(8211, SUELO - 32, 38, 6), true, "Maceta grande", "arte", "maceta_grande"],
 	[Rect2(8277, SUELO - 89, 182, 6), true, "Baranda", "arte", "baranda"],  # 74 cm
@@ -323,6 +336,9 @@ const TIRABLES := [
 	[Vector2(7197, SUELO - 98), "taza", 9.0],  # taza de café de Valeria (Gemini, estudio v2), al lado de la laptop
 	[Vector2(7280, SUELO - 170), "maceta", -6.0],
 	[Vector2(7312, SUELO - 170), "maceta", -6.0],
+	# Estudio v3: sobre el librero bajo, hundidos 3 px en su cubierta (se ve de 4 px), a los dos lados de su medio.
+	[Vector2(LIBRERO_BAJO_X + 28.0, SUELO - 97), "planta", 3.0],  # la lengua de suegra de Valeria: se rompe (tierra)
+	[Vector2(LIBRERO_BAJO_X + 84.0, SUELO - 97), "portarretratos", 3.0],  # Su Majestad en marco dorado: no se rompe
 ]
 ## Comida: [posición, tipo]. El pollo es el almuerzo de Valeria (travesura "almuerzo"): espera sobre el microondas,
 ## fuera de la patrulla del ratón del mesón (G5).
@@ -331,6 +347,8 @@ const POLLO := Vector2(MICROONDAS_X + 49.0, SUELO - 160)
 const COMIDA := [[Vector2(3010, SUELO), "tazon"], [POLLO, "pollo"]]
 ## A.S.P.I.: [base de carga, límite izquierdo, límite derecho] dentro del estudio.
 ## La base es el lugar donde se estaciona: a la izquierda de la estación, con el frente pegado a ella (no encima).
+## Los límites cubren el cuarto entero (50 px de cada pared): persigue a Felipe hasta el librero bajo de la derecha, y
+## lo que se rompe en cualquier lado le deja una mancha que limpiar (BatallaAspi.agregar_mancha).
 const ASPI := [Vector2(7200, SUELO), 6870.0, 7706.0]
 ## Puntos de descanso: la caja de arena (recibidor) y el cojín (pasillo, a 2 px del rectángulo de la puerta del jefe).
 const DESCANSOS := [Rect2(1852, SUELO - 60, 71, 70), Rect2(5364, SUELO - 40, 70, 50)]

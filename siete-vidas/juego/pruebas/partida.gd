@@ -343,17 +343,12 @@ func _balcon() -> void:
 
 # --- Pelea --------------------------------------------------------------------------------------------------
 
-## Tira al piso lo que haga falta para llenarle el depósito: lo del escritorio (vaso, taza de café), una maceta de la repisa
-## o, si no queda nada, pisa el teclado (los apuntes vuelan). Después baja atravesando el mueble.
+## Tira al piso lo que haga falta para llenarle el depósito, en las dos islas del estudio (estudio v3): lo del librero
+## bajo de la derecha (planta y portarretratos, subiendo por la caja de los libros), lo del escritorio (vaso, taza de
+## café), una maceta de la repisa o, si no queda nada, pisa el teclado (los apuntes vuelan). Después baja atravesando
+## el mueble. Así la pelea va de un lado al otro del cuarto, como la juega una persona.
 func _ensuciar() -> void:
 	var batalla := guion.batalla
-	if felipe.global_position.y > Nivel1.SUELO - 50.0:
-		# Al escritorio por la silla.
-		await _ir_a(7000, 4.0)
-		if _fuera_de_pelea():
-			return
-		await _subir_a(7035, Nivel1.SUELO - 55)
-		await _subir_a(7105, Nivel1.SUELO - 98)
 	var tiro := false
 	for vuelta in 3:
 		if _fuera_de_pelea():
@@ -364,12 +359,10 @@ func _ensuciar() -> void:
 		var objetivo := _municion()
 		if objetivo == null:
 			break
-		if objetivo.position.y < Nivel1.SUELO - 120.0 and felipe.global_position.y > Nivel1.SUELO - 120.0:
-			await _ir_a(7195, 2.0)
-			await _subir_a(7280, Nivel1.SUELO - 170)
+		await _ir_a_la_isla(objetivo)
 		if _fuera_de_pelea():
 			return
-		var lado := 1.0 if objetivo.position.x > 7140.0 else -1.0
+		var lado := _lado_de_tiro(objetivo)
 		await _ir_a(objetivo.position.x - lado * 18.0, 2.0)
 		felipe.mirando = lado
 		await _tocar("interactuar")
@@ -378,10 +371,54 @@ func _ensuciar() -> void:
 		_paso("Ensucia con %s (depósito %d, apagados %d)" % [objetivo.tipo, batalla.deposito, batalla.apagados])
 	if not tiro and batalla.manchas.is_empty():
 		# Sin nada que tirar: pisa el teclado hasta que salga un papel.
+		await _ir_a_la_isla(null)
 		await _ir_a(Nivel1.TECLADO.get_center().x, 2.0)
 		await _hasta(func() -> bool: return not batalla.manchas.is_empty(), 4.5)
 		_paso("Pisa el teclado: vuelan los apuntes (depósito %d)" % batalla.deposito)
 	await _bajar_al_piso()
+
+
+## Lo del librero bajo se tira hacia los lados de su medio (la planta a la izquierda, el portarretratos a la derecha);
+## lo del escritorio y la repisa, como siempre (a la derecha de x 7140, hacia la derecha).
+func _lado_de_tiro(objetivo: Objeto) -> float:
+	var librero := Nivel1.rect_pieza("Librero bajo")
+	if objetivo.position.x >= librero.position.x:
+		return -1.0 if objetivo.position.x < librero.get_center().x else 1.0
+	return 1.0 if objetivo.position.x > 7140.0 else -1.0
+
+
+## Sube a la isla donde está el objetivo (null = el escritorio, por el teclado). Derecha: piso → caja de los libros →
+## librero bajo. Izquierda: piso → silla → escritorio (→ repisa de las macetas si está en alto). Si está en la otra
+## isla, primero baja al piso.
+func _ir_a_la_isla(objetivo: Objeto) -> void:
+	var librero := Nivel1.rect_pieza("Librero bajo")
+	var caja := Nivel1.rect_pieza("Caja de los libros")
+	var a_la_derecha := objetivo != null and objetivo.position.x >= librero.position.x
+	var arriba := felipe.global_position.y < Nivel1.SUELO - 30.0
+	var en_la_derecha := felipe.global_position.x >= caja.position.x - 10.0
+	if arriba and en_la_derecha != a_la_derecha:
+		await _bajar_al_piso()
+		arriba = false
+	if a_la_derecha:
+		if absf(felipe.global_position.y - librero.position.y) < 3.0:
+			return
+		if not arriba:
+			await _ir_a(caja.position.x - 24.0, 4.0)
+			if _fuera_de_pelea():
+				return
+			await _subir_a(caja.get_center().x, caja.position.y)
+		await _subir_a(librero.position.x + 40.0, librero.position.y)
+		return
+	if not arriba:
+		# Al escritorio por la silla.
+		await _ir_a(7000, 4.0)
+		if _fuera_de_pelea():
+			return
+		await _subir_a(7035, Nivel1.SUELO - 55)
+		await _subir_a(7105, Nivel1.SUELO - 98)
+	if objetivo != null and objetivo.position.y < Nivel1.SUELO - 120.0 and felipe.global_position.y > Nivel1.SUELO - 120.0:
+		await _ir_a(7195, 2.0)
+		await _subir_a(7280, Nivel1.SUELO - 170)
 
 
 ## Perdió una vida (reaparece en el cojín) o la pelea terminó: hay que dejar lo que estaba haciendo.
@@ -390,7 +427,8 @@ func _fuera_de_pelea() -> bool:
 	return batalla.ausente or batalla.fase != BatallaAspi.Fase.PELEA or felipe.estado == Felipe.Estado.DESMAYADO or Nivel1.habitacion_de(felipe.global_position) != "estudio"
 
 
-## Lo que se puede tirar ahora en el estudio, de más fácil a más difícil (escritorio antes que la repisa).
+## Lo que se puede tirar ahora en el estudio, de más fácil a más difícil (lo más bajo primero: el librero bajo de 80 cm,
+## después el escritorio y al final la repisa).
 func _municion() -> Objeto:
 	var mejor: Objeto = null
 	for hijo in sala.get_children():

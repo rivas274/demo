@@ -87,8 +87,9 @@ func adentro(felipe: Node2D) -> bool:
 
 
 ## ¿Está parado en el peldaño desde donde se tira la caja de arriba?
+## Solo en ESE peldaño (x incluida): antes bastaba la altura y la caja de los libros del estudio (40 cm) ofrecía «Tirar».
 func en_el_peldano(felipe: Node2D) -> bool:
-	return adentro(felipe) and absf(felipe.global_position.y - peldano.y) < 4.0
+	return adentro(felipe) and absf(felipe.global_position.y - peldano.y) < 4.0 and absf(felipe.global_position.x - peldano.x) < 30.0
 
 
 func interactuar(felipe: Felipe) -> void:

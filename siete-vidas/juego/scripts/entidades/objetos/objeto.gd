@@ -1,7 +1,7 @@
 class_name Objeto
 extends Node2D
-## Objeto que Felipe tira de un manotazo: el vaso (se rompe y da «La Gravedad Funciona»), la taza de café y las macetas
-## (aturden a lo que esté debajo) y las llaves (no se rompen: «¡CLINK CRÍTICO!»). Todo el comportamiento está en su
+## Objeto que Felipe tira de un manotazo: el vaso (se rompe y da «La Gravedad Funciona»), la taza de café, las macetas
+## y la planta (aturden a lo que esté debajo), las llaves y el portarretratos (no se rompen). Todo el comportamiento está en su
 ## pieza Tirable; este nodo solo lo dibuja: apoyado en el medio de la cubierta con su sombra de contacto, cayendo
 ## (gira) o roto en el piso. En la pelea lo roto vuelve a su lugar de a uno (Tirable.reponer, lo decide BatallaAspi).
 ## Escala de gato: vaso, taza, maceta y llaves al doble de su tamaño real (lado menor ≥ 24 px, R8).
@@ -16,7 +16,7 @@ const CRECER := 0.45
 const GRUPO_PEDAZOS := "pedazos_rotos"
 var _tiempo_roto := 0.0
 
-## Qué es: "vaso", "taza", "maceta" o "llaves" (también la imagen de assets/nivel1/).
+## Qué es: "vaso", "taza", "maceta", "planta", "portarretratos" o "llaves" (también la imagen de assets/nivel1/).
 var tipo: String:
 	get:
 		return datos.tipo if datos else ""

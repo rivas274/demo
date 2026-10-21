@@ -7,7 +7,8 @@ extends Node3D
 const K := "res://assets/kenney/"
 
 # Colores cálidos tomados de la sala del juego.
-const PARED := Color("be926c")
+const PARED := Color("d6b088")
+const PARED_RAYA := Color("c79c74")
 const ZOCALO := Color("7c4127")
 const PISO := Color("a15e35")
 const PISO_LINEA := Color("572c1d")
@@ -23,8 +24,8 @@ const CIELO := Color("f0a868")
 const CIUDAD := Color("905535")
 const PERSIANA := Color("ae7857")
 
-@export var energia_lampara := 2.0
-@export var alcance_lampara := 2.1
+@export var energia_lampara := 1.8
+@export var alcance_lampara := 1.7
 @export var energia_sol := 1.1
 @export var energia_relleno := 0.35
 
@@ -45,10 +46,14 @@ func _pared_y_piso() -> void:
 	for z in [-0.85, -0.35, 0.15, 0.65, 1.1]:
 		Toon.caja(self, Vector3(12, 0.004, 0.015), Vector3(0, 0.002, z), PISO_LINEA, false)
 	var z_pared := -1.275
-	Toon.caja(self, Vector3(2.4, 3.5, 0.15), Vector3(-3.8, 1.75, z_pared), PARED)
-	Toon.caja(self, Vector3(7.2, 3.5, 0.15), Vector3(2.4, 1.75, z_pared), PARED)
-	Toon.caja(self, Vector3(1.4, 0.95, 0.15), Vector3(-1.9, 0.475, z_pared), PARED)
-	Toon.caja(self, Vector3(1.4, 1.45, 0.15), Vector3(-1.9, 2.775, z_pared), PARED)
+	for p in [[Vector3(2.4, 3.5, 0.15), Vector3(-3.8, 1.75, z_pared)],
+			[Vector3(7.2, 3.5, 0.15), Vector3(2.4, 1.75, z_pared)],
+			[Vector3(1.4, 0.95, 0.15), Vector3(-1.9, 0.475, z_pared)],
+			[Vector3(1.4, 1.45, 0.15), Vector3(-1.9, 2.775, z_pared)]]:
+		var muro := Toon.caja(self, p[0], p[1], PARED)
+		var m := muro.material_override as ShaderMaterial
+		m.set_shader_parameter("rayas", 0.16)
+		m.set_shader_parameter("color_raya", PARED_RAYA)
 	Toon.caja(self, Vector3(12, 0.1, 0.04), Vector3(0, 0.05, -1.18), ZOCALO)
 	# Cuadro en la pared.
 	Toon.caja(self, Vector3(0.5, 0.6, 0.04), Vector3(3.3, 1.95, -1.18), LATON)

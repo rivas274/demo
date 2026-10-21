@@ -34,10 +34,9 @@ const DURACION_LOGRO := 2.2
 const CAPA_AVISO := Capas.CAPA_AVISOS
 const TAM_AVISO := Vector2(300, 44)
 ## Panel de los corazones y las vidas, en una sola fila dentro de la zona A del HUD (ZonasTexto.HUD, y 0–26).
-const PANEL := Rect2(6, 4, 130, 22)
+const PANEL := Rect2(6, 4, 84, 22)
 const POS_CORAZONES := Vector2(15, 15)
 const PASO_CORAZONES := 14.0
-const X_VIDAS := 88.0
 ## Donde empieza el texto en la etiqueta de logro (después del sello).
 const X_TEXTO_LOGRO := 52.0
 
@@ -121,13 +120,9 @@ func rect_logro() -> Rect2:
 func _draw() -> void:
 	if not felipe:
 		return
+	# HUD limpio (2026-10-21): solo los corazones. Las 9 vidas se ven en la pausa (panel del bolsillo) y en el momento
+	# en que se pierde una (la vida fantasma).
 	Estilo.panel(self, PANEL, &"panel")
-	var ancho := PANEL.end.x - X_VIDAS - 4.0
-	# Con el Collar de la Vergüenza, su nombre (en rojo) va donde iban las vidas: todo queda en la zona A.
-	if felipe.tiene_collar:
-		Estilo.escribir(self, Vector2(X_VIDAS, 19), Estilo.recortar(tr("UI_COLLAR"), &"medidor_collar", ancho), &"medidor_collar", Estilo.color(&"rojo"))
-	else:
-		Estilo.escribir(self, Vector2(X_VIDAS, 19), tr("UI_VIDAS") % felipe.vidas, &"medidor_vidas", Estilo.color(&"tinta_decreto"))
 
 
 func _dibujar_aviso() -> void:

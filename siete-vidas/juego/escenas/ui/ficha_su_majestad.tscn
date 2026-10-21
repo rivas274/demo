@@ -46,7 +46,7 @@ layout_mode = 0
 offset_right = 176.0
 offset_bottom = 165.0
 mouse_filter = 2
-theme_override_constants/separation = 2
+theme_override_constants/separation = 0
 
 [node name="Defensa" parent="Barras" instance=ExtResource("3_barra")]
 layout_mode = 2

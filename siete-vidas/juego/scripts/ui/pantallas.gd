@@ -32,6 +32,10 @@ var pausa: Control
 var menu_pausa: MenuUI
 ## La Ficha de Su Majestad (el único lugar donde se ve el peso).
 var ficha: FichaSuMajestad
+## El bolsillo de la pausa: vidas, calcetines, fotos y snacks (el HUD del juego solo deja los corazones).
+var bolsillo: PanelBolsillo
+## Dónde va el bolsillo en la pausa: abajo a la derecha, bajo los decretos.
+const POS_BOLSILLO := Vector2(456, 292)
 ## Mientras se estampa el sello de lo elegido, no se elige otra cosa.
 var _eligiendo := false
 ## Opciones (controles, reducir movimiento, volumen), encima de la pausa.
@@ -49,6 +53,10 @@ func _ready() -> void:
 	menu_pausa = pausa.get_node("%Menu")
 	menu_pausa.elegido.connect(_al_elegir)
 	ficha = pausa.get_node("%Ficha")
+	bolsillo = PanelBolsillo.new()
+	bolsillo.name = "Bolsillo"
+	bolsillo.position = POS_BOLSILLO
+	pausa.add_child(bolsillo)
 	opciones = PantallaOpciones.crear()
 	opciones.visible = false
 	opciones.cerrada.connect(func() -> void:

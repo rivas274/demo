@@ -28,6 +28,9 @@ signal primera_vez(objeto: Node2D, frase: String)
 const ALTURA_BURBUJA := 84.0
 
 var felipe: Felipe
+## Quienes tienen cara (Valeria): la burbuja no se la tapa; sube o se corre de lado con la misma regla que las palabras
+## del mundo (ZonasTexto.colocar_palabra). Cada uno da rect_dibujado().
+var testigos: Array[Node2D] = []
 ## Objeto que se está anunciando (null si no hay).
 var objeto: Node2D
 ## Verbo que se muestra ("" si no hay burbuja).
@@ -181,7 +184,30 @@ func rect_burbuja() -> Rect2:
 		return Rect2()
 	var tam := Vector2(IconosBotones.ancho("interactuar", 14.0) + Estilo.ancho(verbo, &"indicador") + 12.0, 20.0)
 	var centro := (felipe.global_position + Vector2(0, -ALTURA_BURBUJA)).round()
-	return Rect2((centro - tam / 2.0).round(), tam)
+	return _sin_tapar_caras(Rect2((centro - tam / 2.0).round(), tam))
+
+
+## Si la burbuja cae sobre una cara, se mueve al lugar libre más cercano (en pantalla, fuera de las zonas de texto).
+func _sin_tapar_caras(caja: Rect2) -> Rect2:
+	var caras: Array[Rect2] = []
+	var vista := get_viewport()
+	if vista == null:
+		return caja
+	var lienzo := vista.get_canvas_transform()
+	for testigo in testigos:
+		if is_instance_valid(testigo) and testigo.is_visible_in_tree() and testigo.has_method("rect_dibujado"):
+			var r: Rect2 = testigo.call("rect_dibujado")
+			r.size.y = minf(r.size.y, 90.0)
+			var en_pantalla := Rect2(lienzo * r.position, r.size * lienzo.get_scale())
+			if Rect2(lienzo * caja.position, caja.size).intersects(en_pantalla):
+				caras.append(en_pantalla)
+	if caras.is_empty():
+		return caja
+	# Tampoco encima del propio Felipe (debajo de la cara está él): de costado, al lado de la cara.
+	var pies := lienzo * felipe.global_position
+	caras.append(Rect2(pies + Vector2(-38, -74), Vector2(76, 76)))
+	var movida := ZonasTexto.colocar_palabra(Rect2(lienzo * caja.position, caja.size), caras)
+	return Rect2((lienzo.affine_inverse() * movida.position).round(), caja.size)
 
 
 func _draw() -> void:
@@ -194,8 +220,9 @@ func _draw() -> void:
 	var centro := (felipe.global_position + Vector2(0, -ALTURA_BURBUJA)).round()
 	# Aparece con un saltito (entero, para no emborronar los píxeles).
 	centro.y += roundf((1.0 - _aparecer) * 4.0)
-	var caja := Rect2((centro - tam / 2.0).round(), tam)
-	_dibujar_placa(caja, Vector2(centro.x, caja.end.y))
+	var caja := _sin_tapar_caras(Rect2((centro - tam / 2.0).round(), tam))
+	# La punta señala a Felipe aunque la burbuja se haya corrido (queda dentro de la burbuja).
+	_dibujar_placa(caja, Vector2(clampf(centro.x, caja.position.x + 6.0, caja.end.x - 6.0), caja.end.y))
 	IconosBotones.dibujar(self, accion, caja.position + Vector2(4, 3), 14.0)
 	# Texto con sombra dura de 1 px, como el del diálogo y la libreta (misma letra).
 	Estilo.escribir(self, caja.position + Vector2(ancho_icono + 9.0, 15.0), verbo, &"indicador", Estilo.color(&"indicador_sombra_texto"))

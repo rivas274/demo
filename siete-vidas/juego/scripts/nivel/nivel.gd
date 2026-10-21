@@ -107,6 +107,7 @@ func _ready() -> void:
 	add_child(travesuras)
 	medidores.dialogo = travesuras.dialogo
 	medidores.anuncios = travesuras.anuncios
+	pantallas.bolsillo.conectar(felipe, travesuras.recompensas)
 	_crear_puertas()
 	guion.preparar()
 	_fundido = ColorRect.new()

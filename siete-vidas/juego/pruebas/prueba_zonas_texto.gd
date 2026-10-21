@@ -23,6 +23,7 @@ func _correr() -> void:
 	root.add_child(sala)
 	await _esperar(30)
 	_probar_hud(sala)
+	await _probar_hud_limpio(sala)
 	await _probar_dialogo(sala)
 	await _probar_anuncios(sala)
 	await _probar_palabras(sala)
@@ -90,7 +91,8 @@ func _probar_hud(sala: Nivel) -> void:
 	var ultimo := 0.0
 	for clave: String in t.hud.contadores:
 		var c: ContadorRecurso = t.hud.contadores[clave]
-		var r := Rect2(c.position, c.size)
+		# Mostrado (como cuando cambia): dentro de la franja.
+		var r := Rect2(Vector2(c.position.x, Hud.Y0), c.size)
 		ultimo = maxf(ultimo, r.end.x)
 		if not ZonasTexto.HUD.encloses(r):
 			fuera.append(clave)
@@ -99,6 +101,30 @@ func _probar_hud(sala: Nivel) -> void:
 		fuera.append("barra del jefe")
 	_comprobar(fuera.is_empty(), "Zona A: corazones, agenda, contadores y barra del jefe caben en y 0–26 %s" % [fuera])
 	_comprobar(ultimo < barra.position.x and Medidores.PANEL.end.x < Hud.X0, "Zona A: nada se monta (corazones < agenda; contadores hasta %.0f < barra del jefe en %.0f)" % [ultimo, barra.position.x])
+
+
+## HUD limpio (2026-10-21): fijos solo los corazones; la agenda y los contadores aparecen al cambiar y se van; en la
+## pelea, el de snacks queda fijo; sin el texto «N vidas».
+func _probar_hud_limpio(sala: Nivel) -> void:
+	var hud := sala.travesuras.hud
+	await _esperar(150)
+	var nada := true
+	for clave: String in ["agenda", "calcetin", "foto", "snack"]:
+		nada = nada and not hud.mostrando(clave)
+	_comprobar(nada, "HUD limpio: sin cambios, solo los corazones (agenda y contadores fuera)")
+	hud.golpear("calcetin")
+	await _esperar(15)
+	var c: ContadorRecurso = hud.contadores["calcetin"]
+	_comprobar(hud.mostrando("calcetin") and ZonasTexto.HUD.encloses(Rect2(c.position, c.size)) and not hud.mostrando("foto"), "HUD limpio: al cambiar, el contador entra deslizando a la franja (solo el que cambió)")
+	await _esperar(int((Hud.MOSTRAR + 0.4) * 60.0))
+	_comprobar(not hud.mostrando("calcetin"), "HUD limpio: a los %.0f s se va" % Hud.MOSTRAR)
+	hud.snacks_fijos = func() -> bool: return true
+	await _esperar(30)
+	_comprobar(hud.mostrando("snack"), "HUD limpio: en la pelea, el contador de snacks queda fijo")
+	hud.snacks_fijos = Callable()
+	await _esperar(30)
+	var bolsillo := sala.pantallas.bolsillo
+	_comprobar(bolsillo != null and bolsillo.contadores.size() == 4 and tr("UI_VIDAS") % sala.felipe.vidas == (bolsillo.contadores["vidas"] as ContadorRecurso).texto, "HUD limpio: las vidas, calcetines, fotos y snacks están en el bolsillo de la pausa")
 
 
 func _ancho_barra_jefe() -> float:
@@ -260,6 +286,16 @@ func _probar_palabras(sala: Nivel) -> void:
 	var cara_pantalla := Rect2(lienzo * cara.position, cara.size)
 	j.palabra_en_mundo("PALABRA_GARRAS_AFILADAS", cara.get_center(), Color.WHITE, 13)
 	_comprobar(valeria.visible and not j.ultima_caja.intersects(cara_pantalla) and ZonasTexto.palabra_valida(j.ultima_caja), "Zona D: una palabra no le tapa la cara a Valeria (%s, cara %s)" % [j.ultima_caja, cara_pantalla])
+	# Zona E: con Felipe en el cojín junto a Valeria, la burbuja («Firmar») no le tapa la cara.
+	felipe.global_position = Vector2(400, Nivel1.SUELO - 49)
+	await _esperar(30)
+	lienzo = root.get_viewport().get_canvas_transform()
+	cara = valeria.rect_dibujado()
+	cara.size.y = minf(cara.size.y, 90.0)
+	indicador.verbo = "Firmar"
+	var burbuja_cojin := indicador.rect_burbuja()
+	_comprobar(not burbuja_cojin.intersects(cara), "Zona E: con Felipe en el cojín, la burbuja del Indicador no tapa la cara de Valeria (%s, cara %s)" % [burbuja_cojin, cara])
+	indicador.verbo = ""
 
 
 func _probar_barra_jefe() -> void:

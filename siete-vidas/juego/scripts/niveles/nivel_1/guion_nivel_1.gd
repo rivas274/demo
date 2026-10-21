@@ -254,6 +254,8 @@ func _crear_valeria() -> void:
 	valeria.add_child(sombra_valeria)
 	# Las palabras del mundo no le tapan la cara a Valeria (zona D).
 	travesuras.jugo.testigos.append(valeria)
+	# Ni la burbuja del Indicador (zona E) le tapa la cara.
+	travesuras.indicador.testigos.append(valeria)
 	# Si Valeria va a salir a reaccionar en el cuarto de Felipe, el cartel espera a que salga (G5).
 	travesuras.anuncios.reaccion_en_curso = func() -> bool: return valeria_por_la_casa.en_escena and habitacion == "recibidor" and valeria_por_la_casa.actual in ["bolsas", "maullido"] and not (valeria.cuarto == "recibidor" and valeria.visible)
 
@@ -267,6 +269,8 @@ func _crear_aspi() -> void:
 	nivel.add_child(aspi)
 	if batalla_con_jefe:
 		batalla = BatallaAspi.new(aspi, felipe, nivel)
+		# En la pelea, el contador de snacks queda fijo en el HUD (comer es una decisión de la pelea).
+		travesuras.hud.snacks_fijos = func() -> bool: return batalla != null and batalla.fase == PeleaJefe.Fase.PELEA
 		nivel.add_child(batalla)
 		batalla.presentacion.anuncios = travesuras.anuncios
 		for objeto in tirables:

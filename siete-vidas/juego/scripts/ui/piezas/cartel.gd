@@ -33,7 +33,7 @@ static func crear(titulo: String, nombre: String, secreta: bool, rect: Rect2) ->
 	var x_cinta := roundf((rect.size.x - ANCHO_CINTA) / 2.0)
 	caja.add_child(panel(&"cinta", Rect2(x_cinta, 0, ANCHO_CINTA, ALTO_CINTA)))
 	caja.add_child(etiqueta(titulo, &"cartel_titulo", color, Vector2(x_cinta + 32, 5), ANCHO_CINTA - 64))
-	caja.add_child(etiqueta(nombre.to_upper(), &"cartel_nombre", Estilo.color(&"tinta_decreto"), Vector2(x_papel + 10, ALTO_CINTA - 1.0), ANCHO_PAPEL - 20, false))
+	caja.add_child(etiqueta(nombre.to_upper(), &"cartel_nombre", Estilo.color(&"tinta_decreto"), Vector2(x_papel + 10, ALTO_CINTA - 2.0), ANCHO_PAPEL - 20, false))
 	caja.scale = Vector2(1.6, 0.1)
 	caja.modulate.a = 0.0
 	return caja

@@ -1011,12 +1011,8 @@ def rotos():
         pieza.save(DESTINO / f"{nombre}.png")
         print(f"Rotos: {nombre} {pieza.size}")
     maceta = Image.open(DESTINO / "maceta.png").convert("RGBA")
-    planta = recortar_opaco(maceta.crop((0, 0, maceta.width, 17)))
-    planta = planta.rotate(-90 if False else 90, expand=True)
-    planta = recortar_opaco(planta)
-    a = np.asarray(planta).copy()
-    m = a[:, :, 3] > 0
-    planta = Image.fromarray(a, "RGBA")
+    # La planta (filas 0 a 16 del arte, sin la maceta) acostada en el piso, con las flores hacia la izquierda.
+    planta = recortar_opaco(recortar_opaco(maceta.crop((0, 0, maceta.width, 17))).rotate(90, expand=True))
     planta.save(DESTINO / "planta_tirada.png")
     print(f"Rotos: planta_tirada {planta.size}")
 

@@ -40,11 +40,13 @@ const ESTADOS_DELANTE_DE_HUMANOS := [Felipe.Estado.RONRONEANDO]
 const ACTIVIDADES_HUMANO_DETRAS := [Valeria.Actividad.SENTADA]
 ## Luz de las lámparas encendidas (plan de estabilización 2026-10-20, decisión 4; lección 26: nada de halos redondos).
 ## Cada una: [cuarto, arte, pantalla (rectángulo en la textura del arte), y del mundo donde cae la luz (tablero o piso),
-## ancho de la luz al llegar ahí]. LuzCuarto dibuja con estos datos la pantalla encendida (más clara, con contorno
-## claro), el cono en 3 escalones de bordes duros y la franja iluminada en lo que toca.
+## ancho de la luz al llegar ahí, alto del cono de ARRIBA, ancho arriba, cuánto de la opacidad de abajo lleva el de
+## arriba]. La pantalla es abierta arriba y abajo (decisión del creador, 2026-10-21): tira luz al piso y, más corta y
+## tenue, a la pared o el techo. LuzCuarto dibuja con estos datos la pantalla encendida (más clara, con contorno claro),
+## los dos conos en 3 escalones de bordes duros y la franja iluminada en lo que tocan.
 const LAMPARAS := [
-	["sala", "mesita_sala", Rect2(5, 0, 35, 23), SUELO - 57.0, 66.0],
-	["recibidor", "lampara", Rect2(0, 16, 34, 34), SUELO, 120.0],
+	["sala", "mesita_sala", Rect2(5, 0, 35, 23), SUELO - 57.0, 66.0, 46.0, 52.0, 0.6],
+	["recibidor", "lampara", Rect2(0, 16, 34, 34), SUELO, 120.0, 62.0, 70.0, 0.6],
 ]
 ## Ambiente del atardecer por cuarto con lámpara (CanvasModulate, oscurecimiento suave para que la luz resalte; R14: lo
 ## jugable se sigue leyendo). Los demás cuartos van en blanco.

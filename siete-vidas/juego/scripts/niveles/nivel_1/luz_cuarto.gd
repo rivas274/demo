@@ -186,7 +186,8 @@ func _armar_lamparas() -> void:
 					derecha = x
 			if izquierda >= 0:
 				bordes.append([y, izquierda, derecha])
-		_lamparas.append({"textura": t, "origen": origen, "region": region, "bordes": bordes, "apoyo": datos[3], "ancho": datos[4]})
+		_lamparas.append({"textura": t, "origen": origen, "region": region, "bordes": bordes, "apoyo": datos[3], "ancho": datos[4],
+			"alto_arriba": datos[5], "ancho_arriba": datos[6], "alfa_arriba": datos[7]})
 
 
 ## Cono de luz: 3 trapecios de bordes duros, de la boca de la pantalla al apoyo, cada uno más angosto y del 6 al 10 %.
@@ -207,6 +208,22 @@ func _dibujar_conos() -> void:
 			var b := roundf(float(l["ancho"]) * e / 2.0)
 			var puntos := PackedVector2Array([Vector2(cx - a, y0), Vector2(cx + a, y0), Vector2(cx + b, y1), Vector2(cx - b, y1)])
 			_conos.draw_colored_polygon(puntos, Color(Nivel1.COLOR_LAMPARA, Nivel1.ALFA_CONO[k]))
+		# Hacia arriba: de la boca de arriba de la pantalla, más corto y más tenue, y termina en una franja en la pared.
+		var tope: Array = bordes[0]
+		var ya := origen.y + float(tope[0]) - 1.0
+		var cxa := origen.x + (float(tope[1]) + float(tope[2]) + 1.0) / 2.0
+		var boca_arriba := float(tope[2]) - float(tope[1]) + 1.0
+		var yb := ya - float(l["alto_arriba"])
+		var alfa: float = l["alfa_arriba"]
+		for k in Nivel1.ESCALONES_CONO.size():
+			var e: float = Nivel1.ESCALONES_CONO[k]
+			var a := roundf(boca_arriba * e / 2.0)
+			var b := roundf(float(l["ancho_arriba"]) * e / 2.0)
+			var color := Color(Nivel1.COLOR_LAMPARA, Nivel1.ALFA_CONO[k] * alfa)
+			_conos.draw_colored_polygon(PackedVector2Array([Vector2(cxa - a, ya), Vector2(cxa + a, ya), Vector2(cxa + b, yb), Vector2(cxa - b, yb)]), color)
+			# Franja iluminada donde llega (en escalones, nunca un círculo).
+			var alto_franja: float = FRANJA_TABLERO[k]
+			_conos.draw_rect(Rect2(roundf(cxa - b), roundf(yb - alto_franja), b * 2.0, alto_franja), color)
 
 
 ## Franja iluminada donde cae la luz: escalones planos centrados bajo la lámpara (en el piso o en el tablero).

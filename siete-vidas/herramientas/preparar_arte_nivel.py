@@ -1088,10 +1088,10 @@ def vacios():
 # Esquirlas del vaso (2026-10-21: los recortes rectos parecían vasitos en miniatura): triángulos y trapecios irregulares
 # de 3 a 6 px, en el celeste del vaso, con un brillo claro de 1 px y su contorno. [nombre, polígono en una grilla de 8].
 ESQUIRLAS = [
-    ["roto_vaso_2", [(0, 5), (3, 0), (5, 5)]],
-    ["roto_vaso_3", [(0, 2), (6, 0), (4, 4), (1, 4)]],
-    ["roto_vaso_4", [(0, 3), (2, 0), (4, 1), (3, 4)]],
-    ["roto_vaso_5", [(0, 4), (5, 0), (3, 4)]],
+    ["roto_vaso_2", [(0, 7), (4, 0), (7, 7)]],
+    ["roto_vaso_3", [(0, 3), (8, 0), (6, 6), (1, 6)]],
+    ["roto_vaso_4", [(0, 5), (3, 0), (6, 2), (5, 6)]],
+    ["roto_vaso_5", [(0, 6), (7, 0), (5, 6)]],
 ]
 
 

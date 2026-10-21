@@ -55,13 +55,13 @@ func _process(_delta: float) -> void:
 		animacion.set_speed_scale(1.0 / maxf(Engine.time_scale, 0.001))
 
 
-## Sale rápido (algo urgente pidió la pantalla).
+## Sale al instante (algo pidió la franja: una frase urgente o la fase del jefe). Sin fundido: nunca se ven dos
+## textos en la zona C a la vez, ni un cuadro.
 func ocultar() -> void:
 	if animacion:
 		animacion.kill()
-	var salir := create_tween()
-	salir.tween_property(self, "modulate:a", 0.0, 0.12)
-	salir.tween_callback(queue_free)
+	visible = false
+	queue_free()
 
 
 ## Un panel del kit (pergamino o cinta, del tema) en ese rectángulo.

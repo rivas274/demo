@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dirwj843ghqmt"
-path="res://.godot/imported/monitor.png-50d6f1bc0ace5b4d103cb4fd83927b3e.ctex"
+uid="uid://bsvhiawqoe4dt"
+path="res://.godot/imported/aspi_enojada.png-99d27443bd4ccf0b270c2973e2f5865d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/nivel1/monitor.png"
-dest_files=["res://.godot/imported/monitor.png-50d6f1bc0ace5b4d103cb4fd83927b3e.ctex"]
+source_file="res://assets/nivel1/aspi_enojada.png"
+dest_files=["res://.godot/imported/aspi_enojada.png-99d27443bd4ccf0b270c2973e2f5865d.ctex"]
 
 [params]
 

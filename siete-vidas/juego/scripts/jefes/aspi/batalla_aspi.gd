@@ -262,6 +262,8 @@ func _al_salir_felipe() -> void:
 
 
 func _al_cambiar_fase() -> void:
+	# Fase 3 (dos apagadas): el ojo queda enojado.
+	apariencia.furia = vencidas >= 2
 	_reloj_llena = 0.0
 	deposito = 0
 	llena = false

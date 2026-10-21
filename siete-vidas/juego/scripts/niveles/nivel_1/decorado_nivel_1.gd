@@ -1,7 +1,7 @@
 class_name DecoradoNivel1
 extends RefCounted
-## Decorado sin colisión del nivel 1 (lo que cuenta quién vive aquí y lo que se mueve): la pantalla y el teclado del
-## escritorio de Valeria, los jirones del sofá y los calcetines que vuelan del cajón, la ropa doblada de la cama, la
+## Decorado sin colisión del nivel 1 (lo que cuenta quién vive aquí y lo que se mueve): la pantalla y el teclado de la
+## laptop de Valeria, los jirones del sofá y los calcetines que vuelan del cajón, la ropa doblada de la cama, la
 ## fachada y el toldo bajo el balcón, el nido que se llena de calcetines y el ambiente de cada cuarto (pelos, arañazos,
 ## polvo, enchufes, cables, croquetas, el segundero del reloj). Los nodos los crea ArteNivel1; aquí solo se dibuja.
 
@@ -17,20 +17,21 @@ func _init(de: Nivel, con_guion: GuionNivel1) -> void:
 	guion = con_guion
 
 
-## Pantalla del monitor (en el mundo): ahí sale «jjjjjj» al pisar el teclado.
-const PANTALLA_MONITOR := Rect2(7126 + 4, Nivel1.SUELO - 89 - 48 + 6, 36, 26)
+## La laptop de Valeria (arte `laptop`, 70 × 55, puesta en Nivel1.ARTE): su pantalla y su teclado en el mundo. Al pisar el
+## teclado, la pantalla se llena de «jjjjjj» y las teclas se ven hundidas.
+const LAPTOP := Vector2(7110, Nivel1.SUELO - 89 - 55)
+const PANTALLA_LAPTOP := Rect2(LAPTOP + Vector2(9, 10), Vector2(32, 18))
+const TECLAS_LAPTOP := Rect2(LAPTOP + Vector2(13, 36), Vector2(44, 10))
 
 
-## Decorado sin colisión: pantalla y teclado del escritorio, jirones del sofá, calcetines que vuelan.
+## Decorado sin colisión: pantalla y teclado de la laptop, jirones del sofá, calcetines que vuelan.
 func dibujar_decorado(c: Node2D) -> void:
-	# Escritorio de Valeria: el monitor es arte (arriba-extra); la pantalla cambia al pisar el teclado.
-	if not guion.teclado_pisado:
-		_dibujar_serie(c)
+	# Laptop de Valeria: pisada, la pantalla dice «jjjjjj» y las teclas quedan hundidas.
 	if guion.teclado_pisado:
-		c.draw_rect(PANTALLA_MONITOR, Color("dfe8f2"))
-		for fila in 3:
-			Estilo.escribir(c, PANTALLA_MONITOR.position + Vector2(2, 9 + fila * 8), "jjjjjj", &"etiqueta", Color("2f2f6f"))
-	_dibujar_teclado(c)
+		c.draw_rect(PANTALLA_LAPTOP, Color("dfe8f2"))
+		for fila in 2:
+			Estilo.escribir(c, PANTALLA_LAPTOP.position + Vector2(2, 8 + fila * 8), "jjjjjjj", &"etiqueta", Color("2f2f6f"))
+		c.draw_rect(TECLAS_LAPTOP, Color(0.1, 0.06, 0.05, 0.25))
 	# Jirones del plástico del sofá (G4): tiras brillantes que giran y caen.
 	for j: Array in guion.arte.jirones:
 		c.draw_set_transform(j[0], j[2] * tiempo)
@@ -45,52 +46,6 @@ func dibujar_decorado(c: Node2D) -> void:
 	if guion.cajon_abierto:
 		c.draw_rect(Rect2(Nivel1.CAJON.x - 8, Nivel1.CAJON.y - 8, 30, 10), Color("6e3a26"))
 		c.draw_rect(Rect2(Nivel1.CAJON.x - 6, Nivel1.CAJON.y - 10, 26, 4), Color("e59aa2"))
-
-
-## Pantalla del monitor de Valeria (crítica de Gemini: era un rectángulo azul plano). Su serie, en pixeles: noche
-## azul en franjas, una lámpara, dos siluetas que se miran y un corazón que late; brillo que titila como una pantalla
-## de verdad, un reflejo duro arriba a la izquierda y un poco de luz azul sobre el escritorio. El teclado (delante)
-## tapa la mitad de abajo.
-func _dibujar_serie(c: Node2D) -> void:
-	var r := Rect2(PANTALLA_MONITOR.position + Vector2(0, 1), Vector2(PANTALLA_MONITOR.size.x - 1, 17))
-	var bandas := [Color("1d2547"), Color("26355c"), Color("30486e"), Color("3a5a7c")]
-	for i in bandas.size():
-		c.draw_rect(Rect2(r.position.x, r.position.y + i * 4.0, r.size.x, 4.0 if i < bandas.size() - 1 else r.size.y - i * 4.0), bandas[i])
-	# Lámpara de la escena y su halo.
-	c.draw_rect(Rect2(r.position + Vector2(26, 3), Vector2(4, 4)), Color(1.0, 0.85, 0.45, 0.35))
-	c.draw_rect(Rect2(r.position + Vector2(27, 4), Vector2(2, 2)), Color("ffe08a"))
-	# Dos siluetas que se miran (cabeza, cuello y hombros), oscuras contra la noche.
-	var sombra := Color("0d1020")
-	for persona: Vector3 in [Vector3(7, 6, 1), Vector3(17, 5, -1)]:
-		var p := r.position + Vector2(persona.x, persona.y)
-		c.draw_rect(Rect2(p, Vector2(4, 4)), sombra)
-		c.draw_rect(Rect2(p + Vector2(1 + persona.z, 1), Vector2(1, 1)), sombra)
-		c.draw_rect(Rect2(p + Vector2(1, 4), Vector2(2, 1)), sombra)
-		c.draw_rect(Rect2(p + Vector2(-1, 5), Vector2(6, 8)), sombra)
-	# Corazón entre las dos (late con la escena).
-	if int(tiempo * 2.0) % 2 == 0:
-		var h := r.position + Vector2(13, 3)
-		c.draw_rect(Rect2(h, Vector2(1, 1)), Color("ff7a9a"))
-		c.draw_rect(Rect2(h + Vector2(2, 0), Vector2(1, 1)), Color("ff7a9a"))
-		c.draw_rect(Rect2(h + Vector2(0, 1), Vector2(3, 1)), Color("ff7a9a"))
-		c.draw_rect(Rect2(h + Vector2(1, 2), Vector2(1, 1)), Color("ff7a9a"))
-	# Brillo de pantalla que titila y reflejo duro arriba a la izquierda.
-	c.draw_rect(r, Color(0.7, 0.9, 1.0, 0.06 + 0.04 * sin(tiempo * 7.0)))
-	c.draw_rect(Rect2(r.position + Vector2(1, 1), Vector2(6, 1)), Color(1, 1, 1, 0.45))
-	c.draw_rect(Rect2(r.position + Vector2(1, 2), Vector2(2, 1)), Color(1, 1, 1, 0.3))
-	# Luz azul de la pantalla sobre el escritorio, delante del monitor.
-	c.draw_rect(Rect2(r.position.x - 6.0, Nivel1.SUELO - 89.0, r.size.x + 12.0, 2.0), Color(0.6, 0.85, 1.0, 0.12))
-
-
-## Teclado de Valeria (arte de Gemini, consistencia-casa.png): del tamaño de TECLADO (52 × 24); pisado, las teclas se
-## ven hundidas (más oscuro).
-func _dibujar_teclado(c: Node2D) -> void:
-	var teclado := ArteNivel.textura("teclado")
-	if teclado == null:
-		return
-	var r := Nivel1.TECLADO
-	var tinte := Color(0.75, 0.75, 0.8) if guion.teclado_pisado else Color.WHITE
-	c.draw_texture(teclado, Vector2(r.position.x, r.end.y - teclado.get_height()), tinte)
 
 
 ## Ropa doblada de la cama (arriba-extra, 52 × 48): limpia y, después de que Felipe se acicala encima, con pelos.
@@ -229,13 +184,8 @@ func dibujar_ambiente(c: Node2D) -> void:
 	var angulo := floorf(tiempo) / 60.0 * TAU - PI / 2.0
 	var centro := Vector2(3230, Nivel1.DINTEL + 22.0)
 	c.draw_line(centro, centro + Vector2(cos(angulo), sin(angulo)) * 8.0, Color("c0392b"), 1.0)
-	# Estudio (E-3, E-4): enchufe y cable de la base de carga y post-its en el monitor (la impresora y la regleta con
-	# sus cables se quitaron: recargaban la mesa, lección 30).
-	_enchufe(c, Vector2(7260, Nivel1.PARED_BASE - 13))
-	_cable(c, Vector2(7248, Nivel1.SUELO - 4), Vector2(7263, Nivel1.PARED_BASE - 7), 6.0)
-	for nota: Array in [[Vector2(7166, Nivel1.SUELO - 135), Color("ffd95a")], [Vector2(7167, Nivel1.SUELO - 129), Color("f29ab0")], [Vector2(7124, Nivel1.SUELO - 136), Color("ffd95a")]]:
-		c.draw_rect(Rect2(nota[0], Vector2(4, 4)), nota[1])
-		c.draw_rect(Rect2(nota[0] + Vector2(0, 3), Vector2(4, 1)), (nota[1] as Color).darkened(0.25))
+	# Estudio: el enchufe de la pared donde va el cable de la estación de carga (el cable es del arte).
+	_enchufe(c, Vector2(7262, Nivel1.PARED_BASE - 13))
 
 
 ## Mechón de pelo de 3 a 5 px en los dos tonos de Felipe.

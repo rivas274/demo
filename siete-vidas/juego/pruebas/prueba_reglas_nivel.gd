@@ -140,7 +140,7 @@ func _correr() -> void:
 	# R8 y G8. Escala de gato: ratones a la mitad de Felipe y todo lo interactuable con lado MENOR ≥ 24 px (comida incluida).
 	var raton := ArteNivel.textura("raton").get_size()
 	_comprobar(raton.y >= 30.0, "R8 El ratón de cuerda mide la mitad de Felipe (%.0f px de alto)" % raton.y)
-	var interactuables := ["vaso", "taza", "maceta", "llaves", "tazon", "pollo", "bolsita", "calcetin", "caja", "raton", "aspi", "rascador", "cajas_pila", "caja_arriba"]
+	var interactuables := ["vaso", "taza", "maceta", "llaves", "tazon", "pollo", "bolsita", "calcetin", "caja", "raton", "aspi_lado", "rascador", "cajas_pila", "caja_arriba"]
 	for tirable: Array in Nivel1.TIRABLES:
 		if not tirable[1] in interactuables:
 			interactuables.append(tirable[1])

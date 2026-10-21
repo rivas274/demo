@@ -108,7 +108,7 @@ func cada_cuadro(delta: float) -> void:
 		# La paloma picotea o se infla.
 		(lienzos["pared"] as Node2D).queue_redraw()
 	if not guion.calcetines_volando.is_empty() or habitacion == "estudio":
-		# En el estudio la serie del monitor titila.
+		# En el estudio, la laptop (y los calcetines que vuelan).
 		decorado.queue_redraw()
 	if not jirones.is_empty():
 		for j: Array in jirones:

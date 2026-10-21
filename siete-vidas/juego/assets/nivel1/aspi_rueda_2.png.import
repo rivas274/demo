@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bnpusukgc4cvd"
-path="res://.godot/imported/teclado.png-a7dd7d84d8487095b17aa4f9a5d2aa11.ctex"
+uid="uid://bu57q17n41nbq"
+path="res://.godot/imported/aspi_rueda_2.png-c00d5294a054135e71c6ff0e9db8754f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/nivel1/teclado.png"
-dest_files=["res://.godot/imported/teclado.png-a7dd7d84d8487095b17aa4f9a5d2aa11.ctex"]
+source_file="res://assets/nivel1/aspi_rueda_2.png"
+dest_files=["res://.godot/imported/aspi_rueda_2.png-c00d5294a054135e71c6ff0e9db8754f.ctex"]
 
 [params]
 

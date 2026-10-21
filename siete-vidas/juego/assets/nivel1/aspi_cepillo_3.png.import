@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://de87hw8psae37"
-path="res://.godot/imported/corcho.png-53544be1728783400854a88e588cbfba.ctex"
+uid="uid://bc6xj5ciasbkl"
+path="res://.godot/imported/aspi_cepillo_3.png-494ef9e02df4d3096c45f2f1d941ce49.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/nivel1/corcho.png"
-dest_files=["res://.godot/imported/corcho.png-53544be1728783400854a88e588cbfba.ctex"]
+source_file="res://assets/nivel1/aspi_cepillo_3.png"
+dest_files=["res://.godot/imported/aspi_cepillo_3.png-494ef9e02df4d3096c45f2f1d941ce49.ctex"]
 
 [params]
 

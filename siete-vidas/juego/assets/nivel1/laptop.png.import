@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://buc6ilcrj0uyv"
-path="res://.godot/imported/aspi.png-dc1b5f2b4481b7af55db5eb053a78580.ctex"
+uid="uid://b5qj6rf27ix0w"
+path="res://.godot/imported/laptop.png-d38c82dfc12790afbc305bf4f5a6f0c3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/nivel1/aspi.png"
-dest_files=["res://.godot/imported/aspi.png-dc1b5f2b4481b7af55db5eb053a78580.ctex"]
+source_file="res://assets/nivel1/laptop.png"
+dest_files=["res://.godot/imported/laptop.png-d38c82dfc12790afbc305bf4f5a6f0c3.ctex"]
 
 [params]
 

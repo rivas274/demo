@@ -84,7 +84,7 @@ const ALFEIZAR_PASILLO := SUELO - 109.0
 const VENTANA_COCINA := Rect2(3682, ALFEIZAR - 120, 150, 120)
 ## La del dormitorio va sobre la cama, con la cortina de Gemini a los lados (dos paños desde una barra, hasta el piso).
 const VENTANA_DORMITORIO := Rect2(6049, ALFEIZAR - 120, 150, 120)
-## La del estudio va sobre el escritorio (el monitor queda delante del vidrio).
+## La del estudio va sobre el escritorio (la laptop queda delante del vidrio).
 const VENTANA_ESTUDIO := Rect2(7035, ALFEIZAR - 120, 150, 120)
 const VENTANAS := [VENTANA_COCINA, VENTANA_DORMITORIO, VENTANA_ESTUDIO]
 ## Cortina del dormitorio: cuánto tapa cada paño de la ventana y dónde termina la tela en el arte (45 px: remate de
@@ -188,9 +188,12 @@ const ARTE := [
 	["cesta_vacia", Vector2(6327, SUELO), false, "mueble"],
 	["silla_v2", Vector2(7004, SUELO), false, "mueble"],
 	["escritorio", Vector2(7068, SUELO), false, "mueble"],
-	["monitor", Vector2(7126, SUELO - 89), false, "mueble"],  # en medio de la cubierta (16 px vistos desde arriba), con su sombra
-	["base_carga", Vector2(7180, SUELO), false, "mueble"],
-	["corcho", Vector2(7211, PARED_BASE - 202.0), false, "pared"],  # E-2: el tablero de contenido de Valeria (entre el paño y la puerta)
+	# Estudio v2 (Gemini, 2026-10-21): la laptop abierta con Felipe en la pantalla, en medio de la cubierta (9 px), con su
+	# sombra; la estación de carga de lado con su cable; la pizarra de corcho grande, al lado de la ventana y sobre las
+	# macetas de la repisa (62 × 45: lo que cabe entre el paño de la ventana y el rectángulo sagrado de la puerta).
+	["laptop", Vector2(7110, SUELO - 89), false, "mueble"],
+	["base_carga", Vector2(7176, SUELO), false, "mueble"],
+	["pizarra", Vector2(7213, SUELO - 196.0), false, "pared"],
 	["regadera", Vector2(7814, SUELO + 8.0), false, "mueble"],  # B-3: isla de jardinería
 	["saco_tierra", Vector2(7846, SUELO + 4.0), false, "mueble"],
 	["maceta_rota", Vector2(7874, SUELO + 11.0), false, "mueble"],
@@ -213,14 +216,14 @@ const REFRIGERADOR_X := 4046.0
 ## Boca del grifo de cuello de cisne del arte del mesón (columna 243, fila 44): de ahí cae la gota.
 const GRIFO := Vector2(MESON_X + 243.0, SUELO - 112.0)
 ## Lo que va encima de un mueble y lleva sombra de contacto (1 px más ancha que su base) sobre la cubierta.
-const APOYADOS := ["monitor", "libro", "microondas", "maceta", "croquetas_reserva"]
+const APOYADOS := ["laptop", "libro", "microondas", "maceta", "croquetas_reserva"]
 ## Objetos de pared que proyectan sombra (G5): 2 px hacia abajo y 1 px a la derecha (la luz entra por el oeste).
 ## Fregadero de la cocina (pasada única, 2026-10-19: el de antes era una cajita pegada al borde, desproporcionada): cuba
 ## de acero embutida en la cubierta de azulejos (filas 3 a 19 del arte del mesón), de un tercio del mesón (62 de 188 px,
 ## unos 50 cm a escala de gato) y bien adentro del borde. El grifo es de código: cuello de cisne con el caño
 ## (GRIFO, la boca) sobre el centro de la cuba; el ratón del mesón patrulla por detrás de la cuba (sobre el borde de
 ## atrás de la cubierta), sin pisarla.
-const SOMBRA_PARED := ["retrato", "marco_foto", "marco_huella", "perchero", "marco_viral", "reloj", "alacenas", "retrato_familiar", "paisaje", "corcho", "repisa_cocina"]
+const SOMBRA_PARED := ["retrato", "marco_foto", "marco_huella", "perchero", "marco_viral", "reloj", "alacenas", "retrato_familiar", "paisaje", "pizarra", "repisa_cocina"]
 ## Arte que dibujan sus propios nodos (el sofá cambia de imagen; el rascador tiembla al arañarlo): [imagen, (x izquierda, base)].
 const ARTE_EXTRA := [["sofa_plastico", Vector2(240, SUELO)], ["rascador", Vector2(RASCADOR_X - 50.0, SUELO)]]
 ## El pasamanos de la escalera va delante de Felipe (baja a 70 % de opacidad mientras sube).
@@ -317,7 +320,7 @@ const TIRABLES := [
 	[Vector2(1766, SUELO - 97), "llaves", 2.0],
 	[Vector2(4758, SUELO - 97), "vaso", 4.0],  # bien adentro de la consola (Gemini: rozaba el borde)
 	[Vector2(7095, SUELO - 98), "vaso", 9.0],
-	[Vector2(7194, SUELO - 98), "taza", 9.0],  # taza de café de Valeria (reemplazó al rollo de papel higiénico)
+	[Vector2(7197, SUELO - 98), "taza", 9.0],  # taza de café de Valeria (Gemini, estudio v2), al lado de la laptop
 	[Vector2(7230, SUELO - 151), "maceta", -6.0],
 	[Vector2(7262, SUELO - 151), "maceta", -6.0],
 ]
@@ -346,7 +349,7 @@ const RASCADOR_X := 570.0
 const VALERIA_SOFA := Vector2(410, SUELO - 49)
 ## En la cocina v2 prepara el café frente a la estufa: desde ahí ve el microondas (el pollo, «¡EN SU CARA!»).
 const VALERIA_COCINA := Vector2(3500, SUELO)
-## Cajón de los calcetines (en la cómoda), ropa doblada (en la cama) y teclado del escritorio. Lo interactuable
+## Cajón de los calcetines (en la cómoda), ropa doblada (en la cama) y teclado de la laptop. Lo interactuable
 ## dibujado por código declara su tamaño (lado menor ≥ 24 px, R8 y G7; prueba_reglas_nivel lo mide).
 const CAJON := Vector2(6242, SUELO - 75)
 const RECT_CAJON := Rect2(-14, -12, 60, 24)
@@ -398,7 +401,7 @@ const AGENDA_SITIOS := {
 	"almuerzo": [POLLO, "«¡EN SU CARA!» y Valeria: «Ese era mi almuerzo.»"],
 	"laser": [Vector2(5280, SUELO), "El puntero se apaga de vergüenza"],
 	"cajon": [CAJON, "Calcetines volando por todo el cuarto"],
-	"teclado": [Vector2(7146, SUELO - 98), "La pantalla dice «jjjjjjjjjj» y los apuntes de Valeria vuelan"],
+	"teclado": [Vector2(7146, SUELO - 98), "La laptop dice «jjjjjjjjjj» y los apuntes de Valeria vuelan"],
 	"desenchufar": [Vector2(7217, SUELO), "«¡APAGADA!» y «Limpieza cancelada.»"],
 }
 ## Lugares que se ven antes de poder alcanzarlos (R17): [qué, dónde, con qué maña se vuelve].

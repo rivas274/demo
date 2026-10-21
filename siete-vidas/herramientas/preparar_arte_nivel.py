@@ -93,11 +93,9 @@ PIEZAS = {
     "ropa_limpia": ("arriba-extra", 6, (52, 48), None),  # ropa doblada de la cama (interactuable, lado menor ≥ 24)
     "ropa_pelos": ("arriba-extra", 7, (52, 48), None),  # la misma, después de que Felipe se acicala encima
     "caja_recuerdos": ("arriba-extra", 8, (44, 33), None),  # lugar visto: repisa alta del dormitorio
-    "monitor": ("arriba-extra", 9, (44, 48), (0.08, 0.0, 0.48, 0.50)),  # del escritorio con monitor e impresora
     "papel": ("arriba-extra", 10, (30, 16), None),  # papel plano en el piso (mancha de la pelea)
     "papel_arrugado": ("arriba-extra", 11, (16, 20), None),  # papeles que escupe la impresora
     # A.S.P.I. (escala de gato: más grande que una real); la gigante es imaginación de Felipe.
-    "aspi": ("aspi-gemini-1", 0, (76, 47), None),
     "aspi_gigante": ("aspi-gigante", 0, (330, 270), None),
 }
 
@@ -566,7 +564,6 @@ PIEZAS_3E = {
     "polaroid_1": ((35, 728, 118, 830), (12, 14)),
     "polaroid_2": ((132, 725, 222, 828), (12, 14)),
     "polaroid_3": ((232, 728, 325, 832), (12, 14)),
-    "corcho": ((32, 858, 322, 1065), (64, 46)),
     "regadera": ((740, 758, 955, 898), (30, 22)),
     "saco_tierra": ((788, 920, 962, 1068), (26, 22)),
 }
@@ -858,8 +855,6 @@ PIEZAS_CONSISTENCIA = {
     "vista_pasillo": ("consistencia-casa", 1, (150, 120), (0.012, 0.17, 0.988, 0.988)),  # B2: 1,25 : 1 sin cortar el toldo
     # El armario bajo la escalera (pieza 2) no calza con el larguero de la escalera: se probó y no se usa (sigue el de
     # código, ArteNivel1._dibujar_armario_escalera).
-    "teclado": ("consistencia-casa", 3, (52, 24), None),
-    "monitor": ("correccion-estilo", 0, (44, 48), None),
     "microondas": ("correccion-estilo", 1, (98, 54), None),
     "vaso": ("correccion-estilo", 2, (24, 32), None),
     "pollo": ("correccion-estilo", 3, (64, 50), None),  # de 1,6 : 1 a 1,28 : 1 (más alto, se lee como pollo)
@@ -1159,6 +1154,94 @@ def vista_paloma():
         print("Vista paloma:", nombre, pose.size, cambiados)
 
 
+# A.S.P.I. de lado, en 3/4 (Gemini, 2026-10-21, `aspi-lateral.png`): cuerpos (normal, enojada, tapa abierta con pelusa,
+# apagada), rueda en 2 cuadros, cepillo lateral en 6, LED encendida y apagada y una espiral de mareo. Todo a UNA
+# escala: el cuerpo normal mide ANCHO_ASPI px de ancho (lo que medía la vista desde arriba). Bajo cada cuerpo asoma
+# una ruedita: se borra (las filas de abajo más angostas que el 60 % del cuerpo); la rueda va aparte y la anima el juego.
+ANCHO_ASPI = 76
+ASPI_CUERPOS = [("aspi_lado", (26, 97, 405, 308)), ("aspi_enojada", (434, 98, 819, 313)),
+                ("aspi_tapa", (853, 18, 1250, 330)), ("aspi_apagada", (1006, 533, 1380, 754))]
+ASPI_PIEZAS = [("aspi_rueda_1", (61, 367, 243, 572), 12), ("aspi_rueda_2", (270, 370, 452, 575), 12),
+               ("aspi_cepillo_1", (486, 401, 655, 525), 0), ("aspi_cepillo_2", (666, 401, 822, 522), 0),
+               ("aspi_cepillo_3", (850, 410, 998, 508), 0), ("aspi_cepillo_4", (44, 601, 217, 724), 0),
+               ("aspi_cepillo_5", (267, 595, 449, 724), 0), ("aspi_cepillo_6", (496, 595, 669, 724), 0),
+               ("aspi_led_on", (748, 588, 966, 639), 0), ("aspi_led_off", (748, 659, 966, 710), 0),
+               ("aspi_espiral", (1174, 419, 1224, 469), 0)]
+ALTO_CEPILLO = 13
+
+
+def sin_ruedita(imagen):
+    a = np.asarray(imagen).copy()
+    anchos = (a[:, :, 3] > 0).sum(axis=1)
+    maximo = anchos.max()
+    y = a.shape[0] - 1
+    while y > 0 and anchos[y] < maximo * 0.35:
+        a[y, :, 3] = 0
+        y -= 1
+    return recortar_opaco(Image.fromarray(a, "RGBA"))
+
+
+def aspi_lateral():
+    hoja, _ = sin_fondo(Image.open(ORIGEN / "aspi-lateral.png"))
+    k = ANCHO_ASPI / recortar_opaco(hoja.crop(ASPI_CUERPOS[0][1])).width
+    for nombre, caja in ASPI_CUERPOS:
+        pieza = sin_ruedita(recortar_opaco(hoja.crop(caja)))
+        pieza = escalar(pieza, (round(pieza.width * k), round(pieza.height * k)))
+        pieza.save(DESTINO / f"{nombre}.png")
+        print("A.S.P.I.:", nombre, pieza.size, sin_blanco_puro(nombre))
+    for nombre, caja, alto in ASPI_PIEZAS:
+        pieza = recortar_opaco(hoja.crop(caja))
+        if alto:
+            kk = alto / pieza.height
+        elif nombre.startswith("aspi_cepillo"):
+            kk = ALTO_CEPILLO / 124.0
+        elif nombre.startswith("aspi_led"):
+            kk = k * 0.92
+        else:
+            kk = 10.0 / pieza.height
+        pieza = escalar(pieza, (max(1, round(pieza.width * kk)), max(1, round(pieza.height * kk))))
+        pieza.save(DESTINO / f"{nombre}.png")
+        print("A.S.P.I.:", nombre, pieza.size, sin_blanco_puro(nombre))
+
+
+# Estudio v2 (Gemini, 2026-10-21; `estudio-v2.png` y `estudio-v2-correccion.png`): la laptop abierta con Felipe en la
+# pantalla y la taza (sobre el escritorio, a escala de gato), la pizarra de corcho (la de la corrección: la más llena
+# tenía la esquina tapada por la estación y al reponerla quedaban costuras) y la estación de carga de lado con su cable.
+ESTUDIO_V2 = {"laptop": ((25, 26, 556, 446), 70), "taza": ((450, 140, 606, 296), 32)}
+PIZARRA_LIMPIA = (32, 32, 786, 577)
+ANCHO_PIZARRA = 62
+ESTACION = ((444, 731, 968, 1046), 82)
+
+
+def estudio_v2():
+    hoja, _ = sin_fondo(Image.open(ORIGEN / "estudio-v2.png"))
+    for nombre, (caja, ancho) in ESTUDIO_V2.items():
+        pieza = recortar_opaco(hoja.crop(caja))
+        if nombre == "laptop":
+            # Sin la taza que se mete en la caja por la derecha (pieza aparte): solo lo unido a la laptop.
+            a = np.asarray(pieza).copy()
+            etiquetas, _ = ndimage.label(a[:, :, 3] > 0)
+            tamanos = ndimage.sum(a[:, :, 3] > 0, etiquetas, range(1, etiquetas.max() + 1))
+            a[etiquetas != int(np.argmax(tamanos)) + 1, 3] = 0
+            pieza = recortar_opaco(Image.fromarray(a, "RGBA"))
+        pieza = escalar(pieza, (ancho, round(pieza.height * ancho / pieza.width)))
+        pieza.save(DESTINO / f"{nombre}.png")
+        print("Estudio v2:", nombre, pieza.size, sin_blanco_puro(nombre))
+    # La pizarra llena con la esquina repuesta dejaba costuras (corcho y marco de otro tono, un post-it cortado):
+    # se usa la de la corrección, entera y limpia (decisión prevista en el encargo).
+    correccion, _ = sin_fondo(Image.open(ORIGEN / "estudio-v2-correccion.png"))
+    pizarra = recortar_opaco(correccion.crop(PIZARRA_LIMPIA))
+    pizarra = escalar(pizarra, (ANCHO_PIZARRA, round(pizarra.height * ANCHO_PIZARRA / pizarra.width)))
+    pizarra.save(DESTINO / "pizarra.png")
+    print("Estudio v2: pizarra", pizarra.size, sin_blanco_puro("pizarra"))
+    caja, ancho = ESTACION
+    # El blanco encerrado por el rulo del cable es fondo, no pieza.
+    estacion = recortar_opaco(sin_huecos(correccion.crop(caja)))
+    estacion = escalar(estacion, (ancho, round(estacion.height * ancho / estacion.width)))
+    estacion.save(DESTINO / "base_carga.png")
+    print("Estudio v2: base_carga", estacion.size, sin_blanco_puro("base_carga"))
+
+
 if __name__ == "__main__":
     import sys
     if sys.argv[1:] == ["consistencia"]:
@@ -1171,5 +1254,9 @@ if __name__ == "__main__":
         vacios()
     elif sys.argv[1:] == ["paloma"]:
         vista_paloma()
+    elif sys.argv[1:] == ["aspi"]:
+        aspi_lateral()
+    elif sys.argv[1:] == ["estudio"]:
+        estudio_v2()
     else:
         main()

@@ -7,12 +7,12 @@
 [resource]
 script = ExtResource("1_datos")
 nombre = "ASPI"
-arte = "aspi"
-alto_dibujo = 47.0
+arte = "aspi_lado"
+alto_dibujo = 41.0
 apariencia = ExtResource("2_apariencia")
 sombra = Vector2(80, 0.45)
 ancho = 72.0
-alto = 26.0
+alto = 30.0
 golpes = 3
 velocidad_patrulla = 40.0
 velocidad_persecucion = 80.0

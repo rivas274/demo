@@ -6,6 +6,8 @@
 # Modo manual (Tab): flechas izquierda/derecha caminan, abajo se sienta, arriba se para.
 extends Node3D
 
+signal empieza_vuelta
+
 const RUTA := "res://assets/quaternius/AnimationLibrary_Godot_Standard.glb"
 const SUDADERA := Color("3f6f68")
 const PANTALON := Color("3d3a40")
@@ -151,6 +153,8 @@ func _girar(_delta: float) -> void:
 func _cambiar(fase: String) -> void:
 	_fase = fase
 	_t = 0.0
+	if fase == "entrar":
+		empieza_vuelta.emit()
 
 
 ## Pinta cada vértice según el hueso que más lo mueve: sudadera, pantalón, piel, zapatos.

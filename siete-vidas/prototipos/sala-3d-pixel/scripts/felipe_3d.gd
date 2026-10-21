@@ -1,62 +1,202 @@
 # PROTOTIPO: no es código del juego.
-# Pregunta: ¿se ve mejor la sala en 3D renderizado como pixel art?
+# Pregunta: ¿se ve mejor la sala en 3D renderizado como pixel art? (y Felipe en 3D)
 # Fecha: 2026-10-21
-# Felipe tal cual está en el juego (sus hojas 2D) puesto como Sprite3D en la sala 3D.
-# Escala de siempre: cuadro de 106 px a 0.72 => 67 px de alto en 640x360.
-extends Sprite3D
+# Felipe chibi armado con primitivas y animado por código (no hay un gato 3D libre
+# con proporciones de persa chibi). Mide 0,48 m de orejas a patas (58 px) y la
+# cabeza es el 56 % de eso. Mira +x; se gira 30° hacia la cámara para verse en 3/4.
+# Guion en bucle sincronizado con Valeria: espera, camina, salta al sofá, se queda
+# a su lado, baja y vuelve.
+extends Node3D
 
-const PX_POR_METRO := 121.0
-const ESCALA_SPRITE := 0.72
-const HOJAS := {
-	"quieto": [preload("res://assets/felipe/felipe-idle-sheet.png"), 8.0],
-	"caminar": [preload("res://assets/felipe/felipe-caminar-largo-sheet.png"), 10.0],
-}
+const BLANCO := Color("f3efe8")
+const ATIGRADO := Color("8b7864")
+const RAYA := Color("5b4d41")
+const ROSA := Color("e59aa2")
+const OJO := Color("a3b06a")
+const PUPILA := Color("1b1714")
 
-## 120 px/s del juego pasados a metros.
-@export var velocidad := 120.0 / PX_POR_METRO
-@export var puntos: Array[float] = [-1.1, 1.7]
-@export var pausa := 3.5
+@export var velocidad := 120.0 / 121.0
+@export var ciclo := 30.0
+@export var x_casa := -2.3
+@export var x_sofa := 1.08
+@export var z_piso := 0.3
+@export var z_cojin := -0.62
+@export var alto_cojin := 0.36
+@export var giro_3_4 := 30.0
 
-var _anim := ""
-var _cuadro_t := 0.0
-var _destino := 0
-var _espera := 0.0
+var _cuerpo: Node3D
+var _cabeza: Node3D
+var _cola: Node3D
+var _patas: Array[Node3D] = []
+var _t := 0.0
+var _paso := 0.0
+var _mira_derecha := true
 
 
 func _ready() -> void:
-	pixel_size = ESCALA_SPRITE / PX_POR_METRO
-	hframes = 8
-	texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
-	shaded = false
-	billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	centered = true
-	# Los pies del cuadro de 106 px quedan cerca del borde de abajo.
-	offset = Vector2(0, 52)
-	_poner("quieto")
+	_armar()
+	position = Vector3(x_casa, 0.0, z_piso)
 
 
 func _process(delta: float) -> void:
-	_cuadro_t += delta * float(HOJAS[_anim][1])
-	frame = int(_cuadro_t) % 8
-	if _espera > 0.0:
-		_espera -= delta
-		return
-	var x := puntos[_destino]
+	_t = fmod(_t + delta, ciclo)
+	var caminando := false
+	var salto := 0.0  # 0..1 dentro de un salto
+	if _t < 1.5:
+		pass
+	elif position.y < 0.01 and _t < 6.0:
+		caminando = _ir_a(x_sofa, delta)
+	elif _t >= 6.0 and _t < 6.6:
+		salto = (_t - 6.0) / 0.6
+		_saltar(salto, Vector3(x_sofa, 0.0, z_piso), Vector3(x_sofa, alto_cojin, z_cojin))
+	elif _t >= 6.6 and _t < 10.9:
+		position = Vector3(x_sofa, alto_cojin, z_cojin)
+	elif _t >= 10.9 and _t < 11.4:
+		salto = (_t - 10.9) / 0.5
+		_saltar(salto, Vector3(x_sofa, alto_cojin, z_cojin), Vector3(x_sofa + 0.35, 0.0, z_piso))
+	elif _t >= 11.4:
+		caminando = _ir_a(x_casa, delta)
+	_animar(delta, caminando, salto)
+
+
+func _ir_a(x: float, delta: float) -> bool:
 	var d := x - position.x
 	if absf(d) < 0.02:
-		_destino = (_destino + 1) % puntos.size()
-		_espera = pausa
-		_poner("quieto")
-		return
-	flip_h = d < 0.0
+		_mira_derecha = true
+		return false
+	_mira_derecha = d > 0.0
 	position.x += signf(d) * minf(absf(d), velocidad * delta)
-	_poner("caminar")
+	return true
 
 
-func _poner(nombre: String) -> void:
-	if _anim == nombre:
-		return
-	_anim = nombre
-	texture = HOJAS[nombre][0]
-	_cuadro_t = 0.0
+func _saltar(k: float, desde: Vector3, hasta: Vector3) -> void:
+	var p := desde.lerp(hasta, k)
+	p.y += sin(k * PI) * 0.35
+	position = p
+
+
+func _animar(delta: float, caminando: bool, salto: float) -> void:
+	var giro := -giro_3_4 if _mira_derecha else 180.0 + giro_3_4
+	rotation.y = lerp_angle(rotation.y, deg_to_rad(giro), clampf(delta * 12.0, 0.0, 1.0))
+	if caminando:
+		_paso += delta * 9.0
+	# Patas alternadas en diagonal.
+	for i in _patas.size():
+		var fase := 0.0 if i == 0 or i == 3 else PI
+		var amp := 0.55 if caminando else 0.0
+		if salto > 0.0:
+			amp = 0.0
+			_patas[i].rotation.z = (0.6 if i < 2 else -0.6) * sin(salto * PI)
+		else:
+			_patas[i].rotation.z = sin(_paso + fase) * amp
+	# Respirar (y rebote al caminar), estirar/aplastar dentro de ±8 %.
+	var resp := sin(_t * 2.4) * 0.025
+	var bote := absf(sin(_paso)) * 0.012 if caminando else 0.0
+	var est := 1.0 + resp
+	if salto > 0.0:
+		est = 1.0 + 0.08 * cos(salto * PI) * (1.0 if salto < 0.5 else -1.0)
+	_cuerpo.scale = Vector3(1.0 / sqrt(est), est, 1.0 / sqrt(est))
+	_cuerpo.position.y = bote
+	# Cola esponjada que se mece; la cabeza acompaña un poco.
+	_cola.rotation.x = sin(_t * 1.7) * 0.35
+	_cola.rotation.z = 0.25 + sin(_t * 2.3) * 0.12
+	_cabeza.rotation.z = sin(_paso) * 0.04 if caminando else sin(_t * 0.8) * 0.03
+
+
+# ---------------------------------------------------------------- armado
+
+func _armar() -> void:
+	_cuerpo = Node3D.new()
+	add_child(_cuerpo)
+	# Cuerpo de persa grande: redondo, lomo atigrado, panza y pecho blancos.
+	_ovalo(_cuerpo, 0.135, Vector3(-0.02, 0.16, 0), Vector3(1.3, 0.85, 0.95), func(p: Vector3) -> Color:
+		if p.y < -0.15 or (p.x > 0.55 and p.y < 0.5):
+			return BLANCO
+		return RAYA if fmod(p.x * 2.2 + 10.0, 1.0) < 0.28 and p.y > 0.1 else ATIGRADO)
+	# Patas cortas y blancas (pivote arriba para mecerlas).
+	for pos in [Vector3(0.1, 0.1, 0.07), Vector3(0.1, 0.1, -0.07), Vector3(-0.13, 0.1, 0.07), Vector3(-0.13, 0.1, -0.07)]:
+		var pivote := Node3D.new()
+		pivote.position = pos
+		_cuerpo.add_child(pivote)
+		_ovalo(pivote, 0.045, Vector3(0, -0.055, 0), Vector3(1.0, 1.35, 1.0), func(_p: Vector3) -> Color: return BLANCO)
+		_patas.append(pivote)
+	# Cola enorme: varias esferas que suben en curva.
+	_cola = Node3D.new()
+	_cola.position = Vector3(-0.17, 0.2, 0)
+	_cuerpo.add_child(_cola)
+	var puntos := [Vector3(-0.03, 0.03, 0), Vector3(-0.07, 0.09, 0), Vector3(-0.09, 0.16, 0), Vector3(-0.08, 0.23, 0), Vector3(-0.05, 0.29, 0)]
+	for i in puntos.size():
+		var r := 0.055 + 0.012 * sin(float(i) / 4.0 * PI)
+		var oscura := i % 2 == 1
+		_ovalo(_cola, r, puntos[i], Vector3.ONE, func(_p: Vector3) -> Color: return RAYA if oscura else ATIGRADO)
+	# Cabeza grande (56 % de la altura): gorro atigrado con franja blanca, cachetes blancos.
+	_cabeza = Node3D.new()
+	_cabeza.position = Vector3(0.11, 0.33, 0)
+	_cuerpo.add_child(_cabeza)
+	_ovalo(_cabeza, 0.125, Vector3.ZERO, Vector3(0.95, 0.92, 1.08), func(p: Vector3) -> Color:
+		if p.y < -0.05 or (p.x > 0.35 and absf(p.z) < 0.28):
+			return BLANCO
+		if p.y > 0.35 and absf(p.z) < 0.4 and fmod(absf(p.z) * 6.0, 1.0) > 0.6:
+			return RAYA
+		return ATIGRADO)
+	for lado in [-1.0, 1.0]:
+		# Cachetes esponjados de persa.
+		_ovalo(_cabeza, 0.06, Vector3(0.07, -0.055, 0.06 * lado), Vector3(1.0, 0.8, 1.0), func(_p: Vector3) -> Color: return BLANCO)
+		# Orejas pequeñas.
+		var oreja := MeshInstance3D.new()
+		var cono := CylinderMesh.new()
+		cono.top_radius = 0.0
+		cono.bottom_radius = 0.04
+		cono.height = 0.06
+		cono.radial_segments = 4
+		oreja.mesh = cono
+		oreja.position = Vector3(-0.01, 0.11, 0.07 * lado)
+		oreja.rotation = Vector3(0.45 * lado, 0, 0)
+		_material(oreja, ATIGRADO)
+		_cabeza.add_child(oreja)
+		# Ojos verde avellana a media asta, mirando de reojo hacia la cámara.
+		var ojo_pos := Vector3(0.105, 0.015, 0.05 * lado)
+		_ovalo(_cabeza, 0.024, ojo_pos, Vector3(0.5, 1.0, 1.0), func(_p: Vector3) -> Color: return OJO, false)
+		_ovalo(_cabeza, 0.011, ojo_pos + Vector3(0.012, -0.004, 0.012), Vector3(0.5, 1.4, 1.0), func(_p: Vector3) -> Color: return PUPILA, false)
+		_ovalo(_cabeza, 0.026, ojo_pos + Vector3(0.006, 0.016, 0), Vector3(0.5, 0.55, 1.05), func(_p: Vector3) -> Color: return ATIGRADO, false)
+	# Nariz rosada.
+	_ovalo(_cabeza, 0.016, Vector3(0.12, -0.03, 0), Vector3(0.6, 0.7, 1.0), func(_p: Vector3) -> Color: return ROSA, false)
+
+
+## Esfera escalada con color por vértice según una función de la posición (de -1 a 1).
+func _ovalo(padre: Node3D, r: float, pos: Vector3, esc: Vector3, color_de: Callable, contorno: bool = true) -> MeshInstance3D:
+	var sm := SphereMesh.new()
+	sm.radius = 1.0
+	sm.height = 2.0
+	sm.radial_segments = 20
+	sm.rings = 10
+	var arr := sm.surface_get_arrays(0)
+	var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var colores := PackedColorArray()
+	for v in verts:
+		colores.append(color_de.call(v))
+	var limpio: Array = []
+	limpio.resize(Mesh.ARRAY_MAX)
+	limpio[Mesh.ARRAY_VERTEX] = verts
+	limpio[Mesh.ARRAY_NORMAL] = arr[Mesh.ARRAY_NORMAL]
+	limpio[Mesh.ARRAY_COLOR] = colores
+	limpio[Mesh.ARRAY_INDEX] = arr[Mesh.ARRAY_INDEX]
+	var am := ArrayMesh.new()
+	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, limpio)
+	var mi := MeshInstance3D.new()
+	mi.mesh = am
+	mi.position = pos
+	mi.scale = esc * r
+	var mat := Toon.material(Color.WHITE)
+	mat.set_shader_parameter("usar_color_vertice", true)
+	if contorno:
+		mat.next_pass = Toon.material_contorno()
+	mi.material_override = mat
+	padre.add_child(mi)
+	return mi
+
+
+func _material(mi: MeshInstance3D, c: Color) -> void:
+	var mat := Toon.material(c)
+	mat.next_pass = Toon.material_contorno()
+	mi.material_override = mat

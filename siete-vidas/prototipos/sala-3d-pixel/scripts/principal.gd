@@ -37,6 +37,7 @@ var pantalla: TextureRect
 var camara: Camera3D
 var valeria: Node3D
 var felipe: Sprite3D
+var felipe_3d: Node3D
 var ayuda: Label
 var _cam_x := 0.0
 
@@ -71,9 +72,17 @@ func _ready() -> void:
 
 	felipe = Sprite3D.new()
 	felipe.name = "Felipe"
-	felipe.set_script(load("res://scripts/felipe_3d.gd"))
-	felipe.position = Vector3(-1.1, 0.0, 0.55)
+	felipe.set_script(load("res://scripts/felipe_sprite.gd"))
+	felipe.position = Vector3(2.0, 0.0, 0.45)
+	felipe.set("puntos", [2.0, 2.9] as Array[float])
 	vista.add_child(felipe)
+
+	felipe_3d = Node3D.new()
+	felipe_3d.name = "Felipe3D"
+	felipe_3d.set_script(load("res://scripts/felipe_3d.gd"))
+	felipe_3d.set("x_sofa", sala.get("punto_sofa").x + 0.68)
+	vista.add_child(felipe_3d)
+	valeria.connect("empieza_vuelta", func() -> void: felipe_3d.set("_t", 0.0))
 
 	camara = Camera3D.new()
 	camara.projection = Camera3D.PROJECTION_ORTHOGONAL

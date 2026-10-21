@@ -27,7 +27,7 @@ const PERSIANA := Color("ae7857")
 @export var energia_lampara := 1.8
 @export var alcance_lampara := 1.7
 @export var energia_sol := 1.1
-@export var energia_relleno := 0.35
+@export var energia_relleno := 0.7
 
 ## Dónde se sienta Valeria (centro del cojín, en el piso).
 var punto_sofa := Vector3(0.4, 0.0, -0.55)

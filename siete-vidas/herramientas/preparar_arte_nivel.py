@@ -1209,7 +1209,7 @@ def aspi_lateral():
 # tenía la esquina tapada por la estación y al reponerla quedaban costuras) y la estación de carga de lado con su cable.
 ESTUDIO_V2 = {"laptop": ((25, 26, 556, 446), 70), "taza": ((450, 140, 606, 296), 32)}
 PIZARRA_LIMPIA = (32, 32, 786, 577)
-ANCHO_PIZARRA = 62
+ANCHO_PIZARRA = 120
 ESTACION = ((444, 731, 968, 1046), 82)
 
 

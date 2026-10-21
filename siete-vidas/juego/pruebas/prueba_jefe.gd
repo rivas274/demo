@@ -128,7 +128,7 @@ func _correr() -> void:
 	await _esperar_que(func() -> bool: return not batalla.manchas.is_empty(), 90)
 	_comprobar(batalla.manchas.size() == 1, "La maceta rota deja una mancha en el piso")
 	await _poner_en(Vector2(arena.position.x + 60, Nivel1.SUELO))
-	await _esperar_que(func() -> bool: return batalla.limpiar.reloj_aviso > 0.0, 400)
+	await _esperar_que(func() -> bool: return batalla.limpiar.reloj_aviso > 0.0, 800)
 	_comprobar(batalla.limpiar.reloj_aviso > 0.0 and not batalla.limpiando, "Antes de aspirar, el cepillo gira 0,6 s (anticipación)")
 	await _esperar_que(func() -> bool: return batalla.limpiando, 100)
 	_comprobar(batalla.limpiando and absf(aspi.global_position.x - batalla.manchas[0]) < 8.0, "A.S.P.I. va a limpiar la mancha")

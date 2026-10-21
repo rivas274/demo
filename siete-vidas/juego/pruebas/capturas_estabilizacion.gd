@@ -217,9 +217,9 @@ func _correr() -> void:
 	# Balcón: sube a la baranda donde la sube el bot y se sienta.
 	valeria.poner(Nivel1.VALERIA_SOFA, "sala", 1.0, Valeria.Actividad.SENTADA)
 	sala.travesuras.dialogo.limpiar()
-	felipe.global_position = Vector2(7890, Nivel1.SUELO)
+	felipe.global_position = Vector2(7986, Nivel1.SUELO)
 	await _esperar(30)
-	felipe.global_position = Vector2(8095, Nivel1.SUELO - 90)
+	felipe.global_position = Vector2(8191, Nivel1.SUELO - 90)
 	felipe.velocity = Vector2.ZERO
 	await _esperar(150)
 	sala.travesuras.dialogo.limpiar()

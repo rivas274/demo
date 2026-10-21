@@ -92,7 +92,7 @@ func dibujar_fachada(c: Node2D) -> void:
 	c.draw_rect(Rect2(balcon.position.x, Nivel1.ALTO, balcon.size.x, 2), Color("9a5b4c"))
 	c.draw_rect(Rect2(balcon.position.x, Nivel1.ALTO + 12, balcon.size.x, 6), Color(0, 0, 0, 0.25))
 	# Ventanas del piso de abajo: marco de madera, vidrio con luz, cortinas y alféizar.
-	for x0: float in [7666.0, 7806.0]:
+	for x0: float in [7762.0, 7902.0]:
 		var ventana := Rect2(x0, Nivel1.ALTO + 56, 70, 84)
 		c.draw_rect(ventana.grow(6), oscuro)
 		c.draw_rect(ventana.grow(5), Color("6e3a26"))

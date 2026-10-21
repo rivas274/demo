@@ -324,10 +324,10 @@ func _balcon() -> void:
 	if felipe.global_position.y < Nivel1.SUELO - 2.0:
 		await _bajar()
 	await _entrar(Nivel1.PUERTA_BALCON)
-	await _ir_a(7890)
-	await _subir_a(7930, Nivel1.SUELO - 32)
-	await _subir_a(8060, Nivel1.SUELO - 89)
-	await _ir_a(8095)
+	await _ir_a(7986)
+	await _subir_a(8026, Nivel1.SUELO - 32)
+	await _subir_a(8156, Nivel1.SUELO - 89)
+	await _ir_a(8191)
 	await _hasta(func() -> bool: return guion.balcon.sentado_en_baranda, 3.0)
 	_paso("Se sienta en la baranda y mira la ciudad")
 	await _segundos(2.4)
@@ -366,7 +366,7 @@ func _ensuciar() -> void:
 			break
 		if objetivo.position.y < Nivel1.SUELO - 120.0 and felipe.global_position.y > Nivel1.SUELO - 120.0:
 			await _ir_a(7195, 2.0)
-			await _subir_a(7230, Nivel1.SUELO - 151)
+			await _subir_a(7280, Nivel1.SUELO - 170)
 		if _fuera_de_pelea():
 			return
 		var lado := 1.0 if objetivo.position.x > 7140.0 else -1.0
@@ -429,7 +429,7 @@ func _esperar_en_el_piso() -> void:
 		_paso("Come un snack del bolsillo (corazones %d, snacks %d)" % [felipe.corazones, felipe.snacks])
 		return
 	if not batalla.limpiando and absf(dx) < 90.0 and felipe.is_on_floor():
-		var lejos := clampf(aspi.global_position.x + (140.0 if dx > 0.0 else -140.0), 6880.0, 7400.0)
+		var lejos := clampf(aspi.global_position.x + (140.0 if dx > 0.0 else -140.0), 6880.0, 7496.0)
 		await _ir_a(lejos, 1.0)
 		return
 	await _cuadro()

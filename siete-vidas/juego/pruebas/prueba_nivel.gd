@@ -820,7 +820,7 @@ func _foto_suelta(cuarto: String) -> Recogible:
 ## ¿Hay una maceta de la baranda donde se para Felipe? (la del medio se borró del arte: M6).
 func _maceta_en(x: float) -> bool:
 	var imagen: Image = ArteNivel.textura("baranda").get_image()
-	var columna := int(x - 7980.0)
+	var columna := int(x - 8076.0)
 	# Solo la maceta que se dibuja (columnas 0–94; la de la derecha del arte se quitó) y todo el ancho de Felipe sentado.
 	for dx in range(-28, 29):
 		var cx := clampi(columna + dx, 0, imagen.get_width() - 1)

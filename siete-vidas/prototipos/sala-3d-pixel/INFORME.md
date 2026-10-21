@@ -10,8 +10,9 @@ Pedidos del creador durante el trabajo:
 2. Un Felipe 3D para comparar.
 3. Un Felipe y una Valeria hechos **desde su imagen** con IA de imagen a 3D.
 4. Pixel más grande, bordes mejores (exterior e interior, sin antialias) y menos degradados.
+5. Plan B sin servicios externos: darle esqueleto y caminata a la Valeria IA.
 
-## Qué se construyó (versión 2, la vigente)
+## Qué se construyó (versión 2; la v3 cambia a Valeria, ver más abajo)
 - **Tubería en Godot 4.3 Forward+:**
   - Escena 3D con cámara ortográfica de lado inclinada 18°, dibujada en un `SubViewport` chico y mostrada a 1280×720 con escala entera y filtro nearest.
   - Pixel de render a **×2, ×3 o ×4** (tecla 4). El predeterminado es **×3** (render de 427×240).
@@ -39,6 +40,7 @@ Capturas y clips (sin jugadores de verdad; falta que el creador lo mire), en `/t
 - `hoja-tamano-pixel.png`: el mismo cuadro con pixel ×2, ×3 y ×4.
 - `hoja-felipe-v2.png`: Felipe A 2D, sprite en la sala, primitivas, IA e IA en el sofá (×3), más la escena completa.
 - `hoja-valeria-v2.png`: sprite del juego, concepto Gemini, maniquí animado y Valeria IA.
+- `sala-3d-pixel-v3.mp4` y `hoja-valeria-v3.png`: Valeria IA con esqueleto automático (ver la sección v3).
 - Versión 1 (comparación con la sala actual): `hoja-sala-2d-vs-3d.png`, `hoja-felipe-2d-vs-3d.png` y `sala-3d-pixel.mp4`.
 
 Lo que se ve en el clip:
@@ -70,7 +72,7 @@ Lo que se ve en el clip:
 
 **Valeria IA:**
 - **Es la gran sorpresa:** de frente y a ×3 es claramente Valeria: moño, cara con ojos, sudadera con cordones, pantalón gris y pantuflas de gato. Al lado del maniquí no hay comparación posible: el problema de "Valeria parece un maniquí" desaparece.
-- **Pero no se mueve:** sin huesos solo puede respirar o deslizarse. Para que camine y se siente como el maniquí hay que **ponerle esqueleto** (autorig: Mixamo pide cuenta de Adobe; Meshy o AccuRIG con cuenta gratis, o a mano en Blender) y pasarle las animaciones de la biblioteca de Quaternius. Eso es justo lo que no probamos y es la siguiente pregunta.
+- **Pero no se mueve (en la v2):** sin huesos solo puede respirar o deslizarse; la v3 le pone esqueleto por código. Para que camine y se siente como el maniquí hay que **ponerle esqueleto** (autorig: Mixamo pide cuenta de Adobe; Meshy o AccuRIG con cuenta gratis, o a mano en Blender) y pasarle las animaciones de la biblioteca de Quaternius. Eso es justo lo que no probamos y es la siguiente pregunta.
 - De perfil es plana (la IA infiere poco volumen de una sola vista): se nota en el giro y al sentarse de lado.
 
 ## Qué aprendimos
@@ -98,19 +100,42 @@ Lo que se ve en el clip:
 - **Rehacer el juego en 3D** (movimiento, colisiones, nivel 1 y pruebas): varias semanas.
 - **Total:** de 2 a 3 meses antes de volver a donde estamos.
 
-## Veredicto (revisado): CAMBIAR
-Con los cambios del creador la sala 3D ya se ve **bien por sí misma**: pixel ×3, bordes limpios, luz cálida viva y profundidad. Valeria IA demuestra que la IA de imagen a 3D sí puede dar un personaje **reconocible** desde el arte Gemini. Pero todavía no se ve mejor que el juego 2D en lo que más importa, los personajes:
-- Felipe IA es un bulto que se desliza.
-- Valeria IA no tiene esqueleto.
-- El maniquí que sí se mueve no es Valeria.
+## Valeria IA con esqueleto (versión 3, plan B sin servicios externos)
+**Cómo se hizo (`scripts/auto_piel.gd`, todo en Godot, $0):**
+- Se toma la malla de Valeria de Hunyuan3D-2 y el esqueleto CC0 de Quaternius en su primera pose de "Idle", que tiene los brazos abajo como la imagen.
+- El esqueleto se **reajusta a las proporciones de Valeria**, medidas sobre su imagen: tobillo 6 %, rodilla 23 %, cadera 41 %, hombro 65,5 %, cuello 70 % y cabeza 73,5 % del alto. También se abren o cierran los brazos según su ancho.
+- Cada vértice se pega a sus **2 huesos más cercanos** con peso 1/d⁴, sin cruzar de lado: la pierna izquierda no se pega a la derecha.
+- Cada cuadro, después de la animación de Quaternius, se reponen los largos de hueso de Valeria.
+- Blender no hizo falta. Con sus pesos automáticos saldría mejor, pero no lo probé por tiempo.
+- Camina girada 35° hacia la cámara, porque la malla IA es plana de perfil y de frente se ve mucho mejor.
+- Con `-- --maniqui` vuelve el maniquí de la v2, para comparar.
 
-Pasar el juego entero sería apostar meses a un paso que no probamos: **ponerle esqueleto a un modelo IA y animarlo**.
+**Qué se ve** (`sala-3d-pixel-v3.mp4` y `hoja-valeria-v3.png`):
+- **Sí camina, se sienta y se para, y sigue siendo Valeria:** moño, cara, sudadera con cordones, pantalón gris y pantuflas. Ningún paso es grotesco, y a ×3 en movimiento se lee como un personaje, no como un maniquí.
+- **Postura encorvada:** las animaciones son de un cuerpo adulto de proporciones normales. Con la cabeza grande de Valeria, la caminata la deja mirando al piso con la cabeza adelantada.
+- **Manchas oscuras** en la espalda y detrás de la pierna: el color proyectado de frente no cubre los lados.
+- **La pierna de atrás** al caminar se ve plana (pantufla "pegada").
+- **Al sentarse** las canillas casi desaparecen dentro del sofá y la pantufla queda suelta delante. Los muslos tienen poco volumen en profundidad.
+- Con un modelo de varias vistas (frente, espalda y lados) y los pesos de Blender, la mayoría de esto mejoraría. Igual quedaría por debajo del sprite pintado del juego en cara y expresión.
 
-**Siguiente prototipo (una sola pregunta):** Valeria IA con esqueleto automático y las animaciones de Quaternius (caminar, sentarse) en esta misma sala con pixel ×3: ¿se mueve bien y sigue siendo Valeria? Necesita una cuenta gratis (token de Hugging Face para TRELLIS.2, o Meshy). Según la respuesta:
-- **Sí:** el camino sería un **híbrido**, con humanos y escenarios en 3D y Felipe en sprite 2D por ahora.
-- **No:** DESCARTAR el 3D y pedir más poses 2D de Valeria al `director-arte`.
+## Veredicto final: DESCARTAR (por ahora), guardando lo aprendido
+Esta es la tercera vuelta sobre la misma idea (v1 CAMBIAR, v2 CAMBIAR, v3). La regla dice que tres CAMBIAR obligan a considerar DESCARTAR, y la evidencia lo apoya.
 
-## Si seguimos
+**El híbrido (casa y humanos en 3D, Felipe en sprite):**
+- **La casa en 3D sí se ve bien por sí misma:** luz dinámica cálida, bordes limpios, pixel ×3 y escala real gratis.
+- **Los humanos 3D salen reconocibles pero toscos:** encorvados, con lados manchados, y al sentarse pierden las piernas.
+- **Felipe en sprite convive técnicamente, pero choca en estilo:** un dibujo pintado con contorno propio al lado de volúmenes toon. Felipe en 3D desde imagen todavía es un bulto.
+- **El costo de llegar a la calidad del arte 2D actual:** regenerar con varias vistas (con cuenta), pesos en Blender, limpiar mallas, rehacer el movimiento y el nivel en 3D. Son 2 a 3 meses en plena Fase 3, que busca calidad final en el nivel 1.
+
+Por eso recomiendo **no cambiar el juego a 3D ahora**. Si el creador lo aprueba, se borra la carpeta y queda solo la decisión.
+
+**Qué guardar para el juego 2D:**
+1. **La luz es lo que más enamoró.** Se puede lograr en 2D con `PointLight2D` y mapas de normales en los muebles, cortando la luz en 3 escalones como el shader toon. Vale un prototipo chico propio.
+2. **El contorno interior más claro** que el exterior es una regla de estilo útil para el arte 2D.
+3. **La IA de imagen a 3D sirve como referencia:** girar a Valeria o a Felipe para dibujar vistas nuevas (espalda, perfil) para el `director-arte`.
+4. Si más adelante se reabre el 3D, empezar por la pregunta que quedó: Valeria **multivista** con pesos de Blender y animaciones hechas para su cuerpo.
+
+## Si se reabre el 3D
 - Diseño a cerrar: híbrido (humanos y casa en 3D, Felipe 2D) o todo 3D; la herramienta de IA y su licencia (TRELLIS.2 MIT con token o Meshy CC BY); el autorig.
 - Arte que pediría (para el `director-arte`, con costo): una vista de espalda y otra de perfil de Valeria y de Felipe A, para que la IA no invente los lados. La IA mejora mucho con varias vistas: Hunyuan3D-2 acepta frente, espalda, izquierda y derecha.
 - Valores que funcionaron:

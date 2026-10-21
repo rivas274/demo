@@ -4,7 +4,7 @@
 # Arma la tubería: escena 3D -> SubViewport chico -> bordes -> paleta -> pantalla 1280x720
 # con escala entera (pixel de render de x2, x3 o x4 pixeles de pantalla).
 # Teclas: 1 paleta, 2 bordes, 3 escalones de luz, 4 tamaño de pixel, Tab guion/manual, F1 ayuda.
-# Argumentos (después de --): --con-paleta, --pixel=2|3|4.
+# Argumentos (después de --): --con-paleta, --pixel=2|3|4, --maniqui (Valeria maniquí de la v2).
 extends Node
 
 ## Escala del juego: Valeria 1,65 m = 200 px de 640x360, Felipe 67 px. El encuadre
@@ -82,6 +82,11 @@ func _ready() -> void:
 	valeria.name = "Valeria"
 	valeria.set_script(load("res://scripts/valeria.gd"))
 	valeria.set("x_sofa", sala.get("punto_sofa").x)
+	if not "--maniqui" in OS.get_cmdline_user_args():
+		# v3: Valeria hecha por IA desde su imagen, con esqueleto automático.
+		valeria.set("malla_ia", "res://assets/valeria_ia/valeria_hunyuan.glb")
+		valeria.set("alto_m", 1.75)  # con el moño
+		valeria.set("z_sentada", -0.6)  # piernas más cortas: se sienta más adelante
 	vista.add_child(valeria)
 
 	felipe = Sprite3D.new()
@@ -97,8 +102,6 @@ func _ready() -> void:
 	felipe_ia = _modelo_3d("FelipeIA", "res://assets/felipe_ia/felipe_hunyuan.glb", Vector3.ZERO, false)
 	felipe_ia.set("x_sofa", sala.get("punto_sofa").x + 0.68)
 	valeria.connect("empieza_vuelta", func() -> void: felipe_ia.set("_t", 0.0))
-	# Valeria hecha por IA desde su imagen (sin huesos: solo respira), de pie al fondo.
-	var valeria_ia := _modelo_3d("ValeriaIA", "res://assets/valeria_ia/valeria_hunyuan.glb", Vector3(-1.75, 0.0, -0.25), true, 1.7)
 
 	camara = Camera3D.new()
 	camara.projection = Camera3D.PROJECTION_ORTHOGONAL

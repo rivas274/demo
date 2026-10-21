@@ -23,12 +23,17 @@ const ZAPATOS := Color("e8dccb")
 @export var mezcla := 0.2
 ## Cuánto más atrás (hacia el sofá) queda la cadera al sentarse; se compensa al pararse.
 @export var z_camino := -0.15
+## Si se da, se usa esta malla hecha por IA (sin huesos) pegada al esqueleto con AutoPiel.
+@export var malla_ia := ""
+## Con la malla IA (plana de perfil) camina girada hacia la cámara: 90° - este valor.
+@export var giro_camara := 35.0
 
 var manual := false
 var x_sofa := 0.4
 var z_sentada := -0.72
 
 var _modelo: Node3D
+var _piel: AutoPiel
 var _ap: AnimationPlayer
 var _fase := "esperar"
 var _t := 0.0
@@ -44,20 +49,27 @@ func _ready() -> void:
 	var sk := _modelo.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 	_ap = _modelo.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
 	_modelo.scale = Vector3.ONE * (alto_m / mi.mesh.get_aabb().size.y)
-	_recolorear(mi, sk)
-	_pelo(sk)
+	if malla_ia != "":
+		mi.visible = false
+		_piel = AutoPiel.new()
+		_piel.armar(sk, _ap, malla_ia)
+	else:
+		_recolorear(mi, sk)
+		_pelo(sk)
 	position = Vector3(x_fuera, 0.0, z_camino)
 	_ap.play("Idle")
 	_cambiar("entrar")
 
 
 func _process(delta: float) -> void:
+	if _piel:
+		_piel.avanzar(delta)
 	_t += delta
 	if manual:
 		_manual(delta)
 	else:
 		_guion(delta)
-	rotation.y = _rumbo
+	rotation.y = _rumbo * (1.0 - giro_camara / 90.0) if _piel else _rumbo
 
 
 func _guion(delta: float) -> void:

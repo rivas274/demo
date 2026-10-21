@@ -11,6 +11,8 @@ const ESCENA := "res://escenas/entidades/comida.tscn"
 signal comido(comida: Comida)
 
 @export var datos: DatosObjeto
+## Ya se la comieron: se dibuja el recipiente vacío.
+var comida_comida := false
 
 ## "tazon" (croquetas en el piso de la cocina) o "pollo" (el almuerzo de Valeria, en el mesón).
 var tipo: String:
@@ -36,8 +38,17 @@ func interactuar(felipe: Felipe) -> void:
 	felipe.comer(self)
 
 
+## La boca llegó: se va la comida y queda el recipiente vacío (sus datos: `vacio`), que ya no se ofrece al botón.
 func al_comido() -> void:
 	comido.emit(self)
+	if datos and datos.vacio != "":
+		comida_comida = true
+		# Un golpecito de escala al vaciarse (no desaparece: el plato sigue ahí).
+		var golpe := create_tween()
+		golpe.tween_property(self, "scale", Vector2(1.08, 0.92), 0.06)
+		golpe.tween_property(self, "scale", Vector2.ONE, 0.1)
+		queue_redraw()
+		return
 	var desaparecer := create_tween()
 	desaparecer.tween_property(self, "scale", Vector2(1.2, 0.0), 0.15)
 	desaparecer.tween_callback(queue_free)
@@ -63,6 +74,8 @@ func rect_dibujo() -> Rect2:
 
 
 func _draw() -> void:
+	if comida_comida and ArteNivel.dibujar(self, datos.vacio, 0.0, 0.0):
+		return
 	if ArteNivel.dibujar(self, tipo, 0.0, 0.0):
 		return
 	match tipo:

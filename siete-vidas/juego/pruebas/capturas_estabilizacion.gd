@@ -32,6 +32,8 @@ func _initialize() -> void:
 		_luces.call_deferred()
 	elif args.size() > 1 and args[1] == "rotos":
 		_rotos.call_deferred()
+	elif args.size() > 1 and args[1] == "comida":
+		_comida.call_deferred()
 	else:
 		_correr.call_deferred()
 
@@ -83,6 +85,40 @@ func _rotos() -> void:
 			sala.travesuras.anuncios.limpiar()
 			await _esperar(2)
 			await _capturar("r-%s-despues" % objeto.tipo)
+	quit()
+
+
+## Comer: antes y después del tazón de Felipe y del pollo de Valeria (queda el recipiente vacío).
+func _comida() -> void:
+	var sala: Nivel = load("res://escenas/nivel_1.tscn").instantiate()
+	sala.mostrar_titulo = false
+	(sala.guion as GuionNivel1).batalla_con_jefe = false
+	root.add_child(sala)
+	var felipe: Felipe = sala.get_node("Felipe")
+	await _esperar(30)
+	for nodo in sala.find_children("*", "Comida", true, false):
+		var comida := nodo as Comida
+		sala.travesuras.dialogo.limpiar()
+		felipe.global_position = comida.global_position + Vector2(-26, 0)
+		# Antes, también corrido, para ver la comida entera; después se acerca a comer.
+		await _esperar(20)
+		felipe.global_position = comida.global_position + Vector2(-60, 0)
+		felipe.velocity = Vector2.ZERO
+		felipe.mirando = 1.0
+		await _esperar(60)
+		sala.travesuras.dialogo.limpiar()
+		await _capturar("c-%s-antes" % comida.tipo)
+		felipe.global_position = comida.global_position + Vector2(-26, 0)
+		await _esperar(20)
+		felipe.comer(comida)
+		await _esperar(90)
+		# Felipe se corre para que se vea lo que quedó.
+		felipe.global_position = comida.global_position + Vector2(-60, 0)
+		await _esperar(30)
+		sala.travesuras.dialogo.limpiar()
+		sala.travesuras.anuncios.limpiar()
+		await _esperar(2)
+		await _capturar("c-%s-despues" % comida.tipo)
 	quit()
 
 

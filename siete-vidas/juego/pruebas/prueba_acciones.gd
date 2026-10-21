@@ -248,6 +248,7 @@ func _probar_snacks() -> void:
 	felipe.comer(plato)
 	await _esperar_que(func() -> bool: return felipe.estado != Felipe.Estado.COMIENDO, 120)
 	_comprobar(felipe.snacks == 3, "El plato de comida de Felipe recarga 1 snack al comerlo (snacks %d)" % felipe.snacks)
+	_comprobar(is_instance_valid(plato) and plato.is_inside_tree() and plato.comida_comida and not plato.is_in_group(Componentes.INTERACTUABLES), "Después de comer, el tazón queda vacío en el piso (solo desaparece la comida)")
 	_comprobar(load("res://datos/objetos/pollo.tres").recarga_snacks == 0, "El almuerzo de Valeria no recarga snacks (solo el plato de Felipe)")
 	await _esperar(10)
 

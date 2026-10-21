@@ -8,3 +8,4 @@ tipo = "tazon"
 nombre = "Comida (tazon)"
 verbo = "VERBO_DEGUSTAR"
 recarga_snacks = 1
+vacio = "tazon_vacio"

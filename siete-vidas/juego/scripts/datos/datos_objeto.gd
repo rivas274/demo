@@ -12,6 +12,9 @@ extends Resource
 @export_group("Si se come (Comida)")
 ## Snacks que recarga en el bolsillo al comerla (el plato de Felipe: 1; decisión del creador, 2026-10-20).
 @export var recarga_snacks := 0
+## El recipiente que queda en el mundo, vacío, después de comer (imagen de assets/nivel1/; "" = desaparece entero).
+## Solo desaparece la comida: el tazón queda vacío con croquetas sueltas; la bandeja del pollo, con los huesitos.
+@export var vacio := ""
 @export_group("Si se tira (Tirable)")
 ## Al caer aturde a lo que tenga debajo (la taza y la maceta sí; el vaso no).
 @export var aturde := true

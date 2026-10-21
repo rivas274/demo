@@ -120,6 +120,14 @@ pasamanos), luz, estela, imaginación, efectos, censura e Indicador.
   jefe, letras y que cada carácter de `textos.csv` exista en las letras del tema). Capturas:
   `pruebas/capturas_estabilizacion.gd -- <carpeta> [textos|luces]`.
 
+**HUD limpio (2026-10-21):** zona A fija solo con los corazones (`Medidores`) y, en la pelea, la barra del jefe y el
+contador de snacks (`Hud.snacks_fijos`). La agenda y los contadores entran deslizando 2 s al cambiar (`Hud.golpear` →
+`Hud.mostrando`). Lo que se lleva se mira en la pausa: `PanelBolsillo` (vidas, calcetines, fotos, snacks). La burbuja
+del Indicador esquiva caras (`Indicador.testigos`, misma regla que `ZonasTexto.colocar_palabra`).
+
+**Lo roto y lo comido (por datos, `DatosObjeto`):** `piezas_rotura` (PiezaSuelta), `charco_*` y `queda` para lo que se
+rompe; `vacio` para el recipiente que queda al comer. Arte: `herramientas/preparar_arte_nivel.py rotos|vacios`.
+
 ### Receta: un texto nuevo en pantalla
 
 1. ¿Es un anuncio grande? `anuncios.anunciar(tipo, texto, tamaño, mostrar)`: sale en la zona C cuando le toca; el

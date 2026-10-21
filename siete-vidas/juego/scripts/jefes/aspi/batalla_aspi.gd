@@ -365,8 +365,8 @@ func _piso_libre(x: float) -> float:
 	var patrulla := jefe.patrulla
 	var zonas: Array[Vector2] = []
 	for nombre: String in Nivel1.ASPI_NO_SE_LLENA_BAJO:
-		var pieza := nivel.pieza(nombre)
-		if pieza:
+		var pieza := Nivel1.rect_pieza(nombre)
+		if pieza.has_area():
 			zonas.append(Vector2(pieza.position.x - MARGEN_LLENA, pieza.end.x + MARGEN_LLENA))
 	var repisa := nivel.pieza("Repisa de las macetas")
 	if repisa and absf(x - (repisa.position.x + 30.0)) < 70.0:

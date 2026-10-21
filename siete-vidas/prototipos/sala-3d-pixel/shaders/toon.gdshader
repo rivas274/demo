@@ -1,7 +1,8 @@
 // PROTOTIPO: no es código del juego.
 // Pregunta: ¿se ve mejor la sala en 3D renderizado como pixel art?
 // Fecha: 2026-10-21
-// Luz en escalones (sin degradados): cada luz se corta en 0 / medio / lleno.
+// Luz en escalones (sin degradados): el sol y el relleno se cortan en 2 tonos y la
+// lámpara en 3; con la sombra ambiente quedan 3 a 4 tonos por material.
 shader_type spatial;
 render_mode specular_disabled, ambient_light_disabled;
 
@@ -13,7 +14,7 @@ uniform float corte_bajo = 0.12;
 uniform float corte_alto = 0.55;
 uniform float nivel_medio = 0.55;
 // Luz ambiente propia: la sombra es un tono plano y algo violeta (luz cálida, sombra fría).
-uniform vec3 ambiente = vec3(0.36, 0.31, 0.44);
+uniform vec3 ambiente = vec3(0.26, 0.22, 0.34);
 // Papel mural: rayas verticales suaves cada `rayas` metros (0 = sin rayas).
 uniform float rayas = 0.0;
 uniform vec4 color_raya : source_color = vec4(0.0);
@@ -26,7 +27,9 @@ void vertex() {
 void fragment() {
 	vec3 base = color.rgb;
 	if (usar_color_vertice) {
-		base *= COLOR.rgb;
+		// Los colores por vértice vienen en sRGB: se pasan a lineal como los uniformes.
+		vec3 c = COLOR.rgb;
+		base *= mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c));
 	}
 	if (rayas > 0.0 && fract(pos_mundo.x / rayas) < 0.18) {
 		base = color_raya.rgb;
@@ -40,7 +43,13 @@ void light() {
 	float e = n_l * ATTENUATION;
 	float q = e;
 	if (escalones) {
-		q = e > corte_alto ? 1.0 : (e > corte_bajo ? nivel_medio : 0.0);
+		if (LIGHT_IS_DIRECTIONAL) {
+			// Sol y relleno: solo "da o no da" (2 tonos), para no sumar degradados.
+			q = e > corte_bajo ? 1.0 : 0.0;
+		} else {
+			// Lámpara: 3 tonos (nada, medio, lleno).
+			q = e > corte_alto ? 1.0 : (e > corte_bajo ? nivel_medio : 0.0);
+		}
 	}
 	DIFFUSE_LIGHT += q * LIGHT_COLOR / PI;
 }

@@ -1,11 +1,17 @@
 # PROTOTIPO: no es código del juego.
 # Pregunta: ¿se ve mejor la sala en 3D renderizado como pixel art?
 # Fecha: 2026-10-21
-# Arma la tubería: escena 3D -> SubViewport 640x360 -> paleta -> pantalla con escala entera.
-# Teclas: 1 paleta, 2 contorno, 3 escalones de luz, Tab guion/manual, F1 ayuda.
+# Arma la tubería: escena 3D -> SubViewport chico -> bordes -> paleta -> pantalla 1280x720
+# con escala entera (pixel de render de x2, x3 o x4 pixeles de pantalla).
+# Teclas: 1 paleta, 2 bordes, 3 escalones de luz, 4 tamaño de pixel, Tab guion/manual, F1 ayuda.
+# Argumentos (después de --): --con-paleta, --pixel=2|3|4.
 extends Node
 
-const PX_POR_METRO := 121.0  # Valeria 1,65 m = 200 px, como en el juego.
+## Escala del juego: Valeria 1,65 m = 200 px de 640x360, Felipe 67 px. El encuadre
+## (2,975 m de alto) no cambia con el tamaño del pixel: los personajes miden lo mismo.
+const PX_POR_METRO := 121.0
+const ALTO_CUADRO_M := 360.0 / PX_POR_METRO
+const PANTALLA := Vector2i(1280, 720)
 const PALETA := [
 	"d6b088", "c79c74", "e9c9a0",
 	# Madera, pared y sombras (de la sala del juego).
@@ -27,10 +33,12 @@ const PALETA := [
 ]
 
 @export var inclinacion_grados := 18.0
-@export var paleta_activa := true
+@export var paleta_activa := false
+## Tamaño del pixel de render en pixeles de pantalla 1280x720 (2 = 640x360 de render).
+@export var tam_pixel := 3
 @export var contorno_activo := true
 @export var escalones_activos := true
-@export var limites_camara := Vector2(-1.4, 1.9)
+@export var limites_camara := Vector2(-1.2, 1.9)
 
 var vista: SubViewport
 var pantalla: TextureRect
@@ -38,14 +46,20 @@ var camara: Camera3D
 var valeria: Node3D
 var felipe: Sprite3D
 var felipe_3d: Node3D
+var felipe_ia: Node3D
+var bordes: ShaderMaterial
 var ayuda: Label
 var _cam_x := 0.0
 
 
 func _ready() -> void:
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--pixel="):
+			tam_pixel = int(arg.get_slice("=", 1))
 	vista = SubViewport.new()
-	vista.size = Vector2i(640, 360)
 	vista.msaa_3d = Viewport.MSAA_DISABLED
+	vista.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
+	vista.use_taa = false
 	vista.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	vista.positional_shadow_atlas_size = 2048
 	add_child(vista)
@@ -73,30 +87,46 @@ func _ready() -> void:
 	felipe = Sprite3D.new()
 	felipe.name = "Felipe"
 	felipe.set_script(load("res://scripts/felipe_sprite.gd"))
-	felipe.position = Vector3(2.0, 0.0, 0.45)
-	felipe.set("puntos", [2.0, 2.9] as Array[float])
+	felipe.position = Vector3(2.2, 0.0, 0.45)
+	felipe.set("puntos", [2.2] as Array[float])
 	vista.add_child(felipe)
 
-	felipe_3d = Node3D.new()
-	felipe_3d.name = "Felipe3D"
-	felipe_3d.set_script(load("res://scripts/felipe_3d.gd"))
-	felipe_3d.set("x_sofa", sala.get("punto_sofa").x + 0.68)
-	vista.add_child(felipe_3d)
-	valeria.connect("empieza_vuelta", func() -> void: felipe_3d.set("_t", 0.0))
+	# Felipe de primitivas, quieto a un lado para comparar.
+	felipe_3d = _modelo_3d("Felipe3D", "", Vector3(2.75, 0.0, 0.45), true)
+	# Felipe hecho por IA desde su imagen: el que camina y salta al sofá.
+	felipe_ia = _modelo_3d("FelipeIA", "res://assets/felipe_ia/felipe_hunyuan.glb", Vector3.ZERO, false)
+	felipe_ia.set("x_sofa", sala.get("punto_sofa").x + 0.68)
+	valeria.connect("empieza_vuelta", func() -> void: felipe_ia.set("_t", 0.0))
+	# Valeria hecha por IA desde su imagen (sin huesos: solo respira), de pie al fondo.
+	var valeria_ia := _modelo_3d("ValeriaIA", "res://assets/valeria_ia/valeria_hunyuan.glb", Vector3(-3.2, 0.0, -0.35), true, 1.7)
 
 	camara = Camera3D.new()
 	camara.projection = Camera3D.PROJECTION_ORTHOGONAL
-	camara.size = 360.0 / PX_POR_METRO
+	camara.size = ALTO_CUADRO_M
 	camara.near = 0.1
 	camara.far = 40.0
 	camara.rotation_degrees.x = -inclinacion_grados
 	vista.add_child(camara)
+	# Post-proceso de bordes: un quad pegado a la cámara que cubre la pantalla.
+	var quad := MeshInstance3D.new()
+	var qm := QuadMesh.new()
+	qm.size = Vector2(1, 1)
+	quad.mesh = qm
+	quad.extra_cull_margin = 16384.0
+	quad.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	bordes = ShaderMaterial.new()
+	bordes.shader = load("res://shaders/bordes.gdshader")
+	quad.material_override = bordes
+	quad.position = Vector3(0, 0, -1)
+	camara.add_child(quad)
 	_cam_x = clampf(valeria.position.x, limites_camara.x, limites_camara.y)
 	_colocar_camara()
 
 	pantalla = TextureRect.new()
 	pantalla.texture = vista.get_texture()
 	pantalla.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	pantalla.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	pantalla.stretch_mode = TextureRect.STRETCH_SCALE
 	var mat := ShaderMaterial.new()
 	mat.shader = load("res://shaders/paleta.gdshader")
 	var colores := PackedVector3Array()
@@ -109,13 +139,14 @@ func _ready() -> void:
 	add_child(pantalla)
 
 	ayuda = Label.new()
-	ayuda.text = "1 paleta  2 contorno  3 escalones  Tab guion/manual  (flechas)"
-	ayuda.position = Vector2(4, 344)
-	ayuda.add_theme_font_size_override("font_size", 8)
+	ayuda.text = "1 paleta  2 bordes  3 escalones  4 pixel x2/x3/x4  Tab guion/manual (flechas)"
+	ayuda.position = Vector2(8, 690)
+	ayuda.add_theme_font_size_override("font_size", 16)
 	ayuda.visible = false
 	add_child(ayuda)
-	if "--sin-paleta" in OS.get_cmdline_user_args():
-		paleta_activa = false
+	if "--con-paleta" in OS.get_cmdline_user_args():
+		paleta_activa = true
+	_cambiar_pixel(tam_pixel)
 	_aplicar()
 
 
@@ -125,9 +156,29 @@ func _process(delta: float) -> void:
 	_colocar_camara()
 
 
-## La cámara solo se mueve en x y en múltiplos exactos de un píxel: nada tiembla.
+func _cambiar_pixel(k: int) -> void:
+	tam_pixel = k
+	vista.size = Vector2i(ceili(PANTALLA.x / float(k)), PANTALLA.y / k)
+	pantalla.size = Vector2(vista.size * k)
+	pantalla.position = Vector2.ZERO
+
+
+func _modelo_3d(nombre: String, ruta: String, pos: Vector3, quieto: bool, alto: float = 67.0 / 121.0) -> Node3D:
+	var n := Node3D.new()
+	n.name = nombre
+	n.set_script(load("res://scripts/felipe_3d.gd"))
+	n.set("modelo_ia", ruta)
+	n.set("solo_quieto", quieto)
+	n.set("alto_ia", alto)
+	n.position = pos
+	vista.add_child(n)
+	return n
+
+
+## La cámara solo se mueve en x y en múltiplos exactos de un pixel de render: nada tiembla.
 func _colocar_camara() -> void:
-	var x := roundf(_cam_x * PX_POR_METRO) / PX_POR_METRO
+	var px_m := float(vista.size.y) / ALTO_CUADRO_M
+	var x := roundf(_cam_x * px_m) / px_m
 	var y_centro := 1.22
 	var dist := 12.0
 	var a := deg_to_rad(inclinacion_grados)
@@ -144,6 +195,8 @@ func _unhandled_input(e: InputEvent) -> void:
 			contorno_activo = not contorno_activo
 		KEY_3:
 			escalones_activos = not escalones_activos
+		KEY_4:
+			_cambiar_pixel(2 + (tam_pixel - 1) % 3)
 		KEY_TAB:
 			valeria.set("manual", not valeria.get("manual"))
 		KEY_F1:
@@ -157,5 +210,4 @@ func _aplicar() -> void:
 		m.set_shader_parameter("escalones", escalones_activos)
 		if m.next_pass:
 			(m.next_pass as ShaderMaterial).set_shader_parameter("grosor_px", 1.0 if contorno_activo else 0.0)
-	for c in Toon.contornos:
-		c.visible = contorno_activo
+	bordes.set_shader_parameter("activo", contorno_activo)

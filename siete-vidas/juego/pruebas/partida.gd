@@ -369,6 +369,13 @@ func _ensuciar() -> void:
 		await _segundos(0.7)
 		tiro = true
 		_paso("Ensucia con %s (depósito %d, apagados %d)" % [objetivo.tipo, batalla.deposito, batalla.apagados])
+		# En el escritorio, la secreta de la agenda: pisa el teclado una vez («jjjjjjjjjj»), como haría una persona.
+		var agenda: Agenda = sala.travesuras.agenda
+		if not agenda.esta_cumplida("teclado") and absf(felipe.global_position.y - (Nivel1.SUELO - 98.0)) < 3.0:
+			await _ir_a(Nivel1.TECLADO.get_center().x, 1.5)
+			await _segundos(0.4)
+			if agenda.esta_cumplida("teclado"):
+				_paso("Pisa el teclado de Valeria (secreta)")
 	if not tiro and batalla.manchas.is_empty():
 		# Sin nada que tirar: pisa el teclado hasta que salga un papel.
 		await _ir_a_la_isla(null)

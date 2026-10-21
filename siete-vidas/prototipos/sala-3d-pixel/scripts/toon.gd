@@ -8,6 +8,9 @@ extends RefCounted
 const SHADER_TOON := preload("res://shaders/toon.gdshader")
 const SHADER_CONTORNO := preload("res://shaders/contorno.gdshader")
 const COLOR_CONTORNO := Color("210c0a")
+## El contorno por casco invertido quedó reemplazado por el post-proceso de bordes
+## (shaders/bordes.gdshader, Forward+). Se deja apagado para comparar.
+const USAR_CASCO := false
 
 ## Todos los materiales creados, para poder cambiar escalones/contorno en vivo.
 static var materiales: Array[ShaderMaterial] = []
@@ -24,6 +27,8 @@ static func material(color: Color, emision: float = 0.0) -> ShaderMaterial:
 
 
 static func material_contorno() -> ShaderMaterial:
+	if not USAR_CASCO:
+		return null
 	var m := ShaderMaterial.new()
 	m.shader = SHADER_CONTORNO
 	m.set_shader_parameter("color", COLOR_CONTORNO)
@@ -56,6 +61,8 @@ static func malla_contorno(malla: Mesh) -> ArrayMesh:
 
 
 static func agregar_contorno(mi: MeshInstance3D) -> void:
+	if not USAR_CASCO:
+		return
 	var casco := MeshInstance3D.new()
 	casco.name = "Contorno"
 	casco.mesh = malla_contorno(mi.mesh)

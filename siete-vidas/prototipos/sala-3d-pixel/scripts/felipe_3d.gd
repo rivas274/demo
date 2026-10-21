@@ -6,6 +6,9 @@
 # cabeza es el 56 % de eso. Mira +x; se gira 30° hacia la cámara para verse en 3/4.
 # Guion en bucle sincronizado con Valeria: espera, camina, salta al sofá, se queda
 # a su lado, baja y vuelve.
+# Con `modelo_ia` carga en su lugar un modelo hecho por IA de imagen a 3D (sin huesos):
+# se anima el cuerpo entero (respirar ±2 %, rebote y balanceo al caminar, saltito).
+# Con `solo_quieto` se queda en su sitio respirando (para comparar).
 extends Node3D
 
 const BLANCO := Color("f3efe8")
@@ -23,6 +26,12 @@ const PUPILA := Color("1b1714")
 @export var z_cojin := -0.62
 @export var alto_cojin := 0.36
 @export var giro_3_4 := 40.0
+@export var modelo_ia := ""
+## Alto total en pantalla: 67 px = 0,554 m (con la cola).
+@export var alto_ia := 67.0 / 121.0
+## Giro del modelo IA para que la cara de la imagen mire a la cámara.
+@export var frente_ia_grados := 0.0
+@export var solo_quieto := false
 
 var _cuerpo: Node3D
 var _cabeza: Node3D
@@ -34,12 +43,19 @@ var _mira_derecha := true
 
 
 func _ready() -> void:
-	_armar()
-	position = Vector3(x_casa, 0.0, z_piso)
+	if modelo_ia != "":
+		_cargar_ia()
+	else:
+		_armar()
+	if not solo_quieto:
+		position = Vector3(x_casa, 0.0, z_piso)
 
 
 func _process(delta: float) -> void:
 	_t = fmod(_t + delta, ciclo)
+	if solo_quieto:
+		_animar(delta, false, 0.0)
+		return
 	var caminando := false
 	var salto := 0.0  # 0..1 dentro de un salto
 	if _t < 1.5:
@@ -76,6 +92,9 @@ func _saltar(k: float, desde: Vector3, hasta: Vector3) -> void:
 
 
 func _animar(delta: float, caminando: bool, salto: float) -> void:
+	if modelo_ia != "":
+		_animar_ia(caminando, salto)
+		return
 	var giro := -giro_3_4 if _mira_derecha else 180.0 + giro_3_4
 	rotation.y = lerp_angle(rotation.y, deg_to_rad(giro), clampf(delta * 12.0, 0.0, 1.0))
 	if caminando:
@@ -101,6 +120,44 @@ func _animar(delta: float, caminando: bool, salto: float) -> void:
 	_cola.rotation.x = sin(_t * 1.7) * 0.35
 	_cola.rotation.z = 0.25 + sin(_t * 2.3) * 0.12
 	_cabeza.rotation.z = sin(_paso) * 0.04 if caminando else sin(_t * 0.8) * 0.03
+
+
+## Modelo IA: se mueve entero, como un sprite con volumen. Mira siempre en 3/4 y se
+## voltea con un espejo (escala x negativa) al caminar a la izquierda.
+func _animar_ia(caminando: bool, salto: float) -> void:
+	var resp := sin(_t * 2.4) * 0.02
+	var est := 1.0 + resp
+	if salto > 0.0:
+		est = 1.0 + 0.08 * cos(salto * PI) * (1.0 if salto < 0.5 else -1.0)
+	var lado := 1.0 if _mira_derecha else -1.0
+	_cuerpo.scale = Vector3(lado / sqrt(est), est, 1.0 / sqrt(est))
+	_cuerpo.position.y = absf(sin(_paso)) * 0.03 if caminando else 0.0
+	_cuerpo.rotation.z = sin(_paso) * 0.07 * lado if caminando else 0.0
+	if salto > 0.0:
+		_cuerpo.rotation.z = -0.25 * sin(salto * PI) * lado
+
+
+func _cargar_ia() -> void:
+	_cuerpo = Node3D.new()
+	add_child(_cuerpo)
+	var raiz := (load(modelo_ia) as PackedScene).instantiate() as Node3D
+	var giro := Node3D.new()
+	giro.rotation_degrees.y = frente_ia_grados
+	_cuerpo.add_child(giro)
+	giro.add_child(raiz)
+	var mallas := raiz.find_children("*", "MeshInstance3D", true, false)
+	if raiz is MeshInstance3D:
+		mallas.append(raiz)
+	var caja := AABB()
+	for i in mallas.size():
+		var mi := mallas[i] as MeshInstance3D
+		caja = mi.mesh.get_aabb() if i == 0 else caja.merge(mi.mesh.get_aabb())
+		var mat := Toon.material(Color.WHITE)
+		mat.set_shader_parameter("usar_color_vertice", true)
+		mi.material_override = mat
+	var k := alto_ia / caja.size.y
+	raiz.scale = Vector3.ONE * k
+	raiz.position = -Vector3(caja.get_center().x, caja.position.y, caja.get_center().z) * k
 
 
 # ---------------------------------------------------------------- armado

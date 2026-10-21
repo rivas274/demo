@@ -1242,8 +1242,65 @@ def estudio_v2():
     print("Estudio v2: base_carga", estacion.size, sin_blanco_puro("base_carga"))
 
 
+# Estudio v3 (pedido del creador, 2026-10-21: «la batalla no se centre en un solo pedazo de la pantalla»): la segunda
+# isla de juego, a la derecha, con arte de Gemini que ya estaba en el repositorio (0 créditos).
+# - Librero bajo de Valeria: el librero alto lleno de libros de `muebles-sala.png` (pieza 2), sin sus 4 filas del medio
+#   (como la fachada del balcón: se quitan filas enteras, el costado sigue sin cortes): cornisa y primera fila (filas
+#   0–105 del recorte) más la tabla, las dos filas de abajo y el zócalo (431–618). A 80 cm (97 px).
+# - Caja de la mudanza que Valeria todavía no desempaca (los libros que faltan): la caja de abajo de la pila de
+#   `cocina-v2.png` (pieza 3, filas 280 al final), a 40 cm (48 px). Es el escalón del piso al librero.
+# - La planta de Valeria (lengua de suegra) de `librero-gato.png`, sin el librero: se tira y se rompe (pedazos de la
+#   maceta, tierra y la planta, como la maceta de flores). Al doble de su tamaño real (40 px de alto).
+# - El portarretratos de Su Majestad: el retrato dorado de `cuadros.png` (pieza 0) chico, parado sobre el librero. Se
+#   tira y no se rompe (queda boca abajo en el piso, como las llaves).
+LIBRERO_BAJO_FILAS = [(0, 105), (431, 618)]
+ALTO_LIBRERO_BAJO = 97
+CAJA_LIBROS_FILAS = (280, 386)
+ALTO_CAJA_LIBROS = 48
+PLANTA_CAJA = (340, 430, 500, 634)
+ALTO_PLANTA = 40
+ALTO_PORTARRETRATOS = 36
+
+
+def estudio_v3():
+    imagen, cajas = piezas("muebles-sala")
+    librero = np.asarray(recortar_opaco(imagen.crop(cajas[2]))).copy()
+    librero = np.concatenate([librero[y0:y1] for y0, y1 in LIBRERO_BAJO_FILAS], axis=0)
+    librero = Image.fromarray(librero, "RGBA")
+    k = ALTO_LIBRERO_BAJO / librero.height
+    escalar(librero, (round(librero.width * k), ALTO_LIBRERO_BAJO)).save(DESTINO / "librero_bajo.png")
+    imagen, cajas = piezas("cocina-v2")
+    pila = recortar_opaco(imagen.crop(cajas[3]))
+    caja = recortar_opaco(pila.crop((0, CAJA_LIBROS_FILAS[0], pila.width, CAJA_LIBROS_FILAS[1])))
+    k = ALTO_CAJA_LIBROS / caja.height
+    escalar(caja, (round(caja.width * k), ALTO_CAJA_LIBROS)).save(DESTINO / "caja_libros.png")
+    # Planta: sin el poste del librero ni la tabla donde se apoya (bajo las hojas solo queda la maceta) ni el blanco
+    # encerrado entre las hojas; se queda el grupo de pixeles más grande (hojas y maceta).
+    imagen, _ = piezas("librero-gato")
+    planta = np.asarray(sin_huecos(imagen.crop(PLANTA_CAJA))).copy()
+    planta[:, :6, 3] = 0
+    planta[177:, :40, 3] = 0
+    planta[177:, 128:, 3] = 0
+    etiquetas, _ = ndimage.label(planta[:, :, 3] > 0)
+    tamanos = ndimage.sum(planta[:, :, 3] > 0, etiquetas, range(1, etiquetas.max() + 1))
+    planta[etiquetas != int(np.argmax(tamanos)) + 1, 3] = 0
+    planta = recortar_opaco(Image.fromarray(planta, "RGBA"))
+    k = ALTO_PLANTA / planta.height
+    final = maceta_contrastada(escalar(planta, (round(planta.width * k), ALTO_PLANTA)))
+    final.save(DESTINO / "planta.png")
+    imagen, cajas = piezas("cuadros")
+    retrato = recortar_opaco(imagen.crop(cajas[0]))
+    k = ALTO_PORTARRETRATOS / retrato.height
+    escalar(retrato, (round(retrato.width * k), ALTO_PORTARRETRATOS)).save(DESTINO / "portarretratos.png")
+    for nombre in ["librero_bajo", "caja_libros", "planta", "portarretratos"]:
+        print("Estudio v3:", nombre, Image.open(DESTINO / f"{nombre}.png").size, sin_blanco_puro(nombre))
+
+
 if __name__ == "__main__":
     import sys
+    if sys.argv[1:] == ["estudio3"]:
+        estudio_v3()
+        sys.exit(0)
     if sys.argv[1:] == ["consistencia"]:
         consistencia()
     elif sys.argv[1:] == ["derrotas"]:

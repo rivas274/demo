@@ -2,73 +2,120 @@
 Fecha: 2026-10-21 · Carpeta: siete-vidas/prototipos/sala-3d-pixel/
 
 ## Pregunta
-Si el juego se hace en **3D renderizado como pixel art** (cámara ortográfica, 640×360, luz en escalones y contorno de 1 px), la sala se verá mejor y Valeria se moverá con más vida que con los sprites de pocas poses. Lo notaremos en la comparación lado a lado y en el clip: ¿la sala 3D se ve igual de bien o mejor, y Valeria se ve más viva?
-Suposición más arriesgada: que con assets libres (CC0) el resultado tenga personalidad propia y no parezca un maniquí en una maqueta.
+Si el juego se hace en **3D renderizado como pixel art** (cámara ortográfica, render chico, luz en escalones y contorno de 1 px), la sala se verá mejor y Valeria se moverá con más vida que con los sprites de pocas poses. Lo notaremos en la comparación lado a lado y en el clip: ¿la sala 3D se ve igual de bien o mejor, y los personajes se ven más vivos?
+Suposición más arriesgada: que los personajes 3D se parezcan a Felipe y a Valeria y no se vean como maniquíes en una maqueta.
 
-Aclaración del creador durante el trabajo: no importa que se vea como otro juego (estamos en concepto); hay que buscar que la sala 3D se vea lo mejor posible por sí misma. Además pidió un **Felipe 3D** para comparar con el sprite.
+Pedidos del creador durante el trabajo:
+1. No importa que se vea como otro juego (estamos en concepto); hay que buscar que la sala 3D se vea lo mejor posible por sí misma.
+2. Un Felipe 3D para comparar.
+3. Un Felipe y una Valeria hechos **desde su imagen** con IA de imagen a 3D.
+4. Pixel más grande, bordes mejores (exterior e interior, sin antialias) y menos degradados.
 
-## Qué se construyó
-- **La técnica en Godot 4.3 (renderizador Compatibility):** escena 3D con cámara ortográfica de lado inclinada 18°, dibujada en un `SubViewport` de 640×360 y mostrada con escala entera y filtro nearest. Shader toon propio: cada luz se corta en 3 tonos (sombra, medio y lleno), sin degradados, y la sombra es un tono plano algo violeta (luz cálida, sombra fría). Contorno oscuro de 1 px con **casco invertido** que se agranda en píxeles de pantalla. Sobre la imagen, una paleta limitada de 55 colores (tecla 1). La cámara sigue a Valeria y solo se mueve en múltiplos exactos de un píxel, así que el fondo no tiembla.
-- **La sala:** pared con papel a rayas, ventana con persiana y cielo de atardecer (el sol entra por el hueco y proyecta la persiana en el piso), piso de tablas, sofá, alfombra, mesita con **lámpara encendida** (luz cálida con sombra, en anillos escalonados), librero, libros, plantas y un cuadro. Los muebles son de Kenney (CC0), recoloreados con colores de la sala del juego.
-- **Valeria 3D:** maniquí CC0 de Quaternius con animaciones reales: caminar, quieta, sentarse, sentada y pararse. Está recoloreada por hueso (sudadera verde azulado, pantalón gris oscuro, piel, zapatillas), con pelo y moño de esferas y ojos de 2 px. Sigue un guion en bucle de unos 17 s: entra, gira, se sienta en el sofá, se queda, se para y se va. Con Tab pasa a modo manual (flechas).
-- **Felipe 3D (pedido extra):** en OpenGameArt no había un gato 3D libre con proporciones de persa chibi; los que hay son delgados o realistas. Lo armé con primitivas a su escala (58 px de las orejas a las patas, 67 px con la cola y la cabeza al 56 %), con la paleta de la guía: lomo atigrado con rayas, pecho, panza y patas crema, gorro con franja blanca, cachetes de persa, nariz rosada y ojos verde avellana a media asta. Está animado por código: patas alternadas, respiración, cola que se mece y salto al sofá con estirar y aplastar de ±8 %. Camina, salta al sofá junto a Valeria, se queda y baja. Para que se lea en 3/4 se gira 40° hacia la cámara.
-- **Felipe 2D:** su sprite del juego como `Sprite3D` (escala 0.72, 67 px), caminando a la derecha de la sala para comparar.
-- Quedó fuera a propósito: control de Felipe, colisiones, HUD, sonido y la casa entera.
+## Qué se construyó (versión 2, la vigente)
+- **Tubería en Godot 4.3 Forward+:**
+  - Escena 3D con cámara ortográfica de lado inclinada 18°, dibujada en un `SubViewport` chico y mostrada a 1280×720 con escala entera y filtro nearest.
+  - Pixel de render a **×2, ×3 o ×4** (tecla 4). El predeterminado es **×3** (render de 427×240).
+  - El encuadre no cambia con el tamaño del pixel: Felipe mide lo mismo que 67 px del juego y Valeria 1,65 m (unos 200 px del juego).
+  - La cámara sigue a Valeria moviéndose solo en múltiplos exactos de un pixel de render, así que no hay bordes que bailen.
+  - MSAA, FXAA y TAA apagados, y sombras sin suavizado.
+- **Bordes nuevos (post-proceso por profundidad y normales):**
+  - **Contorno exterior** de 1 pixel de render donde salta la profundidad. Lo dibuja solo el pixel más cercano y su color es el tono del objeto oscurecido y mezclado con un café profundo; nunca negro puro.
+  - **Contorno interior**, más claro, donde cambian las normales: brazos sobre el cuerpo, cojines del sofá, patas, cola sobre el lomo y cajones.
+  - Umbrales duros, sin medios píxeles. Reemplaza al casco invertido de la versión 1, que solo marcaba la silueta.
+- **Menos degradados:** el shader toon corta el sol y el relleno en 2 tonos y la lámpara en 3. Con la sombra ambiente (plana y algo violeta) quedan **3 a 4 tonos por material**. La paleta global de 55 colores quedó opcional (tecla 1, apagada por defecto) porque corría los colores del sprite de Felipe hacia violeta.
+- **La sala:** pared con papel a rayas, ventana con persiana y cielo de atardecer (el sol entra y proyecta la persiana en el piso), piso de tablas, sofá, alfombra, mesita con **lámpara encendida** (luz cálida con sombra, en anillos), librero, libros, plantas y un cuadro. Los muebles son de Kenney (CC0) y están recoloreados.
+- **Personajes en escena:**
+  - **Valeria maniquí** (Quaternius, CC0) con animaciones reales: camina, gira, se sienta en el sofá, se queda, se para y se va, en un bucle de unos 17 s. Con Tab pasa a modo manual (flechas).
+  - **Felipe IA** (Hunyuan3D-2, desde Felipe A): camina con rebote y balanceo, salta al sofá junto a Valeria con estirar y aplastar de ±8 %, se queda respirando (±2 %), baja y vuelve.
+  - **Valeria IA** (Hunyuan3D-2, desde su pose de pie de Gemini): de pie junto a la ventana, respirando.
+  - **Felipe de primitivas** (versión 1) y **Felipe 2D** (su sprite como `Sprite3D` a 0.72), quietos a la derecha para comparar.
+- Quedó fuera a propósito: control de Felipe, colisiones, HUD, sonido, esqueleto para los modelos IA y la casa entera.
 
-Para abrirlo: Godot 4.3 → `siete-vidas/prototipos/sala-3d-pixel/project.godot` → F5. Teclas: **1** activa o quita la paleta, **2** el contorno, **3** los escalones de luz; **Tab** cambia entre guion y modo manual, **F1** muestra la ayuda.
+Para abrirlo: Godot 4.3 → `siete-vidas/prototipos/sala-3d-pixel/project.godot` → F5. Teclas: **1** paleta, **2** bordes, **3** escalones de luz, **4** tamaño de pixel (×2, ×3 o ×4), **Tab** guion o manual, **F1** ayuda. El proyecto ahora usa **Forward+**, que necesita Vulkan; cualquier PC con tarjeta de video de los últimos años lo tiene.
 
 ## Qué pasó
-Capturas del bot de cámara (sin jugadores de verdad; falta que el creador lo mire):
-- Hoja de la sala, la actual contra la 3D: `/tmp/claude-0/-home-user-demo/38ed3265-b77e-553c-bb05-17ea4f4a88e4/scratchpad/proto3d/hoja-sala-2d-vs-3d.png`
-- Hoja de Felipe, 2D contra 3D a ×3, más la escena: `/tmp/claude-0/-home-user-demo/38ed3265-b77e-553c-bb05-17ea4f4a88e4/scratchpad/proto3d/hoja-felipe-2d-vs-3d.png`
-- Clip de 18 s: `/tmp/claude-0/-home-user-demo/38ed3265-b77e-553c-bb05-17ea4f4a88e4/scratchpad/proto3d/sala-3d-pixel.mp4`
-- Paleta activa contra paleta apagada: `/tmp/claude-0/-home-user-demo/38ed3265-b77e-553c-bb05-17ea4f4a88e4/scratchpad/proto3d/pal_vs.png`
+Capturas y clips (sin jugadores de verdad; falta que el creador lo mire), en `/tmp/claude-0/-home-user-demo/38ed3265-b77e-553c-bb05-17ea4f4a88e4/scratchpad/proto3d/`:
+- `sala-3d-pixel-v2.mp4`: clip de 17 s con pixel ×3 y bordes nuevos.
+- `hoja-tamano-pixel.png`: el mismo cuadro con pixel ×2, ×3 y ×4.
+- `hoja-felipe-v2.png`: Felipe A 2D, sprite en la sala, primitivas, IA e IA en el sofá (×3), más la escena completa.
+- `hoja-valeria-v2.png`: sprite del juego, concepto Gemini, maniquí animado y Valeria IA.
+- Versión 1 (comparación con la sala actual): `hoja-sala-2d-vs-3d.png`, `hoja-felipe-2d-vs-3d.png` y `sala-3d-pixel.mp4`.
 
-Lo que se ve:
-- **0 a 4 s:** Valeria entra caminando. La caminata se lee fluida y con peso: brazos, cadera y pasos de verdad, algo que hoy no tenemos con sprites. La cámara la sigue sin que el fondo tiemble.
-- **4 a 6 s:** Valeria gira de frente y se sienta en el sofá con un movimiento continuo; Felipe 3D llega caminando. **6 s:** Felipe salta al cojín junto a ella. **6 a 11 s:** los dos quedan sentados; la luz de la lámpara les pega en escalones.
-- **11 a 17 s:** Felipe baja, Valeria se para y se va.
-- **La luz:** es lo mejor del prototipo. La lámpara pinta anillos cálidos en la pared, la pantalla de la lámpara proyecta su sombra y el sol pasa por la persiana hasta el piso. Todo eso sale solo, sin dibujar ni un rayo.
-- **Valeria no se ve como Valeria:** el maniquí es un huevo sin cara, de hombros anchos y cuerpo neutro. Con dos ojos de 2 px parece un muñeco de madera o un maniquí de tienda, no una persona. En la sala 2D, en cambio, tiene cara, expresión, pelo con volumen y capucha.
-- **Felipe 3D se reconoce como "un gato chibi atigrado" pero no del todo como Felipe:** le faltan el pelaje esponjado del persa, la cara chata y la mirada de reojo con carácter. Al lado del sprite se ve más simple y más juguete. El sprite 2D convive técnicamente (escala correcta, se ordena bien en profundidad), pero estilísticamente choca: un dibujo detallado con contorno propio frente a volúmenes planos.
-- **La paleta** calma los amarillos quemados de la luz, pero **mueve los colores del sprite de Felipe** hacia violeta. Si se usa, el sprite tiene que quedar fuera de la cuantización o la paleta se ajusta a él.
-- **Comparada con la sala actual:** la 2D tiene mucho más detalle de ilustración (papel mural con dibujo, madera con veta, objetos con historia, el cuadro de Felipe). La 3D tiene más profundidad, luz y movimiento, pero objetos más genéricos ("muebles de Kenney"). **Sí, se ve como otro juego**: más "diorama low-poly" que "pixel art pintado".
+Lo que se ve en el clip:
+- **0 a 4 s:** Valeria maniquí entra caminando y Felipe IA entra por la izquierda con rebote y balanceo; Valeria IA respira junto a la ventana.
+- **4 a 6 s:** Valeria se sienta. **6 s:** Felipe IA salta al cojín a su lado. **6 a 11 s:** los dos sentados bajo la luz de la lámpara.
+- **11 a 17 s:** Felipe baja y vuelve a su sitio; Valeria se para y se va.
+
+## Tamaño del pixel y bordes: por qué ×3
+- **×2 (640×360):** es la resolución del juego actual. Los personajes y caras se leen mejor, pero el 3D se nota "3D a baja resolución": muchas diagonales finas y detalles de 1 px.
+- **×3 (427×240), el elegido:** se lee como pixel art pintado. Bloques claros, contornos que se notan, la luz de la lámpara en anillos limpios y la persiana todavía legible. La cara de Felipe IA y la de Valeria IA siguen reconocibles: ojos y nariz alcanzan a ser 1 o 2 pixeles.
+- **×4 (320×180):** el sprite de Felipe y las caras se rompen (ojos de medio pixel que desaparecen), la persiana se vuelve ruido y el sofá pierde los cojines. Sirve para un juego de estilo más tosco, no para este.
+- **Bordes:** el contorno por profundidad y normales es claramente mejor que el casco de la versión 1. Ahora se ven los cojines, las patas de la mesita, los brazos de Valeria sobre el cuerpo y la cola de Felipe sobre el lomo, y no hay medios píxeles. El borde interior queda bien más claro que el exterior. Con modelos IA el contorno marca también el ruido de la malla (orejas y cola con picos); por eso el modelo tiene que estar limpio.
+
+## Con modelos propios desde imagen
+**Cómo se hizo:**
+- `microsoft/TRELLIS.2` respondió, pero todas las veces rechazó el trabajo por **cuota de GPU gratuita agotada** para usuarios sin cuenta ("ZeroGPU quota 0s left"). Lo intenté 3 veces en unos 10 minutos.
+- `microsoft/TRELLIS` estaba caído (CONFIG_ERROR).
+- Funcionó el respaldo **`tencent/Hunyuan3D-2`**, pero su textura falla en el servidor (NameError). Bajé solo la forma, la reduje a 9.000 a 12.000 caras y le puse color **proyectando la imagen original de frente** sobre los vértices. Cada modelo tomó 1 a 3 minutos y $0.
+- Para Valeria, el primer intento salió sin cuerpo (solo cabeza y pantuflas). Con el fondo quitado a mano y 30 pasos salió completa.
+
+**Felipe IA:**
+- **¿Se reconoce?** Sí, bastante más que el de primitivas: de frente tiene la cara chata, el gorro con la franja blanca, el pecho blanco esponjado, la nariz rosada y la cola atigrada grande. En el sofá, a ×3, se lee como Felipe.
+- **Problemas:**
+  - La forma es un bulto: las patas casi no existen y la cola y una oreja salen en pedazos sueltos o con picos.
+  - Los costados y la espalda repiten la textura del frente estirada, porque el color va proyectado.
+  - Sin esqueleto, al caminar se desliza en bloque con rebote: se lee como un muñeco de peluche que avanza, no como un gato que camina.
+  - Siempre muestra la misma cara en 3/4. Al ir a la izquierda se refleja como un espejo, igual que el sprite.
+- **Frente al sprite:** el sprite sigue siendo más lindo y más Felipe (pelaje, ojos, pose). El modelo IA gana en luz y volumen (le pega la lámpara y proyecta sombra), pero hoy pierde en forma y en animación.
+
+**Valeria IA:**
+- **Es la gran sorpresa:** de frente y a ×3 es claramente Valeria: moño, cara con ojos, sudadera con cordones, pantalón gris y pantuflas de gato. Al lado del maniquí no hay comparación posible: el problema de "Valeria parece un maniquí" desaparece.
+- **Pero no se mueve:** sin huesos solo puede respirar o deslizarse. Para que camine y se siente como el maniquí hay que **ponerle esqueleto** (autorig: Mixamo pide cuenta de Adobe; Meshy o AccuRIG con cuenta gratis, o a mano en Blender) y pasarle las animaciones de la biblioteca de Quaternius. Eso es justo lo que no probamos y es la siguiente pregunta.
+- De perfil es plana (la IA infiere poco volumen de una sola vista): se nota en el giro y al sentarse de lado.
 
 ## Qué aprendimos
-- **La técnica funciona en Godot 4.3 Compatibility** con contorno de casco invertido. Hay que trabajar sin buffer de profundidad (Compatibility no lo da en 4.3) y sin Vulkan en la sesión. El contorno por casco no marca los bordes interiores, solo la silueta; para eso haría falta Forward+, con post-proceso de profundidad y normales.
-- **La cámara ortográfica no da paralaje:** la profundidad se lee por solapamiento y por la inclinación, no al moverse. Si se quiere paralaje, la cámara tiene que ser en perspectiva con FOV estrecho, y entonces el ajuste a píxeles es más difícil.
-- **La luz es la gran ganancia:** escalones cálidos, sombras proyectadas y sol por la persiana, gratis y dinámicos (por ejemplo, si Felipe tira la lámpara, la luz se mueve con ella).
-- **La animación también gana:** con una sola biblioteca CC0 Valeria camina, se sienta y se para sin pedir arte nuevo, y cualquier animación de esa biblioteca (más de 40) sirve para otro humano.
-- **El cuello de botella es el personaje, no la técnica:** sin un modelo de Valeria hecho a medida (cara, pelo, ropa y proporciones), los humanos 3D se ven genéricos. Con assets libres no se llega a la calidad de personaje que ya tiene el arte 2D.
-- Felipe 3D con primitivas sirve para probar el movimiento, pero el personaje del juego depende de su pelaje y su cara de reojo. Eso pide un modelo esculpido con textura pintada.
-
-## Felipe en 3D
-- **¿Se reconoce?** A medias. Se lee como un gato chibi atigrado de cola grande, con los colores de Felipe, y el salto al sofá se siente natural. Pero no tiene la cara chata, los cachetes esponjados ni la mirada de reojo que hacen a Felipe. A 67 px, la cara son 3 o 4 píxeles de ojo y nariz.
-- **Qué se gana:** cualquier movimiento sin pedir hojas (girar, saltar a cualquier altura, sentarse junto a alguien), consistencia total entre animaciones (siempre es el mismo modelo, que hoy es la regla más cara del proyecto) y que recibe la luz de la escena como los demás.
-- **Qué se pierde:** el dibujo. El sprite tiene pelaje, volumen pintado y expresión. El 3D toon hecho con primitivas parece un juguete. Para igualarlo hace falta un modelo esculpido con textura pintada a mano y un rig con cola y orejas, trabajo de artista 3D.
-- **Recomendación:** si el juego se pasara a 3D, Felipe también tendría que ser 3D, porque el sprite no convive en estilo. Pero no con primitivas: con un modelo hecho a medida. No lo cambiaría ahora.
+- **La técnica funciona y la versión 2 se ve mucho más "pixel art"** que la 1: pixel ×3, bordes exterior e interior y 3 a 4 tonos por material. Hace falta **Forward+**, porque el renderizador Compatibility de Godot 4.3 no da la profundidad y las normales que necesita el contorno interior.
+- **La luz sigue siendo la mayor ganancia:** dinámica, cálida, con sombras y gratis.
+- **El cuello de botella son los personajes:**
+  - Con assets libres salen maniquíes.
+  - Con IA de imagen a 3D salen **parecidos** (sobre todo Valeria) pero **sin esqueleto** y con malla sucia.
+  - Felipe es el más difícil: forma chibi peluda y cola grande.
+- **La IA gratis es frágil:** la cuota anónima de GPU se acaba (TRELLIS.2), los espacios se caen (TRELLIS) y fallan a medias (textura de Hunyuan). Para producción hace falta una cuenta: un token gratis de Hugging Face o Meshy.
+- **Licencias:** TRELLIS.2 es MIT. Hunyuan3D-2 no lo es (excluye la UE, el Reino Unido y Corea del Sur). Lo usado aquí sirve para juzgar, no para el juego.
+- La cámara ortográfica no da paralaje; la profundidad se lee por solapamiento y por la inclinación.
 
 ## Si el juego entero fuera así
 **Qué cambiaría:**
-- **Felipe:** modelo 3D propio en lugar de las 22 hojas, con rig de gato (cola, orejas, columna). Las animaciones (caminar, correr, saltar, trepar, arañar, comer, etc.) se rehacen en 3D. Se acaba el problema de "que sea el mismo gato" y se pierde el trabajo hecho con SpriteCook.
-- **Casa:** cada habitación se arma con muebles 3D en vez de fondos pintados. Las alturas reales y la escala de gato se respetan solas, porque todo está en metros. La luz por habitación (lámpara, sol, refrigerador abierto) sale gratis. Los objetos que se tiran tendrían física de verdad.
-- **Barrio:** calles y fachadas modulares (hay kits CC0 de Kenney y Quaternius). Es lo que más rinde en 3D, porque se reutiliza mucho.
-- **Humanos y jefes:** Valeria, vecinos y A.S.P.I. con modelo propio. Las animaciones humanas salen de bibliotecas CC0.
+- **Felipe:** un modelo 3D propio en vez de 22 hojas. Sale de la IA desde Felipe A, pero hay que limpiarlo (cola, orejas, patas), retopologizarlo y ponerle esqueleto de gato. Las animaciones se rehacen en 3D. Se acaba el problema de "que sea el mismo gato" (ya no hay que comparar cada hoja). Recomiendo no pasarlo a 3D mientras el modelo no sea tan bueno como el sprite.
+- **Casa:** muebles 3D (kits CC0 recoloreados) en vez de fondos pintados. Las alturas reales y la escala de gato salen solas. La luz de cada habitación es dinámica (si Felipe tira la lámpara, la luz cae con ella) y los objetos que se tiran tienen física de verdad.
+- **Barrio:** fachadas y calles modulares (kits CC0). Es donde más rinde el 3D, porque se reutiliza mucho.
+- **Humanos y jefes:** Valeria, vecinos y A.S.P.I. desde su imagen Gemini con IA, con autorig y animaciones de biblioteca CC0.
 
 **Cuánto costaría (estimación gruesa):**
-- **Tubería** (shader, contorno, cámara y paleta, llevados a Forward+ para tener contorno interior): de 1 a 2 semanas, que ya están medio hechas aquí.
-- **Personajes con modelo propio** (Felipe, Valeria, 2 o 3 humanos, A.S.P.I.): es lo caro. Necesita un artista 3D o encargos: unas 1 a 2 semanas por personaje con rig y texturas pintadas, y Felipe más, por la cola y el pelaje. SpriteCook y Gemini no hacen modelos 3D animables, así que es dinero o tiempo fuera de las herramientas actuales.
-- **Escenarios:** por habitación, 1 a 3 días con kits CC0 y recolor; más si se modelan muebles propios para tener la personalidad de la sala actual.
-- **Rehacer el juego:** el movimiento de Felipe, las colisiones, el nivel 1 y las pruebas pasan de 2D a 3D. Es casi empezar la Fase 3 de nuevo: varias semanas.
-- **Total:** de 2 a 4 meses de trabajo extra antes de volver a donde estamos, con un riesgo grande en el arte de personajes.
+- **Tubería:** casi hecha aquí (Forward+, bordes, cámara, pixel ×3). Faltan de 3 a 5 días para pulirla y pasarla al juego.
+- **Personajes:** para cada uno, regenerar con TRELLIS.2 (MIT) usando un token gratis o con Meshy (100 créditos al mes en el plan gratis, licencia CC BY), limpiar y ponerle esqueleto. Unos 2 a 4 días por humano. Felipe, de 1 a 2 semanas, por la cola, el pelaje y las animaciones de gato, o un encargo a un artista 3D.
+- **Escenarios:** 1 a 3 días por habitación con kits recoloreados.
+- **Rehacer el juego en 3D** (movimiento, colisiones, nivel 1 y pruebas): varias semanas.
+- **Total:** de 2 a 3 meses antes de volver a donde estamos.
 
-## Veredicto: CAMBIAR
-La técnica sí da algo que el 2D actual no tiene: **luz viva, profundidad y humanos que se mueven de verdad**. Pero así como está, **no se ve mejor que la sala actual; se ve distinta y más genérica**: Valeria parece un maniquí, los muebles parecen de kit y Felipe 2D choca con el resto. Pasar todo el juego a 3D cuesta meses y depende de modelos de personaje hechos a medida, que hoy no podemos producir con nuestras herramientas.
+## Veredicto (revisado): CAMBIAR
+Con los cambios del creador la sala 3D ya se ve **bien por sí misma**: pixel ×3, bordes limpios, luz cálida viva y profundidad. Valeria IA demuestra que la IA de imagen a 3D sí puede dar un personaje **reconocible** desde el arte Gemini. Pero todavía no se ve mejor que el juego 2D en lo que más importa, los personajes:
+- Felipe IA es un bulto que se desliza.
+- Valeria IA no tiene esqueleto.
+- El maniquí que sí se mueve no es Valeria.
 
-Variante a probar (siguiente prototipo, una sola pregunta): **¿un híbrido mantiene el arte 2D y gana la animación de Valeria?** Valeria 3D con toon y contorno, renderizada a una hoja de sprites (o en vivo) **sobre la sala 2D actual**, con una cara pintada como textura. Si ni así se ve como Valeria, la recomendación sería DESCARTAR el 3D y pedir más poses 2D de Valeria al `director-arte`.
+Pasar el juego entero sería apostar meses a un paso que no probamos: **ponerle esqueleto a un modelo IA y animarlo**.
+
+**Siguiente prototipo (una sola pregunta):** Valeria IA con esqueleto automático y las animaciones de Quaternius (caminar, sentarse) en esta misma sala con pixel ×3: ¿se mueve bien y sigue siendo Valeria? Necesita una cuenta gratis (token de Hugging Face para TRELLIS.2, o Meshy). Según la respuesta:
+- **Sí:** el camino sería un **híbrido**, con humanos y escenarios en 3D y Felipe en sprite 2D por ahora.
+- **No:** DESCARTAR el 3D y pedir más poses 2D de Valeria al `director-arte`.
 
 ## Si seguimos
-- Diseño a cerrar: si el 3D sería solo para humanos (híbrido) o para todo el juego; y el renderizador (Forward+ para contorno interior y post-proceso, o seguir en Compatibility).
-- Arte que pediría (para el `director-arte`, con costo): un modelo de Valeria a medida (cara pintada, moño, sudadera con capucha), con rig compatible con la Universal Animation Library de Quaternius.
-- Valores que funcionaron: 121 px por metro (Valeria 200 px, Felipe 67 px), cámara ortográfica de 2,975 m de alto inclinada 18°, cámara ajustada a 1/121 m, luz en 3 escalones (cortes 0,12 y 0,55, medio 0,55), ambiente violeta (0,36, 0,31, 0,44), lámpara de energía 1,8 y alcance 1,7 m, contorno de 1 px `#210c0a`, papel a rayas cada 0,16 m.
-- Otra pregunta para después: ¿aporta el paralaje de una cámara en perspectiva lo suficiente para justificar perder el ajuste exacto a píxeles?
+- Diseño a cerrar: híbrido (humanos y casa en 3D, Felipe 2D) o todo 3D; la herramienta de IA y su licencia (TRELLIS.2 MIT con token o Meshy CC BY); el autorig.
+- Arte que pediría (para el `director-arte`, con costo): una vista de espalda y otra de perfil de Valeria y de Felipe A, para que la IA no invente los lados. La IA mejora mucho con varias vistas: Hunyuan3D-2 acepta frente, espalda, izquierda y derecha.
+- Valores que funcionaron:
+  - Pixel ×3 (render de 427×240 a 1280×720) y cámara ortográfica de 2,975 m de alto inclinada 18°, ajustada a 1 pixel de render.
+  - Bordes: umbral de profundidad 0,12 m, umbral de normal 0,45, exterior a 0,08 lineal mezclado 60 % con el café `#29140f`, interior a 0,42 lineal.
+  - Luz: sol y relleno en 2 tonos, lámpara en 3 (cortes 0,12 y 0,55); ambiente violeta (0,26, 0,22, 0,34); lámpara de energía 1,8 y alcance 1,7 m.
+  - Modelos IA reducidos a 9.000 a 12.000 caras, con el color proyectado de frente y el borde de la máscara erosionado 2 px para que no queden halos blancos.
+- Otra pregunta para después: ¿aporta el paralaje de una cámara en perspectiva lo suficiente para justificar perder el ajuste exacto a pixel?

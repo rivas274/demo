@@ -114,6 +114,8 @@ func _ready() -> void:
 	ayuda.add_theme_font_size_override("font_size", 8)
 	ayuda.visible = false
 	add_child(ayuda)
+	if "--sin-paleta" in OS.get_cmdline_user_args():
+		paleta_activa = false
 	_aplicar()
 
 

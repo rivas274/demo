@@ -22,7 +22,7 @@ const PUPILA := Color("1b1714")
 @export var z_piso := 0.3
 @export var z_cojin := -0.62
 @export var alto_cojin := 0.36
-@export var giro_3_4 := 30.0
+@export var giro_3_4 := 40.0
 
 var _cuerpo: Node3D
 var _cabeza: Node3D
@@ -109,7 +109,7 @@ func _armar() -> void:
 	_cuerpo = Node3D.new()
 	add_child(_cuerpo)
 	# Cuerpo de persa grande: redondo, lomo atigrado, panza y pecho blancos.
-	_ovalo(_cuerpo, 0.135, Vector3(-0.02, 0.16, 0), Vector3(1.3, 0.85, 0.95), func(p: Vector3) -> Color:
+	_ovalo(_cuerpo, 0.13, Vector3(-0.03, 0.15, 0), Vector3(1.3, 0.88, 1.0), func(p: Vector3) -> Color:
 		if p.y < -0.15 or (p.x > 0.55 and p.y < 0.5):
 			return BLANCO
 		return RAYA if fmod(p.x * 2.2 + 10.0, 1.0) < 0.28 and p.y > 0.1 else ATIGRADO)
@@ -124,16 +124,16 @@ func _armar() -> void:
 	_cola = Node3D.new()
 	_cola.position = Vector3(-0.17, 0.2, 0)
 	_cuerpo.add_child(_cola)
-	var puntos := [Vector3(-0.03, 0.03, 0), Vector3(-0.07, 0.09, 0), Vector3(-0.09, 0.16, 0), Vector3(-0.08, 0.23, 0), Vector3(-0.05, 0.29, 0)]
+	var puntos := [Vector3(-0.04, 0.03, 0), Vector3(-0.09, 0.1, 0), Vector3(-0.1, 0.18, 0), Vector3(-0.08, 0.25, 0)]
 	for i in puntos.size():
-		var r := 0.055 + 0.012 * sin(float(i) / 4.0 * PI)
+		var r := 0.068 + 0.016 * sin(float(i) / 3.0 * PI)
 		var oscura := i % 2 == 1
 		_ovalo(_cola, r, puntos[i], Vector3.ONE, func(_p: Vector3) -> Color: return RAYA if oscura else ATIGRADO)
 	# Cabeza grande (56 % de la altura): gorro atigrado con franja blanca, cachetes blancos.
 	_cabeza = Node3D.new()
-	_cabeza.position = Vector3(0.11, 0.33, 0)
+	_cabeza.position = Vector3(0.13, 0.31, 0)
 	_cuerpo.add_child(_cabeza)
-	_ovalo(_cabeza, 0.125, Vector3.ZERO, Vector3(0.95, 0.92, 1.08), func(p: Vector3) -> Color:
+	_ovalo(_cabeza, 0.145, Vector3.ZERO, Vector3(0.95, 0.92, 1.08), func(p: Vector3) -> Color:
 		if p.y < -0.05 or (p.x > 0.35 and absf(p.z) < 0.28):
 			return BLANCO
 		if p.y > 0.35 and absf(p.z) < 0.4 and fmod(absf(p.z) * 6.0, 1.0) > 0.6:
@@ -141,7 +141,7 @@ func _armar() -> void:
 		return ATIGRADO)
 	for lado in [-1.0, 1.0]:
 		# Cachetes esponjados de persa.
-		_ovalo(_cabeza, 0.06, Vector3(0.07, -0.055, 0.06 * lado), Vector3(1.0, 0.8, 1.0), func(_p: Vector3) -> Color: return BLANCO)
+		_ovalo(_cabeza, 0.07, Vector3(0.075, -0.06, 0.065 * lado), Vector3(1.0, 0.8, 1.0), func(_p: Vector3) -> Color: return BLANCO)
 		# Orejas pequeñas.
 		var oreja := MeshInstance3D.new()
 		var cono := CylinderMesh.new()
@@ -150,17 +150,17 @@ func _armar() -> void:
 		cono.height = 0.06
 		cono.radial_segments = 4
 		oreja.mesh = cono
-		oreja.position = Vector3(-0.01, 0.11, 0.07 * lado)
+		oreja.position = Vector3(-0.01, 0.13, 0.08 * lado)
 		oreja.rotation = Vector3(0.45 * lado, 0, 0)
 		_material(oreja, ATIGRADO)
 		_cabeza.add_child(oreja)
 		# Ojos verde avellana a media asta, mirando de reojo hacia la cámara.
-		var ojo_pos := Vector3(0.105, 0.015, 0.05 * lado)
-		_ovalo(_cabeza, 0.024, ojo_pos, Vector3(0.5, 1.0, 1.0), func(_p: Vector3) -> Color: return OJO, false)
-		_ovalo(_cabeza, 0.011, ojo_pos + Vector3(0.012, -0.004, 0.012), Vector3(0.5, 1.4, 1.0), func(_p: Vector3) -> Color: return PUPILA, false)
-		_ovalo(_cabeza, 0.026, ojo_pos + Vector3(0.006, 0.016, 0), Vector3(0.5, 0.55, 1.05), func(_p: Vector3) -> Color: return ATIGRADO, false)
+		var ojo_pos := Vector3(0.122, 0.018, 0.058 * lado)
+		_ovalo(_cabeza, 0.031, ojo_pos, Vector3(0.5, 1.0, 1.0), func(_p: Vector3) -> Color: return OJO, false)
+		_ovalo(_cabeza, 0.014, ojo_pos + Vector3(0.014, -0.005, 0.014), Vector3(0.5, 1.4, 1.0), func(_p: Vector3) -> Color: return PUPILA, false)
+		_ovalo(_cabeza, 0.034, ojo_pos + Vector3(0.008, 0.02, 0), Vector3(0.5, 0.55, 1.05), func(_p: Vector3) -> Color: return ATIGRADO, false)
 	# Nariz rosada.
-	_ovalo(_cabeza, 0.016, Vector3(0.12, -0.03, 0), Vector3(0.6, 0.7, 1.0), func(_p: Vector3) -> Color: return ROSA, false)
+	_ovalo(_cabeza, 0.02, Vector3(0.14, -0.035, 0), Vector3(0.6, 0.7, 1.0), func(_p: Vector3) -> Color: return ROSA, false)
 
 
 ## Esfera escalada con color por vértice según una función de la posición (de -1 a 1).
@@ -187,7 +187,7 @@ func _ovalo(padre: Node3D, r: float, pos: Vector3, esc: Vector3, color_de: Calla
 	mi.mesh = am
 	mi.position = pos
 	mi.scale = esc * r
-	var mat := Toon.material(Color.WHITE)
+	var mat := Toon.material(Color.WHITE, 0.25)
 	mat.set_shader_parameter("usar_color_vertice", true)
 	if contorno:
 		mat.next_pass = Toon.material_contorno()

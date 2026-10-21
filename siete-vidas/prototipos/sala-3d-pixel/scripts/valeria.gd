@@ -210,17 +210,17 @@ func _pelo(sk: Skeleton3D) -> void:
 	pelo.transform = reposo.affine_inverse() * Transform3D(Basis(), reposo.origin + Vector3(0, 0.12, 0))
 	var mat := Toon.material(PELO)
 	mat.next_pass = Toon.material_contorno()
-	_esfera(pelo, 0.112, Vector3(0, 0.05, -0.045), Vector3(1.0, 0.85, 0.95), mat)
+	_esfera(pelo, 0.11, Vector3(0, 0.06, -0.03), Vector3(0.86, 0.78, 1.0), mat)
 	_esfera(pelo, 0.075, Vector3(0, 0.15, -0.07), Vector3.ONE, mat)
 	# Ojos: dos puntitos oscuros (a esta escala son 2 px).
 	var ojo := Toon.material(Color("2a1810"))
 	for lado in [-1.0, 1.0]:
 		var o := MeshInstance3D.new()
 		var bm := BoxMesh.new()
-		bm.size = Vector3(0.022, 0.03, 0.02)
+		bm.size = Vector3(0.026, 0.034, 0.03)
 		o.mesh = bm
 		o.material_override = ojo
-		o.position = Vector3(0.038 * lado, 0.0, 0.095)
+		o.position = Vector3(0.036 * lado, 0.0, 0.112)
 		pelo.add_child(o)
 
 

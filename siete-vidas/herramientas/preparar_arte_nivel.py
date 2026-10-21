@@ -1121,6 +1121,44 @@ def vaso_esquirlas():
         print(f"Esquirlas: {nombre} {ancho}x{alto}")
 
 
+# Vista del pasillo con la paloma (decisión del creador, 2026-10-21; encargo diseno/encargo-gemini-vista-paloma.md).
+# `vista-paloma.png`: a la izquierda la vista sin pizza (ladrillo y toldo), a la derecha la paloma en 3 poses (quieta,
+# picoteando, inflada). La vista se ajusta al vidrio (150 × 120) recortando, sin deformar; el borde casi blanco del
+# toldo pasa a crema; la paloma va a ~1/4 del alto de la vista, a la densidad de pixel de la vista.
+VISTA_PALOMA = (28, 172, 662, 718)
+PALOMAS = [("paloma_quieta", (694, 90, 944, 365)), ("paloma_picotea", (676, 490, 972, 662)), ("paloma_inflada", (690, 735, 966, 1015))]
+ALTO_PALOMA = 30
+## Fila de la vista (ya a 150 × 120) donde empieza el toldo (la barra de arriba).
+TOLDO_PALOMA_Y = 33
+
+
+def vista_paloma():
+    hoja, _ = sin_fondo(Image.open(ORIGEN / "vista-paloma.png"))
+    vista = Image.open(ORIGEN / "vista-paloma.png").convert("RGBA").crop(VISTA_PALOMA)
+    # 150 × 120 = 1,25 : 1; la vista mide ~1,16 : 1, así que se escala por el ancho y se recorta arriba (ladrillo).
+    escala = 150 / vista.width
+    vista = vista.resize((150, round(vista.height * escala)), Image.NEAREST)
+    sobra = vista.height - 120
+    vista = vista.crop((0, sobra, 150, sobra + 120))
+    a = np.asarray(vista).copy().astype(int)
+    a[:, :, 3] = 255
+    casi_blanco = a[:, :, :3].min(axis=2) >= 225
+    a[casi_blanco, :3] = (237, 228, 214)
+    # El toldo un poco más oscuro que el ladrillo (como la vista anterior, B2): se lee como algo de afuera.
+    a[TOLDO_PALOMA_Y:, :, :3] = (a[TOLDO_PALOMA_Y:, :, :3] * OSCURECER_TOLDO).astype(int)
+    Image.fromarray(a.astype(np.uint8), "RGBA").save(DESTINO / "vista_pasillo.png")
+    print("Vista paloma: vista_pasillo", vista.size, f"recortados {sobra} px arriba, {int(casi_blanco.sum())} px crema")
+    # La paloma: la misma escala para las 3 poses (la de la quieta da el alto).
+    quieta = recortar_opaco(hoja.crop(PALOMAS[0][1]))
+    k = ALTO_PALOMA / quieta.height
+    for nombre, caja in PALOMAS:
+        pose = recortar_opaco(hoja.crop(caja))
+        pose = recortar_opaco(sin_sueltos(pose.resize((max(1, round(pose.width * k)), max(1, round(pose.height * k))), Image.NEAREST)))
+        pose.save(DESTINO / f"{nombre}.png")
+        cambiados = sin_blanco_puro(nombre)
+        print("Vista paloma:", nombre, pose.size, cambiados)
+
+
 if __name__ == "__main__":
     import sys
     if sys.argv[1:] == ["consistencia"]:
@@ -1131,5 +1169,7 @@ if __name__ == "__main__":
         rotos()
     elif sys.argv[1:] == ["vacios"]:
         vacios()
+    elif sys.argv[1:] == ["paloma"]:
+        vista_paloma()
     else:
         main()

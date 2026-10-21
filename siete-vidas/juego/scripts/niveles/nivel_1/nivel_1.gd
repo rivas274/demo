@@ -94,7 +94,7 @@ const CORTINA_ADENTRO := 9.0
 const CORTINA_FIN_TELA := 42.0
 const CORTINA_SOBRE_VENTANA := 18.0
 ## Vidrio de la ventana del pasillo (en el mundo): el hueco de 150 × 120 del marco de la casa (`ventana_casa`, G2),
-## con la vista del toldo y la caja de pizza detrás (`vista_pasillo`, B2). El alféizar del marco queda a 90 cm.
+## con la vista del toldo y la paloma detrás (`vista_pasillo`, B2). El alféizar del marco queda a 90 cm.
 const VIDRIO_PASILLO := Rect2(4639, ALFEIZAR_PASILLO - 132, 150, 120)
 ## Puertas: [nombre, posición (al pie, al centro), puerta a la que lleva]. Van de a pares.
 const PUERTAS := [
@@ -403,12 +403,16 @@ const AGENDA_SITIOS := {
 }
 ## Lugares que se ven antes de poder alcanzarlos (R17): [qué, dónde, con qué maña se vuelve].
 const LUGARES_VISTOS := [
-	["Toldo del vecino con la caja de pizza (afuera, tras el vidrio del pasillo)", PIZZA, "Caer de Pie"],
+	["Toldo del vecino con la paloma (afuera, tras el vidrio del pasillo)", PALOMA, "Caer de Pie"],
 	["Caja de recuerdos de Valeria (repisa alta del dormitorio)", Rect2(6315, SUELO - 284, 80, 10), "Afilar Garras"],
 ]
-## La caja de pizza, sobre el toldo del vecino, del otro lado del vidrio (dentro de VIDRIO_PASILLO).
-## Es la caja del arte de la vista (`vista_pasillo`), con la tapa abierta y la grasa; el vapor lo pone el código.
-const PIZZA := Rect2(VIDRIO_PASILLO.position.x + 63, VIDRIO_PASILLO.position.y + 25, 77, 72)
+## La paloma, parada sobre la tela del toldo del vecino, del otro lado del vidrio (dentro de VIDRIO_PASILLO; decisión
+## del creador, 2026-10-21: reemplaza a la caja de pizza). Los pies en la fila 42 de la vista (arriba de la tela, bajo la
+## barra), en el paño derecho: el parante del marco no la corta). 3 poses de Gemini (`paloma_quieta`, `paloma_picotea`, `paloma_inflada`) que anima ArteNivel1.
+const PALOMA := Rect2(VIDRIO_PASILLO.position.x + 94, VIDRIO_PASILLO.position.y + 42 - 31, 32, 31)
+## La paloma: cada cuánto picotea (s) y cuánto dura el picotazo; se infla si Felipe está en el alféizar.
+const PALOMA_PICOTEA_CADA := 3.4
+const PALOMA_PICOTEA_DURA := 0.5
 ## Atajos (R6): [qué, dónde, desde dónde se abre].
 const ATAJOS := [["Caja de arriba de la pila de la mudanza", CAJAS, "escalera"]]
 ## Cada maña que el nivel enseña abre un camino y molesta a alguien (R19): maña -> [camino, a quién molesta].

@@ -472,14 +472,14 @@ func _actualizar_laser(delta: float) -> void:
 		travesuras.cumplir("laser", Vector2(4710, Nivel1.SUELO - 97))
 
 
-## Frases que salen una vez al ver algo: la pizza del lugar visto (desde el alféizar) y el láser (la primera vez).
+## Frases que salen una vez al ver algo: la paloma del lugar visto (desde el alféizar) y el láser (la primera vez).
 func _actualizar_frases_de_lugar() -> void:
 	if not felipe.is_on_floor():
 		return
 	var pies := felipe.global_position
 	var alfeizar: Rect2 = Nivel1.rect_pieza("Alféizar")
 	if absf(pies.y - alfeizar.position.y) < 3.0 and pies.x > alfeizar.position.x and pies.x < alfeizar.end.x:
-		_decir("pizza", true)
+		_decir("paloma", true)
 	if habitacion == "pasillo" and _laser and not _laser.apagado and absf(_laser.global_position.x - pies.x) < 200.0 and pies.y > Nivel1.SUELO - 4.0:
 		_decir("laser_visto")
 

@@ -286,11 +286,11 @@ func _correr() -> void:
 			se_alcanza = se_alcanza or (superficie.position.x < rect.end.x and superficie.end.x > rect.position.x and absf(superficie.position.y - rect.end.y) < 12.0)
 		_comprobar(not se_alcanza and lugar[2] != "", "R17 «%s» se ve pero no se alcanza todavía (se vuelve con %s)" % [lugar[0], lugar[2]])
 		_comprobar(Nivel1.habitacion_de(rect.get_center()) != "", "R17 «%s» está dentro de un cuarto" % lugar[0])
-	# G3. La caja de pizza está afuera: dentro del vidrio del pasillo y por encima de su borde de abajo; el alféizar
+	# G3. La paloma está afuera: dentro del vidrio del pasillo y por encima de su borde de abajo; el alféizar
 	# (que se pisa) queda bajo el vidrio y no la contiene.
 	var alfeizar := _pieza("Alféizar")
-	_comprobar(Nivel1.VIDRIO_PASILLO.encloses(Nivel1.PIZZA), "G3 La caja de pizza está detrás del vidrio del pasillo")
-	_comprobar(alfeizar.position.y > Nivel1.VIDRIO_PASILLO.end.y and Nivel1.PIZZA.end.y < alfeizar.position.y - 20.0, "G3 El alféizar pisable queda bajo el vidrio y no contiene la caja")
+	_comprobar(Nivel1.VIDRIO_PASILLO.encloses(Nivel1.PALOMA), "G3 La paloma está detrás del vidrio del pasillo")
+	_comprobar(alfeizar.position.y > Nivel1.VIDRIO_PASILLO.end.y and Nivel1.PALOMA.end.y < alfeizar.position.y - 20.0, "G3 El alféizar pisable queda bajo el vidrio y no contiene la paloma")
 
 	# R18. Una travesura de la Agenda con reacción por habitación (salvo el alivio).
 	var con_travesura := {}

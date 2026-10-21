@@ -3,7 +3,7 @@ extends RefCounted
 ## Arte del nivel 1 (Gemini, assets/nivel1/; ArteNivel lo carga): crea los lienzos por capa y dibuja lo que va en cada
 ## uno. Las piezas de la lista Nivel1.ARTE se dibujan con las funciones genéricas de ArteNivel (dibujar_capa, sombras de
 ## pared y de contacto); aquí queda solo lo propio de esta casa: la cortina del dormitorio, el armario bajo la escalera,
-## la ventana del pasillo con la pizza afuera, las alfombras tendidas, el sofá que cambia al romper el plástico, la
+## la ventana del pasillo con la paloma afuera, las alfombras tendidas, el sofá que cambia al romper el plástico, la
 ## baranda con sus plantas, el grifo que gotea y el pasamanos delante de Felipe. El decorado sin colisión (pantalla,
 ## teclado, fachada, nido, pelos, cables) lo dibuja DecoradoNivel1. Nada de esto toca colisiones ni lógica.
 
@@ -105,7 +105,7 @@ func cada_cuadro(delta: float) -> void:
 	var en_escalera := felipe.en_escalera() or (habitacion == "recibidor" and felipe.global_position.x > Nivel1.CAJAS.end.x and felipe.global_position.y < Nivel1.SUELO - 4.0)
 	pasamanos.modulate.a = Nivel1.OPACIDAD_PASAMANOS if en_escalera else 1.0
 	if habitacion == "pasillo":
-		# El vapor de la pizza se mueve.
+		# La paloma picotea o se infla.
 		(lienzos["pared"] as Node2D).queue_redraw()
 	if not guion.calcetines_volando.is_empty() or habitacion == "estudio":
 		# En el estudio la serie del monitor titila.
@@ -314,23 +314,29 @@ func _dibujar_armario_escalera(c: Node2D) -> void:
 	c.draw_rect(Rect2(rellano.position.x, rellano.end.y + 1, rellano.size.x, 3), Color(0, 0, 0, 0.3))
 
 
-## Vista de la ventana del pasillo (B2, G3): el patio de luz con el toldo del vecino y la caja de pizza AFUERA, detrás
-## del vidrio (`vista_pasillo`, Gemini, con el toldo un poco más oscuro); encima, el tinte del vidrio, dos reflejos de
-## pixel y el vapor de la pizza (por código). El marco de la casa (`ventana_casa`) se dibuja después, delante.
+## Vista de la ventana del pasillo (B2, G3): el patio de luz con el toldo del vecino y la paloma AFUERA, detrás del
+## vidrio (`vista_pasillo` y las 3 poses de la paloma, Gemini, 2026-10-21); encima, el tinte del vidrio y dos reflejos
+## de pixel. La paloma: quieta; de vez en cuando picotea; se infla si Felipe está en el alféizar. El marco de la casa
+## (`ventana_casa`) se dibuja después, delante.
+## ¿Felipe está parado en el alféizar del pasillo? (la paloma se infla).
+func felipe_en_alfeizar() -> bool:
+	var felipe := nivel.felipe
+	var alfeizar: Rect2 = Nivel1.rect_pieza("Alféizar")
+	return felipe.is_on_floor() and absf(felipe.global_position.y - alfeizar.position.y) < 3.0 and felipe.global_position.x > alfeizar.position.x and felipe.global_position.x < alfeizar.end.x
+
+
 func _dibujar_vista_pasillo(c: Node2D) -> void:
 	var vidrio := Nivel1.VIDRIO_PASILLO
 	var vista := ArteNivel.textura("vista_pasillo")
 	if vista:
 		c.draw_texture(vista, vidrio.position)
-	var t := tiempo
-	var pizza := Nivel1.PIZZA
-	for i in 3:
-		var x0 := pizza.position.x + 18.0 + i * 9.0
-		var puntos := PackedVector2Array()
-		for k in 6:
-			var y := pizza.position.y + 40.0 - k * 3.0 - fmod(t * 6.0 + i * 4.0, 3.0)
-			puntos.append(Vector2(x0 + sin(k * 1.3 + t * 3.0 + i) * 2.0, y))
-		c.draw_polyline(puntos, Color(1, 1, 1, 0.55), 1.0)
+	var pose := "paloma_quieta"
+	if felipe_en_alfeizar():
+		pose = "paloma_inflada"
+	elif fmod(tiempo, Nivel1.PALOMA_PICOTEA_CADA) < Nivel1.PALOMA_PICOTEA_DURA:
+		pose = "paloma_picotea"
+	# Los pies sobre la tela (base de PALOMA), centrada en su rectángulo.
+	ArteNivel.dibujar(c, pose, Nivel1.PALOMA.get_center().x, Nivel1.PALOMA.end.y)
 	c.draw_rect(vidrio, Color(0.75, 0.88, 1.0, 0.08))
 	for desde: float in [0.3, 0.72]:
 		var x0 := vidrio.position.x + vidrio.size.x * desde

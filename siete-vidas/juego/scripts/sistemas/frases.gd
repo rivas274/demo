@@ -101,7 +101,7 @@ const FELIPE := {
 	"robot_registra": [["FELIPE_ROBOT_REGISTRA_1", 0]],
 	"puerta_abierta": [["FELIPE_PUERTA_ABIERTA_1", 7]],
 	"ropa": [["FELIPE_ROPA_1", 7]],
-	"pizza": [["FELIPE_PIZZA_1", 4]],
+	"paloma": [["FELIPE_PALOMA_1", 4]],
 	# La puerta del baño (lugar insinuado para la maña futura «Abrir puertas»).
 	"bano": [["FELIPE_BANO_1", 4]],
 	"bano_manija": [["FELIPE_BANO_MANIJA_1", 1]],

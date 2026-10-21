@@ -34,6 +34,8 @@ func _initialize() -> void:
 		_rotos.call_deferred()
 	elif args.size() > 1 and args[1] == "comida":
 		_comida.call_deferred()
+	elif args.size() > 1 and args[1] == "paloma":
+		_paloma.call_deferred()
 	else:
 		_correr.call_deferred()
 
@@ -119,6 +121,35 @@ func _comida() -> void:
 		sala.travesuras.anuncios.limpiar()
 		await _esperar(2)
 		await _capturar("c-%s-despues" % comida.tipo)
+	quit()
+
+
+## La ventana del pasillo con la paloma: quieta, picoteando y, con Felipe en el alféizar, inflada.
+func _paloma() -> void:
+	var sala: Nivel = load("res://escenas/nivel_1.tscn").instantiate()
+	sala.mostrar_titulo = false
+	(sala.guion as GuionNivel1).batalla_con_jefe = false
+	root.add_child(sala)
+	var felipe: Felipe = sala.get_node("Felipe")
+	await _esperar(30)
+	felipe.global_position = Vector2(Nivel1.VIDRIO_PASILLO.position.x - 60.0, Nivel1.SUELO)
+	await _esperar(60)
+	var arte := (sala.guion as GuionNivel1).arte
+	for i in 400:
+		if fmod(arte.tiempo, Nivel1.PALOMA_PICOTEA_CADA) > Nivel1.PALOMA_PICOTEA_DURA + 0.3:
+			break
+		await physics_frame
+	sala.travesuras.dialogo.limpiar()
+	await _capturar("p1-paloma-quieta")
+	for i in 400:
+		if fmod(arte.tiempo, Nivel1.PALOMA_PICOTEA_CADA) < Nivel1.PALOMA_PICOTEA_DURA * 0.5:
+			break
+		await physics_frame
+	await _capturar("p2-paloma-picotea")
+	var alfeizar: Rect2 = Nivel1.rect_pieza("Alféizar")
+	felipe.global_position = Vector2(alfeizar.get_center().x, alfeizar.position.y)
+	await _esperar(60)
+	await _capturar("p3-paloma-inflada")
 	quit()
 
 

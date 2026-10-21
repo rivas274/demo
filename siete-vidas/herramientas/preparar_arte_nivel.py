@@ -981,10 +981,8 @@ def derrotas():
 # MISMO arte del objeto (misma escala y paleta), cada uno con su contorno de 1 px. [nombre, origen, polígono en pixeles
 # del origen]. La planta tirada es la planta de la maceta, sin la maceta. El charco y la tierra los dibuja el juego.
 ROTOS = [
-    ["roto_vaso_1", "vaso", [(2, 3), (12, 3), (9, 13), (3, 11)]],
-    ["roto_vaso_2", "vaso", [(13, 6), (21, 4), (20, 15), (14, 13)]],
-    ["roto_vaso_3", "vaso", [(4, 18), (13, 20), (11, 29), (3, 28)]],
-    ["roto_vaso_4", "vaso", [(15, 21), (21, 19), (21, 29), (16, 28)]],
+    # El fondo curvo del vaso: el pedazo grande (las esquirlas son de vaso_esquirlas()).
+    ["roto_vaso_1", "vaso", [(2, 24), (21, 24), (21, 31), (2, 31)]],
     ["roto_taza_1", "taza", [(1, 3), (12, 3), (10, 13), (2, 12)]],
     ["roto_taza_2", "taza", [(9, 10), (20, 9), (19, 20), (11, 19)]],
     ["roto_taza_3", "taza", [(20, 6), (29, 6), (29, 18), (21, 18)]],
@@ -1010,6 +1008,7 @@ def rotos():
         pieza = recortar_opaco(Image.fromarray(a, "RGBA"))
         pieza.save(DESTINO / f"{nombre}.png")
         print(f"Rotos: {nombre} {pieza.size}")
+    vaso_esquirlas()
     maceta = Image.open(DESTINO / "maceta.png").convert("RGBA")
     # La planta (filas 0 a 17 del arte, sin la maceta), entera: queda caída sobre su tierra en el piso. Acostada de lado
     # no se leía (probado 2026-10-21).
@@ -1084,6 +1083,42 @@ def vacios():
     trazo([(46, 28), (46, 30)])
     Image.fromarray(v, "RGBA").save(DESTINO / "pollo_huesos.png")
     print("Vacíos: pollo_huesos", Image.open(DESTINO / "pollo_huesos.png").size)
+
+
+# Esquirlas del vaso (2026-10-21: los recortes rectos parecían vasitos en miniatura): triángulos y trapecios irregulares
+# de 3 a 6 px, en el celeste del vaso, con un brillo claro de 1 px y su contorno. [nombre, polígono en una grilla de 8].
+ESQUIRLAS = [
+    ["roto_vaso_2", [(0, 5), (3, 0), (5, 5)]],
+    ["roto_vaso_3", [(0, 2), (6, 0), (4, 4), (1, 4)]],
+    ["roto_vaso_4", [(0, 3), (2, 0), (4, 1), (3, 4)]],
+    ["roto_vaso_5", [(0, 4), (5, 0), (3, 4)]],
+]
+
+
+def vaso_esquirlas():
+    from PIL import ImageDraw
+    vaso = np.asarray(Image.open(DESTINO / "vaso.png").convert("RGBA")).astype(int)
+    opaco = vaso[:, :, 3] > 0
+    celeste = vaso[14, 6].tolist()
+    brillo = vaso[4, 4].tolist() if vaso[4, 4, 3] > 0 else [230, 244, 250, 255]
+    for nombre, poligono in ESQUIRLAS:
+        ancho = max(x for x, _ in poligono) + 3
+        alto = max(y for _, y in poligono) + 3
+        mascara = Image.new("L", (ancho, alto), 0)
+        ImageDraw.Draw(mascara).polygon([(x + 1, y + 1) for x, y in poligono], fill=255, outline=255)
+        m = np.asarray(mascara) > 0
+        a = np.zeros((alto, ancho, 4), int)
+        a[m] = celeste
+        borde = m & ~ndimage.binary_erosion(m)
+        a[borde] = CONTORNO_ROTO
+        # Brillo de 1 px: el primer pixel de adentro de la fila de más arriba.
+        adentro = m & ~borde
+        ys, xs = np.where(adentro)
+        if len(ys):
+            k = np.argmin(ys * 10 + xs)
+            a[ys[k], xs[k]] = brillo
+        Image.fromarray(a.astype(np.uint8), "RGBA").save(DESTINO / f"{nombre}.png")
+        print(f"Esquirlas: {nombre} {ancho}x{alto}")
 
 
 if __name__ == "__main__":

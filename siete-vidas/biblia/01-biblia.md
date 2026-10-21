@@ -55,7 +55,7 @@ Cada personaje es una caricatura reconocible del barrio o de internet, vista por
 | Personaje | Quién es | Qué aporta al juego | Frase típica |
 | --- | --- | --- | --- |
 | **Su Majestad** Felipe Ron con Pasas I ("Pipe" para Valeria) | El protagonista. Gato blanco con manchas atigradas grises y cafés, pelo largo, ego enorme, cero cardio | Todos los poderes y la narración | *"No estoy gordo. Estoy en modo invierno."* |
-| **Valeria** | Su dueña. Teletrabaja, sube todo a redes, lo ama de verdad | La base, el final del Hijo Pródigo | *"¿Quién es el bebito más gordito? ¡TÚ!"* |
+| **Valeria** | Su dueña. Teletrabaja, ama a Felipe y a veces sube algo; su humor es seco e irónico, no de redes | La base, el final del Hijo Pródigo | *"Ya, bebito gordito. Ganaste. Otra vez."* |
 | **A.S.P.I.** | La aspiradora robot de la casa | Jefe recurrente que va mejorando a lo largo del juego | *"Detectando suciedad. Detectando… gato."* |
 | **Duquesa** | Gata persa del penthouse, influencer con 200 mil seguidores | La conquista amorosa; abre zonas de lujo | *"Ay, ¿tu dueña compra comida de supermercado? Qué tierno."* |
 | **El Patrón** | Gato tuerto, jefe del Consejo de los Tejados | Jefe de mitad del juego; controla el respeto felino | *"En este techo no se maulla sin permiso."* |
@@ -335,6 +335,14 @@ Logros 21 a 40. Los marcados como ocultos no se muestran en Steam hasta consegui
 - **Frases de internet usadas mal a propósito:** *"literal"*, *"no es por nada pero"*, *"me siento atacado"*, *"POV:"*, *"y lo volvería a hacer"*, *"bro"*, *"main character"*, *"red flag"*.
 - **Picante +16, censurado con ironía:** el romance con Duquesa, las "casas paralelas" como infidelidad, el celo de los gatos del techo.
 - **La sátira apunta hacia arriba:** se burla de influencers, constructoras, juntas de vecinos y la cultura del meme; no de grupos vulnerables.
+
+### Voz de Valeria (2026-10-21)
+
+Es la realidad plana contra la que choca la epicidad de Felipe (pilar 5). Tres reglas:
+
+1. **Su vida no son las redes, es su día:** reuniones, café, cuotas, limpieza, mudanza, almuerzo. Las redes salen una sola vez por nivel, de pasada y nunca como remate; cuando graba, la pose lo cuenta.
+2. **No hace chistes: dice lo que pasa, cansada.** Frases planas de 60 caracteres como máximo, con punto final, sin mayúsculas sostenidas, sin juegos de palabras ni frases de internet. Cuanto más se enoja, más corto habla.
+3. **Lo malcría con hechos, no con discursos:** abre la puerta, perdona y vuelve a perdonar. «Bebito gordito» sale una sola vez, al perdonar.
 
 **Memes con moderación.** La base del humor es cómo un gato ve a los humanos, que no envejece. Máximo una frase de internet por escena, y todas van en una tabla aparte para actualizarlas o adaptarlas en cada idioma.
 

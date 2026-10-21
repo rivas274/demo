@@ -6,6 +6,7 @@ Estado: **diseño aprobado: versión A del híbrido v2** (muy Chibi, cabeza gran
 
 - **Nombre:** Felipe Ron con Pasas ("como el sabor de helado que nadie pide").
 - **Cómo exige que lo llamen:** Su Majestad Felipe Ron con Pasas I, el Magnífico.
+- **Voz de Valeria (2026-10-21; detalle en la biblia, «Tono, humor y voz»):** (1) su vida no son las redes, es su día (redes una vez por nivel, de pasada); (2) no hace chistes: dice lo que pasa, cansada, en frases planas de 60 caracteres como máximo, sin mayúsculas sostenidas; (3) lo malcría con hechos, no con discursos («bebito gordito» una sola vez, al perdonar). Felipe sigue épico: es el otro polo.
 - **Apodo de Valeria:** Pipe. Otras casas le dicen "Michi" o "Don Gato".
 - **Personalidad:** ego de rey egipcio, cero cardio, egoísta, sarcástico, secretamente leal a Valeria.
 - **Voz:** aristócrata ofendido que aprendió a escribir en los comentarios de internet. Sin actor de voz: maullidos procesados y texto.

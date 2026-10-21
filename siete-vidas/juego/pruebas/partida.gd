@@ -438,7 +438,7 @@ func _municion() -> Objeto:
 	var mejor: Objeto = null
 	var mejor_otra: Objeto = null
 	for hijo in sala.get_children():
-		if hijo is Objeto and Nivel1.habitacion_de(hijo.position) == "estudio" and hijo.visible and not hijo.tirable.roto and hijo.position.y < Nivel1.SUELO - 10.0:
+		if hijo is Objeto and Nivel1.habitacion_de(hijo.position) == "estudio" and hijo.visible and not hijo.tirable.roto and not hijo.tirable.cayendo and hijo.position.y < Nivel1.SUELO - 10.0:
 			var isla := "derecha" if hijo.position.x >= librero.position.x else "izquierda"
 			if mejor == null or hijo.position.y > mejor.position.y:
 				mejor = hijo

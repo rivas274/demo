@@ -25,6 +25,8 @@ const DESVANECER := 0.8
 const REBOTE := -420.0
 ## Lleno bajo la repisa: sale disparada hacia adelante (nunca queda justo bajo la repisa).
 const EMPUJE_LLENA := 80.0
+## Margen a cada lado de los muebles bajo los que no se queda llena (medio cuerpo de A.S.P.I. y un poco).
+const MARGEN_LLENA := 44.0
 ## Alto del dibujo de A.S.P.I.: Felipe la apaga si cae sobre esa franja.
 const ALTO_ARRIBA := 40.0
 ## Mientras se ve el «¡CLIC!» no hay otro rótulo sobre A.S.P.I. (M3).
@@ -348,13 +350,41 @@ func _llenar() -> void:
 	apariencia.abrir_tapa()
 	nivel.sonar("logro")
 	presentacion.cartel("JEFE_DEPOSITO_LLENO", 1.6, datos.pista_vulnerable)
-	# Nunca queda justo bajo la repisa: sale disparada unos 80 px hacia adelante.
-	var repisa := nivel.pieza("Repisa de las macetas")
-	var patrulla := jefe.patrulla
-	if repisa and absf(jefe.global_position.x - (repisa.position.x + 30.0)) < 70.0:
-		var hacia := 1.0 if jefe.global_position.x + EMPUJE_LLENA < patrulla.limite_derecho else -1.0
+	# Nunca queda justo bajo la repisa ni bajo la isla del librero (estudio v3: desde arriba Felipe caería en la caja o
+	# en el librero, no en su botón): sale disparada hacia adelante, al piso libre más cercano.
+	var x := jefe.global_position.x
+	var libre := _piso_libre(x)
+	if absf(libre - x) > 0.5:
 		var sale := create_tween()
-		sale.tween_property(jefe, "position:x", clampf(jefe.position.x + hacia * EMPUJE_LLENA, patrulla.limite_izquierdo, patrulla.limite_derecho), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		sale.tween_property(jefe, "position:x", jefe.position.x + (libre - x), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+
+## La x libre más cercana para quedarse llena: fuera de lo que tapa su botón desde arriba (Nivel1.ASPI_NO_SE_LLENA_BAJO,
+## con medio cuerpo de margen) y dentro de su patrulla. La repisa conserva su regla de siempre (80 px hacia adelante).
+func _piso_libre(x: float) -> float:
+	var patrulla := jefe.patrulla
+	var zonas: Array[Vector2] = []
+	for nombre: String in Nivel1.ASPI_NO_SE_LLENA_BAJO:
+		var pieza := nivel.pieza(nombre)
+		if pieza:
+			zonas.append(Vector2(pieza.position.x - MARGEN_LLENA, pieza.end.x + MARGEN_LLENA))
+	var repisa := nivel.pieza("Repisa de las macetas")
+	if repisa and absf(x - (repisa.position.x + 30.0)) < 70.0:
+		var hacia := 1.0 if x + EMPUJE_LLENA < patrulla.limite_derecho else -1.0
+		x = clampf(x + hacia * EMPUJE_LLENA, patrulla.limite_izquierdo, patrulla.limite_derecho)
+	# Las zonas se tocan (la caja va delante del librero): se sale por la derecha, hacia la puerta del balcón (piso
+	# libre); si no cabe en su patrulla, por la izquierda.
+	for zona in zonas:
+		if x > zona.x and x < zona.y:
+			var desde := zona.x
+			var hasta := zona.y
+			for otra in zonas:
+				if otra.x <= hasta and otra.y >= desde:
+					desde = minf(desde, otra.x)
+					hasta = maxf(hasta, otra.y)
+			x = hasta if hasta <= patrulla.limite_derecho else desde
+			break
+	return x
 
 
 func _actualizar_llena(delta: float) -> void:

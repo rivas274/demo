@@ -110,3 +110,11 @@ Idea tomada de un video sobre cómo hacer que un dash se sienta bien (5 pasos). 
 - [x] **Pausa «Decreto real» (hecha 2026-10-20):** Ficha de Su Majestad a la izquierda (retrato, kilos, humor y barras de defensa, carisma, ataque y peso con su frase; la velocidad, solo chiste), pergamino «Decretos de Su Majestad» con Felipe en su cojín y la corona al centro, y 4 botones de pergamino a la derecha que estampan el sello de lacre con destellos al elegir.
 - [x] **Toda la interfaz con el kit (G6/G7, hecha 2026-10-20):** HUD (pergaminos e íconos del kit), diálogo (pergamino y marco de retrato), libreta (pergamino con la foto del unicornio), resumen del día (pergamino con la cinta), aviso de logro (etiqueta con sello), barra del jefe (marco de madera y oro con relleno rojo y escudo azul) y carteles (cinta y pergamino).
 - [ ] **Mostrar al creador:** capturas antes y después de la pausa, la ficha, el HUD, el diálogo, los carteles, la libreta, el resumen y la barra del jefe, y el GIF del sello.
+
+## Prototipo pendiente: luz dinámica con mapas de normales (después de cerrar el nivel 1)
+
+- [ ] **Probar Sprite Normals** (https://github.com/Hugo-Dz/spritefusion-sprite-normals, Hugo Duprez, licencia MIT, CLI en Rust, local y sin créditos). Genera mapas de normales para sprites y hojas de animación de pixel art (`--frame-size 106x106` para las hojas de Felipe), para que las luces de Godot (`PointLight2D` y `CanvasTexture` con normales) iluminen a Felipe, Valeria y los muebles con volumen.
+  - **Cómo:** prototipo aparte en `siete-vidas/prototipos/luz-normales/` con `/prototipo`, sin tocar el juego. Felipe caminando junto a una lámpara con su mapa de normales y una luz pintada **en escalones** (un shader que cuantiza la luz en 2 o 3 niveles) para que siga viéndose pixel art.
+  - **Riesgos:** la luz dinámica tiende a degradados suaves, el «efecto filtro» que rechazó el creador (lección 26), y las normales estimadas desde el color pueden verse raras en el pelo esponjoso.
+  - **Veredicto:** si se ve pixel art y suma vida (lámparas, atardecer de la ventana, la imaginación roja de A.S.P.I.), entra en el nivel 2. Si parece un filtro, se descarta.
+  - Decidido por el creador el 2026-10-21: queda como prototipo pendiente.

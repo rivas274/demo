@@ -267,6 +267,10 @@ func _crear_aspi() -> void:
 	aspi.recibe_golpes.solo_aturdido = true
 	aspi.vida.murio.connect(_abrir_balcon)
 	nivel.add_child(aspi)
+	# En su base se acopla de frente a la estación (que está a su derecha).
+	if aspi.apariencia is AparienciaAspi:
+		(aspi.apariencia as AparienciaAspi).base_x = Nivel1.ASPI[0].x
+		(aspi.apariencia as AparienciaAspi).lado_base = 1.0
 	if batalla_con_jefe:
 		batalla = BatallaAspi.new(aspi, felipe, nivel)
 		# En la pelea, el contador de snacks queda fijo en el HUD (comer es una decisión de la pelea).

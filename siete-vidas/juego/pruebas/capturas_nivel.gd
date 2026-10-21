@@ -22,7 +22,7 @@ const PUNTOS := [
 	["9-dormitorio-cama", Vector2(5910, Nivel1.SUELO)],
 	["10-dormitorio-ropero", Vector2(6360, Nivel1.SUELO)],
 	["11-estudio", Vector2(6980, Nivel1.SUELO)],
-	["12-balcon", Vector2(7926, Nivel1.SUELO)],
+	["12-balcon", Vector2(8126, Nivel1.SUELO)],
 	["13-pasillo-bano", Vector2(Nivel1.BANO.x, Nivel1.SUELO)],
 ]
 

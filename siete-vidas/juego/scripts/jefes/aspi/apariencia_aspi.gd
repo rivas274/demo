@@ -24,8 +24,11 @@ extends Node2D
 @export var lugar_rueda := Vector2(-4, 0)
 @export var lugar_cepillo := Vector2(30, 1)
 ## Cuánto sube el cuerpo sobre el piso (deja ver la rueda) y espirales de la apagada.
-@export var alto_rueda := 3.0
+@export var alto_rueda := 2.0
 @export var espirales := 3
+## Dónde se estaciona (x en el mundo; INF = sin base) y hacia dónde mira ahí: acoplada de frente a la estación.
+var base_x := INF
+var lado_base := 1.0
 
 const CUADROS_CEPILLO := 6
 ## La franja verde de la LED en el arte del cuerpo (aspi_lado, mirando a la derecha) y la franja gris de la apagada.
@@ -63,6 +66,8 @@ func _physics_process(_delta: float) -> void:
 	if absf(x - _ultimo_x) > 0.05:
 		_mirando = signf(x - _ultimo_x)
 	_ultimo_x = x
+	if absf(_enemigo.velocity.x) < 1.0 and absf(x - base_x) < 6.0:
+		_mirando = lado_base
 	queue_redraw()
 
 

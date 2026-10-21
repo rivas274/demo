@@ -22,14 +22,28 @@ func _correr() -> void:
 	var felipe: Felipe = sala.get_node("Felipe")
 	await _cuadros(30, "")
 	var aspi: Enemigo = (sala.guion as GuionNivel1).aspi
-	felipe.global_position = Vector2(6930, Nivel1.SUELO)
+	# El cuarto completo en dos vistas (la cámara lo recorre) y A.S.P.I. en su base.
+	felipe.global_position = Vector2(6960, Nivel1.SUELO)
+	await _cuadros(60, "")
+	await _cuadros(2, "e-cuarto-izquierda")
+	felipe.global_position = Vector2(7600, Nivel1.SUELO)
+	await _cuadros(60, "")
+	await _cuadros(2, "e-cuarto-derecha")
+	aspi.global_position = Nivel1.ASPI[0]
+	aspi.patrulla.vision = 0.0
+	aspi.patrulla.quieta = true
+	felipe.global_position = Vector2(7000, Nivel1.SUELO)
+	await _cuadros(40, "")
+	await _cuadros(2, "d-en-la-base")
+	aspi.patrulla.quieta = false
+	felipe.global_position = Vector2(7380, Nivel1.SUELO)
 	felipe.vida.restante_invulnerable = 999.0
-	aspi.global_position = Vector2(7100, Nivel1.SUELO)
+	aspi.global_position = Vector2(7450, Nivel1.SUELO)
 	aspi.patrulla.vision = 0.0
 	await _cuadros(40, "")
 	await _cuadros(36, "a-anda")
 	aspi.patrulla.vision = 400.0
-	felipe.global_position = Vector2(7280, Nivel1.SUELO)
+	felipe.global_position = Vector2(7620, Nivel1.SUELO)
 	await _cuadros(36, "b-enojada")
 	aspi.vida.morir()
 	await _cuadros(60, "")

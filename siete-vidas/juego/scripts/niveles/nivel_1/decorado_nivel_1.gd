@@ -92,7 +92,7 @@ func dibujar_fachada(c: Node2D) -> void:
 	c.draw_rect(Rect2(balcon.position.x, Nivel1.ALTO, balcon.size.x, 2), Color("9a5b4c"))
 	c.draw_rect(Rect2(balcon.position.x, Nivel1.ALTO + 12, balcon.size.x, 6), Color(0, 0, 0, 0.25))
 	# Ventanas del piso de abajo: marco de madera, vidrio con luz, cortinas y alféizar.
-	for x0: float in [7762.0, 7902.0]:
+	for x0: float in [7962.0, 8102.0]:
 		var ventana := Rect2(x0, Nivel1.ALTO + 56, 70, 84)
 		c.draw_rect(ventana.grow(6), oscuro)
 		c.draw_rect(ventana.grow(5), Color("6e3a26"))
@@ -185,7 +185,7 @@ func dibujar_ambiente(c: Node2D) -> void:
 	var centro := Vector2(3230, Nivel1.DINTEL + 22.0)
 	c.draw_line(centro, centro + Vector2(cos(angulo), sin(angulo)) * 8.0, Color("c0392b"), 1.0)
 	# Estudio: el enchufe de la pared donde va el cable de la estación de carga (el cable es del arte).
-	_enchufe(c, Vector2(7262, Nivel1.PARED_BASE - 13))
+	_enchufe(c, Vector2(7330, Nivel1.PARED_BASE - 13))
 
 
 ## Mechón de pelo de 3 a 5 px en los dos tonos de Felipe.

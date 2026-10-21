@@ -56,7 +56,7 @@ const COLOR_LAMPARA := Color(1.0, 0.82, 0.5)
 const ALFA_CONO := [0.06, 0.07, 0.08]
 const ESCALONES_CONO := [1.0, 0.7, 0.42]
 const ALTO := SUELO + 30.0
-const ANCHO := 8356.0
+const ANCHO := 8556.0
 ## Medio ancho del rectángulo sagrado de cada puerta: medio vano (52 px) más 40 px libres a cada lado (B3).
 const MEDIO_RECT_PUERTA := 92.0
 ## Habitaciones en orden de ruta: [rectángulo, nombre, estilo de pared]. Muros de 160 px entre una y otra.
@@ -67,8 +67,8 @@ const HABITACIONES := [
 	[Rect2(2800, TECHO, 1340, SUELO - TECHO), "cocina", "azulejo"],
 	[Rect2(4380, TECHO, 1240, SUELO - TECHO), "pasillo", "tapiz_azul"],
 	[Rect2(5780, TECHO, 720, SUELO - TECHO), "dormitorio", "rosa"],
-	[Rect2(6820, TECHO, 736, SUELO - TECHO), "estudio", "tapiz_mostaza"],  # 2026-10-21: 96 px más ancho (pizarra grande)
-	[Rect2(7716, TECHO, 640, SUELO - TECHO), "balcon", "exterior"],
+	[Rect2(6820, TECHO, 936, SUELO - TECHO), "estudio", "tapiz_mostaza"],  # 2026-10-21: 296 px más ancho (pizarra grande y lugar para la pelea)
+	[Rect2(7916, TECHO, 640, SUELO - TECHO), "balcon", "exterior"],
 ]
 ## Orden de la ruta (las reglas de diseño lo usan para comprobar que se enseña antes de pedir).
 const RUTA := ["sala", "recibidor", "cocina", "pasillo", "dormitorio", "estudio", "balcon"]
@@ -108,8 +108,8 @@ const PUERTAS := [
 	["dormitorio<pasillo", Vector2(5872, SUELO), "pasillo>dormitorio"],
 	["pasillo>estudio", Vector2(5528, SUELO), "estudio<pasillo"],
 	["estudio<pasillo", Vector2(6912, SUELO), "pasillo>estudio"],
-	["estudio>balcon", Vector2(7464, SUELO), "balcon<estudio"],  # cerrada hasta desenchufar a A.S.P.I.
-	["balcon<estudio", Vector2(7808, SUELO), "estudio>balcon"],
+	["estudio>balcon", Vector2(7664, SUELO), "balcon<estudio"],  # cerrada hasta desenchufar a A.S.P.I.
+	["balcon<estudio", Vector2(8008, SUELO), "estudio>balcon"],
 ]
 ## Puerta del baño (2.4.1 del plan de ambientes): cerrada, con el marco de las demás, en la capa de puertas. No es
 ## habitación ni va en PUERTAS (R7): es un lugar insinuado para la maña futura «Abrir puertas».
@@ -192,19 +192,19 @@ const ARTE := [
 	# sombra; la estación de carga de lado con su cable; la pizarra de corcho grande, al lado de la ventana y sobre las
 	# macetas de la repisa, grande (120 × 86) y a la altura de la vista: el estudio se ensanchó 96 px para ella (2026-10-21).
 	["laptop", Vector2(7110, SUELO - 89), false, "mueble"],
-	["base_carga", Vector2(7176, SUELO), false, "mueble"],
+	["base_carga", Vector2(7240, SUELO), false, "mueble"],  # bajo la pizarra; A.S.P.I. se acopla de frente, a su izquierda
 	["pizarra", Vector2(7236, SUELO - 72.0), false, "pared"],
-	["regadera", Vector2(7910, SUELO + 8.0), false, "mueble"],  # B-3: isla de jardinería
-	["saco_tierra", Vector2(7942, SUELO + 4.0), false, "mueble"],
-	["maceta_rota", Vector2(7970, SUELO + 11.0), false, "mueble"],
-	["maceta_grande", Vector2(8006, SUELO), false, "mueble"],
-	["baranda", Vector2(8076, SUELO), false, "mueble"],
+	["regadera", Vector2(8110, SUELO + 8.0), false, "mueble"],  # B-3: isla de jardinería
+	["saco_tierra", Vector2(8142, SUELO + 4.0), false, "mueble"],
+	["maceta_rota", Vector2(8170, SUELO + 11.0), false, "mueble"],
+	["maceta_grande", Vector2(8206, SUELO), false, "mueble"],
+	["baranda", Vector2(8276, SUELO), false, "mueble"],
 ]
 ## Alfombras (tanda 3E): [imagen, x izquierda], en la franja del piso (después del piso y antes de las sombras).
 const ALFOMBRAS := [["alfombra_sala", 232.0], ["alfombra_pasillo", 4750.0], ["alfombra_dormitorio", 5978.0]]
 ## Fachada del edificio alrededor de la puerta del balcón (B-1): el hueco (x 89 a 221 del arte) queda detrás de la
 ## puerta-ventana.
-const FACHADA_BALCON := Vector2(7653, PARED_BASE)
+const FACHADA_BALCON := Vector2(7853, PARED_BASE)
 ## Borde de arriba de la tabla de la repisa de la entrada de la cocina (decorado de pared, sin colisión).
 const REPISA_COCINA_Y := PARED_BASE - 150.0
 ## Cocina v2: x izquierda de cada mueble (el arte de Gemini, medido).
@@ -276,8 +276,8 @@ const PIEZAS := [
 	[Rect2(7085, SUELO - 98, 126, 6), true, "Escritorio", "arte", "escritorio"],  # 81 cm
 	[Rect2(7266, SUELO - 170, 60, 6), true, "Repisa de las macetas", "repisa", ""],  # 1,40 m, sobre la pizarra
 	# Balcón.
-	[Rect2(8011, SUELO - 32, 38, 6), true, "Maceta grande", "arte", "maceta_grande"],
-	[Rect2(8077, SUELO - 89, 182, 6), true, "Baranda", "arte", "baranda"],  # 74 cm
+	[Rect2(8211, SUELO - 32, 38, 6), true, "Maceta grande", "arte", "maceta_grande"],
+	[Rect2(8277, SUELO - 89, 182, 6), true, "Baranda", "arte", "baranda"],  # 74 cm
 ]
 ## Sofá cuando ya no tiene plástico (sofa_aranado: más bajo): asiento y respaldo se mueven a su arte.
 const SOFA_ARANADO := {"Asiento del sofá": SUELO - 45, "Respaldo del sofá": SUELO - 95}
@@ -330,18 +330,19 @@ const TIRABLES := [
 const POLLO := Vector2(MICROONDAS_X + 49.0, SUELO - 160)
 const COMIDA := [[Vector2(3010, SUELO), "tazon"], [POLLO, "pollo"]]
 ## A.S.P.I.: [base de carga, límite izquierdo, límite derecho] dentro del estudio.
-const ASPI := [Vector2(7217, SUELO), 6870.0, 7506.0]
+## La base es el lugar donde se estaciona: a la izquierda de la estación, con el frente pegado a ella (no encima).
+const ASPI := [Vector2(7200, SUELO), 6870.0, 7706.0]
 ## Puntos de descanso: la caja de arena (recibidor) y el cojín (pasillo, a 2 px del rectángulo de la puerta del jefe).
 const DESCANSOS := [Rect2(1852, SUELO - 60, 71, 70), Rect2(5364, SUELO - 40, 70, 50)]
 ## La meta: la baranda del balcón (sentarse y saltar da Caer de Pie), en el tramo sin maceta (M6).
-const SALIDA := 8166.0
-## Tramo de la baranda donde Felipe se sienta: a la derecha de la única maceta de la baranda (8098–8136), con aire
+const SALIDA := 8366.0
+## Tramo de la baranda donde Felipe se sienta: a la derecha de la única maceta de la baranda (8298–8336), con aire
 ## para su cola. Fuera de este tramo no se sienta (plan de estabilización 2026-10-20: al lado de la maceta, no encima).
-const ASIENTO_BARANDA := Vector2(8164, 8246)
+const ASIENTO_BARANDA := Vector2(8364, 8446)
 ## Lo que se ve al saltar del balcón (G1): la cámara baja CAIDA_BALCON px y Felipe aterriza en el toldo de la
 ## panadería de abajo (solo existe durante el salto final).
 const CAIDA_BALCON := 230.0
-const TOLDO := Rect2(8056, SUELO + 196, 300, 8)
+const TOLDO := Rect2(8256, SUELO + 196, 300, 8)
 ## Sofá arañable (con el plástico nuevo): [centro de la base, ancho, alto]. Línea "sofa" de la agenda.
 const SOFA_ARANABLE := [Vector2(360, SUELO), 240.0, 100.0]
 const RASCADOR_X := 570.0
@@ -391,7 +392,7 @@ const LECCIONES := [
 	[Rect2(4840, TECHO, 140, SUELO - TECHO), "LECCION_INTERACTUAR_PUERTA_ENTORNADA_QUE", 7],
 	[Rect2(5880, TECHO, 140, SUELO - TECHO), "LECCION_SALTAR_BANQUITO_CAMA_COMODA", 0],
 	[Rect2(6180, TECHO, 150, SUELO - TECHO), "LECCION_INTERACTUAR_EL_CAJON_DE", 7],
-	[Rect2(7956, TECHO, 140, SUELO - TECHO), "LECCION_SALTAR_LA_MACETA_LA", 0],
+	[Rect2(8156, TECHO, 140, SUELO - TECHO), "LECCION_SALTAR_LA_MACETA_LA", 0],
 ]
 ## Dónde pasa cada travesura de la Agenda y su reacción (R18).
 const AGENDA_SITIOS := {
@@ -402,7 +403,7 @@ const AGENDA_SITIOS := {
 	"laser": [Vector2(5280, SUELO), "El puntero se apaga de vergüenza"],
 	"cajon": [CAJON, "Calcetines volando por todo el cuarto"],
 	"teclado": [Vector2(7146, SUELO - 98), "La laptop dice «jjjjjjjjjj» y los apuntes de Valeria vuelan"],
-	"desenchufar": [Vector2(7217, SUELO), "«¡APAGADA!» y «Limpieza cancelada.»"],
+	"desenchufar": [Vector2(7200, SUELO), "«¡APAGADA!» y «Limpieza cancelada.»"],
 }
 ## Lugares que se ven antes de poder alcanzarlos (R17): [qué, dónde, con qué maña se vuelve].
 const LUGARES_VISTOS := [

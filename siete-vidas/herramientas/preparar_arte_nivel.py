@@ -977,11 +977,57 @@ def derrotas():
         print(f"Derrotas: {nombre} {Image.open(DESTINO / f'{nombre}.png').size} ({cambiados} px de blanco teñidos)")
 
 
+# Lo que queda al romperse (decisión del creador, 2026-10-21: «se rompió», no «se evaporó»): pedazos recortados del
+# MISMO arte del objeto (misma escala y paleta), cada uno con su contorno de 1 px. [nombre, origen, polígono en pixeles
+# del origen]. La planta tirada es la planta de la maceta, acostada. El charco y la tierra los dibuja el juego.
+ROTOS = [
+    ["roto_vaso_1", "vaso", [(2, 3), (12, 3), (9, 13), (3, 11)]],
+    ["roto_vaso_2", "vaso", [(13, 6), (21, 4), (20, 15), (14, 13)]],
+    ["roto_vaso_3", "vaso", [(4, 18), (13, 20), (11, 29), (3, 28)]],
+    ["roto_vaso_4", "vaso", [(15, 21), (21, 19), (21, 29), (16, 28)]],
+    ["roto_taza_1", "taza", [(1, 3), (12, 3), (10, 13), (2, 12)]],
+    ["roto_taza_2", "taza", [(9, 10), (20, 9), (19, 20), (11, 19)]],
+    ["roto_taza_3", "taza", [(20, 6), (29, 6), (29, 18), (21, 18)]],
+    ["roto_maceta_1", "maceta", [(1, 18), (13, 18), (11, 27), (3, 26)]],
+    ["roto_maceta_2", "maceta", [(13, 19), (26, 18), (23, 30), (15, 29)]],
+    ["roto_maceta_3", "maceta", [(5, 28), (15, 30), (13, 36), (7, 36)]],
+]
+CONTORNO_ROTO = (43, 29, 26, 255)
+
+
+def rotos():
+    from PIL import ImageDraw
+    for nombre, origen, poligono in ROTOS:
+        base = Image.open(DESTINO / f"{origen}.png").convert("RGBA")
+        mascara = Image.new("L", base.size, 0)
+        ImageDraw.Draw(mascara).polygon(poligono, fill=255)
+        a = np.asarray(base).copy()
+        m = (np.asarray(mascara) > 0) & (a[:, :, 3] > 0)
+        a[~m] = 0
+        # Contorno de 1 px: el borde de adentro de la pieza (lo cortado también lleva línea, como el resto del arte).
+        borde = m & ~ndimage.binary_erosion(m)
+        a[borde] = CONTORNO_ROTO
+        pieza = recortar_opaco(Image.fromarray(a, "RGBA"))
+        pieza.save(DESTINO / f"{nombre}.png")
+        print(f"Rotos: {nombre} {pieza.size}")
+    maceta = Image.open(DESTINO / "maceta.png").convert("RGBA")
+    planta = recortar_opaco(maceta.crop((0, 0, maceta.width, 17)))
+    planta = planta.rotate(-90 if False else 90, expand=True)
+    planta = recortar_opaco(planta)
+    a = np.asarray(planta).copy()
+    m = a[:, :, 3] > 0
+    planta = Image.fromarray(a, "RGBA")
+    planta.save(DESTINO / "planta_tirada.png")
+    print(f"Rotos: planta_tirada {planta.size}")
+
+
 if __name__ == "__main__":
     import sys
     if sys.argv[1:] == ["consistencia"]:
         consistencia()
     elif sys.argv[1:] == ["derrotas"]:
         derrotas()
+    elif sys.argv[1:] == ["rotos"]:
+        rotos()
     else:
         main()

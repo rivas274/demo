@@ -979,7 +979,7 @@ def derrotas():
 
 # Lo que queda al romperse (decisión del creador, 2026-10-21: «se rompió», no «se evaporó»): pedazos recortados del
 # MISMO arte del objeto (misma escala y paleta), cada uno con su contorno de 1 px. [nombre, origen, polígono en pixeles
-# del origen]. La planta tirada es la planta de la maceta, acostada. El charco y la tierra los dibuja el juego.
+# del origen]. La planta tirada es la planta de la maceta, sin la maceta. El charco y la tierra los dibuja el juego.
 ROTOS = [
     ["roto_vaso_1", "vaso", [(2, 3), (12, 3), (9, 13), (3, 11)]],
     ["roto_vaso_2", "vaso", [(13, 6), (21, 4), (20, 15), (14, 13)]],
@@ -1011,8 +1011,9 @@ def rotos():
         pieza.save(DESTINO / f"{nombre}.png")
         print(f"Rotos: {nombre} {pieza.size}")
     maceta = Image.open(DESTINO / "maceta.png").convert("RGBA")
-    # La planta (filas 0 a 16 del arte, sin la maceta) acostada en el piso, con las flores hacia la izquierda.
-    planta = recortar_opaco(recortar_opaco(maceta.crop((0, 0, maceta.width, 17))).rotate(90, expand=True))
+    # La planta (filas 0 a 17 del arte, sin la maceta), entera: queda caída sobre su tierra en el piso. Acostada de lado
+    # no se leía (probado 2026-10-21).
+    planta = recortar_opaco(maceta.crop((0, 0, maceta.width, 18)))
     planta.save(DESTINO / "planta_tirada.png")
     print(f"Rotos: planta_tirada {planta.size}")
 

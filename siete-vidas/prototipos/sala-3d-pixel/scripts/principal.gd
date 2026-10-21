@@ -98,7 +98,7 @@ func _ready() -> void:
 	felipe_ia.set("x_sofa", sala.get("punto_sofa").x + 0.68)
 	valeria.connect("empieza_vuelta", func() -> void: felipe_ia.set("_t", 0.0))
 	# Valeria hecha por IA desde su imagen (sin huesos: solo respira), de pie al fondo.
-	var valeria_ia := _modelo_3d("ValeriaIA", "res://assets/valeria_ia/valeria_hunyuan.glb", Vector3(-3.2, 0.0, -0.35), true, 1.7)
+	var valeria_ia := _modelo_3d("ValeriaIA", "res://assets/valeria_ia/valeria_hunyuan.glb", Vector3(-1.75, 0.0, -0.25), true, 1.7)
 
 	camara = Camera3D.new()
 	camara.projection = Camera3D.PROJECTION_ORTHOGONAL

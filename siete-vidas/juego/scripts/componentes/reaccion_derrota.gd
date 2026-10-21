@@ -222,7 +222,10 @@ func _aterrizar() -> void:
 
 func _dejar_marca(pie: Vector2) -> void:
 	# Del lado de donde vino el golpe (hacia Felipe), en el piso.
-	marca = PiezaSuelta.crear(datos.marca, pie + Vector2(-_lado * datos.lado_marca, 0), Vector2.ZERO, pie.y)
+	# A la altura del dibujo (DatosEnemigo.profundidad: A.S.P.I. anda más adelante en el piso).
+	var d: DatosEnemigo = _cuerpo.get("datos")
+	var hondo := d.profundidad if d else 0.0
+	marca = PiezaSuelta.crear(datos.marca, pie + Vector2(-_lado * datos.lado_marca, hondo), Vector2.ZERO, pie.y + hondo)
 	marca.z_index = _cuerpo.z_index
 	_cuerpo.get_parent().add_child(marca)
 	marca._apoyar()

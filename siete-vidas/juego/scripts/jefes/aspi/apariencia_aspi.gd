@@ -29,6 +29,8 @@ extends Node2D
 ## Dónde se estaciona (x en el mundo; INF = sin base) y hacia dónde mira ahí: acoplada de frente a la estación.
 var base_x := INF
 var lado_base := 1.0
+## A cuántos px de la base empieza a subir en diagonal hacia el fondo (la estación está contra la pared).
+@export var acercamiento_base := 36.0
 
 const CUADROS_CEPILLO := 6
 ## La franja verde de la LED en el arte del cuerpo (aspi_lado, mirando a la derecha) y la franja gris de la apagada.
@@ -58,6 +60,28 @@ func _init() -> void:
 func _ready() -> void:
 	_enemigo = get_parent() as Enemigo
 	_ultimo_x = _enemigo.global_position.x
+	if _enemigo.sombra:
+		_enemigo.sombra.desfase = func() -> Vector2: return Vector2(0, profundidad_actual())
+	if _enemigo.dano:
+		_enemigo.dano.desfase_felipe = Vector2(0, -_enemigo.datos.profundidad)
+
+
+## Cuánto más abajo se dibuja ahora: toda su profundidad andando; en los últimos px antes de la base sube en diagonal
+## hasta la pared, donde se acopla a la estación.
+func profundidad_actual() -> float:
+	var p := _enemigo.datos.profundidad
+	if base_x != INF and not _enemigo.vida.muerto:
+		p *= clampf(absf(_enemigo.global_position.x - base_x) / acercamiento_base, 0.0, 1.0)
+	return roundf(p)
+
+
+## Más cerca de la cámara: delante de Felipe en el piso; detrás si Felipe está encima (o saltándole encima).
+func _actualizar_capa() -> void:
+	if not _enemigo.datos.delante_de_felipe:
+		return
+	var felipe := get_tree().get_first_node_in_group("felipe") as Node2D
+	var encima := felipe != null and felipe.global_position.y < _enemigo.global_position.y - _enemigo.datos.alto * 0.6 and absf(felipe.global_position.x - _enemigo.global_position.x) < _enemigo.datos.ancho
+	Capas.usar(self, Capas.TRAS_FELIPE if encima else Capas.JUEGO_CERCA)
 
 
 func _physics_process(_delta: float) -> void:
@@ -68,6 +92,7 @@ func _physics_process(_delta: float) -> void:
 	_ultimo_x = x
 	if absf(_enemigo.velocity.x) < 1.0 and absf(x - base_x) < 6.0:
 		_mirando = lado_base
+	_actualizar_capa()
 	queue_redraw()
 
 
@@ -94,7 +119,7 @@ func cuerpo_actual() -> String:
 func rect_dibujado() -> Rect2:
 	var t := ArteNivel.textura(cuerpo_actual())
 	var tam := t.get_size() if t else Vector2(_enemigo.datos.ancho, _enemigo.datos.alto_dibujo)
-	return Rect2(global_position + Vector2(-tam.x / 2.0 - 2.0, -tam.y - alto_rueda), Vector2(tam.x + 4.0, tam.y + alto_rueda + 2.0))
+	return Rect2(global_position + Vector2(-tam.x / 2.0 - 2.0, -tam.y - alto_rueda + profundidad_actual()), Vector2(tam.x + 4.0, tam.y + alto_rueda + 2.0))
 
 
 ## Depósito lleno: salta un poco y la tapa se levanta en 0,25 s.
@@ -123,14 +148,15 @@ func _draw() -> void:
 	var temblor := Vector2(1 if vibrando and Time.get_ticks_msec() % 80 < 40 else 0, 0)
 	var anda := prendida and absf(_enemigo.velocity.x) > 1.0
 	var bote := -rebote if anda and int(_avance / px_por_rebote) % 2 == 1 else 0.0
-	var base := Vector2(0, roundf(-alto_rueda + bote + salto)) + temblor
+	var hondo := profundidad_actual()
+	var base := Vector2(0, roundf(-alto_rueda + bote + salto + hondo)) + temblor
 	# Rueda (detrás del cuerpo: asoma abajo), con su cuadro según lo que avanzó.
 	var rueda := "aspi_rueda_%d" % (int(_avance / px_por_cuadro_rueda) % 2 + 1)
-	ArteNivel.dibujar(self, rueda, lugar_rueda.x * lado + temblor.x, lugar_rueda.y, espejo)
+	ArteNivel.dibujar(self, rueda, lugar_rueda.x * lado + temblor.x, lugar_rueda.y + hondo, espejo)
 	ArteNivel.dibujar(self, cuerpo_actual(), base.x, base.y, espejo)
 	# Cepillo lateral adelante, girando mientras está encendida.
 	var cuadro := int(Time.get_ticks_msec() / 1000.0 * fps_cepillo) % CUADROS_CEPILLO + 1 if prendida else 1
-	ArteNivel.dibujar(self, "aspi_cepillo_%d" % cuadro, lugar_cepillo.x * lado + temblor.x, lugar_cepillo.y + roundf(bote), espejo)
+	ArteNivel.dibujar(self, "aspi_cepillo_%d" % cuadro, lugar_cepillo.x * lado + temblor.x, lugar_cepillo.y + roundf(bote) + hondo, espejo)
 	if prendida:
 		_dibujar_led(base, lado, espejo)
 	else:

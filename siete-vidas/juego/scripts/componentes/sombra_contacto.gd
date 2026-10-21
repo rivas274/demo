@@ -11,6 +11,8 @@ const GRUPO := "sombras_de_contacto"
 @export var alfa := 0.36
 ## Si está puesta, decide cuándo se dibuja (Valeria no la tiene sentada ni fuera de la casa).
 var mostrar := Callable()
+## Si está puesta, cuánto se corre la sombra respecto de los pies (Vector2): la de A.S.P.I. va con su dibujo.
+var desfase := Callable()
 
 
 func _init(ancho_sombra := 44.0, alfa_sombra := 0.36) -> void:
@@ -33,4 +35,5 @@ func se_ve() -> bool:
 
 ## Dónde va: los pies de quien la lleva.
 func centro() -> Vector2:
-	return (get_parent() as Node2D).global_position
+	var pies := (get_parent() as Node2D).global_position
+	return pies + (desfase.call() as Vector2) if desfase.is_valid() else pies

@@ -16,6 +16,7 @@ extends RefCounted
 ##   TRAS_FELIPE     -1        lo que deja Felipe detrás de sí: estela de fantasmas, líneas de velocidad, polvo del jugo
 ##   JUEGO            0        Felipe, A.S.P.I., ratones, vasos, comida, recompensas, manchas del piso
 ##   MARCAS           1        arañazos sobre lo arañable
+##   JUEGO_CERCA      1        lo del piso más cerca de la cámara que Felipe (A.S.P.I.: DatosEnemigo.delante_de_felipe)
 ##   PERSONAJES       2        SOLO los humanos (Valeria): 200 px, más cerca de la cámara que el escenario. Felipe pasa
 ##                             DETRÁS de ella y se ve su silueta (SiluetaTapada) en la parte que ella tapa (plan 2026-10-20)
 ##   JUEGO_DELANTE    3        Felipe parado sobre algo que queda delante de los humanos (el asiento del sofá junto a
@@ -44,6 +45,7 @@ const MUEBLES := -1
 const TRAS_FELIPE := -1
 const JUEGO := 0
 const MARCAS := 1
+const JUEGO_CERCA := 1
 const PERSONAJES := 2
 const JUEGO_DELANTE := 3
 const PRIMER_PLANO := 4
@@ -69,7 +71,7 @@ const CAPA_PANTALLAS := 40
 ## La tabla del mundo en orden (para la prueba y la memoria): [nombre, z].
 const MUNDO := [
 	["PARED", PARED], ["FACHADA", FACHADA], ["ARTE_PARED", ARTE_PARED], ["ESCALERA", ESCALERA], ["PUERTAS", PUERTAS],
-	["MUEBLES", MUEBLES], ["TRAS_FELIPE", TRAS_FELIPE], ["JUEGO", JUEGO], ["MARCAS", MARCAS], ["PERSONAJES", PERSONAJES],
+	["MUEBLES", MUEBLES], ["TRAS_FELIPE", TRAS_FELIPE], ["JUEGO", JUEGO], ["MARCAS", MARCAS], ["JUEGO_CERCA", JUEGO_CERCA], ["PERSONAJES", PERSONAJES],
 	["JUEGO_DELANTE", JUEGO_DELANTE], ["PRIMER_PLANO", PRIMER_PLANO],
 	["LUZ", LUZ], ["ESTELA", ESTELA], ["IMAGINACION", IMAGINACION],
 	["FELIPE_IMAGINANDO", FELIPE_IMAGINANDO], ["EFECTOS", EFECTOS], ["CENSURA", CENSURA], ["INDICADOR", INDICADOR],

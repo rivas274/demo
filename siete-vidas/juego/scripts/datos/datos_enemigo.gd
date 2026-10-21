@@ -13,6 +13,11 @@ extends Resource
 @export var apoyo := 0.0
 ## Alto de lo dibujado (los anuncios no lo tapan).
 @export var alto_dibujo := 47.0
+## Cuántos px más abajo se dibuja que sus pies físicos: anda más adelante en la franja del piso, más cerca de la cámara
+## (A.S.P.I., decisión del creador 2026-10-21). Lo que se toca (sombra, daño, el botón de arriba, la marca) lo acompaña.
+@export var profundidad := 0.0
+## Más cerca de la cámara: se dibuja delante de Felipe en el piso (no cuando Felipe está encima).
+@export var delante_de_felipe := false
 ## Juguete de cuerda: vencido queda patas arriba con la llave girando.
 @export var llave_de_cuerda := false
 ## Escena o script de apariencia propia (A.S.P.I. dibuja su tapa y su luz); vacío = Apariencia (la imagen y listo).

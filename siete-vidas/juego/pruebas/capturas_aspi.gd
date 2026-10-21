@@ -36,6 +36,17 @@ func _correr() -> void:
 	await _cuadros(40, "")
 	await _cuadros(2, "d-en-la-base")
 	aspi.patrulla.quieta = false
+	# Felipe encima de A.S.P.I. (va delante de ella) y cruzándose en el piso (ella va delante).
+	aspi.global_position = Vector2(7450, Nivel1.SUELO)
+	aspi.patrulla.quieta = true
+	felipe.global_position = Vector2(7450, Nivel1.SUELO - 46)
+	felipe.velocity = Vector2.ZERO
+	await _cuadros(3, "")
+	await _cuadros(2, "f-felipe-encima")
+	felipe.global_position = Vector2(7462, Nivel1.SUELO)
+	await _cuadros(20, "")
+	await _cuadros(2, "g-cruce-piso")
+	aspi.patrulla.quieta = false
 	felipe.global_position = Vector2(7380, Nivel1.SUELO)
 	felipe.vida.restante_invulnerable = 999.0
 	aspi.global_position = Vector2(7450, Nivel1.SUELO)

@@ -360,7 +360,8 @@ func _llenar() -> void:
 func _actualizar_llena(delta: float) -> void:
 	_reloj_llena += delta
 	# Felipe cae sobre ella: le aprieta el botón de apagado con las patas.
-	var distancia := felipe.global_position - jefe.global_position
+	# El botón está arriba del dibujo, que va `profundidad` px más abajo que los pies (más cerca de la cámara).
+	var distancia := felipe.global_position - jefe.global_position - Vector2(0, jefe.datos.profundidad)
 	if felipe.velocity.y > 0.0 and absf(distancia.x) < jefe.datos.ancho / 2.0 + 4.0 and distancia.y > -ALTO_ARRIBA - 14.0 and distancia.y < -ALTO_ARRIBA + 18.0:
 		felipe.velocity.y = REBOTE
 		_apagar()

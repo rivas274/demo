@@ -427,15 +427,27 @@ func _fuera_de_pelea() -> bool:
 	return batalla.ausente or batalla.fase != BatallaAspi.Fase.PELEA or felipe.estado == Felipe.Estado.DESMAYADO or Nivel1.habitacion_de(felipe.global_position) != "estudio"
 
 
-## Lo que se puede tirar ahora en el estudio, de más fácil a más difícil (lo más bajo primero: el librero bajo de 80 cm,
-## después el escritorio y al final la repisa).
+## Lo que se puede tirar ahora en el estudio. Como una persona que reparte la pelea, va a la otra isla que la última
+## vez (librero bajo a la derecha, escritorio y repisa a la izquierda) si allá queda algo; dentro de una isla, lo más
+## bajo primero (el escritorio antes que la repisa).
+var _isla_anterior := ""
+
+
 func _municion() -> Objeto:
+	var librero := Nivel1.rect_pieza("Librero bajo")
 	var mejor: Objeto = null
+	var mejor_otra: Objeto = null
 	for hijo in sala.get_children():
 		if hijo is Objeto and Nivel1.habitacion_de(hijo.position) == "estudio" and hijo.visible and not hijo.tirable.roto and hijo.position.y < Nivel1.SUELO - 10.0:
+			var isla := "derecha" if hijo.position.x >= librero.position.x else "izquierda"
 			if mejor == null or hijo.position.y > mejor.position.y:
 				mejor = hijo
-	return mejor
+			if isla != _isla_anterior and (mejor_otra == null or hijo.position.y > mejor_otra.position.y):
+				mejor_otra = hijo
+	var elegido := mejor_otra if mejor_otra else mejor
+	if elegido:
+		_isla_anterior = "derecha" if elegido.position.x >= librero.position.x else "izquierda"
+	return elegido
 
 
 ## Del escritorio, la repisa o la silla al piso: los atraviesa hacia abajo (agachado + saltar).

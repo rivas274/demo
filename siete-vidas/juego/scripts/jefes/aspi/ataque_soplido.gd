@@ -20,6 +20,8 @@ var soplidos := 0
 var soplando := false
 var _reloj := 0.0
 var _hacia := 1.0
+## Segundos desde el soplido mientras Felipe cae atravesando los muebles (-1 = no está cayendo así).
+var _atravesando := -1.0
 
 
 func nombre() -> String:
@@ -28,6 +30,25 @@ func nombre() -> String:
 
 func al_cambiar_fase(_fase: int) -> void:
 	acampando = 0.0
+	_soltar_muebles()
+
+
+## El soplido lo saca AL PISO (estudio v3: a la derecha de la repisa está la isla del librero bajo y la caja de los
+## libros): mientras vuela atraviesa los muebles atravesables, como al bajar agachado, y al tocar el piso vuelve a
+## chocar con ellos.
+func cada_cuadro(delta: float) -> void:
+	if _atravesando < 0.0:
+		return
+	_atravesando += delta
+	var felipe := pelea.felipe
+	if (_atravesando > 0.15 and felipe.is_on_floor()) or _atravesando > 2.0:
+		_soltar_muebles()
+
+
+func _soltar_muebles() -> void:
+	if _atravesando >= 0.0 and is_instance_valid(pelea) and is_instance_valid(pelea.felipe):
+		pelea.felipe.set_collision_mask_value(Felipe.CAPA_ATRAVESABLE, true)
+	_atravesando = -1.0
 
 
 func vigilar(delta: float) -> void:
@@ -70,7 +91,8 @@ func actualizar(delta: float) -> bool:
 	return true
 
 
-## Sopla hacia arriba: Felipe sale empujado al piso (sin daño) y las macetas caen sin romperse.
+## Sopla hacia arriba: Felipe sale empujado al piso (sin daño, atravesando los muebles bajos) y las macetas caen sin
+## romperse.
 func _soplar() -> void:
 	var b := pelea as BatallaAspi
 	var felipe := b.felipe
@@ -84,6 +106,8 @@ func _soplar() -> void:
 	_hacia = 1.0 if repisa and felipe.global_position.x >= repisa.position.x - 4.0 else -1.0
 	felipe.velocity = Vector2(_hacia * empuje, -300.0)
 	felipe.empuje = Vector2(_hacia * empuje * 0.6, 0.0)
+	felipe.set_collision_mask_value(Felipe.CAPA_ATRAVESABLE, false)
+	_atravesando = 0.0
 	b.presentacion.sacudir(0.2)
 	b.nivel.travesuras.jugo.palabra_en_mundo("PALABRA_FIUUU", felipe.global_position + Vector2(0, -80), Color(0.8, 0.95, 1.0), 16)
 	for objeto in b.municion:

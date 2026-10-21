@@ -1,0 +1,17 @@
+Modelos 3D generados en local (PC del creador, RTX 4060 de 8 GB), 2026-10-21.
+
+Herramienta: Hunyuan3D-2 mini (tencent/Hunyuan3D-2mini, subcarpeta hunyuan3d-dit-v2-mini), solo forma.
+Licencia: Tencent Hunyuan 3D 2.0 Community License. No es válida en la Unión Europea, el Reino Unido ni Corea del Sur.
+Uso: prototipo y prueba de concepto, no comercial.
+
+Color: no es textura de Hunyuan (el paso de textura no corre con 8 GB de VRAM ni sin compilador de CUDA).
+Son colores planos por zona, puestos por un script propio (C:\IA3D\colorear_paleta.py): proyección de
+frente solo para clasificar cada vértice, una paleta corta y una pasada de suavizado. La cara queda lisa,
+sin rasgos de foto.
+
+Entrada de Valeria: la vista previa 3D que generó Tripo (plan gratis, sin descarga) a partir de
+entradas-meshy/valeria-para-3d.png. El fondo se quitó por script, sin rembg.
+
+Giro de 360°: Blender 5.2.2 LTS (GPL; los renders son nuestros), EEVEE, 36 cuadros de 512 px.
+
+TripoSR (MIT) quedó clonado como respaldo y no se usó.

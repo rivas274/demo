@@ -21,6 +21,18 @@ extends Resource
 @export var logro := ""
 ## Sonido del nivel al caer.
 @export var sonido := "vidrio"
+@export_group("Lo que queda roto (marca en el piso)")
+## Pedazos que saltan al romperse, rebotan y quedan quietos (imágenes de assets/nivel1/, recortadas del arte del
+## objeto con `herramientas/preparar_arte_nivel.py rotos`). Los dibuja PiezaSuelta, como en las derrotas.
+@export var piezas_rotura: PackedStringArray = []
+@export var velocidad_piezas := Vector2(50, 110)
+## Charco (o tierra) que se extiende en el piso en escalones de pixel, 2 tonos y sin degradado. Ancho 0 = ninguno.
+@export var charco_ancho := 0.0
+@export var charco_alto := 3.0
+@export var charco_claro := Color(0.62, 0.8, 0.92)
+@export var charco_oscuro := Color(0.38, 0.6, 0.78)
+## Imagen que queda apoyada en el charco (la planta tirada de la maceta; "" = ninguna).
+@export var queda := ""
 
 
 ## Nombre del nodo: el pedido o el tipo con mayúscula.

@@ -13,6 +13,8 @@ signal empujado(felipe: Felipe)
 signal caido(posicion: Vector2)
 ## Se cayó sin romperse (el soplido de A.S.P.I.): no deja mancha.
 signal tirado(objeto: Node2D)
+## Volvió a su lugar, entero (lo que quedó roto se limpia).
+signal repuesto
 
 ## Segundos que queda aturdido lo que recibe el golpe, y a qué distancia horizontal.
 const ATURDIR := 3.0
@@ -108,6 +110,7 @@ func reponer() -> void:
 	roto = false
 	cayendo = false
 	cuerpo.visible = true
+	repuesto.emit()
 	if ofrecer and not is_in_group(Componentes.INTERACTUABLES):
 		add_to_group(Componentes.INTERACTUABLES)
 	cuerpo.queue_redraw()

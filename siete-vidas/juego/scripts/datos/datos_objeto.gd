@@ -25,7 +25,7 @@ extends Resource
 ## Pedazos que saltan al romperse, rebotan y quedan quietos (imágenes de assets/nivel1/, recortadas del arte del
 ## objeto con `herramientas/preparar_arte_nivel.py rotos`). Los dibuja PiezaSuelta, como en las derrotas.
 @export var piezas_rotura: PackedStringArray = []
-@export var velocidad_piezas := Vector2(50, 110)
+@export var velocidad_piezas := Vector2(110, 190)
 ## Charco (o tierra) que se extiende en el piso en escalones de pixel, 2 tonos y sin degradado. Ancho 0 = ninguno.
 @export var charco_ancho := 0.0
 @export var charco_alto := 3.0

@@ -11,6 +11,10 @@ const ESCENA := "res://escenas/entidades/objeto_tirable.tscn"
 
 @export var datos: DatosObjeto
 var tirable: Tirable
+## Lo roto: el charco crece en este tiempo; los pedazos van en este grupo (se borran al reponer).
+const CRECER := 0.45
+const GRUPO_PEDAZOS := "pedazos_rotos"
+var _tiempo_roto := 0.0
 
 ## Qué es: "vaso", "taza", "maceta" o "llaves" (también la imagen de assets/nivel1/).
 var tipo: String:
@@ -36,6 +40,8 @@ func _ready() -> void:
 		tirable = Componentes.de(self, Tirable) as Tirable
 		if datos:
 			tirable.configurar(datos)
+	tirable.caido.connect(_al_romperse)
+	tirable.repuesto.connect(_al_reponer)
 
 
 func _draw() -> void:
@@ -52,32 +58,60 @@ func _draw() -> void:
 			ArteNivel.sombra(self, Vector2(0, hundido), ancho + 2.0, 0.5)
 			ArteNivel.dibujar(self, tipo, 0.0, hundido - (1.0 if tipo == "vaso" else 0.0))
 			return
-	if (not roto or not datos.se_rompe) and ArteNivel.dibujar(self, tipo, 0.0, 0.0):
+	if not roto or not datos.se_rompe:
+		ArteNivel.dibujar(self, tipo, 0.0, 0.0)
 		return
-	match tipo:
-		"taza":
-			# Rota: el charco de café y los trozos de loza (en la pelea, además, la mancha que A.S.P.I. limpia).
-			draw_rect(Rect2(-15, -2, 30, 2), Color("4a2a1a"))
-			draw_rect(Rect2(-11, -3, 20, 1), Color("6b3e22"))
-			for trozo: Rect2 in [Rect2(-12, -6, 6, 4), Rect2(-2, -5, 5, 3), Rect2(6, -7, 7, 5)]:
-				draw_rect(trozo.grow(1), Color("2b1712"))
-				draw_rect(trozo, Color("f1e6d2"))
-				draw_rect(Rect2(trozo.position, Vector2(trozo.size.x, 1)), Color("c0603f"))
-		"maceta":
-			if roto:
-				draw_rect(Rect2(-10, -3, 20, 3), Color("6e4a2c"))
-				draw_rect(Rect2(-8, -5, 6, 3), Color("b0613f"))
-				draw_rect(Rect2(3, -4, 6, 3), Color("b0613f"))
-				return
-			draw_colored_polygon(PackedVector2Array([Vector2(-8, -14), Vector2(8, -14), Vector2(6, 0), Vector2(-6, 0)]), Color("b0613f"))
-			draw_circle(Vector2(-3, -18), 5.0, Color("5f8f5a"))
-			draw_circle(Vector2(4, -20), 5.0, Color("6f9f6a"))
-		_:
-			if roto:
-				for trozo: Vector2 in [Vector2(-9, -2), Vector2(-3, -3), Vector2(4, -2), Vector2(9, -1)]:
-					draw_colored_polygon(PackedVector2Array([trozo, trozo + Vector2(3, -2), trozo + Vector2(4, 1)]), Color(0.85, 0.93, 1.0, 0.8))
-				draw_rect(Rect2(-12, -1, 24, 1), Color(0.6, 0.8, 1.0, 0.6))
-				return
-			draw_rect(Rect2(-5, -15, 10, 15), Color(0.85, 0.93, 1.0, 0.45))
-			draw_rect(Rect2(-4, -9, 8, 8), Color(0.45, 0.7, 0.95, 0.6))
-			draw_rect(Rect2(-5, -15, 10, 15), Color(0.9, 0.95, 1.0, 0.9), false, 1.0)
+	# Roto: el charco (o la tierra) en escalones de 2 tonos que se extiende, y lo que queda apoyado. Los pedazos son
+	# PiezaSuelta (rebotan y quedan quietos).
+	_dibujar_charco()
+	if datos.queda != "":
+		ArteNivel.dibujar(self, datos.queda, 4.0, 1.0)
+
+
+## Charco tendido en el piso: 3 filas (atrás más angosta, adelante más ancha), borde oscuro y el medio claro, sin
+## degradado. Crece en 3 escalones en `CRECER` s.
+func _dibujar_charco() -> void:
+	if datos.charco_ancho <= 0.0:
+		return
+	var paso := ceilf(clampf(_tiempo_roto / CRECER, 0.0, 1.0) * 3.0) / 3.0
+	var ancho := roundf(datos.charco_ancho * maxf(paso, 0.34))
+	var alto := int(datos.charco_alto)
+	# Tendido en el plano del piso: la fila de atrás (arriba) más angosta, la de adelante la más ancha.
+	for fila in alto:
+		var w := roundf(ancho * (0.6 + 0.4 * float(fila + 1) / float(alto)) / 2.0) * 2.0
+		var y := float(fila) - 1.0
+		draw_rect(Rect2(-w / 2.0, y, w, 1), datos.charco_oscuro)
+		if fila < alto - 1 and w > 8.0:
+			draw_rect(Rect2(-w / 2.0 + 3.0, y, w - 6.0, 1), datos.charco_claro)
+
+
+func _process(delta: float) -> void:
+	if tirable == null or not tirable.roto or not datos or not datos.se_rompe:
+		return
+	if _tiempo_roto < CRECER + 0.05:
+		_tiempo_roto += delta
+		queue_redraw()
+
+
+## Se rompió en el piso: suelta sus pedazos (los mismos PiezaSuelta de las derrotas).
+func _al_romperse(_donde: Vector2) -> void:
+	if not datos or not datos.se_rompe:
+		return
+	_tiempo_roto = 0.0
+	for nombre: String in datos.piezas_rotura:
+		# Hacia los lados (entre 25° y 70° sobre el piso), para que se repartan alrededor del charco.
+		var angulo := deg_to_rad(randf_range(25.0, 70.0))
+		var lado := -1.0 if randi() % 2 == 0 else 1.0
+		var vel := Vector2(cos(angulo) * lado, -sin(angulo)) * randf_range(datos.velocidad_piezas.x, datos.velocidad_piezas.y)
+		var pieza := PiezaSuelta.crear(nombre, Vector2(0, -4), vel, 0.0)
+		pieza.vueltas = randf_range(-2.0, 2.0)
+		pieza.add_to_group(GRUPO_PEDAZOS)
+		add_child(pieza)
+
+
+## Vuelve entero (la pelea repone lo roto): se van los pedazos.
+func _al_reponer() -> void:
+	_tiempo_roto = 0.0
+	for hijo in get_children():
+		if hijo.is_in_group(GRUPO_PEDAZOS):
+			hijo.queue_free()

@@ -30,6 +30,8 @@ func _initialize() -> void:
 		_textos.call_deferred()
 	elif args.size() > 1 and args[1] == "luces":
 		_luces.call_deferred()
+	elif args.size() > 1 and args[1] == "rotos":
+		_rotos.call_deferred()
 	else:
 		_correr.call_deferred()
 
@@ -50,6 +52,37 @@ func _luces() -> void:
 		sala.travesuras.dialogo.limpiar()
 		await _esperar(2)
 		await _capturar(punto[0])
+	quit()
+
+
+## Lo que queda roto en el piso: el vaso, la taza y una maceta, antes y después de tirarlos.
+func _rotos() -> void:
+	var sala: Nivel = load("res://escenas/nivel_1.tscn").instantiate()
+	sala.mostrar_titulo = false
+	(sala.guion as GuionNivel1).batalla_con_jefe = false
+	root.add_child(sala)
+	var felipe: Felipe = sala.get_node("Felipe")
+	await _esperar(30)
+	var vistos := {}
+	for nodo in sala.find_children("*", "Objeto", true, false):
+		var objeto := nodo as Objeto
+		if objeto.tipo in ["vaso", "taza", "maceta"] and not vistos.has(objeto.tipo):
+			vistos[objeto.tipo] = true
+			sala.travesuras.dialogo.limpiar()
+			felipe.global_position = Vector2(objeto.global_position.x - 30.0, objeto.tirable.piso)
+			felipe.velocity = Vector2.ZERO
+			await _esperar(50)
+			sala.travesuras.dialogo.limpiar()
+			await _capturar("r-%s-antes" % objeto.tipo)
+			felipe.mirando = 1.0
+			objeto.tirable.empujar(felipe)
+			await _esperar(12)
+			await _capturar("r-%s-cayendo" % objeto.tipo)
+			await _esperar(90)
+			sala.travesuras.dialogo.limpiar()
+			sala.travesuras.anuncios.limpiar()
+			await _esperar(2)
+			await _capturar("r-%s-despues" % objeto.tipo)
 	quit()
 
 

@@ -1018,6 +1018,74 @@ def rotos():
     print(f"Rotos: planta_tirada {planta.size}")
 
 
+# Recipientes vacíos (decisión del creador, 2026-10-21: «parece que se comió el plato»). Al comer solo desaparece la
+# comida: el tazón queda vacío con dos croquetas sueltas y la bandeja del pollo, con los huesitos. Se arman con el MISMO
+# arte (filas del recipiente) y lo que falta se dibuja a pixel con la paleta de la pieza y su contorno de 1 px.
+CONTORNO_COMIDA = (43, 29, 26, 255)
+HUESO = (237, 228, 214, 255)
+HUESO_SOMBRA = (196, 178, 156, 255)
+
+
+def vacios():
+    # Tazón: desde el borde (fila 12) hacia abajo; lo que era croqueta dentro del borde pasa a ser el fondo azul oscuro
+    # del tazón, con 2 croquetas sueltas.
+    a = np.asarray(Image.open(DESTINO / "tazon.png").convert("RGBA")).copy().astype(int)
+    alto = a.shape[0]
+    azul = (a[:, :, 2] > a[:, :, 0] + 20) & (a[:, :, 3] > 0)
+    oscuro = a[azul][np.argmin(a[azul][:, :3].sum(axis=1))]
+    medio = a[azul][np.argsort(a[azul][:, :3].sum(axis=1))[len(a[azul]) // 3]]
+    fondo = medio[:3]
+    croqueta = a[4:7, 21:24].copy()
+    v = np.zeros_like(a)
+    v[12:] = a[12:]
+    cafe = (v[:, :, 0] > v[:, :, 2] + 30) & (v[:, :, 3] > 0)
+    v[cafe, :3] = fondo
+    v[cafe, 3] = 255
+    # El borde de arriba del tazón con su contorno.
+    fila = np.where(v[12, :, 3] > 0)[0]
+    v[12, fila] = CONTORNO_COMIDA
+    for x, y in [(18, 14), (27, 15)]:
+        v[y:y + 3, x:x + 3] = croqueta
+    Image.fromarray(v.astype(np.uint8), "RGBA").save(DESTINO / "tazon_vacio.png")
+    print("Vacíos: tazon_vacio", Image.open(DESTINO / "tazon_vacio.png").size)
+    # Bandeja del pollo: la bandeja (desde la fila 31) y el esqueleto del pollo encima, a pixel.
+    a = np.asarray(Image.open(DESTINO / "pollo.png").convert("RGBA")).copy()
+    v = np.zeros_like(a)
+    v[31:] = a[31:]
+    def punto(x, y, color):
+        v[y, x] = color
+    def trazo(puntos):
+        for x, y in puntos:
+            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                if v[y + dy, x + dx, 3] == 0 or tuple(v[y + dy, x + dx]) == CONTORNO_COMIDA:
+                    v[y + dy, x + dx] = CONTORNO_COMIDA
+        for x, y in puntos:
+            v[y, x] = HUESO
+    # La carcasa vista de lado: una cúpula de costillas de 27 × 10 apoyada en la bandeja (fila 31), crema con su
+    # contorno, y entre costilla y costilla el hueco en sombra (no un peine flotando).
+    import math
+    cx, base = 31, 30
+    cupula = []
+    for dx in range(-13, 14):
+        arriba = base - round(9 * math.sqrt(max(0.0, 1 - (dx / 13.5) ** 2)))
+        for y in range(arriba, base + 1):
+            cupula.append((cx + dx, y))
+    trazo(cupula)
+    # Huecos entre costillas: columnas oscuras de contorno cada 3 px, desde 2 px bajo el borde de la cúpula; la costilla
+    # de al lado lleva su sombra. Así se lee «costillas», no «pan».
+    for dx in range(-10, 11, 3):
+        tope = base - round(9 * math.sqrt(max(0.0, 1 - (dx / 13.5) ** 2))) + 2
+        for y in range(tope, base + 1):
+            v[y, cx + dx] = CONTORNO_COMIDA
+            v[y, cx + dx + 1] = HUESO_SOMBRA
+    # El hueso del muslo, acostado sobre la bandeja a la derecha, con su nudo.
+    trazo([(x, 29) for x in range(47, 56)])
+    trazo([(56, 28), (57, 28), (56, 29), (57, 29), (56, 30), (57, 30)])
+    trazo([(46, 28), (46, 30)])
+    Image.fromarray(v, "RGBA").save(DESTINO / "pollo_huesos.png")
+    print("Vacíos: pollo_huesos", Image.open(DESTINO / "pollo_huesos.png").size)
+
+
 if __name__ == "__main__":
     import sys
     if sys.argv[1:] == ["consistencia"]:
@@ -1026,5 +1094,7 @@ if __name__ == "__main__":
         derrotas()
     elif sys.argv[1:] == ["rotos"]:
         rotos()
+    elif sys.argv[1:] == ["vacios"]:
+        vacios()
     else:
         main()

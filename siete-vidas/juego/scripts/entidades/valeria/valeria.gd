@@ -385,7 +385,7 @@ func perdonar(felipe: Felipe, motivo: String) -> void:
 	perdono.emit(por)
 
 
-## Con el rascador delante de ella: saca el celular y lo graba 8 s, de espaldas al sofá.
+## Con el rascador delante de ella: saca el celular y lo graba 8 s en silencio, de espaldas al sofá.
 func _grabar(felipe: Felipe) -> void:
 	var lado := signf(felipe.global_position.x - global_position.x)
 	if lado == 0.0:
@@ -394,9 +394,8 @@ func _grabar(felipe: Felipe) -> void:
 	caminar_a(x, func() -> void:
 		girar(lado, true)
 		actividad = Actividad.GRABANDO
-		_reloj = TIEMPO_GRABANDO
-		if travesuras:
-			travesuras.decir_valeria("grabando"))
+		# Graba en silencio: la pose y el teléfono ya lo cuentan (voz de Valeria, 2026-10-21).
+		_reloj = TIEMPO_GRABANDO)
 	perdono.emit("rascador")
 
 

@@ -1,7 +1,8 @@
 class_name Frases
 extends RefCounted
 ## La voz de Felipe (aristócrata ofendido que aprendió a escribir en los comentarios de internet) y las réplicas
-## de Valeria (lo trata de bebito gordito y vive para sus redes). Del prototipo de travesuras aprobado.
+## de Valeria (seca y cansada: teletrabaja y lo malcría igual; «bebito gordito» solo al perdonarlo; redes, de pasada;
+## reglas de su voz en memoria/02-guia-felipe.md, «Voz de Valeria»). Del prototipo de travesuras aprobado.
 ## Cada frase: [texto, ánimo del retrato] (ver Dialogo.PERSONAJES). Todas caben en 1 o 2 líneas (la prueba lo mide).
 
 const FELIPE := {
@@ -114,11 +115,8 @@ const FELIPE := {
 }
 
 const VALERIA := {
-	## Rascador con público: perdón al instante (y graba).
-	"rascador": [
-		["VALERIA_RASCADOR_1", 3],
-		["VALERIA_RASCADOR_2", 3],
-	],
+	## Rascador con público: perdón al instante (y graba en silencio).
+	"rascador": [["VALERIA_RASCADOR_1", 3]],
 	## Rascador otra vez en la misma visita (el bis no se cobra).
 	"rascador_bis": [["VALERIA_RASCADOR_BIS_1", 0]],
 	"perdona": [
@@ -133,7 +131,6 @@ const VALERIA := {
 	"vaso": [["VALERIA_VASO_1", 1]],
 	"sofa_atrapado": [["VALERIA_SOFA_ATRAPADO_1", 1]],
 	"sofa_roto": [["VALERIA_SOFA_ROTO_1", 1]],
-	"grabando": [["VALERIA_GRABANDO_1", 3]],
 	"cocina_dieta": [["VALERIA_COCINA_DIETA_1", 0]],
 	"cocina_abre": [["VALERIA_COCINA_ABRE_1", 0]],
 	"popo": [["VALERIA_POPO_1", 1]],

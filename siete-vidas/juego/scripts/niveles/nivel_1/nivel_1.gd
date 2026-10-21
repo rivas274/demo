@@ -394,8 +394,8 @@ const LECCIONES := [
 const AGENDA_SITIOS := {
 	"perdon": [Vector2(905, SUELO - 91), "«¡GRAVEDAD: 1 · VASO: 0!», Valeria: «¡PIPE!» y después «¿Quién es el bebito más gordito?»"],
 	"sofa": [Vector2(370, SUELO - 49), "«¡PLÁSTICO: 0!» y Valeria: «¡Lo estoy pagando en 12 cuotas!»"],
-	"popo": [Vector2(1888, SUELO - 45), "Censura irónica, Valeria con mascarilla: «¡ACABO DE LIMPIARLA!» y se le cae una foto"],
-	"almuerzo": [POLLO, "«¡EN SU CARA!» y Valeria: «¡ESE ERA MI ALMUERZO!»"],
+	"popo": [Vector2(1888, SUELO - 45), "Censura irónica, Valeria con mascarilla: «La acabo de limpiar.» y se le cae una foto"],
+	"almuerzo": [POLLO, "«¡EN SU CARA!» y Valeria: «Ese era mi almuerzo.»"],
 	"laser": [Vector2(5280, SUELO), "El puntero se apaga de vergüenza"],
 	"cajon": [CAJON, "Calcetines volando por todo el cuarto"],
 	"teclado": [Vector2(7146, SUELO - 98), "La pantalla dice «jjjjjjjjjj» y los apuntes de Valeria vuelan"],

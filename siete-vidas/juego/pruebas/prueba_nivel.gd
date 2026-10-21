@@ -109,7 +109,7 @@ func _correr() -> void:
 	_comprobar(guion.valeria.actividad == Valeria.Actividad.REGANANDO and absf(guion.valeria.global_position.y - Nivel1.SUELO) < 0.5, "G2 Al pararse del sofá para regañar, Valeria baja al piso (no queda encima del sofá)")
 	await _esperar(50)
 	_comprobar(not guion.sofa.esta_roto and absf(felipe.global_position.x - (Nivel1.RASCADOR_X - 46.0)) < 6.0, "Valeria lo pilla arañando el sofá y lo deja frente al rascador")
-	_comprobar(_dijo("valeria", "AQUÍ"), "Valeria: «¡Ahí no, bebito, AQUÍ!»")
+	_comprobar(_dijo("valeria", "Aquí"), "Valeria: «Ahí no. Aquí. Para eso lo compré.»")
 	await _esperar(80)
 
 	# El rascador con público: perdón, snack y Valeria graba 8 s de espaldas al sofá; garras afiladas → sofá CRÍTICO.
@@ -180,8 +180,8 @@ func _correr() -> void:
 			vio_puerta_abierta = sala.puertas["recibidor<sala"].apertura > 0.99
 			break
 	_comprobar(guion.valeria.cuarto == "recibidor" and vio_puerta_abierta and guion.valeria.cruces == cruces_antes + 1, "G3 Valeria entra al recibidor por la puerta abierta, una sola vez")
-	await _esperar_que(func() -> bool: return _dijo("valeria", "dieta"), 120)
-	_comprobar(_dijo("valeria", "dieta"), "Valeria pasa al recibidor rumbo a la cocina: «Y tú no entras: dieta.»")
+	await _esperar_que(func() -> bool: return _dijo("valeria", "Dieta"), 120)
+	_comprobar(_dijo("valeria", "Dieta"), "Valeria pasa al recibidor rumbo a la cocina: «Voy por café. Tú no entras. Dieta.»")
 	await _esperar_que(func() -> bool: return guion.valeria.cuarto == "cocina", 900)
 	_comprobar(guion.valeria.cuarto == "cocina" and sala.puertas[Nivel1.PUERTA_COCINA].cerrada, "Valeria se encierra en la cocina")
 
@@ -221,8 +221,8 @@ func _correr() -> void:
 	await _esperar(90)
 	Input.action_release("agacharse")
 	_comprobar(t.agenda.esta_cumplida("popo") and guion.censura_mostrada, "Agachado en la arena: popo táctico con la pegatina de censura irónica")
-	await _esperar_que(func() -> bool: return guion.valeria.cuarto == "recibidor" and guion.valeria.visible and _dijo("valeria", "LIMPIARLA"), 1200)
-	_comprobar(guion.valeria.mascarilla and guion.valeria.cuarto == "recibidor", "Valeria sale con mascarilla: «¡ACABO DE LIMPIARLA!»")
+	await _esperar_que(func() -> bool: return guion.valeria.cuarto == "recibidor" and guion.valeria.visible and _dijo("valeria", "acabo de limpiar"), 1200)
+	_comprobar(guion.valeria.mascarilla and guion.valeria.cuarto == "recibidor", "Valeria sale con mascarilla: «La acabo de limpiar.»")
 	_comprobar(t.agenda.texto_recompensa("popo") == "Foto vergonzosa" and _foto_suelta("recibidor") != null, "G6 El popo táctico da una foto vergonzosa (no un camino ya abierto)")
 	var fotos_antes := t.recompensas.fotos
 	await _poner_en(_foto_suelta("recibidor").global_position + Vector2(0, -2), 60)
@@ -261,7 +261,7 @@ func _correr() -> void:
 	await _tocar("interactuar")
 	await _esperar(60)
 	_comprobar(t.agenda.esta_cumplida("almuerzo") and "¡EN SU CARA!" in t.jugo.palabras, "Robar el pollo delante de Valeria: «¡EN SU CARA!» (travesura «almuerzo»)")
-	_comprobar(_dijo("valeria", "ALMUERZO"), "Valeria: «¡ESE ERA MI ALMUERZO!»")
+	_comprobar(_dijo("valeria", "almuerzo"), "Valeria: «Ese era mi almuerzo.»")
 	await _poner_en(Nivel1.CALCETIN_REFRIGERADOR + Vector2(0, -1))
 	await _esperar(30)
 	_comprobar(sala.calcetines == 2, "El calcetín de arriba del refrigerador se recoge (%d)" % sala.calcetines)
@@ -366,7 +366,7 @@ func _correr() -> void:
 	_comprobar(guion.cajas.rect_borde_caja() != Rect2() and "¡PUM! · MUDANZA: 0" in t.jugo.palabras, "La caja de arriba queda abierta en el piso (su borde se pisa), con «¡PUM! · MUDANZA: 0»")
 	_comprobar(polvo_salio and guion.cajas.ropa_esparcida(), "Al caer la caja: nube de polvo y la ropa se esparce por el piso")
 	_comprobar(sacudio, "Al caer la caja: sacudida corta de cámara")
-	_comprobar(con_audifonos and audifono_afuera and _dijo("valeria", "era el gato"), "Valeria, con audífonos, oye el ¡PUM!: se saca uno y reacciona («…Perdón, era el gato. ¡FELIPE, MIS CAJAS!»)")
+	_comprobar(con_audifonos and audifono_afuera and _dijo("valeria", "era el gato"), "Valeria, con audífonos, oye el ¡PUM!: se saca uno y reacciona («…Perdón, era el gato.»)")
 	await _esperar_que(func() -> bool: return _dijo("felipe", "Mudanza terminada"), 400)
 	_comprobar(_dijo("felipe", "Mudanza terminada") and _orden_dicho("era el gato", "Mudanza terminada"), "Después, Felipe sin culpa: «Mudanza terminada. De nada.» (no se pisan)")
 	_comprobar(guion.valeria.audifonos, "Valeria se vuelve a poner el audífono (sigue en su reunión)")

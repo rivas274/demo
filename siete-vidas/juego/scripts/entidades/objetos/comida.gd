@@ -40,6 +40,7 @@ func interactuar(felipe: Felipe) -> void:
 
 ## La boca llegó: se va la comida y queda el recipiente vacío (sus datos: `vacio`), que ya no se ofrece al botón.
 func al_comido() -> void:
+	remove_from_group(Componentes.INTERACTUABLES)
 	comido.emit(self)
 	if datos and datos.vacio != "":
 		comida_comida = true

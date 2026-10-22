@@ -268,3 +268,20 @@ El creador vio el rig: «está aceptable… es lo mejor que tenemos». Se sigui�
 - **La pata que pide** sube unos 9 cm. Se ve bien en 3/4 y poco de perfil.
 - **Arañar en la sala** se ve en 3/4 de espaldas, porque el respaldo queda detrás del cojín.
 - **El salto en la sala** es corto (cojín a 43 cm) y se ve chico a ×3.
+
+### Caminata v2: más rápida y fluida (2026-10-22)
+El creador: «las demás acciones se ven bien», pero la caminata «parece un juguete». Se rehízo solo `caminar`, con el método estándar de ciclo de cuadrúpedo (Richard Williams, *The Animator's Survival Kit*; los videos del Felipe real).
+
+- **Ritmo:** ciclo de **0,67 s** (16 cuadros; antes 0,92 s) y paso un poco más largo (0,34 u, 11,7 cm a escala 1). Avanza a **0,29 m/s** (0,38 m/s con la escala 1,3 de la sala; antes 0,19 m/s). El apoyo dura el 60 % del ciclo, así que la pata en el aire va más rápido.
+- **El pie apoyado sigue sin patinar:** se corre 2,3 mm, menos de medio pixel a ×3.
+  - La delantera, casi recta en reposo, alcanza el paso más largo con la escápula (±20°) y con el paso centrado 1,2 cm más atrás, como un gato real.
+- **Arcos y breakdowns:** 9 poses por pata: contacto, bajada, apoyo medio, talón arriba, despegue, recoge, paso, adelanta y estira. El vuelo hace un arco Bezier con facilidad de entrada y salida; el apoyo va lineal.
+- **Peso y desfases**, con claves en los 16 cuadros:
+  - La grupa baja después de cada apoyo trasero y los hombros después de cada delantero, desfasados.
+  - La cadera se corre hacia la trasera que apoya y cae del lado de la que vuela; el pecho rola con su propio desfase (la columna se tuerce).
+- **Cabeza estabilizada:** compensa el cabeceo del pecho, el balanceo y el giro del cuerpo. Mira adelante, con un cabeceo mínimo y atrasado.
+- **Cola:** la misma capa, con 2 cuadros de retraso por hueso (antes 3) para el ritmo más rápido, y el resorte de Godot encima.
+- **Mezclas desde y hacia caminar:** 0,2 s, como el resto. Arañar, pedir y saltar no se tocaron.
+- **Entregables:**
+  - `felipe-rig-camina-v2.gif`: arriba la caminata anterior y abajo la nueva, de perfil y en 3/4, sobre el piso con rayas (`pruebas/felipe_rig_camina_comparar.gd`);
+  - `felipe-rig-acciones-v2.mp4`: la rutina completa en la sala.

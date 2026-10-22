@@ -126,7 +126,8 @@ def aranar_salida():
     B.cabeza(5, cuello=10, cab=4)
     B.orejas(5, atras=8)
     for lado in ("L", "R"):
-        B.pata(5, "del", lado, pos=B.natural("del", lado, sube=0.004, cabeceo=30) + V((0, -0.012, -0.004)),
+        # Se separa del respaldo al bajar (la mano no debe pasar a través de él).
+        B.pata(5, "del", lado, pos=B.natural("del", lado, sube=0.004, cabeceo=30) + V((0, 0.03, -0.004)),
                rot=-25, dedo=-5, escapula=6)
         B.pata(5, "tras", lado, rot=3)
     # Apoya las manos y amortigua con el lomo arqueado.

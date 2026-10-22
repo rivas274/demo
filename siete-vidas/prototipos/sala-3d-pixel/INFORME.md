@@ -170,17 +170,17 @@ Notas de `felipe-video3-sentado-olfatea.png`: al caminar o explorar la cola va a
 ## Felipe con rig hecho en Blender (2026-10-22)
 **Por qué:** las versiones anteriores fallaban por la misma causa. La malla de IA es «una estatua»: una sopa de triángulos sin bucles en las articulaciones. Con pesos por distancia (v6) se deformaba como masa, y con piezas rígidas (v7 y v8) se veían cortes. Esta vez se siguió la receta de un artista: retopología, textura horneada, esqueleto, pesos de calor y animación con poses clave.
 
-**Cómo se abre:** `godot --path . -- --felipe-rig`. Felipe camina de un lado a otro de la sala a la velocidad de su paso, se queda quieto y se da vuelta. El código está en `scripts/felipe_rig.gd`; en `principal.gd` solo se agregó un `if`.
+**Cómo se abre:** `godot --path . -- --felipe-rig`. Desde la segunda vuelta, Felipe hace una rutina: camina, salta al sofá, araña, baja, camina y pide (ver más abajo). El código está en `scripts/felipe_rig.gd`; en `principal.gd` solo se agregó un `if`.
 
 **Cómo se hizo** (Blender 5.2.3 como módulo de Python, `pip install bpy==5.2.3`; scripts en `assets/meshy_prueba/felipe_rig/scripts/`, se corren en orden):
 1. **`01_retopo.py`:** importa el GLB, aplica las transformaciones y lo centra con el piso en z = 0. Hace un remallado por vóxeles de 6 mm, que cierra la malla y une las 127 islas sueltas en una sola pieza. Después, **QuadriFlow** con simetría en X da **7.754 cuadriláteros** (todas las caras), y se pega a la original con Shrinkwrap.
 2. **`02_textura.py`:** UV nuevas con Smart UV Project y margen. Hornea en Cycles, en modo **Selected to Active**, solo el color difuso desde la original: 2048 px, extrusión de 1,2 cm y rayo de 4 cm. Ningún texel quedó sin dato.
-3. **`03_rig.py`:** esqueleto desde el **metarig de gato de Rigify**, recortado a 33 huesos: raíz, columna de 4 (grupa a pecho), cuello, cabeza, 2 orejas, cola de 4 y, por pata, escápula o pelvis, 3 segmentos y dedos. Los huesos van en las marcas del creador (`plantilla_esqueleto/creador_*.png`) con el mapeo de `vistas.gd`. El ancho de las patas traseras se midió en la malla.
+3. **`03_rig.py`:** esqueleto desde el **metarig de gato de Rigify**, recortado a 34 huesos: raíz, columna de 4 (grupa a pecho), cuello, cabeza, 2 orejas, cola de 5 y, por pata, escápula o pelvis, 3 segmentos y dedos. Los huesos van en las marcas del creador (`plantilla_esqueleto/creador_*.png`) con el mapeo de `vistas.gd`. El ancho de las patas traseras se midió en la malla.
    - Pesos con **Automatic Weights (calor)**: funcionó en todos los vértices. Luego se suavizan los grupos.
    - Reglas por script: la cabeza va entera a su hueso, con un anillo de mezcla de 30 px solo abajo y atrás, donde nace el cuello; la cara, la boca y el mentón no se mezclan. Las orejas salen de la máscara del creador. Ninguna pata toma vértices del otro lado ni del centro de la panza. Máximo 4 huesos por vértice, normalizado.
    - Sin Preserve Volume, porque Godot usa skinning lineal.
 4. **`04_poses.py`:** prueba de poses. Patas a ±35° (hombro o cadera y codo o rodilla), cola a 30° hacia atrás y al lado, y cabeza a 20° abajo y al lado.
-5. **`05_anima.py`:** todo pasa a metros (alto total de 0,554 m). Se arman controles IK de animador: control del pie con pivote en la bola, objetivo IK que es copia del pie y polos de rodilla y codo, con el ángulo buscado para que el reposo no cambie. Las claves son Bezier con facilidad de entrada y salida y modificador Cycles. Se hornea a los huesos que deforman, se borran los controles y se exporta `felipe_rig.glb` con 2 animaciones.
+5. **`05_anima.py`** (con `anima_base.py`, `anima_locomocion.py` y `anima_acciones.py`): todo pasa a metros (alto total de 0,554 m). Se arman controles IK de animador: control del pie con pivote en la bola, objetivo IK que es copia del pie y polos de rodilla y codo, con el ángulo buscado para que el reposo no cambie. Las claves son Bezier con facilidad de entrada y salida y modificador Cycles. Se hornea a los huesos que deforman, se borran los controles y se exporta `felipe_rig.glb` con 2 animaciones.
    - **caminar:** 22 cuadros a 24 fps (0,92 s), en secuencia lateral (trasera izquierda, delantera izquierda, trasera derecha, delantera derecha).
      - **8 poses clave por pata:** contacto, bajada, apoyo medio, talón arriba, despegue, recoge (lo más alto), paso y estira.
      - La escápula acompaña a la mano.
@@ -188,7 +188,7 @@ Notas de `felipe-video3-sentado-olfatea.png`: al caminar o explorar la cola va a
      - La cabeza va baja y adelantada y se mece poco, con retraso.
      - La cola va a media altura en gancho, con la punta retrasada.
      - Va «en el lugar»: **0,187 m/s** a escala 1 (0,243 m/s con la escala 1,3 de la sala), anotado en `felipe_rig.json`. Medido en Blender, **el pie apoyado se corre 0,02 mm**.
-   - **quieto:** 3 s. Dos respiraciones, la cola se mece lento, la cabeza mira y una oreja da un respingo.
+   - **quieto:** 6 s (era de 3 s). Respira, la cola se mece lento con pausas y un tic de la punta, la cabeza mira y una oreja da un respingo.
 6. **`06_ciclo.py`** y **`07_hojas.py`:** hojas de revisión. **`pruebas/felipe_rig_cuadros.gd`:** cuadros de cerca en Godot (perfil y 3/4).
 
 **Entregables** (en la carpeta de capturas `proto3d/`): `felipe-rig-retopo.png`, `felipe-rig-textura.png`, `felipe-rig-poses.png`, `felipe-rig-ciclo.png`, `felipe-rig-anima.gif` (de cerca, en Godot y con material toon) y `felipe-rig-anima.mp4` (en la sala, pixel ×3, 23 s).
@@ -206,3 +206,65 @@ Notas de `felipe-video3-sentado-olfatea.png`: al caminar o explorar la cola va a
 - Al darse vuelta en la sala gira en el lugar sobre una pose quieta; no hay animación de giro.
 
 **Para seguir:** si el creador lo aprueba, el mismo rig sirve para acecho, sentarse, saltar y caer. Bastan más acciones en `05_anima.py` con los mismos controles, sin rehacer la malla ni los pesos.
+
+### Segunda vuelta: sombra de la pata trasera, cola más viva y 3 acciones nuevas (2026-10-22)
+El creador vio el rig: «está aceptable… es lo mejor que tenemos». Se siguió con el mismo rig y los mismos scripts.
+
+**1. La sombra rara de la pata trasera: causa de fondo**
+- **Descartado:**
+  - Normales invertidas o partidas: la malla tiene 0 aristas sin cerrar, 0 caras con el sentido cruzado y 0 pliegues en reposo.
+  - Algo oscuro horneado: en Godot la mancha es igual sin textura.
+  - Sombra proyectada: también es igual con las sombras apagadas (`pruebas/felipe_rig_sombra.gd`).
+- **Causa: los pesos plegaban la piel entre el muslo y la panza al caminar.** Había tres fallas en `03_rig.py`:
+  1. **Cortes duros.** "Las patas no toman la panza" era un corte seco en x = 0,07: un vértice iba entero a la columna y el de al lado entero a la pata. Ahora el peso de la pata se desvanece de 0,12 a 0,02 y hay 3 pasadas de suavizado entre vecinos fuera de la cabeza.
+  2. **El muslo (y el brazo) se llevaban la grupa (y el flanco):** 70–80 % del peso del lado del cuerpo, incluso sobre la cadera. Ahora su peso baja suave entre la rodilla y la cadera (el codo y el hombro), y lo que sobra pasa a la pelvis (la escápula).
+  3. **Un error de bpy:** al borrar los grupos de cada vértice mientras se recorría `v.groups`, la colección se corría y quedaban restos de los pesos de calor (más de 4 huesos, suma mayor que 1). Por eso el exportador avisaba "más de 4 influencias". Ahora hay como máximo 4 y suman 1.
+- **Resultado** (`felipe-rig-sombra-antes-despues.png`): en el alambre desaparecen las caras plegadas entre las patas traseras y la panza, y en Blender se suavizan las franjas oscuras bajo el vientre. En el toon de Godot el cambio es chico. La zona lila grande que queda sobre la grupa es su sombra propia (el corte de luz del toon en 0,12), no un defecto.
+
+**2. La cola más viva** (overlapping action / follow-through, el método estándar):
+- **5 huesos** (antes 4): el tramo de arriba, largo y con el gancho, va en dos. Así se dobla en curva y no en codo.
+- **En Blender:** una onda que viaja de la base a la punta, 3 cuadros de retraso por hueso, amplitud ×0,25 en la base hasta ×1,5 en la punta y giros en ejes locales.
+- **Por acción:**
+  - **caminar:** vaivén con retraso.
+  - **quieto:** 6 s con pausas irregulares y un tic de la punta a los 4 s; nunca está congelada.
+  - **arañar:** sacudidas rápidas de la punta.
+  - **pedir:** la punta curvada se mueve lento.
+  - **saltar:** abajo y atrás al despegar, arriba en el aire y latigazo al aterrizar.
+- **En Godot** (`felipe_rig.gd`): un resorte amortiguado por hueso como capa aditiva sobre el clip.
+  - La punta es más lenta: 2,6 a 1,5 Hz, amortiguación 0,32 y tope de ±25°.
+  - Reacciona a la aceleración del nodo: al arrancar se atrasa, al frenar sigue de largo y rebota, al despegar baja y al aterrizar da un latigazo. También reacciona a los giros.
+
+**3. Acciones nuevas** (poses clave en `anima_acciones.py`):
+- **Base común:**
+  - El torso gira en la cadera, y las manos y patas en el aire se ponen relativas al torso (dónde quedarían + un desplazamiento).
+  - `05_anima.py` mide en cada acción cuánto le falta a cada pata para llegar a su objetivo IK: 0 a 5 mm, y 10 mm en el aire al saltar.
+- **arañar** (2,3 s con dos bucles):
+  - `aranar_entrada` (0,5 s): se carga, se para en dos patas y se asienta contra el respaldo.
+  - `aranar` (0,67 s, bucle): las manos bajan alternadas, con 2 zarpazos por ciclo (garras abajo en los cuadros 3 y 11). El cuerpo se mece con cada zarpazo, las orejas van atrás y la punta de la cola se sacude.
+  - `aranar_salida` (0,5 s): se separa del respaldo, apoya las manos y amortigua con el lomo arqueado.
+- **pedir** (2,25 s con un bucle):
+  - `pedir_entrada` (0,75 s): se sienta y la cola rodea las patas por el lado derecho.
+  - `pedir` (1,5 s, bucle): mira arriba con la cabeza ladeada y la pata derecha sube y toca el aire dos veces.
+  - Para levantarse, Godot pasa `pedir_entrada` al revés.
+  - **No abre la boca:** el rig no tiene mandíbula y no la inventé.
+- **saltar** (1,42 s, en el lugar):
+  - Anticipación (se agacha y mueve la grupa).
+  - Impulso: las traseras empujan y el cuerpo se estira (+7 %).
+  - Aire: las patas recogidas y el lomo redondo.
+  - Caída: las delanteras adelante.
+  - Aterrizaje: delanteras primero (la segunda un cuadro después), luego la grupa, y el lomo se arquea y amortigua (−7 %).
+  - Marcas en `felipe_rig.json`: despegue 0,5 s y aterrizaje 1,0 s. El arco parabólico lo hace Godot entre las dos (`arco_salto`).
+
+**4. Rutina en la sala** (`--felipe-rig`, unos 24 s en bucle, mezclas de 0,2 s): camina, gira, salta al cojín del sofá, araña el respaldo (entrada, 3 bucles y salida), baja de un salto, camina hasta donde estaría Valeria, se sienta y pide 2 veces, se levanta y vuelve a empezar.
+
+**Entregables** (en `proto3d/`):
+- `felipe-rig-sombra-antes-despues.png`;
+- `felipe-rig-acciones.gif`: de cerca en Godot con el toon, de perfil y en 3/4, con caminar, la cola de cerca caminando y en quieto, saltar, arañar y pedir;
+- `felipe-rig-acciones.mp4`: la rutina en la sala, pixel ×3;
+- `felipe-rig-acciones-cuadros.png`: 6 cuadros clave de cada acción, de perfil y en 3/4, en Blender.
+
+**Límites honestos:**
+- **Sentarse:** Felipe chibi no puede sentarse erguido con las manos en el piso. Sus patas delanteras son cortas y casi rectas: cada 25° de pecho levantado suben los hombros unos 8 cm. Por eso pedir es un sentado bajo, "bollo", con 10° de pecho y la grupa 5 cm abajo. Se lee como sentado en 3/4; de perfil parece echado con la cabeza arriba.
+- **La pata que pide** sube unos 9 cm. Se ve bien en 3/4 y poco de perfil.
+- **Arañar en la sala** se ve en 3/4 de espaldas, porque el respaldo queda detrás del cojín.
+- **El salto en la sala** es corto (cojín a 43 cm) y se ve chico a ×3.

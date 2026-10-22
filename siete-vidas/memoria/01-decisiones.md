@@ -45,6 +45,14 @@ Actualizado: 2026-10-19 (PARTE B del nivel 1 v4). Detalle completo en la biblia 
   4. pesos automáticos y suavizados, probados posando;
   5. animación con poses clave mirando video de referencia.
 - **Por qué:** la malla de IA es una «estatua» sin bucles en las articulaciones. Cortarla en piezas o moverla con fórmulas no resuelve la causa.
+- **Lecciones del rig de Felipe (2026-10-22, prototipo `sala-3d-pixel`, detalle en su `INFORME.md`):**
+  - **Pesos sin cortes duros.** Una regla seca entre huesos (por ejemplo, "la pata no toma la panza") pliega la piel y en el toon parece una sombra rara. Lo estándar es desvanecer el peso con una rampa y suavizarlo entre vecinos. Fuente: manual de Blender, *Weight Paint › Smooth* y *Limit Total*.
+  - **El muslo y el brazo solo toman la piel de la pata.** La grupa y el flanco siguen a la pelvis y a la escápula. Si no, giran con la pata.
+  - **En bpy, al borrar los grupos de un vértice,** primero hay que guardar sus índices. Si se borra mientras se recorre `v.groups`, la colección se corre y quedan restos (más de 4 huesos, suma mayor que 1).
+  - **Pies con IK, pivote en la bola del pie y polos** (como el rig «paw» de Rigify). Se animan los controles y se hornea a los huesos: el pie apoyado no patina.
+  - **El torso gira en la cadera** al pararse, sentarse o saltar, y las patas en el aire se ponen relativas al torso. Así ninguna pata se estira de más.
+  - **Cola viva: overlapping action.** Cada hueso va 2 a 4 cuadros atrás del anterior y con más amplitud hacia la punta. Encima, en el motor, un resorte amortiguado aditivo (spring o jiggle bones) que reacciona a la aceleración. Fuente: Richard Williams, *The Animator's Survival Kit* (overlapping action); jiggle/spring bones de los motores.
+  - **Límite de proporciones chibi:** con las patas delanteras cortas, Felipe no puede sentarse erguido con las manos en el piso. Su sentado es bajo.
 
 ## Prototipos
 

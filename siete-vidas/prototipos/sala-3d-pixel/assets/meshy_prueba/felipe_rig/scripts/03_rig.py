@@ -173,6 +173,8 @@ idx_nombre = {g.index: g.name for g in malla.vertex_groups}
 ANILLO = 30.0  # px de mezcla entre cabeza y cuello
 z_cuello = P(0, 560)[2]
 n_cab = n_ore = 0
+final = {}     # índice -> {hueso: peso}, antes de suavizar y limitar
+fijos = set()  # vértices de la cabeza: no se suavizan
 for v in malla.data.vertices:
     px, py, fx = a_px(v.co)
     pesos = {idx_nombre[g.group]: g.weight for g in v.groups}
@@ -198,13 +200,16 @@ for v in malla.data.vertices:
             n_ore += 1
         pesos = nuevo
         n_cab += 1
-    # Patas: no toman vértices del otro lado ni del centro de la panza.
+    # Patas: no toman vértices del otro lado y su peso se desvanece suave hacia el centro de
+    # la panza (de x = 0,12 a 0,02). Un corte duro aquí plegaba la piel entre las patas y la
+    # panza al caminar (franjas oscuras bajo el vientre).
     PATA = ("shoulder", "upper_arm", "forearm", "hand", "f_toe", "pelvis", "thigh", "shin", "foot", "r_toe")
     for k in list(pesos):
         if k.startswith(PATA):
-            otro = (k.endswith(".L") and v.co.x < 0.0) or (k.endswith(".R") and v.co.x > 0.0)
-            centro = abs(v.co.x) < 0.07 and v.co.z > 0.12
-            if otro or centro:
+            lado_x = v.co.x if k.endswith(".L") else -v.co.x
+            t = min(1.0, max(0.0, (lado_x - 0.02) / 0.10))
+            pesos[k] *= t * t * (3 - 2 * t)
+            if pesos[k] <= 1e-4:
                 pesos.pop(k)
     # Muslo y brazo solo toman la piel de la pata: entre la rodilla (o el codo) y la cadera
     # (o el hombro) su peso baja suave a 0 y lo que sobra pasa a la pelvis o la escápula,
@@ -219,19 +224,40 @@ for v in malla.data.vertices:
             pesos[k] -= quita
             fijo = ("pelvis" if k.startswith("thigh") else "shoulder") + k[-2:]
             pesos[fijo] = pesos.get(fijo, 0.0) + quita
-    # Máximo 4 huesos y suma 1.
-    top = sorted(pesos.items(), key=lambda kv: -kv[1])[:4]
+    s = sum(pesos.values())
+    final[v.index] = {k: x / s for k, x in pesos.items()} if s > 1e-6 else {"spine.001": 1.0}
+    if 0 <= px < 1024 and 0 <= py < 1024 and cabeza_m[py, px] and v.co.z > z_cuello - 0.06:
+        fijos.add(v.index)
+print("vértices de cabeza:", n_cab, "de orejas:", n_ore)
+
+# Suavizado de pesos entre vecinos fuera de la cabeza (3 pasadas, mitad propio y mitad
+# promedio de los vecinos): quita los saltos de peso que pliegan la piel.
+vecinos = [[] for _ in malla.data.vertices]
+for e in malla.data.edges:
+    a_, b_ = e.vertices
+    vecinos[a_].append(b_); vecinos[b_].append(a_)
+for _ in range(3):
+    nuevo = {}
+    for i, ps in final.items():
+        if i in fijos or not vecinos[i]:
+            continue
+        acc = {k: 0.5 * x for k, x in ps.items()}
+        for j in vecinos[i]:
+            for k, x in final[j].items():
+                acc[k] = acc.get(k, 0.0) + 0.5 * x / len(vecinos[i])
+        nuevo[i] = acc
+    final.update(nuevo)
+
+# Máximo 4 huesos y suma 1. Se guardan los índices antes de borrar: borrar mientras se
+# recorre v.groups corre la colección y dejaba restos de los pesos de calor.
+for v in malla.data.vertices:
+    top = sorted(final[v.index].items(), key=lambda kv: -kv[1])[:4]
     s = sum(x for _, x in top)
-    if s < 1e-6:
-        top = [("spine.001", 1.0)]; s = 1.0
-    # Se guardan los índices antes de borrar: borrar mientras se recorre v.groups corre la
-    # colección y dejaba restos de los pesos de calor (más de 4 huesos, suma > 1).
     for gi in [g.group for g in v.groups]:
         grupos[idx_nombre[gi]].remove([v.index])
     for k, x in top:
         if x / s > 0.002:
             grupos[k].add([v.index], x / s, "REPLACE")
-print("vértices de cabeza:", n_cab, "de orejas:", n_ore)
 
 malla.modifiers["Armature"].use_deform_preserve_volume = False  # Godot usa skinning lineal
 bpy.ops.wm.save_as_mainfile(filepath=C.BLEND_RIG)

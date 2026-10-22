@@ -201,33 +201,54 @@ bm.free()
 p99, peor, sin_par = simetria_exacta(retopo)
 print("emparejamiento de espejo: p99 %.4f, peor %.4f, vértices sin pareja %d" % (p99, peor, sin_par))
 
-# v4: patas traseras más gruesas ("pantalón" de persa). Se inflan muslo y canilla por la
-# normal, con caída suave hacia la grupa y hacia la mano del pie; el lado de adentro crece
-# poco (las patas no se tocan). Es simétrico: cada vértice usa |x|.
+# v4: patas traseras más gruesas ("pantalón" de persa). Cada vértice de la pata se empuja
+# en horizontal, alejándose del eje de la pata a su altura (no por la normal: las normales
+# de esta malla son ruidosas y la superficie se arrugaba). Caída suave hacia la grupa y hacia
+# la mano del pie; el lado de adentro crece poco. Después se suaviza la zona. Simétrico.
 if PIERNA > 0:
     mt = ndimage.binary_dilation(((mp >> 4) & 1).astype(bool), iterations=2)
     dentro_px = ndimage.distance_transform_edt(mt)
-    retopo.data.update()
-    n_inf = 0
-    for v in retopo.data.vertices:
+    vs = retopo.data.vertices
+    info = []
+    for v in vs:
         px = int(np.clip(round(512 - v.co.y / C.PX), 0, 1023))
         py = int(np.clip(round(512 - (v.co.z - zoff) / C.PX), 0, 1023))
-        if not mt[py, px] or abs(v.co.x) < 0.04:
+        if mt[py, px] and abs(v.co.x) >= 0.04:
+            w = min(1.0, dentro_px[py, px] / 30.0)
+            w *= float(np.clip((py - 540) / 90.0, 0, 1))
+            w *= float(np.clip((880 - py) / 50.0, 0, 1)) * 0.8 + 0.2
+            w *= float(np.clip((abs(v.co.x) - 0.04) / 0.05, 0, 1))
+            info.append((v.index, py, w))
+    # Eje de la pata por franja de altura: centro de |x| e y de sus vértices.
+    franjas = {}
+    for i, py, w in info:
+        franjas.setdefault(py // 20, []).append(i)
+    eje = {}
+    for k, ids in franjas.items():
+        c = np.array([(abs(vs[i].co.x), vs[i].co.y) for i in ids])
+        eje[k] = c.mean(axis=0)
+    mover = {}
+    for i, py, w in info:
+        v = vs[i]
+        xc, yc = eje[py // 20]
+        s_ = 1.0 if v.co.x > 0 else -1.0
+        d = np.array([abs(v.co.x) - xc, v.co.y - yc])
+        n = np.linalg.norm(d)
+        if n < 1e-6:
             continue
-        w = min(1.0, dentro_px[py, px] / 30.0)                  # borde del contorno del creador
-        w *= float(np.clip((py - 540) / 70.0, 0, 1))            # se funde con la grupa arriba
-        w *= float(np.clip((880 - py) / 50.0, 0, 1)) * 0.8 + 0.2 # la mano del pie crece poco
-        w *= float(np.clip((abs(v.co.x) - 0.04) / 0.05, 0, 1))  # nada cerca del centro
-        n = v.normal.copy()
-        s = 1.0 if v.co.x > 0 else -1.0
-        hacia_afuera = n.x * s
-        k = 1.0 if hacia_afuera >= 0 else 0.35                  # adentro, poco
-        d = n.copy(); d.x += 0.35 * s; d.normalize()
-        v.co += d * (PIERNA * w * k)
-        n_inf += w > 0.01
+        d /= n
+        k = 1.0 if d[0] >= -0.2 else 0.35            # adentro (hacia la otra pata), poco
+        mover[i] = (d[0] * s_ * PIERNA * w * k, d[1] * PIERNA * w * k * 0.8)
+    for i, (dx, dy) in mover.items():
+        vs[i].co.x += dx; vs[i].co.y += dy
     retopo.data.update()
+    bm = bmesh.new(); bm.from_mesh(retopo.data); bm.verts.ensure_lookup_table()
+    zona_s = [bm.verts[i] for i in mover]
+    for _ in range(3):
+        bmesh.ops.smooth_vert(bm, verts=zona_s, factor=0.5, use_axis_x=True, use_axis_y=True, use_axis_z=True)
+    bm.to_mesh(retopo.data); bm.free(); retopo.data.update()
     p99, peor, sin_par = simetria_exacta(retopo)
-    print("patas traseras infladas %.3f u en %d vértices (simetría: peor %.5f)" % (PIERNA, n_inf, peor))
+    print("patas traseras infladas %.3f u en %d vértices (simetría: peor %.5f)" % (PIERNA, len(mover), peor))
 for p in retopo.data.polygons:
     p.use_smooth = True
 print("final:", len(retopo.data.vertices), "vértices,", len(retopo.data.polygons), "caras")

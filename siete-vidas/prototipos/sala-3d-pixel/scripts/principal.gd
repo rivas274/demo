@@ -4,7 +4,8 @@
 # Arma la tubería: escena 3D -> SubViewport chico -> bordes -> paleta -> pantalla 1280x720
 # con escala entera (pixel de render de x2, x3 o x4 pixeles de pantalla).
 # Teclas: 1 paleta, 2 bordes, 3 escalones de luz, 4 tamaño de pixel, Tab guion/manual, F1 ayuda.
-# Argumentos (después de --): --con-paleta, --pixel=2|3|4, --maniqui (Valeria maniquí de la v2).
+# Argumentos (después de --): --con-paleta, --pixel=2|3|4, --maniqui (Valeria maniquí de la v2),
+# --felipe-anima (solo Felipe 3D coloreado con esqueleto: camina, salta al sofá y vuelve).
 extends Node
 
 ## Escala del juego: Valeria 1,65 m = 200 px de 640x360, Felipe 67 px. El encuadre
@@ -47,6 +48,7 @@ var valeria: Node3D
 var felipe: Sprite3D
 var felipe_3d: Node3D
 var felipe_ia: Node3D
+var felipe_animado: Node3D
 var bordes: ShaderMaterial
 var ayuda: Label
 var _cam_x := 0.0
@@ -88,7 +90,26 @@ func _ready() -> void:
 		valeria.set("alto_m", 1.75)  # con el moño
 		valeria.set("z_sentada", -0.6)  # piernas más cortas: se sienta más adelante
 	vista.add_child(valeria)
+	var solo_felipe := "--felipe-anima" in OS.get_cmdline_user_args()
+	if solo_felipe:
+		valeria.visible = false
+		valeria.process_mode = Node.PROCESS_MODE_DISABLED
+		felipe_animado = Node3D.new()
+		felipe_animado.name = "FelipeAnimado"
+		felipe_animado.set_script(load("res://scripts/felipe_animado.gd"))
+		vista.add_child(felipe_animado)
+		var guion := Node.new()
+		guion.name = "GuionFelipe"
+		guion.set_script(load("res://scripts/guion_felipe_animado.gd"))
+		guion.set("felipe", felipe_animado)
+		add_child(guion)
 
+	if not solo_felipe:
+		_felipes_comparar(sala)
+	_armar_camara()
+
+
+func _felipes_comparar(sala: Node3D) -> void:
 	felipe = Sprite3D.new()
 	felipe.name = "Felipe"
 	felipe.set_script(load("res://scripts/felipe_sprite.gd"))
@@ -103,6 +124,8 @@ func _ready() -> void:
 	felipe_ia.set("x_sofa", sala.get("punto_sofa").x + 0.68)
 	valeria.connect("empieza_vuelta", func() -> void: felipe_ia.set("_t", 0.0))
 
+
+func _armar_camara() -> void:
 	camara = Camera3D.new()
 	camara.projection = Camera3D.PROJECTION_ORTHOGONAL
 	camara.size = ALTO_CUADRO_M
@@ -122,7 +145,7 @@ func _ready() -> void:
 	quad.material_override = bordes
 	quad.position = Vector3(0, 0, -1)
 	camara.add_child(quad)
-	_cam_x = clampf(valeria.position.x, limites_camara.x, limites_camara.y)
+	_cam_x = clampf(_objetivo().position.x, limites_camara.x, limites_camara.y)
 	_colocar_camara()
 
 	pantalla = TextureRect.new()
@@ -154,9 +177,14 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	var meta := clampf(valeria.position.x, limites_camara.x, limites_camara.y)
+	var meta := clampf(_objetivo().position.x, limites_camara.x, limites_camara.y)
 	_cam_x = lerpf(_cam_x, meta, clampf(delta * 2.5, 0.0, 1.0))
 	_colocar_camara()
+
+
+## La cámara sigue a Valeria, o a Felipe en el modo --felipe-anima.
+func _objetivo() -> Node3D:
+	return felipe_animado if felipe_animado else valeria
 
 
 func _cambiar_pixel(k: int) -> void:

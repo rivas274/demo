@@ -19,3 +19,16 @@ Archivos:
 - `felipe_caminar_perfil_cuadro.png`: un cuadro donde se ve la cabeza girada.
 
 Conclusión: para animar con un rig de cuadrúpedo, la entrada debe ser un perfil puro con la cabeza recta. Para el prototipo, una animación procedural en Three.js (rebote, cola, respiración) sobre el GLB local es gratis y más controlable.
+
+## Modelo descargable gratis: `felipe_meshy.glb` (2026-10-22)
+
+- **Plan Free de Meshy:** permite **10 descargas al mes, solo de modelos hechos con "Meshy 6 Lite"**.
+  - Meshy 7.1 y Meshy 6 piden suscripción: Starter cuesta COP 31.000 al mes (24.800 al mes pagando el año), con 20 descargas al mes. Pro cuesta COP 62.000 al mes y tiene descargas ilimitadas.
+  - La ventana "Suscríbete para descargar" ofrece FBX, OBJ, GLB, USDZ, STL, BLEND, 3MF y DXF una vez suscrito.
+- **Cómo se hizo:** con la misma entrada (`entrada_gemini_v2_1.jpg`), forma en Meshy 6 Lite (10 créditos) y luego textura en Meshy 6 Lite con mapas PBR (10 créditos). Las dos descargas fueron gratis y dejaron el cupo en 8 de 10.
+- **Archivos:**
+  - `felipe_meshy.glb`: con textura PBR, 88.912 caras, 6 MB.
+  - `felipe_meshy_sin_textura.glb`: solo la forma, 1,6 MB.
+  - `felipe_meshy_vistas.png`: render en Blender cada 45°.
+  - Otros formatos ofrecidos en el plan Free: fbx, obj, glb, usdz, stl, blend.
+- **Licencia: CC BY 4.0** (plan Free). Permite uso comercial **con atribución**. En los créditos del juego: "Modelo 3D de Felipe generado con Meshy AI (meshy.ai), CC BY 4.0".

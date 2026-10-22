@@ -29,7 +29,11 @@ uniform vec3 centro_cabeza = vec3(2.5, 2.7, 0.0);
 uniform float radio_cabeza = 1.0;
 uniform float x_cola = -1.75;
 uniform float y_lomo = 2.0;
-uniform vec4 manchas[3];  // centro xyz y radio
+uniform vec3 mancha0_c = vec3(0.0);  // centro y radio de cada mancha
+uniform float mancha0_r = 0.0;
+uniform vec3 mancha1_c = vec3(0.0);
+uniform float mancha1_r = 0.0;
+uniform int depurar = 0;
 
 varying vec3 reposo;
 
@@ -42,24 +46,31 @@ float elipse(vec2 p, vec2 c, vec2 r) {
 	return dot(d, d);
 }
 
+float mancha(vec3 p, vec3 c, float r) {
+	if (r <= 0.0) return 0.0;
+	vec3 d = (p - c) / vec3(r * 1.3, r * 1.05, r * 1.7);
+	return 1.0 - smoothstep(0.85, 1.05, length(d));
+}
+
 void fragment() {
 	vec3 p = reposo;
 	vec3 c = blanco;
 	vec3 h = (p - centro_cabeza) / radio_cabeza;  // cabeza: x adelante, y arriba, z lado
-	bool es_cabeza = length(h) < 1.35 && p.x > centro_cabeza.x - 1.1 * radio_cabeza;
+	bool es_cabeza = h.x > -0.95 && (length(h) < 1.2 || (h.y > 0.8 && length(h) < 1.9));
 	if (es_cabeza) {
 		// Gorra: arriba; baja más por los lados y la nuca que por la cara.
 		float linea = 0.12 + 0.25 * smoothstep(0.2, 0.9, h.x) - 0.25 * smoothstep(0.3, 0.9, abs(h.z));
 		bool gorra = h.y > linea;
 		// Franja blanca en V entre los ojos.
-		bool v_blanca = h.x > 0.35 && abs(h.z) < (0.62 - h.y) * 0.32;
+		bool v_blanca = h.x > 0.3 && abs(h.z) < (0.9 - h.y) * 0.42;
 		if (gorra && !v_blanca) {
 			c = atigrado;
 			if (h.y > 0.45 && sin(abs(h.z) * 14.0 + 2.0 * h.x) > 0.7) c = raya;
 		}
-		// Orejas: rosado por dentro (lo que mira adelante sobre la gorra).
-		if (h.y > 0.72 && abs(h.z) > 0.25 && h.x > -0.05 && NORMAL.y > -2.0) {
-			c = mix(c, rosa, smoothstep(0.0, 0.25, h.x) * 0.9);
+		// Orejas (lo que sobresale del cráneo): gris por fuera, rosado por delante.
+		if (h.y > 0.92) {
+			c = atigrado;
+			if (h.x > -0.05 && h.y > 1.0) c = rosa;
 		}
 		// Cara: en el plano z-y visto de frente, solo lo que mira adelante.
 		if (h.x > 0.45) {
@@ -92,15 +103,15 @@ void fragment() {
 		if (sin(length(p.xy - vec2(x_cola, y_lomo)) * 6.5) > 0.4) c = cola_r;
 	} else {
 		// Manchas del lomo, simétricas, con borde suave y rayas sutiles.
-		float m = 0.0;
-		for (int i = 0; i < 3; i++) {
-			vec3 d = (p - manchas[i].xyz) / vec3(manchas[i].w * 1.25, manchas[i].w * 0.8, manchas[i].w);
-			m = max(m, 1.0 - smoothstep(0.85, 1.05, length(d)));
-		}
+		float m = max(mancha(p, mancha0_c, mancha0_r), mancha(p, mancha1_c, mancha1_r));
 		vec3 parche = atigrado;
 		if (sin(p.x * 5.0 + 1.5 * sin(p.y * 2.0)) > 0.6) parche = raya;
 		c = mix(blanco, parche, m);
 	}
+	if (depurar == 1) c = clamp(h * 0.5 + 0.5, 0.0, 1.0);
+	if (depurar == 2) c = vec3(fract(p.x), fract(p.y), fract(p.z));
+	if (depurar == 3) c = vec3(mancha(p, mancha0_c, mancha0_r), mancha(p, mancha1_c, mancha1_r), 0.0);
+	if (depurar == 4) c = vec3((p.x + 3.0) / 6.0, (p.y - 1.0) / 2.0, p.z + 0.5);
 	ALBEDO = c;
 	EMISSION = c * mix(ambiente, vec3(0.42), ambiente_suave);
 }

@@ -4,17 +4,17 @@
 # y camina de vuelta. Mueve el nodo de Felipe y elige su animación.
 extends Node
 
-const RITMO_PASO := 1.4
+const RITMO_PASO := 1.6
 ## Alto del arco del salto (m) con Felipe a escala 1.
 const ALTO_SALTO := 0.18
 
 var felipe: Node3D
-var x_inicio := -0.6
+var x_inicio := -0.3
 var x_antes_sofa := 0.55
 var cojin := Vector3(0.82, 0.43, -0.55)
 var z_piso := 0.3
 var x_bajada := 0.40
-var x_final := -0.75
+var x_final := -0.45
 var duracion := 14.2
 var _t := 0.0
 var _tramos: Array = []

@@ -88,7 +88,7 @@ def ajustar(V, F, obj, yaws, pitches, escala=0.25, recorte=None):
     return dict(yaw=p[0], pitch=p[1], s=p[2], cx=p[3], cy=p[4], iou=full, iou_inicial=v0)
 
 
-def visibles(V, F, N, prm, W, H, umbral_normal=0.4):
+def visibles(V, F, N, prm, W, H, umbral_normal=0.4, tolerancia=0.02):
     """Vértices que la cámara de la imagen ve (prueba de profundidad + normal)."""
     P = vista(V, prm["yaw"], prm["pitch"])
     Nv = vista(N, prm["yaw"], prm["pitch"])
@@ -105,7 +105,7 @@ def visibles(V, F, N, prm, W, H, umbral_normal=0.4):
     yi = np.clip(np.round(q[:, 1]).astype(int), 0, H - 1)
     tri = ids[yi, xi]
     zfront = np.where(tri >= 0, P[F[np.maximum(tri, 0)], 2].max(axis=1), -9)
-    vis = (P[:, 2] >= zfront - 0.02) & (Nv[:, 2] > umbral_normal)
+    vis = (P[:, 2] >= zfront - tolerancia) & (Nv[:, 2] > umbral_normal)
     return vis, q
 
 

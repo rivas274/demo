@@ -1,7 +1,7 @@
 # PROTOTIPO: no es código del juego.
 # Pregunta: ¿se puede animar a Felipe 3D (modelo IA coloreado) con un esqueleto simple?
-# Fecha: 2026-10-22 (v2: patas más largas, columna y cola flexibles, pies sin resbalar)
-# Toma `felipe_color_patas.glb` (sin huesos; patas alargadas un 60 %), le arma por código
+# Fecha: 2026-10-22 (v3: modelo g03 con patas de verdad, columna y cola flexibles)
+# Toma `felipe_g03_color.glb` (sin huesos, mirando a +z), le arma por código
 # un esqueleto de cuadrúpedo midiendo la malla y hornea 3 animaciones:
 # - Huesos: raíz, columna de 3 (caderas, medio, hombros), cabeza, cola de 5 y 4 patas de 2.
 # - Pesos: cada vértice a sus 2 huesos más cercanos (distancia a la superficie del hueso),
@@ -12,7 +12,7 @@
 # y "saltar" (1,2 s: se agacha, se estira, recoge, cae con las delanteras y amortigua).
 extends Node3D
 
-const RUTA := "res://assets/local3d/texturizados/felipe_color_patas.glb"
+const RUTA := "res://assets/local3d/texturizados/felipe_g03_color.glb"
 const DUR_CAMINAR := 0.8
 const DUR_SALTAR := 1.2
 const DUR_QUIETO := 3.2
@@ -26,10 +26,10 @@ const DEFORMACION_MAXIMA := 0.08
 const PATAS := ["di", "dd", "ti", "td"]  # delantera/trasera, izquierda/derecha
 const COLA := ["cola1", "cola2", "cola3", "cola4", "cola5"]
 
-## Metros por unidad de la malla: con esto Felipe mide 67 px (0,554 m) como antes de
-## alargarle las patas; `escala` lo agranda (1,3 = 30 % más grande).
-@export var metros_por_unidad := (67.0 / 121.0) / 1.977
+## Alto total (con la cola): 67 px = 0,554 m; `escala` lo agranda (1,3 = 30 % más grande).
+@export var alto := 67.0 / 121.0
 @export var escala := 1.0
+var metros_por_unidad := 1.0
 ## Giro hacia la cámara cuando está quieto o saltando (al caminar va de perfil, para
 ## que las patas apoyadas no resbalen de lado).
 @export var giro_3_4 := 35.0
@@ -49,6 +49,7 @@ var _pie: Dictionary = {}     # pata -> posición del pie en reposo (unidades de
 var _l1 := 0.1
 var _l2 := 0.1
 var _paso := 0.2              # largo del paso (unidades de la malla)
+var z_cola := 0.0             # detrás de esto empieza la cola
 
 
 func _ready() -> void:
@@ -96,6 +97,7 @@ func _armar() -> void:
 	for v in verts:
 		caja = caja.expand(v)
 	_suelo = caja.position.y
+	metros_por_unidad = alto / caja.size.y
 	var k := metros_por_unidad * escala
 
 	giro = Node3D.new()
@@ -152,6 +154,7 @@ func _armar() -> void:
 	cab /= float(nc)
 	# Cola: detrás y por encima del lomo, en 6 tramos de altura (5 huesos).
 	var y_cola := y_panza + 0.86
+	z_cola = caja.position.z + 0.3 * caja.size.z
 	var tramos: Array[Vector3] = []
 	for i in 6:
 		var a := lerpf(y_cola, caja.end.y, i / 6.0)
@@ -159,7 +162,7 @@ func _armar() -> void:
 		var suma := Vector3.ZERO
 		var n := 0
 		for v in verts:
-			if v.z < caja.position.z + 0.3 * caja.size.z and v.y >= a and v.y < b:
+			if v.z < z_cola and v.y >= a and v.y < b:
 				suma += v
 				n += 1
 		tramos.append(suma / maxf(n, 1))
@@ -169,7 +172,7 @@ func _armar() -> void:
 	var y_rodilla := _suelo + 0.45 * (y_cadera - _suelo)
 	_l1 = y_cadera - y_rodilla
 	_l2 = y_rodilla - _suelo
-	_paso = 0.6 * (_l1 + _l2)
+	_paso = 0.85 * (_l1 + _l2)
 	var y_col := y_panza + 0.40
 	var z_hombros: float = (_pie["di"].z + _pie["dd"].z) * 0.5 - 0.08
 	var z_caderas: float = (_pie["ti"].z + _pie["td"].z) * 0.5 + 0.08
@@ -244,8 +247,12 @@ func _armar() -> void:
 					continue
 				if (nombre[0] == "d") != (v.z > z_mitad):
 					continue
+				# Solo cerca de su pata: el pelo del pecho no se va con la pata delantera.
+				var pie: Vector3 = _pie[nombre.substr(0, 2)]
+				if Vector2(v.x - pie.x, v.z - pie.z).length() > 0.26:
+					continue
 			elif nombre.begins_with("cola"):
-				if v.z > z_mitad - 0.1 or v.y < y_panza + 0.67:
+				if v.z > z_cola or v.y < y_panza + 0.6:
 					continue
 			elif nombre == "cabeza" and (v.y < y_cabeza or v.z < z_mitad - 0.1):
 				continue

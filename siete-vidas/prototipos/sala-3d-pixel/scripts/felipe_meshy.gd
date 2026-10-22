@@ -70,6 +70,11 @@ const PUNTOS := {
 @export var piezas := false
 ## Anillos de triángulos que cada pieza se mete en la vecina.
 const SOLAPE := 6
+## 8: piezas y huesos marcados por el creador (scripts/felipe_v8.gd); 7: piezas por
+## cortes planos; la v6 es piezas = false.
+@export var version := 7
+## Por piezas v8: la pierna entera parte del hombro o la cadera, así que gira casi todo.
+const AMPLITUD_V8 := [0.8, 0.9, 0.6]
 
 var ap: AnimationPlayer
 var sk: Skeleton3D
@@ -89,11 +94,20 @@ var _cola_lag := 0.0
 var _huesos_capa: Array[int] = []
 var _vs_meshy := PackedVector3Array()
 var _suelo := 0.0
+var puntos: Dictionary = PUNTOS
+var _v8: FelipeV8
+var _despiece := false
 
 
 func _ready() -> void:
 	if OS.get_environment("FELIPE_PIEZAS") != "":
 		piezas = OS.get_environment("FELIPE_PIEZAS") == "1"
+	if OS.get_environment("FELIPE_VERSION") != "":
+		version = int(OS.get_environment("FELIPE_VERSION"))
+	if version >= 8:
+		piezas = true
+		_v8 = FelipeV8.new(PATAS)
+		puntos = FelipeV8.PUNTOS_V8
 	_armar()
 	_pos_antes = global_position
 	ap.play("quieto")
@@ -145,7 +159,7 @@ func _capas(delta: float) -> void:
 		for i in 3:
 			var b := sk.find_bone(PATAS[pata][i])
 			var reposo := sk.get_bone_rest(b).basis.get_rotation_quaternion()
-			var amp: float = (AMPLITUD_PIEZAS if piezas else AMPLITUD_PATAS)[i]
+			var amp: float = (AMPLITUD_V8 if _v8 else (AMPLITUD_PIEZAS if piezas else AMPLITUD_PATAS))[i]
 			sk.set_bone_pose_rotation(b, reposo.slerp(sk.get_bone_pose_rotation(b), amp))
 	var anim := ap.current_animation
 	var quieto := anim == "quieto"
@@ -173,6 +187,9 @@ func _capas(delta: float) -> void:
 	_cola_lag = lerpf(_cola_lag, -_inclina * 2.0, clampf(delta * 3.0, 0.0, 1.0))
 	# Por piezas, la cola gira menos (si no, los tramos rígidos se escalonan).
 	var k_cola := 0.5 if piezas else 1.0
+	if _v8:
+		k_cola = 0.75
+		_capas_v8()
 	if piezas:
 		for nombre in COLA:
 			var b := sk.find_bone(nombre)
@@ -184,6 +201,23 @@ func _capas(delta: float) -> void:
 		var b := sk.find_bone(COLA[i])
 		_girar(b, Vector3.UP, amp * sin(_t * frec - 0.7 * i))
 		_girar(b, Vector3.BACK, _cola_lag * (0.4 + 0.2 * i) + 0.04 * sin(_t * frec * 0.5 - 0.5 * i))
+
+
+## v8: movimiento secundario de las piezas nuevas y del cuerpo en 2 masas.
+func _capas_v8() -> void:
+	var fase := TAU * ap.current_animation_position / maxf(ap.current_animation_length, 0.01)
+	var paso := 1.0 if caminando else 0.25
+	# Hombros contra caderas (el cuerpo en 2 masas ondula sin estirar la textura).
+	_girar(sk.find_bone("Bone"), Vector3.UP, 0.05 * paso * sin(fase))
+	_girar(sk.find_bone("Bone_002"), Vector3.UP, -0.1 * paso * sin(fase))
+	_girar(sk.find_bone("Bone_002"), Vector3.RIGHT, 0.04 * paso * sin(fase + 0.6))
+	# Orejas: giran un poco con retraso; mechones y melena se mecen con el paso.
+	for lado in [["oreja_i", 1.0], ["oreja_d", -1.0]]:
+		_girar(sk.find_bone(lado[0]), Vector3.RIGHT, lado[1] * (0.08 * sin(_t * 2.1 - 1.2) + 0.1 * _inclina))
+		_girar(sk.find_bone(lado[0]), Vector3.BACK, 0.06 * sin(_t * 1.3 - 0.8))
+	for lado in [["mechon_i", 1.0], ["mechon_d", -1.0]]:
+		_girar(sk.find_bone(lado[0]), Vector3.RIGHT, lado[1] * 0.06 * paso * sin(2.0 * fase - 1.0))
+	_girar(sk.find_bone("melena"), Vector3.BACK, 0.05 * paso * sin(2.0 * fase - 1.4) - 0.3 * _inclina)
 
 
 func _claves_salto(t: float) -> Array:
@@ -296,14 +330,22 @@ func _armar() -> void:
 		var padre := sk.get_bone_parent(i)
 		var gp := glob[padre] if padre >= 0 else Transform3D()
 		var local := Transform3D(Basis(rot_rest[i]), sk.get_bone_rest(i).origin)
-		if PUNTOS.has(nombre):
-			var meta := t_sk_inv * _a_pack(PUNTOS[nombre], suelo)
+		if puntos.has(nombre):
+			var meta := t_sk_inv * _a_pack(puntos[nombre], suelo)
 			local.origin = gp.affine_inverse() * meta
 		sk.set_bone_rest(i, local)
 		glob[i] = gp * local
+	if _v8:
+		# Huesos nuevos de la v8 (orejas, mechones de mejilla y melena del pecho).
+		for extra in FelipeV8.EXTRA:
+			var padre := sk.find_bone(extra[1])
+			var i := sk.add_bone(extra[0])
+			sk.set_bone_parent(i, padre)
+			var meta := t_sk_inv * _a_pack(puntos[extra[0]], suelo)
+			sk.set_bone_rest(i, Transform3D(Basis(), glob[padre].affine_inverse() * meta))
 	sk.reset_bone_poses()
 	# Las traslaciones animadas (raíz y patas) se reescalan con la nueva altura.
-	var k_alto := (PUNTOS["Bone"].y - suelo) * ESCALA_MESHY / 2.2155
+	var k_alto := (puntos["Bone"].y - suelo) * ESCALA_MESHY / 2.2155
 	for nombre_anim in ap.get_animation_list():
 		var a := ap.get_animation(nombre_anim)
 		for t in a.get_track_count():
@@ -330,7 +372,7 @@ func _armar() -> void:
 		var lista: Array = []
 		# Cuerpo (3 huesos de la columna), cerca de su segmento.
 		for sg in seg_cuerpo:
-			var d := v.distance_to(Geometry3D.get_closest_point_to_segment(v, PUNTOS[sg[0]], PUNTOS[sg[1]]))
+			var d := v.distance_to(Geometry3D.get_closest_point_to_segment(v, puntos[sg[0]], puntos[sg[1]]))
 			lista.append([sk.find_bone(sg[0]), 1.0 / pow(maxf(d, 0.02), 4.0)])
 		_normalizar(lista)
 		# Cabeza entera al hueso de la cabeza (con un cuello corto de mezcla).
@@ -343,7 +385,7 @@ func _armar() -> void:
 			var sub: Array = []
 			var cadena := COLA + ["Bone_007_end"]
 			for i in COLA.size():
-				var d := v.distance_to(Geometry3D.get_closest_point_to_segment(v, PUNTOS[cadena[i]], PUNTOS[cadena[i + 1]]))
+				var d := v.distance_to(Geometry3D.get_closest_point_to_segment(v, puntos[cadena[i]], puntos[cadena[i + 1]]))
 				sub.append([sk.find_bone(cadena[i]), 1.0 / pow(maxf(d, 0.02), 4.0)])
 			_normalizar(sub)
 			_mezclar_lista(lista, sub, en_cola)
@@ -351,8 +393,8 @@ func _armar() -> void:
 		var delante := v.z > 0.12
 		var pata := ("d" if delante else "t") + ("d" if v.x < 0.0 else "i")
 		var nombres: Array = PATAS[pata]
-		var pie: Vector3 = PUNTOS[nombres[2]]
-		var hombro: Vector3 = PUNTOS[nombres[0]]
+		var pie: Vector3 = puntos[nombres[2]]
+		var hombro: Vector3 = puntos[nombres[0]]
 		var dxz := Vector2(v.x - pie.x, v.z - (pie.z + hombro.z) * 0.5).length()
 		var y_panza := -0.62 if not delante else -0.66
 		var abajo := 1.0 - smoothstep(0.10, 0.17, dxz)
@@ -362,7 +404,7 @@ func _armar() -> void:
 		if wl > 0.001:
 			var sub: Array = []
 			for i in 3:
-				var d := v.distance_to(Geometry3D.get_closest_point_to_segment(v, PUNTOS[nombres[i]], PUNTOS[nombres[i + 1]]))
+				var d := v.distance_to(Geometry3D.get_closest_point_to_segment(v, puntos[nombres[i]], puntos[nombres[i + 1]]))
 				sub.append([sk.find_bone(nombres[i]), 1.0 / pow(maxf(d, 0.015), 4.0)])
 			_normalizar(sub)
 			_mezclar_lista(lista, sub, wl)
@@ -406,6 +448,10 @@ func _armar() -> void:
 		mt.set_shader_parameter("usar_textura", true)
 		mt.set_shader_parameter("textura", tex)
 		mi.material_override = mt
+	elif _despiece:
+		var dm := StandardMaterial3D.new()
+		dm.vertex_color_use_as_albedo = true
+		mi.material_override = dm
 	else:
 		var std := StandardMaterial3D.new()
 		std.albedo_texture = tex
@@ -428,8 +474,11 @@ func _armar() -> void:
 	lib.add_animation("quieto", idle)
 	lib.add_animation("caminar", walk)
 	lib.add_animation("saltar", salto)
-	for b in ["Bone", "Bone_001", CABEZA] + COLA:
+	for b in ["Bone", "Bone_001", "Bone_002", CABEZA] + COLA:
 		_huesos_capa.append(sk.find_bone(b))
+	if _v8:
+		for extra in FelipeV8.EXTRA:
+			_huesos_capa.append(sk.find_bone(extra[0]))
 	for pata in PATAS:
 		_huesos_capa.append(sk.find_bone(PATAS[pata][0]))
 		_huesos_capa.append(sk.find_bone(PATAS[pata][1]))
@@ -452,8 +501,8 @@ func _cuadro_parecido(suelo: float) -> float:
 			var n: Array = PATAS[pata]
 			var a := _t_sk * sk.get_bone_global_pose(sk.find_bone(n[0])).origin
 			var b := _t_sk * sk.get_bone_global_pose(sk.find_bone(n[2])).origin
-			var ma := _a_pack(PUNTOS[n[0]], suelo)
-			var mb := _a_pack(PUNTOS[n[2]], suelo)
+			var ma := _a_pack(puntos[n[0]], suelo)
+			var mb := _a_pack(puntos[n[2]], suelo)
 			var da := Vector2(b.x - a.x, b.y - a.y).angle()
 			var dm := Vector2(mb.x - ma.x, mb.y - ma.y).angle()
 			costo += pow(angle_difference(da, dm), 2.0)
@@ -503,11 +552,13 @@ const ANCHO_PATA := 0.13       # media anchura de la columna de cada pata
 ## Centro de la columna de una pata (entre el codo o la rodilla y la mano o el pie).
 func _centro_pata(pata: String) -> Vector3:
 	var n: Array = PATAS[pata]
-	return (PUNTOS[n[1]] + PUNTOS[n[2]]) * 0.5
+	return (puntos[n[1]] + puntos[n[2]]) * 0.5
 
 
 ## Planos de corte de la v7: [normal, punto].
 func _planos() -> Array:
+	if _v8:
+		return _v8.planos()
 	var p: Array = [
 		[Vector3.UP, Vector3(0, Y_CORTE_PATA, 0)],
 		[Vector3.RIGHT, Vector3.ZERO],
@@ -518,7 +569,7 @@ func _planos() -> Array:
 	]
 	for pata in PATAS:
 		var pie: Vector3 = _centro_pata(pata)
-		p.append([Vector3.UP, Vector3(0, PUNTOS[PATAS[pata][2]].y + 0.04, 0)])
+		p.append([Vector3.UP, Vector3(0, puntos[PATAS[pata][2]].y + 0.04, 0)])
 		# Columna cuadrada de la pata: lo de afuera bajo la panza sigue siendo cuerpo.
 		p.append([Vector3.RIGHT, pie + Vector3(ANCHO_PATA, 0, 0)])
 		p.append([Vector3.RIGHT, pie - Vector3(ANCHO_PATA, 0, 0)])
@@ -526,33 +577,35 @@ func _planos() -> Array:
 		p.append([Vector3.BACK, pie - Vector3(0, 0, ANCHO_PATA)])
 	# Cola en 3 tramos (la punta enroscada va con el tercero): cortes perpendiculares a la
 	# cadena en las juntas. Con 4 se abría una grieta en la punta.
-	var cadena := [PUNTOS["Bone_004"], PUNTOS["Bone_005"], PUNTOS["Bone_006"], PUNTOS["Bone_007"], PUNTOS["Bone_007_end"]]
+	var cadena := [puntos["Bone_004"], puntos["Bone_005"], puntos["Bone_006"], puntos["Bone_007"], puntos["Bone_007_end"]]
 	for i in range(1, 3):
 		p.append([((cadena[i + 1] - cadena[i - 1]) as Vector3).normalized(), cadena[i]])
-	p.append([(Vector3(0, 0.32, 0.55) - PUNTOS[CABEZA]).normalized(), PUNTOS[CABEZA]])
+	p.append([(Vector3(0, 0.32, 0.55) - puntos[CABEZA]).normalized(), puntos[CABEZA]])
 	return p
 
 
 ## Pieza (nombre de hueso) de un punto de Meshy, con los mismos planos de _planos().
 func _pieza_de(c: Vector3) -> String:
-	var n_cuello := (Vector3(0, 0.32, 0.55) - PUNTOS[CABEZA]).normalized()
+	if _v8:
+		return _v8.pieza_de(c)
+	var n_cuello := (Vector3(0, 0.32, 0.55) - puntos[CABEZA]).normalized()
 	# Cola: detrás de la base; arriba, la punta enroscada llega más adelante.
 	if c.z < Z_COLA or (c.z < -0.3 and c.y > 0.2):
-		var cadena := [PUNTOS["Bone_004"], PUNTOS["Bone_005"], PUNTOS["Bone_006"], PUNTOS["Bone_007"], PUNTOS["Bone_007_end"]]
+		var cadena := [puntos["Bone_004"], puntos["Bone_005"], puntos["Bone_006"], puntos["Bone_007"], puntos["Bone_007_end"]]
 		var tramo := 0
 		for i in range(1, 3):
 			var n := ((cadena[i + 1] - cadena[i - 1]) as Vector3).normalized()
 			if (c - cadena[i]).dot(n) > 0.0:
 				tramo = i
 		return COLA[tramo]
-	if (c - PUNTOS[CABEZA]).dot(n_cuello) > 0.0:
+	if (c - puntos[CABEZA]).dot(n_cuello) > 0.0:
 		return CABEZA
 	if c.y < Y_CORTE_PATA:
 		var pata := ("d" if c.z > Z_MITAD else "t") + ("d" if c.x < 0.0 else "i")
 		var pie := _centro_pata(pata)
 		if absf(c.x - pie.x) < ANCHO_PATA and absf(c.z - pie.z) < ANCHO_PATA:
 			var n: Array = PATAS[pata]
-			return n[2] if c.y < PUNTOS[n[2]].y + 0.04 else n[1]
+			return n[2] if c.y < puntos[n[2]].y + 0.04 else n[1]
 	return "Bone_001"
 
 
@@ -722,6 +775,19 @@ func _en_piezas(a: Array) -> Array:
 	r[Mesh.ARRAY_INDEX] = i2
 	r[Mesh.ARRAY_BONES] = b2
 	r[Mesh.ARRAY_WEIGHTS] = w2
+	if OS.get_environment("DESPIECE") != "":
+		# Revisión: cada pieza de un color y separada de las demás.
+		var col := PackedColorArray()
+		col.resize(v2.size())
+		var centro := sk.get_bone_global_rest(sk.find_bone("Bone_001")).origin
+		var abrir := float(OS.get_environment("DESPIECE"))
+		for i in v2.size():
+			var b := b2[i * 4]
+			col[i] = Color.from_hsv(fmod(b * 0.618, 1.0), 0.65, 0.95)
+			v2[i] += (sk.get_bone_global_rest(b).origin - centro) * abrir
+		r[Mesh.ARRAY_VERTEX] = v2
+		r[Mesh.ARRAY_COLOR] = col
+		_despiece = true
 	return r
 
 
@@ -732,16 +798,17 @@ func _articulaciones(tex: Texture2D, uv: PackedVector2Array, vs_meshy: PackedVec
 	if img and img.is_compressed():
 		img.decompress()
 	# [hueso, punto en Meshy, radio]
-	var juntas: Array = [["Bone_003", PUNTOS["Bone_003"], 0.16], ["Bone_005", PUNTOS["Bone_005"], 0.10],
-		["Bone_006", PUNTOS["Bone_006"], 0.11], ["Bone_007", PUNTOS["Bone_007"], 0.11]]
+	var juntas: Array = [["Bone_003", puntos["Bone_003"], 0.16], ["Bone_005", puntos["Bone_005"], 0.10],
+		["Bone_006", puntos["Bone_006"], 0.11], ["Bone_007", puntos["Bone_007"], 0.11]]
 	for pata in PATAS:
 		var n: Array = PATAS[pata]
-		juntas.append([n[1], PUNTOS[n[1]], 0.075])
-		juntas.append([n[2], PUNTOS[n[2]], 0.06])
+		juntas.append([n[1], puntos[n[1]], 0.075])
+		juntas.append([n[2], puntos[n[2]], 0.06])
 		# "Hombro" de la pata a la altura de la panza: tapa el borde de arriba de la pieza.
-		var pie: Vector3 = PUNTOS[n[2]]
+		var pie: Vector3 = puntos[n[2]]
 		var y_corte := -0.62 if pata[0] == "t" else -0.66
-		juntas.append([n[1], Vector3(pie.x, Y_CORTE_PATA + 0.01, (PUNTOS[n[1]].z + pie.z) * 0.5), 0.11])
+		if not _v8:
+			juntas.append([n[1], Vector3(pie.x, Y_CORTE_PATA + 0.01, (puntos[n[1]].z + pie.z) * 0.5), 0.11])
 	var k := ESCALA_MESHY / _t_sk.basis.get_scale().x
 	for junta in juntas:
 		var nombre: String = junta[0]

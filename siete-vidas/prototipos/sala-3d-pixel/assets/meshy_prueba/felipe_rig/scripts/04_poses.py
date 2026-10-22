@@ -45,7 +45,10 @@ for i, (nombre, vista, pose) in enumerate(POSES):
         e["XYZ".index(eje)] = math.radians(g)
         pb.rotation_euler = e
     bpy.context.view_layer.update()
-    R.camara(vista, centro=(0, 0, 0.78), tam=1.95)
+    if "delantera" in nombre or "trasera" in nombre:
+        R.camara(vista, centro=(0, 0, 0.32), tam=1.25)  # de cerca: la piel de las patas
+    else:
+        R.camara(vista, centro=(0, 0, 0.78), tam=1.95)
     fila = []
     for tipo, objs in (("tex", [m]), ("alambre", [m, w])):
         if tipo == "alambre":

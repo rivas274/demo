@@ -144,7 +144,9 @@ def mascara(nombre):
 
 mp, mf = mascara("perfil"), mascara("frente")
 cabeza_m = ((mp >> 0) & 1).astype(bool)
-dist_cab = ndimage.distance_transform_edt(cabeza_m)
+# Por columna, el borde de abajo de la cabeza: la mezcla con el cuello se mide hacia abajo.
+filas = np.arange(1024)[:, None]
+fondo = np.where(cabeza_m.any(axis=0), np.where(cabeza_m, filas, -1).max(axis=0), -1)
 oreja_f = (((mf >> 0) & 1) | ((mf >> 1) & 1)).astype(bool)
 
 
@@ -164,10 +166,10 @@ for v in malla.data.vertices:
     px, py, fx = a_px(v.co)
     pesos = {idx_nombre[g.group]: g.weight for g in v.groups}
     if 0 <= px < 1024 and 0 <= py < 1024 and cabeza_m[py, px] and v.co.z > z_cuello - 0.06:
-        d = dist_cab[py, px]
-        # El anillo de mezcla solo en la parte de abajo y atrás de la cabeza (donde nace el cuello).
-        abajo = py > 470
-        w = min(1.0, d / ANILLO) if abajo else 1.0
+        # El anillo de mezcla solo abajo y atrás de la cabeza (donde nace el cuello); la cara,
+        # la boca y el mentón (px >= 790) van enteros a la cabeza.
+        d = fondo[px] - py
+        w = min(1.0, max(0.0, d) / ANILLO) if px < 790 else 1.0
         nuevo = {"spine.006": w}
         if w < 1.0:
             resto = {k: x for k, x in pesos.items() if k not in ("spine.006",) and not k.startswith("ear")}

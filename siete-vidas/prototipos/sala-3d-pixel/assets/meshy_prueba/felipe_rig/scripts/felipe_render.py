@@ -161,3 +161,14 @@ def material_translucido(obj, alfa=0.35):
         bs = m.node_tree.nodes.get("Principled BSDF")
         if bs:
             bs.inputs["Alpha"].default_value = alfa
+
+
+def letra(tam=16):
+    """Fuente con tildes para las etiquetas de las hojas (la de PIL por defecto no las tiene)."""
+    from PIL import ImageFont
+    for r in ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "DejaVuSans.ttf"):
+        try:
+            return ImageFont.truetype(r, tam)
+        except OSError:
+            pass
+    return ImageFont.load_default()

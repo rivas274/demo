@@ -106,7 +106,8 @@ for n in PUNTOS:
         b.use_connect = False
         b.parent = eb[espejo(PADRE[n]) if lado != n else PADRE[n]]
         b.use_connect = n in CONECTADO
-# Rol uniforme: el eje X local de cada hueso = X del mundo (doblar = girar en X local).
+# Rol uniforme: el eje Z local de cada hueso apunta a +X del mundo. Las animaciones giran
+# en ejes del mundo (05_anima.py, q_mundo), así que no dependen de esto.
 for b in eb:
     b.select = True
 bpy.ops.armature.calculate_roll(type="GLOBAL_POS_X")

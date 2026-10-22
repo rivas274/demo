@@ -1,7 +1,7 @@
 # Paso 4b: prueba de poses. Dobla patas ±35° (hombro/cadera y codo/rodilla), cola 30° y
 # cabeza 20°, y renderiza una hoja con textura y otra en alambre para revisar la piel.
 # Uso: python3 04_poses.py <salida.png> [blend]
-import sys, os, math, bpy
+import sys, os, math, bpy, mathutils
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import felipe_comun as C, felipe_render as R
 from PIL import Image, ImageDraw
@@ -18,35 +18,36 @@ R.escena(420, 10)
 R.luz()
 w = R.alambre_de(m, grosor=0.0028)
 
-# (nombre, vista, {hueso: (eje, grados)}); eje en el espacio local (X local = X del mundo).
+# (nombre, vista, {hueso: (eje del mundo, grados)}). X = adelante/atrás (para huesos que
+# cuelgan, + = atrás; para huesos que suben, + = adelante), Y = de lado, Z = girar.
 POSES = [
     ("reposo", "perfil_d", {}),
     ("delantera +35/-35", "perfil_d", {"upper_arm.R": ("X", 35), "forearm.R": ("X", -35)}),
     ("delantera -35/+35", "perfil_d", {"upper_arm.R": ("X", -35), "forearm.R": ("X", 35)}),
     ("trasera +35/-35", "perfil_d", {"thigh.R": ("X", 35), "shin.R": ("X", -35)}),
     ("trasera -35/+35", "perfil_d", {"thigh.R": ("X", -35), "shin.R": ("X", 35)}),
-    ("cola 30 atrás", "perfil_d", {"tail.001": ("X", 30), "tail.002": ("X", 15)}),
-    ("cola 30 al lado", "atras", {"tail.001": ("Z", 30), "tail.002": ("Z", 15)}),
-    ("cabeza 20 abajo", "perfil_d", {"spine.006": ("X", -20)}),
+    ("cola 30 atrás", "perfil_d", {"tail.001": ("X", -30), "tail.002": ("X", -15)}),
+    ("cola 30 al lado", "atras", {"tail.001": ("Y", 30), "tail.002": ("Y", 15)}),
+    ("cabeza 20 abajo", "perfil_d", {"spine.006": ("X", 20)}),
     ("cabeza 20 al lado", "tres_cuartos", {"spine.006": ("Z", 20)}),
     ("todo junto 3/4", "tres_cuartos", {"upper_arm.L": ("X", -35), "forearm.L": ("X", 35),
                                        "thigh.R": ("X", 35), "shin.R": ("X", -35),
-                                       "tail.001": ("X", 30), "spine.006": ("X", -20)}),
+                                       "tail.001": ("X", -30), "spine.006": ("X", 20)}),
 ]
 cuadros = []
 for i, (nombre, vista, pose) in enumerate(POSES):
     for pb in a.pose.bones:
-        pb.rotation_mode = "XYZ"
-        pb.rotation_euler = (0, 0, 0)
+        pb.rotation_mode = "QUATERNION"
+        pb.rotation_quaternion = (1, 0, 0, 0)
         pb.location = (0, 0, 0)
     for h, (eje, g) in pose.items():
         pb = a.pose.bones[h]
-        e = list(pb.rotation_euler)
-        e["XYZ".index(eje)] = math.radians(g)
-        pb.rotation_euler = e
+        r = a.data.bones[h].matrix_local.to_quaternion()
+        v = mathutils.Vector([1.0 if c == eje else 0.0 for c in "XYZ"])
+        pb.rotation_quaternion = r.inverted() @ mathutils.Quaternion(v, math.radians(g)) @ r
     bpy.context.view_layer.update()
     if "delantera" in nombre or "trasera" in nombre:
-        R.camara(vista, centro=(0, 0, 0.32), tam=1.25)  # de cerca: la piel de las patas
+        R.camara(vista, centro=(0, -0.1, 0.36), tam=1.45)  # de cerca: la piel de las patas
     else:
         R.camara(vista, centro=(0, 0, 0.78), tam=1.95)
     fila = []
@@ -70,6 +71,6 @@ for i, (nombre, fila) in enumerate(cuadros):
     for k, ruta in enumerate(fila):
         y = (filab + k) * (T + 24)
         hoja.paste(Image.open(ruta).convert("RGB"), (col * T, y + 24))
-        d.text((col * T + 6, y + 5), nombre + (" (alambre)" if k else ""), fill=(20, 20, 20))
+        d.text((col * T + 6, y + 5), nombre + (" (alambre)" if k else ""), fill=(20, 20, 20), font=R.letra())
 hoja.save(salida)
 print("hoja", salida)

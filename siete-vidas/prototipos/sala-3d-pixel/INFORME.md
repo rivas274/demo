@@ -166,3 +166,43 @@ Por eso recomiendo **no cambiar el juego a 3D ahora**. Si el creador lo aprueba,
 Felipe agazapado: cuerpo pegado al piso o la cama, cabeza baja y adelantada, grupa un poco alta y cola barriendo de lado a lado. Anotada para más adelante; no está hecha. Las otras notas de ese video (salto con impulso de las traseras, aterrizaje con las delanteras y el lomo arqueado, cola que se sacude atenta) ya están en la v8 (`scripts/felipe_meshy.gd`, `scripts/felipe_v8.gd`).
 
 Notas de `felipe-video3-sentado-olfatea.png`: al caminar o explorar la cola va a media altura con la punta en gancho (la punta se mece más que la base), y así quedó en la v8. Pendiente para cuando haya animación de sentarse: sentado, la cola estirada en el piso y solo la punta se mueve.
+
+## Felipe con rig hecho en Blender (2026-10-22)
+**Por qué:** las versiones anteriores fallaban por la misma causa. La malla de IA es «una estatua»: una sopa de triángulos sin bucles en las articulaciones. Con pesos por distancia (v6) se deformaba como masa, y con piezas rígidas (v7 y v8) se veían cortes. Esta vez se siguió la receta de un artista: retopología, textura horneada, esqueleto, pesos de calor y animación con poses clave.
+
+**Cómo se abre:** `godot --path . -- --felipe-rig`. Felipe camina de un lado a otro de la sala a la velocidad de su paso, se queda quieto y se da vuelta. El código está en `scripts/felipe_rig.gd`; en `principal.gd` solo se agregó un `if`.
+
+**Cómo se hizo** (Blender 5.2.3 como módulo de Python, `pip install bpy==5.2.3`; scripts en `assets/meshy_prueba/felipe_rig/scripts/`, se corren en orden):
+1. **`01_retopo.py`:** importa el GLB, aplica las transformaciones y lo centra con el piso en z = 0. Hace un remallado por vóxeles de 6 mm, que cierra la malla y une las 127 islas sueltas en una sola pieza. Después, **QuadriFlow** con simetría en X da **7.754 cuadriláteros** (todas las caras), y se pega a la original con Shrinkwrap.
+2. **`02_textura.py`:** UV nuevas con Smart UV Project y margen. Hornea en Cycles, en modo **Selected to Active**, solo el color difuso desde la original: 2048 px, extrusión de 1,2 cm y rayo de 4 cm. Ningún texel quedó sin dato.
+3. **`03_rig.py`:** esqueleto desde el **metarig de gato de Rigify**, recortado a 33 huesos: raíz, columna de 4 (grupa a pecho), cuello, cabeza, 2 orejas, cola de 4 y, por pata, escápula o pelvis, 3 segmentos y dedos. Los huesos van en las marcas del creador (`plantilla_esqueleto/creador_*.png`) con el mapeo de `vistas.gd`. El ancho de las patas traseras se midió en la malla.
+   - Pesos con **Automatic Weights (calor)**: funcionó en todos los vértices. Luego se suavizan los grupos.
+   - Reglas por script: la cabeza va entera a su hueso, con un anillo de mezcla de 30 px solo abajo y atrás, donde nace el cuello; la cara, la boca y el mentón no se mezclan. Las orejas salen de la máscara del creador. Ninguna pata toma vértices del otro lado ni del centro de la panza. Máximo 4 huesos por vértice, normalizado.
+   - Sin Preserve Volume, porque Godot usa skinning lineal.
+4. **`04_poses.py`:** prueba de poses. Patas a ±35° (hombro o cadera y codo o rodilla), cola a 30° hacia atrás y al lado, y cabeza a 20° abajo y al lado.
+5. **`05_anima.py`:** todo pasa a metros (alto total de 0,554 m). Se arman controles IK de animador: control del pie con pivote en la bola, objetivo IK que es copia del pie y polos de rodilla y codo, con el ángulo buscado para que el reposo no cambie. Las claves son Bezier con facilidad de entrada y salida y modificador Cycles. Se hornea a los huesos que deforman, se borran los controles y se exporta `felipe_rig.glb` con 2 animaciones.
+   - **caminar:** 22 cuadros a 24 fps (0,92 s), en secuencia lateral (trasera izquierda, delantera izquierda, trasera derecha, delantera derecha).
+     - **8 poses clave por pata:** contacto, bajada, apoyo medio, talón arriba, despegue, recoge (lo más alto), paso y estira.
+     - La escápula acompaña a la mano.
+     - La grupa y los hombros bajan por turnos al recibir el peso. El lomo ondula: giro lateral, balanceo e inclinación.
+     - La cabeza va baja y adelantada y se mece poco, con retraso.
+     - La cola va a media altura en gancho, con la punta retrasada.
+     - Va «en el lugar»: **0,187 m/s** a escala 1 (0,243 m/s con la escala 1,3 de la sala), anotado en `felipe_rig.json`. Medido en Blender, **el pie apoyado se corre 0,02 mm**.
+   - **quieto:** 3 s. Dos respiraciones, la cola se mece lento, la cabeza mira y una oreja da un respingo.
+6. **`06_ciclo.py`** y **`07_hojas.py`:** hojas de revisión. **`pruebas/felipe_rig_cuadros.gd`:** cuadros de cerca en Godot (perfil y 3/4).
+
+**Entregables** (en la carpeta de capturas `proto3d/`): `felipe-rig-retopo.png`, `felipe-rig-textura.png`, `felipe-rig-poses.png`, `felipe-rig-ciclo.png`, `felipe-rig-anima.gif` (de cerca, en Godot y con material toon) y `felipe-rig-anima.mp4` (en la sala, pixel ×3, 23 s).
+
+**Qué se ve:**
+- **Ya no hay masa ni cortes.** La malla tiene anillos parejos y se dobla como un cuerpo: patas, cuello y cola giran sin estirar la textura y sin picos. La cabeza gira entera, con la cara intacta.
+- **La textura horneada se ve igual que la original:** cara, ojos, gorra atigrada, manchas y anillos de la cola. Se pierde el relieve fino del pelo del pecho, que venía de las 89.000 caras y del mapa de normales; la malla nueva lo deja más liso.
+- **Camina como un gato chico y pesado:** pasos cortos con la pata que se dobla y empuja, la grupa y los hombros que suben y bajan por turnos, la cabeza baja y la cola en gancho que se mece. De perfil y en 3/4 se lee bien a ×3.
+
+**Límites:**
+- Las patas son muñones cortos, así que el paso es chico (10 cm a escala 1).
+- Con la delantera a 35° se arruga un poco el pelo esponjado del pecho. La caminata usa ángulos menores.
+- La retopología es una malla pareja de QuadriFlow, no una topología dibujada a mano con bucles pensados en cada articulación. Funciona porque es densa (7.754 caras) y regular. Un modelador la mejoraría en codos y rodillas.
+- La animación está hecha por script con poses clave, sin ojo humano cuadro a cuadro. Falta que el creador la mire y pida ajustes de carácter (más o menos peso, actitud).
+- Al darse vuelta en la sala gira en el lugar sobre una pose quieta; no hay animación de giro.
+
+**Para seguir:** si el creador lo aprueba, el mismo rig sirve para acecho, sentarse, saltar y caer. Bastan más acciones en `05_anima.py` con los mismos controles, sin rehacer la malla ni los pesos.

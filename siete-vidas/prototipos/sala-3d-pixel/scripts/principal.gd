@@ -5,7 +5,8 @@
 # con escala entera (pixel de render de x2, x3 o x4 pixeles de pantalla).
 # Teclas: 1 paleta, 2 bordes, 3 escalones de luz, 4 tamaño de pixel, Tab guion/manual, F1 ayuda.
 # Argumentos (después de --): --con-paleta, --pixel=2|3|4, --maniqui (Valeria maniquí de la v2),
-# --felipe-anima (solo Felipe de Meshy con la caminata del gato de Quaternius: camina, salta al sofá y vuelve).
+# --felipe-anima (solo Felipe de Meshy con la caminata del gato de Quaternius: camina, salta al sofá y vuelve),
+# --felipe-rig (Felipe retopologizado y con esqueleto en Blender: camina de lado a lado y se queda quieto).
 extends Node
 
 ## Escala del juego: Valeria 1,65 m = 200 px de 640x360, Felipe 67 px. El encuadre
@@ -110,6 +111,14 @@ func _ready() -> void:
 		guion.set("felipe", felipe_animado)
 		add_child(guion)
 
+	if "--felipe-rig" in OS.get_cmdline_user_args():
+		solo_felipe = true  # Felipe con rig de Blender (scripts/felipe_rig.gd), solo en la sala.
+		valeria.visible = false
+		valeria.process_mode = Node.PROCESS_MODE_DISABLED
+		felipe_animado = Node3D.new()
+		felipe_animado.name = "FelipeRig"
+		felipe_animado.set_script(load("res://scripts/felipe_rig.gd"))
+		vista.add_child(felipe_animado)
 	if not solo_felipe:
 		_felipes_comparar(sala)
 	_armar_camara()

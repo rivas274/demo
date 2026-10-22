@@ -1,0 +1,8 @@
+{
+  "velocidad_caminar_m_s": 0.187,
+  "ciclo_caminar_s": 0.9167,
+  "zancada_m": 0.1029,
+  "ciclo_quieto_s": 3.0,
+  "alto_m": 0.5537,
+  "patinaje_max_mm": 0.02
+}

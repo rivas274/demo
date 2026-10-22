@@ -58,9 +58,9 @@ func _initialize() -> void:
 	vp.add_child(f)
 	var cam := Camera3D.new()
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
-	cam.size = 0.95
+	cam.size = 0.8
 	cam.rotation_degrees.x = -12.0
-	var cam_base := Vector3(0, 0.38, 0) + cam.transform.basis.z * 4.0
+	var cam_base := Vector3(0, 0.32, 0) + cam.transform.basis.z * 4.0
 	vp.add_child(cam)
 	cam.current = true
 	await process_frame

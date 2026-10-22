@@ -3,11 +3,15 @@
 # Fecha: 2026-10-22 (v3: modelo g03 con patas de verdad, columna y cola flexibles)
 # Toma `felipe_g03_color.glb` (sin huesos, mirando a +z), le arma por código
 # un esqueleto de cuadrúpedo midiendo la malla y hornea 3 animaciones:
-# - Huesos: raíz, columna de 3 (caderas, medio, hombros), cabeza, cola de 5 y 4 patas de 2.
-# - Pesos: cada vértice a sus 2 huesos más cercanos (distancia a la superficie del hueso),
-#   sin cruzar de lado ni de mitad en las patas.
-# - Patas por cinemática inversa de 2 huesos: la pata apoyada queda quieta respecto del
-#   piso y la que avanza se levanta y se dobla.
+# - Huesos: raíz, columna de 3 (caderas, medio, hombros), cabeza, cola de 5 y 4 patas de 3
+#   (brazo o muslo desde el hombro o la cadera, a media altura del torso; antebrazo o
+#   canilla; mano o pie).
+# - Pesos: el cuerpo por cercanía a sus huesos; cada pata es su columna bajo la panza y
+#   sube por el flanco (hombro o anca) con peso que cae de 100 % a 0 % a media altura
+#   del torso, sin tocar el otro lado, la panza central ni el pelo del pecho.
+# - Patas: la pierna entera gira desde el hombro o la cadera (±27°); la inversa de 2
+#   huesos fija la muñeca y la mano queda plana en el piso al apoyar. Codo atrás en las
+#   delanteras, corvejón adelante en las traseras.
 # "quieto" (respira, cola lenta), "caminar" (diagonales, 0,8 s, columna en S, cola en onda)
 # y "saltar" (1,2 s: se agacha, se estira, recoge, cae con las delanteras y amortigua).
 extends Node3D
@@ -48,6 +52,9 @@ var _suelo := 0.0
 var _pie: Dictionary = {}     # pata -> posición del pie en reposo (unidades de la malla)
 var _l1 := 0.1
 var _l2 := 0.1
+var _l3 := 0.05
+var _lv := 0.3               # largo de pata visible (piso a la panza): escala del salto
+const GIRO_PIERNA := deg_to_rad(27.0)
 var _paso := 0.2              # largo del paso (unidades de la malla)
 var z_cola := 0.0             # detrás de esto empieza la cola
 
@@ -142,7 +149,7 @@ func _armar() -> void:
 	# Panza: lo más bajo entre las patas delanteras y traseras.
 	var y_panza := INF
 	for v in verts:
-		if absf(v.z - z_mitad) < 0.06 and absf(v.x - cx) < 0.15:
+		if absf(v.z - z_mitad) < 0.05 and absf(v.x - cx) < 0.06:
 			y_panza = minf(y_panza, v.y)
 	# Cabeza: centro de los vértices de arriba y adelante.
 	var cab := Vector3.ZERO
@@ -168,12 +175,19 @@ func _armar() -> void:
 		tramos.append(suma / maxf(n, 1))
 
 	# --- huesos (posiciones globales en unidades de la malla) ---
-	var y_cadera := y_panza + 0.10
-	var y_rodilla := _suelo + 0.45 * (y_cadera - _suelo)
-	_l1 = y_cadera - y_rodilla
-	_l2 = y_rodilla - _suelo
-	_paso = 0.85 * (_l1 + _l2)
-	var y_col := y_panza + 0.40
+	var y_col := y_panza + 0.40      # hombros y caderas: a media altura del torso
+	var y_mano := _suelo + 0.07      # muñeca y tobillo
+	var y_codo := lerpf(y_mano, y_col, 0.42)  # codo y rodilla: bajo el pecho
+	_l1 = y_col - y_codo
+	_l2 = y_codo - y_mano
+	_l3 = y_mano - _suelo
+	_lv = y_panza + 0.1 - _suelo
+	_paso = 2.0 * (_l1 + _l2) * sin(GIRO_PIERNA)
+	# Radio de cada pata: lo que ocupan sus vértices más bajos.
+	var r_pata := 0.0
+	for v in bajos:
+		var pc: Vector3 = _pie[("d" if v.z > z_mitad else "t") + ("i" if v.x < cx else "d")]
+		r_pata = maxf(r_pata, Vector2(v.x - pc.x, v.z - pc.z).length())
 	var z_hombros: float = (_pie["di"].z + _pie["dd"].z) * 0.5 - 0.08
 	var z_caderas: float = (_pie["ti"].z + _pie["td"].z) * 0.5 + 0.08
 	var g := {}
@@ -186,8 +200,9 @@ func _armar() -> void:
 	for i in range(1, 5):
 		g[COLA[i]] = tramos[i]
 	for p in PATAS:
-		g[p + "1"] = Vector3(_pie[p].x, y_cadera, _pie[p].z)
-		g[p + "2"] = Vector3(_pie[p].x, y_rodilla, _pie[p].z)
+		g[p + "1"] = Vector3(_pie[p].x, y_col, _pie[p].z)
+		g[p + "2"] = Vector3(_pie[p].x, y_codo, _pie[p].z)
+		g[p + "3"] = Vector3(_pie[p].x, y_mano, _pie[p].z)
 	_padre = {"raiz": "", "medio": "raiz", "hombros": "medio", "caderas": "medio",
 		"cabeza": "hombros", "cola1": "caderas"}
 	for i in range(1, 5):
@@ -195,11 +210,13 @@ func _armar() -> void:
 	for p in PATAS:
 		_padre[p + "1"] = "hombros" if p[0] == "d" else "caderas"
 		_padre[p + "2"] = p + "1"
+		_padre[p + "3"] = p + "2"
 	_orden = ["raiz", "medio", "hombros", "caderas", "cabeza"]
 	_orden.append_array(COLA)
 	for p in PATAS:
 		_orden.append(p + "1")
 		_orden.append(p + "2")
+		_orden.append(p + "3")
 	for nombre in _orden:
 		var i := sk.add_bone(nombre)
 		var pp: String = _padre[nombre]
@@ -223,41 +240,28 @@ func _armar() -> void:
 	for i in range(1, 5):
 		var fin: Vector3 = tramos[i + 1] if i < 4 else tramos[5] + (tramos[5] - tramos[4]) * 0.5
 		seg[COLA[i]] = [g[COLA[i]], fin, 0.14 + 0.01 * i]
-	for p in PATAS:
-		seg[p + "1"] = [g[p + "1"], g[p + "2"], 0.1]
-		seg[p + "2"] = [g[p + "2"], _pie[p], 0.1]
 	var nombres: Array = seg.keys()
 	var huesos := PackedInt32Array()
 	var pesos := PackedFloat32Array()
 	huesos.resize(verts.size() * 4)
 	pesos.resize(verts.size() * 4)
-	var y_pata := y_cadera + 0.03
 	var y_cabeza := y_panza + 0.37
+	var r_in := r_pata + 0.03
+	var r_out := r_in + 0.1
 	for vi in verts.size():
 		var v := verts[vi]
+		# Cuerpo: los 2 huesos (no de pata) más cercanos.
 		var mejor := [-1, -1]
 		var dist := [INF, INF]
 		for c in nombres.size():
 			var nombre: String = nombres[c]
-			if nombre.length() == 3:  # pata: solo abajo, de su lado y de su mitad
-				if v.y > y_pata:
-					continue
-				var lado := -1.0 if nombre[1] == "i" else 1.0
-				if absf(v.x - cx) > 0.03 and signf(v.x - cx) != lado:
-					continue
-				if (nombre[0] == "d") != (v.z > z_mitad):
-					continue
-				# Solo cerca de su pata: el pelo del pecho no se va con la pata delantera.
-				var pie: Vector3 = _pie[nombre.substr(0, 2)]
-				if Vector2(v.x - pie.x, v.z - pie.z).length() > 0.26:
-					continue
-			elif nombre.begins_with("cola"):
+			if nombre.begins_with("cola"):
 				if v.z > z_cola or v.y < y_panza + 0.6:
 					continue
 			elif nombre == "cabeza" and (v.y < y_cabeza or v.z < z_mitad - 0.1):
 				continue
-			var s: Array = seg[nombre]
-			var d := v.distance_to(Geometry3D.get_closest_point_to_segment(v, s[0], s[1])) - float(s[2])
+			var s_: Array = seg[nombre]
+			var d := v.distance_to(Geometry3D.get_closest_point_to_segment(v, s_[0], s_[1])) - float(s_[2])
 			d = maxf(d, 0.01)
 			if d < dist[0]:
 				dist[1] = dist[0]
@@ -272,10 +276,36 @@ func _armar() -> void:
 			dist[1] = dist[0]
 		var w0 := 1.0 / pow(dist[0], 3.0)
 		var w1 := 1.0 / pow(dist[1], 3.0)
-		huesos[vi * 4] = sk.find_bone(nombres[mejor[0]])
-		huesos[vi * 4 + 1] = sk.find_bone(nombres[mejor[1]])
-		pesos[vi * 4] = w0 / (w0 + w1)
-		pesos[vi * 4 + 1] = w1 / (w0 + w1)
+		var lista := [[sk.find_bone(nombres[mejor[0]]), w0 / (w0 + w1)], [sk.find_bone(nombres[mejor[1]]), w1 / (w0 + w1)]]
+		# Pata: la de su lado y su mitad. Bajo la panza, su columna; sobre la panza, el
+		# flanco de su lado (no el centro: panza y pecho), con peso que cae hacia arriba.
+		var pata := ("d" if v.z > z_mitad else "t") + ("i" if v.x < cx else "d")
+		var pie: Vector3 = _pie[pata]
+		var col_xz := 1.0 - smoothstep(r_in, r_out, Vector2(v.x - pie.x, v.z - pie.z).length())
+		var col_z := 1.0 - smoothstep(0.12, 0.27, absf(v.z - pie.z))
+		var arriba := smoothstep(y_panza - 0.05, y_panza + 0.05, v.y)
+		var columna := lerpf(col_xz, col_z * smoothstep(0.06, 0.18, absf(v.x - cx)), arriba)
+		var alto_w := 1.0 - smoothstep(y_panza - 0.02, y_col, v.y)
+		var wl := clampf(columna * alto_w, 0.0, 1.0)
+		if wl > 0.001:
+			var a := smoothstep(y_mano - 0.03, y_mano + 0.03, v.y)
+			var b := smoothstep(y_codo - 0.04, y_codo + 0.04, v.y)
+			for par in lista:
+				par[1] *= 1.0 - wl
+			lista.append([sk.find_bone(pata + "1"), wl * a * b])
+			lista.append([sk.find_bone(pata + "2"), wl * a * (1.0 - b)])
+			lista.append([sk.find_bone(pata + "3"), wl * (1.0 - a)])
+		lista.sort_custom(func(m: Array, n: Array) -> bool: return m[1] > n[1])
+		var total := 0.0
+		for j in mini(4, lista.size()):
+			total += lista[j][1]
+		for j in 4:
+			if j < lista.size():
+				huesos[vi * 4 + j] = lista[j][0]
+				pesos[vi * 4 + j] = lista[j][1] / total
+			else:
+				huesos[vi * 4 + j] = 0
+				pesos[vi * 4 + j] = 0.0
 
 	var limpio: Array = []
 	limpio.resize(Mesh.ARRAY_MAX)
@@ -326,8 +356,8 @@ func _pose_caminar(t: float) -> Dictionary:
 	p["caderas"] = Vector3(0.0, -0.08 * sin(w), -0.05 * sin(w))
 	p["medio"] = Vector3(0.0, 0.0, 0.0)
 	# Sube y baja con cada paso (2 veces por ciclo).
-	var bote := 0.035 * l * cos(2.0 * w)
-	p["pos_medio"] = Vector3(0, -0.08 * l + bote, 0)
+	var bote := 0.035 * l * (cos(2.0 * w) - 1.0)  # baja con cada paso, nunca estira de más
+	p["pos_medio"] = Vector3(0, -l * (1.0 - cos(GIRO_PIERNA)) - 0.01 + bote, 0)
 	# La cabeza compensa: deshace casi todo el giro de los hombros, se queda más quieta
 	# y cabecea un poco, atrasada respecto del bote.
 	p["cabeza"] = Vector3(0.04 * sin(2.0 * w - 1.0), -0.07 * sin(w), -0.045 * sin(w))
@@ -342,13 +372,15 @@ func _pose_caminar(t: float) -> Dictionary:
 		var f: float = fmod(u + fase[pata], 1.0)
 		var z := 0.0
 		var alto := 0.0
+		var curva := 0.0
 		if f < APOYO:  # apoyada: retrocede respecto del cuerpo a la velocidad del avance
 			z = _paso * (0.5 - f / APOYO)
 		else:  # avanza por el aire: se levanta y dobla
 			var s := (f - APOYO) / (1.0 - APOYO)
 			z = _paso * (-0.5 + smoothstep(0.0, 1.0, s))
-			alto = 0.25 * l * sin(PI * s)
-		pies[pata] = [z, alto]
+			alto = 0.2 * l * sin(PI * s)
+			curva = 0.9 * sin(PI * s)  # la mano o el pie se recoge en el aire
+		pies[pata] = [z, alto, curva]
 	p["pies"] = pies
 	p["escala"] = 1.0 + 0.012 * cos(2.0 * w)
 	return p
@@ -356,7 +388,7 @@ func _pose_caminar(t: float) -> Dictionary:
 
 func _pose_quieto(t: float) -> Dictionary:
 	var w := TAU * t / DUR_QUIETO
-	var l := _l1 + _l2
+	var l := _lv
 	var p := {}
 	p["pos_medio"] = Vector3(0, -0.04 * l + 0.012 * l * sin(2.0 * w), 0)
 	p["cabeza"] = Vector3(0.015 * sin(w), 0.03 * sin(w * 0.5 + 1.0), 0)
@@ -396,7 +428,7 @@ func _pose_saltar(t: float) -> Dictionary:
 			break
 	var k := smoothstep(0.0, 1.0, (t - a[0]) / maxf(b[0] - a[0], 0.001))
 	var v := func(j: int) -> float: return lerpf(a[j], b[j], k)
-	var l := _l1 + _l2
+	var l := _lv
 	var p := {}
 	p["pos_medio"] = Vector3(0, v.call(1) * l, 0)
 	p["medio"] = Vector3(v.call(2), 0, 0)
@@ -412,8 +444,10 @@ func _pose_saltar(t: float) -> Dictionary:
 	else:
 		for pata in PATAS:
 			var o := 8 if pata[0] == "d" else 10
-			p[pata + "1"] = Vector3(v.call(o), 0, 0)
-			p[pata + "2"] = Vector3(v.call(o + 1), 0, 0)
+			# La pierna entera gira desde el hombro: ángulos algo menores que con la pata corta.
+			p[pata + "1"] = Vector3(0.75 * v.call(o), 0, 0)
+			p[pata + "2"] = Vector3(0.8 * v.call(o + 1), 0, 0)
+			p[pata + "3"] = Vector3(0.4 * v.call(o + 1), 0, 0)
 	return p
 
 
@@ -470,9 +504,9 @@ func _global(p: Dictionary, nombre: String) -> Transform3D:
 	return local if pp == "" else _global(p, pp) * local
 
 
-## Cinemática inversa de 2 huesos en el plano de la pata (giro en x del hueso): pone la
-## punta de la pata en el pie pedido. Delanteras con el codo atrás, traseras con la
-## rodilla adelante.
+## Cinemática inversa: la muñeca va sobre el pie pedido (giro en x desde el hombro o la
+## cadera, con el codo atrás en las delanteras y el corvejón adelante en las traseras) y
+## la mano queda plana, o recogida `curva` radianes en el aire.
 func _resolver_patas(p: Dictionary) -> void:
 	if not p.has("pies"):
 		return
@@ -480,15 +514,18 @@ func _resolver_patas(p: Dictionary) -> void:
 	for pata in PATAS:
 		var pp: String = _padre[pata + "1"]
 		var g_padre := _global(p, pp)
-		var meta: Vector3 = _pie[pata] + Vector3(0, pies[pata][1], pies[pata][0])
+		var dato: Array = pies[pata]
+		var meta: Vector3 = _pie[pata] + Vector3(0, dato[1] + _l3, dato[0])
 		var dv: Vector3 = g_padre.affine_inverse() * meta - _rest[pata + "1"]
 		var d := clampf(Vector2(dv.y, dv.z).length(), 0.05, (_l1 + _l2) * 0.999)
 		var alfa := atan2(-dv.z, -dv.y)
 		var gamma := acos(clampf((_l1 * _l1 + d * d - _l2 * _l2) / (2.0 * _l1 * d), -1.0, 1.0))
 		var kappa := acos(clampf((_l1 * _l1 + _l2 * _l2 - d * d) / (2.0 * _l1 * _l2), -1.0, 1.0))
-		if pata[0] == "d":
-			p[pata + "1"] = Vector3(alfa + gamma, 0, 0)
-			p[pata + "2"] = Vector3(-(PI - kappa), 0, 0)
-		else:
-			p[pata + "1"] = Vector3(alfa - gamma, 0, 0)
-			p[pata + "2"] = Vector3(PI - kappa, 0, 0)
+		var a1 := alfa + gamma if pata[0] == "d" else alfa - gamma
+		var a2 := -(PI - kappa) if pata[0] == "d" else PI - kappa
+		# Mano plana: deshace el giro del padre (hombros o caderas) y de los 2 huesos.
+		var giro_padre := g_padre.basis.get_euler().x
+		var curva: float = dato[2] if dato.size() > 2 else 0.0
+		p[pata + "1"] = Vector3(a1, 0, 0)
+		p[pata + "2"] = Vector3(a2, 0, 0)
+		p[pata + "3"] = Vector3(-(a1 + a2 + giro_padre) + (curva if pata[0] == "d" else 0.4 * curva), 0, 0)

@@ -14,6 +14,7 @@ COLA = ["tail.001", "tail.002", "tail.003", "tail.004", "tail.005"]
 AMP_COLA = [0.25, 0.5, 0.8, 1.15, 1.5]
 RETRASO_COLA = 3  # cuadros de retraso de cada hueso respecto del anterior
 DEF_MAX = 0.08    # estirar y aplastar: como mucho ±8 %
+POLO_M = float(os.environ.get("FELIPE_POLO", "0.25"))  # distancia del polo de rodilla y codo
 
 arm = None
 pbs = None
@@ -70,7 +71,9 @@ def preparar():
             p = eb.new("polo_%s.%s" % (pata, lado))
             # Polo de la rodilla fijo al piso; el del codo va con el pecho (sigue al torso
             # cuando se para en dos patas o se sienta).
-            p.head = b_ik.head + V((0, -0.04, 0)); p.tail = p.head + V((0, 0, 0.01))
+            # Polo lejos (POLO_M adelante): con el polo pegado al codo, el plano de la pata
+            # giraba cuando la mano pasaba por delante y el codo se metía o se abría.
+            p.head = b_ik.head + V((0, -POLO_M, 0)); p.tail = p.head + V((0, 0, 0.01))
             p.parent = eb[padre_polo]; p.use_deform = False
             CTL[(pata, lado)] = {"ctl": c.name, "ik": t.name, "polo": p.name, "ikb": ik_hueso + "." + lado,
                                  "pie": pie + "." + lado, "dedo": dedo + "." + lado}

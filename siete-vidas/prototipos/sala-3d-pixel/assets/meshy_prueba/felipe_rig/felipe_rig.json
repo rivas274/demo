@@ -1,8 +1,8 @@
 {
-  "velocidad_caminar_m_s": 0.2914,
-  "zancada_m": 0.1166,
+  "velocidad_caminar_m_s": 0.2924,
+  "zancada_m": 0.1169,
   "alto_m": 0.5537,
-  "patinaje_max_mm": 2.3,
+  "patinaje_max_mm": 0.02,
   "fps": 24,
   "duracion_s": {
     "caminar": 0.6667,

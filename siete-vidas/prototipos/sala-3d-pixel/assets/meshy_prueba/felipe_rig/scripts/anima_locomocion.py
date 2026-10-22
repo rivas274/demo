@@ -7,6 +7,8 @@ N_QUIETO = 144        # 6 s: el quieto con pausas irregulares no debe verse como
 DUTY = 0.6            # fracción del ciclo con el pie apoyado (las patas en el aire van más rápido)
 ZANCADA_U = 0.34      # largo del paso en unidades de Meshy (se pasa a metros con K)
 ALZA_U = {"tras": 0.07, "del": 0.085}
+MANO_X = float(__import__("os").environ.get("FELIPE_MANO_X", "0.018"))  # m hacia afuera (elegido entre 0 y 0,024)
+VUELO_X = float(__import__("os").environ.get("FELIPE_VUELO_X", "0.04"))  # m más afuera en el vuelo (elegido entre 0 y 0,04)
 # Secuencia lateral de gato: trasera izq., delantera izq., trasera der., delantera der.
 FASE = {("tras", "L"): 0.0, ("del", "L"): 0.25, ("tras", "R"): 0.5, ("del", "R"): 0.75}
 # Poses de cada pata (claves y breakdowns): (fase, avance [-1 adelante .. +1 atrás] * zancada/2,
@@ -46,7 +48,14 @@ def caminar():
             # La delantera, casi recta en reposo, alcanza con la escápula (como un gato real) y
             # con el paso centrado un poco más atrás.
             centro = 0.012 if pata == "del" else 0.0
-            B.pata(f, pata, lado, desp=(0, av * Z / 2 + centro, al * alza), rot=g, dedo=gd,
+            # La mano delantera se apoya un poco más afuera: la pata de Felipe va inclinada hacia
+            # adentro (hombro a 0,098 m del centro, mano a 0,049) y, al doblarse, el codo se
+            # metía bajo la melena y se abría al levantarla.
+            # En el vuelo, la mano va además un poco más afuera (bajo el hombro): así el antebrazo
+            # no queda inclinado hacia el centro cuando la pata se dobla.
+            vuelo = VUELO_X * math.sin(math.pi * min(1.0, max(0.0, (fase - DUTY) / (1 - DUTY))))
+            afuera = (MANO_X + vuelo if pata == "del" else 0.0) * (1 if lado == "L" else -1)
+            B.pata(f, pata, lado, desp=(afuera, av * Z / 2 + centro, al * alza), rot=g, dedo=gd,
                    escapula=20 * av if pata == "del" else None)
             if fase < DUTY - 1e-6:
                 lineales.append(f)

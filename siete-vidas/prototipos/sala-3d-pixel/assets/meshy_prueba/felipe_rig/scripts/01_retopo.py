@@ -15,6 +15,7 @@ import simetria as S
 
 MITAD = "NEGATIVE_X"
 SOLDADURA = 0.005
+RELAJAR = int(os.environ.get("FELIPE_RELAJAR", "6"))   # pasadas de suavizado del cuerpo
 
 CARAS = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
 
@@ -42,6 +43,15 @@ S.ajustar_plano(orig)
 print("manos antes:", S.patas_delanteras(meshy, C.ALTO_M / 1.6149))
 print("soldados:", S.simetrizar(orig, MITAD, SOLDADURA), "costura abierta:", S.medir_costura(orig))
 print("manos después:", S.patas_delanteras(orig, C.ALTO_M / 1.6149))
+# Soldar toda la de alta: Meshy la trae en pedazos con grietas entre ellos; en el plano medio
+# los rayos del horneado pasaban por esas grietas y pintaban una línea blanca en el lomo.
+# (Las UV son por esquina de cara: soldar vértices no las cambia.)
+bm = bmesh.new(); bm.from_mesh(orig.data)
+antes_b = sum(1 for e in bm.edges if e.is_boundary)
+bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=0.0015)
+despues_b = sum(1 for e in bm.edges if e.is_boundary)
+bm.to_mesh(orig.data); bm.free(); orig.data.update()
+print("soldadura total: bordes abiertos %d -> %d, costura central %d" % (antes_b, despues_b, S.medir_costura(orig)))
 bpy.ops.object.select_all(action="DESELECT")
 
 # Islas sueltas de la original (solo informativo: el remallado por vóxeles las une).
@@ -67,7 +77,6 @@ print("islas de la original:", len(islas), islas[:10])
 retopo = orig.copy(); retopo.data = orig.data.copy(); retopo.name = "Retopo"
 bpy.context.collection.objects.link(retopo)
 retopo.data.materials.clear()
-retopo.data.use_mirror_x = True   # QuadriFlow usa esta simetría
 bpy.ops.object.select_all(action="DESELECT")
 bpy.context.view_layer.objects.active = retopo
 retopo.select_set(True)
@@ -97,7 +106,9 @@ for g in grupos[1:]:
 bm.to_mesh(retopo.data); bm.free()
 
 ok = False
-for intento, (sim, bordes) in enumerate([(True, True), (True, False), (False, True)]):
+# Sin la simetría de QuadriFlow: deja las dos mitades sin unir (una franja sin caras en el
+# plano medio). La simetría se hace después cortando al medio y espejando (Mirror).
+for intento, (sim, bordes) in enumerate([(False, True), (False, False)]):
     try:
         r = bpy.ops.object.quadriflow_remesh(
             use_mesh_symmetry=sim, use_preserve_sharp=bordes, use_preserve_boundary=bordes,
@@ -146,22 +157,48 @@ def simetria_exacta(obj):
     return float(np.percentile(d, 99)), float(d.max()), no_par
 
 
+# Relajar el cuerpo: la malla de Meshy trae escalones en los bordes de sus manchas viejas
+# (crestas dentadas en el lomo y la grupa) y la retopo los copia al pegarse a ella. Suavizado
+# laplaciano solo fuera de la cabeza (la cara y las orejas quedan como están).
+from PIL import Image
+from scipy import ndimage
+mp = np.array(Image.open(os.path.join(C.PLANTILLA, "mascaras_perfil.png")))[..., 0]
+cab = ndimage.binary_dilation(((mp >> 0) & 1).astype(bool) | ((mp >> 1) & 1).astype(bool), iterations=4)
+zoff = C.CENTRO_ORIGINAL[2] - C.Z_PISO_ORIGINAL
+bm = bmesh.new(); bm.from_mesh(retopo.data); bm.verts.ensure_lookup_table()
+cuerpo = []
+for v in bm.verts:
+    px = int(np.clip(round(512 - v.co.y / C.PX), 0, 1023))
+    py = int(np.clip(round(512 - (v.co.z - zoff) / C.PX), 0, 1023))
+    # Solo detrás del pecho (lomo, grupa y cola): el pelo esponjado del pecho conserva su relieve.
+    if not cab[py, px] and v.co.z > 0.04 and px < 690:
+        cuerpo.append(v)
+for _ in range(RELAJAR):
+    bmesh.ops.smooth_vert(bm, verts=cuerpo, factor=0.5, use_axis_x=True, use_axis_y=True, use_axis_z=True)
+bm.to_mesh(retopo.data); bm.free()
+retopo.data.update()
+print("relajado: %d vértices del cuerpo, %d pasadas" % (len(cuerpo), RELAJAR))
+
+# Simetría exacta con costura cerrada: cortar al medio, quedarse con la mitad -X y espejarla
+# (Mirror con recorte y soldadura en el plano medio).
+bm = bmesh.new(); bm.from_mesh(retopo.data)
+bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:], plane_co=(0, 0, 0),
+                       plane_no=(1, 0, 0), clear_outer=True)
+for v in bm.verts:
+    if abs(v.co.x) < 1e-4:
+        v.co.x = 0.0
+bm.to_mesh(retopo.data); bm.free()
+md = retopo.modifiers.new("espejo", "MIRROR")
+md.use_clip = True; md.use_mirror_merge = True; md.merge_threshold = 1e-4
+bpy.context.view_layer.objects.active = retopo
+bpy.ops.object.modifier_apply(modifier="espejo")
+bm = bmesh.new(); bm.from_mesh(retopo.data)
+abiertos = sum(1 for e in bm.edges if e.is_boundary)
+quads = sum(1 for f in bm.faces if len(f.verts) == 4)
+print("espejada: %d caras (%d cuadriláteros), bordes abiertos %d" % (len(bm.faces), quads, abiertos))
+bm.free()
 p99, peor, sin_par = simetria_exacta(retopo)
 print("emparejamiento de espejo: p99 %.4f, peor %.4f, vértices sin pareja %d" % (p99, peor, sin_par))
-if sin_par > 0.01 * len(retopo.data.vertices) or peor > 0.02:
-    # Respaldo: cortar al medio y espejar (topología exacta; la costura central con n-gonos).
-    bm = bmesh.new(); bm.from_mesh(retopo.data)
-    bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:], plane_co=(0, 0, 0),
-                           plane_no=(1, 0, 0), clear_outer=True)
-    for v in bm.verts:
-        if abs(v.co.x) < 1e-4:
-            v.co.x = 0.0
-    bm.to_mesh(retopo.data); bm.free()
-    md = retopo.modifiers.new("espejo", "MIRROR")
-    md.use_clip = True; md.use_mirror_merge = True; md.merge_threshold = 1e-4
-    bpy.context.view_layer.objects.active = retopo
-    bpy.ops.object.modifier_apply(modifier="espejo")
-    print("respaldo: cortada al medio y espejada")
 for p in retopo.data.polygons:
     p.use_smooth = True
 print("final:", len(retopo.data.vertices), "vértices,", len(retopo.data.polygons), "caras")

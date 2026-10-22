@@ -248,6 +248,28 @@ for _ in range(3):
         nuevo[i] = acc
     final.update(nuevo)
 
+# Pesos espejados (como Mirror Vertex Groups): la malla es simétrica, así que cada vértice
+# del lado derecho (-X) toma los pesos de su pareja del izquierdo con .L <-> .R.
+from scipy.spatial import cKDTree
+co = np.array([v.co[:] for v in malla.data.vertices])
+esp = co.copy(); esp[:, 0] *= -1
+dist, par = cKDTree(co).query(esp)
+cambia = lambda k: k[:-2] + (".R" if k.endswith(".L") else ".L") if k.endswith((".L", ".R")) else k
+espejados = 0
+for i in range(len(co)):
+    if co[i, 0] < -1e-5 and dist[i] < 1e-4:
+        final[i] = {cambia(k): x for k, x in final[int(par[i])].items()}
+        espejados += 1
+    elif abs(co[i, 0]) <= 1e-5:
+        # En el plano medio: promedio con su propio espejo (izquierda y derecha iguales).
+        ps = final[i]
+        sim = {}
+        for k, x in ps.items():
+            sim[k] = sim.get(k, 0) + x / 2
+            sim[cambia(k)] = sim.get(cambia(k), 0) + x / 2
+        final[i] = sim
+print("pesos espejados: %d vértices (peor distancia de pareja %.6f)" % (espejados, float(dist.max())))
+
 # Máximo 4 huesos y suma 1. Se guardan los índices antes de borrar: borrar mientras se
 # recorre v.groups corre la colección y dejaba restos de los pesos de calor.
 for v in malla.data.vertices:

@@ -29,7 +29,7 @@ VARIANTES = [
     ("e_chicas", (0.39, 0.60), (0.05, 0.28), 6, (78, 90), 2.0),
     ("f_cuadradas", (0.36, 0.62), (0.02, 0.30), 6, (88, 100), 2.6),
     # Elegida: tamaño cercano a las fotos (como d) sin cerrar la banda blanca (como a).
-    ("g_medianas", (0.345, 0.64), (0.01, 0.315), 6, (94, 106), 2.0),
+    ("g_medianas", (0.345, 0.64), (0.01, 0.315), 6, (100, 112), 2.0),
 ]
 ELEGIDA = "g_medianas"
 GY, GA = 260, 180   # celdas del mapa cilíndrico (largo x ángulo)
@@ -92,7 +92,7 @@ py = np.clip(np.round(512 - (pos[..., 2] - zoff) / C.PX).astype(int), 0, 1023)
 Y0, Y1 = 290, 800      # px de perfil (de la grupa al pecho y la nuca)
 cab_sola = ((mp >> 0) & 1).astype(bool) | ((mp >> 1) & 1).astype(bool)
 # Nuca: lo de atrás y abajo de la cabeza (no la cara ni la gorra de arriba) también va blanco.
-nuca = cab_sola[py, px] & (py > 470) & (px < 700)
+nuca = cab_sola[py, px] & (py > 445) & (px < 715)
 # Todo el cuerpo salvo la cabeza (sin la nuca) y la cola: así no quedan restos del gris
 # deshilachado de Meshy (la panza y las patas, fuera de las manchas, quedan blancas).
 zona = cubre & (~cabeza[py, px] | nuca) & ~cola[py, px]
@@ -124,7 +124,10 @@ mapa = mapa[idx[0], idx[1]]
 # Color de la gorra (gris pardo atigrado) para rellenar: lo oscuro de la cabeza, arriba.
 gorra = cubre & cabeza[py, px] & (py < 330) & (lum < 0.55)
 gris = np.median(tex[gorra], axis=0) if gorra.any() else oscuro_ref
-raya = gris * 0.72
+# Las manchas del Felipe real (felipe-video6-camina-costado.png) son más oscuras que la gorra
+# de Meshy: pardo muy oscuro con rayas casi negras.
+gris = gris * 0.66
+raya = gris * 0.62
 print("blanco", blanco_ref, "gris de la gorra", gris)
 
 
@@ -208,7 +211,8 @@ def param_cola(pxs, pys):
 en_cola = cubre & cola[py, px] & (py < 610)
 s_cola = np.zeros(px.shape)
 s_cola[en_cola] = param_cola(px[en_cola], py[en_cola])
-GRIS_COLA = np.array([0.20, 0.19, 0.19], np.float32)
+# Cola: café oscuro atigrado, con el interior más claro y pardo (video 6).
+GRIS_COLA = np.array([0.21, 0.17, 0.14], np.float32)
 
 
 def aplicar(params):
@@ -229,7 +233,7 @@ def aplicar(params):
     # Cola: base blanca (anillo corto) y luego gris muy oscuro casi liso, más clara al centro.
     sc = s_cola
     base = np.clip((0.13 - sc) / 0.04, 0, 1)
-    centro = 1 + 0.18 * np.exp(-((sc - 0.55) / 0.22) ** 2)
+    centro = 1 + 0.35 * np.exp(-((sc - 0.55) / 0.25) ** 2)
     oscuro = GRIS_COLA[None, None, :] * centro[..., None]
     col = blanco_ref[None, None, :] * base[..., None] + oscuro * (1 - base[..., None])
     wc = (en_cola * np.clip((sc - 0.0) / 0.02, 0, 1))[..., None]

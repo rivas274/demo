@@ -285,3 +285,54 @@ El creador: «las demás acciones se ven bien», pero la caminata «parece un ju
 - **Entregables:**
   - `felipe-rig-camina-v2.gif`: arriba la caminata anterior y abajo la nueva, de perfil y en 3/4, sobre el piso con rayas (`pruebas/felipe_rig_camina_comparar.gd`);
   - `felipe-rig-acciones-v2.mp4`: la rutina completa en la sala.
+
+### v3: modelo simétrico, pata delantera y lomo del Felipe real (2026-10-22)
+El creador vio la v2: «mete mucho una de las patas delanteras; se ve mal pintado el lomo». Su idea: hacer el modelo simétrico, que es el flujo estándar (se modela y se arma simétrico en reposo, y la asimetría la pone la animación).
+
+**Causa de la pata:** la malla de Meshy traía la mano delantera izquierda **6 cm más atrás** que la derecha (y −0,13 contra −0,19 m), bajo el pecho. El esqueleto es simétrico y el recorrido igual, así que esa pata terminaba metida bajo la melena.
+
+**Qué se hizo** (en `01_retopo.py` y `simetria.py`; las variantes en `01a_simetria_variantes.py`):
+1. **Simetría de la malla de alta:** se busca el plano medio (estaba centrado: desplazamiento 0, giro 0°) y se aplica **Symmetrize**.
+   - 6 variantes: mitad −X o +X, con soldadura de 0,5, 2 o 5 mm. Elegida: **la mitad −X (derecha de Felipe), con 5 mm**.
+   - Esa mitad tiene la mano en su lugar y es el lado donde el creador marcó el esqueleto. La soldadura de 5 mm cierra la costura: quedan 7 bordes abiertos, contra 298 a 524 con las otras.
+   - Además se suelda toda la malla de alta: venía en 83 pedazos con grietas, y por ellas el horneado pintaba una línea blanca en el lomo.
+2. **Retopo simétrica:** QuadriFlow, luego se corta al medio y se espeja con Mirror soldado.
+   - QuadriFlow con su opción de simetría dejaba una grieta abierta a lo largo del plano medio.
+   - Resultado: 7.359 caras, con 1 borde abierto y todos los vértices con su pareja exacta.
+   - El lomo y la grupa se relajan 6 pasadas (sin tocar la cara ni el pecho), porque la malla traía escalones en el borde de las manchas viejas.
+3. **Textura:** se hornea desde la malla de alta simétrica y se repinta con `02b_lomo.py`.
+4. **Pesos espejados**, como Mirror Vertex Groups: los 3.544 vértices de la derecha copian los pesos de su pareja, con .L y .R intercambiados.
+5. **Todas las animaciones** se rehicieron sobre el rig nuevo con los mismos scripts.
+
+**Pata delantera** (`anima_locomocion.py`):
+- La mano se apoya 1,8 cm más afuera y en el vuelo va 4 cm más afuera, bajo el hombro.
+- La pata de Felipe va inclinada hacia adentro (hombro a 9,8 cm del centro, mano a 4,9). Al doblarse, el codo se metía bajo la melena y la pata cruzaba hacia el centro.
+- Probé 5 anchos de apoyo (0 a 2,4 cm) y 5 de vuelo (0 a 4 cm), y también 5 distancias de polo, que casi no cambiaron nada. Medí el patinaje, el alcance IK y la inclinación del antebrazo, y miré renders de frente.
+- **Elegidos 1,8 y 4 cm:** el pie no patina (0,02 mm), el IK alcanza siempre (0 mm) y las dos delanteras barren el mismo rango simétrico.
+
+**Lomo y cola**, con el patrón de las fotos del creador (`felipe-lomo-arriba-1/2.jpg`, `felipe-lomo-costado.jpg`, `felipe-video6-camina-*.png`):
+- La gorra no se toca y la nuca queda blanca.
+- **Un par de manchas a media espalda**, separadas por una franja blanca sobre la columna, y una banda blanca atravesada.
+- **Un par de manchas sobre la cadera** que bajan por el muslo.
+- La base de la cola es blanca, y el resto café oscuro casi liso, más claro al centro.
+- Las manchas son pardo oscuro con rayas finas de la columna hacia abajo y bordes suaves. Se dibujan en un mapa del cuerpo (largo × ángulo) y se evalúan en cada texel, así no hay escalones en las costuras UV, y el padding se rellena.
+- **Por qué no limpiar la mancha de Meshy:** limpiarla con cierre y apertura daba siempre un solo bloque (la "montura" gris de Meshy, que no es el patrón real). Por eso se dibujan las manchas del patrón.
+- Probé 7 variantes de tamaño, franja y forma, medidas por número de manchas, huecos, redondez, simetría y área. **Elegida `g_medianas`:** 4 manchas, 0 huecos, simetría 0,97 y un tamaño cercano a las fotos sin cerrar la banda blanca.
+
+**Caminata con el video 6:**
+- La cola va **alta, en arco hacia adelante sobre la grupa**; antes iba a media altura en gancho.
+- Las patas se levantan un poco menos (paso tranquilo y pesado).
+- Arañar, pedir y saltar no cambian, salvo que las manchas y la cola nuevas se ven en todas.
+
+**Entregables** (en `proto3d/`):
+- `felipe-simetrico-antes-despues.png`: frente, espalda, arriba y alambre;
+- `felipe-rig-lomo-antes-despues.png`;
+- `felipe-rig-patas-antes-despues.png`: perfil y frente, 4 cuadros del ciclo;
+- `felipe-rig-camina-v3.gif`: v2 arriba y v3 abajo;
+- `felipe-rig-acciones-v3.mp4`;
+- `felipe-rig-acciones-cuadros.png`.
+
+**Límites:**
+- La pata delantera sigue inclinada hacia adentro en reposo: es la anatomía chibi de Meshy. Ya no se cruza, pero de frente se ve "patizamba".
+- La cara venía casi simétrica y quedó espejada de la mitad derecha.
+- El pelo esponjado del pecho conserva el relieve de Meshy.

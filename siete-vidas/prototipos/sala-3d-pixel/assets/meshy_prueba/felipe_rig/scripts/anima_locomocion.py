@@ -6,7 +6,7 @@ N_CAMINAR = 16        # 0,67 s a 24 fps (v2: antes 22 = 0,92 s, se veía lento, 
 N_QUIETO = 144        # 6 s: el quieto con pausas irregulares no debe verse como metrónomo
 DUTY = 0.6            # fracción del ciclo con el pie apoyado (las patas en el aire van más rápido)
 ZANCADA_U = 0.34      # largo del paso en unidades de Meshy (se pasa a metros con K)
-ALZA_U = {"tras": 0.07, "del": 0.085}
+ALZA_U = {"tras": 0.06, "del": 0.075}   # levanta poco pero con decisión (video 6)
 MANO_X = float(__import__("os").environ.get("FELIPE_MANO_X", "0.018"))  # m hacia afuera (elegido entre 0 y 0,024)
 VUELO_X = float(__import__("os").environ.get("FELIPE_VUELO_X", "0.04"))  # m más afuera en el vuelo (elegido entre 0 y 0,04)
 # Secuencia lateral de gato: trasera izq., delantera izq., trasera der., delantera der.
@@ -85,9 +85,10 @@ def caminar():
         B.cabeza(f, cuello=20 + pecho_cab + 0.6 * s(0.55, 2), cab=-8 - 0.4 * s(0.65, 2),
                  giro_lat=-giro + 1.5 * s(0.4), ladeo=-rol_pecho * 0.9)
         B.orejas(f, atras=4)
-    # Cola a media altura en gancho; la onda (de lado una vez por ciclo, sube y baja dos veces)
-    # viaja de la base a la punta con 2 cuadros de retraso por hueso (ritmo más rápido).
-    B.cola(n, estatica=[(2, 0), (-22, 0), (-8, 0), (16, 0), (26, 0)],
+    # Cola alta, en arco hacia adelante sobre la grupa, con la punta suelta (video 6). La onda
+    # (de lado una vez por ciclo, sube y baja dos veces) viaja de la base a la punta con 2
+    # cuadros de retraso por hueso.
+    B.cola(n, estatica=[(14, 0), (8, 0), (14, 0), (22, 0), (18, 0)],
            onda=lambda t: (3.0 * B.seno(t, n, 2, 0.1), 8.0 * B.seno(t, n, 1, 0.25)), paso=1, retraso=2)
     B.suavizar(a)
     B.completar(a, n)

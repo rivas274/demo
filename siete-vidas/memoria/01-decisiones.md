@@ -54,6 +54,8 @@ Actualizado: 2026-10-19 (PARTE B del nivel 1 v4). Detalle completo en la biblia 
   - **Pies con IK, pivote en la bola del pie y polos** (como el rig «paw» de Rigify). Se animan los controles y se hornea a los huesos: el pie apoyado no patina.
   - **El torso gira en la cadera** al pararse, sentarse o saltar, y las patas en el aire se ponen relativas al torso. Así ninguna pata se estira de más.
   - **Cola viva: overlapping action.** Cada hueso va 2 a 4 cuadros atrás del anterior y con más amplitud hacia la punta. Encima, en el motor, un resorte amortiguado aditivo (spring o jiggle bones) que reacciona a la aceleración. Fuente: Richard Williams, *The Animator's Survival Kit* (overlapping action); jiggle/spring bones de los motores.
+  - **Simetría primero:** el personaje se arma simétrico en reposo (Symmetrize de la malla de alta, retopo cortada al medio y espejada con Mirror, pesos espejados con .L y .R) y la asimetría la pone la animación. Una mano 6 cm atrás en la malla de IA hacía que esa pata "se metiera" al caminar. Fuente: flujo estándar de modelado y rigging de personajes (Blender, *Symmetrize* y *Mirror Vertex Groups*).
+  - **Manchas de pelaje:** si la textura de IA no tiene el patrón real, limpiarla no lo arregla. Se dibuja el patrón de las fotos en un mapa del cuerpo y se pasa a la textura.
   - **Límite de proporciones chibi:** con las patas delanteras cortas, Felipe no puede sentarse erguido con las manos en el piso. Su sentado es bajo.
 
 ## Prototipos

@@ -144,3 +144,14 @@ Por eso recomiendo **no cambiar el juego a 3D ahora**. Si el creador lo aprueba,
   - Luz: sol y relleno en 2 tonos, lámpara en 3 (cortes 0,12 y 0,55); ambiente violeta (0,26, 0,22, 0,34); lámpara de energía 1,8 y alcance 1,7 m.
   - Modelos IA reducidos a 9.000 a 12.000 caras, con el color proyectado de frente y el borde de la máscara erosionado 2 px para que no queden halos blancos.
 - Otra pregunta para después: ¿aporta el paralaje de una cámara en perspectiva lo suficiente para justificar perder el ajuste exacto a pixel?
+
+## Valeria de Meshy con animaciones de Mixamo (2026-10-22)
+**Cómo se abre (un solo comando, desde esta carpeta):** `godot --path . -- --valeria-mixamo` (o la escena `valeria_mixamo.tscn`). No hace falta abrir el editor antes: si Godot no importó los archivos, los lee directo con `GLTFDocument`/`FBXDocument`.
+- **Fuente:** `assets/meshy_prueba/valeria/mixamo/valeria_animada.glb` (malla Meshy + 5 clips de Mixamo). Si no está, junta los FBX de esa carpeta copiando las pistas `mixamorig` al esqueleto del FBX con skin; si no hay nada, usa `valeria_meshy.glb` estático. Para probar cada uno: `--valeria-fbx` y `--valeria-estatica`.
+- **Código:** `scripts/valeria_mixamo.gd` (rutina), `scripts/mixamo_carga.gd` (carga, copia de pistas, medidas), `scripts/principal_valeria_mixamo.gd` (la sala sin Felipes).
+- **Sin patinar:** la caminata de Mixamo avanza; se ancla la raíz y el nodo avanza a la velocidad medida en la propia animación (1,41 m/s; medida en los pies apoyados da 1,33 m/s).
+- **Sentada de verdad:** la cadera del clip Sitting Idle se lleva a 10 cm sobre el cojín (asiento a 0,425 m). Sentarse y levantarse son cortes con mezcla de 0,6 s (no hay clips de transición); entre las demás, 0,25 s.
+- **Recoger:** la pelota aparece en el piso donde la mano llega más abajo y desde ese cuadro va pegada a la mano.
+- **Estilo:** material toon de la sala con la textura de Meshy como color; los bordes salen del post-proceso de la sala.
+
+**Qué se ve** (`valeria-mixamo.mp4`, 24 s, en la carpeta de capturas): entra caminando, mira el celular, camina al sofá, se sienta sobre el cojín con los pies en la alfombra, se levanta, recoge la pelota y sale. Es Valeria (moño, cara, sudadera, pantuflas) y se mueve como una persona, sin la postura encorvada de la v3. Pendiente: el celular no aparece en la mano (Mixamo no trae objetos) y al agacharse se ve sobre todo la coronilla.

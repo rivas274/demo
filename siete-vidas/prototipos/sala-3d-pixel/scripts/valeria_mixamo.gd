@@ -3,10 +3,11 @@
 # Fecha: 2026-10-22
 # Valeria de Meshy (CC BY 4.0) con esqueleto y animaciones de Mixamo, en la sala toon.
 # Rutina de unos 20 s en bucle: entra caminando, se detiene y mira el celular, camina al sofá,
-# se sienta, se levanta y se agacha a recoger una pelota.
+# se sienta, se levanta, se agacha a recoger una pelota y sale por la derecha.
 # Fuentes, en orden: assets/meshy_prueba/valeria/mixamo/valeria_animada.glb (5 clips con
 # nombre), si no los FBX de Mixamo de esa carpeta (el de caminar con skin) y, si no hay nada,
 # valeria_meshy.glb estático (se desliza, solo para revisar carga y estilo).
+# Para probar cada fuente: `-- --valeria-mixamo --valeria-fbx` o `--valeria-estatica`.
 extends Node3D
 
 signal empieza_vuelta
@@ -29,15 +30,15 @@ const PELOTA := Color("c27046")
 @export var x_fuera := 4.6
 @export var x_celular := 2.4
 @export var x_sofa := 0.4
-@export var x_recoger := -0.55
+@export var x_recoger := 1.65
 @export var z_camino := -0.12
 ## Cojín del sofá (loungeSofa de Kenney a 0,85 m en sala.gd): altura del asiento y dónde
 ## queda la cadera (el asiento va de z -0,37 a -0,96).
 @export var y_asiento := 0.425
 @export var z_cadera_sentada := -0.66
 @export var cadera_sobre_cojin := 0.1
-@export var tiempo_celular := 4.0
-@export var tiempo_sentada := 4.5
+@export var tiempo_celular := 3.5
+@export var tiempo_sentada := 4.0
 @export var tiempo_giro := 0.35
 
 ## principal.gd lo cambia con Tab; aquí no hay modo manual.
@@ -80,7 +81,11 @@ func _ready() -> void:
 func _cargar() -> String:
 	var clips := {}
 	var fuente := ""
-	if FileAccess.file_exists(GLB_ANIMADO) or ResourceLoader.exists(GLB_ANIMADO):
+	var args := OS.get_cmdline_user_args()
+	if "--valeria-estatica" in args:
+		return _cargar_respaldo()
+	var usar_glb := not "--valeria-fbx" in args
+	if usar_glb and (FileAccess.file_exists(GLB_ANIMADO) or ResourceLoader.exists(GLB_ANIMADO)):
 		_modelo = Carga.cargar(GLB_ANIMADO)
 		fuente = GLB_ANIMADO
 		var ap := Carga.primero(_modelo, "AnimationPlayer") as AnimationPlayer
@@ -226,11 +231,12 @@ func _armar_guion() -> void:
 		{"tipo": "sentarse"},
 		{"tipo": "anim", "anim": "sentada", "tiempo": tiempo_sentada},
 		{"tipo": "levantarse"},
-		{"tipo": "girar", "rumbo": -PI * 0.5},
+		{"tipo": "girar", "rumbo": PI * 0.5},
 		{"tipo": "caminar", "x": x_recoger},
-		{"tipo": "girar", "rumbo": deg_to_rad(-20.0)},
+		{"tipo": "girar", "rumbo": deg_to_rad(25.0)},
 		{"tipo": "recoger"},
-		{"tipo": "anim", "anim": "quieto", "tiempo": 1.2},
+		{"tipo": "girar", "rumbo": PI * 0.5},
+		{"tipo": "caminar", "x": x_fuera},
 	]
 
 

@@ -58,6 +58,9 @@ const PUNTOS := {
 @export var giro_3_4 := 35.0
 @export var usar_toon := true
 @export var perfil_al_caminar := true
+## Al caminar se gira un poco hacia la cámara (para ver la cara); la velocidad de
+## avance en x se corrige con el coseno de este giro.
+@export var giro_caminar := 20.0
 @export var manual := false
 
 var ap: AnimationPlayer
@@ -97,7 +100,7 @@ func reproducir(nombre: String, velocidad: float = 1.0) -> void:
 
 
 func velocidad_caminar() -> float:
-	return _vel_paso * metros_por_unidad * escala
+	return _vel_paso * metros_por_unidad * escala * cos(deg_to_rad(giro_caminar if perfil_al_caminar else giro_3_4))
 
 
 static func arco_salto(t: float) -> Vector2:
@@ -107,7 +110,7 @@ static func arco_salto(t: float) -> Vector2:
 
 func avanzar(delta: float) -> void:
 	_t += delta
-	var lado := 0.0 if (caminando and perfil_al_caminar) else giro_3_4
+	var lado := (giro_caminar if perfil_al_caminar else giro_3_4) if caminando else giro_3_4
 	var meta := -lado if mira_derecha else 180.0 + lado
 	giro.rotation.y = lerp_angle(giro.rotation.y, deg_to_rad(meta), clampf(delta * 8.0, 0.0, 1.0))
 	var v := (global_position - _pos_antes).length() / maxf(delta, 0.0001)

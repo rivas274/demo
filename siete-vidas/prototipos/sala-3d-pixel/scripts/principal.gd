@@ -55,6 +55,10 @@ var _cam_x := 0.0
 
 
 func _ready() -> void:
+	if "--valeria-mixamo" in OS.get_cmdline_user_args() and get_script() == preload("res://scripts/principal.gd"):
+		set_process(false)  # Valeria Meshy + Mixamo: escena propia (valeria_mixamo.tscn).
+		get_tree().change_scene_to_file.call_deferred("res://valeria_mixamo.tscn")
+		return
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--pixel="):
 			tam_pixel = int(arg.get_slice("=", 1))

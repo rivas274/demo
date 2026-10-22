@@ -54,6 +54,8 @@ func _initialize() -> void:
 	f.set_script(load("res://scripts/%s.gd" % guion_felipe))
 	f.set("usar_toon", false)
 	f.set("manual", true)
+	if "giro_caminar" in f:
+		f.set("giro_caminar", 0.0)  # de perfil puro en esta prueba
 	vp.add_child(f)
 	var cam := Camera3D.new()
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL

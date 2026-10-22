@@ -23,6 +23,9 @@ const DEFORMACION_MAXIMA := 0.08
 const MEZCLA := 0.2
 ## Cuánto del giro de cada hueso de pata del pack se usa (brazo, antebrazo, mano).
 const AMPLITUD_PATAS := [0.75, 0.7, 0.45]
+## Por piezas: el hombro o la cadera gira poco (el corte de arriba de la pata no se
+## despega del cuerpo) y el codo o la rodilla hace más del paso.
+const AMPLITUD_PIEZAS := [0.3, 0.85, 0.5]
 const DUR_SALTAR := 1.2
 const DESPEGUE := 0.40
 const ATERRIZAJE := 0.88
@@ -62,6 +65,11 @@ const PUNTOS := {
 ## avance en x se corrige con el coseno de este giro.
 @export var giro_caminar := 20.0
 @export var manual := false
+## v7: Felipe por piezas rígidas (cada vértice a un solo hueso, sin estirar la textura),
+## con un borde de triángulos duplicado como solape y esferas de articulación.
+@export var piezas := false
+## Anillos de triángulos que cada pieza se mete en la vecina.
+const SOLAPE := 6
 
 var ap: AnimationPlayer
 var sk: Skeleton3D
@@ -79,9 +87,13 @@ var _inclina := 0.0
 var _mirar := 0.0
 var _cola_lag := 0.0
 var _huesos_capa: Array[int] = []
+var _vs_meshy := PackedVector3Array()
+var _suelo := 0.0
 
 
 func _ready() -> void:
+	if OS.get_environment("FELIPE_PIEZAS") != "":
+		piezas = OS.get_environment("FELIPE_PIEZAS") == "1"
 	_armar()
 	_pos_antes = global_position
 	ap.play("quieto")
@@ -133,7 +145,8 @@ func _capas(delta: float) -> void:
 		for i in 3:
 			var b := sk.find_bone(PATAS[pata][i])
 			var reposo := sk.get_bone_rest(b).basis.get_rotation_quaternion()
-			sk.set_bone_pose_rotation(b, reposo.slerp(sk.get_bone_pose_rotation(b), AMPLITUD_PATAS[i]))
+			var amp: float = (AMPLITUD_PIEZAS if piezas else AMPLITUD_PATAS)[i]
+			sk.set_bone_pose_rotation(b, reposo.slerp(sk.get_bone_pose_rotation(b), amp))
 	var anim := ap.current_animation
 	var quieto := anim == "quieto"
 	var e := 1.0 + (0.012 * sin(_t * 2.6) if quieto else 0.0)
@@ -158,7 +171,14 @@ func _capas(delta: float) -> void:
 	_girar(cab, Vector3.UP, _mirar + 0.04 * sin(_t * 0.9))
 	_girar(cab, Vector3.BACK, 0.03 * sin(_t * 1.3 + 0.5) - cabeceo * 0.6 + _inclina * 0.5)
 	_cola_lag = lerpf(_cola_lag, -_inclina * 2.0, clampf(delta * 3.0, 0.0, 1.0))
-	var amp := 0.14 if caminando else 0.08
+	# Por piezas, la cola gira menos (si no, los tramos rígidos se escalonan).
+	var k_cola := 0.5 if piezas else 1.0
+	if piezas:
+		for nombre in COLA:
+			var b := sk.find_bone(nombre)
+			var reposo := sk.get_bone_rest(b).basis.get_rotation_quaternion()
+			sk.set_bone_pose_rotation(b, reposo.slerp(sk.get_bone_pose_rotation(b), 0.5))
+	var amp := (0.14 if caminando else 0.08) * k_cola
 	var frec := 3.8 if caminando else 1.6
 	for i in COLA.size():
 		var b := sk.find_bone(COLA[i])
@@ -247,6 +267,15 @@ func _armar() -> void:
 	var alto_m := 0.0
 	for v in vs:
 		alto_m = maxf(alto_m, v.y - suelo)
+	if piezas:
+		# v7: cortes limpios. Se parten los triángulos por los planos de corte (el
+		# borde de cada pieza queda recto) y cada triángulo va entero a una pieza.
+		var cortado := _cortar(vs, ns, arr[Mesh.ARRAY_TEX_UV], arr[Mesh.ARRAY_INDEX], suelo)
+		vs = cortado[0]
+		ns = cortado[1]
+		arr[Mesh.ARRAY_TEX_UV] = cortado[2]
+		arr[Mesh.ARRAY_INDEX] = cortado[3]
+	var vs_meshy := vs.duplicate()
 
 	# 1. Rotaciones de reposo: el cuadro del pack cuyas patas se parecen más a Felipe.
 	var t_rest := _cuadro_parecido(suelo)
@@ -357,6 +386,9 @@ func _armar() -> void:
 	nuevo[Mesh.ARRAY_INDEX] = arr[Mesh.ARRAY_INDEX]
 	nuevo[Mesh.ARRAY_BONES] = huesos
 	nuevo[Mesh.ARRAY_WEIGHTS] = pesos
+	if piezas:
+		_vs_meshy = vs_meshy
+		nuevo = _en_piezas(nuevo)
 	var malla := ArrayMesh.new()
 	malla.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, nuevo)
 	var piel := Skin.new()
@@ -380,6 +412,8 @@ func _armar() -> void:
 		std.roughness = 0.8
 		mi.material_override = std
 
+	if piezas:
+		_articulaciones(tex, arr[Mesh.ARRAY_TEX_UV], vs_meshy, suelo)
 	metros_por_unidad = alto / (alto_m * ESCALA_MESHY)
 	base.scale = Vector3.ONE * metros_por_unidad * escala
 
@@ -454,6 +488,290 @@ func _medir_paso() -> float:
 	vels.sort()
 	ap.play("quieto")
 	return absf(vels[vels.size() / 2]) if vels.size() > 0 else 1.0
+
+
+const Y_CORTE_PATA := -0.64   # pata: lo que queda bajo la panza
+const Z_MITAD := 0.12          # separa patas delanteras y traseras
+const Z_COLA := -0.50          # base de la cola
+const ANCHO_PATA := 0.13       # media anchura de la columna de cada pata
+
+
+## Centro de la columna de una pata (entre el codo o la rodilla y la mano o el pie).
+func _centro_pata(pata: String) -> Vector3:
+	var n: Array = PATAS[pata]
+	return (PUNTOS[n[1]] + PUNTOS[n[2]]) * 0.5
+
+
+## Planos de corte de la v7: [normal, punto].
+func _planos() -> Array:
+	var p: Array = [
+		[Vector3.UP, Vector3(0, Y_CORTE_PATA, 0)],
+		[Vector3.RIGHT, Vector3.ZERO],
+		[Vector3.BACK, Vector3(0, 0, Z_MITAD)],
+		[Vector3.BACK, Vector3(0, 0, Z_COLA)],
+	]
+	for pata in PATAS:
+		var pie: Vector3 = _centro_pata(pata)
+		p.append([Vector3.UP, Vector3(0, PUNTOS[PATAS[pata][2]].y + 0.04, 0)])
+		# Columna cuadrada de la pata: lo de afuera bajo la panza sigue siendo cuerpo.
+		p.append([Vector3.RIGHT, pie + Vector3(ANCHO_PATA, 0, 0)])
+		p.append([Vector3.RIGHT, pie - Vector3(ANCHO_PATA, 0, 0)])
+		p.append([Vector3.BACK, pie + Vector3(0, 0, ANCHO_PATA)])
+		p.append([Vector3.BACK, pie - Vector3(0, 0, ANCHO_PATA)])
+	var cola := [PUNTOS["Bone_005"], PUNTOS["Bone_006"], PUNTOS["Bone_007"]]
+	var prev: Vector3 = PUNTOS["Bone_004"]
+	for i in cola.size():
+		var sig: Vector3 = PUNTOS[COLA[i + 2]] if i + 2 < COLA.size() else PUNTOS["Bone_007_end"]
+		p.append([(sig - prev).normalized(), cola[i]])
+		prev = cola[i]
+	p.append([(Vector3(0, 0.32, 0.55) - PUNTOS[CABEZA]).normalized(), PUNTOS[CABEZA]])
+	return p
+
+
+## Pieza (nombre de hueso) de un punto de Meshy, con los mismos planos de _planos().
+func _pieza_de(c: Vector3) -> String:
+	var n_cuello := (Vector3(0, 0.32, 0.55) - PUNTOS[CABEZA]).normalized()
+	if c.z < Z_COLA:
+		var t := _parametro(c, [PUNTOS["Bone_004"], PUNTOS["Bone_005"], PUNTOS["Bone_006"], PUNTOS["Bone_007"], PUNTOS["Bone_007_end"]])
+		return COLA[clampi(int(t), 0, 3)]
+	if (c - PUNTOS[CABEZA]).dot(n_cuello) > 0.0:
+		return CABEZA
+	if c.y < Y_CORTE_PATA:
+		var pata := ("d" if c.z > Z_MITAD else "t") + ("d" if c.x < 0.0 else "i")
+		var pie := _centro_pata(pata)
+		if absf(c.x - pie.x) < ANCHO_PATA and absf(c.z - pie.z) < ANCHO_PATA:
+			var n: Array = PATAS[pata]
+			return n[2] if c.y < PUNTOS[n[2]].y + 0.04 else n[1]
+	return "Bone_001"
+
+
+## Parte los triángulos que cruzan cada plano (con posición, normal y UV interpolados).
+func _cortar(vs: PackedVector3Array, ns: PackedVector3Array, uv: PackedVector2Array, idx, suelo: float) -> Array:
+	var v := vs.duplicate()
+	var n := ns.duplicate()
+	var u := uv.duplicate()
+	var ind := PackedInt32Array(idx) if idx != null else PackedInt32Array(range(vs.size()))
+	for plano in _planos():
+		var pn: Vector3 = plano[0]
+		var pp: Vector3 = plano[1]
+		var nuevo := PackedInt32Array()
+		var cache := {}
+		var corte := func(a: int, b: int) -> int:
+			var clave := mini(a, b) * 10000000 + maxi(a, b)
+			if cache.has(clave):
+				return cache[clave]
+			var da := (v[a] - pp).dot(pn)
+			var db := (v[b] - pp).dot(pn)
+			var t := da / (da - db)
+			v.append(v[a].lerp(v[b], t))
+			n.append(n[a].lerp(n[b], t).normalized())
+			u.append(u[a].lerp(u[b], t))
+			cache[clave] = v.size() - 1
+			return v.size() - 1
+		for t in range(0, ind.size(), 3):
+			var tri := [ind[t], ind[t + 1], ind[t + 2]]
+			var d := [(v[tri[0]] - pp).dot(pn), (v[tri[1]] - pp).dot(pn), (v[tri[2]] - pp).dot(pn)]
+			var pos := 0
+			for k in 3:
+				if d[k] > 0.0:
+					pos += 1
+			if pos == 0 or pos == 3:
+				nuevo.append_array(tri)
+				continue
+			# El vértice solo de su lado.
+			var solo := 0
+			for k in 3:
+				if (d[k] > 0.0) == (pos == 1):
+					solo = k
+			var a: int = tri[solo]
+			var b: int = tri[(solo + 1) % 3]
+			var c: int = tri[(solo + 2) % 3]
+			var ab: int = corte.call(a, b)
+			var ac: int = corte.call(a, c)
+			nuevo.append_array([a, ab, ac])
+			nuevo.append_array([ab, b, c])
+			nuevo.append_array([ab, c, ac])
+		ind = nuevo
+	print("felipe_meshy: %d triángulos tras los cortes" % (ind.size() / 3))
+	return [v, n, u, ind]
+
+
+## Posición a lo largo de una cadena de puntos (0 en el primero, 1 por tramo).
+func _parametro(v: Vector3, pts: Array) -> float:
+	var mejor := 0.0
+	var dm := INF
+	for i in pts.size() - 1:
+		var a: Vector3 = pts[i]
+		var b: Vector3 = pts[i + 1]
+		var t := clampf((v - a).dot(b - a) / (b - a).length_squared(), 0.0, 1.0)
+		var d := v.distance_squared_to(a.lerp(b, t))
+		if d < dm:
+			dm = d
+			mejor = i + t
+	return mejor
+
+
+## Piezas rígidas: cada vértice a un solo hueso (peso 1), según su pieza. Los triángulos que cruzan
+## una unión se duplican en cada pieza que tocan: ese borde es el solape que tapa la
+## grieta cuando las piezas giran.
+func _en_piezas(a: Array) -> Array:
+	var vs: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+	var ns: PackedVector3Array = a[Mesh.ARRAY_NORMAL]
+	var uv: PackedVector2Array = a[Mesh.ARRAY_TEX_UV]
+	var bo: PackedInt32Array = a[Mesh.ARRAY_BONES]
+	var we: PackedFloat32Array = a[Mesh.ARRAY_WEIGHTS]
+	var idx: PackedInt32Array = a[Mesh.ARRAY_INDEX]
+	# Pieza de cada triángulo (por su centro: los cortes ya son exactos) y de cada
+	# vértice (la de cualquiera de sus triángulos).
+	var dueno := PackedInt32Array()
+	dueno.resize(vs.size())
+	var pieza_tri := PackedInt32Array()
+	for t in range(0, idx.size(), 3):
+		var c := (_vs_meshy[idx[t]] + _vs_meshy[idx[t + 1]] + _vs_meshy[idx[t + 2]]) / 3.0
+		var pz := sk.find_bone(_pieza_de(c))
+		pieza_tri.append(pz)
+		for k in 3:
+			dueno[idx[t + k]] = pz
+	var v2 := PackedVector3Array()
+	var n2 := PackedVector3Array()
+	var u2 := PackedVector2Array()
+	var b2 := PackedInt32Array()
+	var w2 := PackedFloat32Array()
+	var i2 := PackedInt32Array()
+	var mapa := {}
+	# El solape se hunde un poco bajo la superficie (más cuanto más lejos del corte):
+	# rellena la grieta sin asomar como una lámina cuando la pieza gira.
+	var hundir := 0.006 * ESCALA_MESHY / _t_sk.basis.get_scale().x
+	var copiar := func(vi: int, hueso: int, anillo: int) -> int:
+		var clave := vi * 64 + hueso
+		if mapa.has(clave):
+			return mapa[clave]
+		var n := v2.size()
+		v2.append(vs[vi] - ns[vi] * hundir * anillo)
+		n2.append(ns[vi])
+		u2.append(uv[vi])
+		b2.append_array([hueso, 0, 0, 0])
+		w2.append_array([1.0, 0.0, 0.0, 0.0])
+		mapa[clave] = n
+		return n
+	# Solape: cada vértice también pertenece a las piezas de sus vecinos hasta SOLAPE
+	# anillos de distancia, y cada triángulo se copia en todas esas piezas.
+	var nb: Array = []
+	nb.resize(vs.size())
+	for i in vs.size():
+		nb[i] = PackedInt32Array()
+	for t in range(0, idx.size(), 3):
+		for k in 3:
+			(nb[idx[t + k]] as PackedInt32Array).append(idx[t + (k + 1) % 3])
+			(nb[idx[t + k]] as PackedInt32Array).append(idx[t + (k + 2) % 3])
+	# Las costuras de UV duplican vértices en la misma posición: se unen por posición.
+	var por_pos := {}
+	for i in vs.size():
+		var clave := Vector3i((vs[i] * 1e5).round())
+		if por_pos.has(clave):
+			(nb[i] as PackedInt32Array).append(por_pos[clave])
+			(nb[por_pos[clave]] as PackedInt32Array).append(i)
+		else:
+			por_pos[clave] = i
+	var conj: Array = []
+	conj.resize(vs.size())
+	for i in vs.size():
+		conj[i] = {}
+	for t in range(0, idx.size(), 3):
+		for k in 3:
+			conj[idx[t + k]][pieza_tri[t / 3]] = 0
+	for _r in SOLAPE:
+		var nuevo_c: Array = []
+		nuevo_c.resize(vs.size())
+		for i in vs.size():
+			var c: Dictionary = (conj[i] as Dictionary).duplicate()
+			for j in nb[i]:
+				for h in conj[j]:
+					c[h] = mini(c.get(h, 99), conj[j][h] + 1)
+			nuevo_c[i] = c
+		conj = nuevo_c
+	var bordes := 0
+	for t in range(0, idx.size(), 3):
+		var hs := {}
+		for k in 3:
+			for h in conj[idx[t + k]]:
+				hs[h] = true
+		if hs.size() > 1:
+			bordes += 1
+		for h in hs:
+			for k in 3:
+				var vi := idx[t + k]
+				i2.append(copiar.call(vi, h, (conj[vi] as Dictionary).get(h, SOLAPE)))
+	print("felipe_meshy: piezas con %d triángulos de solape" % bordes)
+	var r: Array = []
+	r.resize(Mesh.ARRAY_MAX)
+	r[Mesh.ARRAY_VERTEX] = v2
+	r[Mesh.ARRAY_NORMAL] = n2
+	r[Mesh.ARRAY_TEX_UV] = u2
+	r[Mesh.ARRAY_INDEX] = i2
+	r[Mesh.ARRAY_BONES] = b2
+	r[Mesh.ARRAY_WEIGHTS] = w2
+	return r
+
+
+## Esferas de articulación escondidas dentro (codos, rodillas, muñecas, tobillos, cuello
+## y cola), del color de la textura más cercano, para que al girar no se vea hueco.
+func _articulaciones(tex: Texture2D, uv: PackedVector2Array, vs_meshy: PackedVector3Array, suelo: float) -> void:
+	var img := tex.get_image() if tex else null
+	if img and img.is_compressed():
+		img.decompress()
+	# [hueso, punto en Meshy, radio]
+	var juntas: Array = [["Bone_003", PUNTOS["Bone_003"], 0.16], ["Bone_005", PUNTOS["Bone_005"], 0.10],
+		["Bone_006", PUNTOS["Bone_006"], 0.11], ["Bone_007", PUNTOS["Bone_007"], 0.11]]
+	for pata in PATAS:
+		var n: Array = PATAS[pata]
+		juntas.append([n[1], PUNTOS[n[1]], 0.075])
+		juntas.append([n[2], PUNTOS[n[2]], 0.06])
+		# "Hombro" de la pata a la altura de la panza: tapa el borde de arriba de la pieza.
+		var pie: Vector3 = PUNTOS[n[2]]
+		var y_corte := -0.62 if pata[0] == "t" else -0.66
+		juntas.append([n[1], Vector3(pie.x, Y_CORTE_PATA + 0.01, (PUNTOS[n[1]].z + pie.z) * 0.5), 0.11])
+	var k := ESCALA_MESHY / _t_sk.basis.get_scale().x
+	for junta in juntas:
+		var nombre: String = junta[0]
+		var punto: Vector3 = junta[1]
+		# Color: el del vértice más cercano a la junta.
+		var mejor := 0
+		var dm := INF
+		for i in vs_meshy.size():
+			var d := vs_meshy[i].distance_squared_to(punto)
+			if d < dm:
+				dm = d
+				mejor = i
+		var c := Color(0.9, 0.9, 0.9)
+		if OS.get_environment("BOLAS_ROJAS") != "":
+			img = null
+			c = Color.RED
+		if img:
+			var u := uv[mejor]
+			c = img.get_pixel(clampi(int(u.x * img.get_width()), 0, img.get_width() - 1),
+				clampi(int(u.y * img.get_height()), 0, img.get_height() - 1))
+		var ba := BoneAttachment3D.new()
+		ba.bone_name = nombre
+		sk.add_child(ba)
+		var bola := MeshInstance3D.new()
+		var sm := SphereMesh.new()
+		sm.radius = junta[2] * k
+		sm.height = sm.radius * 2.0
+		sm.radial_segments = 16
+		sm.rings = 8
+		bola.mesh = sm
+		if usar_toon:
+			bola.material_override = Toon.material(c)
+		else:
+			var m := StandardMaterial3D.new()
+			m.albedo_color = c
+			m.roughness = 0.8
+			bola.material_override = m
+		ba.add_child(bola)
+		# Posición de la bola relativa al hueso (en reposo).
+		var b := sk.find_bone(nombre)
+		bola.position = sk.get_bone_global_rest(b).affine_inverse() * (_t_sk.affine_inverse() * _a_pack(punto, suelo))
 
 
 func _normalizar(l: Array) -> void:

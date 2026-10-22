@@ -57,7 +57,7 @@ func _initialize() -> void:
 	giro.rotation.y = deg_to_rad(0.0 if cual != "" else 90.0)
 	var sk: Skeleton3D = f.get("sk")
 	# Marcas que siguen a los huesos (se ven a través del cuerpo).
-	for pata in COLORES:
+	for pata in (COLORES if OS.get_environment("SIN_MARCAS") == "" else {}):
 		var nombres: Array = [pata + "1", pata + "2", pata + "3"]
 		if cual != "":
 			nombres = (f.get_script().get_script_constant_map()["PATAS"] as Dictionary)[pata].slice(0, 3)

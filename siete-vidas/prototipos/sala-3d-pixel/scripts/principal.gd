@@ -101,6 +101,7 @@ func _ready() -> void:
 		felipe_animado = Node3D.new()
 		felipe_animado.name = "FelipeAnimado"
 		felipe_animado.set_script(load("res://scripts/felipe_meshy.gd"))
+		felipe_animado.set("piezas", true)  # v7: por piezas rígidas (FELIPE_PIEZAS=0 vuelve a la v6)
 		felipe_animado.set("escala", 1.3)  # pedido del creador: 30 % más grande
 		vista.add_child(felipe_animado)
 		var guion := Node.new()

@@ -1,0 +1,9 @@
+# Texturas que Godot extrae de los .glb/.fbx al importar: se regeneran solas.
+assets/**/*_[0-9].png
+assets/**/*_[0-9].jpg
+assets/**/*_[0-9].png.import
+assets/**/*_[0-9].jpg.import
+assets/**/*_Image_[0-9].png
+assets/**/*_Image_[0-9].png.import
+assets/meshy_prueba/felipe_rig/felipe_rig_felipe_rig_color.png
+assets/meshy_prueba/felipe_rig/felipe_rig_felipe_rig_color.png.import

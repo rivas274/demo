@@ -58,6 +58,10 @@ ruta = os.path.join(C.TRABAJO, "felipe_rig_color.png")
 img.filepath_raw = ruta
 img.file_format = "PNG"
 img.save()
+# Copia sin retoques: de aquí parte 02b_lomo.py (que repinta el lomo sobre felipe_rig_color.png).
+img.filepath_raw = os.path.join(C.TRABAJO, "felipe_rig_color_horneado.png")
+img.save()
+img.filepath_raw = ruta
 # Rosado puro = texel sin dato (rayo que no encontró la original).
 px = list(img.pixels)
 sin = sum(1 for i in range(0, len(px), 4) if px[i] > 0.99 and px[i + 1] < 0.01 and px[i + 2] > 0.99)

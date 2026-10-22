@@ -1,9 +1,20 @@
 # Paso 1: retopología. Importa el Felipe de Meshy, aplica transformaciones, lo centra
-# (piso en z=0) y hace una malla nueva de cuadriláteros con QuadriFlow.
+# (piso en z=0), lo hace SIMÉTRICO (flujo estándar: se arma simétrico en reposo y la
+# asimetría la pone la animación) y hace una malla nueva de cuadriláteros con QuadriFlow,
+# también simétrica (mismos anillos y mismos pesos de los dos lados).
+# Mitad y soldadura elegidas con 01a_simetria_variantes.py: la mitad -X (derecha de Felipe),
+# que tiene la mano delantera en su lugar (la izquierda venía 6 cm atrás, bajo el pecho) y es
+# el lado donde el creador marcó el esqueleto; soldadura de 0,005 (deja la costura cerrada).
 # Uso: python3 01_retopo.py [caras=8000]
 import sys, os, bpy, bmesh
+import numpy as np
+from scipy.spatial import cKDTree
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import felipe_comun as C
+import simetria as S
+
+MITAD = "NEGATIVE_X"
+SOLDADURA = 0.005
 
 CARAS = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
 
@@ -23,6 +34,15 @@ desp = (-centro[0], -centro[1], -mn[2])
 for v in orig.data.vertices:
     v.co.x += desp[0]; v.co.y += desp[1]; v.co.z += desp[2]
 orig.data.update()
+# Copia sin simetría (solo para comparar) y simetría de la de alta.
+meshy = orig.copy(); meshy.data = orig.data.copy(); meshy.name = "Meshy"
+bpy.context.collection.objects.link(meshy)
+meshy.hide_render = True
+S.ajustar_plano(orig)
+print("manos antes:", S.patas_delanteras(meshy, C.ALTO_M / 1.6149))
+print("soldados:", S.simetrizar(orig, MITAD, SOLDADURA), "costura abierta:", S.medir_costura(orig))
+print("manos después:", S.patas_delanteras(orig, C.ALTO_M / 1.6149))
+bpy.ops.object.select_all(action="DESELECT")
 
 # Islas sueltas de la original (solo informativo: el remallado por vóxeles las une).
 bm = bmesh.new(); bm.from_mesh(orig.data)
@@ -47,6 +67,7 @@ print("islas de la original:", len(islas), islas[:10])
 retopo = orig.copy(); retopo.data = orig.data.copy(); retopo.name = "Retopo"
 bpy.context.collection.objects.link(retopo)
 retopo.data.materials.clear()
+retopo.data.use_mirror_x = True   # QuadriFlow usa esta simetría
 bpy.ops.object.select_all(action="DESELECT")
 bpy.context.view_layer.objects.active = retopo
 retopo.select_set(True)
@@ -76,7 +97,7 @@ for g in grupos[1:]:
 bm.to_mesh(retopo.data); bm.free()
 
 ok = False
-for intento, (sim, bordes) in enumerate([(True, True), (False, True), (False, False)]):
+for intento, (sim, bordes) in enumerate([(True, True), (True, False), (False, True)]):
     try:
         r = bpy.ops.object.quadriflow_remesh(
             use_mesh_symmetry=sim, use_preserve_sharp=bordes, use_preserve_boundary=bordes,
@@ -100,6 +121,47 @@ mod.wrap_method = "PROJECT"
 mod.use_negative_direction = True
 mod.use_positive_direction = True
 bpy.ops.object.modifier_apply(modifier="ajuste")
+
+
+def simetria_exacta(obj):
+    """Empareja cada vértice con su espejo y promedia: la malla queda exactamente simétrica.
+    Devuelve la peor distancia de emparejamiento (si es grande, la topología no es simétrica)."""
+    co = np.array([v.co[:] for v in obj.data.vertices])
+    espejo = co.copy(); espejo[:, 0] *= -1
+    d, j = cKDTree(co).query(espejo)
+    nuevo = co.copy()
+    for i in range(len(co)):
+        par = j[i]
+        if j[par] != i:
+            continue
+        if i == par:
+            nuevo[i, 0] = 0.0
+        else:
+            m = (co[i] + espejo[par]) / 2
+            nuevo[i] = m
+    for v, c in zip(obj.data.vertices, nuevo):
+        v.co = c
+    obj.data.update()
+    no_par = int(sum(1 for i in range(len(co)) if j[j[i]] != i))
+    return float(np.percentile(d, 99)), float(d.max()), no_par
+
+
+p99, peor, sin_par = simetria_exacta(retopo)
+print("emparejamiento de espejo: p99 %.4f, peor %.4f, vértices sin pareja %d" % (p99, peor, sin_par))
+if sin_par > 0.01 * len(retopo.data.vertices) or peor > 0.02:
+    # Respaldo: cortar al medio y espejar (topología exacta; la costura central con n-gonos).
+    bm = bmesh.new(); bm.from_mesh(retopo.data)
+    bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:], plane_co=(0, 0, 0),
+                           plane_no=(1, 0, 0), clear_outer=True)
+    for v in bm.verts:
+        if abs(v.co.x) < 1e-4:
+            v.co.x = 0.0
+    bm.to_mesh(retopo.data); bm.free()
+    md = retopo.modifiers.new("espejo", "MIRROR")
+    md.use_clip = True; md.use_mirror_merge = True; md.merge_threshold = 1e-4
+    bpy.context.view_layer.objects.active = retopo
+    bpy.ops.object.modifier_apply(modifier="espejo")
+    print("respaldo: cortada al medio y espejada")
 for p in retopo.data.polygons:
     p.use_smooth = True
 print("final:", len(retopo.data.vertices), "vértices,", len(retopo.data.polygons), "caras")

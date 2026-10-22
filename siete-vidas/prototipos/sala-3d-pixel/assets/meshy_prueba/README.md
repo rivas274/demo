@@ -32,3 +32,20 @@ Conclusión: para animar con un rig de cuadrúpedo, la entrada debe ser un perfi
   - `felipe_meshy_vistas.png`: render en Blender cada 45°.
   - Otros formatos ofrecidos en el plan Free: fbx, obj, glb, usdz, stl, blend.
 - **Licencia: CC BY 4.0** (plan Free). Permite uso comercial **con atribución**. En los créditos del juego: "Modelo 3D de Felipe generado con Meshy AI (meshy.ai), CC BY 4.0".
+
+## Cola atigrada (repintada en local, 0 créditos)
+
+En la imagen de Gemini la cola de Felipe salía casi negra, y Meshy la dejó de un solo color oscuro. El Felipe real tiene la cola atigrada.
+
+`pintar_cola.py` repinta la textura sin regenerar nada:
+
+1. La cola es el grupo conectado más grande de caras oscuras.
+2. Calcula una línea central de la cola, con tramos de distancia geodésica desde la punta.
+3. Pinta 5 anillos con el gris atigrado y el tono de raya de la cabeza, y deja la punta oscura. Conserva el sombreado original.
+
+Archivos:
+- `felipe_meshy.glb`: con la cola repintada.
+- `felipe_meshy_original.glb`: tal como salió de Meshy.
+- `felipe_meshy_vistas.png` y `felipe_meshy_original_vistas.png`: render de cada uno.
+
+Comando: `python pintar_cola.py felipe_meshy_original.glb felipe_meshy.glb 5 42` (anillos, umbral de oscuro).

@@ -520,9 +520,10 @@ func _planos() -> Array:
 		p.append([Vector3.RIGHT, pie - Vector3(ANCHO_PATA, 0, 0)])
 		p.append([Vector3.BACK, pie + Vector3(0, 0, ANCHO_PATA)])
 		p.append([Vector3.BACK, pie - Vector3(0, 0, ANCHO_PATA)])
-	# Cola en 4 tramos: cortes perpendiculares a la cadena en cada junta.
+	# Cola en 3 tramos (la punta enroscada va con el tercero): cortes perpendiculares a la
+	# cadena en las juntas. Con 4 se abría una grieta en la punta.
 	var cadena := [PUNTOS["Bone_004"], PUNTOS["Bone_005"], PUNTOS["Bone_006"], PUNTOS["Bone_007"], PUNTOS["Bone_007_end"]]
-	for i in range(1, 4):
+	for i in range(1, 3):
 		p.append([((cadena[i + 1] - cadena[i - 1]) as Vector3).normalized(), cadena[i]])
 	p.append([(Vector3(0, 0.32, 0.55) - PUNTOS[CABEZA]).normalized(), PUNTOS[CABEZA]])
 	return p
@@ -535,7 +536,7 @@ func _pieza_de(c: Vector3) -> String:
 	if c.z < Z_COLA or (c.z < -0.3 and c.y > 0.2):
 		var cadena := [PUNTOS["Bone_004"], PUNTOS["Bone_005"], PUNTOS["Bone_006"], PUNTOS["Bone_007"], PUNTOS["Bone_007_end"]]
 		var tramo := 0
-		for i in range(1, 4):
+		for i in range(1, 3):
 			var n := ((cadena[i + 1] - cadena[i - 1]) as Vector3).normalized()
 			if (c - cadena[i]).dot(n) > 0.0:
 				tramo = i

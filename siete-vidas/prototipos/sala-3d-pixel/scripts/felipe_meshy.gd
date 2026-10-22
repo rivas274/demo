@@ -509,6 +509,8 @@ func _planos() -> Array:
 		[Vector3.RIGHT, Vector3.ZERO],
 		[Vector3.BACK, Vector3(0, 0, Z_MITAD)],
 		[Vector3.BACK, Vector3(0, 0, Z_COLA)],
+		[Vector3.BACK, Vector3(0, 0, -0.3)],
+		[Vector3.UP, Vector3(0, 0.2, 0)],
 	]
 	for pata in PATAS:
 		var pie: Vector3 = _centro_pata(pata)
@@ -518,12 +520,10 @@ func _planos() -> Array:
 		p.append([Vector3.RIGHT, pie - Vector3(ANCHO_PATA, 0, 0)])
 		p.append([Vector3.BACK, pie + Vector3(0, 0, ANCHO_PATA)])
 		p.append([Vector3.BACK, pie - Vector3(0, 0, ANCHO_PATA)])
-	var cola := [PUNTOS["Bone_005"], PUNTOS["Bone_006"], PUNTOS["Bone_007"]]
-	var prev: Vector3 = PUNTOS["Bone_004"]
-	for i in cola.size():
-		var sig: Vector3 = PUNTOS[COLA[i + 2]] if i + 2 < COLA.size() else PUNTOS["Bone_007_end"]
-		p.append([(sig - prev).normalized(), cola[i]])
-		prev = cola[i]
+	# Cola en 4 tramos: cortes perpendiculares a la cadena en cada junta.
+	var cadena := [PUNTOS["Bone_004"], PUNTOS["Bone_005"], PUNTOS["Bone_006"], PUNTOS["Bone_007"], PUNTOS["Bone_007_end"]]
+	for i in range(1, 4):
+		p.append([((cadena[i + 1] - cadena[i - 1]) as Vector3).normalized(), cadena[i]])
 	p.append([(Vector3(0, 0.32, 0.55) - PUNTOS[CABEZA]).normalized(), PUNTOS[CABEZA]])
 	return p
 
@@ -531,9 +531,15 @@ func _planos() -> Array:
 ## Pieza (nombre de hueso) de un punto de Meshy, con los mismos planos de _planos().
 func _pieza_de(c: Vector3) -> String:
 	var n_cuello := (Vector3(0, 0.32, 0.55) - PUNTOS[CABEZA]).normalized()
-	if c.z < Z_COLA:
-		var t := _parametro(c, [PUNTOS["Bone_004"], PUNTOS["Bone_005"], PUNTOS["Bone_006"], PUNTOS["Bone_007"], PUNTOS["Bone_007_end"]])
-		return COLA[clampi(int(t), 0, 3)]
+	# Cola: detrás de la base; arriba, la punta enroscada llega más adelante.
+	if c.z < Z_COLA or (c.z < -0.3 and c.y > 0.2):
+		var cadena := [PUNTOS["Bone_004"], PUNTOS["Bone_005"], PUNTOS["Bone_006"], PUNTOS["Bone_007"], PUNTOS["Bone_007_end"]]
+		var tramo := 0
+		for i in range(1, 4):
+			var n := ((cadena[i + 1] - cadena[i - 1]) as Vector3).normalized()
+			if (c - cadena[i]).dot(n) > 0.0:
+				tramo = i
+		return COLA[tramo]
 	if (c - PUNTOS[CABEZA]).dot(n_cuello) > 0.0:
 		return CABEZA
 	if c.y < Y_CORTE_PATA:

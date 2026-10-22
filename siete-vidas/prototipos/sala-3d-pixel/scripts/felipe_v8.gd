@@ -6,7 +6,6 @@
 #   la delantera lejana va corrida hacia atrás, como en el modelo).
 # - Piezas: máscaras sacadas de sus contornos (mascaras_v8.py) + cortes planos en las
 #   articulaciones de las patas, en los 3 tramos de la cola y entre las 2 masas del cuerpo.
-class_name FelipeV8
 extends RefCounted
 
 const CARPETA := "res://assets/meshy_prueba/plantilla_esqueleto/"

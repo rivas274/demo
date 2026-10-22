@@ -70,6 +70,7 @@ const PUNTOS := {
 @export var piezas := false
 ## Anillos de triángulos que cada pieza se mete en la vecina.
 const SOLAPE := 6
+const V8 := preload("res://scripts/felipe_v8.gd")
 ## 8: piezas y huesos marcados por el creador (scripts/felipe_v8.gd); 7: piezas por
 ## cortes planos; la v6 es piezas = false.
 @export var version := 7
@@ -95,7 +96,7 @@ var _huesos_capa: Array[int] = []
 var _vs_meshy := PackedVector3Array()
 var _suelo := 0.0
 var puntos: Dictionary = PUNTOS
-var _v8: FelipeV8
+var _v8 = null  # FelipeV8 (scripts/felipe_v8.gd) en la v8
 var _despiece := false
 
 
@@ -106,8 +107,8 @@ func _ready() -> void:
 		version = int(OS.get_environment("FELIPE_VERSION"))
 	if version >= 8:
 		piezas = true
-		_v8 = FelipeV8.new(PATAS)
-		puntos = FelipeV8.PUNTOS_V8
+		_v8 = V8.new(PATAS)
+		puntos = V8.PUNTOS_V8
 	_armar()
 	_pos_antes = global_position
 	ap.play("quieto")
@@ -337,7 +338,7 @@ func _armar() -> void:
 		glob[i] = gp * local
 	if _v8:
 		# Huesos nuevos de la v8 (orejas, mechones de mejilla y melena del pecho).
-		for extra in FelipeV8.EXTRA:
+		for extra in V8.EXTRA:
 			var padre := sk.find_bone(extra[1])
 			var i := sk.add_bone(extra[0])
 			sk.set_bone_parent(i, padre)
@@ -345,7 +346,7 @@ func _armar() -> void:
 			sk.set_bone_rest(i, Transform3D(Basis(), glob[padre].affine_inverse() * meta))
 	sk.reset_bone_poses()
 	# Las traslaciones animadas (raíz y patas) se reescalan con la nueva altura.
-	var k_alto := (puntos["Bone"].y - suelo) * ESCALA_MESHY / 2.2155
+	var k_alto: float = (puntos["Bone"].y - suelo) * ESCALA_MESHY / 2.2155
 	for nombre_anim in ap.get_animation_list():
 		var a := ap.get_animation(nombre_anim)
 		for t in a.get_track_count():
@@ -477,7 +478,7 @@ func _armar() -> void:
 	for b in ["Bone", "Bone_001", "Bone_002", CABEZA] + COLA:
 		_huesos_capa.append(sk.find_bone(b))
 	if _v8:
-		for extra in FelipeV8.EXTRA:
+		for extra in V8.EXTRA:
 			_huesos_capa.append(sk.find_bone(extra[0]))
 	for pata in PATAS:
 		_huesos_capa.append(sk.find_bone(PATAS[pata][0]))
@@ -588,7 +589,7 @@ func _planos() -> Array:
 func _pieza_de(c: Vector3) -> String:
 	if _v8:
 		return _v8.pieza_de(c)
-	var n_cuello := (Vector3(0, 0.32, 0.55) - puntos[CABEZA]).normalized()
+	var n_cuello: Vector3 = (Vector3(0, 0.32, 0.55) - puntos[CABEZA]).normalized()
 	# Cola: detrás de la base; arriba, la punta enroscada llega más adelante.
 	if c.z < Z_COLA or (c.z < -0.3 and c.y > 0.2):
 		var cadena := [puntos["Bone_004"], puntos["Bone_005"], puntos["Bone_006"], puntos["Bone_007"], puntos["Bone_007_end"]]

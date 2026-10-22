@@ -36,6 +36,8 @@ Actualizado: 2026-10-19 (PARTE B del nivel 1 v4). Detalle completo en la biblia 
 
 ## Pilar de trabajo: no reinventar la rueda (2026-10-22)
 
+- **Regla de los 5 intentos (confirmada por el creador, 2026-10-22):** en cada generación con IA se hacen al menos 5 intentos y se elige el mejor, con una medida objetiva más una revisión visual. Si cuesta créditos o dinero, primero se avisa el costo. Ejemplo: las piezas de HoloPart, con 5 semillas por pieza mala, pasaron de fragmentos a piezas cerradas (`assets/meshy_prueba/felipe_partes/comparacion_intentos.json`).
+
 - **Decisión del creador:** «No somos pioneros; los problemas que tenemos posiblemente alguien más los tuvo; hay que aprender de ellos». Antes de inventar, Claude busca el método estándar de la industria y las herramientas establecidas, y las usa. Si algo falla dos veces, se pregunta qué haría un profesional senior. Lo aprendido se anota con su fuente.
 - Rige para todo el trabajo con Claude, no solo para este proyecto. El texto completo está en `CLAUDE.md`, en la sección «Pilar de trabajo».
 - **Primera lección:** para animar un modelo 3D hecho con IA, el método estándar es:

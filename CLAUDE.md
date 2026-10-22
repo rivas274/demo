@@ -16,6 +16,8 @@ Casi nunca somos los primeros con un problema. Antes de inventar una solución p
 2. **Usa esa receta** y adáptala. Solo se inventa algo propio si no existe solución o si la existente no sirve. En ese caso, dilo explícitamente.
 3. **Cuando algo falla dos veces**, para y pregúntate qué haría un profesional senior en ese campo. Nombra la causa de fondo y el método estándar antes del tercer intento.
 4. **Lo aprendido se anota** en la memoria (`siete-vidas/memoria/`), con el problema, la solución estándar y su fuente, para no repetir el camino.
+5. **Al menos 5 intentos por generación con IA** (decisión del creador, 2026-10-22): modelos 3D, piezas, imágenes y animaciones. Se generan 5 o más variantes (otras semillas u otras entradas), se comparan con una medida objetiva más una revisión visual, y se elige la mejor. Antes de mostrar un resultado se dice cuántos intentos se hicieron.
+   - **Excepción:** si cuesta créditos o dinero, primero se avisa al creador el costo de los 5 intentos y él decide.
 
 Ejemplo que lo originó: el creador pidió animar a Felipe en 3D. Se intentaron 8 versiones con fórmulas y cortes propios antes de aplicar la receta estándar: retopología, horneado de textura, Rigify, pesos automáticos y animación con poses clave.
 

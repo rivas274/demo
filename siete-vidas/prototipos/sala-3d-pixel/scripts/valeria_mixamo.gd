@@ -347,3 +347,8 @@ func _anexo_mano() -> Node3D:
 		_anexo.bone_name = _mano
 		_sk.add_child(_anexo)
 	return _anexo if _anexo else self
+
+
+func _exit_tree() -> void:
+	if _pelota and not _pelota.is_inside_tree():
+		_pelota.free()

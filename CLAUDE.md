@@ -8,6 +8,17 @@ Al empezar un chat nuevo, lee primero `siete-vidas/memoria/05-estado-actual.md` 
 
 **Equipo de diseño y fase actual:** el proyecto avanza por fases con agentes (`.claude/agents/`) y comandos (`.claude/skills/`: `/pilares`, `/prototipo`, `/prueba-juego`, `/revision-diseno`, `/puerta-fase`, `/godot-felipe`). Fase actual: **Fase 3 – Vertical slice: el nivel 1 tutorial con calidad final** (desde el 2026-10-19); detalle en `siete-vidas/memoria/README.md` (Equipo de diseño).
 
+## Pilar de trabajo: no reinventar la rueda (decisión del creador, 2026-10-22)
+
+Casi nunca somos los primeros con un problema. Antes de inventar una solución propia, sobre todo después del primer intento fallido:
+
+1. **Busca cómo lo resuelven los profesionales:** el flujo estándar de la industria, las herramientas establecidas (Blender, Rigify, Mixamo, Godot, add-ons conocidos), tutoriales, documentación y foros. Busca también juegos de referencia que ya lo resolvieron.
+2. **Usa esa receta** y adáptala. Solo se inventa algo propio si no existe solución o si la existente no sirve. En ese caso, dilo explícitamente.
+3. **Cuando algo falla dos veces**, para y pregúntate qué haría un profesional senior en ese campo. Nombra la causa de fondo y el método estándar antes del tercer intento.
+4. **Lo aprendido se anota** en la memoria (`siete-vidas/memoria/`), con el problema, la solución estándar y su fuente, para no repetir el camino.
+
+Ejemplo que lo originó: el creador pidió animar a Felipe en 3D. Se intentaron 8 versiones con fórmulas y cortes propios antes de aplicar la receta estándar: retopología, horneado de textura, Rigify, pesos automáticos y animación con poses clave.
+
 ## Regla fija: cada cambio de un personaje se refleja en tres lugares
 
 Cuando cambies cualquier cosa de un personaje (sprites, animaciones, reglas de movimiento, rasgos), en el mismo trabajo y sin que te lo pidan:

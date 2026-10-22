@@ -34,6 +34,18 @@ Actualizado: 2026-10-19 (PARTE B del nivel 1 v4). Detalle completo en la biblia 
 
 - **Fantasía y pilares aprobados** en `siete-vidas/diseno/pilares.md`: "Es como Hollow Knight, con la ironía de Untitled Goose Game, y además el castigo nunca llega". Pilares: 1 Un barrio que se descubre, 2 Cada maña es llave y travesura, 3 Siempre te sales con la suya, 4 Tus decisiones tienen peso, 5 Épico en su cabeza. Con anti-pilares y juegos de referencia. Desempatan toda decisión.
 
+## Pilar de trabajo: no reinventar la rueda (2026-10-22)
+
+- **Decisión del creador:** «No somos pioneros; los problemas que tenemos posiblemente alguien más los tuvo; hay que aprender de ellos». Antes de inventar, Claude busca el método estándar de la industria y las herramientas establecidas, y las usa. Si algo falla dos veces, se pregunta qué haría un profesional senior. Lo aprendido se anota con su fuente.
+- Rige para todo el trabajo con Claude, no solo para este proyecto. El texto completo está en `CLAUDE.md`, en la sección «Pilar de trabajo».
+- **Primera lección:** para animar un modelo 3D hecho con IA, el método estándar es:
+  1. retopología en cuadriláteros (QuadriFlow o Instant Meshes);
+  2. hornear la textura en UVs nuevas;
+  3. esqueleto estándar (Rigify «Cat»; Mixamo para humanos);
+  4. pesos automáticos y suavizados, probados posando;
+  5. animación con poses clave mirando video de referencia.
+- **Por qué:** la malla de IA es una «estatua» sin bucles en las articulaciones. Cortarla en piezas o moverla con fórmulas no resuelve la causa.
+
 ## Prototipos
 
 - **Travesuras v1 (2026-10-18): CAMBIAR.** Tirar, arañar, maullar e intimidar con la voz de Felipe y respuesta épica divierten al principio, pero sin incentivo pierden sentido; el medidor de CAOS y el puntaje no sirven. Se prueba en v2 la **Agenda de Su Majestad**: lista de 5 a 8 travesuras con nombre por nivel (algunas secretas), cada una con recompensa útil (calcetín, snack por perdón, foto vergonzosa o un camino nuevo) y resumen al final del nivel; sin contador de puntos.

@@ -104,31 +104,32 @@ col[cola & (np.sin(dcol * 22) > 0.35)] = COLA_R
 
 col = suavizar(col, it=2)
 
-# --- cara: ojos y nariz por posición ---
-frente = (z > 0.72) & (N[:, 2] > 0.15)
-ojos = [(-0.225, 0.085), (0.225, 0.085)]
-for ox, oy in ojos:
-    dx, dy = (x - ox) / 0.088, (y - oy) / 0.068
-    r = np.sqrt(dx * dx + dy * dy)
-    dentro = frente & (r < 1.0)
-    parpado = oy + 0.012 - 0.02 * dx * np.sign(ox)  # de reojo: párpado caído hacia afuera
-    iris = dentro & (y < parpado)
-    col[iris] = OJO
-    pdx, pdy = (x - (ox + 0.032)) / 0.03, (y - (oy - 0.01)) / 0.06
-    col[iris & (pdx * pdx + pdy * pdy < 1)] = PUPILA
-    bdx, bdy = (x - (ox + 0.05)) / 0.013, (y - (oy - 0.005)) / 0.013
-    col[iris & (bdx * bdx + bdy * bdy < 1)] = BRILLO
-    # contorno y línea del párpado
-    contorno = frente & (((r >= 1.0) & (r < 1.16)) | (dentro & (y >= parpado) & (y < parpado + 0.014)))
-    contorno &= (y < parpado + 0.014)
-    col[contorno] = LINEA
-# nariz: triángulo con la punta hacia abajo
-ny0, ny1 = 0.045, -0.005
-t = (ny0 - y) / (ny0 - ny1)
-nariz = (z > 0.8) & (N[:, 2] > 0.2) & (t >= 0) & (t <= 1) & (np.abs(x) < 0.038 * (1 - t) + 0.006)
-col[nariz] = ROSA
-cara = frente & (np.abs(x) < 0.4) & (y > -0.1) & (y < 0.25)
-col = suavizar(col, mask=cara, it=1)
+# --- cara: ojos, nariz y boca proyectados desde la imagen de entrada (gemini b) ---
+# La forma salió de esa imagen, así que sus rasgos calzan con los relieves esculpidos.
+# La cámara (giro, escala, desplazamiento) se ajustó igualando siluetas (felipe_prm.json).
+import json, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import proyeccion as pr
+from mascara_felipe import rasgos_felipe
+prm = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "felipe_prm.json")))
+img, w_img = rasgos_felipe()
+H, W = w_img.shape
+vis, q = pr.visibles(V, F, N, prm, W, H, umbral_normal=0.4)
+vis &= (z > 0.5) & (y > -0.3) & (y < 0.35)
+w = pr.muestrear(w_img, q)[:, 0] * vis
+c_img = pr.muestrear(img, q)
+col = col * (1 - w[:, None]) + c_img * w[:, None]
+# El ojo lejano (izquierdo del gato) no se ve entero en la imagen 3/4: su borde
+# exterior se completa con la proyección espejada del ojo cercano.
+X0 = 0.005  # eje de simetría de la cara
+Vm = V * [-1, 1, 1] + [2 * X0, 0, 0]
+Nm = N * [-1, 1, 1]
+vis_m, q_m = pr.visibles(Vm, F, Nm, prm, W, H, umbral_normal=0.4)
+lejano = np.hypot(V[:, 0] - 0.235, (V[:, 1] - 0.085) * 1.3) < 0.15
+w_m = pr.muestrear(w_img, q_m)[:, 0] * vis_m * lejano * (z > 0.5)
+exterior = np.clip((V[:, 0] - 0.245) / 0.03, 0, 1)
+a = w_m * np.clip((0.4 - w) / 0.4, 0, 1) * exterior
+col = col * (1 - a[:, None]) + pr.muestrear(img, q_m) * a[:, None]
 
 rgba = np.c_[np.clip(col, 0, 255), np.full(nv, 255)].astype(np.uint8)
 out = trimesh.Trimesh(V, F, vertex_colors=rgba, process=False)

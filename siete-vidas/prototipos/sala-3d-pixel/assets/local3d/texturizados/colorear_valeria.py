@@ -100,6 +100,11 @@ for _ in range(2):
     idx = np.where(((np.abs(cc[:, 0]) < 0.19) & (cc[:, 1] > 0.36) & (cc[:, 1] < 0.8) & (cc[:, 2] > 0.0)) | ((np.abs(cc[:, 0]) < 0.1) & (cc[:, 1] > 0.08) & (cc[:, 1] < 0.36) & (cc[:, 2] > 0.08)))[0]
     V, F, col = remesh.subdivide(V, F, face_index=idx, vertex_attributes={"c": col})
     col = col["c"]
+# una vez más solo en ojos, cejas, nariz y boca
+cc = V[F].mean(axis=1)
+idx = np.where((np.abs(cc[:, 0]) < 0.13) & (cc[:, 1] > 0.5) & (cc[:, 1] < 0.7) & (cc[:, 2] > 0.08))[0]
+V, F, col = remesh.subdivide(V, F, face_index=idx, vertex_attributes={"c": col})
+col = col["c"]
 tm = trimesh.Trimesh(V, F, process=False)
 N = tm.vertex_normals
 x, y, z = V[:, 0] + 0.005, V[:, 1], V[:, 2]
@@ -116,34 +121,6 @@ col[cuello2 & ~v_esc & (y < 0.43) & (np.abs(x) < 0.11)] = PALETA[VERDE]
 col[v_esc] = PALETA[PIEL]
 frente = (z > 0.08) & (N[:, 2] > 0.25) & (np.abs(x) < 0.16) & (y > 0.48) & (y < 0.72)
 
-for s in (-1, 1):
-    ox, oy = 0.061 * s, 0.632
-    dx, dy = (x - ox) / 0.036, (y - oy) / 0.03
-    r = np.hypot(dx, dy)
-    ojo = frente & (r < 1)
-    col[ojo] = ESCLERA
-    ix, iy = (x - ox) / 0.024, (y - oy + 0.002) / 0.027
-    col[ojo & (np.hypot(ix, iy) < 1)] = OJO
-    col[ojo & (np.hypot(ix * 1.9, iy * 1.9) < 1)] = PUPILA
-    bx, by = (x - (ox - 0.008)) / 0.008, (y - (oy + 0.01)) / 0.008
-    col[ojo & (np.hypot(bx, by) < 1)] = BRILLO
-    # pestañas: arco grueso arriba y línea fina abajo
-    arco = frente & (r >= 0.85) & (r < 1.3) & (y > oy - 0.004)
-    col[arco] = PESTANA
-    ext = frente & (np.abs(y - (oy + 0.012 - 0.6 * (np.abs(x - ox) - 0.034))) < 0.005) & (np.abs(x - ox) > 0.03) & (np.abs(x - ox) < 0.045) & (np.sign(x - ox) == s)
-    col[ext] = PESTANA
-    # ceja
-    cx = (x - (ox + 0.004 * s)) / 0.04
-    cy = oy + 0.05 - 0.012 * cx ** 2
-    ceja = frente & (np.abs(cx) < 1) & (np.abs(y - cy) < 0.0075 * (1 - 0.5 * np.abs(cx)) + 0.002)
-    col[ceja] = CEJA
-
-# boca: arco pequeño
-bx = x / 0.026
-by = 0.546 - 0.006 * (1 - bx ** 2)
-boca = frente & (np.abs(bx) < 1) & (np.abs(y - by) < 0.0045)
-col[boca] = BOCA
-
 # cordones de la sudadera: dos líneas crema con su puntera
 for s_ in (-1, 1):
     t = np.clip((0.33 - y) / (0.33 - 0.13), 0, 1)
@@ -159,6 +136,25 @@ for a, b in tm.edges_unique:
     nb2[a].append(b)
     nb2[b].append(a)
 col = suavizar(col, nb2, mask=frente | zona | cuello2 | ((np.abs(x) < 0.1) & (y > 0.08) & (y < 0.36)), it=1)
+
+# --- cara proyectada desde la imagen de entrada (gemini frente 1) ---
+# La forma salió de esa imagen: sus ojos, cejas, nariz y boca calzan con los relieves.
+# Cámara ajustada igualando siluetas (valeria_prm.json). Solo caras que miran a la
+# cámara (normal·vista > 0,4) y dentro del óvalo de la cara, con borde fundido.
+import json, os
+from PIL import Image
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import proyeccion as pr
+AQUI = os.path.dirname(os.path.abspath(__file__))
+prm = json.load(open(os.path.join(AQUI, "valeria_prm.json")))
+img = np.array(Image.open(SRC.replace("v04.glb", "entrada_gemini_frente.png")).convert("RGB").crop((0, 60, 340, 1010))).astype(float)
+H, W = img.shape[:2]
+vis, q = pr.visibles(V, F, N, prm, W, H, umbral_normal=0.4)
+r_cara = (x / 0.158) ** 2 + ((y - 0.605) / 0.165) ** 2
+c_img = pr.muestrear(img, q)
+fondo = (c_img.min(axis=1) > 215) & (np.ptp(c_img, axis=1) < 20) & (r_cara > 0.72)
+w = np.clip((0.88 - r_cara) / 0.2, 0, 1) * vis * (z > 0.05) * ~fondo
+col = col * (1 - w[:, None]) + c_img * w[:, None]
 
 rgba = np.c_[np.clip(col, 0, 255), np.full(len(V), 255)].astype(np.uint8)
 trimesh.Trimesh(V, F, vertex_colors=rgba, process=False).export(OUT, include_normals=True)

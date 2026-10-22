@@ -1,8 +1,27 @@
 {
   "velocidad_caminar_m_s": 0.187,
-  "ciclo_caminar_s": 0.9167,
   "zancada_m": 0.1029,
-  "ciclo_quieto_s": 3.0,
   "alto_m": 0.5537,
-  "patinaje_max_mm": 0.02
+  "patinaje_max_mm": 0.02,
+  "fps": 24,
+  "duracion_s": {
+    "caminar": 0.9167,
+    "quieto": 6.0,
+    "aranar_entrada": 0.5,
+    "aranar": 0.6667,
+    "aranar_salida": 0.5,
+    "pedir_entrada": 0.75,
+    "pedir": 1.5,
+    "saltar": 1.4167
+  },
+  "saltar": {
+    "despegue_s": 0.5,
+    "aterrizaje_s": 1.0
+  },
+  "aranar": {
+    "zarpazos_s": [
+      0.125,
+      0.4583
+    ]
+  }
 }

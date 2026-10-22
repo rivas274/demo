@@ -40,11 +40,13 @@ PUNTOS = {
     "spine.004": (pf(728, 592), pf(728, 522)),          # cuello
     "spine.006": (pf(728, 522), pf(736, 250)),          # cabeza
     "ear.L": (V((X(665), P(742, 0)[1], C.frente_z(285))), V((X(700), P(765, 0)[1], C.frente_z(185)))),
-    # Cola en 4 (los 3 tramos del creador; el del medio, largo, va en 2).
+    # Cola en 5 (los 3 tramos del creador; el del medio y la punta en gancho, largos, van
+    # en 2 cada uno): gruesa y esponjada, así se dobla en curva y no en codo.
     "tail.001": (pf(345, 560), pf(240, 485)),
     "tail.002": (pf(240, 485), pf(228, 405)),
     "tail.003": (pf(228, 405), pf(222, 305)),
-    "tail.004": (pf(222, 305), pf(110, 195)),
+    "tail.004": (pf(222, 305), pf(196, 243)),
+    "tail.005": (pf(196, 243), pf(110, 195)),
     # Pata delantera: perfil (y, z) y frente (x).
     "shoulder.L": (pf(675, 600, 0.13), pf(690, 683, -X(378))),
     "upper_arm.L": (pf(690, 683, -X(378)), pf(745, 770, -X(380))),
@@ -62,12 +64,13 @@ PADRE = {
     "spine": "root", "spine.001": "spine", "spine.002": "spine.001", "spine.003": "spine.002",
     "spine.004": "spine.003", "spine.006": "spine.004", "ear.L": "spine.006",
     "tail.001": "spine", "tail.002": "tail.001", "tail.003": "tail.002", "tail.004": "tail.003",
+    "tail.005": "tail.004",
     "shoulder.L": "spine.003", "upper_arm.L": "shoulder.L", "forearm.L": "upper_arm.L",
     "hand.L": "forearm.L", "f_toe.L": "hand.L",
     "pelvis.L": "spine", "thigh.L": "pelvis.L", "shin.L": "thigh.L", "foot.L": "shin.L", "r_toe.L": "foot.L",
 }
 CONECTADO = {"spine.001", "spine.002", "spine.003", "spine.004", "spine.006", "tail.002", "tail.003",
-             "tail.004", "upper_arm.L", "forearm.L", "hand.L", "f_toe.L", "thigh.L", "shin.L",
+             "tail.004", "tail.005", "upper_arm.L", "forearm.L", "hand.L", "f_toe.L", "thigh.L", "shin.L",
              "foot.L", "r_toe.L"}
 
 
@@ -158,6 +161,13 @@ def a_px(co):
     return int(round(px)), int(round(py)), int(round(fx))
 
 
+# Alturas de la rampa de muslo y brazo: (z donde el peso ya es 0, z donde vuelve a ser entero).
+RAMPA = {}
+for lado in ("L", "R"):
+    th, ua = arm.data.bones["thigh." + lado], arm.data.bones["upper_arm." + lado]
+    RAMPA["thigh." + lado] = (th.head_local.z + 0.02, th.tail_local.z + 0.02)
+    RAMPA["upper_arm." + lado] = (ua.head_local.z + 0.04, ua.tail_local.z + 0.02)
+print("rampas:", {k: (round(x, 3), round(y, 3)) for k, (x, y) in RAMPA.items()})
 grupos = {g.name: g for g in malla.vertex_groups}
 idx_nombre = {g.index: g.name for g in malla.vertex_groups}
 ANILLO = 30.0  # px de mezcla entre cabeza y cuello
@@ -196,13 +206,28 @@ for v in malla.data.vertices:
             centro = abs(v.co.x) < 0.07 and v.co.z > 0.12
             if otro or centro:
                 pesos.pop(k)
+    # Muslo y brazo solo toman la piel de la pata: entre la rodilla (o el codo) y la cadera
+    # (o el hombro) su peso baja suave a 0 y lo que sobra pasa a la pelvis o la escápula,
+    # que siguen al cuerpo. Sin esto, la grupa y el flanco giraban con la pata y en el toon
+    # se veía una sombra que aparecía y desaparecía sobre la pata trasera.
+    for k in list(pesos):
+        if k.startswith(("thigh", "upper_arm")):
+            arriba, abajo = RAMPA[k]
+            t = min(1.0, max(0.0, (arriba - v.co.z) / (arriba - abajo)))
+            f = t * t * (3 - 2 * t)
+            quita = pesos[k] * (1 - f)
+            pesos[k] -= quita
+            fijo = ("pelvis" if k.startswith("thigh") else "shoulder") + k[-2:]
+            pesos[fijo] = pesos.get(fijo, 0.0) + quita
     # Máximo 4 huesos y suma 1.
     top = sorted(pesos.items(), key=lambda kv: -kv[1])[:4]
     s = sum(x for _, x in top)
     if s < 1e-6:
         top = [("spine.001", 1.0)]; s = 1.0
-    for g in list(v.groups):
-        grupos[idx_nombre[g.group]].remove([v.index])
+    # Se guardan los índices antes de borrar: borrar mientras se recorre v.groups corre la
+    # colección y dejaba restos de los pesos de calor (más de 4 huesos, suma > 1).
+    for gi in [g.group for g in v.groups]:
+        grupos[idx_nombre[gi]].remove([v.index])
     for k, x in top:
         if x / s > 0.002:
             grupos[k].add([v.index], x / s, "REPLACE")

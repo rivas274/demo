@@ -127,3 +127,37 @@ def mostrar_solo(objs):
     for o in bpy.data.objects:
         if o.type in ("MESH", "ARMATURE"):
             o.hide_render = o not in objs
+
+
+def huesos_visibles(arm, radio=0.012, color=(0.9, 0.05, 0.05)):
+    """Un palito rojo por hueso, pegado al hueso (sigue las poses). Cycles no dibuja armaduras."""
+    mt = bpy.data.materials.new("hueso")
+    mt.use_nodes = True
+    nt = mt.node_tree
+    for n in list(nt.nodes):
+        nt.nodes.remove(n)
+    e = nt.nodes.new("ShaderNodeEmission"); e.inputs[0].default_value = (*color, 1); e.inputs[1].default_value = 3
+    o = nt.nodes.new("ShaderNodeOutputMaterial"); nt.links.new(e.outputs[0], o.inputs[0])
+    hechos = []
+    for b in arm.data.bones:
+        largo = b.length
+        bpy.ops.mesh.primitive_cone_add(vertices=6, radius1=radio * 1.6, radius2=radio * 0.4, depth=largo)
+        c = bpy.context.object
+        c.name = "hueso_" + b.name
+        c.data.materials.append(mt)
+        # El cono va en Z; el hueso en Y local: girar y subir media largo.
+        for v in c.data.vertices:
+            v.co = mathutils.Vector((v.co.x, v.co.z + largo / 2, -v.co.y))
+        c.parent = arm
+        c.parent_type = "BONE"
+        c.parent_bone = b.name
+        c.matrix_world = arm.matrix_world @ b.matrix_local
+        hechos.append(c)
+    return hechos
+
+
+def material_translucido(obj, alfa=0.35):
+    for m in obj.data.materials:
+        bs = m.node_tree.nodes.get("Principled BSDF")
+        if bs:
+            bs.inputs["Alpha"].default_value = alfa

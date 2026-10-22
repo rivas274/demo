@@ -2,23 +2,26 @@
 import math
 import anima_base as B
 
-N_CAMINAR = 22        # 0,92 s a 24 fps
+N_CAMINAR = 16        # 0,67 s a 24 fps (v2: antes 22 = 0,92 s, se veía lento, "de juguete")
 N_QUIETO = 144        # 6 s: el quieto con pausas irregulares no debe verse como metrónomo
-DUTY = 0.6            # fracción del ciclo con el pie apoyado
-ZANCADA_U = 0.30      # largo del paso en unidades de Meshy (se pasa a metros con K)
-ALZA_U = {"tras": 0.065, "del": 0.08}
+DUTY = 0.6            # fracción del ciclo con el pie apoyado (las patas en el aire van más rápido)
+ZANCADA_U = 0.34      # largo del paso en unidades de Meshy (se pasa a metros con K)
+ALZA_U = {"tras": 0.07, "del": 0.085}
+# Secuencia lateral de gato: trasera izq., delantera izq., trasera der., delantera der.
 FASE = {("tras", "L"): 0.0, ("del", "L"): 0.25, ("tras", "R"): 0.5, ("del", "R"): 0.75}
-# Poses clave de cada pata: (fase, avance [-1 adelante .. +1 atrás] * zancada/2,
-# alto [0..1] * alza, giro del pie [+ = talón arriba], giro de los dedos).
+# Poses de cada pata (claves y breakdowns): (fase, avance [-1 adelante .. +1 atrás] * zancada/2,
+# alto [0..1] * alza, giro del pie [+ = talón arriba], giro de los dedos). El apoyo (0 a 0,6)
+# va lineal (el pie no patina); el vuelo hace un arco con facilidad de entrada y salida.
 POSES_PATA = [
     (0.00, -1.00, 0.00, 0, 0),     # contacto
-    (0.10, -0.667, 0.00, 0, 0),    # bajada (recibe el peso)
+    (0.08, -0.733, 0.00, 0, 0),    # bajada (recibe el peso)
     (0.30, 0.00, 0.00, 0, 0),      # apoyo medio
-    (0.50, 0.667, 0.00, 22, -22),  # talón arriba, dedos planos
-    (0.60, 1.00, 0.00, 48, -48),   # despegue
-    (0.70, 0.55, 1.00, 70, -10),   # recoge: la pata doblada, lo más alto
-    (0.82, -0.25, 0.85, 25, -5),   # paso: pasa por debajo hacia adelante
-    (0.92, -1.08, 0.30, -6, 4),    # estira para apoyar
+    (0.48, 0.60, 0.00, 18, -18),   # talón arriba, dedos planos
+    (0.60, 1.00, 0.00, 50, -50),   # despegue (empuja atrás)
+    (0.68, 0.80, 0.75, 75, -20),   # recoge: sube rápido y se dobla
+    (0.77, 0.10, 1.00, 45, -8),    # paso: lo más alto, pasa por debajo
+    (0.86, -0.75, 0.70, 10, 0),    # adelanta
+    (0.94, -1.08, 0.22, -8, 6),    # estira para apoyar (breakdown antes del contacto)
 ]
 
 
@@ -40,30 +43,43 @@ def caminar():
         claves.append((claves[0][0] + n,) + claves[0][1:])
         lineales = []
         for f, fase, av, al, g, gd in claves:
-            B.pata(f, pata, lado, desp=(0, av * Z / 2, al * alza), rot=g, dedo=gd,
-                   escapula=10 * av if pata == "del" else None)
+            # La delantera, casi recta en reposo, alcanza con la escápula (como un gato real) y
+            # con el paso centrado un poco más atrás.
+            centro = 0.012 if pata == "del" else 0.0
+            B.pata(f, pata, lado, desp=(0, av * Z / 2 + centro, al * alza), rot=g, dedo=gd,
+                   escapula=20 * av if pata == "del" else None)
             if fase < DUTY - 1e-6:
                 lineales.append(f)
         B.lineal(a, B.CTL[(pata, lado)]["ctl"], lineales)
-    baja = 0.014 * B.K
+    baja = 0.012 * B.K
     lomo_largo = 0.38 * B.K
-    for i in range(9):
-        p = i / 8.0
-        f = p * n
+    for f in range(n + 1):
+        p = f / n
         s = lambda fase, veces=1: math.sin(2 * math.pi * (veces * p - fase))
-        # La grupa baja justo después de cada contacto trasero; los hombros, de los delanteros.
-        grupa = -baja * (0.5 + 0.5 * math.cos(4 * math.pi * (p - 0.10)))
-        hombro = -baja * (0.5 + 0.5 * math.cos(4 * math.pi * (p - 0.35)))
-        B.torso(f, sube=grupa, lado=0.008 * B.K * s(0.15), balanceo=3.0 * s(0.1), giro_lat=2.5 * s(0.05))
-        B.lomo(f, cabeceo=math.degrees((hombro - grupa) / lomo_largo), giro_lat=-1.5 * s(0.15),
-               balanceo=-2.5 * s(0.35))
-        # Cabeza baja y adelantada; se mece poco y con retraso (los gatos la estabilizan).
-        B.cabeza(f, cuello=22 + 1.2 * s(0.45, 2), cab=-9 - 1.2 * s(0.5, 2), giro_lat=2.0 * s(0.3))
+        c = lambda fase, veces=1: math.cos(2 * math.pi * (veces * p - fase))
+        # Peso: la grupa baja un poco después de cada contacto trasero (0 y 0,5) y los hombros
+        # después de los delanteros (0,25 y 0,75): suben y bajan desfasados, 2 veces por ciclo.
+        grupa = -baja * (0.5 + 0.5 * c(0.10, 2))
+        hombro = -baja * (0.5 + 0.5 * c(0.35 * 2, 2))
+        # Balanceo hacia la pata que apoya: la cadera se corre sobre la trasera apoyada y cae
+        # del lado de la que vuela; el pecho lo hace con el desfase de las delanteras.
+        lado = 0.007 * B.K * s(0.0)
+        rol_grupa = -3.0 * s(0.0)
+        rol_pecho = -2.5 * s(0.25)
+        giro = 2.0 * s(0.05)
+        pecho_cab = math.degrees((hombro - grupa) / lomo_largo)
+        B.torso(f, sube=grupa, lado=lado, balanceo=rol_grupa, giro_lat=giro)
+        # Torsión: el pecho gira y rola distinto de la grupa.
+        B.lomo(f, cabeceo=pecho_cab, giro_lat=-2.0 * s(0.15), balanceo=rol_pecho - rol_grupa)
+        # Cabeza estabilizada: mira adelante y compensa el cabeceo, el balanceo y el giro del
+        # cuerpo; solo un cabeceo mínimo y atrasado.
+        B.cabeza(f, cuello=20 + pecho_cab + 0.6 * s(0.55, 2), cab=-8 - 0.4 * s(0.65, 2),
+                 giro_lat=-giro + 1.5 * s(0.4), ladeo=-rol_pecho * 0.9)
         B.orejas(f, atras=4)
-    # Cola a media altura en gancho; la onda (lado a lado una vez por ciclo, sube y baja dos
-    # veces) viaja de la base a la punta con 3 cuadros de retraso por hueso.
+    # Cola a media altura en gancho; la onda (de lado una vez por ciclo, sube y baja dos veces)
+    # viaja de la base a la punta con 2 cuadros de retraso por hueso (ritmo más rápido).
     B.cola(n, estatica=[(2, 0), (-22, 0), (-8, 0), (16, 0), (26, 0)],
-           onda=lambda t: (2.5 * B.seno(t, n, 2), 7.0 * B.seno(t, n, 1, 0.25)))
+           onda=lambda t: (3.0 * B.seno(t, n, 2, 0.1), 8.0 * B.seno(t, n, 1, 0.25)), paso=1, retraso=2)
     B.suavizar(a)
     B.completar(a, n)
     return a, n

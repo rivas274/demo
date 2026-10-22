@@ -38,6 +38,8 @@ const ALTO_ARCO := 0.12
 @export var rutina := true
 ## Otro GLB (por ejemplo, la versión anterior para comparar).
 @export var ruta := RUTA
+## Si es mayor que 0, reemplaza la velocidad del paso de felipe_rig.json (para comparar un GLB viejo).
+@export var velocidad_m_s := 0.0
 @export var resorte_cola := true
 
 var ap: AnimationPlayer
@@ -103,7 +105,8 @@ func _leer_info() -> void:
 
 
 func velocidad() -> float:
-	return float(info["velocidad_caminar_m_s"]) * escala
+	var v := velocidad_m_s if velocidad_m_s > 0.0 else float(info["velocidad_caminar_m_s"])
+	return v * escala
 
 
 func duracion(nombre: String) -> float:

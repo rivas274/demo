@@ -25,7 +25,7 @@ const MEZCLA := 0.2
 const AMPLITUD_PATAS := [0.75, 0.7, 0.45]
 ## Por piezas: el hombro o la cadera gira poco (el corte de arriba de la pata no se
 ## despega del cuerpo) y el codo o la rodilla hace más del paso.
-const AMPLITUD_PIEZAS := [0.3, 0.85, 0.5]
+const AMPLITUD_PIEZAS := [0.55, 0.85, 0.5]
 const DUR_SALTAR := 1.2
 const DESPEGUE := 0.40
 const ATERRIZAJE := 0.88
@@ -487,6 +487,10 @@ func _medir_paso() -> float:
 			vels.append(-(xs[j] - xs[i]) / (largo / n))
 	vels.sort()
 	ap.play("quieto")
+	if piezas:
+		# Con las piezas la pata apoyada casi no baja de su altura de reposo y el filtro
+		# de arriba falla: se usa el recorrido total de la pata en el tiempo de apoyo.
+		return (xs.max() - xs.min()) / (largo * 0.6)
 	return absf(vels[vels.size() / 2]) if vels.size() > 0 else 1.0
 
 

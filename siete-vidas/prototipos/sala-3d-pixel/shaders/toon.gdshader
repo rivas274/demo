@@ -8,6 +8,9 @@ render_mode specular_disabled, ambient_light_disabled;
 
 uniform vec4 color : source_color = vec4(1.0);
 uniform bool usar_color_vertice = false;
+// Textura de color (modelos con textura, como Felipe de Meshy).
+uniform bool usar_textura = false;
+uniform sampler2D textura : source_color, filter_linear_mipmap;
 uniform float emision = 0.0;
 uniform bool escalones = true;
 uniform float corte_bajo = 0.12;
@@ -30,6 +33,9 @@ void fragment() {
 		// Los colores por vértice vienen en sRGB: se pasan a lineal como los uniformes.
 		vec3 c = COLOR.rgb;
 		base *= mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c));
+	}
+	if (usar_textura) {
+		base *= texture(textura, UV).rgb;
 	}
 	if (rayas > 0.0 && fract(pos_mundo.x / rayas) < 0.18) {
 		base = color_raya.rgb;

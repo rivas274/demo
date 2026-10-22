@@ -2,6 +2,7 @@
 # Hoja de un ciclo de caminar de Felipe de perfil: 8 cuadros grandes con las 4 patas
 # marcadas (punto en el hombro o la cadera, el codo o la rodilla y la mano o el pie;
 # delanteras en rojo y naranja, traseras en azul y celeste; claro = lado de la cámara).
+# Con FELIPE=felipe_meshy (o felipe_pack) usa ese Felipe.
 # Uso: xvfb-run -a godot --path siete-vidas/prototipos/sala-3d-pixel --rendering-driver opengl3 \
 #   --script res://pruebas/felipe_ciclo_perfil.gd -- <carpeta>
 extends SceneTree
@@ -38,7 +39,10 @@ func _initialize() -> void:
 	piso.position.y = -0.002
 	vp.add_child(piso)
 	var f := Node3D.new()
-	f.set_script(load("res://scripts/felipe_animado.gd"))
+	var cual := OS.get_environment("FELIPE")
+	f.set_script(load("res://scripts/%s.gd" % (cual if cual != "" else "felipe_animado")))
+	if cual != "":
+		f.set("manual", true)
 	f.set("usar_toon", false)
 	vp.add_child(f)
 	var cam := Camera3D.new()
@@ -50,18 +54,21 @@ func _initialize() -> void:
 	await process_frame
 	f.set_process(false)
 	var giro: Node3D = f.get("giro")
-	giro.rotation.y = deg_to_rad(90.0)
+	giro.rotation.y = deg_to_rad(0.0 if cual != "" else 90.0)
 	var sk: Skeleton3D = f.get("sk")
 	# Marcas que siguen a los huesos (se ven a través del cuerpo).
 	for pata in COLORES:
-		for i in [1, 2, 3]:
+		var nombres: Array = [pata + "1", pata + "2", pata + "3"]
+		if cual != "":
+			nombres = (f.get_script().get_script_constant_map()["PATAS"] as Dictionary)[pata].slice(0, 3)
+		for nombre in nombres:
 			var ba := BoneAttachment3D.new()
-			ba.bone_name = pata + str(i)
+			ba.bone_name = nombre
 			sk.add_child(ba)
 			var bola := MeshInstance3D.new()
 			var sm := SphereMesh.new()
-			sm.radius = 0.035
-			sm.height = 0.07
+			sm.radius = 0.035 if cual == "" else 0.012
+			sm.height = sm.radius * 2.0
 			bola.mesh = sm
 			var mat := StandardMaterial3D.new()
 			mat.albedo_color = COLORES[pata]
@@ -70,11 +77,19 @@ func _initialize() -> void:
 			mat.render_priority = 10
 			bola.material_override = mat
 			ba.add_child(bola)
+	await process_frame
+	# Las marcas miden lo mismo aunque el esqueleto venga escalado.
+	for ba in sk.find_children("*", "BoneAttachment3D", false, false):
+		var bola := ba.get_child(0) as Node3D
+		bola.scale = Vector3.ONE / (ba as Node3D).global_transform.basis.get_scale().x
 	var ap: AnimationPlayer = f.get("ap")
 	ap.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	ap.play("caminar")
+	var dur := ap.current_animation_length
 	for i in 8:
-		ap.seek(0.8 * i / 8.0, true)
+		ap.seek(dur * i / 8.0, true)
+		if cual != "":
+			f.call("_capas", 0.0)
 		for _k in 3:
 			await process_frame
 		vp.get_texture().get_image().save_png("%s/p%d.png" % [dir, i])

@@ -5,7 +5,7 @@
 # con escala entera (pixel de render de x2, x3 o x4 pixeles de pantalla).
 # Teclas: 1 paleta, 2 bordes, 3 escalones de luz, 4 tamaño de pixel, Tab guion/manual, F1 ayuda.
 # Argumentos (después de --): --con-paleta, --pixel=2|3|4, --maniqui (Valeria maniquí de la v2),
-# --felipe-anima (solo Felipe 3D sobre el gato animado del pack: camina, salta al sofá y vuelve).
+# --felipe-anima (solo Felipe de Meshy con la caminata del gato de Quaternius: camina, salta al sofá y vuelve).
 extends Node
 
 ## Escala del juego: Valeria 1,65 m = 200 px de 640x360, Felipe 67 px. El encuadre
@@ -96,7 +96,7 @@ func _ready() -> void:
 		valeria.process_mode = Node.PROCESS_MODE_DISABLED
 		felipe_animado = Node3D.new()
 		felipe_animado.name = "FelipeAnimado"
-		felipe_animado.set_script(load("res://scripts/felipe_pack.gd"))
+		felipe_animado.set_script(load("res://scripts/felipe_meshy.gd"))
 		felipe_animado.set("escala", 1.3)  # pedido del creador: 30 % más grande
 		vista.add_child(felipe_animado)
 		var guion := Node.new()

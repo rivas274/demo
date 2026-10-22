@@ -1,5 +1,6 @@
 # PROTOTIPO: no es código del juego.
 # Cuadros de cerca de Felipe (gato del pack de Quaternius adaptado) sin pixelar.
+# Con FELIPE=felipe_meshy usa el Felipe de Meshy.
 # Uso: xvfb-run -a godot --path siete-vidas/prototipos/sala-3d-pixel --rendering-driver opengl3 \
 #   --script res://pruebas/felipe_pack_cuadros.gd -- <carpeta> [fps] [tam] [solo_pose]
 # Guion: quieto en 3/4, caminar de perfil, caminar en 3/4, trote (caminar ×1,6), frena,
@@ -49,13 +50,14 @@ func _initialize() -> void:
 		r.material_override = mr
 		vp.add_child(r)
 	var f := Node3D.new()
-	f.set_script(load("res://scripts/felipe_pack.gd"))
+	var guion_felipe := OS.get_environment("FELIPE") if OS.get_environment("FELIPE") != "" else "felipe_pack"
+	f.set_script(load("res://scripts/%s.gd" % guion_felipe))
 	f.set("usar_toon", false)
 	f.set("manual", true)
 	vp.add_child(f)
 	var cam := Camera3D.new()
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
-	cam.size = 1.0
+	cam.size = 1.0 if OS.get_environment("FELIPE") != "felipe_meshy" else 0.75
 	cam.rotation_degrees.x = -10.0
 	vp.add_child(cam)
 	cam.current = true

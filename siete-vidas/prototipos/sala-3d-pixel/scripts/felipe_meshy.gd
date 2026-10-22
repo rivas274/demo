@@ -199,13 +199,16 @@ func _capas(delta: float) -> void:
 			sk.set_bone_pose_rotation(b, reposo.slerp(sk.get_bone_pose_rotation(b), 0.5))
 	var amp := (0.14 if caminando else 0.08) * k_cola
 	var frec := 3.8 if caminando else 1.6
-	if _v8 and not caminando:
-		# Atento (quieto): sacude la cola a los lados como un látigo lento (video 2).
-		amp = 0.16
-		frec = 1.2
+	if _v8:
+		# Videos del Felipe real: al caminar la cola va a media altura con la punta en
+		# gancho y se mueve despacio; en quieto se mueve sobre todo la punta. La onda
+		# crece de la base a la punta.
+		amp = 0.07 if caminando else 0.06
+		frec = 2.2 if caminando else 1.1
 	for i in COLA.size():
 		var b := sk.find_bone(COLA[i])
-		_girar(b, Vector3.UP, amp * sin(_t * frec - 0.7 * i))
+		var punta := (0.5 + 0.6 * i) if _v8 else 1.0
+		_girar(b, Vector3.UP, amp * punta * sin(_t * frec - 0.7 * i))
 		_girar(b, Vector3.BACK, _cola_lag * (0.4 + 0.2 * i) + 0.04 * sin(_t * frec * 0.5 - 0.5 * i))
 
 
@@ -228,7 +231,7 @@ func _capas_v8() -> void:
 	_girar(sk.find_bone("Bone"), Vector3.BACK, 0.035 * _andar * sin(2.0 * fase))
 	_girar(sk.find_bone("Bone_002"), Vector3.BACK, -0.06 * _andar * sin(2.0 * fase + 0.9))
 	_girar(sk.find_bone(CABEZA), Vector3.BACK, -0.28 * _andar + 0.03 * _andar * sin(2.0 * fase - 0.6))
-	_girar(sk.find_bone(COLA[0]), Vector3.BACK, 0.35 * _andar)
+	_girar(sk.find_bone(COLA[0]), Vector3.BACK, 0.15 * _andar)
 	# Orejas: giran un poco con retraso; mechones y melena se mecen con el paso.
 	for lado in [["oreja_i", 1.0], ["oreja_d", -1.0]]:
 		_girar(sk.find_bone(lado[0]), Vector3.RIGHT, lado[1] * (0.04 * sin(_t * 2.1 - 1.2) + 0.08 * _inclina))

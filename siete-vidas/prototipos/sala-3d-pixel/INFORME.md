@@ -164,3 +164,5 @@ Por eso recomiendo **no cambiar el juego a 3D ahora**. Si el creador lo aprueba,
 
 ## Pendiente: animación de «acecho» (de `felipe-video2-juega-salta.png`, 2026-10-22)
 Felipe agazapado: cuerpo pegado al piso o la cama, cabeza baja y adelantada, grupa un poco alta y cola barriendo de lado a lado. Anotada para más adelante; no está hecha. Las otras notas de ese video (salto con impulso de las traseras, aterrizaje con las delanteras y el lomo arqueado, cola que se sacude atenta) ya están en la v8 (`scripts/felipe_meshy.gd`, `scripts/felipe_v8.gd`).
+
+Notas de `felipe-video3-sentado-olfatea.png`: al caminar o explorar la cola va a media altura con la punta en gancho (la punta se mece más que la base), y así quedó en la v8. Pendiente para cuando haya animación de sentarse: sentado, la cola estirada en el piso y solo la punta se mueve.

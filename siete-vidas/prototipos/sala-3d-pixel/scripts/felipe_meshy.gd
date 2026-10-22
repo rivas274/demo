@@ -98,6 +98,7 @@ var _suelo := 0.0
 var puntos: Dictionary = PUNTOS
 var _v8 = null  # FelipeV8 (scripts/felipe_v8.gd) en la v8
 var _despiece := false
+var _andar := 0.0  # 0 quieto, 1 caminando (suave): cabeza baja y cola a media altura
 
 
 func _ready() -> void:
@@ -208,6 +209,7 @@ func _capas(delta: float) -> void:
 func _capas_v8() -> void:
 	var fase := TAU * ap.current_animation_position / maxf(ap.current_animation_length, 0.01)
 	var paso := 1.0 if caminando else 0.25
+	_andar = lerpf(_andar, 1.0 if caminando else 0.0, 0.08)
 	# Estos huesos no tienen curvas: se parte del reposo en cada cuadro (si no, los giros
 	# se acumulan).
 	for extra in V8.EXTRA:
@@ -216,13 +218,22 @@ func _capas_v8() -> void:
 	_girar(sk.find_bone("Bone"), Vector3.UP, 0.05 * paso * sin(fase))
 	_girar(sk.find_bone("Bone_002"), Vector3.UP, -0.1 * paso * sin(fase))
 	_girar(sk.find_bone("Bone_002"), Vector3.RIGHT, 0.04 * paso * sin(fase + 0.6))
+	# Como el Felipe real (video de referencia): omóplatos y grupa suben y bajan por turnos
+	# (el lomo ondula), la cabeza va baja y adelantada al caminar y la sube en quieto, y
+	# la cola va a media altura con un balanceo suave.
+	_girar(sk.find_bone("Bone"), Vector3.BACK, 0.035 * _andar * sin(2.0 * fase))
+	_girar(sk.find_bone("Bone_002"), Vector3.BACK, -0.06 * _andar * sin(2.0 * fase + 0.9))
+	_girar(sk.find_bone(CABEZA), Vector3.BACK, -0.28 * _andar + 0.03 * _andar * sin(2.0 * fase - 0.6))
+	_girar(sk.find_bone(COLA[0]), Vector3.BACK, 0.35 * _andar)
 	# Orejas: giran un poco con retraso; mechones y melena se mecen con el paso.
 	for lado in [["oreja_i", 1.0], ["oreja_d", -1.0]]:
-		_girar(sk.find_bone(lado[0]), Vector3.RIGHT, lado[1] * (0.08 * sin(_t * 2.1 - 1.2) + 0.1 * _inclina))
+		_girar(sk.find_bone(lado[0]), Vector3.RIGHT, lado[1] * (0.04 * sin(_t * 2.1 - 1.2) + 0.08 * _inclina))
 		_girar(sk.find_bone(lado[0]), Vector3.BACK, 0.06 * sin(_t * 1.3 - 0.8))
 	for lado in [["mechon_i", 1.0], ["mechon_d", -1.0]]:
 		_girar(sk.find_bone(lado[0]), Vector3.RIGHT, lado[1] * 0.06 * paso * sin(2.0 * fase - 1.0))
-	_girar(sk.find_bone("melena"), Vector3.BACK, 0.05 * paso * sin(2.0 * fase - 1.4) - 0.3 * _inclina)
+	_girar(sk.find_bone("melena"), Vector3.BACK, 0.06 * paso * sin(2.0 * fase - 1.4) - 0.3 * _inclina)
+	# Cabeza baja: la melena del pecho la acompaña un poco para no despegarse del mentón.
+	_girar(sk.find_bone("melena"), Vector3.BACK, -0.1 * _andar)
 
 
 func _claves_salto(t: float) -> Array:

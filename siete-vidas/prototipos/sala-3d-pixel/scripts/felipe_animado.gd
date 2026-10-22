@@ -169,7 +169,7 @@ func _armar() -> void:
 	var y_rodilla := _suelo + 0.45 * (y_cadera - _suelo)
 	_l1 = y_cadera - y_rodilla
 	_l2 = y_rodilla - _suelo
-	_paso = 0.8 * (_l1 + _l2)
+	_paso = 0.6 * (_l1 + _l2)
 	var y_col := y_panza + 0.40
 	var z_hombros: float = (_pie["di"].z + _pie["dd"].z) * 0.5 - 0.08
 	var z_caderas: float = (_pie["ti"].z + _pie["td"].z) * 0.5 + 0.08
@@ -320,7 +320,7 @@ func _pose_caminar(t: float) -> Dictionary:
 	p["medio"] = Vector3(0.0, 0.0, 0.0)
 	# Sube y baja con cada paso (2 veces por ciclo).
 	var bote := 0.035 * l * cos(2.0 * w)
-	p["pos_medio"] = Vector3(0, -0.12 * l + bote, 0)
+	p["pos_medio"] = Vector3(0, -0.08 * l + bote, 0)
 	# La cabeza compensa: deshace casi todo el giro de los hombros, se queda más quieta
 	# y cabecea un poco, atrasada respecto del bote.
 	p["cabeza"] = Vector3(0.04 * sin(2.0 * w - 1.0), -0.07 * sin(w), -0.045 * sin(w))
@@ -340,7 +340,7 @@ func _pose_caminar(t: float) -> Dictionary:
 		else:  # avanza por el aire: se levanta y dobla
 			var s := (f - APOYO) / (1.0 - APOYO)
 			z = _paso * (-0.5 + smoothstep(0.0, 1.0, s))
-			alto = 0.32 * l * sin(PI * s)
+			alto = 0.25 * l * sin(PI * s)
 		pies[pata] = [z, alto]
 	p["pies"] = pies
 	p["escala"] = 1.0 + 0.012 * cos(2.0 * w)

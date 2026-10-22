@@ -36,6 +36,7 @@ func _ready() -> void:
 		_tramos.append([t] + tramo)
 		t += tramo[1]
 	duracion = t
+	print("Guion de Felipe: %.2f s, camina a %.2f m/s" % [duracion, velocidad])
 	felipe.position = Vector3(x_inicio, 0, z_piso)
 
 

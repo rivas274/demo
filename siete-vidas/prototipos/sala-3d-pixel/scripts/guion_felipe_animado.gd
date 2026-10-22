@@ -4,8 +4,9 @@
 # y camina de vuelta. Mueve el nodo de Felipe y elige su animación.
 extends Node
 
-const VELOCIDAD := 0.29  # m/s, a juego con el paso (caminar ×1,6)
-const RITMO_PASO := 1.6
+const RITMO_PASO := 1.4
+## Alto del arco del salto (m) con Felipe a escala 1.
+const ALTO_SALTO := 0.18
 
 var felipe: Node3D
 var x_inicio := -0.6
@@ -20,15 +21,17 @@ var _tramos: Array = []
 
 
 func _ready() -> void:
+	# Avanza exactamente lo que dan sus pasos: la pata apoyada no resbala.
+	var velocidad: float = felipe.call("velocidad_caminar") * RITMO_PASO
 	var t := 0.0
 	_tramos = []
 	for tramo in [
 			["quieto", 0.8, Vector3(x_inicio, 0, z_piso), Vector3(x_inicio, 0, z_piso), true],
-			["caminar", (x_antes_sofa - x_inicio) / VELOCIDAD, Vector3(x_inicio, 0, z_piso), Vector3(x_antes_sofa, 0, z_piso), true],
+			["caminar", (x_antes_sofa - x_inicio) / velocidad, Vector3(x_inicio, 0, z_piso), Vector3(x_antes_sofa, 0, z_piso), true],
 			["saltar", 1.2, Vector3(x_antes_sofa, 0, z_piso), cojin, true],
 			["quieto", 1.5, cojin, cojin, true],
 			["saltar", 1.2, cojin, Vector3(x_bajada, 0, z_piso), false],
-			["caminar", (x_bajada - x_final) / VELOCIDAD, Vector3(x_bajada, 0, z_piso), Vector3(x_final, 0, z_piso), false],
+			["caminar", (x_bajada - x_final) / velocidad, Vector3(x_bajada, 0, z_piso), Vector3(x_final, 0, z_piso), false],
 			["quieto", 2.0, Vector3(x_final, 0, z_piso), Vector3(x_final, 0, z_piso), false]]:
 		_tramos.append([t] + tramo)
 		t += tramo[1]
@@ -61,6 +64,6 @@ func _process(delta: float) -> void:
 					ap.speed_scale = 1.0
 				var arco: Vector2 = felipe.call("arco_salto", local)
 				var p := desde.lerp(hasta, arco.x)
-				p.y += arco.y * 0.18
+				p.y += arco.y * ALTO_SALTO * float(felipe.get("escala"))
 				felipe.position = p
 		break

@@ -1,28 +1,37 @@
 # PROTOTIPO: no es código del juego.
 # Pregunta: ¿se puede animar a Felipe 3D (modelo IA coloreado) con un esqueleto simple?
-# Fecha: 2026-10-22
-# Toma `felipe_color.glb` (sin huesos), le arma por código un esqueleto de cuadrúpedo
-# midiendo la malla (raíz, cuerpo, cabeza, cola de 3 huesos y 4 patas de 2 huesos),
-# pega cada vértice a sus 2 huesos más cercanos y hornea 3 animaciones en bucle o no:
-# "quieto", "caminar" (patas en diagonal, 0,8 s) y "saltar" (1,2 s).
-# El cuerpo se apoya siempre en la pata más baja (cinemática directa al hornear), así
-# ninguna pata atraviesa el piso y el subir y bajar del cuerpo sale del paso.
+# Fecha: 2026-10-22 (v2: patas más largas, columna y cola flexibles, pies sin resbalar)
+# Toma `felipe_color_patas.glb` (sin huesos; patas alargadas un 60 %), le arma por código
+# un esqueleto de cuadrúpedo midiendo la malla y hornea 3 animaciones:
+# - Huesos: raíz, columna de 3 (caderas, medio, hombros), cabeza, cola de 5 y 4 patas de 2.
+# - Pesos: cada vértice a sus 2 huesos más cercanos (distancia a la superficie del hueso),
+#   sin cruzar de lado ni de mitad en las patas.
+# - Patas por cinemática inversa de 2 huesos: la pata apoyada queda quieta respecto del
+#   piso y la que avanza se levanta y se dobla.
+# "quieto" (respira, cola lenta), "caminar" (diagonales, 0,8 s, columna en S, cola en onda)
+# y "saltar" (1,2 s: se agacha, se estira, recoge, cae con las delanteras y amortigua).
 extends Node3D
 
-const RUTA := "res://assets/local3d/texturizados/felipe_color.glb"
+const RUTA := "res://assets/local3d/texturizados/felipe_color_patas.glb"
 const DUR_CAMINAR := 0.8
 const DUR_SALTAR := 1.2
 const DUR_QUIETO := 3.2
+## Fracción del ciclo con la pata apoyada (el resto, en el aire avanzando).
+const APOYO := 0.62
 ## Tramo del salto en el aire (segundos dentro de "saltar"): despega y aterriza.
 const DESPEGUE := 0.40
 const ATERRIZAJE := 0.88
 ## Estirar y aplastar como mucho ±8 % (regla de Felipe).
 const DEFORMACION_MAXIMA := 0.08
 const PATAS := ["di", "dd", "ti", "td"]  # delantera/trasera, izquierda/derecha
+const COLA := ["cola1", "cola2", "cola3", "cola4", "cola5"]
 
-## Alto total en pantalla: 67 px = 0,554 m (con la cola).
-@export var alto := 67.0 / 121.0
-## Giro hacia la cámara para verse en 3/4 al caminar de lado.
+## Metros por unidad de la malla: con esto Felipe mide 67 px (0,554 m) como antes de
+## alargarle las patas; `escala` lo agranda (1,3 = 30 % más grande).
+@export var metros_por_unidad := (67.0 / 121.0) / 1.977
+@export var escala := 1.0
+## Giro hacia la cámara cuando está quieto o saltando (al caminar va de perfil, para
+## que las patas apoyadas no resbalen de lado).
 @export var giro_3_4 := 35.0
 @export var usar_toon := true
 
@@ -31,10 +40,15 @@ var sk: Skeleton3D
 var giro: Node3D
 var estira: Node3D
 var mira_derecha := true
-var _rest: Dictionary = {}  # hueso -> posición de reposo local
-var _suelo := 0.0  # y de las patas en la malla
-var _k := 1.0
-var _largo_pie := 0.1
+var caminando := false
+var _rest: Dictionary = {}    # hueso -> posición de reposo local
+var _padre: Dictionary = {}   # hueso -> padre ("" en la raíz)
+var _orden: Array[String] = []
+var _suelo := 0.0
+var _pie: Dictionary = {}     # pata -> posición del pie en reposo (unidades de la malla)
+var _l1 := 0.1
+var _l2 := 0.1
+var _paso := 0.2              # largo del paso (unidades de la malla)
 
 
 func _ready() -> void:
@@ -43,19 +57,25 @@ func _ready() -> void:
 	ap.play("quieto")
 
 
-## Orientación: el modelo mira a +z; se gira para que mire a +x (derecha) o -x.
 func _process(delta: float) -> void:
-	var meta := 90.0 - giro_3_4 if mira_derecha else -90.0 + giro_3_4
+	var lado := 90.0 if caminando else 90.0 - giro_3_4
+	var meta := lado if mira_derecha else -lado
 	giro.rotation.y = lerp_angle(giro.rotation.y, deg_to_rad(meta), clampf(delta * 10.0, 0.0, 1.0))
 
 
 func reproducir(nombre: String, velocidad: float = 1.0) -> void:
+	caminando = nombre == "caminar"
 	if ap.current_animation != nombre:
 		ap.play(nombre, 0.12, velocidad)
 	ap.speed_scale = velocidad
 
 
-## Altura de la raíz durante el salto (0 en tierra, 1 en el punto más alto) y avance 0..1.
+## Metros por segundo que avanza al caminar con ritmo 1: así los pies no resbalan.
+func velocidad_caminar() -> float:
+	return _paso * metros_por_unidad * escala / (APOYO * DUR_CAMINAR)
+
+
+## Avance (0..1) y altura (0..1) de la raíz durante el salto.
 static func arco_salto(t: float) -> Vector2:
 	var s := clampf((t - DESPEGUE) / (ATERRIZAJE - DESPEGUE), 0.0, 1.0)
 	return Vector2(s, 4.0 * s * (1.0 - s))
@@ -76,7 +96,7 @@ func _armar() -> void:
 	for v in verts:
 		caja = caja.expand(v)
 	_suelo = caja.position.y
-	_k = alto / caja.size.y
+	var k := metros_por_unidad * escala
 
 	giro = Node3D.new()
 	giro.name = "Giro"
@@ -86,18 +106,19 @@ func _armar() -> void:
 	giro.add_child(estira)
 	var modelo := Node3D.new()
 	modelo.name = "Modelo"
-	modelo.scale = Vector3.ONE * _k
-	modelo.position = -Vector3(caja.get_center().x, _suelo, 0.0) * _k
+	modelo.scale = Vector3.ONE * k
+	modelo.position = -Vector3(caja.get_center().x, _suelo, 0.0) * k
 	estira.add_child(modelo)
 	sk = Skeleton3D.new()
 	sk.name = "Esqueleto"
 	modelo.add_child(sk)
 
 	# --- medir la malla ---
-	# Patas: los 4 grupos de vértices más bajos (izquierda/derecha, delante/detrás).
+	var cx := caja.get_center().x
+	# Pies: los 4 grupos de vértices más bajos.
 	var bajos: Array[Vector3] = []
 	for v in verts:
-		if v.y < _suelo + 0.08 * caja.size.y / 2.0:
+		if v.y < _suelo + 0.08:
 			bajos.append(v)
 	var z_min := INF
 	var z_max := -INF
@@ -105,71 +126,80 @@ func _armar() -> void:
 		z_min = minf(z_min, v.z)
 		z_max = maxf(z_max, v.z)
 	var z_mitad := (z_min + z_max) * 0.5
-	var cx := caja.get_center().x
-	var patas := {}
-	for p in PATAS:
-		patas[p] = Vector3.ZERO
 	var cuenta := {}
+	for p in PATAS:
+		_pie[p] = Vector3.ZERO
 	for v in bajos:
 		var p := ("d" if v.z > z_mitad else "t") + ("i" if v.x < cx else "d")
-		patas[p] += v
+		_pie[p] += v
 		cuenta[p] = cuenta.get(p, 0) + 1
 	for p in PATAS:
-		patas[p] /= float(cuenta[p])
-	# Cola: vértices detrás del cuerpo y por encima del lomo, en 3 tramos de altura.
-	var cola_pts: Array[Vector3] = []
+		var q: Vector3 = _pie[p] / float(cuenta[p])
+		q.y = _suelo
+		_pie[p] = q
+	# Panza: lo más bajo entre las patas delanteras y traseras.
+	var y_panza := INF
 	for v in verts:
-		if v.z < caja.position.z + 0.3 * caja.size.z and v.y > _suelo + 0.5 * caja.size.y:
-			cola_pts.append(v)
-	var y0 := _suelo + 0.5 * caja.size.y
-	var y1 := caja.end.y
-	var tramos: Array[Vector3] = []
-	for i in 4:
-		var a := lerpf(y0, y1, i / 4.0)
-		var b := lerpf(y0, y1, (i + 1) / 4.0)
-		var suma := Vector3.ZERO
-		var n := 0
-		for v in cola_pts:
-			if v.y >= a and v.y < b:
-				suma += v
-				n += 1
-		tramos.append(suma / maxf(n, 1))
-	# Cabeza: centro de los vértices de la mitad de arriba y adelante.
+		if absf(v.z - z_mitad) < 0.06 and absf(v.x - cx) < 0.15:
+			y_panza = minf(y_panza, v.y)
+	# Cabeza: centro de los vértices de arriba y adelante.
 	var cab := Vector3.ZERO
 	var nc := 0
 	for v in verts:
-		if v.z > z_mitad and v.y > _suelo + 0.45 * caja.size.y:
+		if v.z > z_mitad and v.y > y_panza + 0.77:
 			cab += v
 			nc += 1
 	cab /= float(nc)
+	# Cola: detrás y por encima del lomo, en 6 tramos de altura (5 huesos).
+	var y_cola := y_panza + 0.86
+	var tramos: Array[Vector3] = []
+	for i in 6:
+		var a := lerpf(y_cola, caja.end.y, i / 6.0)
+		var b := lerpf(y_cola, caja.end.y, (i + 1) / 6.0)
+		var suma := Vector3.ZERO
+		var n := 0
+		for v in verts:
+			if v.z < caja.position.z + 0.3 * caja.size.z and v.y >= a and v.y < b:
+				suma += v
+				n += 1
+		tramos.append(suma / maxf(n, 1))
 
 	# --- huesos (posiciones globales en unidades de la malla) ---
-	var alto_m := caja.size.y
+	var y_cadera := y_panza + 0.10
+	var y_rodilla := _suelo + 0.45 * (y_cadera - _suelo)
+	_l1 = y_cadera - y_rodilla
+	_l2 = y_rodilla - _suelo
+	_paso = 0.8 * (_l1 + _l2)
+	var y_col := y_panza + 0.40
+	var z_hombros: float = (_pie["di"].z + _pie["dd"].z) * 0.5 - 0.08
+	var z_caderas: float = (_pie["ti"].z + _pie["td"].z) * 0.5 + 0.08
 	var g := {}
 	g["raiz"] = Vector3(cx, _suelo, z_mitad)
-	g["cuerpo"] = Vector3(cx, _suelo + 0.27 * alto_m, z_mitad)
-	g["cabeza"] = Vector3(cx, cab.y - 0.22, cab.z - 0.12)  # cuello: pivote bajo la cabeza
-	g["cola1"] = Vector3(cx, tramos[0].y - 0.12, tramos[0].z + 0.08)
-	g["cola2"] = tramos[1]
-	g["cola3"] = tramos[2]
-	var y_cadera := _suelo + 0.16 * alto_m
-	var y_rodilla := _suelo + 0.06 * alto_m
-	_largo_pie = y_rodilla - _suelo
+	g["medio"] = Vector3(cx, y_col, z_mitad)
+	g["hombros"] = Vector3(cx, y_col, z_hombros)
+	g["caderas"] = Vector3(cx, y_col, z_caderas)
+	g["cabeza"] = Vector3(cx, cab.y - 0.22, cab.z - 0.12)
+	g["cola1"] = Vector3(cx, tramos[0].y - 0.1, tramos[0].z + 0.08)
+	for i in range(1, 5):
+		g[COLA[i]] = tramos[i]
 	for p in PATAS:
-		var c: Vector3 = patas[p]
-		g[p + "1"] = Vector3(c.x, y_cadera, c.z)
-		g[p + "2"] = Vector3(c.x, y_rodilla, c.z)
-	var padre := {"raiz": "", "cuerpo": "raiz", "cabeza": "cuerpo", "cola1": "cuerpo", "cola2": "cola1", "cola3": "cola2"}
+		g[p + "1"] = Vector3(_pie[p].x, y_cadera, _pie[p].z)
+		g[p + "2"] = Vector3(_pie[p].x, y_rodilla, _pie[p].z)
+	_padre = {"raiz": "", "medio": "raiz", "hombros": "medio", "caderas": "medio",
+		"cabeza": "hombros", "cola1": "caderas"}
+	for i in range(1, 5):
+		_padre[COLA[i]] = COLA[i - 1]
 	for p in PATAS:
-		padre[p + "1"] = "cuerpo"
-		padre[p + "2"] = p + "1"
-	var orden := ["raiz", "cuerpo", "cabeza", "cola1", "cola2", "cola3"]
+		_padre[p + "1"] = "hombros" if p[0] == "d" else "caderas"
+		_padre[p + "2"] = p + "1"
+	_orden = ["raiz", "medio", "hombros", "caderas", "cabeza"]
+	_orden.append_array(COLA)
 	for p in PATAS:
-		orden.append(p + "1")
-		orden.append(p + "2")
-	for nombre in orden:
+		_orden.append(p + "1")
+		_orden.append(p + "2")
+	for nombre in _orden:
 		var i := sk.add_bone(nombre)
-		var pp: String = padre[nombre]
+		var pp: String = _padre[nombre]
 		var local: Vector3 = g[nombre] - (g[pp] if pp != "" else Vector3.ZERO)
 		if pp != "":
 			sk.set_bone_parent(i, sk.find_bone(pp))
@@ -177,25 +207,29 @@ func _armar() -> void:
 		_rest[nombre] = local
 	sk.reset_bone_poses()
 
-	# Segmentos para los pesos: [desde, hasta, radio]. El radio hace que el cuerpo y la
-	# cabeza "ganen" los vértices de su superficie aunque su eje quede lejos.
+	# --- pesos ---
+	# Segmentos [desde, hasta, radio]: el radio hace que cuerpo y cabeza ganen los
+	# vértices de su superficie aunque su eje quede lejos.
 	var seg := {
-		"cuerpo": [Vector3(cx, g["cuerpo"].y, z_min + 0.2), Vector3(cx, g["cuerpo"].y, z_max - 0.15), 0.42],
+		"caderas": [Vector3(cx, y_col, caja.position.z + 0.2), Vector3(cx, y_col, z_mitad - 0.12), 0.42],
+		"medio": [Vector3(cx, y_col, z_mitad - 0.08), Vector3(cx, y_col, z_hombros - 0.08), 0.42],
+		"hombros": [Vector3(cx, y_col, z_hombros - 0.04), Vector3(cx, y_col, z_max - 0.12), 0.42],
 		"cabeza": [g["cabeza"] + Vector3(0, 0.12, 0), cab + Vector3(0, 0.1, 0.05), 0.42],
 		"cola1": [g["cola1"], g["cola2"], 0.13],
-		"cola2": [g["cola2"], g["cola3"], 0.15],
-		"cola3": [g["cola3"], tramos[3], 0.17],
 	}
+	for i in range(1, 5):
+		var fin: Vector3 = tramos[i + 1] if i < 4 else tramos[5] + (tramos[5] - tramos[4]) * 0.5
+		seg[COLA[i]] = [g[COLA[i]], fin, 0.14 + 0.01 * i]
 	for p in PATAS:
 		seg[p + "1"] = [g[p + "1"], g[p + "2"], 0.1]
-		seg[p + "2"] = [g[p + "2"], Vector3(g[p + "2"].x, _suelo, g[p + "2"].z), 0.1]
+		seg[p + "2"] = [g[p + "2"], _pie[p], 0.1]
 	var nombres: Array = seg.keys()
 	var huesos := PackedInt32Array()
 	var pesos := PackedFloat32Array()
 	huesos.resize(verts.size() * 4)
 	pesos.resize(verts.size() * 4)
-	var y_pata := _suelo + 0.17 * alto_m
-	var y_cabeza := _suelo + 0.25 * alto_m
+	var y_pata := y_cadera + 0.03
+	var y_cabeza := y_panza + 0.37
 	for vi in verts.size():
 		var v := verts[vi]
 		var mejor := [-1, -1]
@@ -211,7 +245,7 @@ func _armar() -> void:
 				if (nombre[0] == "d") != (v.z > z_mitad):
 					continue
 			elif nombre.begins_with("cola"):
-				if v.z > z_mitad - 0.1 or v.y < _suelo + 0.4 * alto_m:
+				if v.z > z_mitad - 0.1 or v.y < y_panza + 0.67:
 					continue
 			elif nombre == "cabeza" and (v.y < y_cabeza or v.z < z_mitad - 0.1):
 				continue
@@ -270,52 +304,78 @@ func _armar() -> void:
 	add_child(ap)
 
 
-# ---------------------------------------------------------------- animaciones
+# ---------------------------------------------------------------- poses
 
-## Pose de cada momento: {hueso: Vector3 de giro en radianes (x, y, z)} más
-## "cuerpo_y" (desplazamiento extra), "escala" (estirar) y "aire" (no apoyar en el piso).
+## Una pose es {hueso: giro (Vector3 en radianes)} más "pos_medio" y "pos_cabeza"
+## (desplazamientos), "escala" (estirar) y "pies" {pata: [z extra, alto]} para la
+## cinemática inversa. Las patas sin "pies" usan el giro que traigan.
 func _pose_caminar(t: float) -> Dictionary:
 	var u := t / DUR_CAMINAR
+	var w := TAU * u
+	var l := _l1 + _l2
 	var p := {}
-	var fase := {"di": 0.0, "td": 0.0, "dd": 0.5, "ti": 0.5}  # en diagonal, como un gato
+	# Columna en S: hombros y caderas giran y se ladean en contra.
+	p["hombros"] = Vector3(0.0, 0.08 * sin(w), 0.05 * sin(w))
+	p["caderas"] = Vector3(0.0, -0.08 * sin(w), -0.05 * sin(w))
+	p["medio"] = Vector3(0.0, 0.0, 0.0)
+	# Sube y baja con cada paso (2 veces por ciclo).
+	var bote := 0.035 * l * cos(2.0 * w)
+	p["pos_medio"] = Vector3(0, -0.12 * l + bote, 0)
+	# La cabeza compensa: deshace casi todo el giro de los hombros, se queda más quieta
+	# y cabecea un poco, atrasada respecto del bote.
+	p["cabeza"] = Vector3(0.04 * sin(2.0 * w - 1.0), -0.07 * sin(w), -0.045 * sin(w))
+	p["pos_cabeza"] = Vector3(0, -0.5 * bote, 0)
+	# Cola en onda que viaja hacia la punta, levantada.
+	for i in COLA.size():
+		p[COLA[i]] = Vector3(0.03 * sin(w - 0.9 * i), 0.0, (0.09 + 0.04 * i) * sin(w - 0.9 * i))
+	# Patas en diagonal (delantera izquierda con trasera derecha).
+	var fase := {"di": 0.0, "td": 0.0, "dd": 0.5, "ti": 0.5}
+	var pies := {}
 	for pata in PATAS:
-		var a: float = TAU * (u + fase[pata])
-		var adelante := 1.0 if pata[0] == "d" else 0.85
-		p[pata + "1"] = Vector3(-0.42 * adelante * sin(a), 0, 0)
-		p[pata + "2"] = Vector3(0.9 * maxf(0.0, cos(a)), 0, 0)  # recoge la pata al avanzar
-	p["cuerpo"] = Vector3(0.0, 0.0, 0.025 * sin(TAU * u))
-	p["cabeza"] = Vector3(0.015 * sin(2.0 * TAU * u), 0.03 * sin(TAU * u), -0.03 * sin(TAU * u))
-	p["cola1"] = Vector3(0.05 * sin(TAU * u), 0, 0.12 * sin(TAU * u))
-	p["cola2"] = Vector3(0, 0, 0.15 * sin(TAU * u - 0.8))
-	p["cola3"] = Vector3(0, 0, 0.18 * sin(TAU * u - 1.6))
-	p["escala"] = 1.0 + 0.015 * cos(2.0 * TAU * u)
+		var f: float = fmod(u + fase[pata], 1.0)
+		var z := 0.0
+		var alto := 0.0
+		if f < APOYO:  # apoyada: retrocede respecto del cuerpo a la velocidad del avance
+			z = _paso * (0.5 - f / APOYO)
+		else:  # avanza por el aire: se levanta y dobla
+			var s := (f - APOYO) / (1.0 - APOYO)
+			z = _paso * (-0.5 + smoothstep(0.0, 1.0, s))
+			alto = 0.32 * l * sin(PI * s)
+		pies[pata] = [z, alto]
+	p["pies"] = pies
+	p["escala"] = 1.0 + 0.012 * cos(2.0 * w)
 	return p
 
 
 func _pose_quieto(t: float) -> Dictionary:
-	var u := t / DUR_QUIETO
+	var w := TAU * t / DUR_QUIETO
+	var l := _l1 + _l2
 	var p := {}
-	p["cuerpo"] = Vector3.ZERO
-	p["cabeza"] = Vector3(0.01 * sin(TAU * u), 0.02 * sin(TAU * u * 0.5 + 1.0), 0)
-	p["cola1"] = Vector3(0, 0, 0.09 * sin(TAU * u))
-	p["cola2"] = Vector3(0, 0, 0.11 * sin(TAU * u - 0.7))
-	p["cola3"] = Vector3(0, 0, 0.13 * sin(TAU * u - 1.4))
-	p["escala"] = 1.0 + 0.012 * sin(TAU * u * 2.0)  # respiración muy suave
+	p["pos_medio"] = Vector3(0, -0.04 * l + 0.012 * l * sin(2.0 * w), 0)
+	p["cabeza"] = Vector3(0.015 * sin(w), 0.03 * sin(w * 0.5 + 1.0), 0)
+	for i in COLA.size():
+		p[COLA[i]] = Vector3(0.0, 0.0, (0.05 + 0.025 * i) * sin(w - 0.7 * i))
+	var pies := {}
+	for pata in PATAS:
+		pies[pata] = [0.0, 0.0]
+	p["pies"] = pies
+	p["escala"] = 1.0 + 0.012 * sin(2.0 * w)  # respiración muy suave
 	return p
 
 
-## Salto por claves: agacharse, estirarse, recoger en el aire, caer con las delanteras
-## primero y amortiguar. [tiempo, delanteras (1, 2), traseras (1, 2), cuerpo x, cabeza x, cola x, escala]
+## Salto por claves. [tiempo, cuerpo y (× largo de pata), cuerpo x, cabeza x, cola x,
+## escala, alto pie delantero, alto pie trasero (× largo de pata),
+## en el aire: delantera (1, 2), trasera (1, 2)]
 const CLAVES_SALTO := [
-	[0.00, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.00],
-	[0.26, 0.55, -1.0, -0.65, 1.1, 0.10, -0.12, 0.25, 0.92],   # se agacha (traseras más)
-	[0.36, 0.30, -0.6, -0.30, 0.5, 0.0, -0.05, 0.1, 0.96],
-	[0.42, -0.75, 0.0, 0.70, 0.15, -0.22, 0.10, -0.25, 1.08],  # se estira: patas extendidas
-	[0.62, -0.25, 1.25, -0.45, 1.1, -0.05, 0.05, -0.1, 1.00],  # recoge las patas en el aire
-	[0.82, -0.55, 0.0, 0.35, 0.5, 0.20, -0.08, 0.2, 1.04],     # baja con las delanteras adelante
-	[0.92, 0.40, -0.8, 0.10, 0.5, 0.08, -0.05, 0.2, 0.92],     # apoya delante y amortigua
-	[1.00, 0.35, -0.7, -0.40, 0.8, 0.0, -0.02, 0.15, 0.94],    # apoyan las traseras
-	[1.20, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.00],
+	[0.00, -0.04, 0.0, 0.0, 0.0, 1.00, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+	[0.28, -0.42, -0.06, 0.08, 0.25, 0.92, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],    # se agacha
+	[0.36, -0.10, -0.16, 0.0, 0.0, 1.06, 0.30, 0.0, -0.6, 0.5, 0.4, 0.2],     # empuja
+	[0.42, 0.00, -0.22, -0.05, -0.20, 1.08, 0.0, 0.0, -0.95, 0.15, 0.75, 0.3],  # se estira
+	[0.62, 0.00, 0.00, 0.0, -0.10, 1.00, 0.0, 0.0, -0.25, 1.4, -0.65, 1.3],   # recoge
+	[0.84, 0.00, 0.16, -0.06, 0.15, 1.04, 0.0, 0.0, -0.55, 0.05, 0.35, 0.6],  # delanteras abajo
+	[0.90, -0.16, 0.12, -0.04, 0.20, 0.94, 0.0, 0.35, 0.0, 0.0, 0.0, 0.0],    # apoya delante
+	[0.98, -0.34, 0.00, 0.0, 0.15, 0.92, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],       # amortigua
+	[1.20, -0.04, 0.0, 0.0, 0.0, 1.00, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
 ]
 
 
@@ -329,26 +389,34 @@ func _pose_saltar(t: float) -> Dictionary:
 			break
 	var k := smoothstep(0.0, 1.0, (t - a[0]) / maxf(b[0] - a[0], 0.001))
 	var v := func(j: int) -> float: return lerpf(a[j], b[j], k)
+	var l := _l1 + _l2
 	var p := {}
-	for pata in PATAS:
-		var o := 1 if pata[0] == "d" else 3
-		p[pata + "1"] = Vector3(v.call(o), 0, 0)
-		p[pata + "2"] = Vector3(v.call(o + 1), 0, 0)
-	p["cuerpo"] = Vector3(v.call(5), 0, 0)
-	p["cabeza"] = Vector3(v.call(6), 0, 0)
-	p["cola1"] = Vector3(v.call(7), 0, 0)
-	p["cola2"] = Vector3(v.call(7) * 0.8, 0, 0.05 * sin(t * 6.0))
-	p["cola3"] = Vector3(v.call(7) * 0.6, 0, 0.08 * sin(t * 6.0 - 0.6))
-	p["escala"] = v.call(8)
-	p["aire"] = t > DESPEGUE and t < ATERRIZAJE
+	p["pos_medio"] = Vector3(0, v.call(1) * l, 0)
+	p["medio"] = Vector3(v.call(2), 0, 0)
+	p["cabeza"] = Vector3(v.call(3) - v.call(2) * 0.6, 0, 0)
+	for i in COLA.size():
+		p[COLA[i]] = Vector3(v.call(4) * (1.0 - 0.15 * i), 0, 0.06 * sin(t * 6.0 - 0.7 * i))
+	p["escala"] = v.call(5)
+	if t <= DESPEGUE or t >= ATERRIZAJE:
+		var pies := {}
+		for pata in PATAS:
+			pies[pata] = [0.0, (v.call(6) if pata[0] == "d" else v.call(7)) * l]
+		p["pies"] = pies
+	else:
+		for pata in PATAS:
+			var o := 8 if pata[0] == "d" else 10
+			p[pata + "1"] = Vector3(v.call(o), 0, 0)
+			p[pata + "2"] = Vector3(v.call(o + 1), 0, 0)
 	return p
 
+
+# ---------------------------------------------------------------- horneado
 
 func _hornear_animaciones() -> void:
 	var lib := AnimationLibrary.new()
 	lib.add_animation("quieto", _hornear(_pose_quieto, DUR_QUIETO, 48, true))
-	lib.add_animation("caminar", _hornear(_pose_caminar, DUR_CAMINAR, 24, true))
-	lib.add_animation("saltar", _hornear(_pose_saltar, DUR_SALTAR, 48, false))
+	lib.add_animation("caminar", _hornear(_pose_caminar, DUR_CAMINAR, 32, true))
+	lib.add_animation("saltar", _hornear(_pose_saltar, DUR_SALTAR, 60, false))
 	ap.add_animation_library("", lib)
 
 
@@ -358,49 +426,62 @@ func _hornear(pose: Callable, dur: float, n: int, bucle: bool) -> Animation:
 	anim.loop_mode = Animation.LOOP_LINEAR if bucle else Animation.LOOP_NONE
 	var ruta := "Giro/Estira/Modelo/Esqueleto:"
 	var pistas := {}
-	for nombre in _rest.keys():
+	for nombre in _orden:
 		var t := anim.add_track(Animation.TYPE_ROTATION_3D)
 		anim.track_set_path(t, ruta + nombre)
 		pistas[nombre] = t
-	var t_pos := anim.add_track(Animation.TYPE_POSITION_3D)
-	anim.track_set_path(t_pos, ruta + "cuerpo")
+	var t_medio := anim.add_track(Animation.TYPE_POSITION_3D)
+	anim.track_set_path(t_medio, ruta + "medio")
+	var t_cabeza := anim.add_track(Animation.TYPE_POSITION_3D)
+	anim.track_set_path(t_cabeza, ruta + "cabeza")
 	var t_esc := anim.add_track(Animation.TYPE_VALUE)
 	anim.track_set_path(t_esc, "Giro/Estira:scale")
-	# Apoyo en tierra calculado antes, para poder interpolarlo en el tramo en el aire.
-	var apoyo: Array[float] = []
-	for i in n + 1:
-		apoyo.append(_apoyo(pose.call(dur * i / n)))
-	var i_desp := -1
-	var i_ater := -1
-	for i in n + 1:
-		var p: Dictionary = pose.call(dur * i / n)
-		if p.get("aire", false):
-			if i_desp < 0:
-				i_desp = i - 1
-			i_ater = i + 1
+	# En bucle, el último cuadro es igual al primero (n pasos cubren todo el ciclo).
 	for i in n + 1:
 		var tiempo := dur * i / n
 		var p: Dictionary = pose.call(tiempo)
-		for nombre in _rest.keys():
+		_resolver_patas(p)
+		for nombre in _orden:
 			var e: Vector3 = p.get(nombre, Vector3.ZERO)
 			anim.rotation_track_insert_key(pistas[nombre], tiempo, Quaternion.from_euler(e))
-		var y := apoyo[i]
-		if i_desp >= 0 and i > i_desp and i < i_ater:
-			y = lerpf(apoyo[i_desp], apoyo[i_ater], float(i - i_desp) / float(i_ater - i_desp))
-		anim.position_track_insert_key(t_pos, tiempo, _rest["cuerpo"] + Vector3(0, y, 0))
+		anim.position_track_insert_key(t_medio, tiempo, _rest["medio"] + p.get("pos_medio", Vector3.ZERO))
+		anim.position_track_insert_key(t_cabeza, tiempo, _rest["cabeza"] + p.get("pos_cabeza", Vector3.ZERO))
 		var e_: float = clampf(p.get("escala", 1.0), 1.0 - DEFORMACION_MAXIMA, 1.0 + DEFORMACION_MAXIMA)
 		anim.track_insert_key(t_esc, tiempo, Vector3(1.0 / sqrt(e_), e_, 1.0 / sqrt(e_)))
 	return anim
 
 
-## Cuánto subir o bajar el cuerpo para que la pata más baja toque el piso (cinemática
-## directa de las patas con la pose dada).
-func _apoyo(p: Dictionary) -> float:
-	var cuerpo := Transform3D(Basis.from_euler(p.get("cuerpo", Vector3.ZERO)), _rest["raiz"] + _rest["cuerpo"])
-	var mas_baja := INF
+## Transformación global (unidades de la malla) de un hueso en la pose dada.
+func _global(p: Dictionary, nombre: String) -> Transform3D:
+	var pos: Vector3 = _rest[nombre]
+	if nombre == "medio":
+		pos += p.get("pos_medio", Vector3.ZERO)
+	elif nombre == "cabeza":
+		pos += p.get("pos_cabeza", Vector3.ZERO)
+	var local := Transform3D(Basis.from_euler(p.get(nombre, Vector3.ZERO)), pos)
+	var pp: String = _padre[nombre]
+	return local if pp == "" else _global(p, pp) * local
+
+
+## Cinemática inversa de 2 huesos en el plano de la pata (giro en x del hueso): pone la
+## punta de la pata en el pie pedido. Delanteras con el codo atrás, traseras con la
+## rodilla adelante.
+func _resolver_patas(p: Dictionary) -> void:
+	if not p.has("pies"):
+		return
+	var pies: Dictionary = p["pies"]
 	for pata in PATAS:
-		var t1 := cuerpo * Transform3D(Basis.from_euler(p.get(pata + "1", Vector3.ZERO)), _rest[pata + "1"])
-		var t2 := t1 * Transform3D(Basis.from_euler(p.get(pata + "2", Vector3.ZERO)), _rest[pata + "2"])
-		for punta in [Vector3(0, -_largo_pie, 0.06), Vector3(0, -_largo_pie, -0.06)]:
-			mas_baja = minf(mas_baja, (t2 * punta).y)
-	return _suelo - mas_baja
+		var pp: String = _padre[pata + "1"]
+		var g_padre := _global(p, pp)
+		var meta: Vector3 = _pie[pata] + Vector3(0, pies[pata][1], pies[pata][0])
+		var dv: Vector3 = g_padre.affine_inverse() * meta - _rest[pata + "1"]
+		var d := clampf(Vector2(dv.y, dv.z).length(), 0.05, (_l1 + _l2) * 0.999)
+		var alfa := atan2(-dv.z, -dv.y)
+		var gamma := acos(clampf((_l1 * _l1 + d * d - _l2 * _l2) / (2.0 * _l1 * d), -1.0, 1.0))
+		var kappa := acos(clampf((_l1 * _l1 + _l2 * _l2 - d * d) / (2.0 * _l1 * _l2), -1.0, 1.0))
+		if pata[0] == "d":
+			p[pata + "1"] = Vector3(alfa + gamma, 0, 0)
+			p[pata + "2"] = Vector3(-(PI - kappa), 0, 0)
+		else:
+			p[pata + "1"] = Vector3(alfa - gamma, 0, 0)
+			p[pata + "2"] = Vector3(PI - kappa, 0, 0)

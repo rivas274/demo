@@ -4,10 +4,10 @@
 # Valeria de Meshy (CC BY 4.0) con esqueleto y animaciones de Mixamo, en la sala toon.
 # Rutina de unos 20 s en bucle: entra caminando, se detiene y mira el celular, camina al sofá,
 # se sienta, se levanta, se agacha a recoger una pelota y sale por la derecha.
-# Fuentes, en orden: assets/meshy_prueba/valeria/mixamo/valeria_animada.glb (5 clips con
-# nombre), si no los FBX de Mixamo de esa carpeta (el de caminar con skin) y, si no hay nada,
-# valeria_meshy.glb estático (se desliza, solo para revisar carga y estilo).
-# Para probar cada fuente: `-- --valeria-mixamo --valeria-fbx` o `--valeria-estatica`.
+# Fuentes, en orden: los FBX de Mixamo de assets/meshy_prueba/valeria/mixamo/ (el de caminar
+# con skin; los demás aportan sus pistas), si no valeria_animada.glb (5 clips con nombre) y, si
+# no hay nada, valeria_meshy.glb estático (se desliza, solo para revisar carga y estilo).
+# Para probar cada fuente: `-- --valeria-mixamo --valeria-glb` o `--valeria-estatica`.
 extends Node3D
 
 signal empieza_vuelta
@@ -84,8 +84,27 @@ func _cargar() -> String:
 	var args := OS.get_cmdline_user_args()
 	if "--valeria-estatica" in args:
 		return _cargar_respaldo()
-	var usar_glb := not "--valeria-fbx" in args
-	if usar_glb and (FileAccess.file_exists(GLB_ANIMADO) or ResourceLoader.exists(GLB_ANIMADO)):
+	# Primero los FBX de Mixamo: sus curvas son poses locales absolutas y se copian bien al
+	# esqueleto del FBX con skin. El GLB juntado en Blender trae mal los brazos en los clips que
+	# no son walking (ver INFORME), así que solo se usa si no hay FBX o con --valeria-glb.
+	if not "--valeria-glb" in args:
+		var archivos := Carga.buscar(CARPETA)
+		var con_piel := ""
+		for papel: String in archivos:
+			var escena := Carga.cargar(archivos[papel])
+			if escena == null:
+				continue
+			clips[papel] = Carga.animacion(escena)
+			if Carga.tiene_piel(escena) and (con_piel == "" or papel == "caminar"):
+				if _modelo:
+					_modelo.free()
+				_modelo = escena
+				con_piel = archivos[papel]
+			else:
+				escena.free()
+		fuente = con_piel
+	if _modelo == null and (FileAccess.file_exists(GLB_ANIMADO) or ResourceLoader.exists(GLB_ANIMADO)):
+		clips.clear()
 		_modelo = Carga.cargar(GLB_ANIMADO)
 		fuente = GLB_ANIMADO
 		var ap := Carga.primero(_modelo, "AnimationPlayer") as AnimationPlayer
@@ -93,18 +112,6 @@ func _cargar() -> String:
 			for papel: String in CLIPS_GLB:
 				if ap.has_animation(CLIPS_GLB[papel]):
 					clips[papel] = ap.get_animation(CLIPS_GLB[papel])
-	if _modelo == null:
-		var archivos := Carga.buscar(CARPETA)
-		var con_piel := ""
-		for papel: String in archivos:
-			var escena := Carga.cargar(archivos[papel])
-			if escena == null:
-				continue
-			if _modelo == null and Carga.tiene_piel(escena) and (con_piel == "" or papel == "caminar"):
-				_modelo = escena
-				con_piel = archivos[papel]
-			clips[papel] = Carga.animacion(escena)
-		fuente = con_piel
 	if _modelo == null or Carga.primero(_modelo, "Skeleton3D") == null or clips.is_empty():
 		return _cargar_respaldo()
 	add_child(_modelo)

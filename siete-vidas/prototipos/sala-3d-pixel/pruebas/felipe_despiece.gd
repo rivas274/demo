@@ -42,6 +42,11 @@ func _initialize() -> void:
 	var giro: Node3D = f.get("giro")
 	var sk: Skeleton3D = f.get("sk")
 	sk.reset_bone_poses()
+	if OS.get_environment("ANIM_T") != "":
+		var ap: AnimationPlayer = f.get("ap")
+		ap.play("caminar")
+		ap.seek(float(OS.get_environment("ANIM_T")), true)
+		f.call("_capas", 0.0)
 	# Encuadre: el mismo tamaño relativo que vistas.gd (1,15 × el lado mayor).
 	var m: float = f.get("metros_por_unidad") * 2.7
 	cam.size = 1.15 * 1.89942 * m

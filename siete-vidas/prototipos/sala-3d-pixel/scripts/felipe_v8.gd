@@ -120,7 +120,8 @@ func pieza_de(c: Vector3) -> String:
 	var bp := bits_perfil(c)
 	var bf := bits_frente(c)
 	# Cola en 3 tramos.
-	if tiene(bp, BITS_PERFIL, "cola") and c.z < -0.22:
+	# (lo de arriba y atrás es cola aunque se salga un poco del contorno)
+	if (tiene(bp, BITS_PERFIL, "cola") and c.z < -0.22) or (c.y > 0.05 and c.z < -0.3):
 		return ["Bone_004", "Bone_005", "Bone_006"][_tramo(c, ["Bone_004", "Bone_005", "Bone_006", "Bone_007"])]
 	# Cabeza, orejas y mechones de mejilla.
 	if tiene(bp, BITS_PERFIL, "cabeza"):

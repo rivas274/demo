@@ -75,7 +75,7 @@ const V8 := preload("res://scripts/felipe_v8.gd")
 ## cortes planos; la v6 es piezas = false.
 @export var version := 7
 ## Por piezas v8: la pierna entera parte del hombro o la cadera, así que gira casi todo.
-const AMPLITUD_V8 := [0.8, 0.9, 0.6]
+const AMPLITUD_V8 := [0.7, 0.9, 0.6]
 
 var ap: AnimationPlayer
 var sk: Skeleton3D
@@ -208,6 +208,10 @@ func _capas(delta: float) -> void:
 func _capas_v8() -> void:
 	var fase := TAU * ap.current_animation_position / maxf(ap.current_animation_length, 0.01)
 	var paso := 1.0 if caminando else 0.25
+	# Estos huesos no tienen curvas: se parte del reposo en cada cuadro (si no, los giros
+	# se acumulan).
+	for extra in V8.EXTRA:
+		sk.reset_bone_pose(sk.find_bone(extra[0]))
 	# Hombros contra caderas (el cuerpo en 2 masas ondula sin estirar la textura).
 	_girar(sk.find_bone("Bone"), Vector3.UP, 0.05 * paso * sin(fase))
 	_girar(sk.find_bone("Bone_002"), Vector3.UP, -0.1 * paso * sin(fase))
@@ -706,7 +710,7 @@ func _en_piezas(a: Array) -> Array:
 	var mapa := {}
 	# El solape se hunde un poco bajo la superficie (más cuanto más lejos del corte):
 	# rellena la grieta sin asomar como una lámina cuando la pieza gira.
-	var hundir := 0.006 * ESCALA_MESHY / _t_sk.basis.get_scale().x
+	var hundir := (0.012 if _v8 else 0.006) * ESCALA_MESHY / _t_sk.basis.get_scale().x
 	var copiar := func(vi: int, hueso: int, anillo: int) -> int:
 		var clave := vi * 64 + hueso
 		if mapa.has(clave):
@@ -801,10 +805,12 @@ func _articulaciones(tex: Texture2D, uv: PackedVector2Array, vs_meshy: PackedVec
 	# [hueso, punto en Meshy, radio]
 	var juntas: Array = [["Bone_003", puntos["Bone_003"], 0.16], ["Bone_005", puntos["Bone_005"], 0.10],
 		["Bone_006", puntos["Bone_006"], 0.11], ["Bone_007", puntos["Bone_007"], 0.11]]
+	if _v8:
+		juntas.pop_back()  # la punta de la cola es una sola pieza (Bone_006)
 	for pata in PATAS:
 		var n: Array = PATAS[pata]
-		juntas.append([n[1], puntos[n[1]], 0.075])
-		juntas.append([n[2], puntos[n[2]], 0.06])
+		juntas.append([n[1], puntos[n[1]], 0.05 if _v8 else 0.075])
+		juntas.append([n[2], puntos[n[2]], 0.045 if _v8 else 0.06])
 		# "Hombro" de la pata a la altura de la panza: tapa el borde de arriba de la pieza.
 		var pie: Vector3 = puntos[n[2]]
 		var y_corte := -0.62 if pata[0] == "t" else -0.66

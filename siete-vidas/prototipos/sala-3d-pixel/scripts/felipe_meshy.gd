@@ -199,6 +199,10 @@ func _capas(delta: float) -> void:
 			sk.set_bone_pose_rotation(b, reposo.slerp(sk.get_bone_pose_rotation(b), 0.5))
 	var amp := (0.14 if caminando else 0.08) * k_cola
 	var frec := 3.8 if caminando else 1.6
+	if _v8 and not caminando:
+		# Atento (quieto): sacude la cola a los lados como un látigo lento (video 2).
+		amp = 0.16
+		frec = 1.2
 	for i in COLA.size():
 		var b := sk.find_bone(COLA[i])
 		_girar(b, Vector3.UP, amp * sin(_t * frec - 0.7 * i))
@@ -243,7 +247,7 @@ func _claves_salto(t: float) -> Array:
 		[0.40, 1.08, 0.30, -0.5, 0.6],
 		[0.62, 1.00, 0.05, 0.7, -0.6],
 		[0.84, 1.03, -0.25, -0.35, 0.3],
-		[0.94, 0.92, -0.08, 0.15, -0.25],
+		[0.94, 0.92, 0.10, 0.15, -0.25],   # aterriza con las delanteras: el lomo se arquea
 		[1.20, 1.00, 0.0, 0.0, 0.0],
 	]
 	for i in c.size() - 1:

@@ -55,7 +55,7 @@ var _cam_x := 0.0
 
 
 func _ready() -> void:
-	if "--valeria-mixamo" in OS.get_cmdline_user_args() and get_script() == preload("res://scripts/principal.gd"):
+	if "--valeria-mixamo" in OS.get_cmdline_user_args():
 		set_process(false)  # Valeria Meshy + Mixamo: escena propia (valeria_mixamo.tscn).
 		get_tree().change_scene_to_file.call_deferred("res://valeria_mixamo.tscn")
 		return

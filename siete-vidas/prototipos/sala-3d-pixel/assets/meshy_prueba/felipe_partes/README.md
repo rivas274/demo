@@ -54,3 +54,25 @@
 - Las piezas malas se pueden reemplazar por formas simples. El pecho sería una esfera, como la que dibujó el creador.
 - Los mechones y la oreja derecha se pueden tomar de la superficie original con textura (`superficie/`), o reflejar la oreja izquierda.
 - La textura de las piezas de HoloPart se transfiere desde `felipe_meshy.glb` por punto más cercano. Las etiquetas por cara sirven para limitar la búsqueda a la misma pieza.
+
+## Actualización: el mejor de 5 semillas (regla del creador: al menos 5 intentos)
+
+Las 5 piezas que salieron mal se repitieron con las semillas 1, 7, 123 y 2026, además de la 42 original. `comparar_intentos.py` puntúa cada intento según:
+- si está cerrada;
+- en cuántos trozos sale;
+- qué fracción de la superficie queda fuera del modelo original;
+- qué tan bien cubre la zona original de la pieza.
+
+Después hubo una revisión visual de todos los intentos (`intentos_5_semillas.png`). Los puntajes están en `comparacion_intentos.json`.
+
+| Pieza | Elegida | Antes (semilla 42) | Ahora |
+|---|---|---|---|
+| cuerpo_pecho | s123 | 5 fragmentos, abierta | 1 pieza cerrada |
+| oreja_der | s2026 | aleta, abierta | cerrada |
+| mechon_izq | s123 | 104 trozos | 1 lámina cerrada (delgada) |
+| mechon_der | s2026 | 52 trozos | 1 pieza cerrada (delgada) |
+| cola_base | s123 | faldón, abierta | cerrada, **pero el faldón sigue** |
+
+**El faldón de cola_base sale en las 5 semillas porque está en el modelo de Meshy.** El 30 % de la superficie de esa zona mira hacia abajo: la raíz de la cola se abre como un ala sobre la grupa. Para quitarlo hay que recortarlo a mano, o redibujar la base de la cola más arriba.
+
+**Las 15 piezas de `holopart/` ya están cerradas.** Juntas están en `felipe_partes_holopart.glb`, con el despiece en `despiece_holopart.png`. Las patas siguen siendo cáscaras delgadas por el flanco: eso viene del contorno dibujado, no de la semilla.

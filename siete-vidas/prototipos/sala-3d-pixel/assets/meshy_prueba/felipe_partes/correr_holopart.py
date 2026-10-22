@@ -1,6 +1,7 @@
 """HoloPart local (RTX 4060 de 8 GB): completa cada parte de una malla ya segmentada.
 
-Uso: python correr_holopart.py <entrada_partes.glb> <salida.glb> [pasos=50] [semilla=42] [profundidad=9]
+Uso: python correr_holopart.py <entrada_partes.glb> <salida.glb> [pasos=50] [semilla=42] [profundidad=9] [piezas]
+     piezas: lista separada por comas para correr solo esas (para repetir con otras semillas)
 
 La entrada es una escena GLB con una malla por parte (segmentar_felipe.py la arma).
 Diferencias con scripts/inference_holopart.py del repo:
@@ -29,6 +30,7 @@ entrada, salida = sys.argv[1], sys.argv[2]
 pasos = int(sys.argv[3]) if len(sys.argv) > 3 else 50
 semilla = int(sys.argv[4]) if len(sys.argv) > 4 else 42
 profundidad = int(sys.argv[5]) if len(sys.argv) > 5 else 9
+solo = set(sys.argv[6].split(",")) if len(sys.argv) > 6 else None  # p. ej. "cola_base,oreja_der"
 dir_latentes = salida.rsplit(".", 1)[0] + "_latentes"
 os.makedirs(dir_latentes, exist_ok=True)
 
@@ -41,6 +43,8 @@ print("partes:", nombres, "carga:", round(time.time() - t), "s", flush=True)
 partes = []
 with torch.no_grad():
     for i, nombre in enumerate(nombres):
+        if solo and nombre not in solo:
+            continue
         ruta_lat = os.path.join(dir_latentes, f"{nombre}.pt")
         if os.path.exists(ruta_lat):
             lat = torch.load(ruta_lat).to("cuda", torch.float16)

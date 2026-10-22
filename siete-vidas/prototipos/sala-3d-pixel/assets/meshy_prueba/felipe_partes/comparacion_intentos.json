@@ -1,0 +1,312 @@
+{
+ "cuerpo_grupa": [
+  {
+   "semilla": "42",
+   "cerrada": true,
+   "trozos": 2,
+   "fuera": 0.0,
+   "cobertura": 0.1,
+   "puntaje": 0.6
+  }
+ ],
+ "cuerpo_pecho": [
+  {
+   "semilla": "123",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.1,
+   "puntaje": 0.1
+  },
+  {
+   "semilla": "2026",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.1,
+   "puntaje": 0.1
+  },
+  {
+   "semilla": "7",
+   "cerrada": true,
+   "trozos": 2,
+   "fuera": 0.0,
+   "cobertura": 0.1,
+   "puntaje": 0.6
+  },
+  {
+   "semilla": "1",
+   "cerrada": false,
+   "trozos": 2,
+   "fuera": 0.0,
+   "cobertura": 0.1,
+   "puntaje": 1.6
+  },
+  {
+   "semilla": "42",
+   "cerrada": false,
+   "trozos": 5,
+   "fuera": 0.0,
+   "cobertura": 0.09,
+   "puntaje": 3.09
+  }
+ ],
+ "melena": [
+  {
+   "semilla": "42",
+   "cerrada": true,
+   "trozos": 3,
+   "fuera": 0.0,
+   "cobertura": 0.06,
+   "puntaje": 1.06
+  }
+ ],
+ "cabeza": [
+  {
+   "semilla": "42",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.06,
+   "puntaje": 0.06
+  }
+ ],
+ "oreja_izq": [
+  {
+   "semilla": "42",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.08,
+   "puntaje": 0.08
+  }
+ ],
+ "oreja_der": [
+  {
+   "semilla": "1",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.1,
+   "puntaje": 0.1
+  },
+  {
+   "semilla": "7",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.1,
+   "puntaje": 0.1
+  },
+  {
+   "semilla": "2026",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.1,
+   "puntaje": 0.1
+  },
+  {
+   "semilla": "42",
+   "cerrada": false,
+   "trozos": 2,
+   "fuera": 0.0,
+   "cobertura": 0.1,
+   "puntaje": 1.6
+  },
+  {
+   "semilla": "123",
+   "cerrada": false,
+   "trozos": 4,
+   "fuera": 0.0,
+   "cobertura": 0.1,
+   "puntaje": 2.6
+  }
+ ],
+ "mechon_izq": [
+  {
+   "semilla": "1",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.08,
+   "puntaje": 0.08
+  },
+  {
+   "semilla": "123",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.08,
+   "puntaje": 0.08
+  },
+  {
+   "semilla": "2026",
+   "cerrada": false,
+   "trozos": 92,
+   "fuera": 0.201,
+   "cobertura": 0.08,
+   "puntaje": 52.6
+  },
+  {
+   "semilla": "42",
+   "cerrada": false,
+   "trozos": 104,
+   "fuera": 0.264,
+   "cobertura": 0.07,
+   "puntaje": 60.47
+  },
+  {
+   "semilla": "7",
+   "cerrada": false,
+   "trozos": 143,
+   "fuera": 0.206,
+   "cobertura": 0.08,
+   "puntaje": 78.27
+  }
+ ],
+ "mechon_der": [
+  {
+   "semilla": "2026",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.16,
+   "puntaje": 0.16
+  },
+  {
+   "semilla": "7",
+   "cerrada": true,
+   "trozos": 2,
+   "fuera": 0.0,
+   "cobertura": 0.16,
+   "puntaje": 0.66
+  },
+  {
+   "semilla": "123",
+   "cerrada": true,
+   "trozos": 2,
+   "fuera": 0.0,
+   "cobertura": 0.16,
+   "puntaje": 0.66
+  },
+  {
+   "semilla": "1",
+   "cerrada": false,
+   "trozos": 3,
+   "fuera": 0.0,
+   "cobertura": 0.16,
+   "puntaje": 2.16
+  },
+  {
+   "semilla": "42",
+   "cerrada": false,
+   "trozos": 52,
+   "fuera": 0.03,
+   "cobertura": 0.17,
+   "puntaje": 27.58
+  }
+ ],
+ "cola_base": [
+  {
+   "semilla": "123",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.12,
+   "puntaje": 0.12
+  },
+  {
+   "semilla": "2026",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.12,
+   "puntaje": 0.12
+  },
+  {
+   "semilla": "1",
+   "cerrada": false,
+   "trozos": 2,
+   "fuera": 0.0,
+   "cobertura": 0.12,
+   "puntaje": 1.62
+  },
+  {
+   "semilla": "7",
+   "cerrada": false,
+   "trozos": 2,
+   "fuera": 0.0,
+   "cobertura": 0.12,
+   "puntaje": 1.62
+  },
+  {
+   "semilla": "42",
+   "cerrada": false,
+   "trozos": 3,
+   "fuera": 0.0,
+   "cobertura": 0.12,
+   "puntaje": 2.12
+  }
+ ],
+ "cola_medio": [
+  {
+   "semilla": "42",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.13,
+   "puntaje": 0.13
+  }
+ ],
+ "cola_punta": [
+  {
+   "semilla": "42",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.1,
+   "puntaje": 0.1
+  }
+ ],
+ "pata_del_izq": [
+  {
+   "semilla": "42",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.07,
+   "puntaje": 0.07
+  }
+ ],
+ "pata_del_der": [
+  {
+   "semilla": "42",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.1,
+   "puntaje": 0.1
+  }
+ ],
+ "pata_tras_izq": [
+  {
+   "semilla": "42",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.07,
+   "puntaje": 0.07
+  }
+ ],
+ "pata_tras_der": [
+  {
+   "semilla": "42",
+   "cerrada": true,
+   "trozos": 1,
+   "fuera": 0.0,
+   "cobertura": 0.1,
+   "puntaje": 0.1
+  }
+ ]
+}

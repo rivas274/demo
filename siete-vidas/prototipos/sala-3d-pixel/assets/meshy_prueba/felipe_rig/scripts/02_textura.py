@@ -45,7 +45,7 @@ bk = sc.render.bake
 bk.use_selected_to_active = True
 bk.use_cage = False
 bk.cage_extrusion = 0.012
-bk.max_ray_distance = 0.04
+bk.max_ray_distance = 0.12  # las patas traseras se inflaron (v4)
 bk.margin = 12
 bk.margin_type = "EXTEND"
 bpy.ops.object.select_all(action="DESELECT")
@@ -53,7 +53,7 @@ orig.select_set(True)
 retopo.select_set(True)
 bpy.context.view_layer.objects.active = retopo
 bpy.ops.object.bake(type="DIFFUSE", pass_filter={"COLOR"}, use_selected_to_active=True,
-                    cage_extrusion=0.012, max_ray_distance=0.04, margin=12)
+                    cage_extrusion=0.012, max_ray_distance=0.12, margin=12)
 ruta = os.path.join(C.TRABAJO, "felipe_rig_color.png")
 img.filepath_raw = ruta
 img.file_format = "PNG"

@@ -18,20 +18,22 @@ from scipy import ndimage
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import felipe_comun as C
 
-# Variantes del patrón: (nombre, manchas del medio (t0, t1), manchas de la cadera (t0, t1),
-# media franja de la columna (°), hasta dónde bajan por el costado (°) medio y cadera,
-# exponente de la superelipse). t: 0 = arranque de la cola, 1 = pecho.
+# v4 (pedido del creador: «deja una sola mancha, como estaba antes»): UNA montura grande sobre
+# el lomo, de detrás de los hombros a la grupa (llega hasta la base de la cola), que baja por
+# los costados a media altura, con borde suave en mechones (no geométrico).
+# Variantes: (nombre, t0 (grupa/cola), t1 (hombros), hasta dónde baja (° desde el lomo),
+# exponente de la forma, largo de los mechones (fracción), mechones por vuelta, ancho del borde).
+# t: 0 = arranque de la cola, 1 = pecho.
 VARIANTES = [
-    ("a_base", (0.36, 0.62), (0.02, 0.30), 6, (88, 100), 2.0),
-    ("b_franja_angosta", (0.36, 0.62), (0.02, 0.30), 3, (88, 100), 2.0),
-    ("c_franja_ancha", (0.36, 0.62), (0.02, 0.30), 10, (88, 100), 2.0),
-    ("d_grandes", (0.33, 0.66), (0.00, 0.33), 6, (98, 110), 2.0),
-    ("e_chicas", (0.39, 0.60), (0.05, 0.28), 6, (78, 90), 2.0),
-    ("f_cuadradas", (0.36, 0.62), (0.02, 0.30), 6, (88, 100), 2.6),
-    # Elegida: tamaño cercano a las fotos (como d) sin cerrar la banda blanca (como a).
-    ("g_medianas", (0.345, 0.64), (0.01, 0.315), 6, (100, 112), 2.0),
+    ("a_montura_media", -0.06, 0.66, 92, 2.4, 0.10, 22, 0.14),
+    ("b_montura_grande", -0.08, 0.72, 104, 2.4, 0.10, 22, 0.14),
+    ("c_montura_chica", -0.04, 0.60, 80, 2.4, 0.10, 22, 0.14),
+    ("d_mechones_largos", -0.06, 0.66, 92, 2.4, 0.18, 16, 0.14),
+    ("e_mechones_finos", -0.06, 0.66, 92, 2.4, 0.07, 34, 0.10),
+    ("f_redondeada", -0.06, 0.66, 92, 1.8, 0.10, 22, 0.18),
+    ("g_cuadrada", -0.06, 0.66, 92, 3.2, 0.10, 22, 0.12),
 ]
-ELEGIDA = "g_medianas"
+ELEGIDA = "b_montura_grande"
 GY, GA = 260, 180   # celdas del mapa cilíndrico (largo x ángulo)
 
 eleccion = sys.argv[1] if len(sys.argv) > 1 else ELEGIDA
@@ -145,22 +147,19 @@ def _alfa(m):
     return np.clip(0.5 + (dentro - fuera) / 2.5, 0, 1)
 
 
-def campo(T, LAT, medio, cadera, franja, baja, expo):
-    """Opacidad (0..1) de las manchas en el largo T (0 cola .. 1 pecho) y la distancia LAT (°)
-    a la línea del lomo. Se evalúa directo en cada texel (sin grilla: sin cortes ni escalones)."""
-    f = np.full(T.shape, 9.0)
-    for (t0, t1), hasta in ((medio, baja[0]), (cadera, baja[1])):
-        tc, rt = (t0 + t1) / 2, (t1 - t0) / 2
-        ac, ra = (franja + hasta) / 2, (hasta - franja) / 2
-        # Borde orgánico: el radio ondula un poco (no recto).
-        onda = 1 + 0.07 * np.sin(9 * T * math.pi + 0.07 * LAT) + 0.05 * np.sin(0.13 * LAT + 1.0)
-        u = np.abs(T - tc) / (rt * onda)
-        v = np.abs(LAT - ac) / (ra * onda)
-        f = np.minimum(f, u ** expo + v ** expo)
-    alfa = np.clip((1.08 - f) / 0.16, 0, 1)
-    # Franja blanca sobre la columna, de borde suave.
-    alfa *= np.clip((LAT - franja) / 3.0, 0, 1)
-    return alfa
+def campo(T, LAT, t0, t1, baja, expo, mech, frec, borde):
+    """Opacidad (0..1) de la montura en el largo T (0 cola .. 1 pecho) y la distancia LAT (°)
+    a la línea del lomo. Se evalúa directo en cada texel (sin grilla: sin cortes ni escalones).
+    El borde lleva mechones: puntas que bajan por el costado (según T) y otras hacia adelante
+    y atrás (según LAT), con dos frecuencias para que no se vean regulares."""
+    tc, rt = (t0 + t1) / 2, (t1 - t0) / 2
+    pico = lambda x: np.abs(np.sin(x)) ** 0.6           # puntas agudas, valles redondos
+    mech_lat = 1 + mech * (0.65 * pico(frec * T * math.pi) + 0.35 * pico(frec * 1.7 * T * math.pi + 1.3))
+    mech_t = 1 + mech * 0.6 * (0.6 * pico(0.21 * LAT * frec / 22) + 0.4 * pico(0.37 * LAT * frec / 22 + 0.7))
+    u = np.abs(T - tc) / (rt * mech_t)
+    v = LAT / (baja * mech_lat)
+    f = u ** expo + v ** expo
+    return np.clip((1 + borde / 2 - f) / borde, 0, 1)
 
 
 def limpiar(*params):
@@ -230,12 +229,13 @@ def aplicar(params):
     nuevo = dentro * a[..., None] + blanco_ref[None, None, :] * (1 - a[..., None])
     w = peso_zona[..., None]
     out = tex * (1 - w) + nuevo * w
-    # Cola: base blanca (anillo corto) y luego gris muy oscuro casi liso, más clara al centro.
+    # Cola: nace del color de la montura (sin anillo blanco) y pasa a café oscuro casi liso,
+    # más claro al centro.
     sc = s_cola
-    base = np.clip((0.13 - sc) / 0.04, 0, 1)
+    base = np.clip((0.16 - sc) / 0.10, 0, 1)
     centro = 1 + 0.35 * np.exp(-((sc - 0.55) / 0.25) ** 2)
     oscuro = GRIS_COLA[None, None, :] * centro[..., None]
-    col = blanco_ref[None, None, :] * base[..., None] + oscuro * (1 - base[..., None])
+    col = gris[None, None, :] * base[..., None] + oscuro * (1 - base[..., None])
     wc = (en_cola * np.clip((sc - 0.0) / 0.02, 0, 1))[..., None]
     out = out * (1 - wc) + col * wc
     out[~cubre] = tex[~cubre]

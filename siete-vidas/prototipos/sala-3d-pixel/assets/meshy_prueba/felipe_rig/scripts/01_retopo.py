@@ -16,6 +16,7 @@ import simetria as S
 MITAD = "NEGATIVE_X"
 SOLDADURA = 0.005
 RELAJAR = int(os.environ.get("FELIPE_RELAJAR", "6"))   # pasadas de suavizado del cuerpo
+PIERNA = float(os.environ.get("FELIPE_PIERNA", "0.06"))  # cuánto se inflan las patas traseras (u)
 
 CARAS = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
 
@@ -199,6 +200,34 @@ print("espejada: %d caras (%d cuadriláteros), bordes abiertos %d" % (len(bm.fac
 bm.free()
 p99, peor, sin_par = simetria_exacta(retopo)
 print("emparejamiento de espejo: p99 %.4f, peor %.4f, vértices sin pareja %d" % (p99, peor, sin_par))
+
+# v4: patas traseras más gruesas ("pantalón" de persa). Se inflan muslo y canilla por la
+# normal, con caída suave hacia la grupa y hacia la mano del pie; el lado de adentro crece
+# poco (las patas no se tocan). Es simétrico: cada vértice usa |x|.
+if PIERNA > 0:
+    mt = ndimage.binary_dilation(((mp >> 4) & 1).astype(bool), iterations=2)
+    dentro_px = ndimage.distance_transform_edt(mt)
+    retopo.data.update()
+    n_inf = 0
+    for v in retopo.data.vertices:
+        px = int(np.clip(round(512 - v.co.y / C.PX), 0, 1023))
+        py = int(np.clip(round(512 - (v.co.z - zoff) / C.PX), 0, 1023))
+        if not mt[py, px] or abs(v.co.x) < 0.04:
+            continue
+        w = min(1.0, dentro_px[py, px] / 30.0)                  # borde del contorno del creador
+        w *= float(np.clip((py - 540) / 70.0, 0, 1))            # se funde con la grupa arriba
+        w *= float(np.clip((880 - py) / 50.0, 0, 1)) * 0.8 + 0.2 # la mano del pie crece poco
+        w *= float(np.clip((abs(v.co.x) - 0.04) / 0.05, 0, 1))  # nada cerca del centro
+        n = v.normal.copy()
+        s = 1.0 if v.co.x > 0 else -1.0
+        hacia_afuera = n.x * s
+        k = 1.0 if hacia_afuera >= 0 else 0.35                  # adentro, poco
+        d = n.copy(); d.x += 0.35 * s; d.normalize()
+        v.co += d * (PIERNA * w * k)
+        n_inf += w > 0.01
+    retopo.data.update()
+    p99, peor, sin_par = simetria_exacta(retopo)
+    print("patas traseras infladas %.3f u en %d vértices (simetría: peor %.5f)" % (PIERNA, n_inf, peor))
 for p in retopo.data.polygons:
     p.use_smooth = True
 print("final:", len(retopo.data.vertices), "vértices,", len(retopo.data.polygons), "caras")

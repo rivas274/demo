@@ -8,6 +8,9 @@ Actualizado: 2026-10-21 (estudio v3: la pelea en todo el cuarto; antes, plan de 
 
 ## En curso
 
+- **2026-10-23, decisión del creador:** «Ya estamos bien con Felipe; seguir insistiendo podría entorpecer el juego». Se cierra la animación de Felipe 3D, rig v6; solo falta la mirada a cámara ocasional y quieto largo (sentarse, mirar al jugador y jugar con la pelota).
+  - **Siguiente paso:** una **sala 3D jugable** (`jugable.tscn`) para probar controles, salto e interacciones (arañar el sofá, tirar un vaso, pedir a Valeria, la pelota), con Valeria de Mixamo.
+  - Es un proyecto **independiente** del juego 2D: no toca `siete-vidas/juego/`.
 - **Prototipo de sala en 3D pixel (`prototipos/sala-3d-pixel/`), con plazo hasta el domingo 2026-10-25 (plan aprobado por el creador el 2026-10-22).**
   - **Lo ya probado:** Felipe y Valeria generados con IA a partir de imágenes de Gemini, con Hunyuan3D-2 mini en la PC del creador (gratis). La forma de Felipe g03 está aprobada y pintada.
   - **Por qué se descartó animarlo con fórmulas:** al animarlo así se veía «rígido, tenía más vida el pixel art». El modelo de patas estiradas se descartó por amorfo.

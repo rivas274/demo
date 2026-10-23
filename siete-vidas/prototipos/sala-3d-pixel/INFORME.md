@@ -469,3 +469,11 @@ El creador: «me encanta la animación de la habitación… creo que lo logramos
 - `felipe-v6-textura.png`: espalda, perfil, 3/4, cara, boca de cerca y a ×3, v5 contra v6;
 - `felipe-v6-cabeza-opciones.png`;
 - `felipe-rig-acciones-v6.mp4`.
+
+### v6.1 (v6b): la mirada a cámara como gesto, no permanente (2026-10-23)
+El creador: «cuando se voltea de espaldas, se ve raro que mire la cámara; se ve raro que siempre esté mirando la cámara». Solo cambia la capa de cabeza de `felipe_rig.gd`:
+- **De espaldas** (de 100° a 130° lejos de la cámara, con fundido) **o mientras se da vuelta:** la cabeza sigue al cuerpo, sin giro.
+- **Caminando:** el giro hacia la cámara es sutil, 12° como máximo (antes 30°), solo para no ver la coronilla. El cuello sigue 12° más alto.
+- **Quieto:** una mirada ocasional a la cámara de 1 a 2 s, cada 4 a 8 s al azar (semilla fija), de hasta 35°, y vuelve.
+- **Pidiendo:** mira a la persona (hacia la cámara, 25° como máximo).
+- Todo con suavizado. Entregables: `felipe-v6b-mirada.png` (v6 contra v6b) y `felipe-rig-acciones-v6b.mp4`.

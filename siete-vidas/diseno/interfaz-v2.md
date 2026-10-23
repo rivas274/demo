@@ -283,6 +283,7 @@ Hasta que eso se decida, el arte trae los 5 estados de la huella, y el HUD de la
 - **El cartel de travesura mantiene la sombra oscura,** porque el magenta es de Valeria (un color, un significado).
 - **Colores:** Felipe en oro ámbar #E8913A; la oportunidad en amarillo limón #FFE066, solo como borde y texto con flecha.
 - **A corregir en los assets:** con texto grande, el texto del diálogo tiene que dejar al menos 6 px libres después del retrato. En la C quedaba pegado.
+- **Kit final (2026-10-23):** `juego/assets/ui/v2/` (68 piezas, con su `README.md`) y la lámina `revisiones/capturas/interfaz-rediseno/kit-v2.png`. Hueco retrato-texto medido: 13 px en normal y 12 px en grande.
 
 Lo que sigue es el registro de las tres opciones que se compararon.
 

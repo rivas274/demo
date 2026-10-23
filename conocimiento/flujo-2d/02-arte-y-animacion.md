@@ -24,6 +24,18 @@ Conseguir arte de calidad sin dibujante y sin presupuesto, y que el protagonista
 6. **Recepción automática:** un script quita el fondo blanco y el halo del JPEG, separa las piezas, **recorta cada una a su borde opaco antes y después de escalar**, quita pixeles sueltos y escala sin suavizar (vecino más cercano). Ver [03-godot-2d.md](03-godot-2d.md).
 7. **Mide la colisión en el arte:** la superficie que se pisa sale de la fila opaca de la imagen y una prueba la compara a ±2 px.
 
+## Receta: pasar una hoja de UI de IA a pixel exacto
+
+La IA dibuja la UI «tipo pixel art», pero sin rejilla real, con medio tono en los bordes y a otra escala. Reescalarla no sirve. Lo que funcionó (kit de interfaz de Felipe, 2026-10-23):
+
+1. **Separar por tipo de pieza.** Lo geométrico (marcos, franjas, barras, paneles) se dibuja por código a 1 px real con las mismas funciones de la lámina de dirección: queda exacto, se puede rehacer y coincide con la lámina. La hoja de IA solo da detalles (bisel, línea interior). Solo lo de forma propia (íconos, huellas, orejitas, colas) sale de la IA.
+2. **Silueta y relleno, no colores:** la silueta es lo que no se alcanza desde el borde del recorte pasando por el fondo blanco; el relleno es la silueta menos el contorno oscuro que toca el exterior. El contorno de 1 px se vuelve a trazar al final.
+3. **Reducir por clases y probar varios métodos:** «mayoría» por celda, «huecos» (el vacío gana desde el 30 %, guarda la separación entre dedos de una huella) y «centro» (vecino más próximo). Ningún método gana siempre.
+4. **Medir y mirar:** puntaje de 0 a 1 con apego a la paleta, píxeles cambiados por la limpieza, partes que se leen a ×1 (una huella tiene 5), simetría y parecido a la forma de la lámina; más una lámina con cada variante a ×1 sobre el fondo real y a ×6. Cuando la vista contradice al puntaje, se agrega la medida que faltaba (ej.: «acento sólido» para que el interior de una oreja no sea un anillo que a ×1 parece ruido).
+5. **Retoque a mano y rejilla en el código:** la ganadora se limpia píxel a píxel y queda escrita como rejilla de letras, con una nota de qué se cambió.
+6. **Cajas con lados en diagonal en 9 partes:** si la diagonal va de arriba abajo, solo se estira a lo ancho; el alto es fijo (una pieza por alto). Los márgenes se calculan buscando las columnas iguales a la del centro, y se prueba rearmando las pantallas solo con las piezas y comparando píxel a píxel con la lámina.
+7. **Paleta exacta comprobada por script:** todo píxel visible es un color de la lista y alfa 0 o 255.
+
 ## Receta: animaciones consistentes con SpriteCook
 
 1. **Aprueba una imagen base** del protagonista (en Felipe, «Felipe A»). Todo sale de ella.

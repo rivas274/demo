@@ -16,7 +16,7 @@ import simetria as S
 MITAD = "NEGATIVE_X"
 SOLDADURA = 0.005
 RELAJAR = int(os.environ.get("FELIPE_RELAJAR", "6"))   # pasadas de suavizado del cuerpo
-CABEZA = os.environ.get("FELIPE_CABEZA", "orig1")
+CABEZA = os.environ.get("FELIPE_CABEZA", "orig2")  # elegida entre 5 (la más fiel a Meshy)
 PIERNA = float(os.environ.get("FELIPE_PIERNA", "0.07"))  # cuánto se inflan las patas traseras (u; elegido entre 0 y 0,09)
 
 CARAS = int(sys.argv[1]) if len(sys.argv) > 1 else int(os.environ.get("FELIPE_CARAS", "8000"))
@@ -259,6 +259,10 @@ if PIERNA > 0:
 # cuello. El cuerpo sigue simétrico. Variantes en FELIPE_CABEZA: "sim" (v4), "orig" (proyecta),
 # "orig1"/"orig2" (proyecta tras 1 o 2 subdivisiones de la cabeza).
 if CABEZA != "sim":
+    # Copia sin subdividir: ahí se calculan los pesos de calor (03_rig.py) y se transfieren.
+    base = retopo.copy(); base.data = retopo.data.copy(); base.name = "RetopoBase"
+    bpy.context.collection.objects.link(base)
+    base.hide_render = True
     cab0 = ((mp >> 0) & 1).astype(bool) | ((mp >> 1) & 1).astype(bool)
     dcab = ndimage.distance_transform_edt(cab0)
     def peso_cabeza(co):

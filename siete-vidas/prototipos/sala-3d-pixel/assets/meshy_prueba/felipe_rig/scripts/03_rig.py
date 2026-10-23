@@ -129,7 +129,36 @@ bpy.ops.object.select_all(action="DESELECT")
 malla.select_set(True)
 arm.select_set(True)
 bpy.context.view_layer.objects.active = arm
-bpy.ops.object.parent_set(type="ARMATURE_AUTO")
+if "RetopoBase" in bpy.data.objects:
+    # v5: la malla final tiene la cabeza subdividida (42 mil caras) y el calor de Blender falla
+    # en ella. Se calculan los pesos en la malla base (sin subdividir) y se transfieren con
+    # Data Transfer (vecino más cercano, interpolado en la cara).
+    base = bpy.data.objects["RetopoBase"]
+    base.hide_viewport = False
+    bpy.ops.object.select_all(action="DESELECT")
+    base.select_set(True); arm.select_set(True)
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.parent_set(type="ARMATURE_AUTO")
+    for g in base.vertex_groups:
+        malla.vertex_groups.new(name=g.name)
+    dt = malla.modifiers.new("pesos", "DATA_TRANSFER")
+    dt.object = base
+    dt.use_vert_data = True
+    dt.data_types_verts = {"VGROUP_WEIGHTS"}
+    dt.vert_mapping = "POLYINTERP_NEAREST"
+    dt.layers_vgroup_select_src = "ALL"
+    dt.layers_vgroup_select_dst = "NAME"
+    bpy.ops.object.select_all(action="DESELECT")
+    malla.select_set(True)
+    bpy.context.view_layer.objects.active = malla
+    bpy.ops.object.modifier_apply(modifier="pesos")
+    bpy.ops.object.select_all(action="DESELECT")
+    malla.select_set(True); arm.select_set(True)
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.parent_set(type="ARMATURE_NAME")
+    bpy.data.objects.remove(base)
+else:
+    bpy.ops.object.parent_set(type="ARMATURE_AUTO")
 cuenta = {g.name: 0 for g in malla.vertex_groups}
 for v in malla.data.vertices:
     for g in v.groups:

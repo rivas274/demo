@@ -263,7 +263,7 @@ def aplicar(params):
 
 # Pliegues: distancia (px de perfil) al borde de los contornos de las patas del creador, solo
 # en su parte de arriba (de donde la pata se separa del cuerpo hacia arriba).
-PLIEGUE = float(os.environ.get("FELIPE_PLIEGUE", "0.8"))
+PLIEGUE = float(os.environ.get("FELIPE_PLIEGUE", "0"))  # v5: apagado (ensuciaba a ×3)
 patas_m = (((mp >> 3) & 1) | ((mp >> 4) & 1)).astype(bool)
 borde_p = patas_m & ~ndimage.binary_erosion(patas_m)
 fy2, fx2 = np.mgrid[0:1024, 0:1024]

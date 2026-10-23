@@ -55,7 +55,15 @@ var _bordes_cmd := false
 ## cuello sube al caminar (la caminata la lleva baja y, con la cámara alta, se veía sobre todo
 ## la coronilla); escala_cabeza: escala uniforme del hueso de la cabeza.
 ## Se prueban con -- --giro=g --alza=g --escala-cabeza=k --glb=ruta.
-@export var giro_cabeza := 30.0
+@export var giro_cabeza := 12.0   # v6.1: al caminar, giro sutil (solo evita ver la coronilla)
+## v6.1: mirada a cámara solo como gesto: en quieto, cada 4 a 8 s (al azar) mira 1 a 2 s; al
+## pedir mira a la persona. De espaldas o dándose vuelta, la cabeza sigue al cuerpo.
+@export var giro_gesto := 35.0
+@export var giro_pedir := 25.0
+var _rng := RandomNumberGenerator.new()
+var _prox_gesto := 5.0
+var _gesto_t := 0.0
+var _gesto_dur := 0.0
 @export var alza_cabeza := 12.0
 @export var escala_cabeza := 1.0
 var _cab_idx := -1
@@ -124,6 +132,7 @@ func _ready() -> void:
 				casco.set_shader_parameter("grosor_px", contorno_px)
 				mt.next_pass = casco
 	_ajustar_bordes.call_deferred()
+	_rng.seed = 7
 	ap.play("quieto")
 	if rutina:
 		_armar_rutina()
@@ -215,26 +224,50 @@ func animar(delta: float) -> void:
 	_pos_antes = pos
 	_vel_antes = vel
 	_giro_antes = rotation.y
-	_cabeza(delta)
+	_cabeza(delta, giro_vel)
 	if resorte_cola:
 		_cola(delta, giro_vel)
 
 
-## Capa de cabeza: sube el cuello al caminar y gira la cabeza hacia la cámara (suavizado).
-func _cabeza(delta: float) -> void:
+## Capa de cabeza (v6.1): sube el cuello al caminar y gira la cabeza, con suavizado:
+## - de espaldas a la cámara (más de ~60° pasada la vista de perfil) o dándose vuelta: 0;
+## - caminando: hacia la cámara como mucho giro_cabeza (sutil, mira hacia donde va);
+## - quieto: mirada ocasional a la cámara (gesto de 1 a 2 s cada 4 a 8 s);
+## - pidiendo: mira a la persona (hacia la cámara, giro_pedir).
+func _cabeza(delta: float, giro_vel: float = 0.0) -> void:
 	if _cab_idx < 0:
 		return
-	var anda := 1.0 if ap.current_animation == "caminar" else 0.0
+	var anim := ap.current_animation
+	var anda := 1.0 if anim == "caminar" else 0.0
 	_anda = lerpf(_anda, anda, clampf(delta * 6.0, 0.0, 1.0))
 	var cam := get_viewport().get_camera_3d()
-	var meta := 0.0
+	var hacia := 0.0      # ángulo (°) de la cámara respecto del frente de Felipe
 	if cam:
-		# Dirección a la cámara en el espacio del esqueleto (Felipe mira a +Z, su izquierda es +X).
 		var a_cam := sk.global_transform.affine_inverse() * cam.global_position
-		var cab := sk.get_bone_global_pose(_cab_idx).origin
-		var d := a_cam - cab
-		meta = clampf(rad_to_deg(atan2(d.x, d.z)), -giro_cabeza, giro_cabeza)
-	_giro_cab = lerpf(_giro_cab, meta, clampf(delta * 4.0, 0.0, 1.0))
+		var d := a_cam - sk.get_bone_global_pose(_cab_idx).origin
+		hacia = rad_to_deg(atan2(d.x, d.z))
+	# Gesto ocasional en quieto.
+	if anim == "quieto":
+		_prox_gesto -= delta
+		if _prox_gesto <= 0.0 and _gesto_t <= 0.0:
+			_gesto_dur = _rng.randf_range(1.0, 2.0)
+			_gesto_t = _gesto_dur
+			_prox_gesto = _rng.randf_range(4.0, 8.0) + _gesto_dur
+	else:
+		_prox_gesto = maxf(_prox_gesto, 2.0)
+	_gesto_t = maxf(0.0, _gesto_t - delta)
+	var tope := 0.0
+	if anim == "caminar":
+		tope = giro_cabeza
+	elif anim.begins_with("pedir"):
+		tope = giro_pedir
+	elif anim == "quieto" and _gesto_t > 0.0:
+		tope = giro_gesto
+	# De espaldas: nada (se desvanece de 100° a 130° de la cámara); dándose vuelta: nada.
+	var de_frente := 1.0 - smoothstep(100.0, 130.0, absf(hacia))
+	var quieto_giro := 1.0 - smoothstep(0.5, 1.5, absf(giro_vel))
+	var meta := clampf(hacia, -tope, tope) * de_frente * quieto_giro
+	_giro_cab = lerpf(_giro_cab, meta, clampf(delta * 3.5, 0.0, 1.0))
 	if _cuello_idx >= 0 and alza_cabeza != 0.0:
 		_girar_hueso(_cuello_idx, Basis(Vector3.RIGHT, deg_to_rad(-alza_cabeza * _anda)))
 	_girar_hueso(_cab_idx, Basis(Vector3.UP, deg_to_rad(_giro_cab)))

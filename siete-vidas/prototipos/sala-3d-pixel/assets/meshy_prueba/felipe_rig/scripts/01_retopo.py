@@ -6,7 +6,7 @@
 # que tiene la mano delantera en su lugar (la izquierda venía 6 cm atrás, bajo el pecho) y es
 # el lado donde el creador marcó el esqueleto; soldadura de 0,005 (deja la costura cerrada).
 # Uso: python3 01_retopo.py [caras=8000]
-import sys, os, bpy, bmesh
+import sys, os, bpy, bmesh, mathutils
 import numpy as np
 from scipy.spatial import cKDTree
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -16,6 +16,8 @@ import simetria as S
 MITAD = "NEGATIVE_X"
 SOLDADURA = 0.005
 RELAJAR = int(os.environ.get("FELIPE_RELAJAR", "6"))   # pasadas de suavizado del cuerpo
+CRANEO = float(os.environ.get("FELIPE_CRANEO", "0.08"))  # elegido entre 0, 5, 8 y 12 %
+HOCICO_MM = float(os.environ.get("FELIPE_HOCICO", "3"))  # elegido entre 0; 1,5; 3 y 4,5 mm
 CABEZA = os.environ.get("FELIPE_CABEZA", "orig2")  # elegida entre 5 (la más fiel a Meshy)
 PIERNA = float(os.environ.get("FELIPE_PIERNA", "0.07"))  # cuánto se inflan las patas traseras (u; elegido entre 0 y 0,09)
 
@@ -290,6 +292,46 @@ if CABEZA != "sim":
     retopo.data.update()
     print("cabeza (%s): %d vértices proyectados sobre la Meshy original; total %d caras"
           % (CABEZA, n_p, len(retopo.data.polygons)))
+    # v6: forma de la cabeza (pedido del creador: «parece un cerebro gigante»). Edición
+    # proporcional suave y simétrica, sin tocar ojos, nariz ni boca:
+    #  - CRANEO: la parte de arriba y de atrás (sobre y detrás de los ojos) se acerca a un
+    #    pivote a la altura de los ojos; las orejas bajan con su base, sin achicarse.
+    #  - HOCICO_MM: nariz, boca y cachetes blancos se adelantan (mm reales), con caída suave.
+    if CRANEO > 0 or HOCICO_MM > 0:
+        vs_ = retopo.data.vertices
+        cab_v = [v for v in vs_ if peso_cabeza(v.co) > 0]
+        y_fr = min(v.co.y for v in cab_v)
+        z_ojo = 1.01
+        y_ojo = y_fr + 0.16
+        piv = mathutils.Vector((0.0, y_fr + 0.40, z_ojo))
+        u_mm = 1.6149 / (C.ALTO_M * 1000)      # unidades del modelo por mm
+        hoc = mathutils.Vector((0.0, y_fr, 0.88))
+        sm = lambda t: (lambda c: c * c * (3 - 2 * c))(min(1.0, max(0.0, t)))
+        def craneo_d(co):
+            w = max(sm((co.z - (z_ojo + 0.08)) / 0.22), sm((co.y - (y_ojo + 0.22)) / 0.25))
+            return (piv - co) * (CRANEO * w)
+        def deformar(co):
+            wc = peso_cabeza(co)
+            if wc <= 0:
+                return co
+            d = mathutils.Vector()
+            if CRANEO > 0:
+                oreja = abs(co.x) > 0.15 and co.z > 1.38
+                base = mathutils.Vector((co.x, co.y, 1.38)) if oreja else co
+                d += craneo_d(base)
+            if HOCICO_MM > 0:
+                r = (co - hoc).length
+                d.y -= HOCICO_MM * u_mm * sm(1 - r / 0.17) * sm((-co.y + y_fr + 0.20) / 0.10)
+            return co + d * wc
+        for v in cab_v:
+            v.co = deformar(v.co.copy())
+        retopo.data.update()
+        # La misma deformación en la Meshy de alta (de donde se hornea la textura): así la malla
+        # nueva y la original coinciden y la textura no se estira ni quedan huecos negros.
+        for v in meshy.data.vertices:
+            v.co = deformar(v.co.copy())
+        meshy.data.update()
+        print("forma de la cabeza: cráneo %.0f %%, hocico %.1f mm" % (CRANEO * 100, HOCICO_MM))
 for p in retopo.data.polygons:
     p.use_smooth = True
 print("final:", len(retopo.data.vertices), "vértices,", len(retopo.data.polygons), "caras")

@@ -64,6 +64,8 @@ Hornea el color desde la malla alta con «Selected to Active» (ver [02-texturas
 - Patas delanteras cortas: el gato no puede sentarse erguido con las manos en el piso; su sentado es bajo.
 - Engrosar una parte: empuja desde el eje del miembro, no por la normal (con normales ruidosas la piel se arruga), y suaviza.
 - QuadriFlow da una malla pareja, no bucles pensados por articulación: funciona si es densa; un modelador la mejoraría.
+- **Cabeza grande vista desde una cámara alta:** si la caminata lleva la cabeza baja, la cámara ve sobre todo la coronilla ("cerebro gigante"). La técnica estándar de los juegos de vista lateral es que la cabeza gire hacia la cámara (~30°, con suavizado) y suba un poco al caminar, como capa en el motor. Ayuda mucho más que achicar la cabeza. Retoques de forma mínimos (cráneo 8 % más chico y hocico 3 mm afuera) completan el arreglo sin cambiar la expresión.
+- **No simetrizar la cara de un modelo de IA:** el cuerpo sí, pero la cara se proyecta sobre la original con más densidad. Espejarla la aplana y hunde los ojos.
 
 ## Errores típicos
 
@@ -81,4 +83,4 @@ Hornea el color desde la malla alta con «Selected to Active» (ver [02-texturas
 - Scripts en orden: `siete-vidas/prototipos/sala-3d-pixel/assets/meshy_prueba/felipe_rig/scripts/` (`01_retopo.py`, `02_textura.py`, `03_rig.py`, `04_poses.py`, `05_anima.py`, `anima_locomocion.py`, `anima_acciones.py`, `simetria.py`).
 - Plantillas para marcar huesos: `siete-vidas/prototipos/sala-3d-pixel/assets/meshy_prueba/plantilla_esqueleto/`.
 - Uso en Godot (resorte de la cola): `siete-vidas/prototipos/sala-3d-pixel/scripts/felipe_rig.gd`.
-- Detalle de las versiones v1 a v4: `siete-vidas/prototipos/sala-3d-pixel/INFORME.md` («Felipe con rig hecho en Blender»); lecciones: `siete-vidas/memoria/01-decisiones.md` («Pilar de trabajo»).
+- Detalle de las versiones v1 a v6: `siete-vidas/prototipos/sala-3d-pixel/INFORME.md` («Felipe con rig hecho en Blender»); lecciones: `siete-vidas/memoria/01-decisiones.md` («Pilar de trabajo»).

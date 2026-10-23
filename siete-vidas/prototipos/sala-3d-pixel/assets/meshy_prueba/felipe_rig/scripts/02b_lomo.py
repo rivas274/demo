@@ -129,7 +129,10 @@ idx = ndimage.distance_transform_edt(~hay, return_distances=False, return_indice
 mapa = mapa[idx[0], idx[1]]
 
 # Color de la gorra (gris pardo atigrado) para rellenar: lo oscuro de la cabeza, arriba.
-gorra = cubre & cabeza[py, px] & (py < 330) & (lum < 0.55)
+# Gorra: lo de arriba de la cabeza (30 % superior de su altura real, no una fila fija de la
+# plantilla: con el cráneo más chico la gorra baja y la muestra quedaba vacía -> textura negra).
+_zc = pos[..., 2][cubre & cabeza[py, px]]
+gorra = cubre & cabeza[py, px] & (pos[..., 2] > np.percentile(_zc, 70)) & (lum < 0.55)
 gris = np.median(tex[gorra], axis=0) if gorra.any() else oscuro_ref
 # Las manchas del Felipe real (felipe-video6-camina-costado.png) son más oscuras que la gorra
 # de Meshy: pardo muy oscuro con rayas casi negras.
@@ -137,7 +140,7 @@ gris = np.median(tex[gorra], axis=0) if gorra.any() else oscuro_ref
 # combinaba con la cabeza).
 lg = tex[gorra] @ np.array([0.299, 0.587, 0.114])
 gris = np.median(tex[gorra][lg > np.percentile(lg, 55)], axis=0)
-raya = np.median(tex[gorra][lg < np.percentile(lg, 15)], axis=0)
+raya = np.median(tex[gorra][lg <= np.percentile(lg, 15)], axis=0)  # <=: con valores repetidos, < dejaba la muestra vacía
 RAYAS_CUERPO = float(os.environ.get("FELIPE_RAYAS", "8"))   # rayas a lo largo del lomo
 RAYAS_COLA = float(os.environ.get("FELIPE_RAYAS_COLA", "7"))
 print("blanco", blanco_ref, "gris de la gorra", gris)
@@ -301,7 +304,7 @@ borde_p &= (fy2 < 770) & (fy2 > 560) & (fx2 > 345)   # sin el borde de atrás de
 pliegue_px = ndimage.distance_transform_edt(~borde_p)
 
 # Boca: en la cara de frente, bajo la nariz, los texels oscuros (la línea de la boca).
-BOCA_PX = int(os.environ.get("FELIPE_BOCA", "3"))
+BOCA_PX = int(os.environ.get("FELIPE_BOCA", "2"))  # elegida entre 0, 2, 3 y 4
 frente_y = pos[..., 1].min() if cubre.any() else 0
 rosa = cubre & (tex[..., 0] - tex[..., 1] > 0.15) & (pos[..., 1] < frente_y + 0.10) & (np.abs(pos[..., 0]) < 0.07)
 z_nariz = pos[..., 2][rosa].min() if rosa.any() else 0.87
@@ -315,7 +318,7 @@ nariz_b = ndimage.binary_dilation(rosa, iterations=max(1, BOCA_PX // 2)) & ~rosa
 if BOCA_PX > 0:
     boca_m |= nariz_b
 # Ojos: lo verde (iris) con la pupila adentro, en la cara de frente; uno por lado.
-OJOS = float(os.environ.get("FELIPE_OJOS", "1"))
+OJOS = float(os.environ.get("FELIPE_OJOS", "2"))  # elegida entre 0 y 3
 verde = cubre & (tex[..., 1] - tex[..., 2] > 0.10) & (tex[..., 1] > 0.45) & (pos[..., 1] < frente_y + 0.25)
 ojos = []
 for sg in (1, -1):

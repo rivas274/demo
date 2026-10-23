@@ -31,6 +31,10 @@ Cuando cambias la malla (retopología), el color se pasa de la malla vieja (alta
 - Revisa a la resolución final (en Felipe, ×3): lo que se ve de cerca puede desaparecer o ensuciarse.
 - Las uniones (base de la cola con la grupa) suelen quedar fuera de toda zona pintada y conservan la textura vieja: cúbrelas a propósito.
 - Las líneas de pliegue pintadas (donde la pata entra al cuerpo) ayudan de cerca, pero a ×3 casi no se notan; ahí ayuda más el contorno.
+- **El cuerpo usa el mismo tono y las mismas rayas que la cabeza.** Muestrea el color de la gorra (claro y oscuro) en la textura de la IA y repite sus rayas, finas (~25 % del período) y en la dirección del cuerpo. Una mancha oscurecida "a ojo" no combina con la cabeza. La cola también lleva rayas (anillos), no un bloque liso.
+- **Rasgos chicos a pixel ×3** (boca, nariz): engruesa la línea que ya existe 1 o 2 texels y oscurécela, sin cambiar su forma. Elige el grosor más sutil que deje al menos 1 px oscuro en la resolución final.
+- **Volumen toon en los ojos:** un brillo chico y una sombra leve bajo el párpado superior, pintados en la textura. Es reversible y no toca la geometría.
+- **Al muestrear colores por percentil,** usa `<=` y no `<`: con valores repetidos la muestra queda vacía, el color sale NaN y toda la textura se pone negra.
 
 ## Herramientas
 
@@ -49,6 +53,7 @@ Cuando cambias la malla (retopología), el color se pasa de la malla vieja (alta
 | Anillo blanco en la base de la cola | Zona fuera del cuerpo y de la cola al pintar | Que la cola nazca del color del cuerpo |
 | Manchas con escalones en las costuras | Pintar directo en la imagen UV | Pintar en un mapa del cuerpo y evaluar por texel |
 | Lomo «recargado» | Copiar el patrón real exacto | Una mancha simple y legible |
+| Parches negros al achicar una parte de la malla | Los rayos del horneado salen por dentro de la original | Aplicar la misma deformación a la malla de alta antes de hornear |
 | Se pierde el relieve fino del pelo | La malla nueva es más lisa que la de IA | Aceptarlo o hornear también un mapa de normales |
 
 ## Fuente o ejemplo
@@ -56,4 +61,4 @@ Cuando cambias la malla (retopología), el color se pasa de la malla vieja (alta
 - Horneado: `siete-vidas/prototipos/sala-3d-pixel/assets/meshy_prueba/felipe_rig/scripts/02_textura.py`.
 - Repintado del lomo con variantes: `siete-vidas/prototipos/sala-3d-pixel/assets/meshy_prueba/felipe_rig/scripts/02b_lomo.py`.
 - Cola atigrada repintada sin regenerar: `siete-vidas/prototipos/sala-3d-pixel/assets/meshy_prueba/pintar_cola.py`.
-- Resultados y decisiones (v3 y v4): `siete-vidas/prototipos/sala-3d-pixel/INFORME.md`.
+- Resultados y decisiones (v3 a v6): `siete-vidas/prototipos/sala-3d-pixel/INFORME.md`.

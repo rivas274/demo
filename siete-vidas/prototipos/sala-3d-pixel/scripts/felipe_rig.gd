@@ -50,6 +50,18 @@ const ALTO_ARCO := 0.12
 ## -- --contorno=px y -- --bordes=prof,normal se prueban otras combinaciones.
 @export var contorno_px := 0.0  # v5: sin casco (sus caras traseras asomaban como puntos oscuros en el pecho y la cara)
 var _bordes_cmd := false
+## v6: capa de cabeza (técnica estándar de vista lateral: el personaje "muestra la cara").
+## giro_cabeza: grados máximos que la cabeza gira hacia la cámara; alza_cabeza: grados que el
+## cuello sube al caminar (la caminata la lleva baja y, con la cámara alta, se veía sobre todo
+## la coronilla); escala_cabeza: escala uniforme del hueso de la cabeza.
+## Se prueban con -- --giro=g --alza=g --escala-cabeza=k --glb=ruta.
+@export var giro_cabeza := 30.0
+@export var alza_cabeza := 12.0
+@export var escala_cabeza := 1.0
+var _cab_idx := -1
+var _cuello_idx := -1
+var _giro_cab := 0.0
+var _anda := 0.0
 var umbral_profundidad := 0.12
 var umbral_normal := 0.45
 const COLOR_CONTORNO := Color("2b140e")
@@ -75,6 +87,9 @@ var _giro_desde := 0.0
 
 func _ready() -> void:
 	_leer_info()
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--glb="):
+			ruta = arg.get_slice("=", 1)
 	var doc := GLTFDocument.new()
 	var estado := GLTFState.new()
 	if doc.append_from_file(ruta, estado) != OK:
@@ -88,6 +103,8 @@ func _ready() -> void:
 	sk = modelo.find_children("*", "Skeleton3D", true, false)[0]
 	for nombre in ap.get_animation_list():
 		ap.get_animation(nombre).loop_mode = Animation.LOOP_LINEAR if nombre in BUCLES else Animation.LOOP_NONE
+	_cab_idx = sk.find_bone("spine.006")
+	_cuello_idx = sk.find_bone("spine.004")
 	for h in COLA:
 		_cola_idx.append(sk.find_bone(h))
 		_cola_ang.append(Vector2.ZERO)
@@ -118,7 +135,13 @@ func _ready() -> void:
 ## arma su post-proceso (principal.gd fija el casco a 1 px al empezar).
 func _ajustar_bordes() -> void:
 	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--contorno="):
+		if arg.begins_with("--giro="):
+			giro_cabeza = float(arg.get_slice("=", 1))
+		elif arg.begins_with("--alza="):
+			alza_cabeza = float(arg.get_slice("=", 1))
+		elif arg.begins_with("--escala-cabeza="):
+			escala_cabeza = float(arg.get_slice("=", 1))
+		elif arg.begins_with("--contorno="):
 			contorno_px = float(arg.get_slice("=", 1))
 		elif arg.begins_with("--bordes="):
 			var v := arg.get_slice("=", 1).split(",")
@@ -192,8 +215,39 @@ func animar(delta: float) -> void:
 	_pos_antes = pos
 	_vel_antes = vel
 	_giro_antes = rotation.y
+	_cabeza(delta)
 	if resorte_cola:
 		_cola(delta, giro_vel)
+
+
+## Capa de cabeza: sube el cuello al caminar y gira la cabeza hacia la cámara (suavizado).
+func _cabeza(delta: float) -> void:
+	if _cab_idx < 0:
+		return
+	var anda := 1.0 if ap.current_animation == "caminar" else 0.0
+	_anda = lerpf(_anda, anda, clampf(delta * 6.0, 0.0, 1.0))
+	var cam := get_viewport().get_camera_3d()
+	var meta := 0.0
+	if cam:
+		# Dirección a la cámara en el espacio del esqueleto (Felipe mira a +Z, su izquierda es +X).
+		var a_cam := sk.global_transform.affine_inverse() * cam.global_position
+		var cab := sk.get_bone_global_pose(_cab_idx).origin
+		var d := a_cam - cab
+		meta = clampf(rad_to_deg(atan2(d.x, d.z)), -giro_cabeza, giro_cabeza)
+	_giro_cab = lerpf(_giro_cab, meta, clampf(delta * 4.0, 0.0, 1.0))
+	if _cuello_idx >= 0 and alza_cabeza != 0.0:
+		_girar_hueso(_cuello_idx, Basis(Vector3.RIGHT, deg_to_rad(-alza_cabeza * _anda)))
+	_girar_hueso(_cab_idx, Basis(Vector3.UP, deg_to_rad(_giro_cab)))
+	if escala_cabeza != 1.0:
+		sk.set_bone_pose_scale(_cab_idx, Vector3.ONE * escala_cabeza)
+
+
+## Gira un hueso en el espacio del esqueleto alrededor de su cabeza (capa aditiva).
+func _girar_hueso(b: int, giro: Basis) -> void:
+	var padre := sk.get_bone_parent(b)
+	var gp := sk.get_bone_global_pose(b)
+	var pp := sk.get_bone_global_pose(padre) if padre >= 0 else Transform3D()
+	sk.set_bone_pose_rotation(b, (pp.basis.inverse() * (giro * gp.basis)).get_rotation_quaternion())
 
 
 func _cola(delta: float, giro_vel: float) -> void:

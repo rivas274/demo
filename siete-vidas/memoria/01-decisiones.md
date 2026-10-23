@@ -63,6 +63,7 @@ Actualizado: 2026-10-19 (PARTE B del nivel 1 v4). Detalle completo en la biblia 
   - **Partes que se aplastan al doblar** (manos, pies): se dejan rígidas en su hueso, con la mezcla arriba de la articulación, y se mide su volumen en cada cuadro.
   - **Contorno:** no subir la sensibilidad del post-proceso global por un personaje, porque ensucia toda la escena a pixel ×3. El casco invertido en mallas con normales ruidosas deja puntos. Antes de dar un ajuste por bueno, comparar contra la versión anterior en el mismo cuadro.
   - **Entregas animadas en MP4** (H.264, yuv420p, faststart), no en GIF: en la app del creador los GIF no se reproducen solos.
+  - **Cabeza grande con cámara alta:** la cabeza gira hacia la cámara y sube un poco al caminar (capa en el motor). Es la técnica de los juegos de vista lateral y arregla el "cerebro gigante" mejor que achicarla. Detalle en `conocimiento/flujo-3d/03-rig-y-animacion-cuadrupedo.md`.
   - **Límite de proporciones chibi:** con las patas delanteras cortas, Felipe no puede sentarse erguido con las manos en el piso. Su sentado es bajo.
 
 ## Prototipos

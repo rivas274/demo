@@ -434,3 +434,38 @@ El creador: la v4 «es la que mejor se mueve», pero con 3 problemas. Se buscó 
 Desde ahora todo lo animado se entrega en MP4 (H.264, yuv420p, faststart).
 
 **Límite:** el GLB pesa 4,1 MB por la cabeza densa. Si hiciera falta, se puede bajar a una subdivisión (1,1 mm de distancia, 14 mil caras).
+
+### v6: textura con el tono de la gorra, boca, ojos y cabeza que muestra la cara (2026-10-23)
+El creador: «me encanta la animación de la habitación… creo que lo logramos». Pidió retoques de textura y después, sobre la cabeza: «se ve un poco chata en los ojos», «muy rara; parece un cerebro gigante», «hacer más pequeña la parte de arriba o sacar un poquito más el hocico». **El rig, los pesos y las animaciones no cambiaron.**
+
+**Textura** (`02b_lomo.py`):
+- **Montura más chica** (5 variantes; elegida `v6b_media_baja`): sobre el lomo, sin cubrir el anca ni tanto los costados.
+- **Tono y rayas de la gorra:** se muestrea el color claro y el oscuro de la gorra en la textura de Meshy. Las rayas son finas y bajan de la columna hacia los costados. Antes la mancha se oscurecía al 66 % y no combinaba con la cabeza.
+- **Cola** con el mismo tono y anillos atigrados a lo largo, algo más oscura hacia la punta. Ya no es un bloque liso.
+- **Boca:** la "Y" invertida y el contorno de la nariz se engruesan 2 texels y se oscurecen, sin cambiar la forma. Probé 0, 2, 3 y 4. Con 2 se lee 1 px oscuro a ×3.
+- **Ojos** (opción a, la menos invasiva): un brillo chico y una sombra leve bajo el párpado superior y hacia afuera. Probé 4 intensidades y elegí la 2: es reversible y no toca la geometría.
+
+**Cabeza:**
+- **Causa:** la caminata lleva la cabeza baja y la cámara de la sala está alta. Al alejarse en 3/4 se ve sobre todo la coronilla: un casco gris enorme con el ojo en el borde (la captura del creador).
+- **Capa en Godot** (`felipe_rig.gd`): la cabeza gira hacia la cámara, como máximo 30°, con suavizado, y el cuello sube 12° al caminar. También se puede probar la escala de la cabeza (`--giro=`, `--alza=`, `--escala-cabeza=`).
+- **Forma** (`01_retopo.py`, `CRANEO` y `HOCICO_MM`): edición proporcional suave y simétrica sobre la cabeza de Meshy. El cráneo (arriba y atrás de los ojos) se acerca a un pivote y las orejas bajan con su base. El hocico (nariz, boca y cachetes) se adelanta.
+  - La misma deformación se aplica a la malla de alta antes de hornear. Sin eso, los rayos salían por dentro y quedaban parches negros.
+- **Combinaciones probadas** (13, en `felipe-v6-cabeza-opciones.png`):
+  - giro y alza: 0/0, 20/8, 30/12 y 35/16;
+  - escala de la cabeza: 0,9;
+  - solo cráneo, solo hocico y los dos;
+  - cráneo 5, 8 y 12 % con giro;
+  - cráneo + hocico + giro.
+- **Elegida: cráneo 8 %, hocico 3 mm, giro 30° y alza 12°, escala 1,0.**
+  - Lo que más arregla es el giro: en el cuadro de la captura se ven el ojo, la V blanca y la nariz.
+  - Con cráneo al 12 % se aplastan los párpados.
+  - La escala 0,9 casi no cambia nada, y la cabeza grande es parte del estilo chibi.
+
+**Dos errores encontrados y corregidos en el camino:**
+- La muestra de la gorra salía vacía con el cráneo más chico: una franja fija de la plantilla y un percentil con `<`. El color salía NaN y la textura quedaba negra.
+- Los parches negros del horneado, por no deformar también la malla de alta.
+
+**Entregables** (en `proto3d/`):
+- `felipe-v6-textura.png`: espalda, perfil, 3/4, cara, boca de cerca y a ×3, v5 contra v6;
+- `felipe-v6-cabeza-opciones.png`;
+- `felipe-rig-acciones-v6.mp4`.

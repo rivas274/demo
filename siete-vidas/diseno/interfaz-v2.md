@@ -8,6 +8,8 @@ Actualizado: 2026-10-23. **Estado:** primero se decide la **estructura** (dónde
 
 ## Layout y legibilidad multiplataforma
 
+> **APROBADO por el creador (2026-10-23).** El diálogo va **siempre arriba** (zona B), también con texto grande: la cara del humano ya está en el retrato.
+
 **Datos nuevos del creador (2026-10-23):**
 
 - El juego puede salir en **Switch** (portátil y TV), **PC** y **PlayStation**. Todo el texto debe leerse en esas pantallas.

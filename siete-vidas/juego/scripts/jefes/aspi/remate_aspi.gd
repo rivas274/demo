@@ -10,8 +10,6 @@ extends Node2D
 ## - **Golpe:** pausa de impacto de 4 cuadros (el final, más larga), destello blanco de su silueta, estrellas, la onda y
 ##   el temblor (ReaccionesAspi.golpe), «¡CLIC!» y polvo. Al tercero se apaga del todo.
 
-## Lleno bajo la repisa: sale disparada hacia adelante (nunca queda justo bajo la repisa).
-const EMPUJE_LLENA := 80.0
 ## Margen a cada lado de los muebles bajo los que no se queda llena (medio cuerpo de A.S.P.I. y un poco).
 const MARGEN_LLENA := 44.0
 ## Al apagarla, Felipe rebota hacia arriba.
@@ -78,8 +76,9 @@ func quedar_vulnerable(por: String) -> void:
 		sale.tween_property(b.jefe, "position:x", b.jefe.position.x + (libre - x), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 
-## La x libre más cercana para quedarse llena: fuera de lo que tapa su botón desde arriba (Nivel1.ASPI_NO_SE_LLENA_BAJO,
-## con medio cuerpo de margen) y dentro de su patrulla. La repisa conserva su regla de siempre (80 px hacia adelante).
+## La x libre más cercana para quedarse vulnerable: fuera de lo que tapa su botón desde arriba (Nivel1.ASPI_NO_SE_LLENA_BAJO
+## y la repisa de las macetas, con medio cuerpo de margen) y dentro de su patrulla. Se corre al borde libre MÁS CERCANO
+## (v5: antes salía siempre hacia la derecha y, en corto junto a la repisa, cruzaba medio estudio).
 func piso_libre(x: float) -> float:
 	var patrulla := b.jefe.patrulla
 	var zonas: Array[Vector2] = []
@@ -88,21 +87,21 @@ func piso_libre(x: float) -> float:
 		if pieza.has_area():
 			zonas.append(Vector2(pieza.position.x - MARGEN_LLENA, pieza.end.x + MARGEN_LLENA))
 	var repisa := b.nivel.pieza("Repisa de las macetas")
-	if repisa and absf(x - (repisa.position.x + 30.0)) < 70.0:
-		var hacia := 1.0 if x + EMPUJE_LLENA < patrulla.limite_derecho else -1.0
-		x = clampf(x + hacia * EMPUJE_LLENA, patrulla.limite_izquierdo, patrulla.limite_derecho)
-	# Las zonas se tocan (la caja va delante del librero): se sale por la derecha, hacia la puerta del balcón (piso
-	# libre); si no cabe en su patrulla, por la izquierda.
+	if repisa:
+		zonas.append(Vector2(repisa.position.x + 30.0 - 70.0, repisa.position.x + 30.0 + 70.0))
+	# Las zonas que se tocan se juntan (la repisa, la caja y el librero quedan seguidos).
+	zonas.sort_custom(func(p: Vector2, q: Vector2) -> bool: return p.x < q.x)
+	var juntas: Array[Vector2] = []
 	for zona in zonas:
+		if not juntas.is_empty() and zona.x <= juntas[-1].y:
+			juntas[-1].y = maxf(juntas[-1].y, zona.y)
+		else:
+			juntas.append(zona)
+	for zona in juntas:
 		if x > zona.x and x < zona.y:
-			var desde := zona.x
-			var hasta := zona.y
-			for otra in zonas:
-				if otra.x <= hasta and otra.y >= desde:
-					desde = minf(desde, otra.x)
-					hasta = maxf(hasta, otra.y)
-			x = hasta if hasta <= patrulla.limite_derecho else desde
-			break
+			var izquierda := zona.x if zona.x >= patrulla.limite_izquierdo else INF
+			var derecha := zona.y if zona.y <= patrulla.limite_derecho else INF
+			return izquierda if absf(x - izquierda) <= absf(derecha - x) else derecha
 	return x
 
 

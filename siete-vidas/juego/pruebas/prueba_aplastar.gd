@@ -54,6 +54,10 @@ func _correr() -> void:
 		var pies := Vector2(roundf(mueble.get_center().x), mueble.position.y)
 		await _caso(nombre.to_lower(), pies, _x_libre(pies.x, datos.alcance_mueble))
 
+	# En corto (charco del apagón) también se ofrece.
+	await _preparar(Vector2(6990, Nivel1.SUELO), _x_libre(6990.0, datos.alcance_piso), true, "charco")
+	_comprobar(felipe.objeto_cercano() == batalla.aplastar, "En corto (charco del apagón) también se ofrece «Aplastar»")
+
 	# Le gana a lo que se puede tirar: en el escritorio, junto al vaso.
 	var vaso: Objeto = null
 	for objeto in batalla.municion:
@@ -85,7 +89,7 @@ func _x_libre(x: float, alcance: float) -> float:
 
 
 ## Deja a A.S.P.I. en `x_aspi` (vulnerable o no) y a Felipe parado en `pies`, con la pelea en la fase 1.
-func _preparar(pies: Vector2, x_aspi: float, vulnerable: bool) -> void:
+func _preparar(pies: Vector2, x_aspi: float, vulnerable: bool, motivo := "deposito") -> void:
 	batalla.vencidas = 0
 	batalla.llena = false
 	batalla.reinicio = 0.0
@@ -101,7 +105,7 @@ func _preparar(pies: Vector2, x_aspi: float, vulnerable: bool) -> void:
 	aspi.patrulla.quieta = true
 	await _parar(pies + Vector2(0, -2), 20)
 	if vulnerable:
-		batalla.quedar_vulnerable("deposito")
+		batalla.quedar_vulnerable(motivo)
 		await _esperar(25)
 
 

@@ -308,7 +308,7 @@ func _aplastar() -> void:
 	for intento in 4:
 		if not batalla.llena or batalla.apagados > antes:
 			break
-		# Al llenarse bajo la repisa sale disparada unos 80 px (0,3 s): se espera a que quede quieta.
+		# Al quedar vulnerable bajo la repisa, la caja o el librero se corre al borde libre más cercano (0,3 s): se espera.
 		await _hasta_que_aspi_se_detenga()
 		if felipe.objeto_cercano() != batalla.aplastar:
 			await _bajar_al_piso()

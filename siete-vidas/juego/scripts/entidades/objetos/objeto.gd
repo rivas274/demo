@@ -16,6 +16,8 @@ var tirable: Tirable
 const CRECER := 0.45
 const GRUPO_PEDAZOS := "pedazos_rotos"
 var _tiempo_roto := 0.0
+## Cuántos pedazos deja al romperse como mucho (-1 = todos los de sus datos; la pelea con A.S.P.I. pide menos, v5).
+var max_pedazos := -1
 
 ## Qué es: "vaso", "taza", "maceta", "planta", "portarretratos" o "llaves" (también la imagen de assets/nivel1/).
 var tipo: String:
@@ -64,7 +66,7 @@ func _draw() -> void:
 			var arte := ArteNivel.textura(tipo)
 			if arte:
 				ArteNivel.sombra(self, Vector2(0, 1), arte.get_width() * 0.9 + 2.0, 0.45)
-		ArteNivel.dibujar(self, tipo, 0.0, 0.0, false, PiezaSuelta.RESTO if roto else Color.WHITE)
+		ArteNivel.dibujar(self, tipo, 0.0, 0.0, false, PiezaSuelta.tinte_resto if roto else Color.WHITE)
 		return
 	# Roto: el charco (o la tierra) en escalones de 2 tonos que se extiende, y lo que queda apoyado. Los pedazos son
 	# PiezaSuelta (rebotan y quedan quietos).
@@ -73,7 +75,7 @@ func _draw() -> void:
 		var queda := ArteNivel.textura(datos.queda)
 		if queda:
 			ArteNivel.sombra(self, Vector2(4, 2), queda.get_width() * 0.8 + 2.0, 0.4)
-		ArteNivel.dibujar(self, datos.queda, 4.0, 1.0, false, PiezaSuelta.RESTO)
+		ArteNivel.dibujar(self, datos.queda, 4.0, 1.0, false, PiezaSuelta.tinte_resto)
 
 
 ## Charco tendido en el piso: 3 filas (atrás más angosta, adelante más ancha), borde oscuro y el medio claro, sin
@@ -106,7 +108,10 @@ func _al_romperse(_donde: Vector2) -> void:
 	if not datos or not datos.se_rompe:
 		return
 	_tiempo_roto = 0.0
-	for nombre: String in datos.piezas_rotura:
+	var piezas := datos.piezas_rotura
+	if max_pedazos >= 0 and piezas.size() > max_pedazos:
+		piezas = piezas.slice(0, max_pedazos)
+	for nombre: String in piezas:
 		# Hacia los lados (entre 25° y 70° sobre el piso), para que se repartan alrededor del charco.
 		var angulo := deg_to_rad(randf_range(25.0, 70.0))
 		var lado := -1.0 if randi() % 2 == 0 else 1.0

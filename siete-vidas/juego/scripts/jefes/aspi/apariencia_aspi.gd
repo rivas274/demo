@@ -53,6 +53,8 @@ var salto := 0.0
 ## v4: el depósito hinchado (0 a 0,08: tope ±8 %, como el estirar y aplastar de Felipe), cuántos de los 3 LED del
 ## medidor de su lomo están encendidos y si está mareada (estrellitas que giran).
 var inflado := 0.0
+## La LED parpadea en reposo (v5: en la pelea queda quieta; solo parpadea con un aviso).
+var led_parpadea := true
 var leds := 0
 var mareada := false
 var _tween_tapa: Tween
@@ -103,6 +105,11 @@ func _physics_process(_delta: float) -> void:
 		_mirando = lado_base
 	_actualizar_capa()
 	queue_redraw()
+
+
+## ¿Dibujada en espejo (mirando a la izquierda)?
+func en_espejo() -> bool:
+	return _mirando < 0.0
 
 
 ## ¿Encendida? (no vencida).
@@ -213,7 +220,7 @@ func _dibujar_led(base: Vector2, _lado: float, espejo: bool) -> void:
 	if cuerpo == null or apagada_tex == null:
 		return
 	var periodo := led_encendida + led_apagada
-	var apagada_ahora := fmod(Time.get_ticks_msec() / 1000.0, periodo) > led_encendida
+	var apagada_ahora := led_parpadea and fmod(Time.get_ticks_msec() / 1000.0, periodo) > led_encendida
 	var franja := FRANJA_LED
 	var arriba := base + Vector2(-cuerpo.get_width() / 2.0, -cuerpo.get_height())
 	var x := arriba.x + (cuerpo.get_width() - franja.end.x if espejo else franja.position.x)

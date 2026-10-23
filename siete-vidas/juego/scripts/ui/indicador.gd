@@ -110,6 +110,10 @@ func _physics_process(delta: float) -> void:
 	verbo = ""
 	if objeto:
 		verbo = tr(String(objeto.call("verbo", felipe))) if objeto.has_method("verbo") else tr("VERBO_USAR")
+		# Lo que dibuja su propio aviso con el botón (A.S.P.I.: «[E] ¡APLASTA!» sobre ella) no lleva burbuja: un aviso a
+		# la vez (v5). El contorno sí.
+		if objeto.has_method("burbuja_propia") and objeto.call("burbuja_propia"):
+			verbo = ""
 	elif felipe and felipe.progreso_comer_snack() > 0.0:
 		verbo = tr("VERBO_DEGUSTAR_SNACK")
 	_aparecer = minf(1.0, _aparecer + delta * 8.0)

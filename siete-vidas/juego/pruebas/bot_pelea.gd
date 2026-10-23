@@ -31,7 +31,7 @@ func jugar() -> void:
 			await p._hasta(func() -> bool: return not batalla.ausente, 4.0)
 			continue
 		if batalla.llena:
-			await _apagar_de_un_salto()
+			await _aplastar()
 			continue
 		if _conviene_charco():
 			await _atraer_al_charco()
@@ -301,38 +301,30 @@ func _hasta_que_aspi_se_detenga() -> void:
 		await p._cuadro()
 
 
-## Depósito lleno: al piso, junto a ella, y salta para caerle encima.
-func _apagar_de_un_salto() -> void:
+## Vulnerable (llena o en corto): «Aplastar» (v5). Si ya está al alcance (desde el piso o desde el mueble donde está),
+## aprieta el botón de acción; si no, baja al piso y se acerca hasta que la burbuja diga «Aplastar».
+func _aplastar() -> void:
 	var antes := batalla.apagados
-	await _bajar_al_piso()
 	for intento in 4:
 		if not batalla.llena or batalla.apagados > antes:
 			break
-		# Al llenarse bajo la repisa sale disparada unos 80 px (EMPUJE_LLENA, 0,3 s): hay que esperar a que se quede
-		# quieta antes de elegir el lado. Si no, va adonde estaba, queda del otro lado y salta alejándose de ella.
+		# Al llenarse bajo la repisa sale disparada unos 80 px (0,3 s): se espera a que quede quieta.
 		await _hasta_que_aspi_se_detenga()
-		var x := guion.aspi.global_position.x
-		var lado := -1.0 if felipe.global_position.x < x else 1.0
-		# A media carcasa de distancia (ella es sólida: más cerca, Felipe choca y el bot salta solo y pierde tiempo).
-		# Si está lejos (se alejó para comer un snack), corre (Shift): llena espera solo 3 a 4 s.
-		var lejos := absf(x + lado * 44.0 - felipe.global_position.x) > 150.0
-		if lejos:
-			Input.action_press("zoomies")
-		await p._ir_a(x + lado * 44.0, 3.0)
-		Input.action_release("zoomies")
-		# Lado y blanco se miden de nuevo justo antes de saltar; si no quedó a tiro, se acerca otra vez.
-		x = guion.aspi.global_position.x
-		var dx := x - felipe.global_position.x
-		if absf(dx) > 64.0:
+		if felipe.objeto_cercano() != batalla.aplastar:
+			await _bajar_al_piso()
+			var x := guion.aspi.global_position.x
+			var lado := -1.0 if felipe.global_position.x < x else 1.0
+			# Si está lejos (se alejó para comer un snack), corre (Shift): vulnerable espera solo 3 a 4 s.
+			if absf(x + lado * 70.0 - felipe.global_position.x) > 150.0:
+				Input.action_press("zoomies")
+			await p._ir_a(x + lado * 70.0, 3.0)
+			Input.action_release("zoomies")
+			await p._hasta(func() -> bool: return felipe.objeto_cercano() == batalla.aplastar or not batalla.llena, 0.6)
+		if felipe.objeto_cercano() != batalla.aplastar:
 			continue
-		if absf(dx) < 24.0:
-			# Quedó pegado a ella (se corrió al quedar vulnerable): un paso atrás para saltar en arco, como una persona.
-			await p._ir_a(x - signf(dx if dx != 0.0 else 1.0) * 44.0, 0.6)
-			x = guion.aspi.global_position.x
-			dx = x - felipe.global_position.x
-		await p._saltar(signf(dx), x)
-		await p._hasta(func() -> bool: return batalla.apagados > antes or felipe.is_on_floor(), 1.5)
+		await p._tocar("interactuar")
+		await p._hasta(func() -> bool: return batalla.apagados > antes or not batalla.llena, 1.5)
 		if OS.get_cmdline_user_args().has("--detalle"):
-			print("        intento %d de apagarla: dx %.0f, llena %s, apagados %d" % [intento + 1, dx, batalla.llena, batalla.apagados])
+			print("        intento %d de aplastarla: llena %s, apagados %d" % [intento + 1, batalla.llena, batalla.apagados])
 	await p._hasta(func() -> bool: return felipe.is_on_floor(), 2.0)
-	p._paso("Le salta encima: apagados %d" % batalla.apagados)
+	p._paso("La aplasta: apagados %d" % batalla.apagados)

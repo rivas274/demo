@@ -295,7 +295,7 @@ func _dormitorio() -> void:
 	await _entrar("pasillo>estudio")
 
 
-## Pelea: la juega `bot_pelea.gd` (ensuciar en las dos islas, esparcir la pelusa, apagarla de un salto).
+## Pelea: la juega `bot_pelea.gd` (ensuciar en las dos islas, esparcir la pelusa, aplastarla con el botón de acción).
 func _pelea() -> void:
 	await load("res://pruebas/bot_pelea.gd").new(self).jugar()
 

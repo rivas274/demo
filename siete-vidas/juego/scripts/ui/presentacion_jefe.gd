@@ -229,6 +229,11 @@ func _mostrar_cartel(texto: String, segundos: float, pista: String, y: float) ->
 	_y_cartel = y
 
 
+## ¿Se ve un cartel de fase?
+func cartel_visible() -> bool:
+	return _cartel > 0.0 and _texto_cartel != ""
+
+
 ## La pista que se está mostrando bajo el cartel ("" si no hay).
 func pista_actual() -> String:
 	return _pista if _cartel > 0.0 else ""

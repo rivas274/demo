@@ -159,7 +159,7 @@ func _correr() -> void:
 	_comprobar(batalla.ayuda.accion == "" and "agacharse" in batalla.ayuda.vistos, "v4 Al agacharse, el ícono se va y no vuelve (solo la primera vez)")
 	await _poner_en(Vector2(arena.position.x + 60, Nivel1.SUELO))
 	await _esperar_que(func() -> bool: return batalla.deposito == 1, 300)
-	_comprobar(batalla.deposito == 1 and batalla.presentacion.escudo > 0.0 and "+1 · Glup." in sala.travesuras.jugo.palabras, "Limpiar le llena el depósito (barra azul, «+1» y «Glup.»)")
+	_comprobar(batalla.deposito == 1 and batalla.presentacion.escudo > 0.0 and batalla.calma.mas_unos == 1, "Limpiar le llena el depósito (barra azul y un «+1» chico sobre ella, v5)")
 	_comprobar(batalla.apariencia.leds == 1, "v4 En su lomo se enciende 1 de los 3 LED (capacidad 2 en la fase 1: reescalado)")
 	var pedazos := maceta.get_children().filter(func(n: Node) -> bool: return n is PiezaSuelta).size()
 	await _esperar(8 * 60)
@@ -197,7 +197,11 @@ func _correr() -> void:
 	_comprobar(jugo.temblor_maximo <= 2.0 and jugo.temblor_maximo >= 1.0, "Con «Reducir sacudida» el temblor baja a %.0f px" % jugo.temblor_maximo)
 	Opciones.reducir_sacudida = false
 	_comprobar("¡CLIC!" in sala.travesuras.jugo.palabras, "Al apagarla: congelado, destello, sacudida y «¡CLIC!»")
-	await _esperar(130)
+	# v5: la montaña sale cuando ya se fueron el «¡CLIC!» y el cartel de fase (un foco a la vez).
+	await _esperar(60)
+	_comprobar(batalla.montanas.is_empty() and batalla.pelusa.en_camino == 0, "v5 Mientras se ve el cartel de fase todavía no escupe la montaña")
+	await _esperar_que(func() -> bool: return not batalla.montanas.is_empty() and batalla.montanas[0].en_piso, 300)
+	await _esperar(10)
 	_comprobar(batalla.montanas.size() == 1 and batalla.montanas[0].cantidad == batalla.datos.devuelve[0] and batalla.montanas[0].en_piso, "Al terminar la fase se le abre el depósito y escupe una montaña de pelusa (%d motas)" % batalla.datos.devuelve[0])
 	_comprobar(sala.ya_dijo("devolucion"), "Felipe la comenta: «Devolución aceptada.»")
 	var dialogo: Dialogo = sala.travesuras.dialogo

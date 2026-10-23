@@ -63,6 +63,8 @@ var pelusa: PelusaAspi
 var apagon: ApagonEstudio
 var reacciones: ReaccionesAspi
 var remate: RemateAspi
+var aplastar: AplastarAspi
+var calma: CalmaAspi
 var ayuda: AyudaAspi
 var sin_sombrear := CanvasItemMaterial.new()
 ## Por qué está vulnerable: "deposito" (lleno) o "charco" (electrocutada en el apagón).
@@ -134,7 +136,7 @@ func _ready() -> void:
 	super()
 	presentacion.encuadre_momento = centro_gigante + Vector2(0, 40)
 	# El globito tampoco tapa el aviso de oportunidad («¡LLENA! ¡SALTA!»): la frase espera a después del golpe.
-	globo.peligro = func() -> bool: return amenaza() or llena
+	globo.peligro = func() -> bool: return amenaza() or llena or presentacion.cartel_visible()
 	presentacion.paso_empezado.connect(_al_paso)
 	presentacion.empujon.connect(_al_empujon)
 	# La imaginación de Felipe tapa TODO el escenario (muebles, puertas, repisa); solo Felipe va delante (B1).
@@ -157,6 +159,10 @@ func _ready() -> void:
 	add_child(reacciones)
 	remate = RemateAspi.new(self)
 	add_child(remate)
+	aplastar = AplastarAspi.new(self)
+	add_child(aplastar)
+	calma = CalmaAspi.new(self)
+	add_child(calma)
 	ayuda = AyudaAspi.new(self)
 	add_child(ayuda)
 	_polvo = Particulas.polvo(24, 0.7, Vector2(0, 220), Vector2(50, 140), Vector2(2, 4), Color(0.86, 0.82, 0.75))
@@ -178,6 +184,8 @@ func _lienzo(nombre: String, capa: int, al_dibujar: Callable) -> Node2D:
 func agregar_municion(objeto: Objeto) -> void:
 	municion.append(objeto)
 	objeto.tirable.caido.connect(func(posicion: Vector2) -> void: agregar_mancha(posicion))
+	# Restos que no compiten (v5): como mucho tantos pedazos.
+	objeto.max_pedazos = datos.jugo.max_pedazos if datos.jugo else -1
 
 
 ## Lo que suelta cosas de a una (las notas del corcho, los libros del estante, los apuntes del teclado).
@@ -352,6 +360,7 @@ func _al_empujon(_numero: int) -> void:
 func _al_empezar_pelea() -> void:
 	gigante = 0.0
 	transformacion = 0.0
+	calma.empezar()
 
 
 ## Felipe perdió una vida: todo lo del piso, las montañas y el depósito se conservan (nada se pierde). Si estaba llena,
@@ -439,7 +448,8 @@ func llenar_deposito() -> void:
 	if deposito >= DatosJefe.por_fase(datos.capacidad, vencidas):
 		_llenar()
 	else:
-		nivel.travesuras.jugo.palabra_en_mundo("PALABRA_1_GLUP", jefe.global_position + Vector2(0, -60), Color(0.5, 0.85, 1.0), 14)
+		# «+1» chico sobre los LED (v5: antes, la palabra grande «+1 · Glup.»).
+		calma.sumar_uno()
 
 
 ## Depósito lleno: queda vulnerable (RemateAspi: la anticipación y el golpe).
@@ -465,6 +475,7 @@ func _al_oir_maullido(_felipe_que_maulla: Felipe) -> void:
 func _terminar() -> void:
 	presentacion.saltar()
 	fase = Fase.FIN
+	calma.terminar()
 	terminar_ataque()
 	succionando = false
 	limpiar.limpiando = false

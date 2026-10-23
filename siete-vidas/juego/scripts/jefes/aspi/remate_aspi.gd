@@ -16,8 +16,6 @@ const EMPUJE_LLENA := 80.0
 const MARGEN_LLENA := 44.0
 ## Al apagarla, Felipe rebota hacia arriba.
 const REBOTE := -420.0
-## Segundos después del «¡CLIC!» en que escupe la montaña (cuando ya se fue la palabra: una a la vez).
-const ESPERA_ESCUPIR := 0.7
 ## Color de la silueta en el destello (modulate por encima de 1: se satura a blanco).
 const BLANCO := Color(12, 12, 12)
 ## Estrellas: cuánto vuelan (s) y a qué velocidad (px/s).
@@ -115,7 +113,7 @@ func actualizar(delta: float) -> void:
 	# El botón está arriba del dibujo, que va `profundidad` px más abajo que los pies (más cerca de la cámara).
 	var distancia := felipe.global_position - b.jefe.global_position - Vector2(0, b.jefe.datos.profundidad)
 	var arriba := -BatallaAspi.ALTO_ARRIBA
-	if felipe.velocity.y > 0.0 and absf(distancia.x) < b.jefe.datos.ancho / 2.0 + 4.0 and distancia.y > arriba - 14.0 and distancia.y < arriba + 18.0:
+	if not b.aplastar.saltando and felipe.velocity.y > 0.0 and absf(distancia.x) < b.jefe.datos.ancho / 2.0 + 4.0 and distancia.y > arriba - 14.0 and distancia.y < arriba + 18.0:
 		felipe.velocity.y = REBOTE
 		apagar()
 		return
@@ -128,10 +126,8 @@ func actualizar(delta: float) -> void:
 ## viene cayendo encima, silencio (contraste antes del golpe).
 func _anticipar(delta: float, distancia: Vector2) -> void:
 	var cayendo := b.felipe.velocity.y > 0.0 and absf(distancia.x) < b.jefe.datos.ancho and distancia.y < -BatallaAspi.ALTO_ARRIBA and distancia.length() < datos.silencio_distancia
-	if cayendo and not _callado:
-		_callado = true
-		hubo_silencio = true
-		b.nivel.callar()
+	if cayendo:
+		silenciar()
 	if b.motivo != "deposito":
 		return
 	var pulso := 2.0 + reloj * 0.8
@@ -147,6 +143,15 @@ func _anticipar(delta: float, distancia: Vector2) -> void:
 		_reloj_falla = datos.falla_cada
 		_fallas += 1
 		b.sonar_evento("falla", maxf(0.5, 1.0 - _fallas * 0.08))
+
+
+## Silencio de golpe justo antes del impacto (una vez por cada vez que queda vulnerable).
+func silenciar() -> void:
+	if _callado:
+		return
+	_callado = true
+	hubo_silencio = true
+	b.nivel.callar()
 
 
 ## Nadie la apagó a tiempo: con el depósito lleno lo vacía EN EL PISO (montaña de pelusa con todo lo que tenía); en
@@ -193,7 +198,7 @@ func apagar() -> void:
 	b.cambiar_fase()
 	# Se le abre el depósito y escupe la pelusa: lo que limpió vuelve al piso (cuando ya se fue el «¡CLIC!»).
 	var escupe := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_STOP)
-	escupe.tween_interval(ESPERA_ESCUPIR)
+	escupe.tween_interval(datos.espera_escupir)
 	escupe.tween_callback(func() -> void:
 		if b.fase == PeleaJefe.Fase.PELEA:
 			b.escupir_pelusa(motas))

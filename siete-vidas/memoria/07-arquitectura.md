@@ -262,6 +262,13 @@ ataque), `GloboDialogo.peligro` (la frase espera si hay amenaza), `Nivel.retener
 apagón) y los colores `peligro` / `oportunidad` del tema. Números nuevos en `DatosJugoJefe` (grupos «Remate» y
 «Recuperación»).
 
+**Pelea v5 (2026-10-23):** `AplastarAspi` (acción «Aplastar»: un interactuable con `prioritario(felipe)`, que
+`ManasFelipe.objeto_cercano` mira antes que todo lo demás y con su propio alcance; salto dirigido por un arco de Bézier
+que corre en `process_physics_priority` alto, después de Felipe, con la máscara de colisión apagada mientras vuela) y
+`CalmaAspi` (un solo foco a la vez: velo sobre el decorado, sin motas en el rayo, LED quieta, restos oscuros con menos
+pedazos, «+1» chico). Los números, en `DatosJugoJefe` (grupos «Aplastar» y «Ruido»). `FondoApartamento.sin_motas`,
+`Objeto.max_pedazos`, `PiezaSuelta.tinte_resto` y `PresentacionJefe.cartel_visible()` son los enganches.
+
 **Montaña de pelusa (`MontanaPelusa`, `scripts/entidades/objetos/`):** la escupe la pelea (`BatallaAspi.escupir_pelusa`)
 al apagarla (`DatosJefe.devuelve`) o al vaciar el depósito; se esparce con el manotazo («Esparcir») y cada mota avisa
 `mota_en_piso`. La pelea lleva la cuenta de toda la suciedad (`suciedad_total`): solo baja al apagarla.

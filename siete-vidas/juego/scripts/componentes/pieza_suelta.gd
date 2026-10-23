@@ -31,8 +31,9 @@ var _brincando := false
 var _reloj := 0.0
 var _cuadros: Array[Texture2D] = []
 
-## Lo que ya quedó en el piso se ve un poco más apagado que lo que todavía se puede tirar (v4, Gemini).
-const RESTO := Color(0.8, 0.78, 0.84)
+## Lo que ya quedó en el piso se ve más apagado que lo que todavía se puede tirar (v4, Gemini; v5: lo elige la pelea,
+## `DatosJugoJefe.tinte_resto`, para que los restos se fundan con el piso).
+static var tinte_resto := Color(0.8, 0.78, 0.84)
 ## Cuadros del giro de la llave de cuerda (de frente, de tres cuartos, de canto, del otro lado y de vuelta).
 const CUADROS_GIRO := 5
 
@@ -114,5 +115,5 @@ func _draw() -> void:
 		var tinte := Color.WHITE
 		if con_sombra and en_piso:
 			ArteNivel.sombra(self, Vector2(0, 1), t.get_width() * 0.9 + 2.0, 0.45)
-			tinte = RESTO
+			tinte = tinte_resto
 		draw_texture(t, Vector2(-roundf(t.get_width() / 2.0), -t.get_height()), tinte)

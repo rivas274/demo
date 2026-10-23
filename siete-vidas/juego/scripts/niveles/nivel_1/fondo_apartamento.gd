@@ -62,6 +62,8 @@ var alto: float
 var _textura_pared: ImageTexture
 var _textura_piso: ImageTexture
 var _luz: Node2D
+## Tono del cuarto cuyo rayo va sin motas de polvo ("" = todos con motas; la pelea con A.S.P.I. calma el estudio, v5).
+var sin_motas := ""
 
 
 func _init(ancho_nivel: float, alto_nivel: float) -> void:
@@ -403,7 +405,7 @@ func _dibujar_luz(c: Node2D) -> void:
 				Vector2(v.position.x + adentro, v.position.y), Vector2(v.end.x - adentro, v.position.y),
 				Vector2(v.end.x + 140 - adentro, piso), Vector2(v.position.x + 90 + adentro, piso),
 			]), Color(tono, 0.035))
-		for m in 5:
+		for m in (0 if datos[1] == sin_motas else 5):
 			var subida := fmod(t * 0.04 + m * 0.21 + v.position.x * 0.001, 1.0)
 			var y := lerpf(piso - 6.0, v.position.y + 6.0, subida)
 			var avance := (y - v.position.y) / (piso - v.position.y)

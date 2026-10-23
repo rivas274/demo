@@ -42,6 +42,36 @@ extends Resource
 ## Silencio antes del impacto: si Felipe cae sobre ella y está a menos de estos px, se callan los sonidos.
 @export var silencio_distancia := 90.0
 
+@export_group("Aplastar: el salto dirigido (v5)")
+## Alcance de «Aplastar»: en el piso (px de lado) y subido a un mueble (px de lado y hasta qué altura sobre el piso).
+@export var alcance_piso := 120.0
+@export var alcance_mueble := 190.0
+@export var altura_mueble := 200.0
+## El arco: cuánto sube sobre el extremo más alto y cuánto dura (base, más por distancia, con tope).
+@export var altura_arco := 40.0
+@export var aplastar_base := 0.3
+@export var aplastar_px_por_s := 700.0
+@export var aplastar_maximo := 0.55
+
+@export_group("Ruido: un solo foco a la vez (v5)")
+## Velo sobre el fondo durante la pelea (baja el contraste del decorado; lo jugable queda a todo color): color y
+## opacidad (0 = sin velo) y hasta qué capa cubre (Capas: -2 = pared, cuadros y ventana; 0 = también los muebles).
+@export var velo_color := Color(0.62, 0.5, 0.4)
+@export var velo := 0.0
+@export var velo_capa := -2
+## Destello de lo que se puede tirar: 0 = nunca, 1 = solo cerca de Felipe, 2 = siempre (v4). Y qué tan cerca.
+@export_range(0, 2) var brillo_tirables := 1
+@export var brillo_cerca := 110.0
+## Motas de polvo que suben por el rayo de la ventana del estudio.
+@export var motas_ambiente := false
+## Restos del piso: tinte (más oscuro y plano: se funden con el piso) y cuántos pedazos deja algo roto como mucho.
+@export var tinte_resto := Color(0.8, 0.78, 0.84)
+@export var max_pedazos := 99
+## La LED de A.S.P.I. parpadea en reposo (fuera de los avisos).
+@export var led_parpadea := true
+## Segundos después del «¡CLIC!» en que escupe la montaña (cuando ya se fueron el «¡CLIC!» y el cartel de fase).
+@export var espera_escupir := 0.7
+
 @export_group("Recuperación (el cuarto tiempo de cada ataque)")
 ## Después de chocar con la embestida o de escupir una bola queda mareada: quieta e inofensiva (ventana para pasarla o
 ## usarla de trampolín).

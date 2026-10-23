@@ -36,10 +36,15 @@ func limpiar() -> void:
 ## El objeto interactuable más cercano al alcance, o null si no hay ninguno (el botón no hace nada).
 ## Los objetos anchos (sofá, rascador) dicen con punto_para(desde) dónde se los alcanza; los que a veces
 ## no se pueden usar, con disponible(felipe).
+## Lo que dice `prioritario(felipe)` le gana a todo lo demás y tiene su propio alcance (A.S.P.I. vulnerable: «Aplastar»).
 func objeto_cercano() -> Node2D:
 	var mejor: Node2D = null
 	var mejor_distancia := INF
-	for objeto: Node2D in felipe.get_tree().get_nodes_in_group(Componentes.INTERACTUABLES):
+	var lista := felipe.get_tree().get_nodes_in_group(Componentes.INTERACTUABLES)
+	for objeto: Node2D in lista:
+		if objeto.has_method("prioritario") and objeto.call("prioritario", felipe):
+			return objeto
+	for objeto: Node2D in lista:
 		if objeto.has_method("disponible") and not objeto.call("disponible", felipe):
 			continue
 		var punto: Vector2 = objeto.call("punto_para", felipe.global_position) if objeto.has_method("punto_para") else objeto.global_position

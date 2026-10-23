@@ -13,6 +13,8 @@ Actualizado: 2026-10-23 (pelea con A.S.P.I. v5: acción «Aplastar» y un solo f
   - **Las 9 vidas son la salud:** 9 huellas que se gastan con los golpes. Cambia el diseño de juego (hoy hay 5 corazones más vidas aparte): revisarlo con el diseñador antes de implementar.
   - **Assets:** se generan con Gemini y ChatGPT desde la PC del creador y Claude los retoca.
   - **Orden:** primero las láminas de dirección de arte A, B y C; el creador elige una; luego se generan los assets, se aclaran los puntos pendientes y recién entonces se programa.
+  - **Cambio de orden (2026-10-23):** las láminas A, B y C quedan en pausa. **Primero el layout**, con wireframes sin arte (dónde va cada cosa y cómo se comporta), pensado para **Switch (portátil y TV), PC y PlayStation**: texto legible, zona segura y opciones de accesibilidad.
+  - **Los snacks salen del HUD** y quedan solo en el menú de pausa.
 
 - **Pelea con A.S.P.I. v5 (hecha 2026-10-23, 0 créditos; lo que vio el creador en la v4). Revisión: `diseno/revisiones/2026-10-23-pelea-aspi-v5.md`.**
   - **Acción nueva «Aplastar»** (`AplastarAspi`): con A.S.P.I. vulnerable y al alcance (piso 120 px; desde un mueble del estudio 190 px de lado), el botón de acción hace un salto dirigido que siempre cae sobre ella y la apaga. Le gana a cualquier otra acción cercana. El aviso amarillo dice «[E] ¡APLASTA!». El salto manual sigue valiendo. Prueba nueva `prueba_aplastar.gd` (piso y los 6 muebles); el bot la usa.

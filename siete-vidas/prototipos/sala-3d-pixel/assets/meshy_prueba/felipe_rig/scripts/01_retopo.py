@@ -16,9 +16,10 @@ import simetria as S
 MITAD = "NEGATIVE_X"
 SOLDADURA = 0.005
 RELAJAR = int(os.environ.get("FELIPE_RELAJAR", "6"))   # pasadas de suavizado del cuerpo
+CABEZA = os.environ.get("FELIPE_CABEZA", "orig1")
 PIERNA = float(os.environ.get("FELIPE_PIERNA", "0.07"))  # cuánto se inflan las patas traseras (u; elegido entre 0 y 0,09)
 
-CARAS = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
+CARAS = int(sys.argv[1]) if len(sys.argv) > 1 else int(os.environ.get("FELIPE_CARAS", "8000"))
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath=C.GLB_ORIGINAL)
@@ -52,6 +53,9 @@ antes_b = sum(1 for e in bm.edges if e.is_boundary)
 bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=0.0015)
 despues_b = sum(1 for e in bm.edges if e.is_boundary)
 bm.to_mesh(orig.data); bm.free(); orig.data.update()
+bm = bmesh.new(); bm.from_mesh(meshy.data)
+bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=0.0015)
+bm.to_mesh(meshy.data); bm.free(); meshy.data.update()
 print("soldadura total: bordes abiertos %d -> %d, costura central %d" % (antes_b, despues_b, S.medir_costura(orig)))
 bpy.ops.object.select_all(action="DESELECT")
 
@@ -249,6 +253,39 @@ if PIERNA > 0:
     bm.to_mesh(retopo.data); bm.free(); retopo.data.update()
     p99, peor, sin_par = simetria_exacta(retopo)
     print("patas traseras infladas %.3f u en %d vértices (simetría: peor %.5f)" % (PIERNA, len(mover), peor))
+# v5: la CABEZA no se simetriza (espejar una mitad la dejó chata, con los ojos hundidos y la
+# cara "espichada" de un lado) y conserva el relieve de Meshy: sus vértices se densifican y se
+# proyectan sobre la cabeza ORIGINAL de Meshy (sin simetría), con una franja de mezcla en el
+# cuello. El cuerpo sigue simétrico. Variantes en FELIPE_CABEZA: "sim" (v4), "orig" (proyecta),
+# "orig1"/"orig2" (proyecta tras 1 o 2 subdivisiones de la cabeza).
+if CABEZA != "sim":
+    cab0 = ((mp >> 0) & 1).astype(bool) | ((mp >> 1) & 1).astype(bool)
+    dcab = ndimage.distance_transform_edt(cab0)
+    def peso_cabeza(co):
+        px_ = int(np.clip(round(512 - co.y / C.PX), 0, 1023))
+        py_ = int(np.clip(round(512 - (co.z - zoff) / C.PX), 0, 1023))
+        return float(np.clip(dcab[py_, px_] / 18.0, 0, 1))
+    subdiv = {"orig": 0, "orig1": 1, "orig2": 2}[CABEZA]
+    for _ in range(subdiv):
+        bm = bmesh.new(); bm.from_mesh(retopo.data)
+        aristas = [e for e in bm.edges if all(peso_cabeza(v.co) > 0.0 for v in e.verts)]
+        bmesh.ops.subdivide_edges(bm, edges=aristas, cuts=1, use_grid_fill=True)
+        bm.to_mesh(retopo.data); bm.free(); retopo.data.update()
+    # Proyección sobre la superficie más cercana de la Meshy original.
+    from mathutils.bvhtree import BVHTree
+    bvh = BVHTree.FromObject(meshy, bpy.context.evaluated_depsgraph_get())
+    n_p = 0
+    for v in retopo.data.vertices:
+        w = peso_cabeza(v.co)
+        if w <= 0.0:
+            continue
+        hit = bvh.find_nearest(v.co)
+        if hit[0] is not None:
+            v.co = v.co.lerp(hit[0], w)
+            n_p += 1
+    retopo.data.update()
+    print("cabeza (%s): %d vértices proyectados sobre la Meshy original; total %d caras"
+          % (CABEZA, n_p, len(retopo.data.polygons)))
 for p in retopo.data.polygons:
     p.use_smooth = True
 print("final:", len(retopo.data.vertices), "vértices,", len(retopo.data.polygons), "caras")

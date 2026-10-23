@@ -6,7 +6,11 @@ import felipe_comun as C
 
 TAM = 2048
 bpy.ops.wm.open_mainfile(filepath=C.BLEND_RETOPO)
-orig = bpy.data.objects["Original"]
+# v5: se hornea desde la Meshy original (sin simetría): la cabeza de la retopo se proyecta
+# sobre ella; el cuerpo y la cola se repintan después (02b_lomo.py).
+orig = bpy.data.objects["Meshy"] if "Meshy" in bpy.data.objects else bpy.data.objects["Original"]
+orig.hide_render = False
+orig.hide_viewport = False
 retopo = bpy.data.objects["Retopo"]
 
 # UV: islas por ángulo, con margen para que el horneado no se mezcle entre islas.

@@ -6,8 +6,10 @@
 # persona):
 # 1. la altura del salto (v²/2g) es la del juego 2D, unos 0,66 m;
 # 2. desde el piso, pegado al sofá, Felipe cae sobre el cojín (45 cm);
-# 3. desde el piso, pegado a la mesa alta (75 cm), no llega: vuelve al piso;
-# 4. desde el sofá (cojín y luego el brazo) sí alcanza la mesa alta.
+# 3. desde el piso, bajo la mesa alta (75 cm), no llega ni quieto ni con carrera: vuelve al piso;
+# 4. desde el sofá (cojín y luego el respaldo, 85 cm) sí alcanza la mesa alta;
+# 5. S + Espacio baja de la mesa al piso.
+# El juego es de un solo plano (2,5D): Felipe nunca sale de z = Z_PLANO.
 # Uso: godot --headless --path . --script res://pruebas/prueba_salto_jugable.gd
 extends SceneTree
 
@@ -63,22 +65,33 @@ func _correr() -> void:
 	var mesa: float = escena.get("MESA_ALTO")
 	_ok(alto < mesa, "la mesa alta (%.2f m) queda más alta que el salto" % mesa)
 
-	await _saltar(f, Vector3(0.4, 0.0, -0.2))
+	var zp: float = escena.get("Z_PLANO")
+	await _saltar(f, Vector3(0.4, 0.0, zp))
 	var y := f.global_position.y
-	_ok(y > 0.35 and y < 0.55 and f.is_on_floor(), "desde el piso cae sobre el cojín del sofá (pies a %.3f m)" % y)
+	_ok(y > 0.38 and y < 0.48 and f.is_on_floor(), "desde el piso cae sobre el cojín del sofá (pies a %.3f m)" % y)
 
-	await _saltar(f, Vector3(1.7, 0.0, -0.44))
-	_ok(f.get("altura_max") < mesa - 0.05, "pegado a la mesa alta, los pies suben hasta %.3f m (< %.2f)" % [f.get("altura_max"), mesa])
+	await _saltar(f, Vector3(1.7, 0.0, zp))
+	_ok(f.get("altura_max") < mesa - 0.05, "bajo la mesa alta, los pies suben hasta %.3f m (< %.2f)" % [f.get("altura_max"), mesa])
 	_ok(f.global_position.y < 0.05, "y vuelve al piso (pies a %.3f m)" % f.global_position.y)
 
-	await _saltar(f, Vector3(1.7, 0.0, -0.44), "mover_arriba", 60)
-	_ok(f.global_position.y < 0.05, "apretando hacia la mesa tampoco sube (pies a %.3f m)" % f.global_position.y)
+	await _saltar(f, Vector3(2.4, 0.0, zp), "mover_izq", 60)
+	_ok(f.global_position.y < 0.05, "con carrera hacia la mesa tampoco sube (pies a %.3f m)" % f.global_position.y)
 
-	await _saltar(f, Vector3(0.85, 0.43, -0.6), "mover_der", 50)
-	var y_brazo := f.global_position.y
-	await _saltar(f, f.global_position, "mover_der", 50)
+	await _saltar(f, Vector3(0.9, 0.43, zp))
+	var y_resp := f.global_position.y
+	await _saltar(f, Vector3(1.0, f.global_position.y, zp), "mover_der", 75)
 	y = f.global_position.y
-	_ok(y > 0.7 and f.global_position.x > 1.3, "desde el sofá (cojín, brazo a %.2f m) sí alcanza la mesa alta (pies a %.3f m, x %.2f)" % [y_brazo, y, f.global_position.x])
+	_ok(y_resp > 0.8 and absf(y - mesa) < 0.03 and f.global_position.x > 1.45, "desde el sofá (cojín, respaldo a %.2f m) sí alcanza la mesa alta (pies a %.3f m, x %.2f)" % [y_resp, y, f.global_position.x])
+
+	Input.action_press("mover_abajo")
+	await _esperar(5)
+	Input.action_press("saltar")
+	await _esperar(5)
+	Input.action_release("saltar")
+	Input.action_release("mover_abajo")
+	await _esperar(60)
+	_ok(f.global_position.y < 0.05, "S + Espacio baja de la mesa al piso (pies a %.3f m)" % f.global_position.y)
+	_ok(absf(f.global_position.z - zp) < 0.001, "Felipe nunca salió de su plano (z = %.3f)" % f.global_position.z)
 
 	print("RESULTADO: %s (%d fallas)" % ["PASA" if _fallas == 0 else "FALLA", _fallas])
 	quit(1 if _fallas > 0 else 0)

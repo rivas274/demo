@@ -6,6 +6,8 @@ config_version=5
 
 config/name="Prototipo Sala 3D Pixel (Felipe)"
 run/main_scene="res://principal.tscn"
+; El ejecutable de export_presets.cfg (función "sala_jugable") abre la sala jugable.
+run/main_scene.sala_jugable="res://jugable.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 
 [display]

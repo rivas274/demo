@@ -49,7 +49,7 @@ func _ready() -> void:
 		["esperar_libre"],
 		["esperar", 0.3],
 		["ir_x", -2.2],
-		["mantener", "mover_izq", 1.0],
+		["mantener", "mover_izq", 0.6],
 		["esperar", 0.4],
 		["esperar_valeria_libre"],
 		["ir_valeria"],

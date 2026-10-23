@@ -23,7 +23,12 @@ static func buscar(carpeta: String) -> Dictionary:
 	var hallados := {}
 	if not DirAccess.dir_exists_absolute(carpeta):
 		return hallados
-	var archivos := Array(DirAccess.get_files_at(carpeta))
+	var archivos := []
+	# En un ejecutable exportado la carpeta lista "x.fbx.import" (el FBX original no viaja).
+	for f: String in DirAccess.get_files_at(carpeta):
+		f = f.trim_suffix(".import").trim_suffix(".remap")
+		if not f in archivos:
+			archivos.append(f)
 	archivos.sort()
 	for f: String in archivos:
 		if not f.to_lower().ends_with(".fbx"):

@@ -181,9 +181,9 @@ func _caja_forma(tam: Vector3) -> BoxShape3D:
 
 func _colisiones() -> void:
 	# Piso y paredes de los lados (sólidos para todos).
-	_estatico(_caja_forma(Vector3(12, 0.2, 2.6)), Vector3(0, -0.1, 0.1))
-	_estatico(_caja_forma(Vector3(0.2, 3.5, 2.6)), Vector3(-3.45, 1.75, 0.1))
-	_estatico(_caja_forma(Vector3(0.2, 3.5, 2.6)), Vector3(4.4, 1.75, 0.1))
+	_estatico(_caja_forma(Vector3(12, 1.0, 2.6)), Vector3(0, -0.5, 0.1))
+	_estatico(_caja_forma(Vector3(1.0, 3.5, 2.6)), Vector3(-3.85, 1.75, 0.1))
+	_estatico(_caja_forma(Vector3(1.0, 3.5, 2.6)), Vector3(4.8, 1.75, 0.1))
 	# La lámpara de la mesita es un estorbo sólido sobre la mesita (no en el piso).
 	_estatico(_caja_forma(Vector3(0.24, 0.47, 2.6)), Vector3(-0.95, 0.795, 0.1))
 	for p in PLATAFORMAS:
@@ -277,6 +277,7 @@ func _objetos() -> void:
 	pelota.axis_lock_linear_z = true
 	pelota.axis_lock_angular_x = true
 	pelota.axis_lock_angular_y = true
+	pelota.continuous_cd = true
 	pelota.linear_damp = 0.8
 	pelota.angular_damp = 1.5
 	var pm := PhysicsMaterial.new()
@@ -430,6 +431,10 @@ func _process(delta: float) -> void:
 		_indicador.reset_size()
 		var bote := sin(Time.get_ticks_msec() / 160.0) * 3.0
 		_indicador.position = (_en_pantalla(punto) - Vector2(_indicador.size.x * 0.5, _indicador.size.y - 6.0 + bote)).round()
+	# Si la pelota se escapa (apretada contra la pared), vuelve a su lugar.
+	if pelota.global_position.y < -0.5:
+		pelota.linear_velocity = Vector3.ZERO
+		pelota.global_position = Vector3(-2.4, 0.3, Z_PLANO)
 	# Golosinas: Felipe se las come al pasar.
 	for g in _golosinas.duplicate():
 		var d: Vector3 = g.global_position - gato.global_position

@@ -100,10 +100,14 @@ func _ready() -> void:
 			ruta = arg.get_slice("=", 1)
 	var doc := GLTFDocument.new()
 	var estado := GLTFState.new()
-	if doc.append_from_file(ruta, estado) != OK:
+	if FileAccess.file_exists(ruta) and doc.append_from_file(ruta, estado) == OK:
+		modelo = doc.generate_scene(estado)
+	elif ResourceLoader.exists(ruta):
+		# En un ejecutable exportado el .glb original no viaja: se usa la escena importada.
+		modelo = (load(ruta) as PackedScene).instantiate()
+	else:
 		push_error("felipe_rig: no se pudo cargar " + ruta)
 		return
-	modelo = doc.generate_scene(estado)
 	modelo.scale = Vector3.ONE * escala
 	add_child(modelo)
 	ap = modelo.find_children("*", "AnimationPlayer", true, false)[0]

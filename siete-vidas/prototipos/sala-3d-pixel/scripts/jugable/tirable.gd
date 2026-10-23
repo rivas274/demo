@@ -104,8 +104,8 @@ func golpear(dir: Vector3) -> void:
 
 
 func _al_tocar(_cuerpo: Node) -> void:
-	# Cuenta como "tirado" al tocar algo bastante más abajo que su mueble (piso o sofá).
-	if not _volando or global_position.y > _inicio.origin.y - 0.2:
+	# Cuenta como "tirado" al tocar algo más abajo que su mueble (piso, brazo o cojín del sofá).
+	if not _volando or global_position.y > _inicio.origin.y - 0.05:
 		return
 	_volando = false
 	_caido = true

@@ -499,3 +499,77 @@ El creador: «tiene como el ano negro… difuminado». **Causa:** en la v4 se ag
 - **Sin cambios** en malla, rig ni animaciones: `felipe_rig.glb` se reexportó con la textura nueva, y `felipe_rig.json` quedó idéntico.
 - **Entregable:** `felipe-v6c-bajo-cola.png`, con la meta del creador, antes y después desde atrás, atrás y abajo, 3/4 desde abajo y desde abajo, con la cola levantada 40°. También trae la sala a ×3 y las otras zonas revisadas.
 
+
+## Sala jugable (2026-10-23)
+**Pregunta:** si el jugador controla a Felipe 3D (con rig) en una sala como el juego 2D (caminar, saltar a los muebles, arañar, tirar cosas y pedirle a Valeria), ¿se siente como jugar con Felipe y no como mover un muñeco? Lo notaremos en que el creador repite las acciones sin que se lo pidan y en cómo compara el control con el demo 2D.
+
+**Cómo jugarla:**
+- **En el editor (Windows, Godot 4.3):** abrir `siete-vidas/prototipos/sala-3d-pixel/project.godot`, abrir `jugable.tscn` y apretar **F6** (Ejecutar escena actual). F5 sigue abriendo la sala de comparación de siempre.
+- **Por línea de comandos** (desde esta carpeta): `godot --path . res://jugable.tscn`. Con `-- --bot` juega solo (el bot del video) y con `-- --sin-valeria` aparece solo Felipe.
+- **Ejecutable para Windows:** `export_presets.cfg` trae el preset «Windows» (x86_64, todo dentro del `.exe`, solo lo que usa la sala). Se exporta con `godot --headless --path . --export-release "Windows" Felipe3D-Sala.exe`. El `.exe` abre directo la sala jugable gracias a la función `sala_jugable` del preset (`run/main_scene.sala_jugable` en `project.godot`). Necesita una tarjeta de video con Vulkan (Forward+).
+
+**Controles** (en pantalla; **H** los oculta):
+
+| Tecla | Mando | Qué hace |
+| --- | --- | --- |
+| A / D o ← / → | Palanca o cruceta | Caminar (con aceleración y frenado) |
+| Espacio | A | Saltar; soltar antes corta el salto |
+| S + Espacio | Abajo + A | Bajar del mueble donde está |
+| E | Y | Acción sobre lo marcado con el indicador: **Arañar** (sofá), **Tirar** (vaso y taza), **Pedir** (Valeria) |
+| Q | B | Pedir a Valeria si está cerca; si no, maullar |
+| Nada durante 8,5 s | — | Se sienta, mira al jugador y juega con la pelota si la tiene cerca; cualquier tecla lo levanta |
+
+**Cómo se juega:** es 2D en la jugabilidad (2,5D de desplazamiento lateral, como pidió el creador). Felipe solo va a la izquierda y a la derecha, en un plano fijo, y salta en X e Y. Los muebles son plataformas que se atraviesan desde abajo, como en el juego 2D: desde el piso se sube al **cojín del sofá (43 cm)** y a la **mesita (55 cm)**. La **mesa alta (75 cm)** no se alcanza desde el piso; se llega por el **respaldo (85 cm)** y desde ahí al **librero (90 cm)**. Encima de cada mueble, Felipe se dibuja a la profundidad del mueble (sobre el cojín se ve sobre el cojín), pero la física no sale del plano.
+
+**Qué se construyó** (escena `jugable.tscn`; scripts en `scripts/jugable/`; no toca el juego 2D):
+- `jugable.gd`: la sala de siempre (pixel ×3, bordes y luz toon). Suma las plataformas de un sentido, con la profundidad a la que se dibuja Felipe en cada una. También la mesa alta, el vaso, la taza y la pelota (con física y el eje Z bloqueado), los globos de texto, el indicador de E, el snack y la cámara. La cámara sigue a Felipe en X con suavizado y un poco en Y, dentro de los límites de la sala y en pasos de 1 pixel de render.
+- `felipe_jugable.gd`: CharacterBody3D con los valores del juego 2D pasados a metros (121 px = 1 m):
+  - salto de 0,66 m, con caída 1,7 veces más pesada y tope de caída;
+  - margen de 0,12 s al salir de un borde, salto recordado de 0,15 s y corte del salto al soltar;
+  - tope de 0,6 m/s, al que llega en 0,1 s y del que frena en 0,08 s.
+- El dibujo es `felipe_rig.gd` (rig, cola con resorte y mirada) como hijo:
+  - la caminata va al ritmo de la velocidad (`velocidad_caminar_m_s` de `felipe_rig.json`): las patas no patinan;
+  - el salto tiene 0,1 s de anticipación y su clip se recorre según la física, desde el despegue hasta las patas adelante;
+  - al aterrizar se reproduce el resto del clip;
+  - al cambiar de dirección, Felipe gira pasando por la cámara.
+- **Acciones** (en el cuadro justo, no al apretar):
+  - **Arañar:** clip de entrada, bucle y salida. En cada zarpazo de `felipe_rig.json` quedan 3 marcas en el tapiz y sale pelusa.
+  - **Tirar:** se para en dos patas y, en el primer zarpazo, el objeto sale hacia el borde del mueble. El vaso se rompe en 8 pedazos y la taza cae sobre el brazo del sofá.
+  - **Pedir:** clip `pedir`, y Valeria responde.
+  - **Pelota:** se empuja caminando contra ella.
+  - **Quieto largo:** `sentarse` → `sentado_mira` → `sentado_pelota` → `levantarse`. La pelota recibe un toque en cada contacto de la pata (`sentado_pelota.contactos`).
+- `valeria_jugable.gd`: reusa la carga Meshy + Mixamo de `valeria_mixamo.gd` y camina por un carril apenas detrás de Felipe, así que no chocan: él pasa por delante, como las capas del 2D.
+  - **Rutina:** mira el celular junto al librero, se sienta en el sofá, recoge la pelota y se la lanza a Felipe, y mira por la ventana.
+  - **Si Felipe tira algo:** dice «¡FELIPE!», voltea, camina, recoge (clip `recoger`) y dice «Gato malo...». El objeto vuelve a su mueble al rato.
+  - **Si le pide:** se agacha y le deja un snack (Felipe se lo come al pasar). Si está sentada, se lo tira sin pararse; si ya le dio, contesta «Ya comiste, gordo».
+  - **En el sofá:** Felipe puede subirse al cojín con ella sentada y se dibuja delante de ella.
+- `bot_jugable.gd`: juega como una persona, con las mismas acciones del teclado.
+- `pruebas/prueba_salto_jugable.gd`: prueba el salto con la física real. Pasa 9 de 9.
+  - El salto mide 0,661 m (el del 2D).
+  - Desde el piso cae sobre el cojín.
+  - Bajo la mesa alta no llega a ella, ni quieto (los pies suben a 0,615 m) ni con carrera.
+  - Desde el sofá, por el respaldo, sí la alcanza.
+  - S + Espacio baja de la mesa.
+  - Felipe nunca sale de su plano.
+- Cambios mínimos en archivos compartidos, para que funcione en el `.exe`:
+  - `felipe_rig.gd`: si el `.glb` original no está, usa la escena importada;
+  - `mixamo_carga.gd`: reconoce los FBX importados;
+  - `project.godot`: escena principal del ejecutable.
+
+**Qué se vio en el video del bot** (`sala-jugable.mp4`, 52 s, en la carpeta de capturas):
+- camina, salta al cojín y araña el respaldo (quedan marcas) con Valeria sentada al lado;
+- sube al respaldo y a la mesa alta, y tira la taza: Valeria grita, se levanta y la recoge del brazo del sofá;
+- baja con S + Espacio, tira el vaso de la mesita y se rompe: Valeria va y lo recoge;
+- empuja la pelota y le pide a Valeria, que se agacha y le da un snack («¡Ñam! +1»);
+- quieto 8,5 s, va hacia la pelota, se sienta, mira a la cámara y le da manotazos que la mueven; una tecla lo levanta.
+- No atraviesa muebles, los pies quedan en el cojín, el respaldo, la mesa y el piso, y la cámara lo sigue sin temblar.
+
+**Lo que no funcionó o queda flojo** (para que el creador lo juzgue jugando):
+- **Caminar es lento.** El clip va a 0,38 m/s; a 0,6 m/s ya se acelera 1,6 veces y parece un trote apurado. Cruzar la sala toma unos 5 s. Para ir a la velocidad del 2D (proporcionalmente ~1,3 m/s) haría falta un clip de **trote o carrera** desde el rig (anotado para el `director-arte`).
+- **El manotazo usa el clip de arañar** (se para en dos patas), porque no hay uno de zarpazo. Desde el piso se lee bien; sobre la mesa se ve raro. Falta un clip `zarpazo` en cuatro patas.
+- **Felipe 3D es 1,3 veces más grande** (pedido del creador) pero salta lo del 2D (0,66 m). Proporcionalmente salta menos que el Felipe 2D.
+- **Al tirar algo y al arañar, Felipe queda de 3/4 de espaldas:** mira al mueble, que está detrás de su plano.
+- **Valeria a veces pasa delante del indicador o del globo** de Felipe; es solo de lectura.
+- En `--headless` (sin pantalla) Godot imprime `Parameter "m" is null`: es el renderizador vacío, no aparece al jugar.
+
+**Veredicto:** pendiente de que el creador la juegue y la compare con el demo 2D (no se marca SEGUIR ni CAMBIAR sin eso). Mi lectura está en la entrega al creador.

@@ -9,6 +9,10 @@ Estado: **diseño aprobado: versión A del híbrido v2** (muy Chibi, cabeza gran
 - **Voz de Valeria (2026-10-21; detalle en la biblia, «Tono, humor y voz»):** (1) su vida no son las redes, es su día (redes una vez por nivel, de pasada); (2) no hace chistes: dice lo que pasa, cansada, en frases planas de 60 caracteres como máximo, sin mayúsculas sostenidas; (3) lo malcría con hechos, no con discursos («bebito gordito» una sola vez, al perdonar). Felipe sigue épico: es el otro polo.
 - **Apodo de Valeria:** Pipe. Otras casas le dicen "Michi" o "Don Gato".
 - **Personalidad:** ego de rey egipcio, cero cardio, egoísta, sarcástico, secretamente leal a Valeria.
+  - **Alegre, juguetón y con mucha personalidad** (el creador, 2026-10-23, con fotos del Felipe real en `arte/referencias/felipe-real/felipe-curioso-*.jpg`).
+  - El desdén es **pose de aristócrata**, no tristeza ni mal humor: disfruta cada travesura, juega con todo y se mete en todas partes (debajo de la mesa, en la ropa, en las cajas).
+  - Entre una pose de reojo y otra muestra curiosidad: ojos grandes mirando hacia arriba, cabeza ladeada.
+  - En animaciones y textos, que se note que **se divierte**.
 - **Voz:** aristócrata ofendido que aprendió a escribir en los comentarios de internet. Sin actor de voz: maullidos procesados y texto.
 
 ## Referencia real

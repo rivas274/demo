@@ -8,6 +8,10 @@ Actualizado: 2026-10-21 (estudio v3: la pelea en todo el cuarto; antes, plan de 
 
 ## En curso
 
+- **DECISIÓN 3D o 2D (creador, 2026-10-23, después de jugar los dos demos):** **el juego sigue en 2D.**
+  - **Por qué:** en 2D se lograron resultados aceptables en 1 o 2 días; en 3D se invirtió mucho más tiempo sin llegar a algo decente para un juego completo.
+  - **El 3D no se descarta:** queda **en pausa** como referencia. Se conservan el prototipo `prototipos/sala-3d-pixel/` (sala jugable, Felipe con rig y Valeria con Mixamo) y la base de conocimiento `conocimiento/flujo-3d/`.
+  - **Sigue:** volver a la Fase 3, el nivel 1 en 2D con calidad final.
 - **2026-10-23, decisión del creador:** «Ya estamos bien con Felipe; seguir insistiendo podría entorpecer el juego». Se cierra la animación de Felipe 3D, rig v6; solo falta la mirada a cámara ocasional y quieto largo (sentarse, mirar al jugador y jugar con la pelota).
   - **Siguiente paso:** una **sala 3D jugable** (`jugable.tscn`) para probar controles, salto e interacciones (arañar el sofá, tirar un vaso, pedir a Valeria, la pelota), con Valeria de Mixamo.
   - Es un proyecto **independiente** del juego 2D: no toca `siete-vidas/juego/`.

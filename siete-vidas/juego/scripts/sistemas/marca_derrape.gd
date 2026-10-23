@@ -12,7 +12,7 @@ var _color: Color
 func _init(datos: DatosJugo, direccion: float) -> void:
 	name = "Marca de derrape"
 	# Va en el piso como los arañazos (Capas.MARCAS).
-	z_index = Capas.MARCAS
+	Profundidad.poner(self, Capas.Rol.MARCA)
 	_largo = roundf(datos.derrape)
 	_direccion = direccion
 	_color = datos.color_marca

@@ -86,15 +86,6 @@ func profundidad_actual() -> float:
 	return roundf(p)
 
 
-## Más cerca de la cámara: delante de Felipe en el piso; detrás si Felipe está encima (o saltándole encima).
-func _actualizar_capa() -> void:
-	if not _enemigo.datos.delante_de_felipe:
-		return
-	var felipe := get_tree().get_first_node_in_group("felipe") as Node2D
-	var encima := felipe != null and felipe.global_position.y < _enemigo.global_position.y - _enemigo.datos.alto * 0.6 and absf(felipe.global_position.x - _enemigo.global_position.x) < _enemigo.datos.ancho
-	Capas.usar(self, Capas.TRAS_FELIPE if encima else Capas.JUEGO_CERCA)
-
-
 func _physics_process(_delta: float) -> void:
 	var x := _enemigo.global_position.x
 	_avance += absf(x - _ultimo_x)
@@ -103,7 +94,6 @@ func _physics_process(_delta: float) -> void:
 	_ultimo_x = x
 	if absf(_enemigo.velocity.x) < 1.0 and absf(x - base_x) < 6.0:
 		_mirando = lado_base
-	_actualizar_capa()
 	queue_redraw()
 
 

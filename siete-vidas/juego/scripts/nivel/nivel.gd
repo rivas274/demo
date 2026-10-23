@@ -445,6 +445,20 @@ func _crear_pieza(rect: Rect2, atravesable: bool, nombre: String, estilo: String
 	add_child(cuerpo)
 
 
+## La pieza (mueble) cuya cubierta sostiene `punto` (la base de un objeto), o "piso": para la profundidad de lo apoyado.
+func superficie_en(punto: Vector2) -> String:
+	for nombre: String in _piezas:
+		var cuerpo: StaticBody2D = _piezas[nombre]
+		var forma := cuerpo.get_child(0) as CollisionShape2D
+		if forma == null or not forma.shape is RectangleShape2D:
+			continue
+		var tam := (forma.shape as RectangleShape2D).size
+		var arriba := cuerpo.global_position
+		if punto.x >= arriba.x - 2.0 and punto.x <= arriba.x + tam.x + 2.0 and absf(punto.y - arriba.y) <= 14.0:
+			return nombre
+	return "piso"
+
+
 ## Cuerpo sólido de una pieza (para las pruebas y el guion): su rectángulo actual en el mundo.
 func pieza(nombre: String) -> StaticBody2D:
 	return _piezas.get(nombre)

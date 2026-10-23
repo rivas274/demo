@@ -55,10 +55,9 @@ extends Resource
 
 @export_group("Ruido: un solo foco a la vez (v5)")
 ## Velo sobre el fondo durante la pelea (baja el contraste del decorado; lo jugable queda a todo color): color y
-## opacidad (0 = sin velo) y hasta qué capa cubre (Capas: -2 = pared, cuadros y ventana; 0 = también los muebles).
+## opacidad (0 = sin velo). Va en la capa VELO de Capas: tapa pared, muebles y restos; no lo jugable.
 @export var velo_color := Color(0.62, 0.5, 0.4)
 @export var velo := 0.0
-@export var velo_capa := -2
 ## Destello de lo que se puede tirar: 0 = nunca, 1 = solo cerca de Felipe, 2 = siempre (v4). Y qué tan cerca.
 @export_range(0, 2) var brillo_tirables := 1
 @export var brillo_cerca := 110.0

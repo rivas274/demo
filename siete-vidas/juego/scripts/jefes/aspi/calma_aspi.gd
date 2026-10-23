@@ -5,7 +5,7 @@ extends Node2D
 ## `datos/jefes/aspi_jugo.tres` (grupo «Ruido»), elegidos entre 5 variantes comparadas a ×1
 ## (`diseno/revisiones/2026-10-23-pelea-aspi-v5.md`).
 ## - **Velo:** durante la pelea, un velo del color del cuarto, apenas opaco, sobre el decorado (pared, cuadros, ventana
-##   y corcho; según `velo_capa`, también los muebles). Baja su contraste; Felipe, A.S.P.I., lo que se puede tirar y
+##   y corcho, muebles y lo que queda en el piso: rol VELO de Capas). Baja su contraste; Felipe, A.S.P.I., lo que se puede tirar y
 ##   los avisos van delante, a todo color.
 ## - **Sin motas** de polvo en el rayo de la ventana, **LED quieta** en reposo, **restos** más oscuros y con menos
 ##   pedazos.
@@ -31,17 +31,16 @@ func _init(de: BatallaAspi) -> void:
 
 
 func _ready() -> void:
-	Capas.usar(self, Capas.EFECTOS)
+	Profundidad.poner(self, Capas.Rol.EFECTO)
 	_velo = Node2D.new()
 	_velo.name = "Velo del fondo"
 	_velo.draw.connect(_dibujar_velo)
 	add_child(_velo)
-	Capas.usar(_velo, datos.velo_capa)
+	Profundidad.poner(_velo, Capas.Rol.VELO)
 
 
 ## Empieza la pelea: el cuarto se calma (motas, LED, restos).
 func empezar() -> void:
-	Capas.usar(_velo, datos.velo_capa)
 	for fondo in b.nivel.find_children("*", "FondoApartamento", true, false):
 		(fondo as FondoApartamento).sin_motas = "" if datos.motas_ambiente else "estudio"
 	b.apariencia.led_parpadea = datos.led_parpadea

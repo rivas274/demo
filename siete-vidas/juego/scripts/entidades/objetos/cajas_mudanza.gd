@@ -53,7 +53,7 @@ func _init(rectangulo: Rect2, peldano_golpe: Vector2) -> void:
 
 func _ready() -> void:
 	add_to_group(Componentes.INTERACTUABLES)
-	z_index = Capas.MUEBLES
+	Profundidad.poner(self, Capas.Rol.SALTABLE, PackedStringArray([String(name)]))
 	_forma = CollisionShape2D.new()
 	_forma.shape = RectangleShape2D.new()
 	add_child(_forma)
@@ -61,7 +61,7 @@ func _ready() -> void:
 	# Nube de polvo al golpear el piso (delante de las cajas, en la capa del juego: nunca encima de la imaginación).
 	_polvo = Particulas.polvo(34, 0.9, Vector2(0, 90), Vector2(40, 110), Vector2(3, 6), Color(0.9, 0.85, 0.76, 0.9), 75.0)
 	_polvo.name = "Polvo de la caja"
-	Capas.usar(_polvo, Capas.JUEGO)
+	Profundidad.poner(_polvo, Capas.Rol.OBJETO_JUEGO)
 	_polvo.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
 	_polvo.emission_rect_extents = Vector2(36, 2)
 	_polvo.damping_min = 40.0

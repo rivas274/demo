@@ -45,7 +45,7 @@ func _init(de: BatallaAspi) -> void:
 
 
 func _ready() -> void:
-	Capas.usar(self, Capas.EFECTOS)
+	Profundidad.poner(self, Capas.Rol.EFECTO)
 	material = b.sin_sombrear
 	_humo = Particulas.polvo(6, 0.9, Vector2(0, -30), Vector2(10, 30), Vector2(3, 5), Color(0.62, 0.62, 0.66, 0.85), 20.0)
 	_humo.name = "Humo"

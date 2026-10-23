@@ -38,7 +38,6 @@ aplastar_px_por_s = 700.0
 aplastar_maximo = 0.55
 velo_color = Color(0.62, 0.5, 0.4, 1)
 velo = 0.22
-velo_capa = -1
 brillo_tirables = 1
 brillo_cerca = 110.0
 motas_ambiente = false

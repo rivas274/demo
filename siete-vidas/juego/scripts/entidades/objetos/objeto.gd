@@ -44,6 +44,12 @@ func _ready() -> void:
 		if datos:
 			tirable.configurar(datos)
 	tirable.caido.connect(_al_romperse)
+	# Profundidad por rol: apoyado sobre su mueble; al caer, lo que se toca; en el piso, resto.
+	var nivel := Componentes.nivel(self)
+	var donde := nivel.superficie_en(global_position) if nivel else "piso"
+	Profundidad.poner(self, datos.rol if datos else Capas.Rol.APOYADO, PackedStringArray([donde]))
+	tirable.empujado.connect(func(_f: Felipe) -> void: Profundidad.poner(self, Capas.Rol.OBJETO_JUEGO))
+	tirable.caido.connect(func(_donde: Vector2) -> void: Profundidad.poner(self, Capas.Rol.RESTO_PISO))
 
 
 func _draw() -> void:

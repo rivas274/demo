@@ -29,7 +29,7 @@ func _ready() -> void:
 	_humo = Particulas.polvo(18, 0.9, Vector2(0, -30), Vector2(10, 40), Vector2(2, 4), Color(0.55, 0.55, 0.58, 0.9), 40.0, 0.2)
 	_humo.name = "Humo"
 	_humo.material = b.sin_sombrear
-	Capas.usar(_humo, Capas.EFECTOS)
+	Profundidad.poner(_humo, Capas.Rol.EFECTO)
 	add_child(_humo)
 
 

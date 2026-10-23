@@ -34,7 +34,7 @@ func _ready() -> void:
 	add_to_group(GRUPO)
 	if datos.ofrecer:
 		add_to_group(Componentes.INTERACTUABLES)
-	Capas.usar(self, Capas.ARTE_PARED if datos.capa == "pared" else Capas.MUEBLES)
+	Profundidad.poner(self, Capas.Rol.ARTE_PARED if datos.capa == "pared" else Capas.Rol.DECORADO)
 
 
 ## Cuántas le quedan por soltar.
@@ -76,7 +76,6 @@ func soltar(hacia := 1.0) -> PiezaSuelta:
 	pieza.gravedad = datos.gravedad
 	pieza.vueltas = datos.vueltas * (1.0 if randf() < 0.5 else -1.0)
 	pieza.con_sombra = true
-	Capas.usar(pieza, Capas.JUEGO)
 	pieza.apoyada.connect(_al_apoyarse)
 	get_parent().add_child(pieza)
 	var nivel := Componentes.nivel(self)
@@ -107,7 +106,7 @@ func arte_indicador() -> Dictionary:
 	var desde: Vector2 = datos.salidas[i] if i < datos.salidas.size() else Vector2.ZERO
 	var arte := ArteNivel.arte_en(self, nombre, desde.x, desde.y)
 	if not arte.is_empty():
-		arte["z"] = z_index
+		arte["z"] = Capas.z_efectivo(self)
 	return arte
 
 

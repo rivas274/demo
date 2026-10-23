@@ -31,7 +31,7 @@ func _init(de: BatallaAspi) -> void:
 
 
 func _ready() -> void:
-	Capas.usar(self, Capas.EFECTOS)
+	Profundidad.poner(self, Capas.Rol.EFECTO)
 	material = b.sin_sombrear
 
 

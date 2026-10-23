@@ -65,7 +65,7 @@ func _escupir() -> void:
 	var b := pelea as BatallaAspi
 	var bola := Node2D.new()
 	bola.name = "Bola de pelo"
-	Capas.usar(bola, Capas.EFECTOS)
+	Profundidad.poner(bola, Capas.Rol.EFECTO)
 	var desde := b.jefe.global_position + Vector2(0, -30)
 	var hasta := objetivo + Vector2(0, -20)
 	var velocidad := Vector2((hasta.x - desde.x) / vuelo, (hasta.y - desde.y) / vuelo - 0.5 * gravedad * vuelo)

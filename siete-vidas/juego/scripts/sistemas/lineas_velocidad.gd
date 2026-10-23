@@ -9,7 +9,7 @@ var _color: Color
 
 func _init(datos: DatosJugo, direccion: float, alto: float) -> void:
 	name = "Lineas de velocidad"
-	z_index = Capas.TRAS_FELIPE
+	Profundidad.poner(self, Capas.Rol.TRAS_FELIPE)
 	_color = datos.lineas_color
 	for i in datos.lineas_cantidad:
 		var largo := roundf(randf_range(datos.lineas_largo.x, datos.lineas_largo.y))

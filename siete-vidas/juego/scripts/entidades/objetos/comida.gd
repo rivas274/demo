@@ -30,6 +30,10 @@ static func crear(datos_comida: DatosObjeto) -> Comida:
 
 func _ready() -> void:
 	add_to_group(Componentes.INTERACTUABLES)
+	# Apoyada sobre el mueble donde está (o en el piso): Profundidad por rol, de sus datos.
+	var nivel := Componentes.nivel(self)
+	var donde := nivel.superficie_en(global_position) if nivel else "piso"
+	Profundidad.poner(self, datos.rol if datos else Capas.Rol.OBJETO_JUEGO, PackedStringArray([donde]))
 
 
 ## Felipe se pone a comer; la comida desaparece cuando la boca llega (cuadro de impacto: al_comido).

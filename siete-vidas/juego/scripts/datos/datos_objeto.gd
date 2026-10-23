@@ -9,6 +9,9 @@ extends Resource
 @export var nombre := ""
 ## Verbo de Felipe en la burbuja del Indicador.
 @export var verbo := "VERBO_LIBERAR"
+## Su rol de profundidad (Capas.Rol): apoyado sobre el mueble donde está (detrás de Felipe, salvo que Felipe esté en
+## esa misma superficie). Al caer pasa a lo que se toca y, en el piso, a resto.
+@export var rol: Capas.Rol = Capas.Rol.APOYADO
 @export_group("Si se come (Comida)")
 ## Snacks que recarga en el bolsillo al comerla (el plato de Felipe: 1; decisión del creador, 2026-10-20).
 @export var recarga_snacks := 0

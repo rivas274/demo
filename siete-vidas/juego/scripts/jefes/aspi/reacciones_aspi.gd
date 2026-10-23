@@ -38,7 +38,7 @@ func _init(de: BatallaAspi) -> void:
 
 
 func _ready() -> void:
-	Capas.usar(self, Capas.EFECTOS)
+	Profundidad.poner(self, Capas.Rol.EFECTO)
 	material = b.sin_sombrear
 
 
@@ -56,7 +56,7 @@ func golpe(donde: Vector2, final := false) -> void:
 		b.nivel.travesuras.jugo.temblar(datos.temblor_golpe, datos.temblor_golpe_s)
 	var polvo := Particulas.polvo(int(datos.polvo * k), 0.6, Vector2(0, 320), Vector2(60, 150), Vector2(2, 3), Color(0.86, 0.8, 0.72), 70.0)
 	polvo.global_position = _onda_centro + Vector2(0, -2)
-	Capas.usar(polvo, Capas.EFECTOS)
+	Profundidad.poner(polvo, Capas.Rol.EFECTO)
 	b.add_child(polvo)
 	polvo.restart()
 	polvo.emitting = true

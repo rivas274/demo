@@ -40,7 +40,7 @@ static func crear(motas: int, piso_y: float) -> MontanaPelusa:
 
 func _ready() -> void:
 	add_to_group(GRUPO)
-	Capas.usar(self, Capas.JUEGO)
+	Profundidad.poner(self, Capas.Rol.OBJETO_JUEGO)
 
 
 ## Sale de `desde` (la tapa de A.S.P.I.) y cae en arco (de `arco` px de alto) hasta `x` sobre el piso.
@@ -103,7 +103,6 @@ func esparcir(hacia := 1.0) -> void:
 		mota.vueltas = randf_range(-1.5, 1.5)
 		mota.rebote = 0.2
 		mota.con_sombra = true
-		Capas.usar(mota, Capas.JUEGO)
 		motas_en_vuelo += 1
 		mota.apoyada.connect(_al_apoyarse_mota)
 		get_parent().add_child(mota)
@@ -122,7 +121,7 @@ func _al_apoyarse_mota(mota: PiezaSuelta) -> void:
 func _nube(granos: int) -> void:
 	var nube := Particulas.polvo(granos, 0.8, Vector2(0, 50), Vector2(30, 90), Vector2(2, 4), COLOR_NUBE, 80.0)
 	nube.position = position + Vector2(0, -8)
-	Capas.usar(nube, Capas.EFECTOS)
+	Profundidad.poner(nube, Capas.Rol.EFECTO)
 	get_parent().add_child(nube)
 	nube.restart()
 	nube.emitting = true

@@ -140,9 +140,9 @@ func _ready() -> void:
 	presentacion.paso_empezado.connect(_al_paso)
 	presentacion.empujon.connect(_al_empujon)
 	# La imaginación de Felipe tapa TODO el escenario (muebles, puertas, repisa); solo Felipe va delante (B1).
-	_imaginacion = _lienzo("Imaginacion", Capas.IMAGINACION, func() -> void: dibujo.imaginacion(_imaginacion))
-	_manchas_dibujo = _lienzo("Manchas", Capas.MUEBLES, func() -> void: dibujo.manchas(_manchas_dibujo))
-	_encima = _lienzo("Viento y depósito", Capas.EFECTOS, func() -> void: dibujo.encima(_encima))
+	_imaginacion = _lienzo("Imaginacion", Capas.Rol.IMAGINACION, func() -> void: dibujo.imaginacion(_imaginacion))
+	_manchas_dibujo = _lienzo("Manchas", Capas.Rol.RESTO_PISO, func() -> void: dibujo.manchas(_manchas_dibujo))
+	_encima = _lienzo("Viento y depósito", Capas.Rol.EFECTO, func() -> void: dibujo.encima(_encima))
 	# Avisos, chispas y bolas se leen también en el apagón (sin sombrear).
 	sin_sombrear.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
 	_encima.material = sin_sombrear
@@ -167,14 +167,14 @@ func _ready() -> void:
 	add_child(ayuda)
 	_polvo = Particulas.polvo(24, 0.7, Vector2(0, 220), Vector2(50, 140), Vector2(2, 4), Color(0.86, 0.82, 0.75))
 	_polvo.name = "Polvo"
-	Capas.usar(_polvo, Capas.EFECTOS)
+	Profundidad.poner(_polvo, Capas.Rol.EFECTO)
 	add_child(_polvo)
 
 
-func _lienzo(nombre: String, capa: int, al_dibujar: Callable) -> Node2D:
+func _lienzo(nombre: String, rol: int, al_dibujar: Callable) -> Node2D:
 	var lienzo := Node2D.new()
 	lienzo.name = nombre
-	Capas.usar(lienzo, capa)
+	Profundidad.poner(lienzo, rol)
 	lienzo.draw.connect(al_dibujar)
 	add_child(lienzo)
 	return lienzo
@@ -246,7 +246,7 @@ func chispas(donde: Vector2, cantidad := 16) -> void:
 	for color: Color in [Color(1.0, 0.92, 0.4), Color(0.6, 0.9, 1.0)]:
 		var chispa := Particulas.polvo(cantidad, 0.45, Vector2(0, 260), Vector2(80, 200), Vector2(1, 2), color, 160.0)
 		chispa.material = sin_sombrear
-		Capas.usar(chispa, Capas.EFECTOS)
+		Profundidad.poner(chispa, Capas.Rol.EFECTO)
 		chispa.global_position = donde
 		add_child(chispa)
 		chispa.restart()
@@ -288,10 +288,11 @@ func _process(delta: float) -> void:
 	# Felipe queda delante de su propia imaginación; el escenario, detrás.
 	# Solo toca la capa de Felipe mientras imagina (y para devolverla): el resto del tiempo la decide el nivel (delante
 	# o detrás de Valeria según dónde está parado).
-	if gigante > 0.0 or transformacion > 0.0:
-		felipe.z_index = Capas.FELIPE_IMAGINANDO
-	elif felipe.z_index == Capas.FELIPE_IMAGINANDO:
-		felipe.z_index = Capas.JUEGO
+	var imaginando := gigante > 0.0 or transformacion > 0.0
+	var de_felipe := Profundidad.de(felipe)
+	if de_felipe and de_felipe.imaginando != imaginando:
+		de_felipe.imaginando = imaginando
+		de_felipe.aplicar()
 	if not papeles.is_empty():
 		for i in papeles.size():
 			papeles[i].y += delta

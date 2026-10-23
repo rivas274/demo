@@ -41,7 +41,7 @@ func _ready() -> void:
 	sala.add_child.call_deferred(aspi)
 	var dibujo := Node2D.new()
 	dibujo.name = "Mancha del ensayo"
-	dibujo.z_index = Capas.MUEBLES
+	Profundidad.poner(dibujo, Capas.Rol.DECORADO)
 	dibujo.draw.connect(func() -> void:
 		if mancha_x != INF and paso in [Paso.ESPERANDO, Paso.VA, Paso.LIMPIA]:
 			ArteNivel.dibujar(dibujo, "mancha", mancha_x, Nivel1.SUELO + 2.0)

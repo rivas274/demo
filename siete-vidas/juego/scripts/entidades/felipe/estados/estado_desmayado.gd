@@ -19,7 +19,7 @@ func entrar(_datos := {}) -> void:
 	fantasma.scale = Vector2.ONE * Felipe.ESCALA_SPRITE * 0.6
 	fantasma.global_position = sprite.global_position
 	fantasma.modulate = Color(1, 1, 1, 0.7)
-	fantasma.z_index = Capas.ESTELA
+	Profundidad.poner(fantasma, Capas.Rol.ESTELA)
 	felipe.get_parent().add_child(fantasma)
 	var subir := fantasma.create_tween().set_parallel()
 	subir.tween_property(fantasma, "global_position:y", fantasma.global_position.y - 70.0, 1.4)

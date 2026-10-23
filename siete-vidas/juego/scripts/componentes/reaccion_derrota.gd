@@ -180,7 +180,6 @@ func _desarmar() -> void:
 		var rapidez := randf_range(datos.velocidad_piezas.x, datos.velocidad_piezas.y)
 		var pieza := PiezaSuelta.crear(datos.piezas[i], pie + Vector2(0, -8), Vector2.from_angle(angulo) * rapidez, pie.y)
 		pieza.vueltas = randf_range(-2.5, 2.5)
-		pieza.z_index = _cuerpo.z_index
 		if datos.piezas[i] == datos.pieza_que_gira:
 			pieza.gira_segundos = datos.giro_segundos
 		mundo.add_child(pieza)
@@ -191,7 +190,7 @@ func _desarmar() -> void:
 		fantasma = PiezaSuelta.crear(datos.fantasma, pie + Vector2(0, -10), Vector2.ZERO, pie.y)
 		fantasma.set_physics_process(false)
 		fantasma.modulate.a = 0.6
-		fantasma.z_index = _cuerpo.z_index + 1
+		Profundidad.poner(fantasma, Capas.Rol.EFECTO)
 		mundo.add_child(fantasma)
 		# Después del «¡POP!» (zonas de texto: una palabra a la vez, cada una 0,9 s).
 		_palabra(datos.palabra_fantasma, pie + Vector2(0, -70), ZonasTexto.DURACION_PALABRA)
@@ -226,7 +225,6 @@ func _dejar_marca(pie: Vector2) -> void:
 	var d: DatosEnemigo = _cuerpo.get("datos")
 	var hondo := d.profundidad if d else 0.0
 	marca = PiezaSuelta.crear(datos.marca, pie + Vector2(-_lado * datos.lado_marca, hondo), Vector2.ZERO, pie.y + hondo)
-	marca.z_index = _cuerpo.z_index
 	marca.con_sombra = true
 	_cuerpo.get_parent().add_child(marca)
 	marca._apoyar()
@@ -237,7 +235,7 @@ func _soltar_nube(pie: Vector2) -> void:
 		return
 	var nube := Particulas.polvo(datos.nube, 0.9, Vector2(0, 60), Vector2(30, 90), Vector2(2, 4), datos.color_nube, 80.0)
 	nube.position = pie + Vector2(0, -10)
-	nube.z_index = _cuerpo.z_index + 1
+	Profundidad.poner(nube, Capas.Rol.EFECTO)
 	_cuerpo.get_parent().add_child(nube)
 	nube.restart()
 	nube.emitting = true

@@ -36,7 +36,7 @@ func _init(nombre := "Arañable", ancho_zona := 120.0, alto_zona := 60.0) -> voi
 
 func _ready() -> void:
 	add_to_group(Componentes.INTERACTUABLES)
-	z_index = Capas.MARCAS
+	Profundidad.poner(self, Capas.Rol.MARCA)
 	_pelusa = Particulas.polvo(10, 0.8, Vector2(0, 150), Vector2(30, 80), Vector2(1, 2), Color(0.95, 0.92, 0.85), 70.0, 0.9)
 	add_child(_pelusa)
 

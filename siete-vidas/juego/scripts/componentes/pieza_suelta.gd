@@ -49,6 +49,8 @@ static func crear(nombre_pieza: String, desde: Vector2, velocidad_inicial: Vecto
 
 
 func _ready() -> void:
+	# Profundidad por rol: en el aire, lo que se toca; en el piso, resto (detrás de Felipe y de A.S.P.I.).
+	Profundidad.poner(self, Capas.Rol.RESTO_PISO if en_piso else Capas.Rol.OBJETO_JUEGO)
 	for i in range(1, CUADROS_GIRO + 1):
 		var cuadro := ArteNivel.textura("%s_%d" % [nombre, i])
 		if cuadro:
@@ -79,6 +81,7 @@ func _physics_process(delta: float) -> void:
 ## Se queda en el piso, derecha, y empieza a girar si le toca.
 func _apoyar() -> void:
 	en_piso = true
+	Profundidad.poner(self, Capas.Rol.RESTO_PISO)
 	velocidad = Vector2.ZERO
 	rotation = 0.0
 	position = position.round()
@@ -99,6 +102,7 @@ func brincar(alto: float) -> void:
 	en_piso = false
 	girando = false
 	_brincando = true
+	Profundidad.poner(self, Capas.Rol.OBJETO_JUEGO)
 	velocidad = Vector2(0.0, -sqrt(2.0 * gravedad * alto))
 	vueltas = 0.0
 

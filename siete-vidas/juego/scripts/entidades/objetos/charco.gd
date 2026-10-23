@@ -23,7 +23,7 @@ static func crear(donde: Vector2, ancho_charco := 46.0) -> Charco:
 
 
 func _ready() -> void:
-	Capas.usar(self, Capas.JUEGO)
+	Profundidad.poner(self, Capas.Rol.RESTO_PISO)
 
 
 func _process(delta: float) -> void:

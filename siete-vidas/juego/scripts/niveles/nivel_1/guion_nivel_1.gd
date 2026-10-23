@@ -195,7 +195,7 @@ func _crear_objetos() -> void:
 	# Rascador (teatro para Valeria) y sofá con plástico.
 	rascador = Rascador.new()
 	rascador.position = Vector2(Nivel1.RASCADOR_X, Nivel1.SUELO)
-	rascador.z_index = Capas.MUEBLES
+	Profundidad.poner(rascador, Capas.Rol.SALTABLE, PackedStringArray(["Rascador abajo", "Rascador medio", "Rascador arriba"]))
 	nivel.add_child(rascador)
 	travesuras.conectar_rascador(rascador)
 	sofa = Aranable.new("Sofa arañable", Nivel1.SOFA_ARANABLE[1], Nivel1.SOFA_ARANABLE[2])
@@ -228,7 +228,7 @@ func _crear_objetos() -> void:
 		arte_ropa["z"] = Capas.MARCAS  # sobre la cama (si fuera detrás, la cama lo taparía)
 		return arte_ropa
 	# Detrás de Felipe: se acicala encima de la ropa, no detrás de la pila.
-	ropa.z_index = Capas.MUEBLES
+	Profundidad.poner(ropa, Capas.Rol.DECORADO)
 	nivel.add_child(ropa)
 	# La puerta de la cocina oye los maullidos de este lado (Valeria está adentro): su pieza OyeMaullido.
 	var oido := OyeMaullido.new()
@@ -403,10 +403,10 @@ func _actualizar_capa_felipe() -> void:
 		return
 	var delante := superficie_de_felipe() in Nivel1.DELANTE_DE_HUMANOS or felipe.estado in Nivel1.ESTADOS_DELANTE_DE_HUMANOS \
 		or (valeria != null and valeria.actividad in Nivel1.ACTIVIDADES_HUMANO_DETRAS)
-	if delante and felipe.z_index == Capas.JUEGO:
-		felipe.z_index = Capas.JUEGO_DELANTE
-	elif not delante and felipe.z_index == Capas.JUEGO_DELANTE:
-		felipe.z_index = Capas.JUEGO
+	var de_felipe := Profundidad.de(felipe)
+	if de_felipe and de_felipe.delante_de_humanos != delante:
+		de_felipe.delante_de_humanos = delante
+		de_felipe.aplicar()
 
 
 ## Nombre de la pieza donde está parado Felipe ("" si es el piso u otra cosa sin nombre).
@@ -442,7 +442,7 @@ func _censura_ironica() -> void:
 	var lineas := tr("PALABRA_CONTENIDO_SENSIBLE").split(" ", false)
 	var pegatina := Node2D.new()
 	pegatina.name = "Censura"
-	pegatina.z_index = Capas.CENSURA
+	Profundidad.poner(pegatina, Capas.Rol.CENSURA)
 	pegatina.global_position = (felipe.global_position + Vector2(0, -34)).round()
 	pegatina.draw.connect(func() -> void:
 		var alto := 16.0 * lineas.size() + 8.0

@@ -59,6 +59,11 @@ static func desde_escena(ruta: String, izquierda := -INF, derecha := INF) -> Ene
 func _ready() -> void:
 	armar()
 	add_to_group(Componentes.ENEMIGOS)
+	# Profundidad por rol (sus datos): delante de los muebles; contra Felipe en el piso, según delante_de_felipe.
+	if datos:
+		var profundidad := Profundidad.poner(self, datos.rol)
+		profundidad.delante = datos.delante_de_felipe
+		profundidad.aplicar()
 
 
 ## Pone las piezas que falten y las conecta (una sola vez; la fábrica lo llama antes de agregarlo).

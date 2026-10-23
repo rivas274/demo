@@ -18,6 +18,8 @@ extends Resource
 @export var profundidad := 0.0
 ## Más cerca de la cámara: se dibuja delante de Felipe en el piso (no cuando Felipe está encima).
 @export var delante_de_felipe := false
+## Su rol de profundidad (Capas.Rol): los enemigos del piso van siempre delante de los muebles.
+@export var rol: Capas.Rol = Capas.Rol.ENEMIGO_PISO
 ## Juguete de cuerda: vencido queda patas arriba con la llave girando.
 @export var llave_de_cuerda := false
 ## Escena o script de apariencia propia (A.S.P.I. dibuja su tapa y su luz); vacío = Apariencia (la imagen y listo).

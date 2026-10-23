@@ -569,15 +569,6 @@ static func superficies_del_arte(datos: Array) -> PackedStringArray:
 	return lista
 
 
-## El mueble (nombre de PIEZAS) cuya cubierta sostiene `punto` (la base de un objeto), o "piso".
-static func superficie_en(punto: Vector2) -> String:
-	for pieza: Array in PIEZAS:
-		var r: Rect2 = pieza[0]
-		if punto.x >= r.position.x - 2.0 and punto.x <= r.end.x + 2.0 and absf(punto.y - r.position.y) <= 14.0:
-			return pieza[2]
-	return "piso"
-
-
 static func rect_pieza(nombre: String) -> Rect2:
 	for pieza: Array in PIEZAS:
 		if pieza[2] == nombre:

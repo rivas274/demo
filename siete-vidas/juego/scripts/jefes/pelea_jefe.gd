@@ -56,7 +56,7 @@ func _init(datos_jefe: DatosJefe, el_jefe: Enemigo, gato: Felipe, de_nivel: Nive
 	nivel = de_nivel
 	arena = donde
 	# La pelea en sí no dibuja nada: cada parte va en su capa de la tabla única (Capas, B1 de la revisión 3).
-	z_index = Capas.JUEGO
+	Profundidad.poner(self, Capas.Rol.JUEGO)
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	for conducta: ConductaJefe in datos.conductas:
 		var copia := conducta.duplicate() as ConductaJefe

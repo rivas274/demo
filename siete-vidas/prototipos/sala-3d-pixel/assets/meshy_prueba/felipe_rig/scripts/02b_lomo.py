@@ -90,6 +90,16 @@ cola |= (fx < 400) & (fy < 520)
 # Bajo la raíz de la cola (py >= 600) es grupa: se pinta como cuerpo (si no, quedaba un óvalo
 # con el color viejo, sin pintar, alrededor de la base de la cola).
 cola &= fy < 600
+# v6c: la cara de abajo de la raíz de la cola (bajo la fila 600) también es cola: lo que está a
+# menos de 40 px de su línea central y por encima de la fila 640. Si no, quedaba un óvalo
+# blanco bajo la base de la cola.
+_lin = np.array([(345, 560), (240, 485), (228, 405), (222, 305), (196, 243), (110, 195)], float)
+_dmin = np.full((1024, 1024), 1e9)
+for (ax, ay), (bx, by) in zip(_lin[:-1], _lin[1:]):
+    vx, vy = bx - ax, by - ay
+    u = np.clip(((fx - ax) * vx + (fy - ay) * vy) / (vx * vx + vy * vy), 0, 1)
+    _dmin = np.minimum(_dmin, np.hypot(fx - (ax + u * vx), fy - (ay + u * vy)))
+cola |= (_dmin < 40) & (fy < 640) & (fx < 380)
 zoff = C.CENTRO_ORIGINAL[2] - C.Z_PISO_ORIGINAL
 px = np.clip(np.round(512 - pos[..., 1] / C.PX).astype(int), 0, 1023)
 py = np.clip(np.round(512 - (pos[..., 2] - zoff) / C.PX).astype(int), 0, 1023)
@@ -232,10 +242,9 @@ def aplicar(params):
     LAT = np.degrees(np.abs(ang - math.pi / 2))
     LAT = np.minimum(LAT, 360 - LAT)
     a = campo(T, LAT, *params)
-    # La montura cubre también la parte de atrás de la grupa, bajo la raíz de la cola (el mapa
-    # del cuerpo la cuenta como "abajo"): sin franja blanca entre la grupa y la cola.
-    atras = np.clip((700 - py) / 45.0, 0, 1) * np.clip((345 - px) / 35.0, 0, 1)
-    a = np.maximum(a, atras)
+    # v6c: se quitó el relleno "atras" de la v4 (una rampa de 45 px con el color de la montura
+    # bajo la raíz de la cola): dejaba una mancha oscura y borrosa entre las nalgas. La unión
+    # con la cola ya la resuelve la cola, que nace del color de la montura.
     # Rayas atigradas finas: de la columna hacia abajo (líneas a lo largo del costado), con
     # una leve ondulación; oscuras y angostas.
     largo = (px - Y0) / (Y1 - Y0)

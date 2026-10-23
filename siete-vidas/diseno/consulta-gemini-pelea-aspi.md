@@ -1,46 +1,49 @@
-# Consulta a Gemini: rediseñar la pelea contra A.S.P.I. (2026-10-23)
+# Consulta a Gemini: pelea contra A.S.P.I., versión 2 (2026-10-23)
 
-**Copia y pega todo lo que está debajo de la línea en Gemini, junto con las imágenes y el video adjuntos.**
+Adjuntar estas imágenes de `siete-vidas/diseno/revisiones/capturas/pelea-aspi/`:
+- `v2-capturas.png`: la versión 2, desde el principio, fase por fase, hasta el estudio destruido;
+- `v2-estudio-destruido.png`: cómo queda el estudio al final, ampliado;
+- `hoja-pelea.png`: la versión anterior, para comparar.
 
-Adjuntos:
-- `pelea-aspi.mp4`: video de 41 s de la pelea actual, jugada por el bot.
-- `hoja-pelea.png`: 10 cuadros del video, cada 4 s.
-- `cuarto-izquierda.png` y `cuarto-derecha.png`: el estudio completo, que es la arena de la pelea.
-- `objetos-tirados.png`: cómo quedan las cosas al tirarlas.
-
-Las imágenes están en `siete-vidas/diseno/revisiones/capturas/pelea-aspi/`.
+Pegar en Gemini solo lo que está entre las dos líneas.
 
 ---
 
-Hola. Estoy haciendo un juego de plataformas 2D en pixel art, de vista lateral, a 640×360: **«Felipe: Nueve Vidas, Cero Disculpas»**. Felipe es un gato persa malcriado que se cree aristócrata; el humor es una sátira desde su punto de vista. Pilares: «Siempre te sales con la suya», «Cada maña es llave y travesura» y «Épico en su cabeza» (todo se vive épico, como en Broforce o Balatro, aunque sea algo cotidiano de gato). Sin sangre ni sufrimiento: los enemigos son juguetes y máquinas.
+Hola. Estoy haciendo un juego de plataformas 2D en pixel art, de vista lateral, a 640×360: **«Felipe: Nueve Vidas, Cero Disculpas»**.
 
-**El jefe del nivel 1 es A.S.P.I., una aspiradora robot.** Su título es «Devoradora de Pelos · Nivel 99». La pelea es en el estudio de Valeria, la dueña, que mide unos 2 pantallas de ancho. Hay dos islas de muebles para subir (silla, escritorio, repisas, una caja y un librero bajo) y la aspiradora anda por el piso.
+**El juego:**
+- **Felipe** es un gato persa malcriado que se cree aristócrata.
+- **El humor** es una sátira desde su punto de vista.
+- **Los pilares** son «Siempre te sales con la suya», «Cada maña es llave y travesura» y «Épico en su cabeza»: todo se vive épico, como en Broforce o Balatro, aunque sea algo cotidiano de gato.
+- No hay sangre ni sufrimiento.
 
-**Cómo funciona hoy:**
-- Felipe **tira cosas al piso** de un manotazo: un vaso, una taza, 2 macetas, una planta, un portarretratos y papeles. Si pisa el teclado, la impresora escupe papeles. Lo que cae deja una **mancha**.
-- A.S.P.I. va a limpiar cada mancha con un aviso previo de 0,6 s. Mientras aspira, arrastra a Felipe si está cerca, y él puede agacharse para aguantar.
-- Cuando junta 2, 3 y 3 manchas (según la fase), su **depósito se llena** y se queda quieta unos segundos pitando «¡DEPÓSITO LLENO!». Felipe le salta encima, aprieta su botón y la «golpea». Son 3 fases.
+**La pelea contra A.S.P.I.** (una aspiradora robot, «Devoradora de Pelos · Nivel 99») es el jefe del nivel 1 y **el gancho del juego**: de ella depende que la gente siga jugando o lo abandone. Necesito que se sienta memorable.
+
+**Cómo funciona ahora (versión 2):**
+- **El escenario:** el estudio de la dueña, de unas 2 pantallas de ancho, con muebles para subir.
+- **Ensuciar:** Felipe tira cosas al piso de un manotazo: vaso, taza, macetas, planta, libros del librero, pilas de libros, notas del corcho y apuntes. **Nada reaparece:** todo queda tirado hasta el final, y el estudio termina destruido.
+- **Limpiar:** A.S.P.I. va a limpiar cada mancha, avisando antes. Mientras aspira, arrastra a Felipe si está cerca, y él se agacha para aguantar.
+- **Apagarla:** cuando junta 2, 3 y 3 manchas, según la fase, se llena y se queda quieta pitando. Felipe le salta encima y la apaga. Son 3 fases.
+- **La pelusa:** al apagarla, se le abre el depósito y **escupe una montaña de pelusa** («¡BLORP!»). Felipe la esparce de un manotazo y quedan 2 motas que vuelven a servir de munición. Así nunca falta.
 - **Ataques:**
   - **embestida**, avisada con una luz roja;
-  - **soplido** contra Felipe si se queda arriba de un mueble mucho rato (desde la fase 2): lo bota al piso sin daño;
-  - **bolas de pelo en arco** en la fase 3.
-  - Si Felipe maúlla, A.S.P.I. gira hacia él.
+  - **soplido** contra Felipe si se queda arriba de un mueble mucho rato;
+  - **bolas de pelo en arco**, en la fase 3.
+- **Final:** en cámara lenta sale «¡APAGADA!» y Felipe dice «Estudio redecorado. Estilo: Su Majestad.».
 
-**El problema que vio el creador:** para que nunca falten manchas, **lo que se rompe vuelve a aparecer en su lugar cada 6 segundos, de uno en uno**. El creador dice que **rompe la inmersión**: las cosas reaparecen por arte de magia. Preferiría algo más como que Felipe las **tumbe**, sin que vuelvan solas. Hay que replantear el recurso «manchas», pero sin perder lo que funciona: el ciclo de ensuciar, que ella limpie, que se llene y que Felipe le salte encima.
-
-**Ideas que ya tenemos (opina y mejóralas):**
-- **A. Tumbar y que quede donde cae:** nada desaparece ni vuelve. Las cosas quedan en el piso (tierra, libros abiertos, café derramado, papeles) y se agregan más fuentes de desorden al cuarto: unas 12 a 14 para 8 manchas necesarias. Al final el estudio queda destruido como trofeo.
-- **B. A.S.P.I. devuelve la suciedad:** al apagarse en cada fase, su depósito se abre y escupe una montaña de pelusa que Felipe puede volver a esparcir.
-- **C. Felipe es la suciedad:** se sacude o se frota y suelta una bola de pelo que cuenta como mancha («Devoradora de Pelos»). Con límite para que no sea repetitivo.
+**Lo que todavía no convence:**
+- La fase 3 se siente como un trámite: solo agrega bolas de pelo y no hay un clímax.
+- Si el jugador tira lo mínimo (4 cosas), el estudio queda poco destruido y se pierde el chiste del trofeo.
+- La música y los sonidos son provisionales.
 
 **Preguntas (responde en español, concreto y por puntos):**
-1. ¿Cuál de las ideas A, B o C recomiendas, o qué combinación? ¿Por qué, pensando en la inmersión, la diversión y el humor?
-2. Propón **2 o 3 ideas propias** para que nunca falte munición sin que nada reaparezca por magia. ¿Cómo lo resuelven otros jefes de juegos 2D? Da ejemplos de juegos concretos.
-3. ¿Cómo harías que la pelea **escale en las 3 fases** si los objetos son limitados? ¿Cambia la arena (cosas que caen solas o que la aspiradora tumba al chocar)?
-4. ¿Qué **momentos épicos o chistes** agregarías, en el tono de Felipe, para que se sienta más memorable?
-5. Mirando el video y las capturas, ¿qué **otros 3 problemas** ves en la pelea (claridad, ritmo, lectura de los ataques, cámara, interfaz)? Ordénalos por importancia.
-6. Si puedes, **dibuja una maqueta** del estudio con tu propuesta: dónde están las fuentes de desorden y por dónde se mueve A.S.P.I.
+1. Viendo las capturas, ¿qué opinas del ciclo actual (ensuciar → que limpie → apagarla → que escupa la pelusa)? ¿Qué le falta para ser memorable?
+2. Propón **3 ideas de clímax para la fase 3**: un cambio en la arena, un ataque nuevo, una transformación cómica o un momento «épico en su cabeza». Pon ejemplos de jefes de otros juegos.
+3. ¿Cómo **premiarías destruir más** sin obligarlo? Por ejemplo: un puntaje de desorden, una reacción de la dueña al final, un logro o un chiste distinto según cuánto se rompió.
+4. Describe **los sonidos y la música** ideales para la pelea y sus 3 fases (ritmo, instrumentos y efectos clave), para pedirlos o buscarlos gratis.
+5. Mirando las capturas, ¿cuáles son los **3 problemas más importantes** que ves: claridad, lectura de los ataques, textos o cámara? Ordénalos por importancia.
+6. Si puedes, **dibuja una maqueta** de la fase 3 con tu mejor idea de clímax.
 
 ---
 
-Guardar la respuesta de Gemini en `siete-vidas/diseno/revisiones/2026-10-23-gemini-pelea-aspi.md`, y lo que dibuje en `siete-vidas/diseno/revisiones/capturas/pelea-aspi/`. Después, Claude junta la propuesta de Gemini con la suya y la pasa por el diseñador de juego contra los pilares.
+Guardar la respuesta en `siete-vidas/diseno/revisiones/2026-10-23-gemini-pelea-aspi.md` y lo que dibuje en `siete-vidas/diseno/revisiones/capturas/pelea-aspi/`.

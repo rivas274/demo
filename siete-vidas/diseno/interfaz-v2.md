@@ -1,6 +1,236 @@
-# Interfaz v2: dirección de arte (en elección)
+# Interfaz v2: layout primero, después el arte
 
-Actualizado: 2026-10-23. **Estado:** el creador elige entre las opciones A, B y C. **Todavía no se producen piezas finales ni se toca el juego.** Cuando elija, los assets se generan con Gemini y ChatGPT desde su PC (encargos al final), se recortan y se ajustan a la paleta, y recién ahí se arma el plan de implementación.
+Actualizado: 2026-10-23. **Estado:** primero se decide la **estructura** (dónde va todo y cómo se lee en cada pantalla) y después el arte. Pedido del creador: «rediseña la UI; no importa el arte, sino dónde va todo y cómo iría».
+
+- El layout en wireframes, sin arte, está en la sección «Layout y legibilidad multiplataforma», que viene enseguida. **Lo aprueba el creador.**
+- Las láminas de estilo A, B y C (sección «Dirección de arte: opciones») quedan **en pausa**. Se retoman cuando se apruebe el layout, y entonces se ajustan a él: por ejemplo, el contador de snacks sale del HUD y las etiquetas de 8 px pasan a 16 px.
+- No se toca el juego.
+
+## Layout y legibilidad multiplataforma
+
+**Datos nuevos del creador (2026-10-23):**
+
+- El juego puede salir en **Switch** (portátil y TV), **PC** y **PlayStation**. Todo el texto debe leerse en esas pantallas.
+- **Los snacks salen de la pantalla principal:** se ven solo en la pausa, en el bolsillo.
+
+Se aplica el pilar de no reinventar la rueda: los números salen de las guías públicas de la industria (fuentes al final de la sección). Nintendo y Sony no publican sus guías (están detrás del portal de desarrolladores, con acuerdo de confidencialidad). Por eso se usan las de Xbox, que son públicas y las más estrictas, más las de accesibilidad. Al registrarse en Nintendo y PlayStation hay que contrastarlas con sus requisitos de certificación (Lotcheck y TRC).
+
+### Lo que dicen los estándares
+
+| Tema | Estándar | Fuente |
+| --- | --- | --- |
+| Zona segura | **Títulos: el 90 % interior** de la pantalla (menús, HUD, texto, todo lo importante). **Acción: el 95 %.** A 1080p, la zona de títulos queda a 96 px de los lados y 40 px de arriba y abajo. Los 32 px laterales y los 8 px de arriba y abajo pueden tener avisos del sistema | Xbox GDK, «Screen safe areas» |
+| Zona segura (TV clásica) | Acción al 90 % y títulos al 80 % (SMPTE RP 13 y RP 8). La norma de 16:9 (SMPTE RP 2046-2) deja solo el 90 % | Autodesk, «Safe display regions»; nesdev |
+| Letra mínima, consola | **26 px de cuerpo a 1080p** (52 px a 4K). PC: 18 px a 1080p. El cuerpo se mide del ascendente más alto al descendente más bajo. Hay que poder **agrandarla hasta 200 %**, y los íconos de botón crecen con el texto | Xbox Accessibility Guideline 101 |
+| Letra mínima, portátil | Leíble **a 30 cm** (12 pulgadas): a **720p, mínimo 9 px y recomendado 12 px**; a 1080p, mínimo 14 y recomendado 18 | Xbox, guías de compatibilidad portátil |
+| Letra mínima, accesibilidad | 28 px a 1080p como **piso**, no como meta (guía de 10 pies de Amazon) | Game Accessibility Guidelines |
+| Letra mínima, IGDA | **32 px a 1080p**, y **46 px** para el texto que se va solo, como los subtítulos | IGDA GA-SIG, «Text size» |
+| Distancia | Sofá: «10 pies» (unos 3 m) frente a la TV. Portátil: 30 cm | Amazon Fire TV; Xbox portátil |
+| Contraste | **4,5:1** para texto normal, **3:1** para texto grande e íconos, **7:1** en el modo de contraste alto | Xbox Accessibility Guideline 102 |
+| Ritmo del texto | Que el jugador avance el texto **a su ritmo** | Game Accessibility Guidelines (básica) |
+| Espaciado | ≤ 80 letras por línea; interlineado ≥ 1,5× en bloques de más de 2 líneas; desplazamiento en un solo eje | Xbox Accessibility Guideline 101 |
+
+### Escalado del pixel art
+
+La base es 640×360 y se escala **solo por enteros**, con el vecino más cercano:
+
+| Pantalla | Salida | Escala | 1 px de la base mide |
+| --- | --- | --- | --- |
+| Switch portátil (6,2", 237 ppp) | 1280×720 | ×2 | 0,21 mm |
+| Switch OLED portátil (7", 210 ppp) | 1280×720 | ×2 | 0,24 mm |
+| Switch 2 portátil (7,9", 1080p, unos 279 ppp) | 1920×1080 | ×3 | 0,27 mm |
+| Switch en TV, PS4 y PC a 1080p | 1920×1080 | ×3 | 1,4 mm (TV de 40") a 1,9 mm (TV de 55") |
+| PC a 1440p | 2560×1440 | ×4 | — |
+| PS5 y PC a 4K | 3840×2160 | ×6 | — |
+| Steam Deck | 1280×800 | ×2, con franjas de 40 px | — |
+
+Una pantalla que no es múltiplo usa el mayor entero que cabe, más franjas.
+
+**Qué significa en la base:**
+
+- 26 px a 1080p son 26 / 3 ≈ **9 px de cuerpo** en la base.
+- El recomendado del portátil (12 px a 720p) son 6 px en la base.
+- Los 32 px de IGDA son ≈ 11 px.
+- **Manda la TV**, porque es la pantalla más exigente.
+
+### ¿Cumplen nuestras letras? (medidas en la base, cuerpo de «Hdgjpqy»)
+
+| Letra (uso hoy) | Cuerpo en la base | 1080p (×3) | 720p (×2) | Veredicto |
+| --- | --- | --- | --- | --- |
+| Pixel Operator 16 (texto) | 11 px | 33 px | 22 px | **Cumple** consola (26), GAG (28) e IGDA (32) |
+| Pixel Operator Bold 16 (nombres, números) | 11 px | 33 px | 22 px | **Cumple** |
+| Silkscreen 16 (carteles; solo mayúsculas) | 10 px | 30 px | 20 px | **Cumple** consola y GAG; queda justo bajo IGDA 32 |
+| Silkscreen 24 y 32 | 15 y 20 px | 45 y 60 px | — | **Cumple** |
+| Pixel Operator 8 (hoy: nombre del diálogo, indicador, barra del jefe, ficha, libreta, resumen) | 8 px | 24 px | 16 px | **No cumple en TV** (24 < 26). Sí en portátil |
+| Silkscreen 8 (las láminas A, B y C) | 5 px (mayúsculas) | 15 px | 10 px | **No cumple** en TV, y en portátil queda bajo el recomendado |
+
+En tamaño físico, con Pixel Operator 16 (11 px de cuerpo):
+
+| Pantalla y distancia | Alto del cuerpo | Ángulo |
+| --- | --- | --- |
+| Switch OLED a 30 cm | 2,7 mm | unos 30′ |
+| Switch original a 30 cm | 2,4 mm | unos 27′ |
+| TV de 55" a 2,5 m | 21 mm | unos 29′ |
+| TV de 40" a 3 m | 15 mm | unos 17′ |
+
+El mínimo de Xbox (26 px) en la TV de 40" a 3 m da unos 14′, así que vamos sobre él. Pixel Operator 8 en esa TV da unos 12′: **bajo el mínimo**.
+
+Lámina con las letras a tamaño real: `revisiones/capturas/interfaz-rediseno/layout-00-reglas.png` (y `-x2`).
+
+### Reglas del juego, en números (base 640×360)
+
+1. **Zona segura de títulos (90 %):** el rectángulo de **(32, 18) a (608, 342)**, de 576×324. Todo lo que se lee y todo el HUD va dentro.
+   - La zona de acción (95 %) va de (16, 9) a (624, 351): ahí solo cosas del mundo.
+   - Opción «Zona segura» de 80 % a 100 % (por omisión, 90 %).
+2. **Letra mínima: 11 px de cuerpo en la base** para todo texto que hay que leer (Pixel Operator 16, Pixel Operator Bold 16 o Silkscreen 16). El piso absoluto es 9 px.
+   - **Se dejan de usar Pixel Operator 8 y Silkscreen 8** para texto que se lee.
+   - Solo podrían quedar en algo decorativo que no hace falta leer, como una marca en un objeto del mundo (lo mismo exceptúa la guía portátil de Xbox).
+3. **Texto grande (200 %):** Pixel Operator 32 y Bold 32 (22 px de cuerpo) y Silkscreen 32. Los íconos de botón y las huellas también se duplican (XAG 101).
+   - Solo hay 2 pasos, porque las letras pixel solo se ven nítidas en múltiplos de su tamaño de diseño.
+4. **Íconos:**
+   - ícono de botón: 16×16 en normal y 32×32 en grande;
+   - huella: 13×12, y 26×24 en grande;
+   - nada con lo que se interactúa mide menos de 16 px en el HUD.
+5. **Contraste:**
+   - texto ≥ 4,5:1 contra su panel; texto grande e íconos ≥ 3:1;
+   - modo «Contraste alto» con todo ≥ 7:1 (XAG 102);
+   - todo texto va sobre un panel opaco (≥ 85 %) o con contorno de 1 px más panel en contraste alto, nunca suelto sobre el decorado.
+6. **Diálogo:**
+   - 2 líneas por página, ≤ 74 letras por línea en normal (≤ 80, XAG) y unas 37 en grande;
+   - si no cabe, **se pagina** («página 1 de 2» y la flecha);
+   - interlineado de 17 px en normal y 34 px en grande.
+7. **Ritmo del texto:**
+   - Velocidad de aparición: Lenta 30, Normal 55 (la de hoy), Rápida 110 letras/s, o Al instante.
+   - «Avance del diálogo», por omisión **con botón** en las conversaciones (GAG: a su ritmo).
+   - En automático, cada frase queda **1,5 s + 1 s por cada 15 letras**. Hoy son 1,3 s + 0,035 s por letra (unas 28 letras/s): demasiado rápido para leer en la TV (IGDA pide letra más grande si el texto se va solo).
+   - Los globitos de la pelea son automáticos con la misma regla y se pueden pasar.
+8. **Íconos de botón por mando:**
+   - el ícono sale del último dispositivo usado (`DetectorMando` e Input Helper), con la opción manual «Íconos de botones» (Automático, Switch, PlayStation, Xbox o Teclado);
+   - nunca se escribe «A» o «X» en el texto: siempre va el ícono;
+   - en Switch, **confirmar es A, a la derecha**, y volver es B; en PlayStation, confirmar es ✕;
+   - los íconos de Kenney (CC0) ya están en el juego.
+9. **Sacudida y movimiento:** «Sacudida de pantalla» en Sí, Reducida (la mitad) o No, más «Reducir movimiento» (ya existen; se mueven a Accesibilidad).
+
+### Zonas de texto nuevas (propuesta para `ZonasTexto`; solo en este documento, no en el código)
+
+Todas dentro de la zona segura de títulos. Medidas en px de la base (normal / grande):
+
+| Zona | Lugar | Qué va | Medidas |
+| --- | --- | --- | --- |
+| **A. HUD** | Arriba a la izquierda, desde (32, 18) | **Solo la salud:** cara de Felipe y 9 huellas | 152×20 / 304×40 |
+| **A2. Jefe** | Arriba a la derecha, hasta (608, 18) | Barra del jefe (retrato, nombre, 3 fases), **solo en la pelea** | 250×40 / 250×63 |
+| **B. Diálogo** | Arriba: de y 44 a 103 (grande: de 64 a 163). Abajo, si Felipe está arriba: de y 283 a 342 (grande: de 243 a 342) | Caja de 528 px de ancho (de x 80 a 608), retrato de 52 px a la izquierda desde x 32 y franja del nombre de 15 / 26 px | 528×50 / 528×84 |
+| **C. Carteles** | Centrados bajo el HUD: desde y 44 (grande: 64) | Travesura (título y una línea), fase del jefe, «PODER NUEVO». **Logro: alineado a la derecha** en la misma franja. De a uno, por la cola | alto 22 + 19 / 34 + 30 |
+| **D. Palabras del mundo** | Sobre Felipe o el objeto, dentro de la zona segura y fuera de A–C | «¡CRÍTICO!», «+1 snack» | Silkscreen 16 / 32 |
+| **E. Indicador de botón** | Sobre el objeto o Felipe, dentro de la zona segura | Ícono del mando más verbo | unos 91×22 / 162×38 |
+| **F. Globito y avisos del jefe** | Sobre el personaje, dentro de la zona segura y fuera de A y A2 | Globito de Felipe, «¡LLENA! ¡SALTA!» | 1 línea, 19 / 30 de alto |
+
+**Letra mínima por tipo de texto:**
+
+| Tipo | Normal | Grande |
+| --- | --- | --- |
+| Diálogo y globito | Pixel Operator 16 (cuerpo 11) | Pixel Operator 32 |
+| Nombre del hablante | Pixel Operator Bold 16 (hoy Pixel Operator 8: **sube**) | Bold 32 |
+| Cartel | Silkscreen 16 o 24 | Silkscreen 32 o 48 |
+| Etiqueta (fases I-II-III, menú, valores) | Pixel Operator Bold 16 o Silkscreen 16 (**nada de 8**) | 32 |
+| Palabra del mundo | Silkscreen 16 o 24 con contorno de 1 px | 32 o 48 |
+| Botón | Ícono de 16×16 y verbo en Pixel Operator 16 | Ícono de 32×32 y Pixel Operator 32 |
+
+### Inventario: qué hay hoy en pantalla y qué se decide
+
+Regla: **HUD mínimo.**
+
+- En exploración, solo la salud.
+- Lo demás aparece **cuando cambia** y se va.
+- La barra del jefe, solo en la pelea.
+- Lo que se lleva, en el menú.
+
+| Elemento (pieza de hoy) | Hoy | Decisión | Dónde |
+| --- | --- | --- | --- |
+| Corazones (`Medidores` / `BarraVida`) | Siempre | **Siempre**, como 9 huellas | A |
+| Contador de vidas (9 vidas) | Pausa y al perder una | **Se va**: las 9 huellas son las vidas | — |
+| Collar de la Vergüenza | HUD y pausa | Al ponérselo (palabra o cartel) y en la pausa | D o C, y menú |
+| Agenda (`Hud`, x/8) | Entra 2 s al cambiar | **Menú** (Libreta). El cartel de travesura ya avisa al cumplir | C y menú |
+| Calcetines y fotos (`Hud`) | Entran 2 s al cambiar | Palabra «+1» sobre Felipe al recoger; el resto en el **bolsillo** | D y menú |
+| Snacks (`Hud.snacks_fijos` en la pelea) | Fijos en la pelea | **Solo en la pausa (bolsillo)**, decisión del creador. Al recoger o comer: palabra sobre Felipe | D y menú |
+| Barra del jefe (`PresentacionJefe`) | Pelea | **Solo en la pelea** | A2 |
+| Presentación del jefe (entrada Broforce) | Al empezar la pelea | Igual, pantalla completa, con los textos dentro de la zona segura | — |
+| Carteles de fase del jefe | Zona C | Al cambiar de fase | C |
+| Avisos del jefe («¡LLENA! ¡SALTA!») | Sobre el jefe | Cuando hay oportunidad | F |
+| Diálogo con retrato (`Dialogo`) | Arriba | En las conversaciones | B |
+| Globito de Felipe (`GloboDialogo`) | En la pelea | En la pelea, en una ventana segura | F |
+| Cartel de travesura, secreta y «PODER NUEVO» (`Anuncios` / `Cartel`) | Zona C | Al ocurrir, de a uno | C |
+| Logro (`Medidores._dibujar_aviso`) | Zona C | Al ocurrir, a la derecha, de a uno | C |
+| Palabras del mundo (`Jugo.palabra`) | Sobre el objeto | Igual, de a una, 0,9 s | D |
+| Indicador de botón (`Indicador`) | Sobre Felipe | Cerca de algo usable | E |
+| Íconos de ayuda (`AyudaAspi`) | Sobre Felipe | Solo la primera vez | E |
+| Flecha de borde (`CamaraPelea`) | Borde de la pantalla | En el **borde de la zona segura** (hoy está en el de la pantalla) | Borde |
+| Avisos del tutorial (`Pantallas`) | Tecla y texto | Como el indicador (ícono más verbo) | E |
+| Pausa (`MenuUI`, Decreto real) | Menú | Menú: Continuar, Bolsillo, Ficha, Opciones, Reiniciar, Salir | Menú |
+| Bolsillo (`PanelBolsillo`) | Pausa | Menú: salud, snacks, calcetines, fotos y collar | Menú |
+| Ficha de Su Majestad | Pausa | Menú; en texto grande va en su propia pestaña | Menú |
+| Libreta (Agenda, Tab) | Pantalla propia | Menú (Tab sigue de atajo) | Menú |
+| Opciones (`PantallaOpciones`) | Pausa | Menú, más una pestaña **Accesibilidad** | Menú |
+| Resumen del día | Al terminar el nivel | Pantalla completa, dentro de la zona segura y con letra ≥ 16 (hoy usa 8 en notas) | — |
+| Título, introducción y final | Pantallas | Dentro de la zona segura | — |
+
+**Para el diseñador:** la Ficha y el bolsillo comparten la pantalla en normal. En grande van en pestañas.
+
+### Wireframes
+
+Están en `revisiones/capturas/interfaz-rediseno/`. Cada uno viene en normal y en grande (`-grande`), y cada versión a 640×360 y ampliada (`-x2`). Muestran:
+
+- la zona segura de títulos (rojo) y la de acción (naranja);
+- la rejilla de 8 y 32 px;
+- las medidas de cada caja;
+- el texto real en español, con las letras del juego a su tamaño.
+
+| Archivo | Pantalla | Qué comprueba |
+| --- | --- | --- |
+| `layout-00-reglas.png` | Letras a tamaño real | Qué letra cumple y cuál no |
+| `layout-01-exploracion.png` | Exploración | Solo la salud, arriba a la izquierda |
+| `layout-02-dialogo-valeria.png` | Diálogo de Valeria con texto largo (123 letras) | Normal: 2 líneas. Grande: 4 líneas, **paginado en 2** |
+| `layout-03-dialogo-felipe.png` | Diálogo de Felipe abajo (Felipe en una repisa alta) | La caja baja si Felipe está arriba |
+| `layout-04-pelea.png` | Pelea | Salud, barra del jefe, aviso sobre el jefe y globito sobre Felipe; sin snacks |
+| `layout-05-carteles-logros.png` | Cartel de travesura, logro y fase | Se muestran juntos solo para medir: en el juego salen de a uno |
+| `layout-06-indicador-boton.png` | Indicador sobre un plato, y los íconos de Switch, PlayStation, Xbox y teclado | Ícono más verbo, dentro de la zona segura |
+| `layout-07-pausa.png` | Pausa con el bolsillo y la Ficha | Normal: los dos juntos. Grande: pestañas |
+| `layout-08-opciones.png` | Accesibilidad | Tamaño y velocidad del texto, avance, sacudida, reducir movimiento, contraste alto, zona segura e íconos. En grande, 4 filas más con desplazamiento en un solo eje, y una vista previa del texto |
+
+**Lo que muestran los wireframes:**
+
+- **Todo cabe** en normal y en grande dentro de la zona segura, incluidos el español largo («¡TRAVESURA CUMPLIDA!», «FASE II · PERSECUCIÓN», «Coleccionista de Calcetines») y una frase de 123 letras.
+- **En texto grande, el diálogo de arriba baja hasta y 163** (45 % del alto). Tapa la cabeza de un humano de pie, pero su cara ya está en el retrato, como en Celeste. Si molesta, la alternativa es poner el diálogo grande abajo, pero ahí tapa a Felipe. Recomiendo dejarlo arriba.
+- **En texto grande, la barra del jefe y la salud** suman 304 + 250 px, con 54 px libres entre ellas.
+
+### Referencias: HUD mínimo en juegos 2D de consola
+
+Son observaciones de juego. Conviene verificarlas con capturas antes de citarlas afuera.
+
+| Juego | Qué muestra | Qué no | Qué tomamos |
+| --- | --- | --- | --- |
+| Celeste | Casi nada fijo. Las fresas se cuentan al recogerlas y se van; el pelo de Madeline dice si le queda el impulso | No hay HUD de vida | Lo que cambia aparece y se va; la información en el personaje |
+| Hollow Knight | Arriba a la izquierda: vasija de alma, máscaras de vida y geo | Los jefes no tienen barra de vida (solo el nombre al entrar) | La salud arriba a la izquierda, chica y gráfica (máscaras, para nosotros huellas) |
+| Dead Cells | Vida, armas y habilidades abajo; barra del jefe arriba | — | La barra del jefe arriba |
+| Ori and the Blind Forest | Vida y energía en celdas | Sin números | La salud como unidades contables, no como barra |
+| Cuphead | Abajo a la izquierda: tarjeta de vida y cartas del súper | **Sin barra del jefe** (el avance se ve al morir) | La salud mínima y legible. Nosotros sí mostramos la barra del jefe (las fases ayudan) |
+| Shovel Knight | Franja fija arriba, de borde a borde: oro, objeto, magia, vida y vida del jefe | — | La vida del jefe frente a la propia, arriba |
+| Pizza Tower | Una «tele» con la cara de Peppino que reacciona, y el puntaje | Sin vida | La cara de Felipe en el HUD que reacciona al golpe y al curar |
+
+### Fuentes
+
+- Xbox, «Screen safe areas» (zona segura de títulos al 90 % y de acción al 95 %; 1720×1000 a 1080p): https://devdocs.xbox.com/build/core-features/graphics/overviews/screen-areas
+- Xbox Accessibility Guideline 101, «Text display» (26 px a 1080p en consola, 18 px en PC, texto al 200 %, cómo se mide): https://devdocs.xbox.com/build/game-principles/accessibility/xag-deep-dives/xag-101-text-display
+- Xbox Accessibility Guideline 102, «Contrast» (4,5:1, 3:1 y 7:1): https://devdocs.xbox.com/build/game-principles/accessibility/xag-deep-dives/xag-102-contrast
+- Xbox, guías de compatibilidad portátil (leíble a 12 pulgadas: 9 y 12 px a 720p, 14 y 18 px a 1080p): https://devdocs.xbox.com/build/gdk-and-engines/handheld/handheld-guidelines-and-testcases
+- Game Accessibility Guidelines, «Use an easily readable default font size» (28 px a 1080p como piso): https://gameaccessibilityguidelines.com/use-an-easily-readable-default-font-size/
+- Game Accessibility Guidelines, «Allow the font size to be adjusted»: https://gameaccessibilityguidelines.com/allow-the-font-size-to-be-adjusted/
+- Game Accessibility Guidelines, lista básica («Allow players to progress through text prompts at their own pace», «Provide high contrast between text/UI and background»): https://gameaccessibilityguidelines.com/basic/
+- IGDA GA-SIG, «Text size» (32 px a 1080p; 46 px para el texto que se va solo): https://igda-gasig.org/?p=1387
+- Amazon Fire TV, «Design and user experience guidelines» (UI de 10 pies): https://developer.amazon.com/docs/fire-tv/design-and-user-experience-guidelines.html
+- Autodesk, «Safe display regions for TV production» (SMPTE 80 % y 90 %): https://help.autodesk.com/cloudhelp/ENU/MayaCRE-Rendering/files/GUID-13D613FF-994F-480A-AF0E-DFE06418A351.htm
+- Pantallas de Switch: 6,2" a 720p (unos 237 ppp, ComputerBase): https://www.computerbase.de/2016-10/nintendo-switch-touch-display-6.2-zoll-720p/; Switch OLED, 7" a 720p (unos 210 ppp): https://dimensions.com/element/nintendo-switch-oled
+- Disposición de botones de Switch (A a la derecha confirma): https://www.nintendolife.com/news/2021/03/talking_point_the_problem_with_the_x_button
 
 ## Por qué
 
@@ -21,6 +251,8 @@ Se compararon con la interfaz actual (`actual-*.png`, en la misma carpeta).
 2. **La salud son huellas** («que la vida sea la huella está lindo»). La huella es la estrella del HUD: almohadilla grande y 4 deditos, en pixel art limpio. Tiene 5 estados (llena, media, vacía, golpe y curando) y su animación al perder y al curar.
 3. **Las 9 vidas SON la salud:** 9 huellas que se gastan con los golpes. **No hay medallón con número** ni reintentos aparte en el HUD.
 4. **Assets finales con Gemini y ChatGPT** desde la PC del creador, con los encargos de abajo. El creador elige A, B o C antes de generar.
+5. **Multiplataforma** (Switch portátil y TV, PC y PlayStation): el texto se lee en todas. Reglas en «Layout y legibilidad multiplataforma».
+6. **Los snacks salen de la pantalla principal:** solo en la pausa (bolsillo).
 
 ### Ojo: la decisión 3 cambia el diseño de juego
 
@@ -40,7 +272,7 @@ Con «9 huellas = salud», ese sistema doble desaparece. **Antes de implementar 
 
 Hasta que eso se decida, el arte trae los 5 estados de la huella, y el HUD de las láminas muestra 6 huellas y media de 9.
 
-## Dirección de arte: opciones
+## Dirección de arte: opciones (EN PAUSA hasta aprobar el layout)
 
 Hay una lámina por opción, a 640×360 y ampliada ×2: `revisiones/capturas/interfaz-rediseno/direccion-arte-{A,B,C}.png` y `-x2.png`.
 

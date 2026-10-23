@@ -1,12 +1,18 @@
 # Estado actual: dónde vamos
 
-Actualizado: 2026-10-23 (pelea con A.S.P.I. v4: el salto estrella, LED del depósito, rojo = peligro y amarillo = oportunidad, apagón legible, menos texto, ataques en 4 tiempos; antes, v3: avisos sobre ella, globito, cámara, apagón con charcos, «Arte gatuno»; antes, sin reposición mágica; antes, 3D descartado; antes, estudio v3: la pelea en todo el cuarto; antes, plan de estabilización del nivel 1 aplicado; antes, tercera ronda terminada: jugo, letra, claves, opciones, menú Decreto real, kit de interfaz, arte de la casa y 3 animaciones nuevas de Felipe). **Léelo al empezar un chat nuevo** para retomar sin repetir conversaciones. Al cerrar cada tema, actualiza este archivo (qué se cerró, qué sigue).
+Actualizado: 2026-10-23 (pelea con A.S.P.I. v5: acción «Aplastar» y un solo foco a la vez; antes, v4: el salto estrella, LED del depósito, rojo = peligro y amarillo = oportunidad, apagón legible, menos texto, ataques en 4 tiempos; antes, v3: avisos sobre ella, globito, cámara, apagón con charcos, «Arte gatuno»; antes, sin reposición mágica; antes, 3D descartado; antes, estudio v3: la pelea en todo el cuarto; antes, plan de estabilización del nivel 1 aplicado; antes, tercera ronda terminada: jugo, letra, claves, opciones, menú Decreto real, kit de interfaz, arte de la casa y 3 animaciones nuevas de Felipe). **Léelo al empezar un chat nuevo** para retomar sin repetir conversaciones. Al cerrar cada tema, actualiza este archivo (qué se cerró, qué sigue).
 
 ## Fase del proyecto
 
 **Fase 3: vertical slice — el nivel 1 tutorial con calidad final** (desde el 2026-10-19). Fases 1 y 2 cerradas. Fases: 1 Concepto y pilares → 2 Prototipo de concepto → 3 Vertical slice → 4 Producción → 5 Pulido y lanzamiento (Steam). Para pasar de fase: `/puerta-fase`.
 
 ## En curso
+
+- **Pelea con A.S.P.I. v5 (hecha 2026-10-23, 0 créditos; lo que vio el creador en la v4). Revisión: `diseno/revisiones/2026-10-23-pelea-aspi-v5.md`.**
+  - **Acción nueva «Aplastar»** (`AplastarAspi`): con A.S.P.I. vulnerable y al alcance (piso 120 px; desde un mueble del estudio 190 px de lado), el botón de acción hace un salto dirigido que siempre cae sobre ella y la apaga. Le gana a cualquier otra acción cercana. El aviso amarillo dice «[E] ¡APLASTA!». El salto manual sigue valiendo. Prueba nueva `prueba_aplastar.gd` (piso y los 6 muebles); el bot la usa.
+  - **Un solo foco a la vez** (`CalmaAspi`): destello de lo tirable solo cerca de Felipe, sin motas en el rayo, LED quieta, polvo y brincos a la mitad, onda más corta, 2 pedazos como mucho, restos oscuros, «+1» chico, sin «REINICIANDO...», la montaña sale cuando se fue el cartel, el globito espera al cartel, y un velo del 22 % sobre el decorado (variante D de 5). Elementos animados a la vez: 9/13/9/7 → 3/6/3/1.
+  - **Tres lugares:** fila nueva «Aplastar» en la tabla de Acciones (`02-guia-felipe.md` y ficha local regenerada; **falta publicar la ficha en línea**), juego con pruebas.
+  - **Sigue:** el creador juega el `.zip` y ve `pelea-aspi-v5.mp4` y `pelea-aspi-v5-ruido-antes-despues.png`.
 
 - **Pelea con A.S.P.I. v4 (hecha 2026-10-23, 0 créditos; incluye la v3.1). El creador aprobó 6 mejoras de las respuestas de ChatGPT y Gemini a la v3. Revisión: `diseno/revisiones/2026-10-23-pelea-aspi-v4.md`.**
   - **El salto estrella** (`RemateAspi`): con el depósito lleno el motor falla (tosidos cada vez más graves), el depósito se hincha (tope ±8 %), echa humo y vibra. Si Felipe le cae encima, se hace silencio justo antes. En el golpe hay pausa de impacto de 4 cuadros (el final, 12), destello blanco de su silueta, estrellas, la onda, el temblor y «¡CLIC!».

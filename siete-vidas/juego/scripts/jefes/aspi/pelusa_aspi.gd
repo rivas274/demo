@@ -13,6 +13,8 @@ var b: BatallaAspi
 var montanas: Array[MontanaPelusa] = []
 ## Motas que ya salieron del depósito pero todavía no son montaña (durante la sobrecarga).
 var en_camino := 0
+## Motas que va a escupir al apagarse, mientras espera a que se vaya el cartel de fase (v5): ya cuentan.
+var prometidas := 0
 ## Cuándo escupió la última vez (s): mientras se ve el «¡BLORP!», no hay otro rótulo sobre ella.
 var ultimo := -10.0
 var _humo: CPUParticles2D
@@ -33,7 +35,7 @@ func _ready() -> void:
 
 ## Suciedad que guardan las montañas (sin esparcir o con motas volando) y la que está saliendo.
 func pendientes() -> int:
-	var total := en_camino
+	var total := en_camino + prometidas
 	for montana in montanas:
 		if is_instance_valid(montana):
 			total += montana.pendientes()

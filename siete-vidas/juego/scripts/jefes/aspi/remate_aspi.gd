@@ -197,9 +197,11 @@ func apagar() -> void:
 	var motas: int = DatosJefe.por_fase(b.datos.devuelve, b.vencidas - 1) if not b.datos.devuelve.is_empty() else 0
 	b.cambiar_fase()
 	# Se le abre el depósito y escupe la pelusa: lo que limpió vuelve al piso (cuando ya se fue el «¡CLIC!»).
+	b.pelusa.prometidas += motas
 	var escupe := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_STOP)
 	escupe.tween_interval(datos.espera_escupir)
 	escupe.tween_callback(func() -> void:
+		b.pelusa.prometidas = maxi(0, b.pelusa.prometidas - motas)
 		if b.fase == PeleaJefe.Fase.PELEA:
 			b.escupir_pelusa(motas))
 

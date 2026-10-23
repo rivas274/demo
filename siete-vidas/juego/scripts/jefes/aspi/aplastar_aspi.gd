@@ -73,6 +73,11 @@ func verbo(_felipe: Felipe) -> String:
 	return "VERBO_APLASTAR"
 
 
+## Lo que ocupa (R8: lado menor ≥ 24 px): el dibujo de A.S.P.I.
+func rect_indicador() -> Rect2:
+	return b.apariencia.rect_dibujado()
+
+
 ## Su silueta para el contorno del Indicador (la imagen del cuerpo que se ve ahora, en su lugar).
 func arte_indicador() -> Dictionary:
 	var apariencia := b.apariencia

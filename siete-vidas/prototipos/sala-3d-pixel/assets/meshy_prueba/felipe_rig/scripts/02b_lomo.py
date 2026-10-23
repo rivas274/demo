@@ -234,18 +234,22 @@ en_cola = cubre & cola[py, px]
 # v6c: los texels del cuerpo casi rodeados de cola en 3D (la cara de abajo de la raíz de la
 # cola, que de perfil cae sobre la grupa) también son cola: si no, quedaba un óvalo blanco.
 from scipy.spatial import cKDTree
-_cand = cubre & ~en_cola & (px < 440) & (py < 650)
-if _cand.any():
-    _todo = cubre & (px < 470) & (py < 680)
-    _pp = pos[_todo][::3]
+_todo = cubre & (px < 470) & (py < 680)
+_pp = pos[_todo][::3]
+_arbol = cKDTree(_pp)
+for _paso in range(6):   # crece hacia adentro del óvalo, de a un anillo
+    _cand = cubre & ~en_cola & (px < 440) & (py < 650)
+    if not _cand.any():
+        break
     _es = en_cola[_todo][::3]
-    _arbol = cKDTree(_pp)
     _ci = np.nonzero(_cand)
     _vec = _arbol.query_ball_point(pos[_cand], 0.05)
     _frac = np.array([_es[v].mean() if len(v) else 0.0 for v in _vec])
-    _m = _frac > 0.55
+    _m = _frac > 0.45
     en_cola[_ci[0][_m], _ci[1][_m]] = True
-    print("cola por vecindad 3D: %d texels" % _m.sum())
+    print("cola por vecindad 3D (paso %d): %d texels" % (_paso, _m.sum()))
+    if _m.sum() < 50:
+        break
 s_cola = np.zeros(px.shape)
 s_cola[en_cola] = param_cola(px[en_cola], py[en_cola])
 # Cola: café oscuro atigrado, con el interior más claro y pardo (video 6).

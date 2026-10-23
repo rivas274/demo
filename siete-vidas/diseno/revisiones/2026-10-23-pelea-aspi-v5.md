@@ -25,6 +25,8 @@ Pedido del creador después de jugar y ver la v4 (`2026-10-23-pelea-aspi-v4.md`)
   - le gana a la taza o al vaso del escritorio;
   - no se ofrece si ella no está vulnerable o si está lejos.
 - **El bot** la usa (`bot_pelea._aplastar`).
+- **En corto se queda sobre el charco:** antes se corría a un piso libre, y junto a la repisa cruzaba medio estudio; el bot llegaba tarde. Ahora no se mueve y «Aplastar» la alcanza igual. Con el depósito lleno conserva la regla de siempre.
+- **Bot 8/8:** de la entrada al estudio al último golpe tarda unos 57 s (en la v4, unos 163 s, porque fallaba saltos sobre la silla y llegaba tarde al corto).
 
 ## 2. Un solo foco a la vez (`CalmaAspi`)
 

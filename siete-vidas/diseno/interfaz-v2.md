@@ -274,9 +274,30 @@ Con «9 huellas = salud», ese sistema doble desaparece. **Antes de implementar 
 
 Hasta que eso se decida, el arte trae los 5 estados de la huella, y el HUD de las láminas muestra 6 huellas y media de 9.
 
-## Dirección de arte: opciones (EN PAUSA hasta aprobar el layout)
+## Dirección de arte: opciones (v2, sobre el layout aprobado; el creador elige A, B o C)
 
-Hay una lámina por opción, a 640×360 y ampliada ×2: `revisiones/capturas/interfaz-rediseno/direccion-arte-{A,B,C}.png` y `-x2.png`.
+**Láminas v2:** `revisiones/capturas/interfaz-rediseno/direccion-arte-{A,B,C}-v2.png`, de 1280×990, y `-x2.png`. Las genera `herramientas/interfaz_v2_laminas_layout.py`. Cada lámina junta 4 pantallas reales de 640×360 a escala 1, sacadas del juego **sin interfaz** (`base-sala.png`, `base-sala-2.png` y `base-pelea-2.png`, de `herramientas/capturas_sin_interfaz.gd`):
+
+1. exploración con el diálogo de Valeria arriba;
+2. la pelea, con la salud, la barra del jefe con fases I-II-III, el aviso de oportunidad sobre A.S.P.I. y el globito sobre Felipe;
+3. el cartel de travesura, solo;
+4. la pausa, con la lista a la izquierda y el bolsillo y la Ficha a la derecha.
+
+Abajo hay un recuadro con **texto grande (200 %)**, con las huellas, el diálogo de Felipe y un logro, más la huella, la paleta y las reglas.
+
+En las tres láminas:
+
+- **Mismas posiciones, medidas y zona segura** que el layout aprobado.
+- **Letras de 11 px de cuerpo o más** (Pixel Operator 16 y Bold 16, Silkscreen 16; 32 en grande). Ya no hay letras de 8 px en lo que se lee: los nombres, las fases, el menú y los valores subieron a 16.
+- **HUD solo con las 9 huellas**: sin snacks ni contador de vidas.
+
+**Choque entre el dorado de Felipe y el amarillo de oportunidad (lección 50), resuelto:**
+
+- **Felipe pasa a un oro ámbar**, más anaranjado: A #E8913A, B #E0A848 y C #FF9F2E.
+- **La oportunidad queda en amarillo limón** (#FFE066; en C, #F2F05A) y **solo como borde y texto sobre un panel oscuro, con una flecha** hacia lo que hay que hacer. Nunca es un bloque de color.
+- Así, un bloque dorado es «Felipe» y un borde limón con flecha es «¡ahora!».
+
+**Láminas v1, sin layout** (de referencia): `direccion-arte-{A,B,C}.png`, a 640×360 y ampliadas ×2.
 
 - **A · Corte diagonal:** es la más cercana al cuadro elegido. Usa cajas ciruela oscuro con dos esquinas cortadas en diagonal, líneas crema de 1 px arriba y abajo, bloques sólidos del color de cada personaje y fragmentos triangulares.
 - **B · Oro de la corte:** es la más «real» y dorada. Usa azul tinta con filete de oro y línea crema, diagonales suaves, esquinas biseladas con gemas, nombres en oro sobre oscuro y el fondo del retrato con rayas de terciopelo.

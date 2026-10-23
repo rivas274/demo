@@ -60,6 +60,8 @@ godot --headless --path siete-vidas/juego --script res://pruebas/prueba_nivel.gd
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_reglas_nivel.gd  # reglas de siete-vidas/diseno/reglas-de-niveles.md
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_jefe.gd  # pelea con A.S.P.I.
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_municion.gd  # munición de la pelea: nada reaparece, la suciedad nunca se pierde, peor caso (unos 3 min)
+godot --headless --path siete-vidas/juego --fixed-fps 60 --script res://pruebas/prueba_aplastar.gd  # «Aplastar»: cae siempre sobre A.S.P.I., desde el piso y desde cada mueble del estudio
+godot --headless --path siete-vidas/juego --script res://pruebas/prueba_capas.gd  # capas por rol (Profundidad): nadie fija z_index a mano, reglas en cada superficie
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_acciones.gd  # maullar, arañar, snacks, escalera, rascador, agenda, diálogo, indicador
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_componentes.gd  # las piezas por separado, estados de Felipe, conductas de jefe y un enemigo armado solo con datos
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_interfaz.gd  # barra de vida, pila de pantallas, menú, textos, controles y tema

@@ -25,15 +25,15 @@ import felipe_comun as C
 # exponente de la forma, largo de los mechones (fracción), mechones por vuelta, ancho del borde).
 # t: 0 = arranque de la cola, 1 = pecho.
 VARIANTES = [
-    ("a_montura_media", -0.06, 0.66, 92, 2.4, 0.10, 22, 0.14),
-    ("b_montura_grande", -0.08, 0.72, 104, 2.4, 0.10, 22, 0.14),
-    ("c_montura_chica", -0.04, 0.60, 80, 2.4, 0.10, 22, 0.14),
-    ("d_mechones_largos", -0.06, 0.66, 92, 2.4, 0.18, 16, 0.14),
-    ("e_mechones_finos", -0.06, 0.66, 92, 2.4, 0.07, 34, 0.10),
-    ("f_redondeada", -0.06, 0.66, 92, 1.8, 0.10, 22, 0.18),
-    ("g_cuadrada", -0.06, 0.66, 92, 3.2, 0.10, 22, 0.12),
+    ("b_montura_grande", -0.08, 0.72, 104, 2.4, 0.10, 22, 0.14),   # v5 (referencia)
+    # v6: más chicas (montura media sobre el lomo), con el tono y las rayas de la gorra.
+    ("v6a_media", 0.10, 0.64, 72, 2.4, 0.09, 22, 0.14),
+    ("v6b_media_baja", 0.08, 0.66, 82, 2.4, 0.09, 22, 0.14),
+    ("v6c_chica", 0.16, 0.60, 62, 2.4, 0.09, 22, 0.14),
+    ("v6d_larga_angosta", 0.04, 0.68, 66, 2.6, 0.09, 22, 0.14),
+    ("v6e_redonda", 0.12, 0.62, 76, 2.0, 0.08, 26, 0.16),
 ]
-ELEGIDA = "b_montura_grande"
+ELEGIDA = "v6b_media_baja"
 GY, GA = 260, 180   # celdas del mapa cilíndrico (largo x ángulo)
 
 eleccion = sys.argv[1] if len(sys.argv) > 1 else ELEGIDA
@@ -133,8 +133,13 @@ gorra = cubre & cabeza[py, px] & (py < 330) & (lum < 0.55)
 gris = np.median(tex[gorra], axis=0) if gorra.any() else oscuro_ref
 # Las manchas del Felipe real (felipe-video6-camina-costado.png) son más oscuras que la gorra
 # de Meshy: pardo muy oscuro con rayas casi negras.
-gris = gris * 0.66
-raya = gris * 0.62
+# v6: el mismo tono y las mismas rayas que la gorra (antes se oscurecía al 66 % y no
+# combinaba con la cabeza).
+lg = tex[gorra] @ np.array([0.299, 0.587, 0.114])
+gris = np.median(tex[gorra][lg > np.percentile(lg, 55)], axis=0)
+raya = np.median(tex[gorra][lg < np.percentile(lg, 15)], axis=0)
+RAYAS_CUERPO = float(os.environ.get("FELIPE_RAYAS", "8"))   # rayas a lo largo del lomo
+RAYAS_COLA = float(os.environ.get("FELIPE_RAYAS_COLA", "7"))
 print("blanco", blanco_ref, "gris de la gorra", gris)
 
 
@@ -232,8 +237,11 @@ def aplicar(params):
     # una leve ondulación; oscuras y angostas.
     largo = (px - Y0) / (Y1 - Y0)
     lat = np.abs(ang - math.pi / 2)
-    rayas = 0.5 + 0.5 * np.sin(2 * math.pi * (largo * 15.0 + 0.5 * np.sin(lat * 1.6) + 0.15 * np.sin(largo * 40)))
-    rayas = np.clip((rayas - 0.70) * 3.0, 0, 1) * 0.40
+    # Rayas como las de la gorra: bandas oscuras de ~30 % del período, que bajan de la columna
+    # hacia los costados (curvadas un poco hacia atrás), con borde suave y contraste pleno.
+    fase = largo * RAYAS_CUERPO + 0.35 * (1 - np.cos(np.minimum(lat, math.pi / 2)))
+    rayas = 0.5 + 0.5 * np.cos(2 * math.pi * fase)
+    rayas = np.clip((rayas - 0.74) / 0.10, 0, 1) * np.clip(1 - lat / 1.9, 0, 1) ** 0.5   # finas como las de la gorra
     dentro = gris[None, None, :] * (1 - rayas[..., None]) + raya[None, None, :] * rayas[..., None]
     nuevo = dentro * a[..., None] + blanco_ref[None, None, :] * (1 - a[..., None])
     w = peso_zona[..., None]
@@ -241,10 +249,12 @@ def aplicar(params):
     # Cola: nace del color de la montura (sin anillo blanco) y pasa a café oscuro casi liso,
     # más claro al centro.
     sc = s_cola
-    base = np.clip((0.16 - sc) / 0.10, 0, 1)
-    centro = 1 + 0.35 * np.exp(-((sc - 0.55) / 0.25) ** 2)
-    oscuro = GRIS_COLA[None, None, :] * centro[..., None]
-    col = gris[None, None, :] * base[..., None] + oscuro * (1 - base[..., None])
+    # v6: el tono de la gorra, un poco más oscuro hacia la punta, con anillos atigrados a lo
+    # largo de la cola (las mismas rayas que la gorra), no un bloque liso.
+    osc = (0.92 - 0.18 * np.clip(sc, 0, 1))[..., None]
+    anillos = 0.5 + 0.5 * np.cos(2 * math.pi * sc * RAYAS_COLA)
+    anillos = (0.8 * np.clip((anillos - 0.74) / 0.10, 0, 1) * np.clip(sc / 0.08, 0, 1))[..., None]
+    col = (gris[None, None, :] * (1 - anillos) + raya[None, None, :] * anillos) * osc
     wc = en_cola.astype(np.float32)[..., None]
     out = out * (1 - wc) + col * wc
     # Líneas de pliegue (trazo de dibujo): el borde de las patas que marcó el creador, solo
@@ -254,6 +264,26 @@ def aplicar(params):
         lado = np.clip((np.abs(pos[..., 0]) - 0.10) / 0.06, 0, 1)
         k = (np.clip(1.2 - lin / 1.6, 0, 1) * lado * PLIEGUE)[..., None] * cubre[..., None]
         out = out * (1 - k) + (out * 0.42) * k
+    # v6: boca y nariz más marcadas para que se lean a pixel ×3: la "Y" invertida de la boca
+    # (texels oscuros bajo la nariz) se engrosa BOCA_PX texels y se oscurece; la nariz rosada
+    # recibe un contorno fino oscuro. La forma no cambia (se engrosa la línea que ya está).
+    if BOCA_PX > 0:
+        out = np.where(boca_m[..., None], out * 0.0 + COLOR_BOCA, out)
+    # v6: volumen en los ojos (estilo toon): una sombra suave bajo el párpado superior y hacia
+    # el borde de afuera, y un brillo chico arriba y afuera de la pupila. OJOS = intensidad.
+    if OJOS > 0:
+        for lado in ojos:
+            m_, cz, cx, h_, w_ = lado
+            arriba = np.clip((pos[..., 2] - (cz + 0.05 * h_)) / (0.45 * h_), 0, 1)
+            afuera = np.clip((np.abs(pos[..., 0]) - abs(cx)) / (0.6 * w_), 0, 1)
+            sombra = np.clip(arriba + 0.5 * afuera, 0, 1) * m_
+            out = out * (1 - (0.30 * OJOS * sombra)[..., None])
+            bx = cx + np.sign(cx) * 0.18 * w_
+            bz = cz + 0.20 * h_
+            d = np.sqrt((pos[..., 0] - bx) ** 2 + (pos[..., 2] - bz) ** 2)
+            r = (0.06 + 0.02 * OJOS) * h_
+            brillo = np.clip((r - d) / (0.3 * r), 0, 1) * m_
+            out = out * (1 - brillo[..., None]) + np.array([0.98, 0.98, 0.95]) * brillo[..., None]
     out[~cubre] = tex[~cubre]
     # Padding: los texels fuera de las islas UV copian el texel cubierto más cercano.
     idx = ndimage.distance_transform_edt(~cubre, return_distances=False, return_indices=True)
@@ -269,6 +299,39 @@ borde_p = patas_m & ~ndimage.binary_erosion(patas_m)
 fy2, fx2 = np.mgrid[0:1024, 0:1024]
 borde_p &= (fy2 < 770) & (fy2 > 560) & (fx2 > 345)   # sin el borde de atrás del muslo (visto desde atrás eran rayitas sueltas)
 pliegue_px = ndimage.distance_transform_edt(~borde_p)
+
+# Boca: en la cara de frente, bajo la nariz, los texels oscuros (la línea de la boca).
+BOCA_PX = int(os.environ.get("FELIPE_BOCA", "3"))
+frente_y = pos[..., 1].min() if cubre.any() else 0
+rosa = cubre & (tex[..., 0] - tex[..., 1] > 0.15) & (pos[..., 1] < frente_y + 0.10) & (np.abs(pos[..., 0]) < 0.07)
+z_nariz = pos[..., 2][rosa].min() if rosa.any() else 0.87
+zona_boca = cubre & (pos[..., 1] < frente_y + 0.12) & (np.abs(pos[..., 0]) < 0.09) & \
+    (pos[..., 2] < z_nariz + 0.005) & (pos[..., 2] > z_nariz - 0.12)
+lin = zona_boca & (lum < 0.55) & ~rosa
+boca_m = ndimage.binary_dilation(lin, iterations=BOCA_PX) & zona_boca if BOCA_PX > 0 else lin
+# Contorno de la nariz: el borde de lo rosado, 1 texel por cada 2 de la boca.
+nariz_b = ndimage.binary_dilation(rosa, iterations=max(1, BOCA_PX // 2)) & ~rosa & cubre & \
+    (pos[..., 1] < frente_y + 0.12)
+if BOCA_PX > 0:
+    boca_m |= nariz_b
+# Ojos: lo verde (iris) con la pupila adentro, en la cara de frente; uno por lado.
+OJOS = float(os.environ.get("FELIPE_OJOS", "1"))
+verde = cubre & (tex[..., 1] - tex[..., 2] > 0.10) & (tex[..., 1] > 0.45) & (pos[..., 1] < frente_y + 0.25)
+ojos = []
+for sg in (1, -1):
+    v_ = verde & (pos[..., 0] * sg > 0.03)
+    if v_.sum() < 50:
+        continue
+    zz, xx = pos[..., 2][v_], pos[..., 0][v_]
+    cz, cx = float(np.median(zz)), float(np.median(xx))
+    h_, w_ = float(np.percentile(zz, 98) - np.percentile(zz, 2)), float(np.percentile(xx, 98) - np.percentile(xx, 2))
+    # El ojo entero (iris + pupila): elipse alrededor de lo verde, en 3D.
+    m_ = (((pos[..., 2] - cz) / (0.55 * h_)) ** 2 + ((pos[..., 0] - cx) / (0.55 * w_)) ** 2 <= 1) & \
+        (pos[..., 1] < frente_y + 0.25) & cubre & (lum < 0.85)
+    ojos.append((m_.astype(np.float32), cz, cx, h_, w_))
+print("ojos:", [(round(o[1], 3), round(o[2], 3), round(o[3], 3), round(o[4], 3)) for o in ojos])
+COLOR_BOCA = np.median(tex[lin], axis=0) * 0.55 if lin.any() else np.array([0.2, 0.1, 0.1])
+print("boca: %d texels de línea, %d tras engrosar %d px (z nariz %.3f)" % (lin.sum(), boca_m.sum(), BOCA_PX, z_nariz))
 
 resultados = {}
 mapas = {}

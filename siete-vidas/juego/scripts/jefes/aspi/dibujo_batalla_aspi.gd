@@ -51,12 +51,16 @@ func imaginacion(c: Node2D) -> void:
 
 
 ## Las manchas en el piso (tierra de maceta, agua, papel) que A.S.P.I. va a limpiar, y la pelusa que tiembla en la espera.
+## Las de tipo "nodo" son una pieza que se dibuja sola (la nota, la mota de pelusa).
 func manchas(c: Node2D) -> void:
 	for i in b.manchas.size():
-		if b.tipos_mancha[i] == "papel":
-			ArteNivel.dibujar(c, "papel", b.manchas[i], Nivel1.SUELO + 1.0)
-		else:
-			ArteNivel.dibujar(c, "mancha", b.manchas[i], Nivel1.SUELO + 2.0)
+		match b.tipos_mancha[i]:
+			"nodo":
+				pass
+			"papel":
+				ArteNivel.dibujar(c, "papel", b.manchas[i], Nivel1.SUELO + 1.0)
+			_:
+				ArteNivel.dibujar(c, "mancha", b.manchas[i], Nivel1.SUELO + 2.0)
 	if b.fase == BatallaAspi.Fase.ENTRADA and b.presentacion.paso_actual in ["espera", "revelar", "nombre", "barra", "musica", "tamano"]:
 		var t := Time.get_ticks_msec() / 1000.0
 		for i in 12:

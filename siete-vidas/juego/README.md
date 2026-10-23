@@ -47,7 +47,7 @@ Arquitectura por piezas y datos (2026-10-20): mapa completo, lista de piezas y r
 | `scripts/sistemas/` | `Capas`, `Controles` (InputMap y remapeo), `Particulas`, `Travesuras`, `Agenda`, `Recompensas`, `Frases`, `Jugo` |
 | `scripts/ui/` | Pantallas, HUD, medidores, diálogo, anuncios, libreta, resumen, indicador, íconos y `PresentacionJefe`; `base/` (`Estilo`, `GestorPantallas`, `MenuUI`) y `piezas/` (`BarraVida`, `ContadorRecurso`, `Cartel`) |
 | `assets/` | Sonidos provisionales, hojas de Felipe, arte del nivel 1 (`nivel1/`), personajes, luz y Kenney (créditos en `assets/CREDITOS.md`) |
-| `pruebas/` | Pruebas automáticas (movimiento, escenario, mecánicas, nivel, reglas de diseño, jefe, acciones, componentes, interfaz), el bot `partida.gd`, `demo_salto.gd` y capturas (`capturas.gd`, `capturas_sistemas.gd`, `capturas_nivel.gd`, `capturas_luz.gd`) |
+| `pruebas/` | Pruebas automáticas (movimiento, escenario, mecánicas, nivel, reglas de diseño, jefe, acciones, componentes, interfaz), el bot `partida.gd` (la pelea la juega `bot_pelea.gd`), `demo_salto.gd` y capturas (`capturas.gd`, `capturas_sistemas.gd`, `capturas_nivel.gd`, `capturas_luz.gd`) |
 
 ## Comandos
 
@@ -59,6 +59,7 @@ godot --headless --path siete-vidas/juego --script res://pruebas/prueba_mecanica
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_nivel.gd
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_reglas_nivel.gd  # reglas de siete-vidas/diseno/reglas-de-niveles.md
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_jefe.gd  # pelea con A.S.P.I.
+godot --headless --path siete-vidas/juego --script res://pruebas/prueba_municion.gd  # munición de la pelea: nada reaparece, la suciedad nunca se pierde, peor caso (unos 3 min)
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_acciones.gd  # maullar, arañar, snacks, escalera, rascador, agenda, diálogo, indicador
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_componentes.gd  # las piezas por separado, estados de Felipe, conductas de jefe y un enemigo armado solo con datos
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_interfaz.gd  # barra de vida, pila de pantallas, menú, textos, controles y tema
@@ -67,6 +68,8 @@ godot --headless --path siete-vidas/juego --script res://pruebas/prueba_zonas_te
 xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/capturas_estabilizacion.gd -- /tmp/estab [textos|luces]
 # Capturas a 640×360 del Indicador, el diálogo, la libreta, los carteles y el resumen:
 xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/capturas_sistemas.gd -- /tmp/capturas
+# Capturas de la pelea con A.S.P.I.: el estudio entero, cada fase, la montaña de pelusa y el estudio destruido al final:
+xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/capturas_pelea.gd -- /tmp/pelea
 # Capturas de cada cuarto (agregar --debug-collisions para ver las colisiones sobre el arte):
 xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/capturas_nivel.gd -- /tmp/cuartos
 # Partida completa jugada por un bot (prueba de que el nivel se puede terminar sin doble salto, Zoomies ni trepar):

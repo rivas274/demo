@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="DatosFuente" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/datos/datos_fuente.gd" id="1_datos"]
+
+[resource]
+script = ExtResource("1_datos")
+arte = "pizarra"
+capa = "pared"
+verbo = "VERBO_DESPEGAR"
+piezas = PackedStringArray("nota_rosa", "nota_amarilla")
+salidas = PackedVector2Array(-35, -17, 26, -13)
+en_su_lugar = PackedStringArray("nota_rosa", "nota_amarilla")
+alcance = Vector2(-50, -26)
+rect = Rect2(-48, -40, 40, 30)
+mancha = ""
+gravedad = 320.0
+velocidad = Vector2(40, -30)
+vueltas = 0.5
+sonido = "calcetin"

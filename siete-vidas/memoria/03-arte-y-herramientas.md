@@ -126,6 +126,22 @@ Hojas `arte/referencias/gemini/consistencia-casa.png` y `correccion-estilo.png`,
 
 El blanco puro que quedaba en `aranazo_2.png` y `balcon_mini.png` se tiñe de crema (#EDE4D6) por código.
 
+## Desorden del estudio (pelea sin reposición, 2026-10-23, 0 créditos)
+
+Nada nuevo pedido: piezas de Gemini recombinadas a su misma escala con `python3 siete-vidas/herramientas/preparar_arte_nivel.py desorden` en `juego/assets/nivel1/`:
+
+| Pieza | Tamaño | De dónde | Para qué |
+| --- | --- | --- | --- |
+| `libro_b.png`, `libro_c.png` | 42 × 12 | `libro.png` (`objetos.png`) con la tapa verde o azul | Libros que caen |
+| `libros_pila.png`, `libros_pila_b.png` | 45 × 30 | Tres libros apilados, en otro orden de tonos (sin clones) | Se tiran (repisa del gato y caja de la mudanza) |
+| `pizarra_1.png`, `pizarra_2.png` | 120 × 86 | `pizarra.png` sin la nota rosa / sin las dos (corcho de la misma pizarra) | El corcho después de despegar |
+| `nota_rosa.png`, `nota_amarilla.png` | 20 × 21, 23 × 18 | Recortes de `pizarra.png` | Las notas que caen |
+| `librero_bajo_1.png`, `librero_bajo_2.png`, `libro_estante_1.png`, `libro_estante_2.png` | 113 × 97, 12 × 19 | `librero_bajo.png` sin uno y dos libros del estante de arriba (fondo del mismo estante); los libros parados | El estante después de desordenar y el contorno del Indicador |
+| `pelusa_montana.png` | 70 × 24 | La montaña de `derrotas.png` (la misma de la derrota de A.S.P.I.), un poco más grande (lado menor ≥ 24) | Lo que escupe A.S.P.I. |
+| `pelusa_1.png`, `pelusa_2.png` | 23 × 22, 15 × 16 | Las nubes de pelusa de `derrotas.png` | Las motas al esparcirla |
+
+**Encargo opcional a Gemini** (no hace falta para jugar): libro abierto caído boca abajo y una hoja suelta, 2 colores de tapa (en `diseno/revisiones/2026-10-23-pelea-aspi-sin-reposicion.md`).
+
 ## Otras herramientas
 
 - **Texturas de luz (prueba de luz de la sala, 2026-10-19, pendiente del veredicto del creador):** `siete-vidas/herramientas/texturas_luz.py` genera con PIL `juego/assets/luz/luz_escalones.png` (luz redonda de 4 anillos de tono plano) y `luz_rayo.png` (rayo de la ventana de la sala en 3 franjas). Hechas por código, sin créditos ni licencias de terceros. Las usa `scripts/niveles/nivel_1/luz_cuarto.gd` (`LuzCuarto`, bandera `GuionNivel1.luz_activa`).

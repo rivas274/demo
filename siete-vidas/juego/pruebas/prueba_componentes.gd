@@ -39,6 +39,7 @@ func _correr() -> void:
 	_probar_recibe_golpes()
 	await _probar_hace_dano()
 	await _probar_tirable()
+	await _probar_desorden()
 	await _probar_oye_maullido()
 	await _probar_asustable()
 	await _probar_enemigo_solo_con_datos()
@@ -155,11 +156,47 @@ func _probar_tirable() -> void:
 	await _esperar(60)
 	_comprobar(cayo[0] and vaso.tirable.roto and is_equal_approx(vaso.position.y, PISO), "Tirable cae hasta el piso y se rompe")
 	_comprobar(aturdido[0] == Tirable.ATURDIR and raton.recibe_golpes.esta_aturdido(), "Tirable aturde a lo que tenga debajo (RecibeGolpes)")
-	vaso.tirable.reponer()
-	_comprobar(not vaso.tirable.roto and vaso.position == Vector2(300, PISO - 90.0), "Tirable: reponer() lo deja entero en su lugar")
+	await _esperar(120)
+	_comprobar(vaso.tirable.roto and is_equal_approx(vaso.position.y, PISO) and not vaso.tirable.has_method("reponer"), "Tirable: lo caído queda en el piso (nada vuelve a su lugar)")
 	vaso.queue_free()
 	raton.queue_free()
 	await _esperar(2)
+
+
+## FuenteDesorden (el corcho: suelta sus notas de a una y queda con el hueco) y MontanaPelusa (se apoya, se ofrece con
+## «Esparcir» y suelta sus motas).
+func _probar_desorden() -> void:
+	var corcho := FuenteDesorden.crear(load("res://datos/fuentes/corcho.tres"), Vector2(600, PISO - 72.0), PISO)
+	mundo.add_child(corcho)
+	var soltadas: Array = []
+	corcho.soltada.connect(func(pieza: PiezaSuelta, mancha: String) -> void: soltadas.append([pieza, mancha]))
+	_comprobar(corcho.is_in_group(Componentes.INTERACTUABLES) and corcho.restantes() == 2 and tr(corcho.verbo(felipe)) == "Despegar" and not corcho.arte_indicador().is_empty(), "FuenteDesorden: el corcho ofrece «Despegar» con el contorno de la nota")
+	corcho.soltar(1.0)
+	await _esperar(150)
+	_comprobar(soltadas.size() == 1 and (soltadas[0][0] as PiezaSuelta).en_piso and is_equal_approx((soltadas[0][0] as PiezaSuelta).position.y, PISO) and corcho.usadas == 1 and ArteNivel.textura("pizarra_1") != null, "FuenteDesorden: la nota cae, queda en el piso y el corcho se dibuja sin ella")
+	corcho.soltar(-1.0)
+	await _esperar(150)
+	_comprobar(soltadas.size() == 2 and corcho.restantes() == 0 and not corcho.is_in_group(Componentes.INTERACTUABLES) and corcho.soltar() == null, "FuenteDesorden: al acabarse deja de ofrecerse y no suelta más")
+	for par: Array in soltadas:
+		(par[0] as Node).queue_free()
+	corcho.queue_free()
+	var montana := MontanaPelusa.crear(2, PISO)
+	mundo.add_child(montana)
+	montana.escupir(Vector2(900, PISO - 40.0), 960.0)
+	_comprobar(not montana.disponible(felipe), "MontanaPelusa: mientras vuela no se ofrece")
+	await _esperar(40)
+	var rect := montana.rect_dibujo()
+	_comprobar(montana.en_piso and montana.disponible(felipe) and montana.is_in_group(Componentes.INTERACTUABLES) and is_equal_approx(montana.position.y, PISO) and minf(rect.size.x, rect.size.y) >= 24.0, "MontanaPelusa: cae en arco y se apoya en el piso (%.0f × %.0f px)" % [rect.size.x, rect.size.y])
+	var motas: Array = []
+	montana.mota_en_piso.connect(func(m: PiezaSuelta) -> void: motas.append(m))
+	montana.esparcir(1.0)
+	_comprobar(montana.esparcida and montana.pendientes() == 2 and not montana.disponible(felipe), "MontanaPelusa: al esparcirla las motas salen volando")
+	await _esperar(80)
+	_comprobar(motas.size() == 2 and montana.pendientes() == 0 and motas.all(func(m: PiezaSuelta) -> bool: return m.en_piso and m.con_sombra), "MontanaPelusa: las 2 motas quedan en el piso, con sombra")
+	for m in motas:
+		(m as Node).queue_free()
+	await _esperar(150)
+	_comprobar(not is_instance_valid(montana), "MontanaPelusa: ya esparcida, se va (las motas quedan en el piso)")
 
 
 func _probar_oye_maullido() -> void:

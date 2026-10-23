@@ -26,6 +26,9 @@ extends Resource
 @export var tiempo_vulnerable: PackedFloat32Array = []
 ## Pista mientras está vulnerable.
 @export var pista_vulnerable := ""
+## Lo que devuelve al vencer cada fase (A.S.P.I.: motas de la montaña de pelusa que escupe al apagarse; cada mota es
+## una mancha). Lo que tragó vuelve al piso: así nunca falta munición (revisión del 2026-10-23).
+@export var devuelve: PackedInt32Array = []
 ## Segundos quieta e inofensiva al empezar una fase nueva (Felipe alcanza a alejarse).
 @export var reinicio := 1.5
 @export_group("Conductas")

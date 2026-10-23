@@ -48,6 +48,9 @@ jobs:
       - name: Pelea con A.S.P.I.
         run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_jefe.gd
 
+      - name: Munición de la pelea (nada reaparece, la suciedad nunca se pierde, peor caso)
+        run: godot --headless --path siete-vidas/juego --fixed-fps 60 --script res://pruebas/prueba_municion.gd
+
       - name: Acciones de Felipe y sistemas del nivel (agenda, diálogo, indicador, rascador)
         run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_acciones.gd
 

@@ -64,6 +64,7 @@ Las pruebas pasaban y el creador igual encontraba errores a simple vista en el v
 | Textos diminutos, cortados o montados en el HUD | Zonas fijas de texto; letra de 16 px o más en carteles; contorno de 1 px; una prueba revisa rectángulos y caracteres |
 | HUD lleno de contadores | Fijo solo lo que se decide a cada segundo; lo demás aparece al cambiar y vive en la pausa |
 | Objeto de código junto a arte de Gemini | Si se nota la diferencia, arte de verdad o quitarlo |
+| Munición de un jefe que «reaparece por arte de magia» para no acabarse | Resolverlo dentro del mundo: más fuentes que tengan sentido en el cuarto y que el jefe devuelva lo que consumió (Birdo en Super Mario Bros. 2). Llevar la cuenta como conservación (la munición solo baja al vencer una fase) y probar el peor caso: todo gastado al principio, fallar siempre y perder una vida por fase |
 
 ## La lección de fondo
 

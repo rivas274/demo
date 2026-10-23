@@ -1,12 +1,23 @@
 # Estado actual: dónde vamos
 
-Actualizado: 2026-10-21 (estudio v3: la pelea en todo el cuarto; antes, plan de estabilización del nivel 1 aplicado; antes, tercera ronda terminada: jugo, letra, claves, opciones, menú Decreto real, kit de interfaz, arte de la casa y 3 animaciones nuevas de Felipe). **Léelo al empezar un chat nuevo** para retomar sin repetir conversaciones. Al cerrar cada tema, actualiza este archivo (qué se cerró, qué sigue).
+Actualizado: 2026-10-23 (pelea con A.S.P.I. sin reposición mágica; antes, 3D descartado; antes, estudio v3: la pelea en todo el cuarto; antes, plan de estabilización del nivel 1 aplicado; antes, tercera ronda terminada: jugo, letra, claves, opciones, menú Decreto real, kit de interfaz, arte de la casa y 3 animaciones nuevas de Felipe). **Léelo al empezar un chat nuevo** para retomar sin repetir conversaciones. Al cerrar cada tema, actualiza este archivo (qué se cerró, qué sigue).
 
 ## Fase del proyecto
 
 **Fase 3: vertical slice — el nivel 1 tutorial con calidad final** (desde el 2026-10-19). Fases 1 y 2 cerradas. Fases: 1 Concepto y pilares → 2 Prototipo de concepto → 3 Vertical slice → 4 Producción → 5 Pulido y lanzamiento (Steam). Para pasar de fase: `/puerta-fase`.
 
 ## En curso
+
+- **Pelea con A.S.P.I. sin reposición (hecha 2026-10-23, 0 créditos; pedido del creador: «es el gancho del juego»; lo que se rompía volvía cada 6 s «por arte de magia»). Revisión: `diseno/revisiones/2026-10-23-pelea-aspi-sin-reposicion.md`.**
+  - **Nada reaparece:** lo que cae queda en el piso con su sombra hasta el final; al ganar, el estudio queda destruido y Felipe lo comenta («Estudio redecorado. Estilo: Su Majestad.»).
+  - **14 manchas en 11 fuentes** (izquierda 8, centro y derecha 6), todo con arte de Gemini recombinado (`preparar_arte_nivel.py desorden`): vaso, taza, 2 apuntes del teclado (se acaban), 2 notas del corcho («Despegar»), 2 macetas, libros en la repisa del gato y sobre la caja de la mudanza, 2 libros del estante («Desordenar»), planta y portarretratos.
+  - **A.S.P.I. devuelve la suciedad:** al apagarla escupe una montaña de pelusa («¡BLORP!», «Devolución aceptada.»; 2 motas, `DatosJefe.devuelve`) que Felipe esparce con el manotazo («Esparcir», «¡FUP!»); si nadie la apaga a tiempo, vacía el depósito en el piso; al perder una vida se conserva todo. La suciedad solo baja al apagarla: pide 8, bastan 4 cosas tiradas, hay 14 + 4 de pelusa.
+  - **El soplido** ahora rompe las macetas (antes caían «sin romperse» y desaparecían).
+  - **Código:** piezas `FuenteDesorden` (+ `DatosFuente`, `datos/fuentes/`), `MontanaPelusa`, `DesordenEstudio` (corcho, librero, teclado); `PiezaSuelta` con sombra y señal `apoyada`; se quitaron `Tirable.reponer`, `caer_sin_romper` y `BatallaAspi._reponer`. Bot de la pelea aparte (`pruebas/bot_pelea.gd`).
+  - **Pruebas:** `prueba_municion.gd` nueva (cuenta, nada reaparece, peor caso: todo tirado en la fase 1, sin apagarla a tiempo hasta que el piso queda limpio, y una vida perdida en cada fase: se gana igual); `prueba_jefe` y `prueba_componentes` actualizadas. Las 11 pruebas en 0 fallos y el bot con la agenda 8 de 8 (pelea de ~70 s). Video `pelea-aspi-v2.mp4`, hoja `pelea-aspi-v2-capturas.png` y ejecutable `Felipe2D-Windows.zip` (fuera del repositorio).
+  - **Tres lugares:** la fila «Acción» de la tabla de Acciones (verbos «Desordenar», «Despegar», «Esparcir» y «lo que cae queda en el piso») en `02-guia-felipe.md` y en la ficha local regenerada; **falta publicar la ficha en línea**. Juego con pruebas.
+  - **Crítica honesta:** el bot juega lo mínimo y deja el estudio poco destruido (4 o 5 cosas): el «trofeo» depende de cuánto tire el jugador. Esparcir es el mismo manotazo: falta ver si se siente bien. La idea C de la consulta a Gemini («Felipe es la suciedad») quedó fuera.
+  - **Sigue:** que el creador juegue la pelea (ejecutable de Windows) y vea `pelea-aspi-v2.mp4`; `/prueba-juego` con lo que sienta; decidir si esparcir pide más jugo.
 
 - **3D DESCARTADO (decisión del creador, 2026-10-23, después de jugar el demo 2D y la sala 3D):** el juego es 2D.
   - **Por qué:** en 2D se lograron resultados aceptables en 1 o 2 días; en 3D se invirtió mucho más tiempo sin llegar a algo decente para un juego completo.

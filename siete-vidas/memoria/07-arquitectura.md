@@ -145,7 +145,8 @@ rompe; `vacio` para el recipiente que queda al comer. Arte: `herramientas/prepar
 | `RecibeGolpes` | Recibe `recibir_zarpazo` y pasa el daño a la Vida; rebota con escudo; `aturdir(segundos)` | Ratón, A.S.P.I., caja |
 | `HaceDano` | Lastima a Felipe al tocarlo (rectángulo o círculo) | Ratón, A.S.P.I., bolas de pelo |
 | `MovimientoPatrulla` | Va y viene, persigue si ve a Felipe, va a un destino, retrocede, huye | Ratón, A.S.P.I. |
-| `Tirable` | Maña «Tirar»: se ofrece, cae en el cuadro de impacto, se rompe, aturde lo de abajo | Vaso, taza, macetas, llaves |
+| `Tirable` | Maña «Tirar»: se ofrece, cae en el cuadro de impacto, se rompe, aturde lo de abajo. Lo caído **queda en el piso** (no hay `reponer`: decisión del 2026-10-23); el soplido de A.S.P.I. lo tira con `soplar()` | Vaso, taza, macetas, llaves, pilas de libros |
+| `FuenteDesorden` (datos en `datos/fuentes/`, `DatosFuente`) | Suelta cosas de a una (manotazo o el nivel la activa): cada una cae como `PiezaSuelta`, queda en el piso con sombra y avisa `soltada(pieza, mancha)`; el arte del mueble pasa a su versión con el hueco (`<arte>_<n>`); el contorno del Indicador sigue la silueta de la que va a caer; al acabarse deja de ofrecerse | Corcho (notas), estante del librero (libros), apuntes del teclado |
 | `Aranable` | Maña «Arañar»: marcas, pelusa, crítico con garras, se rompe | Sofá, puerta entornada |
 | `OyeMaullido` | Maña «Maullar»: oye dentro del radio y avisa con `oyo` | Valeria, A.S.P.I., puerta de la cocina |
 | `Asustable` | Maña futura «Intimidar»: `asustar(quien)` → huye | Ratón, A.S.P.I. |
@@ -234,6 +235,19 @@ múltiplo); `Estilo.escribir` dibuja con ellas y `Estilo.recortar` corta con «�
    es de la derrota (no la pongas también en la pelea).
 5. Prueba: `_probar_derrotas` en `prueba_componentes.gd` (se dispara con `Vida.murio`, suelta piezas, la llave para y la
    cámara lenta vuelve a 1); capturas con `pruebas/capturas_derrotas.gd`.
+
+### Cómo agregar una fuente de desorden (algo que suelta cosas de a una)
+
+1. Arte: la imagen del mueble y sus versiones con el hueco (`<arte>_1`, `<arte>_2`...) y cada cosa que cae, recombinadas
+   del mismo arte (`preparar_arte_nivel.py desorden` es el ejemplo).
+2. Datos: duplica `datos/fuentes/corcho.tres`: `arte`, `capa`, `verbo`, `piezas`, `salidas` (base de cada una en su
+   lugar), `en_su_lugar` (contorno), `alcance`, `rect` (lado menor ≥ 24) y `mancha` ("" = la pieza es la mancha).
+3. Una línea en `Nivel1.FUENTES`; `DesordenEstudio` la crea y la conecta a la pelea (`BatallaAspi.agregar_fuente`).
+4. Corre `prueba_municion.gd` (la cuenta de manchas cambia) y mira una captura (`capturas_pelea.gd`).
+
+**Montaña de pelusa (`MontanaPelusa`, `scripts/entidades/objetos/`):** la escupe la pelea (`BatallaAspi.escupir_pelusa`)
+al apagarla (`DatosJefe.devuelve`) o al vaciar el depósito; se esparce con el manotazo («Esparcir») y cada mota avisa
+`mota_en_piso`. La pelea lleva la cuenta de toda la suciedad (`suciedad_total`): solo baja al apagarla.
 
 ### Cómo agregar un objeto tirable
 

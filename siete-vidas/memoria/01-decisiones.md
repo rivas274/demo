@@ -83,6 +83,8 @@ Actualizado: 2026-10-19 (PARTE B del nivel 1 v4). Detalle completo en la biblia 
 - **Accesibilidad:** controles reasignables, subtítulos ajustables, modo daltónico, modo asistido que no bloquea logros.
 - **Logros:** 40 en Steam (lista en la biblia); coleccionables: 50 calcetines, 30 fotos vergonzosas, lagartijas.
 
+- **Pelea con A.S.P.I. sin reposición (2026-10-23, creador; `diseno/revisiones/2026-10-23-pelea-aspi-sin-reposicion.md`):** nada reaparece por arte de magia. Lo que Felipe tira queda en el piso hasta el final (el estudio destruido es su trofeo). El estudio tiene 14 manchas en 11 fuentes, y A.S.P.I. **devuelve la suciedad**: al apagarla escupe una montaña de pelusa (2 motas) que Felipe esparce con el manotazo («Esparcir»); si nadie la apaga a tiempo, vacía el depósito en el piso; al perder una vida, todo se conserva. La suciedad solo baja al apagarla: la munición nunca falta.
+
 ## Demo: primer nivel "La Gran Fuga" (v4, construido el 2026-10-19)
 
 Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md` (recorrido, agenda, mapa con medidas y cumplimiento R1–R19).

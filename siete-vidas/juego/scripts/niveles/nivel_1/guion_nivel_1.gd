@@ -18,6 +18,8 @@ var batalla: BatallaAspi
 var aspi: Enemigo
 var valeria: Valeria
 var ensayo: EnsayoAspi
+## Las fuentes de desorden del estudio (corcho, librero, apuntes del teclado).
+var desorden: DesordenEstudio
 var cajas: CajasMudanza
 var sofa: Aranable
 var rascador: Rascador
@@ -43,7 +45,6 @@ var _visitados := {}
 var _tiempo_popo := 0.0
 var _tiempo_laser := 0.0
 var _laser: Laser
-var _espera_papel := 0.0
 var _quieto_bano := 0.0
 var _goteo_bano := 0.0
 var _goteo_cocina := 0.0
@@ -104,7 +105,8 @@ func al_terminar_de_armar() -> void:
 func cada_cuadro(delta: float) -> void:
 	_actualizar_popo(delta)
 	_actualizar_laser(delta)
-	_actualizar_teclado(delta)
+	if desorden:
+		desorden.actualizar_teclado()
 	balcon.cada_cuadro(delta)
 	_actualizar_frases_de_lugar()
 	_actualizar_bano(delta)
@@ -280,6 +282,9 @@ func _crear_aspi() -> void:
 		for objeto in tirables:
 			if Nivel1.habitacion_de(objeto.position) == "estudio":
 				batalla.agregar_municion(objeto)
+	desorden = DesordenEstudio.new(nivel, self)
+	add_child(desorden)
+	desorden.armar(batalla)
 	# Ensayo sin riesgo en el pasillo: A.S.P.I. sale a limpiar lo que Felipe tira (R1, R12).
 	ensayo = EnsayoAspi.new(nivel, Vector2((puertas["pasillo>estudio"] as Puerta).position.x, Nivel1.SUELO))
 	nivel.add_child(ensayo)
@@ -532,23 +537,6 @@ func _actualizar_goteo_cocina(delta: float) -> void:
 		_goteo_cocina = 0.0
 		if habitacion == "cocina":
 			sonar("goteo")
-
-
-## Pisar el teclado de Valeria: "jjjjjjjjjj" (secreta). En la pelea, los apuntes del escritorio vuelan: manchas extra.
-func _actualizar_teclado(delta: float) -> void:
-	_espera_papel = maxf(0.0, _espera_papel - delta)
-	var encima := felipe.is_on_floor() and Nivel1.TECLADO.grow_individual(0, 6, 0, 6).has_point(felipe.global_position)
-	if not encima:
-		return
-	if not teclado_pisado:
-		teclado_pisado = true
-		arte.decorado.queue_redraw()
-		travesuras.cumplir("teclado", Vector2(7146, Nivel1.SUELO - 120))
-	if batalla and batalla.fase == BatallaAspi.Fase.PELEA and _espera_papel <= 0.0:
-		_espera_papel = 4.0
-		var papel := Vector2(7097 + randf_range(-40, 60), Nivel1.SUELO)
-		travesuras.jugo.palabra_en_mundo("PALABRA_FIUU", Vector2(7097, Nivel1.SUELO - 110), Color(1, 1, 1), 11)
-		batalla.agregar_mancha(papel, "papel")
 
 
 func _abrir_cajon(cajon: Interactivo) -> void:

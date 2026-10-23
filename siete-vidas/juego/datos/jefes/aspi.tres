@@ -57,5 +57,6 @@ velocidad = PackedFloat32Array(55, 70, 85)
 capacidad = PackedInt32Array(2, 3, 3)
 tiempo_vulnerable = PackedFloat32Array(4, 3.5, 3)
 pista_vulnerable = "JEFE_ASPI_SALTALE_ENCIMA_Y_APRIETA"
+devuelve = PackedInt32Array(2, 2)
 reinicio = 1.5
 conductas = Array[ExtResource("2_conducta")]([SubResource("Resource_bola"), SubResource("Resource_soplido"), SubResource("Resource_limpiar"), SubResource("Resource_embestida")])

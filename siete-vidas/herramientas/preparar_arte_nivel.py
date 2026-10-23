@@ -1336,8 +1336,107 @@ ROTOS_PLANTA = [
 ]
 
 
+# Pelea con A.S.P.I. sin reposición (2026-10-23, 0 créditos): el desorden del estudio se arma con arte que ya estaba.
+# Nada se dibuja por código ni se pide nuevo: se recombinan piezas de Gemini a su misma escala.
+#   - libro_b, libro_c: el libro de `objetos.png` (ya en el juego como `libro`) con la tapa en otro tono.
+#   - libros_pila, libros_pila_b: tres libros apilados (42+ × 30: lado menor ≥ 24, R8), con otros tonos y otro orden
+#     (lección 20: sin clones).
+#   - pizarra_1, pizarra_2: la pizarra sin la nota rosa y sin las dos notas (el hueco se rellena con corcho de la misma
+#     pizarra); nota_rosa y nota_amarilla: las notas recortadas (caen al piso).
+#   - librero_bajo_1, librero_bajo_2: el librero bajo sin uno y sin dos libros del estante de arriba (el hueco se rellena
+#     con el fondo del mismo estante).
+#   - pelusa_montana: la montaña de pelusa de `derrotas.png` (la misma de la derrota de A.S.P.I.), un poco más grande
+#     (lado menor ≥ 24: se esparce); pelusa_1, pelusa_2: dos nubes de pelusa de la misma hoja (las motas del piso).
+NOTAS_PIZARRA = {"nota_rosa": (15, 48, 35, 69), "nota_amarilla": (74, 55, 97, 73)}
+# Estante de arriba del librero bajo (filas 16 a 34): los libros que salen, en orden (primero el inclinado, que si no
+# quedaría apoyado en nada), y la columna de fondo vacío.
+LIBROS_LIBRERO = [(41, 53), (29, 41)]
+FILAS_ESTANTE = (16, 35)
+COLUMNA_FONDO = 56
+PELUSA_MONTANA = (40, 809, 585, 1016)
+PELUSAS = {"pelusa_1": (640, 865, 795, 1012), "pelusa_2": (780, 785, 890, 890)}
+
+
+def _tono(imagen, giro, mas_oscuro=1.0):
+    """La tapa del libro (pixeles con color) gira de tono; las hojas (crema) y el contorno quedan iguales."""
+    hsv = np.asarray(imagen.convert("RGB").convert("HSV")).astype(int)
+    a = np.asarray(imagen).copy()
+    tapa = (hsv[:, :, 1] > 90) & (a[:, :, 3] > 0)
+    hsv[:, :, 0] = np.where(tapa, (hsv[:, :, 0] + giro) % 256, hsv[:, :, 0])
+    hsv[:, :, 2] = np.where(tapa, np.clip(hsv[:, :, 2] * mas_oscuro, 0, 255), hsv[:, :, 2])
+    rgb = np.asarray(Image.fromarray(hsv.astype(np.uint8), "HSV").convert("RGB"))
+    a[:, :, :3] = np.where(tapa[:, :, None], rgb, a[:, :, :3])
+    return Image.fromarray(a, "RGBA")
+
+
+def _pila(libros, corrimientos):
+    """Apila libros de abajo hacia arriba; cada uno se monta 3 px sobre el de abajo (se ve su cara de arriba)."""
+    alto = libros[0].height + sum(l.height - 3 for l in libros[1:])
+    ancho = max(l.width + c for l, c in zip(libros, corrimientos))
+    salida = Image.new("RGBA", (ancho, alto), (0, 0, 0, 0))
+    y = alto
+    for libro, corrimiento in zip(libros, corrimientos):
+        y -= libro.height
+        salida.alpha_composite(libro, (corrimiento, y))
+        y += 3
+    return recortar_opaco(salida)
+
+
+def _rellenar(a, caja, muestra):
+    """Rellena la caja de `a` con pixeles de corcho: cada pixel toma el de `muestra` (otra zona de corcho limpio)."""
+    x0, y0, x1, y1 = caja
+    mx, my = muestra
+    a[y0:y1, x0:x1] = a[my:my + (y1 - y0), mx:mx + (x1 - x0)]
+
+
+def desorden():
+    libro = Image.open(DESTINO / "libro.png").convert("RGBA")
+    libro_b = _tono(libro, 85, 0.85)  # verde botella
+    libro_c = _tono(libro, 150, 0.9)  # azul
+    libro_b.save(DESTINO / "libro_b.png")
+    libro_c.save(DESTINO / "libro_c.png")
+    _pila([libro_b, libro_c, libro], [0, 3, 1]).save(DESTINO / "libros_pila.png")
+    _pila([libro, libro_b, libro_c], [2, 0, 3]).save(DESTINO / "libros_pila_b.png")
+    # Pizarra: la muestra de corcho limpio es la franja de arriba, entre las fotos (medida: sin hilo ni chinches).
+    pizarra = np.asarray(Image.open(DESTINO / "pizarra.png").convert("RGBA")).copy()
+    for nombre, caja in NOTAS_PIZARRA.items():
+        recortar_opaco(Image.fromarray(pizarra[caja[1]:caja[3], caja[0]:caja[2]].copy(), "RGBA")).save(DESTINO / f"{nombre}.png")
+    sin_rosa = pizarra.copy()
+    _rellenar(sin_rosa, NOTAS_PIZARRA["nota_rosa"], (50, 7))
+    Image.fromarray(sin_rosa, "RGBA").save(DESTINO / "pizarra_1.png")
+    sin_las_dos = sin_rosa.copy()
+    _rellenar(sin_las_dos, NOTAS_PIZARRA["nota_amarilla"], (46, 7))
+    Image.fromarray(sin_las_dos, "RGBA").save(DESTINO / "pizarra_2.png")
+    # Librero: cada columna del libro que sale toma la columna de fondo vacío del mismo estante.
+    librero = np.asarray(Image.open(DESTINO / "librero_bajo.png").convert("RGBA")).copy()
+    y0, y1 = FILAS_ESTANTE
+    fondo = librero[y0:y1, COLUMNA_FONDO].astype(int)
+    for i, (x0, x1) in enumerate(LIBROS_LIBRERO, start=1):
+        # El libro en su lugar (para el contorno del Indicador): lo que no es fondo del estante.
+        libro_estante = librero[y0:y1, x0:x1].copy()
+        igual = np.abs(libro_estante[:, :, :3].astype(int) - fondo[:, None, :3]).sum(axis=2) < 30
+        libro_estante[igual, 3] = 0
+        recortar_opaco(sin_sueltos(Image.fromarray(libro_estante, "RGBA"))).save(DESTINO / f"libro_estante_{i}.png")
+        for x in range(x0, x1):
+            librero[FILAS_ESTANTE[0]:FILAS_ESTANTE[1], x] = librero[FILAS_ESTANTE[0]:FILAS_ESTANTE[1], COLUMNA_FONDO]
+        Image.fromarray(librero, "RGBA").save(DESTINO / f"librero_bajo_{i}.png")
+    # Pelusa: la misma hoja de las derrotas; la montaña a 26 px de alto, las motas a la escala de la montaña.
+    imagen, _ = sin_fondo(Image.open(ORIGEN / "derrotas.png"))
+    montana = recortar_opaco(sin_huecos(imagen.crop(PELUSA_MONTANA)))
+    k = 26.0 / montana.height
+    escalar(montana, (round(montana.width * k), 26)).save(DESTINO / "pelusa_montana.png")
+    for nombre, caja in PELUSAS.items():
+        mota = recortar_opaco(sin_huecos(imagen.crop(caja)))
+        escalar(mota, (max(1, round(mota.width * k * 1.2)), max(1, round(mota.height * k * 1.2)))).save(DESTINO / f"{nombre}.png")
+    for nombre in ["libro_b", "libro_c", "libros_pila", "libros_pila_b", "pizarra_1", "pizarra_2", "nota_rosa", "nota_amarilla", "librero_bajo_1", "librero_bajo_2", "libro_estante_1", "libro_estante_2", "pelusa_montana", "pelusa_1", "pelusa_2"]:
+        print("Desorden:", nombre, Image.open(DESTINO / f"{nombre}.png").size, sin_blanco_puro(nombre))
+
+
 if __name__ == "__main__":
     import sys
+    if sys.argv[1:] == ["desorden"]:
+        desorden()
+        sys.exit(0)
     if sys.argv[1:] == ["estudio3"]:
         estudio_v3()
         sys.exit(0)

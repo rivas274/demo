@@ -112,6 +112,11 @@ const FELIPE := {
 	"balcon": [["FELIPE_BALCON_1", 0]],
 	"aterrice": [["FELIPE_ATERRICE_1", 7]],
 	"limpieza": [["FELIPE_LIMPIEZA_1", 7]],
+	## A.S.P.I. escupe la montaña de pelusa (revisión 2026-10-23): la primera vez, la frase de siempre.
+	"devolucion": [["FELIPE_DEVOLUCION_1", 7]],
+	"devolucion_otra": [["FELIPE_DEVOLUCION_2", 4], ["FELIPE_DEVOLUCION_3", 7]],
+	## Al ganar, mira el estudio destruido con orgullo.
+	"estudio_destruido": [["FELIPE_ESTUDIO_DESTRUIDO_1", 0]],
 }
 
 const VALERIA := {

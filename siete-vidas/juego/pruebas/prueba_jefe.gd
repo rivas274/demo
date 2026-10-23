@@ -155,14 +155,21 @@ func _correr() -> void:
 	await _poner_en(Vector2(arena.position.x + 60, Nivel1.SUELO))
 	await _esperar_que(func() -> bool: return batalla.deposito == 1, 300)
 	_comprobar(batalla.deposito == 1 and batalla.presentacion.escudo > 0.0 and "+1 · Glup." in sala.travesuras.jugo.palabras, "Limpiar le llena el depósito (barra azul, «+1» y «Glup.»)")
-	await _esperar(6 * 60 + 30)
-	_comprobar(maceta.visible and not maceta.tirable.roto, "Lo roto vuelve a su lugar de a uno (6 s)")
+	var pedazos := maceta.get_children().filter(func(n: Node) -> bool: return n is PiezaSuelta).size()
+	await _esperar(8 * 60)
+	_comprobar(maceta.visible and maceta.tirable.roto and maceta.position.y == Nivel1.SUELO and pedazos > 0 and maceta.get_children().filter(func(n: Node) -> bool: return n is PiezaSuelta).size() == pedazos, "Nada reaparece: 8 s después la maceta sigue rota en el piso, con sus %d pedazos" % pedazos)
 
 	# Lleno: se detiene inofensiva; si nadie la apaga, lo vacía.
 	await _llenar(batalla, aspi)
 	_comprobar(batalla.llena and not aspi.dano.activo and "encima" in batalla.presentacion.pista_actual(), "Con el depósito lleno se detiene, inofensiva, y la pista dice que le salte encima")
+	var tenia := batalla.deposito
 	await _esperar_que(func() -> bool: return not batalla.llena, 400)
 	_comprobar(not batalla.llena and batalla.deposito == 0 and batalla.apagados == 0, "Si nadie la apaga a tiempo, vacía el depósito y sigue")
+	_comprobar(batalla.montanas.size() == 1 and batalla.montanas[0].cantidad == tenia and "¡BLORP!" in sala.travesuras.jugo.palabras, "…y lo vacía EN EL PISO: «¡BLORP!» y una montaña de pelusa con lo que tenía (%d)" % tenia)
+	await _esperar_que(func() -> bool: return batalla.montanas.is_empty() or batalla.montanas[0].en_piso, 60)
+	for vieja in batalla.montanas.duplicate():
+		vieja.queue_free()
+	await _esperar(2)
 
 	# Saltarle encima con el depósito lleno la apaga: ¡CLIC!, fase 2, más rápida.
 	await _llenar(batalla, aspi)
@@ -170,6 +177,23 @@ func _correr() -> void:
 	_comprobar(batalla.apagados == 1 and not batalla.llena, "Caerle encima le aprieta el botón: fase 2")
 	_comprobar("¡CLIC!" in sala.travesuras.jugo.palabras, "Al apagarla: congelado, destello, sacudida y «¡CLIC!»")
 	await _esperar(100)
+	_comprobar(batalla.montanas.size() == 1 and batalla.montanas[0].cantidad == batalla.datos.devuelve[0] and batalla.montanas[0].en_piso, "Al terminar la fase se le abre el depósito y escupe una montaña de pelusa (%d motas)" % batalla.datos.devuelve[0])
+	_comprobar(sala.ya_dijo("devolucion"), "Felipe la comenta: «Devolución aceptada.»")
+	# Esparcirla: el manotazo de siempre (burbuja «Esparcir») la deshace en motas que quedan como manchas.
+	var montana: MontanaPelusa = batalla.montanas[0]
+	var manchas_antes := batalla.manchas.size()
+	(batalla.conducta("embestida") as AtaqueEmbestida).reloj_espera = 99.0
+	await _poner_en(montana.global_position + Vector2(-20, 0))
+	felipe.mirando = 1.0
+	_comprobar(felipe.manas.objeto_cercano() == montana and tr(montana.verbo(felipe)) == "Esparcir", "Junto a la montaña, la burbuja dice «Esparcir»")
+	await _tocar("interactuar")
+	await _esperar_que(func() -> bool: return batalla.manchas.size() >= manchas_antes + 2 or batalla.deposito > 0, 120)
+	_comprobar(montana.esparcida and "¡FUP!" in sala.travesuras.jugo.palabras and batalla.manchas.size() + batalla.deposito >= manchas_antes + 2, "Un manotazo la esparce («¡FUP!») y quedan 2 motas de pelusa que cuentan como manchas")
+	batalla.manchas.clear()
+	batalla.tipos_mancha.clear()
+	batalla.nodos_mancha.clear()
+	batalla.deposito = 0
+	(batalla.conducta("embestida") as AtaqueEmbestida).reloj_espera = 2.0
 	_comprobar(aspi.patrulla.velocidad_persecucion > batalla.datos.velocidad[0], "En la fase 2 es más rápida")
 
 	# Contra el que acampa (G12): quieto en la repisa, A.S.P.I. lo saca en 4 s o menos, sin daño.
@@ -199,6 +223,9 @@ func _correr() -> void:
 	await _esperar_que(func() -> bool: return batalla.reinicio <= 0.0 and batalla.ataque == BatallaAspi.Ataque.NINGUNO, 300)
 	batalla.manchas.clear()
 	batalla.tipos_mancha.clear()
+	batalla.nodos_mancha.clear()
+	for sobra in batalla.montanas.duplicate():
+		sobra.queue_free()
 	aspi.patrulla.velocidad_patrulla = 0.0
 	aspi.global_position = Vector2(arena.position.x + 40, Nivel1.SUELO)
 	await _poner_en(Vector2(arena.position.x + 380, Nivel1.SUELO - 98), 2)

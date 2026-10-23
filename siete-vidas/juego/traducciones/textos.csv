@@ -194,7 +194,7 @@ PALABRA_1_GLUP,+1 · Glup.
 PALABRA_CLIC,¡CLIC!
 PALABRA_GATO_DETECTADO,¿Gato detectado?
 JEFE_DEPOSITO_LLENO,¡DEPÓSITO LLENO!
-JEFE_LO_VACIO,¡LO VACIÓ!
+JEFE_LO_VACIO,¡LO VACIÓ EN EL PISO!
 JEFE_APAGADA,¡APAGADA!
 PALABRA_RANURA_DE_MANA,¡RANURA DE MAÑA!
 PALABRA_GARRAS_AFILADAS,¡GARRAS AFILADAS!
@@ -290,3 +290,11 @@ FELIPE_DERROTA_RATON_4,Tornillos por todas partes. Que limpie el personal.
 FELIPE_DERROTA_ASPI_1,"Todo lo que aspiraste, devuelto. De nada."
 FELIPE_DERROTA_ASPI_2,Mi pelo vuelve a su dueño: el piso.
 OPCIONES_VIBRACION,Vibración del mando: %s
+VERBO_ESPARCIR,Esparcir
+VERBO_DESPEGAR,Despegar
+PALABRA_BLORP,¡BLORP!
+PALABRA_FUP,¡FUP!
+FELIPE_DEVOLUCION_1,Devolución aceptada.
+FELIPE_DEVOLUCION_2,¿Me lo devuelves? Qué detalle.
+FELIPE_DEVOLUCION_3,"Reciclaje: lo inventé yo, hace dos minutos."
+FELIPE_ESTUDIO_DESTRUIDO_1,Estudio redecorado. Estilo: Su Majestad.

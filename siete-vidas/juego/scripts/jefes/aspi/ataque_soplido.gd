@@ -1,7 +1,7 @@
 class_name AtaqueSoplido
 extends ConductaJefe
 ## Soplido contra el que acampa (G12): si Felipe pasa más de unos segundos arriba de algo alto, va debajo, vibra con la
-## luz amarilla (anticipación) y lo saca de un soplido hacia algo bajo, sin daño. Las macetas caen sin romperse.
+## luz amarilla (anticipación) y lo saca de un soplido hacia algo bajo, sin daño. Las macetas caen y se rompen (más desorden).
 
 ## Altura que cuenta como «arriba» y segundos que tolera por fase (en la fase 0 no se usa: desde_fase = 1).
 @export var altura_acampar := 90.0
@@ -91,8 +91,8 @@ func actualizar(delta: float) -> bool:
 	return true
 
 
-## Sopla hacia arriba: Felipe sale empujado al piso (sin daño, atravesando los muebles bajos) y las macetas caen sin
-## romperse.
+## Sopla hacia arriba: Felipe sale empujado al piso (sin daño, atravesando los muebles bajos) y las macetas de la
+## repisa caen y se rompen (A.S.P.I. se ensucia sola: más desorden, nada desaparece).
 func _soplar() -> void:
 	var b := pelea as BatallaAspi
 	var felipe := b.felipe
@@ -112,4 +112,4 @@ func _soplar() -> void:
 	b.nivel.travesuras.jugo.palabra_en_mundo("PALABRA_FIUUU", felipe.global_position + Vector2(0, -80), Color(0.8, 0.95, 1.0), 16)
 	for objeto in b.municion:
 		if objeto.tipo == "maceta" and not objeto.tirable.roto and objeto.visible:
-			objeto.tirable.caer_sin_romper(_hacia)
+			objeto.tirable.soplar(_hacia)

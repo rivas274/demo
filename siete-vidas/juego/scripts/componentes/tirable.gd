@@ -9,12 +9,9 @@ extends Node2D
 
 ## La pata llegó: empieza a caer.
 signal empujado(felipe: Felipe)
-## Se rompió en el piso (en la pelea deja una mancha que A.S.P.I. va a limpiar).
+## Llegó al piso y quedó ahí (roto o entero, nunca vuelve a su lugar). En la pelea deja una mancha que A.S.P.I. va a
+## limpiar.
 signal caido(posicion: Vector2)
-## Se cayó sin romperse (el soplido de A.S.P.I.): no deja mancha.
-signal tirado(objeto: Node2D)
-## Volvió a su lugar, entero (lo que quedó roto se limpia).
-signal repuesto
 
 ## Segundos que queda aturdido lo que recibe el golpe, y a qué distancia horizontal.
 const ATURDIR := 3.0
@@ -42,8 +39,6 @@ var piso := 0.0
 var roto := false
 var cayendo := false
 var _velocidad := Vector2.ZERO
-var _inicio := Vector2.ZERO
-var _sin_romper := false
 
 
 func _init() -> void:
@@ -60,7 +55,6 @@ func configurar(datos: DatosObjeto) -> void:
 
 
 func _ready() -> void:
-	_inicio = _cuerpo().position
 	if ofrecer:
 		add_to_group(Componentes.INTERACTUABLES)
 
@@ -86,34 +80,19 @@ func empujar(felipe: Felipe) -> void:
 	_empezar_caida()
 
 
-## Un soplido lo tira sin romperlo: cae al piso y desaparece hasta que lo repongan.
-func caer_sin_romper(hacia := 1.0) -> void:
+## Un soplido de A.S.P.I. lo tira: cae y se rompe donde cae, como si lo tirara Felipe (más desorden; nada desaparece).
+func soplar(hacia := 1.0) -> void:
 	if cayendo or roto:
 		return
 	remove_from_group(Componentes.INTERACTUABLES)
 	_velocidad = Vector2(hacia * 120.0, -140.0)
 	_empezar_caida()
-	_sin_romper = true
 
 
 func _empezar_caida() -> void:
 	cayendo = true
 	_cuerpo().position.y += hundido
 	_cuerpo().queue_redraw()
-
-
-## Vuelve a su lugar, entero (las macetas de la pelea, de a una).
-func reponer() -> void:
-	var cuerpo := _cuerpo()
-	cuerpo.position = _inicio
-	cuerpo.rotation = 0.0
-	roto = false
-	cayendo = false
-	cuerpo.visible = true
-	repuesto.emit()
-	if ofrecer and not is_in_group(Componentes.INTERACTUABLES):
-		add_to_group(Componentes.INTERACTUABLES)
-	cuerpo.queue_redraw()
 
 
 func verbo(_felipe: Felipe) -> String:
@@ -150,13 +129,6 @@ func _physics_process(delta: float) -> void:
 
 func _al_caer() -> void:
 	var nivel := Componentes.nivel(self)
-	if _sin_romper:
-		_sin_romper = false
-		_cuerpo().visible = false
-		tirado.emit(_cuerpo())
-		if nivel:
-			nivel.sonar("caja")
-		return
 	caido.emit(global_position)
 	if nivel:
 		nivel.sonar(sonido)

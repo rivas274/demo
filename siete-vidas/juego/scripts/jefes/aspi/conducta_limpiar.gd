@@ -50,8 +50,7 @@ func intentar(delta: float) -> bool:
 	b.succionando = true
 	_aspirar()
 	if _reloj >= DatosJefe.por_fase(tiempo_limpieza, b.vencidas):
-		b.manchas.pop_front()
-		b.tipos_mancha.pop_front()
+		b.quitar_mancha(0)
 		limpiando = false
 		reloj_aviso = 0.0
 		_reloj = 0.0

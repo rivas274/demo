@@ -9,6 +9,8 @@ extends Node2D
 
 ## Gira en el piso: avisa al parar.
 signal paro
+## Llegó al piso y se quedó quieta.
+signal apoyada(pieza: PiezaSuelta)
 
 var nombre := ""
 var velocidad := Vector2.ZERO
@@ -20,6 +22,8 @@ var piso := 0.0
 var vueltas := 2.0
 ## Segundos que gira sola al quedar en el piso (0 = no gira).
 var gira_segundos := 0.0
+## En el piso lleva su sombra de contacto (lección 22: lo que queda tirado se apoya en el piso).
+var con_sombra := false
 var en_piso := false
 var girando := false
 var _reloj := 0.0
@@ -77,6 +81,7 @@ func _apoyar() -> void:
 		girando = true
 		_reloj = 0.0
 	queue_redraw()
+	apoyada.emit(self)
 
 
 func _draw() -> void:
@@ -88,4 +93,6 @@ func _draw() -> void:
 	else:
 		t = ArteNivel.textura(nombre)
 	if t:
+		if con_sombra and en_piso:
+			ArteNivel.sombra(self, Vector2(0, 1), t.get_width() * 0.9 + 2.0, 0.45)
 		draw_texture(t, Vector2(-roundf(t.get_width() / 2.0), -t.get_height()))

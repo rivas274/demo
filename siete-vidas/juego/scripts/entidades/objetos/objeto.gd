@@ -3,7 +3,8 @@ extends Node2D
 ## Objeto que Felipe tira de un manotazo: el vaso (se rompe y da «La Gravedad Funciona»), la taza de café, las macetas
 ## y la planta (aturden a lo que esté debajo), las llaves y el portarretratos (no se rompen). Todo el comportamiento está en su
 ## pieza Tirable; este nodo solo lo dibuja: apoyado en el medio de la cubierta con su sombra de contacto, cayendo
-## (gira) o roto en el piso. En la pelea lo roto vuelve a su lugar de a uno (Tirable.reponer, lo decide BatallaAspi).
+## (gira) o caído en el piso, donde queda hasta el final con su sombra (nada vuelve a su lugar: decisión del creador,
+## 2026-10-23; lo roto es el trofeo de Felipe).
 ## Escala de gato: vaso, taza, maceta y llaves al doble de su tamaño real (lado menor ≥ 24 px, R8).
 ## Escena: escenas/entidades/objeto_tirable.tscn; qué objeto es lo dicen sus datos (datos/objetos/vaso.tres...).
 
@@ -11,7 +12,7 @@ const ESCENA := "res://escenas/entidades/objeto_tirable.tscn"
 
 @export var datos: DatosObjeto
 var tirable: Tirable
-## Lo roto: el charco crece en este tiempo; los pedazos van en este grupo (se borran al reponer).
+## Lo roto: el charco crece en este tiempo; los pedazos van en este grupo.
 const CRECER := 0.45
 const GRUPO_PEDAZOS := "pedazos_rotos"
 var _tiempo_roto := 0.0
@@ -41,7 +42,6 @@ func _ready() -> void:
 		if datos:
 			tirable.configurar(datos)
 	tirable.caido.connect(_al_romperse)
-	tirable.repuesto.connect(_al_reponer)
 
 
 func _draw() -> void:
@@ -59,12 +59,20 @@ func _draw() -> void:
 			ArteNivel.dibujar(self, tipo, 0.0, hundido - (1.0 if tipo == "vaso" else 0.0))
 			return
 	if not roto or not datos.se_rompe:
+		if roto:
+			# Caído entero (el portarretratos, las llaves): queda en el piso con su sombra.
+			var arte := ArteNivel.textura(tipo)
+			if arte:
+				ArteNivel.sombra(self, Vector2(0, 1), arte.get_width() * 0.9 + 2.0, 0.45)
 		ArteNivel.dibujar(self, tipo, 0.0, 0.0)
 		return
 	# Roto: el charco (o la tierra) en escalones de 2 tonos que se extiende, y lo que queda apoyado. Los pedazos son
 	# PiezaSuelta (rebotan y quedan quietos).
 	_dibujar_charco()
 	if datos.queda != "":
+		var queda := ArteNivel.textura(datos.queda)
+		if queda:
+			ArteNivel.sombra(self, Vector2(4, 2), queda.get_width() * 0.8 + 2.0, 0.4)
 		ArteNivel.dibujar(self, datos.queda, 4.0, 1.0)
 
 
@@ -105,13 +113,6 @@ func _al_romperse(_donde: Vector2) -> void:
 		var vel := Vector2(cos(angulo) * lado, -sin(angulo)) * randf_range(datos.velocidad_piezas.x, datos.velocidad_piezas.y)
 		var pieza := PiezaSuelta.crear(nombre, Vector2(0, -4), vel, 0.0)
 		pieza.vueltas = randf_range(-2.0, 2.0)
+		pieza.con_sombra = true
 		pieza.add_to_group(GRUPO_PEDAZOS)
 		add_child(pieza)
-
-
-## Vuelve entero (la pelea repone lo roto): se van los pedazos.
-func _al_reponer() -> void:
-	_tiempo_roto = 0.0
-	for hijo in get_children():
-		if hijo.is_in_group(GRUPO_PEDAZOS):
-			hijo.queue_free()

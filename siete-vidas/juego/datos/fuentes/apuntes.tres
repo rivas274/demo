@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="DatosFuente" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/datos/datos_fuente.gd" id="1_datos"]
+
+[resource]
+script = ExtResource("1_datos")
+arte = ""
+capa = "mueble"
+verbo = "VERBO_USAR"
+ofrecer = false
+piezas = PackedStringArray("papel", "papel")
+salidas = PackedVector2Array(0, -4, 0, -4)
+en_su_lugar = PackedStringArray()
+mancha = ""
+gravedad = 300.0
+velocidad = Vector2(80, -130)
+vueltas = 0.8
+sonido = "calcetin"

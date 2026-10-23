@@ -339,7 +339,22 @@ const TIRABLES := [
 	# Estudio v3: sobre el librero bajo, hundidos 3 px en su cubierta (se ve de 4 px), a los dos lados de su medio.
 	[Vector2(LIBRERO_BAJO_X + 28.0, SUELO - 97), "planta", 3.0],  # la lengua de suegra de Valeria: se rompe (tierra)
 	[Vector2(LIBRERO_BAJO_X + 84.0, SUELO - 97), "portarretratos", 3.0],  # Su Majestad en marco dorado: no se rompe
+	# Pelea sin reposición (2026-10-23): más desorden. Libros de Valeria, apilados (lado menor ≥ 24), en dos tonos
+	# distintos (lección 20): en la repisa del gato (sube 6 px, como las macetas) y sobre la caja de la mudanza, a la
+	# izquierda de su medio (a la derecha queda el alcance al estante del librero).
+	[Vector2(7410, SUELO - 138), "libros_pila", -6.0],
+	[Vector2(CAJA_LIBROS_X + 24.0, SUELO - 48), "libros_pila_b", 2.0],
 ]
+## Lo que suelta cosas de a una (FuenteDesorden, datos/fuentes/): [datos, base del arte (su centro)]. El corcho (las dos
+## notas, desde la punta derecha del escritorio) y el estante de arriba del librero bajo (dos libros, desde la caja o el
+## librero). Los apuntes del teclado (dos, al pisarlo en la pelea) los suelta el teclado (APUNTES_TECLADO).
+const FUENTES := [
+	["corcho", Vector2(7296, SUELO - 72)],
+	["librero", Vector2(LIBRERO_BAJO_X + 56.5, SUELO)],
+]
+## Los apuntes que vuelan del escritorio al pisar el teclado en la pelea: salen del teclado, de a uno cada 4 s, y se acaban.
+const APUNTES_TECLADO := ["apuntes", Vector2(7146, SUELO - 98)]
+const ESPERA_APUNTES := 4.0
 ## Comida: [posición, tipo]. El pollo es el almuerzo de Valeria (travesura "almuerzo"): espera sobre el microondas,
 ## fuera de la patrulla del ratón del mesón (G5).
 ## Hundido 3 px en la tapa del microondas (se ve su cara de arriba): apoyado, no en el borde de atrás.

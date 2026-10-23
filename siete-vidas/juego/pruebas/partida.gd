@@ -295,29 +295,9 @@ func _dormitorio() -> void:
 	await _entrar("pasillo>estudio")
 
 
-## Pelea: ensuciar (vaso, taza, macetas o los papeles del teclado), bajar cuando se llena y caerle encima desde el
-## piso. Esquiva las embestidas saltando y se aferra cuando aspira cerca.
+## Pelea: la juega `bot_pelea.gd` (ensuciar en las dos islas, esparcir la pelusa, apagarla de un salto).
 func _pelea() -> void:
-	var batalla := guion.batalla
-	await _hasta(func() -> bool: return batalla.fase == BatallaAspi.Fase.PELEA, 12.0)
-	_paso("Entrada de la jefa (8 pasos)")
-	var limite := _cuadros + int(240.0 * _fps)
-	while batalla.fase == BatallaAspi.Fase.PELEA and _cuadros < limite:
-		if batalla.ausente:
-			_paso("Perdió una vida: vuelve desde el cojín")
-			await _hasta(func() -> bool: return felipe.estado != Felipe.Estado.DESMAYADO, 3.0)
-			await _entrar("pasillo>estudio")
-			await _hasta(func() -> bool: return not batalla.ausente, 4.0)
-			continue
-		if batalla.llena:
-			await _apagar_de_un_salto()
-			continue
-		if batalla.manchas.is_empty() and not batalla.limpiando:
-			await _ensuciar()
-			continue
-		await _esperar_en_el_piso()
-	_paso("Apaga a A.S.P.I." if batalla.fase == BatallaAspi.Fase.FIN else "No pudo con A.S.P.I.")
-	await _segundos(2.0)
+	await load("res://pruebas/bot_pelea.gd").new(self).jugar()
 
 
 func _balcon() -> void:
@@ -339,199 +319,6 @@ func _balcon() -> void:
 	Input.action_release("mover_derecha")
 	_paso("Salta del balcón: Caer de Pie" if felipe.tiene_caer_de_pie else "No saltó")
 	await _hasta_real(func() -> bool: return _resumen() != null, 10.0)
-
-
-# --- Pelea --------------------------------------------------------------------------------------------------
-
-## Tira al piso lo que haga falta para llenarle el depósito, en las dos islas del estudio (estudio v3): lo del librero
-## bajo de la derecha (planta y portarretratos, subiendo por la caja de los libros), lo del escritorio (vaso, taza de
-## café), una maceta de la repisa o, si no queda nada, pisa el teclado (los apuntes vuelan). Después baja atravesando
-## el mueble. Así la pelea va de un lado al otro del cuarto, como la juega una persona.
-func _ensuciar() -> void:
-	var batalla := guion.batalla
-	var tiro := false
-	for vuelta in 3:
-		if _fuera_de_pelea():
-			return
-		var falta: int = batalla.datos.capacidad[mini(batalla.apagados, 2)] - batalla.deposito - batalla.manchas.size()
-		if falta <= 0 or batalla.llena or batalla.fase != BatallaAspi.Fase.PELEA:
-			break
-		var objetivo := _municion()
-		if objetivo == null:
-			break
-		await _ir_a_la_isla(objetivo)
-		if _fuera_de_pelea():
-			return
-		var lado := _lado_de_tiro(objetivo)
-		await _ir_a(objetivo.position.x - lado * 18.0, 2.0)
-		felipe.mirando = lado
-		await _tocar("interactuar")
-		await _segundos(0.7)
-		tiro = true
-		_paso("Ensucia con %s (depósito %d, apagados %d)" % [objetivo.tipo, batalla.deposito, batalla.apagados])
-		# En el escritorio, la secreta de la agenda: pisa el teclado una vez («jjjjjjjjjj»), como haría una persona.
-		var agenda: Agenda = sala.travesuras.agenda
-		if not agenda.esta_cumplida("teclado") and absf(felipe.global_position.y - (Nivel1.SUELO - 98.0)) < 3.0:
-			await _ir_a(Nivel1.TECLADO.get_center().x, 1.5)
-			await _segundos(0.4)
-			if agenda.esta_cumplida("teclado"):
-				_paso("Pisa el teclado de Valeria (secreta)")
-	if not tiro and batalla.manchas.is_empty():
-		# Sin nada que tirar: pisa el teclado hasta que salga un papel.
-		await _ir_a_la_isla(null)
-		await _ir_a(Nivel1.TECLADO.get_center().x, 2.0)
-		await _hasta(func() -> bool: return not batalla.manchas.is_empty(), 4.5)
-		_paso("Pisa el teclado: vuelan los apuntes (depósito %d)" % batalla.deposito)
-	await _bajar_al_piso()
-
-
-## Lo del librero bajo se tira hacia los lados de su medio (la planta a la izquierda, el portarretratos a la derecha);
-## lo del escritorio y la repisa, como siempre (a la derecha de x 7140, hacia la derecha).
-func _lado_de_tiro(objetivo: Objeto) -> float:
-	var librero := Nivel1.rect_pieza("Librero bajo")
-	if objetivo.position.x >= librero.position.x:
-		return -1.0 if objetivo.position.x < librero.get_center().x else 1.0
-	return 1.0 if objetivo.position.x > 7140.0 else -1.0
-
-
-## Sube a la isla donde está el objetivo (null = el escritorio, por el teclado). Derecha: piso → caja de los libros →
-## librero bajo. Izquierda: piso → silla → escritorio (→ repisa de las macetas si está en alto). Si está en la otra
-## isla, primero baja al piso.
-func _ir_a_la_isla(objetivo: Objeto) -> void:
-	var librero := Nivel1.rect_pieza("Librero bajo")
-	var caja := Nivel1.rect_pieza("Caja de los libros")
-	var a_la_derecha := objetivo != null and objetivo.position.x >= librero.position.x
-	var arriba := felipe.global_position.y < Nivel1.SUELO - 30.0
-	var en_la_derecha := felipe.global_position.x >= caja.position.x - 10.0
-	if arriba and en_la_derecha != a_la_derecha:
-		await _bajar_al_piso()
-		arriba = false
-	if a_la_derecha:
-		if absf(felipe.global_position.y - librero.position.y) < 3.0:
-			return
-		if not arriba:
-			await _ir_a(caja.position.x - 24.0, 4.0)
-			if _fuera_de_pelea():
-				return
-			await _subir_a(caja.get_center().x, caja.position.y)
-		await _subir_a(librero.position.x + 40.0, librero.position.y)
-		return
-	if not arriba:
-		# Al escritorio por la silla.
-		await _ir_a(7000, 4.0)
-		if _fuera_de_pelea():
-			return
-		await _subir_a(7035, Nivel1.SUELO - 55)
-		await _subir_a(7105, Nivel1.SUELO - 98)
-	if objetivo != null and objetivo.position.y < Nivel1.SUELO - 120.0 and felipe.global_position.y > Nivel1.SUELO - 120.0:
-		await _ir_a(7195, 2.0)
-		await _subir_a(7280, Nivel1.SUELO - 170)
-
-
-## Perdió una vida (reaparece en el cojín) o la pelea terminó: hay que dejar lo que estaba haciendo.
-func _fuera_de_pelea() -> bool:
-	var batalla := guion.batalla
-	return batalla.ausente or batalla.fase != BatallaAspi.Fase.PELEA or felipe.estado == Felipe.Estado.DESMAYADO or Nivel1.habitacion_de(felipe.global_position) != "estudio"
-
-
-## Lo que se puede tirar ahora en el estudio. Como una persona que reparte la pelea, va a la otra isla que la última
-## vez (librero bajo a la derecha, escritorio y repisa a la izquierda) si allá queda algo; dentro de una isla, lo más
-## bajo primero (el escritorio antes que la repisa).
-var _isla_anterior := ""
-
-
-func _municion() -> Objeto:
-	var librero := Nivel1.rect_pieza("Librero bajo")
-	var mejor: Objeto = null
-	var mejor_otra: Objeto = null
-	for hijo in sala.get_children():
-		if hijo is Objeto and Nivel1.habitacion_de(hijo.position) == "estudio" and hijo.visible and not hijo.tirable.roto and not hijo.tirable.cayendo and hijo.position.y < Nivel1.SUELO - 10.0:
-			var isla := "derecha" if hijo.position.x >= librero.position.x else "izquierda"
-			if mejor == null or hijo.position.y > mejor.position.y:
-				mejor = hijo
-			if isla != _isla_anterior and (mejor_otra == null or hijo.position.y > mejor_otra.position.y):
-				mejor_otra = hijo
-	var elegido := mejor_otra if mejor_otra else mejor
-	if elegido:
-		_isla_anterior = "derecha" if elegido.position.x >= librero.position.x else "izquierda"
-	return elegido
-
-
-## Del escritorio, la repisa o la silla al piso: los atraviesa hacia abajo (agachado + saltar).
-func _bajar_al_piso() -> void:
-	for intento in 3:
-		if felipe.is_on_floor() and felipe.global_position.y > Nivel1.SUELO - 2.0:
-			return
-		await _hasta(func() -> bool: return felipe.is_on_floor(), 1.0)
-		await _bajar()
-
-
-## Mientras ella limpia: en el piso, cerca de la mancha pero sin dejarse arrastrar (si aspira, se aferra), listo para
-## saltarle encima apenas se llene. Las embestidas las esquiva el reflejo (_reflejos).
-func _esperar_en_el_piso() -> void:
-	var batalla := guion.batalla
-	var aspi := guion.aspi
-	var dx := felipe.global_position.x - aspi.global_position.x
-	if batalla.succionando and absf(dx) < 270.0:
-		Input.action_press("agacharse")
-		await _hasta(func() -> bool: return not batalla.succionando or batalla.llena, 4.0)
-		Input.action_release("agacharse")
-		return
-	if felipe.corazones <= 2 and felipe.snacks > 0 and felipe.is_on_floor() and absf(dx) > 140.0 and batalla.ataque == BatallaAspi.Ataque.NINGUNO:
-		# Come un snack del bolsillo (mantener la acción 0,6 s): cura, pero queda quieto.
-		Input.action_press("interactuar")
-		await _segundos(0.75)
-		Input.action_release("interactuar")
-		await _segundos(0.5)
-		_paso("Come un snack del bolsillo (corazones %d, snacks %d)" % [felipe.corazones, felipe.snacks])
-		return
-	if not batalla.limpiando and absf(dx) < 90.0 and felipe.is_on_floor():
-		var lejos := clampf(aspi.global_position.x + (140.0 if dx > 0.0 else -140.0), 6880.0, 7696.0)
-		await _ir_a(lejos, 1.0)
-		return
-	await _cuadro()
-
-
-## Espera (hasta 1 s) a que A.S.P.I. no se mueva entre dos cuadros seguidos.
-func _hasta_que_aspi_se_detenga() -> void:
-	var anterior := INF
-	for i in int(1.0 * _fps):
-		var x := guion.aspi.global_position.x
-		if absf(x - anterior) < 0.1:
-			return
-		anterior = x
-		await _cuadro()
-
-
-## Depósito lleno: al piso, junto a ella, y salta para caerle encima.
-func _apagar_de_un_salto() -> void:
-	var batalla := guion.batalla
-	var antes := batalla.apagados
-	await _bajar_al_piso()
-	for intento in 4:
-		if not batalla.llena or batalla.apagados > antes:
-			break
-		# Al llenarse bajo la repisa sale disparada unos 80 px (EMPUJE_LLENA, 0,3 s): hay que esperar a que se quede
-		# quieta antes de elegir el lado. Si no, va adonde estaba, queda del otro lado y salta alejándose de ella.
-		await _hasta_que_aspi_se_detenga()
-		var x := guion.aspi.global_position.x
-		var lado := -1.0 if felipe.global_position.x < x else 1.0
-		# A media carcasa de distancia (ella es sólida: más cerca, Felipe choca y el bot salta solo y pierde tiempo).
-		# Si está lejos (se alejó para comer un snack), corre (Shift): llena espera solo 3 a 4 s.
-		var lejos := absf(x + lado * 44.0 - felipe.global_position.x) > 150.0
-		if lejos:
-			Input.action_press("zoomies")
-		await _ir_a(x + lado * 44.0, 3.0)
-		Input.action_release("zoomies")
-		# Lado y blanco se miden de nuevo justo antes de saltar; si no quedó a tiro, se acerca otra vez.
-		x = guion.aspi.global_position.x
-		var dx := x - felipe.global_position.x
-		if absf(dx) > 64.0:
-			continue
-		await _saltar(signf(dx), x)
-		await _hasta(func() -> bool: return batalla.apagados > antes or felipe.is_on_floor(), 1.5)
-	await _hasta(func() -> bool: return felipe.is_on_floor(), 2.0)
-	_paso("Le salta encima: apagados %d" % batalla.apagados)
 
 
 # --- Movimiento con los botones -----------------------------------------------------------------------------
@@ -758,6 +545,13 @@ func _reflejos() -> void:
 	if saltar:
 		Input.action_press("saltar")
 		_saltando_embestida = 14
+
+
+func _dijo_felipe(texto: String) -> bool:
+	for linea: Array in sala.travesuras.dialogo.historial:
+		if linea[0] == "felipe" and texto in String(linea[1]):
+			return true
+	return false
 
 
 func _paso(texto: String) -> void:

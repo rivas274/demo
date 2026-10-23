@@ -9,7 +9,10 @@ extends PeleaJefe
 ## - El depósito: todo lo que se rompe en el piso deja una mancha; ella la limpia (ConductaLimpiar) y se le llena el
 ##   depósito. Lleno, se detiene pitando, inofensiva, y Felipe le salta encima para apretarle el botón (congelado,
 ##   destello, sacudida, «¡CLIC!» y polvo). Tres apagados la apagan del todo.
-## - Lo roto vuelve de a uno cada 6 s: hay que bajar por la taza, el vaso o los papeles del teclado (G12).
+## - Nada vuelve a su lugar (revisión del 2026-10-23, `diseno/revisiones/2026-10-23-pelea-aspi-sin-reposicion.md`): lo
+##   que cae queda en el piso como desorden hasta el final. Hay 14 manchas en 11 fuentes (objetos y FuenteDesorden) y
+##   la suciedad nunca se pierde: al apagarla escupe una montaña de pelusa (MontanaPelusa, `datos.devuelve`) que Felipe
+##   esparce; si nadie la apaga a tiempo, vacía el depósito en el piso; si Felipe pierde una vida, todo se conserva.
 ## Ataques (conductas, siempre anunciados): embestida, soplido contra el que acampa (fase 2) y bolas de pelo (fase 3).
 ## Si Felipe pierde una vida, reaparece en el cojín y al volver conserva la fase (entrada corta de 1 s).
 
@@ -18,9 +21,12 @@ enum Ataque { NINGUNO, AVISO_EMBESTIDA, EMBESTIDA, AVISO_SOPLIDO, SOPLIDO, AVISO
 
 ## Sus datos (nombre, fases, números y conductas).
 const DATOS := "res://datos/jefes/aspi.tres"
-## Lo que se rompe vuelve de a uno, cada tanto; la gigante se desvanece en el rugido.
-const REPOSICION := 6.0
+## La gigante se desvanece en el rugido.
 const DESVANECER := 0.8
+## Segundos después del «¡CLIC!» en que escupe la montaña (cuando ya se fue la palabra: una a la vez).
+const ESPERA_ESCUPIR := 1.0
+## La montaña cae a este lado de A.S.P.I. (hacia el piso libre).
+const DISTANCIA_MONTANA := 58.0
 ## Al apagarla, Felipe rebota hacia arriba.
 const REBOTE := -420.0
 ## Lleno bajo la repisa: sale disparada hacia adelante (nunca queda justo bajo la repisa).
@@ -42,16 +48,20 @@ var deposito := 0:
 		if presentacion:
 			presentacion.escudo = float(deposito) / DatosJefe.por_fase(datos.capacidad, vencidas)
 var llena := false
-## x de cada mancha en el piso (y qué es: "mancha" o "papel").
+## x de cada mancha en el piso, qué es ("mancha", "papel", "pelusa" o "nodo": la pieza misma, como la nota o la mota)
+## y su nodo (la pieza que se lleva al limpiarla; null si solo es dibujo).
 var manchas: Array[float] = []
 var tipos_mancha: Array[String] = []
+var nodos_mancha: Array[Node2D] = []
 var succionando := false
 ## 0 = estudio normal, 1 = fin del mundo (solo en la entrada).
 var transformacion := 0.0
 ## 0 = A.S.P.I. de tamaño real, 1 = bestia gigante del fondo (solo en la entrada).
 var gigante := 0.0
-## Lo que se puede tirar en el estudio (vuelve de a uno).
+## Lo que se puede tirar en el estudio (queda donde cae), lo que suelta cosas de a una y las montañas de pelusa.
 var municion: Array[Objeto] = []
+var fuentes: Array[FuenteDesorden] = []
+var montanas: Array[MontanaPelusa] = []
 ## Para el dibujo: rayos de la imaginación, segundos de reinicio, papeles que vuelan, cuándo fue el último «¡CLIC!».
 var rayo := 0.0
 var desvaneciendo := false
@@ -61,8 +71,6 @@ var tiempo_clic := -10.0
 var centro_gigante := Vector2.ZERO
 
 var _reloj_llena := 0.0
-var _por_reponer: Array[Objeto] = []
-var _reloj_reponer := 0.0
 var _encima: Node2D
 var _imaginacion: Node2D
 var _manchas_dibujo: Node2D
@@ -137,23 +145,93 @@ func _lienzo(nombre: String, capa: int, al_dibujar: Callable) -> Node2D:
 	return lienzo
 
 
-## Lo que se puede tirar en el estudio: vuelve de a uno cuando se rompe (o cuando un soplido lo tira).
+## Lo que se puede tirar en el estudio: cuando cae, queda en el piso y deja una mancha.
 func agregar_municion(objeto: Objeto) -> void:
 	municion.append(objeto)
-	objeto.tirable.caido.connect(func(posicion: Vector2) -> void:
-		agregar_mancha(posicion)
-		_por_reponer.append(objeto))
-	objeto.tirable.tirado.connect(func(_o: Node2D) -> void: _por_reponer.append(objeto))
+	objeto.tirable.caido.connect(func(posicion: Vector2) -> void: agregar_mancha(posicion))
 
 
-## Algo se rompió en el piso: si es en el estudio y hay pelea, queda una mancha para limpiar.
-func agregar_mancha(posicion: Vector2, tipo := "mancha") -> void:
+## Lo que suelta cosas de a una (las notas del corcho, los libros del estante, los apuntes del teclado).
+func agregar_fuente(fuente: FuenteDesorden) -> void:
+	fuentes.append(fuente)
+	fuente.soltada.connect(func(pieza: PiezaSuelta, mancha: String) -> void:
+		if mancha == "":
+			agregar_mancha(pieza.global_position, "nodo", pieza)
+		else:
+			agregar_mancha(pieza.global_position + Vector2(18.0, 0.0), mancha))
+
+
+## Algo cayó al piso: si es en el estudio y hay pelea, queda una mancha para limpiar. Con `nodo`, la mancha es esa
+## pieza (la nota, la mota de pelusa): al limpiarla, A.S.P.I. se la lleva.
+func agregar_mancha(posicion: Vector2, tipo := "mancha", nodo: Node2D = null) -> void:
 	if fase in [Fase.ESPERANDO, Fase.FIN] or not arena.grow(4).has_point(posicion - Vector2(0, 1)):
 		return
 	manchas.append(clampf(posicion.x, jefe.patrulla.limite_izquierdo, jefe.patrulla.limite_derecho))
 	tipos_mancha.append(tipo)
+	nodos_mancha.append(nodo)
 	if tipo == "papel":
 		papeles.append(Vector3(posicion.x, 0.0, 0.0))
+
+
+## A.S.P.I. limpió la mancha `i`: si era una pieza, se la traga (se achica hacia ella y desaparece).
+func quitar_mancha(i: int) -> void:
+	var nodo: Node2D = nodos_mancha[i]
+	manchas.remove_at(i)
+	tipos_mancha.remove_at(i)
+	nodos_mancha.remove_at(i)
+	if is_instance_valid(nodo):
+		var tragar := nodo.create_tween().set_parallel()
+		tragar.tween_property(nodo, "global_position", jefe.global_position + Vector2(0, -6), 0.25)
+		tragar.tween_property(nodo, "scale", Vector2(0.2, 0.2), 0.25)
+		tragar.chain().tween_callback(nodo.queue_free)
+
+
+## Toda la suciedad que todavía existe: lo que falta por caer (objetos y fuentes), lo que está en el piso, lo que tiene
+## en el depósito y lo que guardan las montañas. Solo baja al apagarla (devuelve menos de lo que tragó): nunca falta.
+func suciedad_total() -> int:
+	var total := manchas.size() + deposito
+	for objeto in municion:
+		if is_instance_valid(objeto) and not objeto.tirable.roto:
+			total += 1
+	for fuente in fuentes:
+		if is_instance_valid(fuente):
+			total += fuente.restantes() + fuente.en_vuelo
+	for montana in montanas:
+		if is_instance_valid(montana):
+			total += montana.pendientes()
+	return total
+
+
+## Vacía el depósito en el piso: se le abre la tapa y escupe una montaña de pelusa con `motas` manchas («¡BLORP!» y
+## nube). La montaña cae hacia el lado con más piso libre.
+func escupir_pelusa(motas: int) -> MontanaPelusa:
+	if motas <= 0:
+		return null
+	var montana := MontanaPelusa.crear(motas, nivel.datos.suelo)
+	montanas.append(montana)
+	montana.mota_en_piso.connect(func(mota: PiezaSuelta) -> void: agregar_mancha(mota.global_position, "nodo", mota))
+	montana.tree_exiting.connect(func() -> void: montanas.erase(montana))
+	nivel.add_child(montana)
+	var x := jefe.global_position.x
+	var hacia := 1.0 if x < arena.get_center().x else -1.0
+	var destino := clampf(x + hacia * DISTANCIA_MONTANA, jefe.patrulla.limite_izquierdo, jefe.patrulla.limite_derecho)
+	montana.escupir(jefe.global_position + Vector2(0, -ALTO_ARRIBA), destino)
+	apariencia.abrir_tapa()
+	var tapa := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_STOP)
+	tapa.tween_interval(0.6)
+	tapa.tween_callback(func() -> void:
+		if not llena:
+			apariencia.cerrar_tapa())
+	_soltar_polvo(jefe.global_position + Vector2(0, -24))
+	nivel.travesuras.jugo.palabra_en_mundo("PALABRA_BLORP", jefe.global_position + Vector2(0, -66), Color(0.86, 0.84, 0.8), 18)
+	nivel.travesuras.jugo.sacudir(0.12, 0.5)
+	nivel.sonar("succion")
+	# Felipe lo comenta (la primera vez con su frase de siempre).
+	if nivel.ya_dijo("devolucion"):
+		nivel.travesuras.decir_felipe("devolucion_otra")
+	else:
+		nivel.decir("devolucion")
+	return montana
 
 
 func _process(delta: float) -> void:
@@ -250,12 +328,14 @@ func _al_empezar_pelea() -> void:
 	transformacion = 0.0
 
 
+## Felipe perdió una vida: todo lo del piso, las montañas y el depósito se conservan (nada se pierde). Si estaba llena,
+## lo vacía en el piso antes de volver a su base.
 func _al_salir_felipe() -> void:
-	manchas.clear()
-	tipos_mancha.clear()
 	limpiar.limpiando = false
-	llena = false
-	deposito = 0
+	if llena:
+		llena = false
+		escupir_pelusa(deposito)
+		deposito = 0
 	apariencia.cerrar_tapa()
 	jefe.patrulla.quieta = true
 	jefe.dano.activo = false
@@ -302,7 +382,6 @@ func _actualizar_pelea(delta: float) -> void:
 
 func _cada_cuadro(delta: float) -> void:
 	(conducta("bola") as AtaqueBolaPelo).mover(delta)
-	_reponer(delta)
 
 
 ## Corta el ataque en curso y la deja en reposo: sin luz de aviso, sin vibrar, inofensiva y a su velocidad.
@@ -314,19 +393,6 @@ func terminar_ataque() -> void:
 	jefe.dano.activo = false
 	jefe.patrulla.destino = INF
 	jefe.patrulla.velocidad_persecucion = DatosJefe.por_fase(datos.velocidad, vencidas)
-
-
-## Lo roto (o tirado) vuelve de a uno, cada REPOSICION segundos, mientras dure la pelea.
-func _reponer(delta: float) -> void:
-	if _por_reponer.is_empty() or fase == Fase.FIN:
-		_reloj_reponer = 0.0
-		return
-	_reloj_reponer += delta
-	if _reloj_reponer >= REPOSICION:
-		_reloj_reponer = 0.0
-		var objeto: Objeto = _por_reponer.pop_front()
-		if is_instance_valid(objeto):
-			objeto.tirable.reponer()
 
 
 ## Limpió una mancha: el depósito sube; lleno, queda vulnerable. Un solo rótulo a la vez sobre ella (M3): si con esto
@@ -397,11 +463,12 @@ func _actualizar_llena(delta: float) -> void:
 		_apagar()
 		return
 	if _reloj_llena >= DatosJefe.por_fase(datos.tiempo_vulnerable, vencidas):
-		# Nadie la apagó: vacía el depósito y sigue.
+		# Nadie la apagó: vacía el depósito EN EL PISO (montaña de pelusa con todo lo que tenía) y sigue.
+		var tenia := deposito
 		deposito = 0
 		llena = false
 		jefe.patrulla.quieta = false
-		apariencia.cerrar_tapa()
+		escupir_pelusa(tenia)
 		presentacion.cartel("JEFE_LO_VACIO", 1.2, DatosJefe.por_fase(datos.pistas, vencidas))
 
 
@@ -417,13 +484,19 @@ func _apagar() -> void:
 	_soltar_polvo(jefe.global_position + Vector2(0, -20))
 	nivel.sonar("golpe")
 	nivel.sonar("caja")
-	manchas.clear()
-	tipos_mancha.clear()
+	# Lo que quedó en el piso sigue ahí (la fase siguiente lo limpia).
 	limpiar.limpiando = false
 	if vencidas >= datos.fases:
 		jefe.vida.morir()
 		return
+	var motas: int = DatosJefe.por_fase(datos.devuelve, vencidas - 1) if not datos.devuelve.is_empty() else 0
 	cambiar_fase()
+	# Se le abre el depósito y escupe la pelusa: lo que limpió vuelve al piso (cuando ya se fue el «¡CLIC!»).
+	var escupe := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_STOP)
+	escupe.tween_interval(ESPERA_ESCUPIR)
+	escupe.tween_callback(func() -> void:
+		if fase == Fase.PELEA:
+			escupir_pelusa(motas))
 
 
 ## Maullar: gira hacia Felipe ("¿Gato detectado?") y se le puede llevar a una mancha o debajo de un salto.
@@ -443,8 +516,7 @@ func _terminar() -> void:
 	succionando = false
 	limpiar.limpiando = false
 	llena = false
-	manchas.clear()
-	tipos_mancha.clear()
+	# El estudio queda como quedó: lo del piso sigue ahí (el trofeo de Felipe).
 	jefe.patrulla.destino = INF
 	jefe.dano.activo = false
 	jefe.patrulla.quieta = true
@@ -469,3 +541,13 @@ func _terminar() -> void:
 		await get_tree().physics_frame
 	felipe.acicalarse()
 	terminada.emit()
+	# Mira su obra: el estudio destruido, con orgullo (después de su frase de la derrota, sin cortarla).
+	# Espera a que se callen las frases de la derrota y de la Agenda (medio segundo seguido sin cuadro de diálogo).
+	var libre := 0
+	for i in 720:
+		libre = 0 if nivel.travesuras.dialogo.ocupado() else libre + 1
+		if libre >= 30 and i > 60:
+			break
+		await get_tree().physics_frame
+	if Nivel1.habitacion_de(felipe.global_position) == "estudio":
+		nivel.travesuras.decir_felipe("estudio_destruido", true)

@@ -19,6 +19,11 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 
 ## Nivel 1 v4 (Fase 3)
 
+- [x] **Pelea con A.S.P.I. sin reposición (2026-10-23):** nada reaparece, 14 manchas en 11 fuentes, montaña de pelusa que se esparce, todo se conserva al perder una vida (`revisiones/2026-10-23-pelea-aspi-sin-reposicion.md`).
+- [ ] **Publicar la ficha en línea** (https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe) con los verbos «Desordenar», «Despegar» y «Esparcir» de la fila «Acción» (la copia local ya está regenerada).
+- [ ] Prueba de juego del creador con la pelea nueva (`/prueba-juego`): ¿esparcir se siente bien o pide más jugo? ¿la fase 3 es clímax o trámite?
+- [ ] Opcional (Gemini): libro abierto caído y hoja suelta (hoy los libros caen cerrados).
+
 - [x] **PARTE A (2026-10-19):** acciones de Felipe (maullar, arañar, subir escalón, snack del bolsillo de 5, efectos en el cuadro de impacto), habilidades apagadas en el nivel 1 y sistemas reutilizables (Agenda, libreta, HUD y carteles, resumen del día, diálogo con retratos, jugo, Indicador con íconos de Kenney, recompensas, rascador, arañables). Prueba `prueba_acciones.gd`.
 - [x] **PARTE B (2026-10-19):** mapa nuevo de 7 cuartos con el arte medido (colisión a ±2 px del borde opaco), Valeria en escena (poses y caminar de Gemini), escalera de fondo con reja anti-fuga y librero, frotarse (ronronear contra Valeria), agenda completa conectada, ensayo de A.S.P.I. en el pasillo, pelea nueva (8 pasos, sin negro, soplido, bolas en arco, entrada corta), balcón con resumen del día, bot sin habilidades (agenda 8 de 8) y video. Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md`.
 - [x] Ficha en línea publicada (2026-10-19) (https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe): la copia local ya tiene las filas de la PARTE A y la de frotarse (lo hace el creador o la sesión principal).

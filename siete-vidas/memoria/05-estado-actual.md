@@ -8,6 +8,17 @@ Actualizado: 2026-10-23 (interfaz v2 «A + C» y salud de 9 huellas programadas 
 
 ## En curso
 
+- **Para retomar en una sesión nueva (cierre de la sesión del 2026-10-23):**
+  - **Esperando al creador:**
+    - Que juegue el `.zip` con la interfaz v2 y las 9 huellas (video `interfaz-v2.mp4`, hoja `capturas/interfaz-rediseno/juego-v2.png`) y diga qué ajustar.
+    - Pelea v5: ¿quedó demasiado fácil con «Aplastar»? El bot gana en ~57 s y la fase 3 dura ~7 s; si es fácil, se achica el alcance desde los muebles en `aspi_jugo.tres`.
+    - ¿Le parece bien que A.S.P.I. en corto se quede quieta sobre el charco?
+    - ¿Le parece bien que A.S.P.I. mareada no se pueda apagar (Felipe rebota)?
+    - ¿Publicar la ficha en línea (https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe)? La copia local ya tiene Aplastar, la salud de 9 huellas y la siesta táctica; falta preguntarle.
+  - **Pendientes de la interfaz:** texto grande en la pausa y los carteles; opciones de velocidad del texto, contraste alto e íconos por mando; filas con flechas algo más altas en Opciones; `felipe.gd` en ~620 líneas (dividirlo).
+  - **Opcional, con costo:** animaciones de personalidad de Felipe en SpriteCook (lamerse, posar, pirueta, clavar uñas, alisarse), ~26 créditos cada una más los 5 intentos; quedan 92 créditos. Pedir aprobación antes.
+  - **Sesión de la PC del creador** «dell-work-demo» (`session_0189wMoRqDQyX9uRTqUUPPW5`): tiene el navegador con Gemini y ChatGPT. ChatGPT gratis: 1 adjunto y tope diario de imágenes; Chrome bloquea sus descargas automáticas hasta que el creador las permita.
+
 - **Rediseño de la interfaz (decisiones del creador, 2026-10-23):**
   - **Estilo dinámico** como el cuadro de diálogo «moderno y expresivo» de ChatGPT (`diseno/revisiones/capturas/interfaz-rediseno/elegido-dialogo-moderno.png`): diagonales, fondo oscuro con borde claro y color por personaje. **Sin pergamino**, también en el menú de pausa.
   - **Las 9 vidas son la salud:** 9 huellas que se gastan con los golpes. Cambia el diseño de juego (hoy hay 5 corazones más vidas aparte): revisarlo con el diseñador antes de implementar.

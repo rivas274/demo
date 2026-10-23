@@ -387,3 +387,50 @@ El creador vio la v3 (simetría, pata y caminata, bien) y pidió varios cambios.
 - `felipe-v4-contorno-opciones.png`;
 - `felipe-rig-camina-v4.gif`: v3 arriba y v4 abajo;
 - `felipe-rig-acciones-v4.mp4`.
+
+### v5: cara de Meshy, mano sin aplastar y sala limpia (2026-10-23)
+El creador: la v4 «es la que mejor se mueve», pero con 3 problemas. Se buscó la causa de cada uno comparando con la versión en que estaba bien.
+
+**1. La cara chata, con los ojos hundidos:**
+- **Causa:** el Symmetrize de la v3. La cara de Meshy no es simétrica: los ojos van algo girados en 3/4. Espejar la mitad derecha achicó y hundió los ojos y aplanó el perfil. La v2, que no estaba simetrizada, tenía los ojos bien. La retopo de unas 7.400 caras además suavizaba el relieve.
+- **Arreglo** (`01_retopo.py`, `FELIPE_CABEZA`): el cuerpo sigue simétrico, pero la cabeza no. Sus vértices se subdividen y se proyectan sobre la cabeza **original** de Meshy, con mezcla en el cuello. La textura se hornea desde la Meshy original.
+- **5 variantes**, medidas por la distancia a la superficie de Meshy y mirándolas:
+
+  | Variante | Distancia media a Meshy |
+  |---|---|
+  | simétrica (v4) | 2,3 mm |
+  | proyectada | 2,1 mm |
+  | proyectada + 1 subdivisión | 1,1 mm |
+  | 16 mil caras | 1,4 mm |
+  | **proyectada + 2 subdivisiones (elegida)** | **0,7 mm** |
+
+  La elegida tiene 42 mil caras, casi todas en la cabeza.
+- La cabeza ya iba entera en su hueso y no hereda el estirar y aplastar.
+- Los pesos de calor fallan en una malla tan densa. Ahora se calculan en la malla base y se transfieren con Data Transfer.
+
+**2. La mano delantera se aplastaba:**
+- **Medido:** el volumen de la mano bajaba hasta 14 % en el vuelo de la v4. Ningún hueso tiene escala en sus curvas y nada hereda el estirar y aplastar.
+- **Causa:** al doblar la muñeca a 75°, la piel de la mano se repartía entre el antebrazo y la mano, y la mezcla lineal la plegaba. Además, en el vuelo la mano subía dentro del pelo del pecho.
+- **Arreglo:**
+  - la bola de la mano queda rígida en su hueso (`03_rig.py`);
+  - en la caminata, la muñeca se dobla al 70 %, los dedos de la mano no se pliegan y la mano sube y va hacia atrás menos en el vuelo (`anima_locomocion.py`);
+  - probé 5 combinaciones.
+- **Resultado:** el volumen se mantiene entre 1,00 y 1,01 del reposo en todo el ciclo. El pie sigue sin patinar.
+
+**3. La sala más sucia en pixel ×3:**
+- **Causa:** los umbrales de bordes de la v4 (0,04 m / 0,30), que dibujaban puntos y rayas sobre el pelo. Además, el casco invertido de 1 px asomaba sus caras traseras como puntos oscuros en el pecho y la cara.
+- **Arreglo:** el post-proceso vuelve a los valores de siempre (0,12 m / 0,45). Quité el casco (`contorno_px` = 0) y las líneas de pliegue pintadas. Los dos siguen disponibles como opciones (`--contorno=`, `--bordes=`, `FELIPE_PLIEGUE`).
+- En `felipe-v5-sala-comparacion.png`, la v5 se ve tan limpia como la v3.
+
+**Se conserva de la v4:** la anatomía, la postura, la montura, las patas gruesas y todas las acciones.
+
+**Entregables** (en `proto3d/`):
+- `felipe-v5-cara.png`;
+- `felipe-v5-mano.png`;
+- `felipe-v5-sala-comparacion.png`;
+- `felipe-rig-camina-v5.mp4`: v4 arriba y v5 abajo;
+- `felipe-rig-acciones-v5.mp4`.
+
+Desde ahora todo lo animado se entrega en MP4 (H.264, yuv420p, faststart).
+
+**Límite:** el GLB pesa 4,1 MB por la cabeza densa. Si hiciera falta, se puede bajar a una subdivisión (1,1 mm de distancia, 14 mil caras).

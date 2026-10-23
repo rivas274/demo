@@ -48,7 +48,7 @@ const ALTO_ARCO := 0.12
 ## v5: el post-proceso global de la sala vuelve a sus valores de siempre (los umbrales bajos de
 ## la v4 ensuciaban la imagen a ×3); a Felipe solo se le agrega su casco de 1 px. Con
 ## -- --contorno=px y -- --bordes=prof,normal se prueban otras combinaciones.
-@export var contorno_px := 1.0
+@export var contorno_px := 0.0  # v5: sin casco (sus caras traseras asomaban como puntos oscuros en el pecho y la cara)
 var _bordes_cmd := false
 var umbral_profundidad := 0.12
 var umbral_normal := 0.45

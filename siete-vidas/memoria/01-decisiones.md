@@ -59,6 +59,10 @@ Actualizado: 2026-10-19 (PARTE B del nivel 1 v4). Detalle completo en la biblia 
   - **Anatomía dentro del pelo:** las patas de un cuadrúpedo empiezan dentro del cuerpo. La cadera va en la grupa con el fémur hacia adelante, y la escápula detrás del cuello con el húmero hacia atrás. El flanco y el hombro siguen a esos huesos con pesos suaves. El estirar y aplastar del torso no se hereda en patas, cuello ni cola (`inherit_scale` = NONE). Fuente: anatomía de cuadrúpedo digitígrado y rigs de cuadrúpedos (Rigify «paw»).
   - **Engrosar una parte de la malla:** se empuja desde el eje del miembro, no por la normal (con normales ruidosas la superficie se arruga), y se suaviza después.
   - **Contorno toon:** casco invertido de 1 px más el post-proceso de profundidad y normales. Bajar mucho el umbral de profundidad ensucia el escenario. Fuente: técnica estándar de cel shading (inverted hull y bordes por Sobel).
+  - **Simetría sí, pero no en la cara de un modelo de IA.** La cara viene expresiva y algo asimétrica, y espejarla la aplana y hunde los ojos. Cuerpo simétrico; cabeza proyectada sobre la original, con más densidad. Los pesos de calor se calculan en la malla base y se transfieren (Data Transfer).
+  - **Partes que se aplastan al doblar** (manos, pies): se dejan rígidas en su hueso, con la mezcla arriba de la articulación, y se mide su volumen en cada cuadro.
+  - **Contorno:** no subir la sensibilidad del post-proceso global por un personaje, porque ensucia toda la escena a pixel ×3. El casco invertido en mallas con normales ruidosas deja puntos. Antes de dar un ajuste por bueno, comparar contra la versión anterior en el mismo cuadro.
+  - **Entregas animadas en MP4** (H.264, yuv420p, faststart), no en GIF: en la app del creador los GIF no se reproducen solos.
   - **Límite de proporciones chibi:** con las patas delanteras cortas, Felipe no puede sentarse erguido con las manos en el piso. Su sentado es bajo.
 
 ## Prototipos

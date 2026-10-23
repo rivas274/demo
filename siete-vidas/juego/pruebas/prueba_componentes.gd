@@ -460,7 +460,6 @@ func _probar_derrotas() -> void:
 	await _segundos_fisica(0.3)
 	var derrota := raton.derrota
 	_comprobar(derrota != null and derrota.datos == load("res://datos/derrotas/raton.tres"), "Derrota: el ratón trae su ReaccionDerrota con datos/derrotas/raton.tres")
-	var antes := mundo.get_children().size()
 	raton.vida.morir()
 	await physics_frame
 	_comprobar(derrota.reaccionada, "Derrota: ReaccionDerrota se dispara con Vida.murio")
@@ -477,7 +476,7 @@ func _probar_derrotas() -> void:
 	await _segundos_fisica(1.5)
 	var en_piso := derrota.piezas.all(func(p: PiezaSuelta) -> bool: return p.en_piso and absf(p.position.y - raton.position.y) < 0.5)
 	var llave: PiezaSuelta = derrota.piezas.filter(func(p: PiezaSuelta) -> bool: return p.nombre == derrota.datos.pieza_que_gira)[0]
-	_comprobar(en_piso and mundo.get_children().size() >= antes + derrota.piezas.size(), "Derrota: las piezas caen, rebotan y quedan en el piso (la marca)")
+	_comprobar(en_piso and derrota.piezas.all(func(p: PiezaSuelta) -> bool: return p.get_parent() == mundo), "Derrota: las piezas caen, rebotan y quedan en el piso (la marca)")
 	_comprobar(llave.girando, "Derrota: la llave de cuerda sigue girando sola en el piso")
 	await _segundos_fisica(derrota.datos.giro_segundos + 0.3)
 	_comprobar(not llave.girando, "Derrota: la llave deja de girar")

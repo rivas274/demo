@@ -29,6 +29,9 @@ func _init(nombre := "Interactivo", verbo_felipe := "Usar", rect := Rect2(-16, -
 
 func _ready() -> void:
 	add_to_group(Componentes.INTERACTUABLES)
+	# Lo dibujado sobre un mueble (el cajón de la cómoda, la ropa de la cama): decorado, salvo que el nivel diga otro rol.
+	if Profundidad.de(self) == null:
+		Profundidad.poner(self, Capas.Rol.DECORADO)
 
 
 func disponible(_felipe: Felipe) -> bool:

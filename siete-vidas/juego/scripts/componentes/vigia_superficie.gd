@@ -37,7 +37,9 @@ func actual() -> String:
 		var choque := felipe.get_slide_collision(i)
 		if choque.get_normal().y < -0.7 and choque.get_collider() is Node:
 			var nombre := String((choque.get_collider() as Node).name)
-			if nivel.pieza(nombre) != null:
+			var cuerpo := nivel.pieza(nombre)
+			# El piso del nivel (y lo que está a su altura) es "piso", no un mueble.
+			if cuerpo != null and cuerpo.global_position.y < nivel.datos.suelo - 1.0:
 				return nombre
 	return "piso"
 

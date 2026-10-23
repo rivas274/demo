@@ -114,6 +114,7 @@ func _ready() -> void:
 	_crear_puertas()
 	# Profundidad (capas por rol): Felipe es el JUGADOR y el vigía avisa en qué superficie está.
 	Profundidad.superficie_felipe = "piso"
+	Profundidad.z_felipe = Capas.JUEGO
 	Profundidad.poner(felipe, Capas.Rol.JUGADOR)
 	add_child(VigiaSuperficie.new(self, felipe))
 	guion.preparar()
@@ -454,6 +455,8 @@ func superficie_en(punto: Vector2) -> String:
 			continue
 		var tam := (forma.shape as RectangleShape2D).size
 		var arriba := cuerpo.global_position
+		if arriba.y >= datos.suelo - 1.0:
+			continue
 		if punto.x >= arriba.x - 2.0 and punto.x <= arriba.x + tam.x + 2.0 and absf(punto.y - arriba.y) <= 14.0:
 			return nombre
 	return "piso"

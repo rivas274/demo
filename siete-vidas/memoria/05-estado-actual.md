@@ -8,6 +8,12 @@ Actualizado: 2026-10-23 (pelea con A.S.P.I. v5: acción «Aplastar» y un solo f
 
 ## En curso
 
+- **Rediseño de la interfaz (decisiones del creador, 2026-10-23):**
+  - **Estilo dinámico** como el cuadro de diálogo «moderno y expresivo» de ChatGPT (`diseno/revisiones/capturas/interfaz-rediseno/elegido-dialogo-moderno.png`): diagonales, fondo oscuro con borde claro y color por personaje. **Sin pergamino**, también en el menú de pausa.
+  - **Las 9 vidas son la salud:** 9 huellas que se gastan con los golpes. Cambia el diseño de juego (hoy hay 5 corazones más vidas aparte): revisarlo con el diseñador antes de implementar.
+  - **Assets:** se generan con Gemini y ChatGPT desde la PC del creador y Claude los retoca.
+  - **Orden:** primero las láminas de dirección de arte A, B y C; el creador elige una; luego se generan los assets, se aclaran los puntos pendientes y recién entonces se programa.
+
 - **Pelea con A.S.P.I. v5 (hecha 2026-10-23, 0 créditos; lo que vio el creador en la v4). Revisión: `diseno/revisiones/2026-10-23-pelea-aspi-v5.md`.**
   - **Acción nueva «Aplastar»** (`AplastarAspi`): con A.S.P.I. vulnerable y al alcance (piso 120 px; desde un mueble del estudio 190 px de lado), el botón de acción hace un salto dirigido que siempre cae sobre ella y la apaga. Le gana a cualquier otra acción cercana. El aviso amarillo dice «[E] ¡APLASTA!». El salto manual sigue valiendo. Prueba nueva `prueba_aplastar.gd` (piso y los 6 muebles); el bot la usa.
   - **Un solo foco a la vez** (`CalmaAspi`): destello de lo tirable solo cerca de Felipe, sin motas en el rayo, LED quieta, polvo y brincos a la mitad, onda más corta, 2 pedazos como mucho, restos oscuros, «+1» chico, sin «REINICIANDO...», la montaña sale cuando se fue el cartel, el globito espera al cartel, y un velo del 22 % sobre el decorado (variante D de 5). Elementos animados a la vez: 9/13/9/7 → 3/6/3/1.

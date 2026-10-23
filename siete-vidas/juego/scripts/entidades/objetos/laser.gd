@@ -22,6 +22,7 @@ func _init(izquierda: float, derecha: float) -> void:
 
 func _ready() -> void:
 	_destino = position
+	Profundidad.poner(self, Capas.Rol.OBJETO_JUEGO)
 
 
 func apagar() -> void:

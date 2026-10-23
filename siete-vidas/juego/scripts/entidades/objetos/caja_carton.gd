@@ -25,6 +25,7 @@ func tamano() -> Vector2:
 
 
 func _ready() -> void:
+	Profundidad.poner(self, Capas.Rol.OBJETO_JUEGO)
 	vida = Componentes.de(self, Vida) as Vida
 	vida.murio.connect(_al_romperse)
 	add_to_group(Componentes.ENEMIGOS)

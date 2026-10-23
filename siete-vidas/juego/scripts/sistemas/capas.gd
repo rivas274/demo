@@ -142,7 +142,8 @@ const PANTALLA := [
 ## - "superficie_felipe": dónde está parado Felipe ("piso", el nombre de un mueble o "aire");
 ## - "superficies": las del nodo (SALTABLE: las suyas; APOYADO: la que lo sostiene);
 ## - "puede_subir" (SALTABLE), "delante" (ENEMIGO_PISO: DatosEnemigo.delante_de_felipe),
-##   "delante_de_humanos" e "imaginando" (JUGADOR), "orden" (FONDO: 0 a 10 hacia adelante), "z" (CONTORNO).
+##   "delante_de_humanos" e "imaginando" (JUGADOR), "orden" (FONDO: 0 a 10 hacia adelante), "z" (CONTORNO),
+##   "z_felipe" (APOYADO en la superficie de Felipe: uno más que él).
 static func z_para(rol: int, contexto := {}) -> int:
 	if Z_FIJO.has(rol):
 		return Z_FIJO[rol]
@@ -154,7 +155,8 @@ static func z_para(rol: int, contexto := {}) -> int:
 		Rol.SALTABLE:
 			return SALTABLE_ACTIVO if donde in mias and contexto.get("puede_subir", true) else MUEBLES
 		Rol.APOYADO:
-			return APOYADO_DELANTE if donde in mias else APOYADO
+			# Con Felipe en su misma superficie, apenas delante de él (esté en la capa que esté).
+			return maxi(APOYADO_DELANTE, int(contexto.get("z_felipe", JUEGO)) + 1) if donde in mias else APOYADO
 		Rol.ENEMIGO_PISO:
 			return JUEGO_CERCA if donde == "piso" and contexto.get("delante", false) else ENEMIGO_DETRAS
 		Rol.JUGADOR:

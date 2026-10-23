@@ -30,6 +30,11 @@ func _init(tipo_recompensa := "calcetin", impulso := Vector2.ZERO) -> void:
 	name = "Recogible (%s)" % tipo
 
 
+func _ready() -> void:
+	# Lo que se toca y no está apoyado (calcetín, foto): detrás de Felipe, delante de los muebles.
+	Profundidad.poner(self, Capas.Rol.OBJETO_JUEGO)
+
+
 func _physics_process(delta: float) -> void:
 	_vida += delta
 	queue_redraw()

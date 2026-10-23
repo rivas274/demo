@@ -13,8 +13,9 @@ const GRUPO := "profundidad"
 const GRUPO_DEPENDE := "profundidad_depende"
 const DEPENDEN := [Capas.Rol.SALTABLE, Capas.Rol.APOYADO, Capas.Rol.ENEMIGO_PISO, Capas.Rol.JUGADOR]
 
-## Dónde está parado Felipe ahora ("piso", el nombre de un mueble o "aire"): lo comparten todos.
+## Dónde está parado Felipe ahora ("piso", el nombre de un mueble o "aire") y su z: lo comparten todos.
 static var superficie_felipe := "piso"
+static var z_felipe := Capas.JUEGO
 
 var rol: int = Capas.Rol.JUEGO
 ## SALTABLE: las superficies (piezas) que dibuja; APOYADO: la que lo sostiene.
@@ -79,6 +80,7 @@ func contexto() -> Dictionary:
 	return {
 		"superficie_felipe": superficie_felipe, "superficies": superficies, "puede_subir": puede_subir,
 		"delante": delante, "delante_de_humanos": delante_de_humanos, "imaginando": imaginando, "orden": orden, "z": z,
+		"z_felipe": z_felipe,
 	}
 
 
@@ -89,3 +91,10 @@ func aplicar() -> void:
 		return
 	item.z_as_relative = false
 	item.z_index = Capas.z_para(rol, contexto())
+	# Felipe cambió de capa (delante de los humanos, imaginando): lo que depende de él se acomoda.
+	if rol == Capas.Rol.JUGADOR and item.z_index != z_felipe:
+		z_felipe = item.z_index
+		if is_inside_tree():
+			for nodo in get_tree().get_nodes_in_group(GRUPO_DEPENDE):
+				if nodo != self:
+					(nodo as Profundidad).aplicar()

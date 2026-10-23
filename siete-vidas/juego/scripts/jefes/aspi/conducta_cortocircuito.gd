@@ -101,7 +101,7 @@ func _chocar() -> void:
 	var enchufe := Vector2(enchufe_x, b.nivel.datos.suelo - 24.0)
 	b.chispas(enchufe, 30)
 	b.presentacion.destello(0.8)
-	b.presentacion.sacudir(0.35)
+	b.nivel.travesuras.jugo.temblar(b.reacciones.datos.temblor_corto, b.reacciones.datos.temblor_corto_s)
 	b.sonar_evento("cortocircuito")
 	b.nivel.travesuras.jugo.palabra_en_mundo("PALABRA_BZZZT", enchufe + Vector2(0, -50), Color(0.7, 0.9, 1.0), 24)
 	b.apagon.apagar()

@@ -9,6 +9,8 @@ const ARCHIVO := "user://opciones.cfg"
 const PASO_VOLUMEN := 0.1
 
 static var reducir_movimiento := false
+## «Reducir sacudida» (accesibilidad, v3.1): los temblores de pantalla se dividen por 3 (mínimo 1 px).
+static var reducir_sacudida := false
 ## Vibración leve del mando en golpes, derrotas y aterrizajes fuertes (DetectorMando.vibrar).
 static var vibracion := true
 ## Volumen general (0 a 1), en el bus Master.
@@ -26,6 +28,7 @@ static func aplicar_volumen() -> void:
 static func guardar(ruta := ARCHIVO) -> Error:
 	var archivo := ConfigFile.new()
 	archivo.set_value("accesibilidad", "reducir_movimiento", reducir_movimiento)
+	archivo.set_value("accesibilidad", "reducir_sacudida", reducir_sacudida)
 	archivo.set_value("sonido", "volumen", volumen)
 	archivo.set_value("mando", "vibracion", vibracion)
 	return archivo.save(ruta)
@@ -36,6 +39,7 @@ static func cargar(ruta := ARCHIVO) -> bool:
 	if archivo.load(ruta) != OK:
 		return false
 	reducir_movimiento = bool(archivo.get_value("accesibilidad", "reducir_movimiento", false))
+	reducir_sacudida = bool(archivo.get_value("accesibilidad", "reducir_sacudida", false))
 	volumen = float(archivo.get_value("sonido", "volumen", 1.0))
 	vibracion = bool(archivo.get_value("mando", "vibracion", true))
 	return true

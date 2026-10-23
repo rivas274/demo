@@ -7,6 +7,6 @@ script = ExtResource("1_datos")
 tipo = "libros_pila"
 nombre = "Libros"
 sonido = "caja"
-piezas_rotura = PackedStringArray("libro_b", "libro_c", "libro")
+piezas_rotura = PackedStringArray("libro_lado_b", "libro_lado")
 velocidad_piezas = Vector2(60, 110)
 charco_ancho = 0.0

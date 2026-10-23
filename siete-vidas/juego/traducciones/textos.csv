@@ -240,6 +240,7 @@ MENU_OPCIONES,Opciones
 OPCIONES_TITULO,Opciones
 OPCIONES_PULSA,…aprieta la tecla o el botón (Esc cancela)
 OPCIONES_REDUCIR,Reducir movimiento: %s
+OPCIONES_REDUCIR_SACUDIDA,Reducir sacudida: %s
 OPCIONES_SI,sí
 OPCIONES_NO,no
 OPCIONES_VOLUMEN,Volumen: %d %%

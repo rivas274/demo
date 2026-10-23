@@ -28,6 +28,14 @@ var _fuerza_sacudida := 0.0
 var _sacudiendo := false
 ## La sacudida actual es solo vertical (un golpe contra el piso).
 var _vertical := false
+## Temblor de pantalla estándar (v3.1, «la pantalla no tiembla»): amplitud en píxeles ENTEROS de la base 640 × 360
+## que decae al cuadrado en `_temblor_dur` s. Va en el offset de la cámara del mundo (después del suavizado), nunca en
+## el HUD. Con «Reducir sacudida» (Opciones) se divide por 3 (mínimo 1 px).
+var _temblor_px := 0.0
+var _temblor_dur := 0.0
+var _temblor_t := 0.0
+## Para las pruebas: el mayor desplazamiento de cámara (px) del último temblor.
+var temblor_maximo := 0.0
 var _flash: ColorRect
 
 
@@ -52,9 +60,23 @@ func congelado() -> bool:
 
 
 func sacudir(segundos: float, fuerza := 1.0, vertical := false) -> void:
-	_vertical = vertical if _sacudida <= 0.0 or vertical else _vertical
-	_sacudida = maxf(_sacudida, segundos)
-	_fuerza_sacudida = maxf(_fuerza_sacudida, fuerza)
+	temblar(roundi(sacudida_maxima * fuerza), segundos, vertical)
+
+
+## Temblor de `px` píxeles enteros que decae en `segundos` (si ya hay uno más fuerte, gana el más fuerte).
+func temblar(px: int, segundos: float, vertical := true) -> void:
+	var amplitud := float(px)
+	if Opciones.reducir_sacudida:
+		amplitud = maxf(1.0, roundf(amplitud / 3.0))
+	var queda := _temblor_px * pow(1.0 - clampf(_temblor_t / maxf(_temblor_dur, 0.001), 0.0, 1.0), 2.0)
+	if amplitud < queda:
+		return
+	_temblor_px = amplitud
+	_temblor_dur = maxf(segundos, 0.05)
+	_temblor_t = 0.0
+	_vertical = vertical
+	temblor_maximo = 0.0
+	_sacudida = _temblor_dur
 
 
 func destello(fuerza := 0.5, color := Color.WHITE) -> void:
@@ -167,8 +189,9 @@ func _evitar_en_pantalla() -> Array[Rect2]:
 
 
 func _process(delta: float) -> void:
-	# Tiempo real, sin la cámara lenta del congelado.
-	var real := delta / maxf(Engine.time_scale, 0.001)
+	# Tiempo real, sin la cámara lenta del congelado. Tope de 1/20 s: el cuadro en que empieza un congelado todavía
+	# trae el delta sin escalar y, dividido por la escala nueva, se comía de golpe la sacudida (v3.1).
+	var real := minf(delta / maxf(Engine.time_scale, 0.001), 0.05)
 	if _tween_palabra and _tween_palabra.is_valid():
 		_tween_palabra.set_speed_scale(1.0 / maxf(Engine.time_scale, 0.001))
 	if _congelado > 0.0:
@@ -179,21 +202,31 @@ func _process(delta: float) -> void:
 	_flash.color.a = maxf(0.0, _flash.color.a - real * 3.5)
 	if camara == null or not is_instance_valid(camara):
 		return
-	if _sacudida > 0.0:
-		_sacudida -= real
+	if _temblor_t < _temblor_dur and _temblor_px > 0.0:
+		# Primero se dibuja la amplitud de este instante (el primer cuadro, entera) y después corre el reloj.
+		var k := 1.0 - clampf(_temblor_t / _temblor_dur, 0.0, 1.0)
+		_temblor_t += real
 		_sacudiendo = true
-		var fuerza := sacudida_maxima * _fuerza_sacudida * minf(_sacudida * 4.0, 1.0)
+		var amplitud := maxf(1.0, roundf(_temblor_px * k * k)) if k > 0.0 else 0.0
+		# Arriba y abajo alternando (un golpe contra el piso); en el temblor libre, también algo de lado.
+		var signo := 1.0 if Engine.get_process_frames() % 2 == 0 else -1.0
+		# Vertical: solo toca el alto del offset (el adelanto de cámara de Zoomies, en x, se respeta).
 		if _vertical:
-			# Golpe contra el piso: arriba y abajo, alternando, sin moverse de lado.
-			camara.offset = Vector2(0.0, roundf(fuerza) * (1.0 if Engine.get_process_frames() % 2 == 0 else -1.0))
+			camara.offset.y = amplitud * signo
 		else:
-			camara.offset = Vector2(roundf(randf_range(-fuerza, fuerza)), roundf(randf_range(-fuerza, fuerza)))
+			camara.offset = Vector2(roundf(randf_range(-amplitud, amplitud)), amplitud * signo)
+		temblor_maximo = maxf(temblor_maximo, absf(amplitud))
+		if _temblor_t >= _temblor_dur:
+			_temblor_px = 0.0
 	elif _sacudiendo:
 		# Solo se devuelve la cámara una vez, para no pelear con otras sacudidas (PresentacionJefe).
 		_sacudiendo = false
-		_vertical = false
 		_fuerza_sacudida = 0.0
-		camara.offset = Vector2.ZERO
+		if _vertical:
+			camara.offset.y = 0.0
+		else:
+			camara.offset = Vector2.ZERO
+		_vertical = false
 
 
 func _exit_tree() -> void:

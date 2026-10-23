@@ -44,7 +44,10 @@ func golpe(donde: Vector2, final := false) -> void:
 	_onda_centro = Vector2(roundf(donde.x), b.nivel.datos.suelo + 2.0)
 	_onda_t = 0.0
 	_onda_fuerza = k
-	b.nivel.travesuras.jugo.sacudir(datos.sacudida * k, datos.fuerza * k, true)
+	if final:
+		b.nivel.travesuras.jugo.temblar(datos.temblor_final, datos.temblor_final_s)
+	else:
+		b.nivel.travesuras.jugo.temblar(datos.temblor_golpe, datos.temblor_golpe_s)
 	var polvo := Particulas.polvo(int(datos.polvo * k), 0.6, Vector2(0, 320), Vector2(60, 150), Vector2(2, 3), Color(0.86, 0.8, 0.72), 70.0)
 	polvo.global_position = _onda_centro + Vector2(0, -2)
 	Capas.usar(polvo, Capas.EFECTOS)

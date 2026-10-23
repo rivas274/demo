@@ -290,7 +290,7 @@ func _probar_opciones() -> void:
 	var op := pantallas.opciones
 	_comprobar(gestor.arriba() == op and paused and op.visible, "Opciones: se abre encima de la pausa (pila de pantallas) y el juego sigue en pausa")
 	_comprobar(op.menu.enfocado() != null, "Opciones: se navega con foco (teclado y mando)")
-	_comprobar(op.menu.has_node("zarpazo") and op.menu.get_child_count() == Controles.ACCIONES.size() + 4 and op.menu.has_node("Vibracion"), "Opciones: una fila por acción, más reducir movimiento, volumen, vibración y volver")
+	_comprobar(op.menu.has_node("zarpazo") and op.menu.get_child_count() == Controles.ACCIONES.size() + 5 and op.menu.has_node("Vibracion") and op.menu.has_node("ReducirSacudida"), "Opciones: una fila por acción, más reducir movimiento, reducir sacudida, volumen, vibración y volver")
 	var antes := InputMap.action_get_events("zarpazo").duplicate()
 	op.empezar_remapeo("zarpazo")
 	var tecla := InputEventKey.new()

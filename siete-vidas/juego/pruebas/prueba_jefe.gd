@@ -178,6 +178,14 @@ func _correr() -> void:
 	await _caerle_encima(aspi)
 	_comprobar(batalla.apagados == 1 and not batalla.llena, "Caerle encima le aprieta el botón: fase 2")
 	_comprobar(batalla.reacciones.golpes == 1 and not batalla.reacciones.ultimo_final, "El piso tiembla: onda de choque, polvo, lo tirado brinca y sacudida vertical")
+	var jugo: Jugo = sala.travesuras.jugo
+	_comprobar(jugo.temblor_maximo >= 3.0, "La pantalla tiembla de verdad: la cámara se movió %.0f px (golpe normal: 3 px)" % jugo.temblor_maximo)
+	# Accesibilidad: con «Reducir sacudida», el mismo temblor de 6 px queda en 2.
+	Opciones.reducir_sacudida = true
+	jugo.temblar(6, 0.2)
+	await _esperar(20)
+	_comprobar(jugo.temblor_maximo <= 2.0 and jugo.temblor_maximo >= 1.0, "Con «Reducir sacudida» el temblor baja a %.0f px" % jugo.temblor_maximo)
+	Opciones.reducir_sacudida = false
 	_comprobar("¡CLIC!" in sala.travesuras.jugo.palabras, "Al apagarla: congelado, destello, sacudida y «¡CLIC!»")
 	await _esperar(130)
 	_comprobar(batalla.montanas.size() == 1 and batalla.montanas[0].cantidad == batalla.datos.devuelve[0] and batalla.montanas[0].en_piso, "Al terminar la fase se le abre el depósito y escupe una montaña de pelusa (%d motas)" % batalla.datos.devuelve[0])
@@ -304,6 +312,7 @@ func _correr() -> void:
 	# Tercer apagado: se apaga del todo.
 	await _llenar(batalla, aspi)
 	await _caerle_encima(aspi)
+	_comprobar(sala.travesuras.jugo.temblor_maximo >= 6.0, "El golpe final hace temblar más la pantalla (%.0f px)" % sala.travesuras.jugo.temblor_maximo)
 	await _esperar_que(func() -> bool: return felipe.estado == Felipe.Estado.OCIO, 200)
 	_comprobar(felipe.estado == Felipe.Estado.OCIO and felipe.sprite.animation == "jugar", "Felipe celebra jugando con el estambre (alegre y juguetón)")
 	_comprobar(aspi.vida.muerto and batalla.fase == BatallaAspi.Fase.FIN, "Al tercer apagado, A.S.P.I. se apaga del todo")

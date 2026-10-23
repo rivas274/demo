@@ -108,7 +108,7 @@ func _soplar() -> void:
 	felipe.empuje = Vector2(_hacia * empuje * 0.6, 0.0)
 	felipe.set_collision_mask_value(Felipe.CAPA_ATRAVESABLE, false)
 	_atravesando = 0.0
-	b.presentacion.sacudir(0.2)
+	b.nivel.travesuras.jugo.temblar(2, 0.15)
 	b.nivel.travesuras.jugo.palabra_en_mundo("PALABRA_FIUUU", felipe.global_position + Vector2(0, -80), Color(0.8, 0.95, 1.0), 16)
 	for objeto in b.municion:
 		if objeto.tipo == "maceta" and not objeto.tirable.roto and objeto.visible:

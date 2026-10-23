@@ -1338,9 +1338,9 @@ ROTOS_PLANTA = [
 
 # Pelea con A.S.P.I. sin reposición (2026-10-23, 0 créditos): el desorden del estudio se arma con arte que ya estaba.
 # Nada se dibuja por código ni se pide nuevo: se recombinan piezas de Gemini a su misma escala.
-#   - libro_b, libro_c: el libro de `objetos.png` (ya en el juego como `libro`) con la tapa en otro tono.
-#   - libros_pila, libros_pila_b: tres libros apilados (42+ × 30: lado menor ≥ 24, R8), con otros tonos y otro orden
-#     (lección 20: sin clones).
+#   - libro_lado, libro_lado_b, libro_lado_c: el libro acostado del estante de `librero-gato.png`, de canto (ver abajo).
+#   - libros_pila, libros_pila_b: dos libros de canto apilados (47 × 28: lado menor ≥ 24, R8), con otros tonos y otro
+#     corrimiento (lección 20: sin clones).
 #   - pizarra_1, pizarra_2: la pizarra sin la nota rosa y sin las dos notas (el hueco se rellena con corcho de la misma
 #     pizarra); nota_rosa y nota_amarilla: las notas recortadas (caen al piso).
 #   - librero_bajo_1, librero_bajo_2: el librero bajo sin uno y sin dos libros del estante de arriba (el hueco se rellena
@@ -1357,28 +1357,16 @@ PELUSA_MONTANA = (40, 809, 585, 1016)
 PELUSAS = {"pelusa_1": (640, 865, 795, 1012), "pelusa_2": (780, 785, 890, 890)}
 
 
-def _tono(imagen, giro, mas_oscuro=1.0):
-    """La tapa del libro (pixeles con color) gira de tono; las hojas (crema) y el contorno quedan iguales."""
-    hsv = np.asarray(imagen.convert("RGB").convert("HSV")).astype(int)
-    a = np.asarray(imagen).copy()
-    tapa = (hsv[:, :, 1] > 90) & (a[:, :, 3] > 0)
-    hsv[:, :, 0] = np.where(tapa, (hsv[:, :, 0] + giro) % 256, hsv[:, :, 0])
-    hsv[:, :, 2] = np.where(tapa, np.clip(hsv[:, :, 2] * mas_oscuro, 0, 255), hsv[:, :, 2])
-    rgb = np.asarray(Image.fromarray(hsv.astype(np.uint8), "HSV").convert("RGB"))
-    a[:, :, :3] = np.where(tapa[:, :, None], rgb, a[:, :, :3])
-    return Image.fromarray(a, "RGBA")
-
-
-def _pila(libros, corrimientos):
-    """Apila libros de abajo hacia arriba; cada uno se monta 3 px sobre el de abajo (se ve su cara de arriba)."""
-    alto = libros[0].height + sum(l.height - 3 for l in libros[1:])
+def _pila(libros, corrimientos, encima=3):
+    """Apila libros de abajo hacia arriba; cada uno se monta `encima` px sobre el de abajo."""
+    alto = libros[0].height + sum(l.height - encima for l in libros[1:])
     ancho = max(l.width + c for l, c in zip(libros, corrimientos))
     salida = Image.new("RGBA", (ancho, alto), (0, 0, 0, 0))
     y = alto
     for libro, corrimiento in zip(libros, corrimientos):
         y -= libro.height
         salida.alpha_composite(libro, (corrimiento, y))
-        y += 3
+        y += encima
     return recortar_opaco(salida)
 
 
@@ -1389,14 +1377,54 @@ def _rellenar(a, caja, muestra):
     a[y0:y1, x0:x1] = a[my:my + (y1 - y0), mx:mx + (x1 - x0)]
 
 
+# Libro acostado visto de canto (v3.1, 2026-10-23: el creador vio los libros en perspectiva «flotando y muy delgados»).
+# Es el libro acostado del estante de `librero-gato.png` (Gemini), redibujado a 44 × 14 con SU paleta: lomo
+# redondeado a la izquierda, tapas de 2 px, hojas crema de 6 px con la línea de las páginas y contorno de 1 px. Base
+# plana: se apoya entero en la superficie (lección 47). Tapas: roja (la del arte), verde y azul.
+CONTORNO_LIBRO = (52, 18, 17, 255)
+HOJAS = (243, 226, 198, 255)
+HOJAS_LINEA = (208, 180, 143, 255)
+TAPAS = {"libro_lado": ((186, 102, 78, 255), (214, 136, 108, 255)),
+         "libro_lado_b": ((74, 128, 82, 255), (104, 160, 108, 255)),
+         "libro_lado_c": ((70, 104, 160, 255), (102, 136, 192, 255))}
+
+
+def libro_de_canto(tapa, brillo, ancho=44, alto=14):
+    """Libro acostado de canto, pixel por pixel con la paleta del libro de Gemini."""
+    a = np.zeros((alto, ancho, 4), np.uint8)
+    for y in range(alto):
+        for x in range(ancho):
+            borde = y in (0, alto - 1) or x == ancho - 1 or (x == 0 and 2 <= y <= alto - 3)
+            esquina = (x == 0 and y in (0, 1, alto - 2, alto - 1)) or (x == 1 and y in (0, alto - 1))
+            if esquina:
+                continue
+            if borde:
+                a[y, x] = CONTORNO_LIBRO
+            elif y in (3, alto - 4) and x >= 4:
+                a[y, x] = CONTORNO_LIBRO  # donde la tapa se junta con las hojas
+            elif x < 4 or y < 3 or y > alto - 4:
+                a[y, x] = brillo if (y == 1 or x == 1) else tapa  # lomo y tapas, con su brillo arriba
+            elif x == ancho - 2:
+                a[y, x] = HOJAS_LINEA
+            else:
+                a[y, x] = HOJAS_LINEA if (y == alto // 2 and 10 <= x <= ancho - 8) else HOJAS
+    return Image.fromarray(a, "RGBA")
+
+
 def desorden():
-    libro = Image.open(DESTINO / "libro.png").convert("RGBA")
-    libro_b = _tono(libro, 85, 0.85)  # verde botella
-    libro_c = _tono(libro, 150, 0.9)  # azul
-    libro_b.save(DESTINO / "libro_b.png")
-    libro_c.save(DESTINO / "libro_c.png")
-    _pila([libro_b, libro_c, libro], [0, 3, 1]).save(DESTINO / "libros_pila.png")
-    _pila([libro, libro_b, libro_c], [2, 0, 3]).save(DESTINO / "libros_pila_b.png")
+    for nombre, (tapa, brillo) in TAPAS.items():
+        libro_de_canto(tapa, brillo).save(DESTINO / f"{nombre}.png")
+    lado = {n: Image.open(DESTINO / f"{n}.png").convert("RGBA") for n in TAPAS}
+    # Estación de carga sin su cable suelto (v3.1: el enchufe suelto en el piso no iba a ningún lado): la misma de
+    # Gemini, sin las columnas del cable (x ≥ 70) ni el enchufe tirado (filas ≥ 39). El cable lo dibuja el juego hasta
+    # el enchufe de la pared (DecoradoNivel1), con contorno de 1 px.
+    base = np.asarray(Image.open(DESTINO / "base_carga.png").convert("RGBA")).copy()
+    base[:, 70:, 3] = 0
+    base[39:, :, 3] = 0
+    recortar_opaco(Image.fromarray(base, "RGBA")).save(DESTINO / "base_carga_sin_cable.png")
+    # Pilas de 2 libros de canto, cada uno montado sobre el de abajo con 1 px de corrimiento distinto (no son clones).
+    _pila([lado["libro_lado_b"], lado["libro_lado"]], [0, 3], encima=0).save(DESTINO / "libros_pila.png")
+    _pila([lado["libro_lado"], lado["libro_lado_c"]], [3, 0], encima=0).save(DESTINO / "libros_pila_b.png")
     # Pizarra: la muestra de corcho limpio es la franja de arriba, entre las fotos (medida: sin hilo ni chinches).
     pizarra = np.asarray(Image.open(DESTINO / "pizarra.png").convert("RGBA")).copy()
     for nombre, caja in NOTAS_PIZARRA.items():
@@ -1428,7 +1456,7 @@ def desorden():
     for nombre, caja in PELUSAS.items():
         mota = recortar_opaco(sin_huecos(imagen.crop(caja)))
         escalar(mota, (max(1, round(mota.width * k * 1.2)), max(1, round(mota.height * k * 1.2)))).save(DESTINO / f"{nombre}.png")
-    for nombre in ["libro_b", "libro_c", "libros_pila", "libros_pila_b", "pizarra_1", "pizarra_2", "nota_rosa", "nota_amarilla", "librero_bajo_1", "librero_bajo_2", "libro_estante_1", "libro_estante_2", "pelusa_montana", "pelusa_1", "pelusa_2"]:
+    for nombre in ["libro_lado", "libro_lado_b", "libro_lado_c", "libros_pila", "libros_pila_b", "base_carga_sin_cable", "pizarra_1", "pizarra_2", "nota_rosa", "nota_amarilla", "librero_bajo_1", "librero_bajo_2", "libro_estante_1", "libro_estante_2", "pelusa_montana", "pelusa_1", "pelusa_2"]:
         print("Desorden:", nombre, Image.open(DESTINO / f"{nombre}.png").size, sin_blanco_puro(nombre))
 
 

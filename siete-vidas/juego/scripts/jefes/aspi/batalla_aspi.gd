@@ -516,7 +516,6 @@ func _apagar() -> void:
 	apariencia.cerrar_tapa()
 	nivel.travesuras.jugo.congelar(0.1)
 	presentacion.destello(0.7)
-	presentacion.sacudir(0.2)
 	nivel.travesuras.jugo.palabra_en_mundo("PALABRA_CLIC", jefe.global_position + Vector2(0, -70), Color(1.0, 0.95, 0.5), 22)
 	tiempo_clic = Time.get_ticks_msec() / 1000.0
 	soltar_polvo(jefe.global_position + Vector2(0, -20))

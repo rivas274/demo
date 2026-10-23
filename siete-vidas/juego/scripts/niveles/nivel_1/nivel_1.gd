@@ -192,7 +192,9 @@ const ARTE := [
 	# sombra; la estación de carga de lado con su cable; la pizarra de corcho grande, al lado de la ventana y sobre las
 	# macetas de la repisa, grande (120 × 86) y a la altura de la vista: el estudio se ensanchó 96 px para ella (2026-10-21).
 	["laptop", Vector2(7110, SUELO - 89), false, "mueble"],
-	["base_carga", Vector2(7240, SUELO), false, "mueble"],  # bajo la pizarra; A.S.P.I. se acopla de frente, a su izquierda
+	# v3.1: la estación de Gemini sin su cable suelto (antes el enchufe tirado la levantaba 10 px del piso); el cable va
+	# por código hasta el enchufe de la pared (DecoradoNivel1, ENCHUFE_ESTUDIO).
+	["base_carga_sin_cable", Vector2(7240, SUELO), false, "mueble"],  # bajo la pizarra; A.S.P.I. se acopla de frente, a su izquierda
 	["pizarra", Vector2(7236, SUELO - 72.0), false, "pared"],
 	# Estudio v3 (pedido del creador, 2026-10-21: «la batalla no se centre en un solo pedazo de la pantalla»): la segunda
 	# isla de juego, a la derecha, contra la pared y sin tapar la puerta del balcón. El librero bajo de Valeria (80 cm) con
@@ -229,6 +231,10 @@ const APOYADOS := ["laptop", "libro", "microondas", "maceta", "croquetas_reserva
 ## unos 50 cm a escala de gato) y bien adentro del borde. El grifo es de código: cuello de cisne con el caño
 ## (GRIFO, la boca) sobre el centro de la cuba; el ratón del mesón patrulla por detrás de la cuba (sobre el borde de
 ## atrás de la cubierta), sin pisarla.
+## Enchufe de la pared del estudio (esquina de arriba a la izquierda de su placa) y de dónde sale el cable de la
+## estación de carga (su costado de atrás, medido en `base_carga_sin_cable`).
+const ENCHUFE_ESTUDIO := Vector2(7346, PARED_BASE - 17)
+const CABLE_ESTACION := Vector2(7240 + 68, SUELO - 20)
 ## Estudio v3: x izquierda del librero bajo (113 × 97) y de la caja de los libros (82 × 48), medidos en su arte.
 const LIBRERO_BAJO_X := 7452.0
 const CAJA_LIBROS_X := 7364.0

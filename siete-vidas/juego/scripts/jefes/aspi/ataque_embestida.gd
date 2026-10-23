@@ -66,6 +66,8 @@ func actualizar(delta: float) -> bool:
 			b.jefe.patrulla.destino = destino
 		return true
 	if _reloj >= duracion or absf(b.jefe.global_position.x - destino) < 6.0:
+		# Frena de golpe: la pantalla tiembla un poco (v3.1).
+		b.nivel.travesuras.jugo.temblar(b.reacciones.datos.temblor_embestida, b.reacciones.datos.temblor_embestida_s)
 		b.terminar_ataque()
 		reloj_espera = DatosJefe.por_fase(espera, b.vencidas)
 		return false

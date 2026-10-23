@@ -183,8 +183,11 @@ func _caerle_encima() -> void:
 		await physics_frame
 		if batalla.apagados > antes:
 			break
-	# El piso tiembla: onda de choque, polvo y lo tirado que brinca (2 o 3 cuadros).
-	await _esperar(3)
+	# El piso tiembla: onda de choque, polvo y lo tirado que brinca (2 o 3 cuadros). Secuencia cuadro a cuadro.
+	for cuadro in 4:
+		await process_frame
+		_capturar("golpe-%d-%d" % [batalla.apagados, cuadro])
+	await _esperar(1)
 	_capturar("golpe-%d" % batalla.apagados)
 	await _esperar(30)
 	if batalla.apagados < batalla.datos.fases:

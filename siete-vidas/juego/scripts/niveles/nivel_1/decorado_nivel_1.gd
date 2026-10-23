@@ -184,8 +184,9 @@ func dibujar_ambiente(c: Node2D) -> void:
 	var angulo := floorf(tiempo) / 60.0 * TAU - PI / 2.0
 	var centro := Vector2(3230, Nivel1.DINTEL + 22.0)
 	c.draw_line(centro, centro + Vector2(cos(angulo), sin(angulo)) * 8.0, Color("c0392b"), 1.0)
-	# Estudio: el enchufe de la pared donde va el cable de la estación de carga (el cable es del arte).
-	_enchufe(c, Vector2(7330, Nivel1.PARED_BASE - 13))
+	# Estudio (v3.1): el cable de la estación de carga baja al piso con su curva y sube al enchufe de la pared; después
+	# del cortocircuito de A.S.P.I. (fase 3), el enchufe queda chamuscado y echa chispitas.
+	_cable_estacion(c, tiempo)
 
 
 ## Mechón de pelo de 3 a 5 px en los dos tonos de Felipe.
@@ -211,6 +212,56 @@ func _enchufe(c: CanvasItem, p: Vector2) -> void:
 	c.draw_rect(Rect2(p + Vector2(1, 1), Vector2(4, 6)), Color("e6e0d4"))
 	c.draw_rect(Rect2(p + Vector2(2, 2), Vector2(1, 1)), Color("3a2a22"))
 	c.draw_rect(Rect2(p + Vector2(2, 5), Vector2(1, 1)), Color("3a2a22"))
+
+
+## Enchufe de la estación: placa de 10 × 12 px en la pared, a la altura del zócalo, con su toma (dos agujeros) y la
+## clavija enchufada. El cable (2 px con contorno de 1 px) sale de atrás de la estación, se apoya en el piso junto a la
+## pared y sube a la clavija.
+func _cable_estacion(c: CanvasItem, tiempo: float) -> void:
+	var placa := Rect2(Nivel1.ENCHUFE_ESTUDIO, Vector2(10, 12))
+	var quemado := _enchufe_quemado()
+	if quemado:
+		# Hollín en escalones (sin degradado) alrededor de la placa.
+		c.draw_rect(placa.grow_individual(4, 7, 5, 1), Color(0.1, 0.07, 0.06, 0.35))
+		c.draw_rect(placa.grow_individual(2, 4, 3, 0), Color(0.1, 0.07, 0.06, 0.45))
+	c.draw_rect(placa, Color("3a2a22"))
+	c.draw_rect(placa.grow(-1), Color("8a8276") if quemado else Color("e6e0d4"))
+	c.draw_rect(Rect2(placa.position + Vector2(1, 1), Vector2(8, 1)), Color("6a6258") if quemado else Color("f4f0e8"))
+	# Toma: dos agujeros verticales (la clavija tapa la de abajo).
+	c.draw_rect(Rect2(placa.position + Vector2(3, 3), Vector2(1, 2)), Color("3a2a22"))
+	c.draw_rect(Rect2(placa.position + Vector2(6, 3), Vector2(1, 2)), Color("3a2a22"))
+	var clavija := Rect2(placa.position + Vector2(2, 6), Vector2(6, 4))
+	c.draw_rect(clavija.grow(1), Color("1c1714"))
+	c.draw_rect(clavija, Color("2b2622") if quemado else Color("4a423c"))
+	c.draw_rect(Rect2(clavija.position, Vector2(clavija.size.x, 1)), Color("6a5e56"))
+	# El cable: de la clavija baja por la pared, se apoya en el piso y llega a la estación con una curva suave.
+	var desde := Vector2(placa.position.x + 5.0, clavija.end.y + 1.0)
+	var piso := Nivel1.PARED_BASE + 3.0
+	var hasta := Nivel1.CABLE_ESTACION
+	var puntos := PackedVector2Array([desde, Vector2(desde.x, piso - 3.0), Vector2(desde.x - 3.0, piso)])
+	for i in range(1, 9):
+		var t := i / 8.0
+		var x := lerpf(desde.x - 3.0, hasta.x + 4.0, t)
+		puntos.append(Vector2(x, piso + sin(t * PI) * 2.0))
+	puntos.append(Vector2(hasta.x + 2.0, hasta.y + 3.0))
+	puntos.append(hasta)
+	for i in puntos.size():
+		puntos[i] = puntos[i].round()
+	c.draw_polyline(puntos, Color("1c1714"), 4.0)
+	c.draw_polyline(puntos, Color("3e3732"), 2.0)
+	for i in range(2, puntos.size() - 2, 3):
+		c.draw_rect(Rect2(puntos[i] + Vector2(0, -1), Vector2(1, 1)), Color("6a5e56"))
+	if quemado and int(tiempo * 5.0) % 7 == 0:
+		# Chispita que salta cada tanto del enchufe quemado.
+		c.draw_rect(Rect2(placa.position + Vector2(8, -1), Vector2(1, 1)), Color(1.0, 0.92, 0.4))
+		c.draw_rect(Rect2(placa.position + Vector2(9, -2), Vector2(1, 1)), Color(0.6, 0.9, 1.0))
+
+
+func _enchufe_quemado() -> bool:
+	if guion.batalla == null:
+		return false
+	var corto := guion.batalla.conducta("cortocircuito") as ConductaCortocircuito
+	return corto != null and corto.hecho
 
 
 ## Cable de 1 px en dos tonos (oscuro con un brillo cada tanto) que cuelga entre dos puntos.

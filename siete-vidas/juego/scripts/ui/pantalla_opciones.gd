@@ -36,7 +36,7 @@ func _ready() -> void:
 		boton.name = accion
 		boton.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 		menu.add_child(boton)
-		menu.move_child(boton, menu.get_child_count() - 4)
+		menu.move_child(boton, menu.get_child_count() - 5)
 		_botones[accion] = boton
 	menu.preparar()
 	menu.elegido.connect(_al_elegir)
@@ -67,6 +67,9 @@ func _al_elegir(opcion: StringName) -> void:
 			cerrar()
 		&"ReducirMovimiento":
 			Opciones.reducir_movimiento = not Opciones.reducir_movimiento
+			Opciones.guardar()
+		&"ReducirSacudida":
+			Opciones.reducir_sacudida = not Opciones.reducir_sacudida
 			Opciones.guardar()
 		&"Vibracion":
 			Opciones.vibracion = not Opciones.vibracion
@@ -132,5 +135,6 @@ func _actualizar_textos() -> void:
 		var tecla := tr("OPCIONES_PULSA") if esperando == accion else "%s / %s" % [Controles.texto(accion, false), Controles.texto(accion, true)]
 		boton.text = "%s: %s" % [tr("ACCION_" + accion.to_upper()), tecla]
 	(menu.get_node("ReducirMovimiento") as Button).text = tr("OPCIONES_REDUCIR") % (tr("OPCIONES_SI") if Opciones.reducir_movimiento else tr("OPCIONES_NO"))
+	(menu.get_node("ReducirSacudida") as Button).text = tr("OPCIONES_REDUCIR_SACUDIDA") % (tr("OPCIONES_SI") if Opciones.reducir_sacudida else tr("OPCIONES_NO"))
 	(menu.get_node("Volumen") as Button).text = tr("OPCIONES_VOLUMEN") % roundi(Opciones.volumen * 100.0)
 	(menu.get_node("Vibracion") as Button).text = tr("OPCIONES_VIBRACION") % (tr("OPCIONES_SI") if Opciones.vibracion else tr("OPCIONES_NO"))

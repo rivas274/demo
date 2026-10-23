@@ -12,7 +12,7 @@
 [sub_resource type="Resource" id="Resource_corto"]
 script = ExtResource("7_corto")
 desde_fase = 2
-enchufe_x = 7330.0
+enchufe_x = 7351.0
 antes_del_enchufe = 30.0
 multiplicador_velocidad = 3.5
 tiempo_maximo = 2.5

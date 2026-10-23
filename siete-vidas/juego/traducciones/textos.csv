@@ -293,15 +293,22 @@ VERBO_DESPEGAR,Despegar
 PALABRA_BLORP,¡BLORP!
 PALABRA_FUP,¡FUP!
 FELIPE_DEVOLUCION_1,Devolución aceptada.
-FELIPE_DEVOLUCION_2,¿Me lo devuelves? Qué detalle.
-FELIPE_DEVOLUCION_3,"Reciclaje: lo inventé yo, hace dos minutos."
+FELIPE_DEVOLUCION_2,¿Me lo devuelves? ¡Qué detalle! Otra vez.
+FELIPE_DEVOLUCION_3,"¡Reciclaje! Lo inventé yo, hace dos minutos."
 FELIPE_ESTUDIO_DESTRUIDO_1,Estudio redecorado. Estilo: Su Majestad.
+FELIPE_ARTE_AFICIONADO_1,¿Ya? Era el calentamiento. ¡Quiero revancha!
+FELIPE_ARTE_OBRA_1,¡Mi obra maestra! Firmada con pelos.
+FELIPE_ESPARCIR_1,¡Confeti!
+FELIPE_ESPARCIR_2,Pelusa al viento. ¡Qué bonito!
+FELIPE_EN_CORTO_1,¡Ja! Baile eléctrico.
+FELIPE_EN_CORTO_2,"¡Chispitas! Otra vez, otra vez."
+PALABRA_ALERTA,!
 JEFE_ASPI_FASE_3_APAGON,FASE 3: ¡APAGÓN!
 JEFE_ASPI_LLEVALA_A_UN_CHARCO,Los charcos la fríen. {maullar} la atrae
 JEFE_EN_CORTO,¡EN CORTO!
 PALABRA_ERROR,¡ERROR!
 PALABRA_BZZZT,¡BZZZT!
-FELIPE_APAGON_1,Se fue la luz. Por fin: ambiente.
+FELIPE_APAGON_1,¡Se fue la luz! Hora de las escondidas.
 ARTE_GATUNO_NOTA,ARTE GATUNO: %d %%
 ARTE_GATUNO_AFICIONADO,Aficionado
 ARTE_GATUNO_DECORADOR,Decorador

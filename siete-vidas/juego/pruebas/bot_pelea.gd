@@ -42,7 +42,7 @@ func jugar() -> void:
 		await _esperar_en_el_piso()
 	p._paso("Apaga a A.S.P.I." if batalla.fase == BatallaAspi.Fase.FIN else "No pudo con A.S.P.I.")
 	# Como una persona: mira su obra (el estudio destruido) antes de salir al balcón.
-	await p._hasta(func() -> bool: return p._dijo_felipe("Estudio redecorado"), 9.0)
+	await p._hasta(func() -> bool: return batalla.nota >= 0, 12.0)
 	await p._segundos(1.5)
 
 
@@ -325,7 +325,14 @@ func _apagar_de_un_salto() -> void:
 		var dx := x - felipe.global_position.x
 		if absf(dx) > 64.0:
 			continue
+		if absf(dx) < 24.0:
+			# Quedó pegado a ella (se corrió al quedar vulnerable): un paso atrás para saltar en arco, como una persona.
+			await p._ir_a(x - signf(dx if dx != 0.0 else 1.0) * 44.0, 0.6)
+			x = guion.aspi.global_position.x
+			dx = x - felipe.global_position.x
 		await p._saltar(signf(dx), x)
 		await p._hasta(func() -> bool: return batalla.apagados > antes or felipe.is_on_floor(), 1.5)
+		if OS.get_cmdline_user_args().has("--detalle"):
+			print("        intento %d de apagarla: dx %.0f, llena %s, apagados %d" % [intento + 1, dx, batalla.llena, batalla.apagados])
 	await p._hasta(func() -> bool: return felipe.is_on_floor(), 2.0)
 	p._paso("Le salta encima: apagados %d" % batalla.apagados)

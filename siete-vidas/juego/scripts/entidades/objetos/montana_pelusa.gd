@@ -96,6 +96,7 @@ func esparcir(hacia := 1.0) -> void:
 		if nivel.travesuras and nivel.travesuras.jugo:
 			nivel.travesuras.jugo.palabra_en_mundo("PALABRA_FUP", global_position + Vector2(0, -44), Color(0.92, 0.9, 0.86), 16)
 			nivel.travesuras.jugo.sacudir(0.08, 0.4)
+			nivel.travesuras.decir_felipe("esparcir")
 	for i in cantidad:
 		var lado := (1.0 if i % 2 == 0 else -1.0) * (signf(hacia) if hacia != 0.0 else 1.0)
 		var mota := PiezaSuelta.crear(MOTAS[i % MOTAS.size()], global_position + Vector2(lado * 8.0, -10.0), Vector2(lado * randf_range(90.0, 150.0) * (1.0 + i * 0.25), randf_range(-210.0, -160.0)), piso)

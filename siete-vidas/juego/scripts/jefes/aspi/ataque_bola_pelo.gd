@@ -9,6 +9,8 @@ extends ConductaJefe
 @export var vuelo := 0.9
 @export var radio := 22.0
 
+## Dónde va a caer la bola (los pies de Felipe al empezar la tos): lo marca el piso (DibujoBatallaAspi).
+var objetivo := Vector2.ZERO
 var bolas: Array[Node2D] = []
 ## Segundos que faltan para la próxima tos.
 var reloj_espera := 0.0
@@ -32,6 +34,8 @@ func intentar(delta: float) -> bool:
 		return false
 	b.empezar_ataque(self)
 	_reloj = 0.0
+	# Apunta adonde está Felipe AHORA (a sus pies): ahí se marca el piso y ahí cae, aunque se mueva (es justo).
+	objetivo = b.felipe.global_position
 	b.jefe.patrulla.quieta = true
 	b.jefe.patrulla.destino = INF
 	b.apariencia.vibrando = true
@@ -56,7 +60,7 @@ func _escupir() -> void:
 	bola.name = "Bola de pelo"
 	Capas.usar(bola, Capas.EFECTOS)
 	var desde := b.jefe.global_position + Vector2(0, -30)
-	var hasta := b.felipe.global_position + Vector2(0, -20)
+	var hasta := objetivo + Vector2(0, -20)
 	var velocidad := Vector2((hasta.x - desde.x) / vuelo, (hasta.y - desde.y) / vuelo - 0.5 * gravedad * vuelo)
 	bola.set_meta("velocidad", velocidad)
 	bola.global_position = desde

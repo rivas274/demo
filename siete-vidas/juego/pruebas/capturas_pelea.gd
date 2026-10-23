@@ -126,6 +126,19 @@ func _correr() -> void:
 	_capturar("11-fase3-izquierda")
 	await _parar(Vector2(7560, Nivel1.SUELO), 30)
 	_capturar("12-fase3-derecha")
+	# Bola de pelo: la marca en el piso donde va a caer.
+	var bola := batalla.conducta("bola") as AtaqueBolaPelo
+	await _esperar_que(func() -> bool: return not batalla.llena and batalla.reinicio <= 0.0 and batalla.reacciones.despertando <= 0.0, 600)
+	batalla.manchas.clear()
+	batalla.tipos_mancha.clear()
+	batalla.nodos_mancha.clear()
+	await _parar(Vector2(aspi.global_position.x + 160.0, Nivel1.SUELO), 2)
+	bola.reloj_espera = 0.0
+	await _esperar_que(func() -> bool: return batalla.ataque == BatallaAspi.Ataque.AVISO_BOLA, 300)
+	await _esperar(20)
+	_capturar("12a-marca-bola")
+	bola.reloj_espera = 9999.0
+	await _esperar(60)
 	# Un charco la deja en corto.
 	await _esperar_que(func() -> bool: return not batalla.llena and batalla.reinicio <= 0.0, 600)
 	var charco: Vector2 = corto.charcos()[0]
@@ -163,11 +176,22 @@ func _correr() -> void:
 
 func _caerle_encima() -> void:
 	await _esperar(20)
+	var antes := batalla.apagados
 	felipe.global_position = aspi.global_position + Vector2(0, -62)
 	felipe.velocity = Vector2.ZERO
+	for i in 60:
+		await physics_frame
+		if batalla.apagados > antes:
+			break
+	# El piso tiembla: onda de choque, polvo y lo tirado que brinca (2 o 3 cuadros).
+	await _esperar(3)
+	_capturar("golpe-%d" % batalla.apagados)
 	await _esperar(30)
-	_capturar("clic-%d" % batalla.apagados)
-	await _esperar(30)
+	if batalla.apagados < batalla.datos.fases:
+		# Se despierta después del «¡BLORP!»: luz roja, «!» y la marca hacia Felipe.
+		await _esperar_que(func() -> bool: return batalla.reacciones.despertando > 0.0, 300)
+		await _esperar(4)
+		_capturar("despertar-%d" % batalla.apagados)
 
 
 func _parar(donde: Vector2, cuadros: int) -> void:

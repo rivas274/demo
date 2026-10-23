@@ -117,6 +117,12 @@ const FELIPE := {
 	"devolucion_otra": [["FELIPE_DEVOLUCION_2", 4], ["FELIPE_DEVOLUCION_3", 7]],
 	## Se corta la luz en la fase 3 (cortocircuito de A.S.P.I.).
 	"apagon": [["FELIPE_APAGON_1", 7]],
+	## Esparce la montaña de pelusa / la deja en corto en un charco: se divierte (alegre y juguetón, 2026-10-23).
+	"esparcir": [["FELIPE_ESPARCIR_1", 6], ["FELIPE_ESPARCIR_2", 6]],
+	"en_corto": [["FELIPE_EN_CORTO_1", 6], ["FELIPE_EN_CORTO_2", 6]],
+	## Al ganar, mira lo que hizo con orgullo, según la nota de «Arte gatuno».
+	"arte_aficionado": [["FELIPE_ARTE_AFICIONADO_1", 6]],
+	"arte_obra": [["FELIPE_ARTE_OBRA_1", 6]],
 	## Al ganar, mira el estudio destruido con orgullo.
 	"estudio_destruido": [["FELIPE_ESTUDIO_DESTRUIDO_1", 0]],
 }

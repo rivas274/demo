@@ -140,7 +140,7 @@ Nada nuevo pedido: piezas de Gemini recombinadas a su misma escala con `python3 
 | `pelusa_montana.png` | 70 × 24 | La montaña de `derrotas.png` (la misma de la derrota de A.S.P.I.), un poco más grande (lado menor ≥ 24) | Lo que escupe A.S.P.I. |
 | `pelusa_1.png`, `pelusa_2.png` | 23 × 22, 15 × 16 | Las nubes de pelusa de `derrotas.png` | Las motas al esparcirla |
 
-**Sonidos provisionales de la pelea v3** (2026-10-23): `motor`, `reversa`, `atragantar` y `cortocircuito`, sintetizados con `python3 siete-vidas/herramientas/sonidos_demo.py siete-vidas/juego/assets/sonidos motor reversa atragantar cortocircuito` (con nombres solo genera esos). Se eligen por momento en `DatosJefe.sonidos`. Encargo de los finales en `05-estado-actual.md`.
+**Sonidos provisionales de la pelea v3** (2026-10-23): `motor`, `reversa`, `atragantar`, `cortocircuito` y `pitido` (se despierta), sintetizados con `python3 siete-vidas/herramientas/sonidos_demo.py siete-vidas/juego/assets/sonidos motor reversa atragantar cortocircuito` (con nombres solo genera esos). Se eligen por momento en `DatosJefe.sonidos`. Encargo de los finales en `05-estado-actual.md`.
 
 **Encargo opcional a Gemini** (no hace falta para jugar): libro abierto caído boca abajo y una hoja suelta, 2 colores de tapa (en `diseno/revisiones/2026-10-23-pelea-aspi-sin-reposicion.md`).
 

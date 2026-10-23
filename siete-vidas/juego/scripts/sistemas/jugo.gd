@@ -26,6 +26,8 @@ var _congelado := 0.0
 var _sacudida := 0.0
 var _fuerza_sacudida := 0.0
 var _sacudiendo := false
+## La sacudida actual es solo vertical (un golpe contra el piso).
+var _vertical := false
 var _flash: ColorRect
 
 
@@ -49,7 +51,8 @@ func congelado() -> bool:
 	return _congelado > 0.0
 
 
-func sacudir(segundos: float, fuerza := 1.0) -> void:
+func sacudir(segundos: float, fuerza := 1.0, vertical := false) -> void:
+	_vertical = vertical if _sacudida <= 0.0 or vertical else _vertical
 	_sacudida = maxf(_sacudida, segundos)
 	_fuerza_sacudida = maxf(_fuerza_sacudida, fuerza)
 
@@ -180,10 +183,15 @@ func _process(delta: float) -> void:
 		_sacudida -= real
 		_sacudiendo = true
 		var fuerza := sacudida_maxima * _fuerza_sacudida * minf(_sacudida * 4.0, 1.0)
-		camara.offset = Vector2(roundf(randf_range(-fuerza, fuerza)), roundf(randf_range(-fuerza, fuerza)))
+		if _vertical:
+			# Golpe contra el piso: arriba y abajo, alternando, sin moverse de lado.
+			camara.offset = Vector2(0.0, roundf(fuerza) * (1.0 if Engine.get_process_frames() % 2 == 0 else -1.0))
+		else:
+			camara.offset = Vector2(roundf(randf_range(-fuerza, fuerza)), roundf(randf_range(-fuerza, fuerza)))
 	elif _sacudiendo:
 		# Solo se devuelve la cámara una vez, para no pelear con otras sacudidas (PresentacionJefe).
 		_sacudiendo = false
+		_vertical = false
 		_fuerza_sacudida = 0.0
 		camara.offset = Vector2.ZERO
 

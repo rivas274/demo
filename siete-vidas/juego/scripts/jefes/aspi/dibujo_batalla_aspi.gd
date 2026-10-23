@@ -94,6 +94,7 @@ func encima(c: Node2D) -> void:
 			var centro := b.aspi.global_position + Vector2(0, -6)
 			c.draw_line(centro, centro + Vector2(cos(angulo), sin(angulo) * 0.4) * 14.0, Color(0.9, 0.95, 1.0, 0.8), 1.0)
 	_aviso_embestida(c, tiempo)
+	_aviso_bolas(c)
 	_charcos(c, tiempo)
 	if b.llena:
 		# Por encima de la tapa abierta (que sube unos 32 px).
@@ -144,10 +145,16 @@ func _aviso_embestida(c: Node2D, tiempo: float) -> void:
 	while (hasta - x) * signf(paso) > 0.0:
 		c.draw_rect(Rect2(roundf(x) - 1.0, y, 3.0, 2.0), color)
 		x += paso
-	# La punta de la flecha al final.
-	var fin := Vector2(roundf(hasta), y)
-	var hacia := signf(paso)
-	c.draw_colored_polygon(PackedVector2Array([fin + Vector2(hacia * 4.0, 0.5), fin + Vector2(-hacia * 2.0, -3.0), fin + Vector2(-hacia * 2.0, 4.0)]), color)
+	# Y el círculo donde termina la carga (el tramo «telegrafiado», que se lee también en la penumbra).
+	ReaccionesAspi.marca(c, Vector2(roundf(hasta), y), b.reacciones.datos.radio_marca, Color("e0483b"))
+
+
+## Donde va a caer la bola de pelo (fase 3): la marca aparece con la tos y sigue hasta que la bola llega.
+func _aviso_bolas(c: Node2D) -> void:
+	var bola := b.conducta("bola") as AtaqueBolaPelo
+	if bola == null or (b.ataque != BatallaAspi.Ataque.AVISO_BOLA and b.bolas.is_empty()):
+		return
+	ReaccionesAspi.marca(c, bola.objetivo + Vector2(0, 2), b.reacciones.datos.radio_marca, Color("ffd23f"))
 
 
 ## En el apagón, los charcos de agua y café brillan (1 px de reflejo que titila): son la clave de la fase 3.

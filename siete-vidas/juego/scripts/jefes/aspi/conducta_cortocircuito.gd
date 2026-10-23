@@ -124,3 +124,4 @@ func _electrocutar(donde: Vector2) -> void:
 	b.chispas(donde + Vector2(0, -6), 22)
 	b.sonar_evento("cortocircuito")
 	b.quedar_vulnerable("charco")
+	b.nivel.travesuras.decir_felipe("en_corto")

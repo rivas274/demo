@@ -177,6 +177,7 @@ func _correr() -> void:
 	await _llenar(batalla, aspi)
 	await _caerle_encima(aspi)
 	_comprobar(batalla.apagados == 1 and not batalla.llena, "Caerle encima le aprieta el botón: fase 2")
+	_comprobar(batalla.reacciones.golpes == 1 and not batalla.reacciones.ultimo_final, "El piso tiembla: onda de choque, polvo, lo tirado brinca y sacudida vertical")
 	_comprobar("¡CLIC!" in sala.travesuras.jugo.palabras, "Al apagarla: congelado, destello, sacudida y «¡CLIC!»")
 	await _esperar(130)
 	_comprobar(batalla.montanas.size() == 1 and batalla.montanas[0].cantidad == batalla.datos.devuelve[0] and batalla.montanas[0].en_piso, "Al terminar la fase se le abre el depósito y escupe una montaña de pelusa (%d motas)" % batalla.datos.devuelve[0])
@@ -272,6 +273,8 @@ func _correr() -> void:
 		if felipe.corazones < corazones:
 			break
 	_comprobar(tosio and alta, "En furia tose y la bola de pelo va en arco hasta arriba")
+	var bola_datos := batalla.conducta("bola") as AtaqueBolaPelo
+	_comprobar(bola_datos.objetivo.distance_to(Vector2(arena.position.x + 380, Nivel1.SUELO - 98)) < 4.0, "La bola apunta a la marca del piso (donde estaba Felipe al toser)")
 	_comprobar(felipe.corazones < corazones, "La bola de pelo quita un corazón aunque esté en el escritorio")
 	felipe.vida.restante_invulnerable = 999.0
 
@@ -302,8 +305,9 @@ func _correr() -> void:
 	await _llenar(batalla, aspi)
 	await _caerle_encima(aspi)
 	await _esperar_que(func() -> bool: return felipe.estado == Felipe.Estado.OCIO, 200)
-	_comprobar(felipe.estado == Felipe.Estado.OCIO and felipe.sprite.animation == "acicalarse", "Felipe se lame la pata como si nada")
+	_comprobar(felipe.estado == Felipe.Estado.OCIO and felipe.sprite.animation == "jugar", "Felipe celebra jugando con el estambre (alegre y juguetón)")
 	_comprobar(aspi.vida.muerto and batalla.fase == BatallaAspi.Fase.FIN, "Al tercer apagado, A.S.P.I. se apaga del todo")
+	_comprobar(batalla.reacciones.ultimo_final and batalla.reacciones.despertares >= 3, "El golpe final es el más fuerte; al entrar y al volver de cada fase se despertó (pitido, luz roja, «!» y pausa: %d)" % batalla.reacciones.despertares)
 	_comprobar(not sala.puertas[Nivel1.PUERTA_BALCON].cerrada and "Desenchufada" in sala.logros and sala.travesuras.agenda.esta_cumplida("desenchufar"), "Se abre la puerta del balcón (travesura «desenchufar» y logro)")
 	_comprobar(Engine.time_scale == 1.0 and not sala.puertas["estudio<pasillo"].cerrada, "Todo vuelve de golpe a la normalidad")
 	_comprobar(not batalla.apagon.activo and ambiente.color.v > 0.9, "Al apagarla por última vez vuelve la luz de golpe")

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="DatosJefe" load_steps=9 format=3]
+[gd_resource type="Resource" script_class="DatosJefe" load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/datos/datos_jefe.gd" id="1_datos"]
 [ext_resource type="Script" path="res://scripts/jefes/conducta_jefe.gd" id="2_conducta"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/jefes/aspi/conducta_limpiar.gd" id="5_limpiar"]
 [ext_resource type="Script" path="res://scripts/jefes/aspi/ataque_embestida.gd" id="6_embestida"]
 [ext_resource type="Script" path="res://scripts/jefes/aspi/conducta_cortocircuito.gd" id="7_corto"]
+[ext_resource type="Resource" path="res://datos/jefes/aspi_jugo.tres" id="8_jugo"]
 
 [sub_resource type="Resource" id="Resource_corto"]
 script = ExtResource("7_corto")
@@ -73,9 +74,11 @@ sonidos = {
 "atragantar": "atragantar",
 "blorp": "puf",
 "cortocircuito": "cortocircuito",
+"despertar": "pitido",
 "motor": "motor",
 "reversa": "reversa"
 }
 tono_por_mancha = 0.12
-reinicio = 1.5
+jugo = ExtResource("8_jugo")
+reinicio = 2.2
 conductas = Array[ExtResource("2_conducta")]([SubResource("Resource_corto"), SubResource("Resource_bola"), SubResource("Resource_soplido"), SubResource("Resource_limpiar"), SubResource("Resource_embestida")])

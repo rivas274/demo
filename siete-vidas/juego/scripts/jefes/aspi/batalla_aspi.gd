@@ -62,6 +62,7 @@ var fuentes: Array[FuenteDesorden] = []
 ## La pelusa que devuelve (sobrecarga y montañas), el apagón de la fase 3 y el material para lo que se lee a oscuras.
 var pelusa: PelusaAspi
 var apagon: ApagonEstudio
+var reacciones: ReaccionesAspi
 var sin_sombrear := CanvasItemMaterial.new()
 ## Por qué está vulnerable: "deposito" (lleno) o "charco" (electrocutada en el apagón).
 var motivo := ""
@@ -145,6 +146,8 @@ func _ready() -> void:
 	add_child(pelusa)
 	apagon = ApagonEstudio.new(nivel, jefe, felipe)
 	add_child(apagon)
+	reacciones = ReaccionesAspi.new(self)
+	add_child(reacciones)
 	_polvo = Particulas.polvo(24, 0.7, Vector2(0, 220), Vector2(50, 140), Vector2(2, 4), Color(0.86, 0.82, 0.75))
 	_polvo.name = "Polvo"
 	Capas.usar(_polvo, Capas.EFECTOS)
@@ -365,6 +368,9 @@ func _al_cambiar_fase() -> void:
 	reinicio = datos.reinicio if vencidas > 0 else 0.0
 	jefe.patrulla.quieta = reinicio > 0.0
 	jefe.dano.activo = false
+	if reinicio <= 0.0:
+		# Al entrar: se despierta (pitido, luz roja, «!» y pausa) antes de moverse.
+		reacciones.despertar()
 	var velocidad: float = DatosJefe.por_fase(datos.velocidad, vencidas)
 	jefe.patrulla.velocidad_patrulla = velocidad * 0.7
 	jefe.patrulla.velocidad_persecucion = velocidad
@@ -378,7 +384,10 @@ func _actualizar_pelea(delta: float) -> void:
 	if reinicio > 0.0:
 		reinicio -= delta
 		if reinicio <= 0.0:
-			jefe.patrulla.quieta = false
+			# Vuelve de la fase: se despierta (pitido, luz roja, «!» y pausa) antes de moverse.
+			reacciones.despertar()
+		return
+	if reacciones.despertando > 0.0:
 		return
 	if llena:
 		_actualizar_llena(delta)
@@ -513,6 +522,8 @@ func _apagar() -> void:
 	soltar_polvo(jefe.global_position + Vector2(0, -20))
 	nivel.sonar("golpe")
 	nivel.sonar("caja")
+	# El piso tiembla: onda de choque, polvo, lo tirado brinca y sacudida vertical (más fuerte el último golpe).
+	reacciones.golpe(jefe.global_position, vencidas >= datos.fases)
 	# Lo que quedó en el piso sigue ahí (la fase siguiente lo limpia).
 	limpiar.limpiando = false
 	apariencia.vibrando = false
@@ -571,7 +582,8 @@ func _terminar() -> void:
 		if felipe.is_on_floor() and felipe.estado == Felipe.Estado.SUELO:
 			break
 		await get_tree().physics_frame
-	felipe.acicalarse()
+	# Celebra jugando (alegre y juguetón): la animación de jugar con el estambre.
+	felipe.acicalarse("jugar")
 	terminada.emit()
 	# Mira su obra: el estudio destruido, con orgullo (después de su frase de la derrota, sin cortarla).
 	# Espera a que se callen las frases de la derrota y de la Agenda (medio segundo seguido sin cuadro de diálogo).
@@ -581,7 +593,8 @@ func _terminar() -> void:
 		if libre >= 30 and i > 60:
 			break
 		await get_tree().physics_frame
+	# Mira su obra con orgullo según la nota de «Arte gatuno» (opcional: se ve, no obliga).
+	var por_ciento := NotaArteGatuno.porcentaje(self)
 	if Nivel1.habitacion_de(felipe.global_position) == "estudio":
-		nivel.travesuras.decir_felipe("estudio_destruido", true)
-	# La nota de «Arte gatuno» (opcional: se ve, no obliga).
+		nivel.travesuras.decir_felipe(NotaArteGatuno.frase(por_ciento), true)
 	nota = NotaArteGatuno.mostrar(self)

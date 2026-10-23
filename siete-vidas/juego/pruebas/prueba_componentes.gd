@@ -177,6 +177,11 @@ func _probar_desorden() -> void:
 	corcho.soltar(-1.0)
 	await _esperar(150)
 	_comprobar(soltadas.size() == 2 and corcho.restantes() == 0 and not corcho.is_in_group(Componentes.INTERACTUABLES) and corcho.soltar() == null, "FuenteDesorden: al acabarse deja de ofrecerse y no suelta más")
+	var nota := soltadas[0][0] as PiezaSuelta
+	nota.brincar(7.0)
+	_comprobar(not nota.en_piso, "PiezaSuelta: un golpe en el piso la hace brincar")
+	await _esperar(90)
+	_comprobar(nota.en_piso and is_equal_approx(nota.position.y, PISO) and soltadas.size() == 2, "PiezaSuelta: vuelve al piso sin avisar de nuevo (no deja otra mancha)")
 	for par: Array in soltadas:
 		(par[0] as Node).queue_free()
 	corcho.queue_free()

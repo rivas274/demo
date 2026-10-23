@@ -64,6 +64,7 @@ SONIDOS = {
     "motor": lambda: tono(70, 90, 0.5, "cuadrada", 0.18, ruido=0.5),  # sube de tono con cada mancha (pitch en el juego)
     "reversa": lambda: tono(1000, 1000, 0.12, "cuadrada", 0.2) + [0.0] * 1800 + tono(1000, 1000, 0.12, "cuadrada", 0.2),
     "atragantar": lambda: tono(180, 90, 0.2, "cuadrada", 0.3, ruido=0.5) + tono(220, 60, 0.35, "cuadrada", 0.3, ruido=0.6),
+    "pitido": lambda: tono(1400, 1400, 0.08, "cuadrada", 0.22) + tono(1900, 1900, 0.12, "cuadrada", 0.22),  # se despierta
     "cortocircuito": lambda: tono(2600, 300, 0.12, "cuadrada", 0.3, ruido=0.9) + tono(1800, 200, 0.18, "cuadrada", 0.3, ruido=0.9)
     + tono(120, 40, 0.4, "cuadrada", 0.35, ruido=0.5),
 }

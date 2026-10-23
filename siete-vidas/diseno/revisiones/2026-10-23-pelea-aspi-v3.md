@@ -53,6 +53,18 @@ Al apagarla (o al vaciar el depósito) hay 0,6 s de **sobrecarga**: vibra, se at
 4. **La nota de «Arte gatuno»** casi nunca da obra maestra si no se busca: la pelea se gana tirando 4 cosas. Está bien que sea un desafío opcional, pero el creador debería decidir si muestra la nota también en el resumen del día.
 5. **Sin música real**, la fase 3 no llega a sentirse «metal».
 
-## 8. Encargo opcional a Gemini (no hace falta)
+## 8. Agregado: aparición y golpes que se sienten (video «How to make enemy spawns feel good», del creador)
+
+De los 5 pasos del video (avisar con un círculo, abrir un portal, dejar caer, hacer temblar el piso y despertar con un «!» y una pausa) se tomó lo que encaja, sin pasarse:
+
+- **A. Cuando Felipe le salta encima, el piso tiembla:** onda de choque tendida en el piso (un óvalo de pixel que crece en 3 escalones), polvo que salta y **lo tirado cerca brinca** (pedazos, papeles, notas, libros y motas; `PiezaSuelta.brincar`, sin dejar otra mancha). La cámara hace una **sacudida vertical** corta (`Jugo.sacudir(..., vertical)`), además del congelado de 0,1 s. El **golpe final** (el que la apaga del todo) es 1,6 veces más fuerte.
+- **B. Despertar** (al entrar y al volver de cada fase, después del «¡BLORP!»): pitido, la luz pasa a roja, un «!» sobre ella (zona D) y **0,4 s de pausa** antes de moverse, con una marca roja en el piso hacia donde va (Felipe). El reinicio entre fases sube a 2,2 s para que entre la sobrecarga, el «¡BLORP!» y el despertar sin pisarse.
+- **C. Embestida:** a la línea roja del piso se le suma el **círculo** donde termina la carga (el tramo «telegrafiado»), que también se lee en la penumbra.
+- **D. Bolas de pelo:** una **marca amarilla en el piso** donde va a caer cada bola, desde la tos hasta que llega. La bola cae ahí, donde estaba Felipe al toser: es justo.
+- **Lo que no se tomó:** el portal con remolino y «dejar caer» al enemigo, porque A.S.P.I. ya está en el cuarto y su entrada es la presentación de 8 pasos.
+- **Datos:** `datos/jefes/aspi_jugo.tres` (`DatosJugoJefe`): radio, escalones y duración de la onda, sacudida, brinco, polvo, multiplicador del golpe final, pausa del despertar y radio de las marcas.
+- **Felipe alegre y juguetón** (nota del creador): celebra cada apagado con un maullido al aterrizar, si el jugador no lo está moviendo, y al ganar juega con el estambre (animaciones que ya existían). Las frases de la pelea suenan a que se divierte: «¡Confeti!» al esparcir, «¡Ja! Baile eléctrico.» en el charco, «¡Se fue la luz! Hora de las escondidas.» y, según la nota, «¡Mi obra maestra! Firmada con pelos.» o «¿Ya? Era el calentamiento. ¡Quiero revancha!».
+
+## 9. Encargo opcional a Gemini (no hace falta)
 
 «Una regleta/enchufe de pared quemado con marca negra de hollín y una chispa, pixel art del mismo estilo de `estudio-v2.png`, 16 × 16 px en el juego, sobre fondo blanco». Hoy el choque se ve con chispas y destello, sin marca que quede.

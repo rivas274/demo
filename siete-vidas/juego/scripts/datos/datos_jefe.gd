@@ -31,6 +31,9 @@ extends Resource
 @export var devuelve: PackedInt32Array = []
 ## Segundos quieta e inofensiva al empezar una fase nueva (Felipe alcanza a alejarse).
 @export var reinicio := 1.5
+@export_group("Jugo")
+## Golpe que hace temblar el piso, despertar y avisos en el piso (DatosJugoJefe).
+@export var jugo: DatosJugoJefe
 @export_group("Sonidos")
 ## Sonido de cada momento de la pelea: evento -> nombre del sonido del nivel (assets/sonidos/). Ganchos para los sonidos
 ## finales (encargo en memoria/05): A.S.P.I. usa motor, reversa, atragantar, blorp y cortocircuito.

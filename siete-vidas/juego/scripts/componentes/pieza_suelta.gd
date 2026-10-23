@@ -26,6 +26,8 @@ var gira_segundos := 0.0
 var con_sombra := false
 var en_piso := false
 var girando := false
+## Brinca por un golpe en el piso (no vuelve a avisar `apoyada` al caer).
+var _brincando := false
 var _reloj := 0.0
 var _cuadros: Array[Texture2D] = []
 
@@ -81,7 +83,21 @@ func _apoyar() -> void:
 		girando = true
 		_reloj = 0.0
 	queue_redraw()
+	if _brincando:
+		_brincando = false
+		return
 	apoyada.emit(self)
+
+
+## Un golpe fuerte en el piso la hace brincar `alto` px y volver a caer en el mismo lugar (sin girar de más).
+func brincar(alto: float) -> void:
+	if not en_piso or alto <= 0.0:
+		return
+	en_piso = false
+	girando = false
+	_brincando = true
+	velocidad = Vector2(0.0, -sqrt(2.0 * gravedad * alto))
+	vueltas = 0.0
 
 
 func _draw() -> void:

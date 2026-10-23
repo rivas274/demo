@@ -116,8 +116,8 @@ func _correr() -> void:
 	var en_el_piso := batalla.municion.filter(func(o: Objeto) -> bool: return o.tirable.roto and o.visible and o.position.y >= Nivel1.SUELO - 1.0).size()
 	var huecos := batalla.fuentes.filter(func(f: FuenteDesorden) -> bool: return f.restantes() == 0 and f.usadas == f.datos.piezas.size()).size()
 	_comprobar(en_el_piso == batalla.municion.size() and huecos == batalla.fuentes.size(), "Al final todo sigue tirado (%d objetos en el piso, %d fuentes vacías)" % [en_el_piso, huecos])
-	await _esperar_que(func() -> bool: return _dijo("Estudio redecorado"), 60 * 15)
-	_comprobar(_dijo("Estudio redecorado"), "Felipe mira su obra: «Estudio redecorado. Estilo: Su Majestad.»")
+	await _esperar_que(func() -> bool: return _dijo("obra maestra"), 60 * 15)
+	_comprobar(_dijo("obra maestra") and batalla.nota == 100, "Todo tirado: ARTE GATUNO 100 %% y Felipe feliz: «¡Mi obra maestra! Firmada con pelos.»")
 
 	for fallo in _fallos:
 		printerr("FALLO: " + fallo)

@@ -26,6 +26,16 @@ static func porcentaje(b: BatallaAspi) -> int:
 	return int(roundf(100.0 * tirado / maxf(total, 1.0)))
 
 
+## Lo que dice Felipe según la nota (Frases.FELIPE): se la pasó en grande en todos los casos.
+static func frase(por_ciento: int) -> String:
+	match rango(por_ciento):
+		"ARTE_GATUNO_AFICIONADO":
+			return "arte_aficionado"
+		"ARTE_GATUNO_OBRA_MAESTRA":
+			return "arte_obra"
+	return "estudio_destruido"
+
+
 ## Clave del rango (Aficionado, Decorador u O B R A   M A E S T R A).
 static func rango(por_ciento: int) -> String:
 	for datos: Array in RANGOS:

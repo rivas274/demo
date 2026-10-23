@@ -2,9 +2,14 @@
 # Pregunta: ¿se siente bien controlar a Felipe 3D (con rig) en una sala jugable: caminar, saltar
 # a los muebles, arañar, tirar cosas y pedirle a Valeria?
 # Fecha: 2026-10-23
-# Escena jugable.tscn: la misma sala de principal.gd (pixel x3, bordes, luz toon) con
-# colisiones, una mesa alta (75 cm), vaso, taza y pelota con física, Felipe controlable y
-# Valeria con rutina y reacciones. Interfaz mínima: controles (H los oculta), globos de texto y
+# Escena jugable.tscn: la misma sala de principal.gd (pixel x3, bordes, luz toon) jugada como
+# el juego 2D (2,5D de desplazamiento lateral): Felipe se mueve solo en X e Y, en un plano fijo
+# (Z_PLANO). Los muebles son plataformas de un sentido (se atraviesan desde abajo; S + Espacio
+# para bajar), como en el juego 2D; cada una dice a qué profundidad se dibuja Felipe cuando
+# está encima (sobre el cojín se ve sobre el cojín). Vaso, taza y pelota tienen física con el
+# eje Z bloqueado. Valeria camina por un carril apenas detrás de Felipe (no chocan: Felipe pasa
+# delante, como las capas del 2D). Mesa alta de 75 cm, vaso, taza, pelota y Valeria con rutina
+# y reacciones. Interfaz mínima: controles (H los oculta), globos de texto y
 # el indicador de E sobre lo que Felipe tiene más cerca.
 # Argumentos (después de --): --bot (juega solo; ver bot_jugable.gd), --sin-valeria, --pixel=N.
 extends "res://scripts/principal.gd"
@@ -19,7 +24,25 @@ const COLOR_GOLOSINA := Color("7c4127")
 const MESA_X := Vector2(1.42, 1.98)
 const MESA_Z := Vector2(-1.1, -0.62)
 const MESA_ALTO := 0.75
-const TECLAS := "A/D o ←/→  caminar\nW/S o ↑/↓  fondo / frente\nEspacio  saltar (soltar = salto corto)\nE  acción (arañar, tirar, pedir)\nQ  pedir / maullar\nQuieto 9 s: se sienta y juega\nH  ocultar esta ayuda"
+## Plano de juego de Felipe (z fija) y carril de Valeria, apenas detrás.
+const Z_PLANO := 0.15
+const Z_VALERIA := -0.15
+## Capas de física: 1 piso y paredes, 2 Felipe, 8 objetos sueltos, 32 plataformas de un sentido
+## (solo Felipe; se apagan cuando él está debajo o bajando), 64 las mismas plataformas, siempre
+## sólidas, para los objetos.
+const CAPA_PLATAFORMA_FELIPE := 32
+const CAPA_PLATAFORMA_OBJETOS := 64
+## Plataformas: [nombre, x desde, x hasta, alto (m), z donde se dibuja Felipe encima].
+const PLATAFORMAS := [
+	["cojin_sofa", -0.38, 1.18, 0.43, -0.55],
+	["brazo_izq_sofa", -0.505, -0.38, 0.68, -0.72],
+	["brazo_der_sofa", 1.18, 1.305, 0.68, -0.72],
+	["respaldo_sofa", -0.38, 1.18, 0.85, -1.04],
+	["mesita", -1.33, -0.57, 0.55, -0.8],
+	["mesa_alta", 1.42, 1.98, 0.75, -0.86],
+	["librero", 2.05, 2.95, 0.9, -1.0],
+]
+const TECLAS := "A/D o ←/→  caminar\nEspacio  saltar (soltar = salto corto)\nS + Espacio  bajar de un mueble\nE  acción (arañar, tirar, pedir)\nQ  pedir / maullar\nQuieto 9 s: se sienta y juega\nH  ocultar esta ayuda"
 
 @export var con_valeria := true
 @export var limites := Vector2(-1.0, 1.7)
@@ -35,6 +58,9 @@ var _globos: Array[Dictionary] = []
 var _capa_ui: Control
 var _indicador: Label
 var _controles: Label
+## [{cuerpo, forma, x0, x1, alto, z}] de las plataformas de un sentido.
+var plataformas: Array[Dictionary] = []
+var _cam_y := 0.0
 
 
 func _ready() -> void:
@@ -74,7 +100,7 @@ func _ready() -> void:
 	gato.name = "Felipe"
 	gato.set_script(load("res://scripts/jugable/felipe_jugable.gd"))
 	gato.set("juego", self)
-	gato.position = Vector3(-1.6, 0.0, -0.15)
+	gato.position = Vector3(-1.6, 0.0, Z_PLANO)
 	vista.add_child(gato)
 
 	if con_valeria:
@@ -154,35 +180,60 @@ func _caja_forma(tam: Vector3) -> BoxShape3D:
 
 
 func _colisiones() -> void:
-	# Piso, pared del fondo, paredes de los lados y una pared invisible al frente.
+	# Piso y paredes de los lados (sólidos para todos).
 	_estatico(_caja_forma(Vector3(12, 0.2, 2.6)), Vector3(0, -0.1, 0.1))
-	_estatico(_caja_forma(Vector3(12, 3.5, 0.2)), Vector3(0, 1.75, -1.3))
 	_estatico(_caja_forma(Vector3(0.2, 3.5, 2.6)), Vector3(-3.45, 1.75, 0.1))
 	_estatico(_caja_forma(Vector3(0.2, 3.5, 2.6)), Vector3(4.4, 1.75, 0.1))
-	_estatico(_caja_forma(Vector3(12, 3.5, 0.2)), Vector3(0, 1.75, 0.68))
-	# Muebles de Kenney: el sofá con su malla exacta (cojín, brazos y respaldo); el resto,
-	# cascos convexos (sólidos, sin meterse en los estantes).
-	for hijo in sala.get_children():
-		if hijo is MeshInstance3D or not (hijo is Node3D) or hijo is Light3D:
-			continue
-		var nombre := String(hijo.name)
-		if nombre.begins_with("rug") or nombre.begins_with("plantSmall") or nombre == "books":
-			continue
-		var exacta := nombre.begins_with("loungeSofa")
-		for mi: MeshInstance3D in hijo.find_children("*", "MeshInstance3D", true, false):
-			if mi.global_position.y > 0.6 and not nombre.begins_with("Lampara"):
-				continue  # plantas de la ventana
-			var cuerpo := StaticBody3D.new()
-			cuerpo.collision_layer = 1
-			cuerpo.collision_mask = 0
-			var cs := CollisionShape3D.new()
-			cs.shape = mi.mesh.create_trimesh_shape() if exacta else mi.mesh.create_convex_shape(true, true)
-			cuerpo.add_child(cs)
-			mi.add_child(cuerpo)
+	# La lámpara de la mesita es un estorbo sólido sobre la mesita (no en el piso).
+	_estatico(_caja_forma(Vector3(0.24, 0.47, 2.6)), Vector3(-0.95, 0.795, 0.1))
+	for p in PLATAFORMAS:
+		var ancho: float = p[2] - p[1]
+		var centro := Vector3((p[1] + p[2]) * 0.5, float(p[3]) - 0.03, 0.1)
+		# Para Felipe: de un sentido. Para los objetos: siempre sólida.
+		var cf := _estatico(_caja_forma(Vector3(ancho, 0.06, 2.6)), centro)
+		cf.collision_layer = CAPA_PLATAFORMA_FELIPE
+		var co := _estatico(_caja_forma(Vector3(ancho, 0.06, 2.6)), centro)
+		co.collision_layer = CAPA_PLATAFORMA_OBJETOS
+		plataformas.append({"nombre": p[0], "forma": cf.get_child(0), "x0": p[1], "x1": p[2], "alto": p[3], "z": p[4]})
 	sofa_aranable = Node3D.new()
 	sofa_aranable.name = "SofaAranable"
 	sofa_aranable.set_script(load("res://scripts/jugable/aranable.gd"))
 	vista.add_child(sofa_aranable)
+
+
+## Plataformas de un sentido (como one_way_collision del 2D): para Felipe solo existen las que
+## quedan bajo sus pies mientras no sube ni está bajando con S + Espacio.
+func ajustar_plataformas(f: CharacterBody3D, bajando: bool) -> void:
+	var pies := f.global_position.y
+	var sube := f.velocity.y > 0.01
+	for p in plataformas:
+		var apagada: bool = sube or bajando or pies < float(p["alto"]) - 0.035
+		(p["forma"] as CollisionShape3D).disabled = apagada
+
+
+## La plataforma bajo Felipe (la más alta que no esté por encima de sus pies), o {} si es el piso.
+func plataforma_bajo(f: Node3D, margen := 0.03) -> Dictionary:
+	var mejor := {}
+	var x := f.global_position.x
+	var pies := f.global_position.y
+	for p in plataformas:
+		if x < float(p["x0"]) - 0.12 or x > float(p["x1"]) + 0.12:
+			continue
+		if float(p["alto"]) <= pies + margen and (mejor.is_empty() or float(p["alto"]) > float(mejor["alto"])):
+			mejor = p
+	return mejor
+
+
+## Profundidad a la que se dibuja Felipe: la del mueble bajo él; en el piso, su plano.
+func z_visual(f: Node3D) -> float:
+	var p := plataforma_bajo(f)
+	if p.is_empty():
+		return Z_PLANO
+	var z: float = p["z"]
+	# Sobre el cojín junto a Valeria sentada va delante de ella (como en el juego 2D).
+	if p["nombre"] == "cojin_sofa" and valeria and valeria.get("_sentada") and absf(f.global_position.x - float(valeria.get("x_sofa"))) < 0.45:
+		z = -0.28
+	return z
 
 
 func _mesa_alta() -> void:
@@ -191,16 +242,12 @@ func _mesa_alta() -> void:
 	var ancho := MESA_X.y - MESA_X.x
 	var fondo := MESA_Z.y - MESA_Z.x
 	var grosor := 0.04
-	var tapa := Vector3(ancho, grosor, fondo)
-	var pos_tapa := Vector3(cx, MESA_ALTO - grosor * 0.5, cz)
-	Toon.caja(sala, tapa, pos_tapa, COLOR_MESA)
-	_estatico(_caja_forma(tapa), pos_tapa)
+	Toon.caja(sala, Vector3(ancho, grosor, fondo), Vector3(cx, MESA_ALTO - grosor * 0.5, cz), COLOR_MESA)
 	var pata := Vector3(0.05, MESA_ALTO - grosor, 0.05)
 	for sx in [-1, 1]:
 		for sz in [-1, 1]:
 			var p := Vector3(cx + sx * (ancho * 0.5 - 0.04), (MESA_ALTO - grosor) * 0.5, cz + sz * (fondo * 0.5 - 0.04))
 			Toon.caja(sala, pata, p, Color("572c1d"))
-			_estatico(_caja_forma(pata), p)
 
 
 func _objetos() -> void:
@@ -209,7 +256,8 @@ func _objetos() -> void:
 	vaso.name = "Vaso"
 	vaso.set_script(Tirable)
 	vaso.set("color", COLOR_VASO)
-	vaso.position = Vector3(-0.66, 0.55 + 0.12, -0.77)
+	vaso.set("lado_caida", -1.0)
+	vaso.position = Vector3(-1.22, 0.55 + 0.12, -0.8)
 	vista.add_child(vaso)
 	taza = RigidBody3D.new()
 	taza.name = "Taza"
@@ -218,13 +266,17 @@ func _objetos() -> void:
 	taza.set("alto", 0.17)
 	taza.set("radio", 0.085)
 	taza.set("color", COLOR_TAZA)
-	taza.position = Vector3(1.86, MESA_ALTO + 0.085, -0.8)
+	taza.set("lado_caida", -1.0)
+	taza.position = Vector3(1.55, MESA_ALTO + 0.085, -0.86)
 	vista.add_child(taza)
 	pelota = RigidBody3D.new()
 	pelota.name = "Pelota"
 	pelota.mass = 0.15
 	pelota.collision_layer = 8
-	pelota.collision_mask = 1 | 2 | 8
+	pelota.collision_mask = 1 | 2 | 8 | CAPA_PLATAFORMA_OBJETOS
+	pelota.axis_lock_linear_z = true
+	pelota.axis_lock_angular_x = true
+	pelota.axis_lock_angular_y = true
 	pelota.linear_damp = 0.8
 	pelota.angular_damp = 1.5
 	var pm := PhysicsMaterial.new()
@@ -255,7 +307,7 @@ func _objetos() -> void:
 	franja.mesh = tm
 	franja.material_override = Toon.material(Color("ffe2b0"))
 	pelota.add_child(franja)
-	pelota.position = Vector3(-2.7, 0.11, 0.25)
+	pelota.position = Vector3(-2.7, 0.11, Z_PLANO)
 	vista.add_child(pelota)
 
 
@@ -267,7 +319,7 @@ func dar_golosina(p: Vector3) -> void:
 	g.mesh = bm
 	g.material_override = Toon.material(COLOR_GOLOSINA)
 	vista.add_child(g)
-	g.position = Vector3(p.x, p.y + 0.025, p.z)
+	g.position = Vector3(p.x, p.y + 0.025, Z_PLANO)
 	_golosinas.append(g)
 
 
@@ -340,6 +392,8 @@ func _process(delta: float) -> void:
 	# Cámara: sigue a Felipe con suavizado, dentro de los límites; en pasos de 1 pixel de render.
 	var meta := clampf(gato.global_position.x, limites.x, limites.y)
 	_cam_x = lerpf(_cam_x, meta, clampf(delta * 3.0, 0.0, 1.0))
+	# Un poco en Y: sube con Felipe en los muebles y saltos (hasta 0,3 m).
+	_cam_y = lerpf(_cam_y, clampf(gato.global_position.y * 0.35, 0.0, 0.3), clampf(delta * 2.0, 0.0, 1.0))
 	_colocar_camara()
 	# Globos.
 	for g in _globos.duplicate():
@@ -379,10 +433,20 @@ func _process(delta: float) -> void:
 	# Golosinas: Felipe se las come al pasar.
 	for g in _golosinas.duplicate():
 		var d: Vector3 = g.global_position - gato.global_position
-		if Vector2(d.x, d.z).length() < 0.3 and absf(d.y) < 0.2:
+		if absf(d.x) < 0.3 and absf(d.y) < 0.2:
 			decir(gato, "¡Ñam! +1", 1.2, 0.8)
 			g.queue_free()
 			_golosinas.erase(g)
+
+
+## Como principal.gd, pero también en Y, siempre en pasos de 1 pixel de render.
+func _colocar_camara() -> void:
+	var px_m := float(vista.size.y) / ALTO_CUADRO_M
+	var x := roundf(_cam_x * px_m) / px_m
+	var y := roundf((1.22 + _cam_y) * px_m) / px_m
+	var dist := 12.0
+	var a := deg_to_rad(inclinacion_grados)
+	camara.position = Vector3(x, y + dist * sin(a), dist * cos(a))
 
 
 func _objetivo() -> Node3D:

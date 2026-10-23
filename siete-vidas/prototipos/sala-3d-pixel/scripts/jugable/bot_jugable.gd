@@ -3,9 +3,9 @@
 # a los muebles, arañar, tirar cosas y pedirle a Valeria?
 # Fecha: 2026-10-23
 # Bot que juega como una persona (aprieta las mismas acciones que el teclado): camina, salta al
-# sofá, araña el respaldo, sube a la mesa alta y tira la taza, baja, tira el vaso de la mesita,
-# empuja la pelota, le pide a Valeria, se come el snack, empuja la pelota y se queda quieto hasta que Felipe se
-# sienta a jugar con ella; al final una tecla lo levanta.
+# cojín del sofá, araña el respaldo, sube al respaldo y a la mesa alta, tira la taza, baja con
+# S + Espacio, tira el vaso de la mesita, empuja la pelota, le pide a Valeria, se come el snack
+# y se queda quieto hasta que Felipe se sienta a jugar con la pelota; una tecla lo levanta.
 # Uso: godot --path . res://jugable.tscn -- --bot   (con --bot-log imprime posiciones)
 extends Node
 
@@ -23,35 +23,31 @@ func _ready() -> void:
 	_log = "--bot-log" in OS.get_cmdline_user_args()
 	_pasos = [
 		["esperar", 0.8],
-		["ir_x", 0.25],
-		["ir_z", -0.2],
+		["ir_x", 0.3],
 		["saltar", 0.3],
 		["esperar_suelo"],
+		["esperar", 0.3],
+		["tecla", "accion"],
+		["esperar_libre"],
+		["esperar", 0.3],
+		["saltar", 0.3],
+		["esperar_suelo"],
+		["esperar", 0.3],
+		["ir_x", 1.1],
+		["saltar_con", "mover_der", 0.35, 0.55],
+		["esperar_suelo"],
+		["esperar", 0.3],
+		["ir_x", 1.85],
+		["tecla", "accion"],
+		["esperar_libre"],
 		["esperar", 0.4],
-		["ir_z", -0.9],
-		["tecla", "accion"],
-		["esperar_libre"],
-		["esperar", 0.5],
-		["ir_x", 1.05],
-		["ir_z", -0.85],
-		["saltar_con", "mover_der", 0.35, 0.45],
+		["bajar"],
 		["esperar_suelo"],
 		["esperar", 0.3],
-		["ir_x", 1.55],
-		["tecla", "accion"],
-		["esperar_libre"],
-		["esperar", 0.6],
-		["ir_x", 1.7],
-		["mantener", "mover_abajo", 1.7],
-		["esperar_suelo"],
-		["esperar", 0.3],
-		["ir_z", -0.12],
-		["ir_x", -1.0],
-		["ir_z", -0.9],
+		["ir_x", -0.95],
 		["tecla", "accion"],
 		["esperar_libre"],
 		["esperar", 0.3],
-		["ir_z", -0.1],
 		["ir_x", -2.2],
 		["mantener", "mover_izq", 1.0],
 		["esperar", 0.4],
@@ -91,16 +87,12 @@ func _siguiente() -> void:
 			print("[bot %.1f s] paso %d %s  felipe=%s" % [_total, _i, str(_pasos[_i]), str(_felipe().global_position)])
 
 
-func _ir_a(x: float, z := NAN, tol := 0.05) -> bool:
-	var f := _felipe()
-	var p := f.global_position
-	var dx := x - p.x
-	var dz := 0.0 if is_nan(z) else z - p.z
+## Camina hasta x (el juego es de un solo plano: solo izquierda y derecha).
+func _ir_a(x: float, _z := NAN, tol := 0.05) -> bool:
+	var dx := x - _felipe().global_position.x
 	_apretar("mover_der", dx > tol)
 	_apretar("mover_izq", dx < -tol)
-	_apretar("mover_abajo", dz > tol)
-	_apretar("mover_arriba", dz < -tol)
-	return absf(dx) <= tol and absf(dz) <= tol
+	return absf(dx) <= tol
 
 
 func _apretar(a: String, si: bool) -> void:
@@ -123,7 +115,7 @@ func _physics_process(delta: float) -> void:
 		print("    t=%.0f estado=%d clip=%s pos=%s pelota=%s" % [_total, f.get("estado"), ap.current_animation, str(f.global_position.snapped(Vector3.ONE * 0.01)), str(b.global_position.snapped(Vector3.ONE * 0.01))])
 	var listo := false
 	# Atascado (contra un mueble): se da por llegado.
-	if p[0] in ["ir_x", "ir_z", "ir_valeria", "ir_golosina", "ir_pelota"]:
+	if p[0] in ["ir_x", "ir_valeria", "ir_golosina", "ir_pelota"]:
 		if (f.global_position - _antes).length() < 0.002 * 1.0:
 			_bloqueo += delta
 		else:
@@ -134,8 +126,6 @@ func _physics_process(delta: float) -> void:
 			listo = _t >= p[1]
 		"ir_x":
 			listo = _ir_a(p[1]) or _bloqueo > 0.35
-		"ir_z":
-			listo = _ir_a(f.global_position.x, p[1]) or _bloqueo > 0.35
 		"saltar":
 			_apretar("saltar", _t < p[1])
 			listo = _t > p[1] + 0.05
@@ -143,6 +133,10 @@ func _physics_process(delta: float) -> void:
 			_apretar("saltar", _t < p[2])
 			_apretar(p[1], _t < p[3])
 			listo = _t > maxf(p[2], p[3]) + 0.05
+		"bajar":
+			_apretar("mover_abajo", _t < 0.3)
+			_apretar("saltar", _t > 0.1 and _t < 0.2)
+			listo = _t > 0.35
 		"mantener":
 			_apretar(p[1], _t < p[2])
 			listo = _t > p[2]

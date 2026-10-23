@@ -4,6 +4,9 @@
 # Fecha: 2026-10-23
 # Felipe jugable: CharacterBody3D con la sensación de juego del 2D (aceleración, margen al salir
 # del borde, salto recordado, corte del salto, caída más pesada) en metros (121 px = 1 m).
+# Se mueve solo en X e Y, en el plano z = Z_PLANO de jugable.gd (2,5D). Los muebles son
+# plataformas de un sentido; S + Espacio baja. El dibujo se corre en z a la profundidad del
+# mueble que pisa (sobre el cojín se ve sobre el cojín), sin cambiar la física.
 # El dibujo es scripts/felipe_rig.gd (rig de Blender, cola con resorte y mirada) como hijo; este
 # script solo elige el clip, su velocidad y hacia dónde mira.
 extends CharacterBody3D
@@ -18,8 +21,6 @@ const CAJA := Vector3(0.5, 0.48, 0.3)
 ## Tope al caminar (m/s). El clip "caminar" se mide en felipe_rig.json (0,29 m/s a escala 1 =
 ## 0,38 m/s a 1,3); a más velocidad el clip se acelera en la misma proporción: las patas no patinan.
 @export var velocidad_max := 0.6
-## Hacia el fondo y el frente se camina más lento (como en un beat 'em up).
-@export var factor_profundidad := 0.75
 ## Tiempo en llegar al tope y en frenar (en el 2D: 120/1200 = 0,1 s y 120/1450 = 0,083 s).
 @export var t_acelerar := 0.1
 @export var t_frenar := 0.083
@@ -52,8 +53,8 @@ var _t := 0.0
 var _coyote := 0.0
 var _recordado := 0.0
 var _cortado := false
-var _z_meta := NAN
-var _y_meta := 0.0
+var _bajando := 0.0
+var _z_plano := 0.15
 var _yaw := deg_to_rad(70.0)
 var _ocio_t := 0.0
 var _empuje := Vector3.ZERO
@@ -64,7 +65,7 @@ var _ocio_meta := Vector3.ZERO
 var _ocio_yaw := 0.0
 var _ocio_bloqueo := 0.0
 var _pos_clip_antes := 0.0
-var _contacto_lado := 1.0
+var _contacto_lado := -1.0
 var _zarpazos_hechos: Array[float] = []
 var _marcas: Array[Node3D] = []
 var _caer_max_y := 0.0
@@ -74,7 +75,8 @@ var altura_max := 0.0
 
 func _ready() -> void:
 	collision_layer = 2
-	collision_mask = 1 | 4 | 8
+	collision_mask = 1 | 8 | 32
+	_z_plano = global_position.z
 	floor_snap_length = 0.06
 	floor_max_angle = deg_to_rad(50.0)
 	var forma := CollisionShape3D.new()
@@ -134,7 +136,7 @@ func _alguna_tecla() -> bool:
 
 
 func _entrada() -> Vector2:
-	return Vector2(Input.get_axis("mover_izq", "mover_der"), Input.get_axis("mover_arriba", "mover_abajo"))
+	return Vector2(Input.get_axis("mover_izq", "mover_der"), 0.0)
 
 
 # ------------------------------------------------------------------ física
@@ -171,16 +173,26 @@ func _physics_process(delta: float) -> void:
 			_frenar(delta)
 			_ocio(delta)
 
+	_bajando = maxf(0.0, _bajando - delta)
+	if juego:
+		juego.call("ajustar_plataformas", self, _bajando > 0.0)
 	if estado != Estado.AIRE:
 		velocity.y = maxf(velocity.y - gravedad_cayendo * delta, -caida_maxima) if not is_on_floor() else minf(velocity.y, 0.0)
 	var empuje_v := _empuje
 	_empuje = _empuje.lerp(Vector3.ZERO, clampf(delta * 6.0, 0.0, 1.0))
 	velocity += empuje_v
+	velocity.z = 0.0
 	move_and_slide()
 	velocity -= empuje_v
+	velocity.z = 0.0
+	global_position.z = _z_plano
 	_empujar_cuerpos()
 	altura_max = maxf(altura_max, global_position.y)
 	_girar(delta)
+	# Profundidad del dibujo: la del mueble bajo él (suave, sin saltos).
+	if juego:
+		var z: float = juego.call("z_visual", self)
+		rig.position.z = lerpf(rig.position.z, z - _z_plano, clampf(delta * 9.0, 0.0, 1.0))
 
 
 func _horizontal() -> Vector3:
@@ -188,9 +200,7 @@ func _horizontal() -> Vector3:
 
 
 func _acelerar(delta: float, dir: Vector2) -> void:
-	var meta := Vector3(dir.x, 0.0, dir.y * factor_profundidad) * velocidad_max
-	if meta.length() > velocidad_max:
-		meta = meta.normalized() * velocidad_max
+	var meta := Vector3(dir.x, 0.0, 0.0) * velocidad_max
 	var h := _horizontal()
 	var a := velocidad_max / (t_acelerar if meta.length() > 0.01 else t_frenar)
 	h = h.move_toward(meta, a * delta)
@@ -206,6 +216,12 @@ func _suelo(delta: float, dir: Vector2) -> void:
 	_acelerar(delta, dir)
 	var en_piso := is_on_floor()
 	# Salto (también con margen al salir del borde y salto recordado).
+	# S + Espacio sobre un mueble: lo atraviesa hacia abajo.
+	if _recordado > 0.0 and en_piso and Input.is_action_pressed("mover_abajo") and global_position.y > 0.05:
+		_recordado = 0.0
+		_bajando = 0.25
+		_cambiar(Estado.AIRE)
+		return
 	if _recordado > 0.0 and (en_piso or _coyote > 0.0):
 		_recordado = 0.0
 		if en_piso:
@@ -255,30 +271,10 @@ func _despegar() -> void:
 	var j: Dictionary = info()["saltar"]
 	if ap.current_animation != "saltar":
 		_tocar("saltar", 0.1, 1.0, float(j["despegue_s"]))
-	_z_meta = _buscar_plataforma() if ayuda_profundidad and absf(_entrada().y) < 0.1 else NAN
-
-
-## Si Felipe salta pegado al frente de un mueble alcanzable, devuelve la z donde caer encima.
-func _buscar_plataforma() -> float:
-	var espacio := get_world_3d().direct_space_state
-	var pie := global_position.y
-	var alto := velocidad_salto * velocidad_salto / (2.0 * gravedad)
-	var atras := global_position.z - CAJA.z * 0.5
-	for k in [0.03, 0.1, 0.16]:
-		var z: float = atras - k
-		var q := PhysicsRayQueryParameters3D.create(Vector3(global_position.x, pie + alto + 0.1, z),
-			Vector3(global_position.x, pie + 0.05, z), 1)
-		var r := espacio.intersect_ray(q)
-		if r and r.normal.y > 0.7 and r.position.y > pie + 0.12 and r.position.y < pie + alto - 0.02:
-			_y_meta = r.position.y
-			return z - CAJA.z * 0.5 - 0.06
-	return NAN
 
 
 func _aire(delta: float, dir: Vector2) -> void:
 	_acelerar(delta, dir)
-	if not is_nan(_z_meta) and absf(dir.y) < 0.1 and global_position.y > _y_meta + 0.02:
-		velocity.z = clampf((_z_meta - global_position.z) / 0.12, -1.6, 1.6)
 	if velocity.y > 0.0:
 		if not _cortado and not Input.is_action_pressed("saltar"):
 			velocity.y *= corte_salto
@@ -301,7 +297,6 @@ func _aire(delta: float, dir: Vector2) -> void:
 
 
 func _aterrizar() -> void:
-	_z_meta = NAN
 	if _recordado > 0.0:
 		_recordado = 0.0
 		_cambiar(Estado.PREPARA)
@@ -380,7 +375,10 @@ func _usar(obj: Node) -> void:
 			_empezar_accion(Estado.ARANANDO)
 		"Tirar":
 			_obj_accion = obj
-			mirar_hacia((obj as Node3D).global_position)
+			# De 3/4 hacia el mueble (el objeto está en su plano, detrás).
+			var dx := (obj as Node3D).global_position.x - global_position.x
+			var lado := signf(dx) if absf(dx) > 0.08 else signf(sin(rig.rotation.y))
+			_yaw = atan2(lado if lado != 0.0 else 1.0, -0.7)
 			_empezar_accion(Estado.MANOTAZO)
 		"Pedir":
 			_pedir_o_maullar()
@@ -480,7 +478,7 @@ func _zarpazo() -> void:
 			_obj_accion.call("golpear", Vector3(clampf(d.x, -0.5, 0.5), 0.0, 0.8).normalized())
 		return
 	# Arañar: rayo hacia el mueble a la altura de las garras.
-	var origen := global_position + Vector3.UP * 0.36
+	var origen := rig.global_position + Vector3.UP * 0.36
 	var q := PhysicsRayQueryParameters3D.create(origen, origen + adelante() * 0.7, 1)
 	var r := get_world_3d().direct_space_state.intersect_ray(q)
 	if r.is_empty():
@@ -524,14 +522,15 @@ func _empezar_ocio() -> void:
 	if pelota and contactos.size() > 0:
 		var d := pelota.global_position - global_position
 		var alto_ok := absf(pelota.global_position.y - global_position.y - 0.11) < 0.08
-		if alto_ok and Vector2(d.x, d.z).length() < 1.6 and pelota.linear_velocity.length() < 0.15:
+		if alto_ok and absf(d.x) < 1.6 and pelota.linear_velocity.length() < 0.15:
 			var lado := 1.0 if d.x >= 0.0 else -1.0
-			_ocio_yaw = deg_to_rad(50.0) * lado
+			# De perfil hacia la pelota, un poco hacia la cámara (3/4).
+			_ocio_yaw = deg_to_rad(72.0) * lado
 			var pie := _pie_contacto()
 			var b := Basis(Vector3.UP, _ocio_yaw)
 			_ocio_meta = pelota.global_position - b * Vector3(pie.x, 0.0, pie.z + 0.1)
 			_ocio_meta.y = global_position.y
-			_ocio_meta.z = clampf(_ocio_meta.z, -0.2, 0.45)
+			_ocio_meta.z = _z_plano
 			_ocio_bloqueo = 0.0
 			estado = Estado.OCIO_IR
 			_t = 0.0
@@ -624,19 +623,16 @@ func _pelota_cerca(max_d := 0.35) -> bool:
 	var pelota: RigidBody3D = juego.get("pelota") if juego else null
 	if pelota == null:
 		return false
-	var d := pelota.global_position - _pata_mundo()
-	d.y = 0.0
-	return d.length() < max_d
+	return absf(pelota.global_position.x - _pata_mundo().x) < max_d
 
 
-## En cada contacto de la pata (marcas de felipe_rig.json) la pelota recibe un toque: hacia un
-## lado y al siguiente hacia el otro, así se queda jugando cerca.
+## En cada contacto de la pata (marcas de felipe_rig.json) la pelota recibe un toque en el plano:
+## el primero la aleja un poco y el segundo la trae de vuelta, así se queda jugando cerca.
 func _tocar_pelota() -> void:
 	var pelota: RigidBody3D = juego.get("pelota") if juego else null
 	if pelota == null or not _pelota_cerca(0.4):
 		return
-	var izquierda := rig.global_transform.basis.x.normalized()
-	var frente := adelante()
+	var frente := Vector3(signf(adelante().x), 0.0, 0.0)
 	_contacto_lado = -_contacto_lado
-	var v := izquierda * 0.38 * _contacto_lado + frente * 0.06 + Vector3.UP * 0.25
+	var v := frente * 0.32 * _contacto_lado + Vector3.UP * 0.3
 	pelota.apply_central_impulse(v * pelota.mass)

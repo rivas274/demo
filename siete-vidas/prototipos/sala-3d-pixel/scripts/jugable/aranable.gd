@@ -2,8 +2,8 @@
 # Pregunta: ¿se siente bien controlar a Felipe 3D (con rig) en una sala jugable: caminar, saltar
 # a los muebles, arañar, tirar cosas y pedirle a Valeria?
 # Fecha: 2026-10-23
-# El sofá como cosa que se araña: desde el cojín (pegado al respaldo) o desde el piso (pegado
-# al frente). Solo dice si Felipe está en posición y dónde va el indicador; las marcas las pone
+# El sofá como cosa que se araña (en el plano de juego, solo cuenta x): desde el cojín araña el
+# respaldo; desde el piso, el frente. Solo dice si Felipe está en posición y dónde va el indicador; las marcas las pone
 # Felipe donde llegan sus garras.
 extends Node3D
 
@@ -23,10 +23,7 @@ func verbo(f: Node3D) -> String:
 	var p := f.global_position
 	if p.x < x_min or p.x > x_max:
 		return ""
-	var medio_z := 0.15 + 0.12
-	if absf(p.y - alto_cojin) < 0.12 and p.z < z_respaldo + medio_z + 0.1:
-		return "Arañar"
-	if p.y < 0.08 and p.z < z_frente + medio_z:
+	if absf(p.y - alto_cojin) < 0.06 or p.y < 0.05:
 		return "Arañar"
 	return ""
 

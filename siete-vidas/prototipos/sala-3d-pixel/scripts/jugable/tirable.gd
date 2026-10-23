@@ -2,8 +2,9 @@
 # Pregunta: ¿se siente bien controlar a Felipe 3D (con rig) en una sala jugable: caminar, saltar
 # a los muebles, arañar, tirar cosas y pedirle a Valeria?
 # Fecha: 2026-10-23
-# Vaso o taza sobre un mueble: quieto (congelado) hasta el manotazo; entonces cae con física.
-# El vaso se rompe en pedazos al tocar el piso; la taza rueda. Avisa con `caido` para que
+# Vaso o taza sobre un mueble: quieto (congelado) hasta el manotazo; entonces cae con física
+# hacia el borde del mueble (lado_caida), con el eje Z bloqueado (no sale de su plano). El vaso
+# se rompe en pedazos al tocar el piso; la taza rueda. Avisa con `caido` para que
 # Valeria vaya a recogerlo; `recoger()` lo hace desaparecer y al rato vuelve a su lugar.
 extends RigidBody3D
 
@@ -14,8 +15,10 @@ signal caido(obj: Node3D, pos: Vector3)
 @export var radio := 0.07
 @export var color := Color("e8dccb")
 ## Alcance del manotazo: distancia en el piso y altura sobre los pies de Felipe (m).
-@export var alcance := 0.6
+@export var alcance := 0.5
 @export var alcance_alto := 0.62
+## Hacia qué borde del mueble sale con el manotazo (-1 izquierda, 1 derecha).
+@export var lado_caida := -1.0
 
 var _inicio := Transform3D.IDENTITY
 var _volando := false
@@ -29,7 +32,10 @@ var pedazos: Array[RigidBody3D] = []
 func _ready() -> void:
 	mass = 0.25
 	collision_layer = 8
-	collision_mask = 1 | 2 | 8
+	collision_mask = 1 | 8 | 64
+	axis_lock_linear_z = true
+	axis_lock_angular_x = true
+	axis_lock_angular_y = true
 	contact_monitor = true
 	max_contacts_reported = 4
 	freeze = true
@@ -79,7 +85,7 @@ func verbo(f: Node3D) -> String:
 		return ""
 	var d := global_position - f.global_position
 	var base := global_position.y - alto * 0.5 - f.global_position.y
-	if Vector2(d.x, d.z).length() <= alcance and base > -0.1 and base < alcance_alto:
+	if absf(d.x) <= alcance and base > -0.1 and base < alcance_alto:
 		return "Tirar"
 	return ""
 
@@ -92,18 +98,17 @@ func golpear(dir: Vector3) -> void:
 	freeze = false
 	_volando = true
 	sleeping = false
-	# En el aire no choca con Felipe (si le cae encima, lo hundiría en el piso).
-	collision_mask = 1 | 8
-	apply_central_impulse((dir.normalized() * 1.25 + Vector3.UP * 0.7) * mass)
-	apply_torque_impulse(dir.cross(Vector3.UP) * -0.02)
+	var lado := Vector3(lado_caida, 0.0, 0.0)
+	apply_central_impulse((lado * 1.2 + Vector3.UP * 0.6) * mass)
+	apply_torque_impulse(Vector3(0.0, 0.0, -lado_caida * 0.02))
 
 
 func _al_tocar(_cuerpo: Node) -> void:
-	if not _volando or global_position.y > 0.3:
+	# Cuenta como "tirado" al tocar algo bastante más abajo que su mueble (piso o sofá).
+	if not _volando or global_position.y > _inicio.origin.y - 0.2:
 		return
 	_volando = false
 	_caido = true
-	set_deferred("collision_mask", 1 | 2 | 8)
 	if rompible and _vel_antes.length() > 0.8:
 		_romper()
 	caido.emit(self, global_position)
@@ -117,7 +122,8 @@ func _romper() -> void:
 	for i in 8:
 		var p := RigidBody3D.new()
 		p.collision_layer = 16
-		p.collision_mask = 1
+		p.collision_mask = 1 | 64
+		p.axis_lock_linear_z = true
 		p.mass = 0.02
 		var tam := Vector3(randf_range(0.03, 0.07), randf_range(0.02, 0.05), randf_range(0.03, 0.06))
 		var f := CollisionShape3D.new()
@@ -134,7 +140,7 @@ func _romper() -> void:
 		get_parent().add_child(p)
 		p.global_position = donde + Vector3(randf_range(-0.05, 0.05), 0.04, randf_range(-0.05, 0.05))
 		var ang := TAU * i / 8.0 + randf_range(-0.3, 0.3)
-		p.linear_velocity = Vector3(cos(ang), 0.0, sin(ang) * 0.6) * randf_range(0.5, 1.1) + Vector3.UP * randf_range(0.6, 1.2)
+		p.linear_velocity = Vector3(cos(ang), 0.0, 0.0) * randf_range(0.4, 1.0) + Vector3.UP * randf_range(0.6, 1.2)
 		p.angular_velocity = Vector3(randf_range(-9, 9), randf_range(-9, 9), randf_range(-9, 9))
 		pedazos.append(p)
 
@@ -160,7 +166,6 @@ func reponer() -> void:
 	visible = true
 	_caido = false
 	_volando = false
-	collision_mask = 1 | 2 | 8
 
 
 func esta_caido() -> bool:

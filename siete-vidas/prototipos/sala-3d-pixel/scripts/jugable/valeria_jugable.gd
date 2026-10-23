@@ -8,16 +8,12 @@
 # - rutina: celular junto al librero, sofá, recoger la pelota y lanzársela a Felipe, ventana;
 # - si Felipe tira algo: "¡FELIPE!", voltea, camina, lo recoge (clip recoger);
 # - si Felipe le pide cerca: se agacha y le da un snack (sentada, se lo tira sin pararse);
-# - esquiva a Felipe al caminar y, si él no se mueve, lo empuja suave.
+# - camina por un carril apenas detrás del plano de Felipe (z = -0,15 contra 0,15): no chocan,
+#   Felipe pasa por delante, como las capas del juego 2D.
 extends "res://scripts/valeria_mixamo.gd"
-
-const CAPA_VALERIA := 4
 
 var felipe: CharacterBody3D
 var juego: Node
-var cuerpo: AnimatableBody3D
-var _forma_pie: CollisionShape3D
-var _forma_sentada: CollisionShape3D
 var _cola: Array[Dictionary] = []
 var _p: Dictionary = {}
 var _act := 0
@@ -32,12 +28,11 @@ var _bloqueo := 0.0
 
 
 func _ready() -> void:
-	z_camino = 0.22
+	z_camino = -0.15
 	_cargar()
 	_aplicar_toon()
 	if _animado:
 		_medir()
-	_crear_cuerpo()
 	add_to_group("interactuable")
 	position = Vector3(3.0, 0.0, z_camino)
 	_rumbo = -PI * 0.5
@@ -45,40 +40,15 @@ func _ready() -> void:
 	_siguiente()
 
 
-func _crear_cuerpo() -> void:
-	cuerpo = AnimatableBody3D.new()
-	cuerpo.sync_to_physics = false
-	cuerpo.collision_layer = CAPA_VALERIA
-	cuerpo.collision_mask = 0
-	_forma_pie = CollisionShape3D.new()
-	var cap := CapsuleShape3D.new()
-	cap.radius = 0.2
-	cap.height = 1.6
-	_forma_pie.shape = cap
-	_forma_pie.position.y = 0.8
-	cuerpo.add_child(_forma_pie)
-	_forma_sentada = CollisionShape3D.new()
-	var caja := BoxShape3D.new()
-	caja.size = Vector3(0.42, 0.8, 0.5)
-	_forma_sentada.shape = caja
-	_forma_sentada.disabled = true
-	cuerpo.add_child(_forma_sentada)
-	add_child(cuerpo)
-
-
 func _sentar_cuerpo(si: bool) -> void:
 	_sentada = si
-	_forma_pie.disabled = si
-	_forma_sentada.disabled = not si
-	if si:
-		_forma_sentada.global_position = Vector3(x_sofa, y_asiento + 0.42, -0.72)
 
 
 # --- Lo que Felipe puede hacer con ella ---------------------------------------
 
 func verbo(f: Node3D) -> String:
 	var d := f.global_position - global_position
-	if Vector2(d.x, d.z).length() <= 1.0 and absf(d.y) < 0.7:
+	if absf(d.x) <= 0.9 and absf(d.y) < 0.7:
 		return "Pedir"
 	return ""
 
@@ -144,7 +114,7 @@ func _parada_cerca(pos: Vector3) -> Vector3:
 	# Si Felipe está al lado de la cosa, se para del otro lado.
 	if felipe and absf(felipe.global_position.x - pos.x) < 0.7:
 		lado = 1.0 if pos.x >= felipe.global_position.x else -1.0
-	return Vector3(pos.x + lado * 0.42, 0.0, clampf(pos.z + 0.1, -0.1, 0.45))
+	return Vector3(pos.x + lado * 0.32, 0.0, clampf(pos.z + 0.45, -0.32, z_camino))
 
 
 func _interrumpir(pasos: Array[Dictionary]) -> void:
@@ -273,7 +243,7 @@ func _process(delta: float) -> void:
 		_siguiente()
 
 
-## Camina hacia el punto; esquiva a Felipe y, si él no se corre, lo empuja suave.
+## Camina hacia el punto (por su carril; Felipe va en otro plano).
 func _ir(delta: float) -> bool:
 	var meta: Vector3 = _p["p"]
 	var d := meta - position
@@ -283,60 +253,11 @@ func _ir(delta: float) -> bool:
 		return true
 	var dir := d.normalized()
 	var vel := _velocidad
-	if felipe and felipe.global_position.y < 0.25:
-		var desvio := _desvio(dir, d.length())
-		if desvio.is_finite():
-			dir = desvio
-			_bloqueo = 0.0
-		else:
-			# No hay por dónde pasar: espera un poco y luego avanza despacio empujándolo suave.
-			_bloqueo += delta
-			vel = 0.0 if _bloqueo < 0.8 else 0.3
-			if _dijo_permiso <= 0.0:
-				_dijo_permiso = 6.0
-				_decir("Permiso, Su Majestad.")
-			if vel > 0.0:
-				var a := felipe.global_position - position
-				a.y = 0.0
-				var lado := dir.cross(Vector3.UP).normalized()
-				lado = lado if lado.dot(a) > 0.0 else -lado
-				felipe.call("empujon", (lado * 0.7 + dir * 0.5).normalized() * 0.45)
 	var paso := minf(vel * delta, d.length())
 	position += dir * paso
-	position.z = clampf(position.z, -0.15, 0.5)
 	_rumbo = lerp_angle(_rumbo, atan2(dir.x, dir.z), clampf(delta * rapidez_giro, 0.0, 1.0))
 	_ap.speed_scale = maxf(vel, 0.05) / maxf(_velocidad, 0.01)
 	return false
-
-
-## Si Felipe está en el camino, devuelve la dirección para rodearlo a 0,62 m por el lado que
-## quede dentro del piso libre (z de -0,15 a 0,5). Vector3(INF...) si no hay por dónde.
-func _desvio(dir: Vector3, largo: float) -> Vector3:
-	var a := felipe.global_position - position
-	a.y = 0.0
-	var proy := a.dot(dir)
-	var lateral := (a - dir * proy).length()
-	if proy < -0.05 or proy > largo + 0.3 or lateral > 0.58:
-		return dir
-	var lado := dir.cross(Vector3.UP).normalized()
-	var mejor := Vector3.INF
-	var mejor_d := INF
-	for s: float in [1.0, -1.0]:
-		var w := felipe.global_position + lado * s * 0.62
-		w.y = 0.0
-		if w.z < -0.15 or w.z > 0.5:
-			continue
-		var dw := (w - position).length()
-		if dw < mejor_d:
-			mejor_d = dw
-			mejor = w
-	if not mejor.is_finite():
-		return Vector3.INF
-	var hacia := mejor - position
-	hacia.y = 0.0
-	if hacia.length() < 0.05:
-		return dir
-	return (hacia.normalized() + dir * 0.3).normalized()
 
 
 # --- La pelota ----------------------------------------------------------------
@@ -367,5 +288,7 @@ func _soltar_carga() -> void:
 	_llevando = null
 	pelota.reparent(get_parent(), true)
 	pelota.rotation = Vector3.ZERO
+	# Vuelve al plano de juego de Felipe.
+	pelota.global_position.z = float(juego.get("Z_PLANO")) if juego else 0.15
 	pelota.freeze = false
 	pelota.sleeping = false

@@ -32,6 +32,30 @@ Por qué funciona:
 | [04-errores-y-lecciones.md](04-errores-y-lecciones.md) | Los errores que el creador vio en segundos y la regla que los evita |
 | [05-herramientas-y-costos.md](05-herramientas-y-costos.md) | Herramientas, licencias, costos reales y el equipo de agentes por fases |
 
+## Evaluación honesta: qué funcionó y qué costó
+
+**Funcionó mucho: Gemini como artista gratis.**
+- Hizo mucho arte de buena calidad: muebles, pisos, ventanas, puertas, el menú «Decreto real», el kit de interfaz y las derrotas de los enemigos.
+- La clave fueron los encargos con reglas fijas: fondo blanco, piezas separadas a 40 px, sin texto, la misma paleta y el mismo contorno, y referencias adjuntas (ver [02-arte-y-animacion.md](02-arte-y-animacion.md)).
+
+**Sirvió menos: Gemini como crítico.**
+- Detectó cosas reales, pero a veces era genérico o pedía cambios que no encajaban con el juego.
+- La mayoría de los errores los encontró **el ojo del creador mirando videos reales** (ver [04-errores-y-lecciones.md](04-errores-y-lecciones.md)).
+
+**Costos ocultos:**
+- El creador era el puente manual: bajaba y subía las imágenes entre Gemini y el repositorio, y algunas se perdieron en el camino.
+- El arte llegaba con otra escala o perspectiva y había que recortarlo o descartarlo. Ejemplo: el armario de Gemini no calzaba con la escalera y se quedó el de código.
+- El riesgo de que todo «se vea hecho por IA» obligó a crear un agente revisor de ambientes.
+- Las pruebas automáticas pasaban y el nivel igual se veía mal. Hay que mirar capturas y video, no solo correr pruebas.
+
+**Cómo mejorarlo en un proyecto nuevo:**
+- Guía de estilo y paleta fijas desde el día 1, adjuntas a cada encargo.
+- Encargos en tandas grandes, no pieza por pieza.
+- 5 variantes por pieza, y elegir la mejor.
+- Automatizar la recepción del arte: una carpeta de entrada y un script que recorte, escale y revise cada pieza (ver [03-godot-2d.md](03-godot-2d.md)).
+
+**Veredicto:** como forma de conseguir arte con cero presupuesto, es **muy recomendable**. Como crítica, es un **complemento**: no reemplaza revisar el juego en video.
+
 ## Resumen en 5 líneas
 
 1. Diseña el nivel en papel con reglas medibles (enseñar → probar → girar, escala del personaje, descansos, atajos) y una prueba automática que las valide.

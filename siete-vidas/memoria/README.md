@@ -15,6 +15,7 @@ Esta carpeta guarda lo que ya se decidió, para que cualquier sesión nueva reto
 | [07-arquitectura.md](07-arquitectura.md) | **Cómo está armado el juego:** piezas (componentes), datos y escenas, estados de Felipe, jefes con conductas, la interfaz (tema, pila de pantallas, textos traducibles, controles); recetas para un enemigo, un objeto, un jefe, una pantalla de menú, traducir un texto o el nivel 2 |
 | [../diseno/pilares.md](../diseno/pilares.md) | **Fantasía y pilares del juego** (aprobados): desempatan toda decisión |
 | [../diseno/reglas-de-niveles.md](../diseno/reglas-de-niveles.md) | Reglas para diseñar niveles (se validan con `prueba_reglas_nivel.gd`) |
+| [../../conocimiento/README.md](../../conocimiento/README.md) | **Base de conocimiento reutilizable para otros proyectos** (fuera del juego): principios de trabajo, flujo 2D y flujo 3D. Actualizarla cuando se aprenda algo general |
 
 ## Equipo de diseño (agentes y comandos)
 

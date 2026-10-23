@@ -1,0 +1,84 @@
+# Rig y animación de un cuadrúpedo hecho con IA (receta estándar en Blender)
+
+## Qué problema resuelve
+
+Animar un animal (gato, perro) generado con IA para que se mueva natural, sin «masa», sin cortes y sin textura estirada. La malla de IA es **una estatua**: una sopa de triángulos sin bucles en las articulaciones. Hay que rehacerla antes de animar.
+
+## Receta paso a paso
+
+Todo se puede correr por script con **Blender como módulo de Python** (`pip install bpy==5.2.3`, sirve también en la nube sin pantalla). Un script por paso, en orden.
+
+### 1. Retopología (malla nueva y limpia)
+1. Importa el GLB, aplica transformaciones y centra con el piso en z = 0.
+2. **Voxel Remesh** (unos 6 mm en un gato de 55 cm): cierra la malla y une las islas sueltas (había 127) en una sola pieza.
+3. **Simetría primero:** busca el plano medio, aplica **Symmetrize** desde la mitad buena y **suelda** (5 mm cerró la costura). El personaje se arma simétrico en reposo; la asimetría la pone la animación.
+4. **QuadriFlow** a unos **7.700 cuadriláteros**. Para que quede simétrica, córtala al medio y espéjala con **Mirror** soldado (la simetría de QuadriFlow dejaba una grieta en el centro).
+5. **Shrinkwrap** a la original para no perder la forma. Relaja zonas con escalones, sin tocar la cara.
+6. **Revisa la cara antes y después:** con poca densidad se aplana (regresión vista en Felipe).
+
+### 2. Textura
+Hornea el color desde la malla alta con «Selected to Active» (ver [02-texturas.md](02-texturas.md)).
+
+### 3. Esqueleto con anatomía real
+- Parte del **metarig de gato de Rigify** y recórtalo (en Felipe, 34 huesos: raíz, columna de 4, cuello, cabeza, 2 orejas, cola de 5 y por pata cintura + 3 segmentos + dedos).
+- **Anatomía de cuadrúpedo digitígrado, dentro del pelo:**
+  - **Trasera:** cadera arriba en la grupa → fémur **hacia adelante** y abajo → rodilla → tibia **hacia atrás** → corvejón → metatarso casi vertical → dedos.
+  - **Delantera:** escápula arriba, detrás del cuello → hombro en la punta del pecho → húmero **hacia atrás** → codo bajo el pecho → antebrazo casi vertical → muñeca → mano.
+- **Las patas empiezan dentro del cuerpo:** la pata visible es solo la punta. Las traseras son más largas y grandes, así que **la grupa queda más alta que los hombros**.
+- Para ubicar huesos y cortes, dale al creador **plantillas ortográficas con cuadrícula** (perfil y frente) para que marque a mano dónde van; luego se leen por script.
+- Cola de 5 huesos (con 4 se dobla en codo, no en curva).
+
+### 4. Pesos
+1. **Automatic Weights** (pesos de calor).
+2. **Suavizar** entre vecinos; nada de cortes duros (un corte seco pliega la piel y en el toon parece una sombra rara). El peso de la pata se desvanece en una rampa.
+3. **Máximo 4 huesos por vértice**, normalizado (Godot no acepta más).
+4. **Cabeza rígida:** toda a su hueso, con un anillo de mezcla solo donde nace el cuello; la cara no se mezcla.
+5. **El flanco sigue al fémur** con caída suave hacia la cadera; el hombro sigue a la escápula y al húmero. El muslo no se lleva la grupa.
+6. Ninguna pata toma vértices del otro lado ni del centro de la panza.
+7. **Pesos espejados** (.L ↔ .R), como Mirror Vertex Groups.
+8. El estirar y aplastar del torso no se hereda en patas, cuello ni cola (`inherit_scale = NONE`), o las patas no llegan al piso.
+9. Sin Preserve Volume: Godot usa skinning lineal.
+10. **Prueba posando** (patas a ±35°, cola, cabeza) antes de animar.
+
+**Trampa de bpy:** al borrar grupos de un vértice, guarda primero los índices. Si borras mientras recorres `v.groups`, la colección se corre y quedan restos (más de 4 huesos, suma mayor que 1).
+
+### 5. Animación con poses clave (a mano, mirando video real)
+- **Graba o busca video del animal real** y toma notas por acción (cómo pisa, dónde va la cola).
+- **Controles de animador:** IK en cada pie con **pivote en la bola del pie** y polos en rodilla y codo. Se animan los controles y se hornea a los huesos: el pie apoyado no patina.
+- **Ciclo de caminar** (Richard Williams, *The Animator's Survival Kit*):
+  - **0,67 s** por ciclo; **apoyo del 60 %** del ciclo.
+  - Secuencia lateral: trasera izq., delantera izq., trasera der., delantera der.
+  - 9 poses por pata con **breakdowns**: contacto, bajada, apoyo medio, talón arriba, despegue, recoge, paso, adelanta, estira. Vuelo en arco Bezier; apoyo lineal.
+  - Grupa y hombros bajan por turnos al recibir el peso; la columna se tuerce.
+  - **Cabeza estabilizada:** compensa el cabeceo del cuerpo y mira adelante.
+  - Mide el patinaje del pie apoyado (en Felipe, 2,3 mm, menos de medio pixel).
+- **Cola con overlapping action / follow-through:** cada hueso 2 a 4 cuadros atrás del anterior y más amplitud hacia la punta. Nunca congelada en quieto.
+- **Acciones:** el torso gira en la cadera y las patas en el aire se ponen relativas al torso, así ninguna se estira de más. Anticipación antes de saltar, aterrizaje con las delanteras primero.
+- Entrada, bucle y salida separados para acciones largas (arañar, pedir).
+
+### 6. Exportar
+- Hornea a los huesos que deforman, borra los controles y exporta **GLB** con las animaciones con nombre. Guarda en un JSON la velocidad del ciclo y las marcas (despegue, aterrizaje).
+- En Godot: el nodo avanza a la velocidad medida; el arco del salto lo hace Godot entre las marcas; encima, un **resorte amortiguado** por hueso de la cola como capa aditiva que reacciona a la aceleración (jiggle o spring bones).
+
+## Límites conocidos con proporciones chibi
+- Patas delanteras cortas: el gato no puede sentarse erguido con las manos en el piso; su sentado es bajo.
+- Engrosar una parte: empuja desde el eje del miembro, no por la normal (con normales ruidosas la piel se arruga), y suaviza.
+- QuadriFlow da una malla pareja, no bucles pensados por articulación: funciona si es densa; un modelador la mejoraría.
+
+## Errores típicos
+
+| Error | Causa | Lo que funcionó |
+| --- | --- | --- |
+| Se deforma como masa | Pesos por distancia sobre la malla de IA | Retopología + pesos de calor suavizados |
+| Sombra rara entre muslo y panza | Corte duro de pesos | Rampa + suavizado entre vecinos |
+| Una pata «se mete» al caminar | La malla de IA tenía una mano 6 cm atrás | Symmetrize antes de todo |
+| Patas que no llegan al piso al saltar | Heredan la escala del torso | `inherit_scale = NONE` |
+| Caminata «de juguete» | Ciclo lento, sin breakdowns ni desfases | 0,67 s, 60 % de apoyo, breakdowns, cabeza estabilizada |
+| La mano se aplastó al animar | Regresión no revisada | Comparar cada versión con la anterior |
+
+## Fuente o ejemplo
+
+- Scripts en orden: `siete-vidas/prototipos/sala-3d-pixel/assets/meshy_prueba/felipe_rig/scripts/` (`01_retopo.py`, `02_textura.py`, `03_rig.py`, `04_poses.py`, `05_anima.py`, `anima_locomocion.py`, `anima_acciones.py`, `simetria.py`).
+- Plantillas para marcar huesos: `siete-vidas/prototipos/sala-3d-pixel/assets/meshy_prueba/plantilla_esqueleto/`.
+- Uso en Godot (resorte de la cola): `siete-vidas/prototipos/sala-3d-pixel/scripts/felipe_rig.gd`.
+- Detalle de las versiones v1 a v4: `siete-vidas/prototipos/sala-3d-pixel/INFORME.md` («Felipe con rig hecho en Blender»); lecciones: `siete-vidas/memoria/01-decisiones.md` («Pilar de trabajo»).

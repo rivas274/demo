@@ -9,6 +9,8 @@ ZANCADA_U = 0.34      # largo del paso en unidades de Meshy (se pasa a metros co
 ALZA_U = {"tras": 0.06, "del": 0.075}   # levanta poco pero con decisión (video 6)
 # v4: postura del Felipe real (felipe-lomo-costado.jpg, video 6): la grupa más alta que los
 # hombros, el lomo baja suave hacia adelante y las traseras van más estiradas (más largas).
+MUNECA_K = float(__import__("os").environ.get("FELIPE_MUNECA", "0.7"))
+DEDOS_K = float(__import__("os").environ.get("FELIPE_DEDOS", "0.0"))
 POSTURA_SUBE = 0.012   # m que sube la cadera
 POSTURA_CAB = -4.0     # grados: el frente baja
 MANO_X = float(__import__("os").environ.get("FELIPE_MANO_X", "0.018"))  # m hacia afuera (elegido entre 0 y 0,024)
@@ -59,6 +61,10 @@ def caminar():
             # no queda inclinado hacia el centro cuando la pata se dobla.
             vuelo = VUELO_X * math.sin(math.pi * min(1.0, max(0.0, (fase - DUTY) / (1 - DUTY))))
             afuera = (MANO_X + vuelo if pata == "del" else 0.0) * (1 if lado == "L" else -1)
+            # v5: la muñeca delantera se dobla menos y los dedos de la mano no se pliegan en el
+            # vuelo (doblada a 75° con los dedos a -20° la mano perdía hasta 12 % de volumen).
+            if pata == "del":
+                g, gd = g * MUNECA_K, gd * DEDOS_K
             B.pata(f, pata, lado, desp=(afuera, av * Z / 2 + centro, al * alza), rot=g, dedo=gd,
                    escapula=20 * av if pata == "del" else None)
             if fase < DUTY - 1e-6:

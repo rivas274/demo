@@ -202,6 +202,8 @@ for lado in ("L", "R"):
     RAMPA["thigh." + lado] = (th.head_local.z + 0.02, th.tail_local.z + 0.02)
     RAMPA["upper_arm." + lado] = (ua.head_local.z + 0.04, ua.tail_local.z + 0.02)
 print("rampas:", {k: (round(x, 3), round(y, 3)) for k, (x, y) in RAMPA.items()})
+MUNECA_Z = arm.data.bones["hand.L"].head_local.z + float(os.environ.get("FELIPE_MANO_ALTO", "0.03"))  # la bola de la mano empieza sobre la articulación
+MUNECA_U = 0.06
 grupos = {g.name: g for g in malla.vertex_groups}
 idx_nombre = {g.index: g.name for g in malla.vertex_groups}
 ANILLO = 30.0  # px de mezcla entre cabeza y cuello
@@ -245,6 +247,27 @@ for v in malla.data.vertices:
             pesos[k] *= t * t * (3 - 2 * t)
             if pesos[k] <= 1e-4:
                 pesos.pop(k)
+    # v5: la mano delantera es rígida en su hueso (la mezcla lineal entre antebrazo y mano la
+    # plegaba al doblar la muñeca: se aplastaba y se veía más chica). Bajo la muñeca, solo
+    # mano y dedos; la mezcla con el antebrazo va en una franja de MUÑECA_U por encima.
+    for lado in ("L", "R"):
+        k_ante, k_mano, k_dedo = "forearm." + lado, "hand." + lado, "f_toe." + lado
+        if not any(k in pesos for k in (k_ante, k_mano, k_dedo)):
+            continue
+        if (v.co.x > 0) != (lado == "L"):
+            continue
+        z_mu = MUNECA_Z
+        t = min(1.0, max(0.0, (v.co.z - z_mu) / MUNECA_U))   # 0 bajo la muñeca, 1 arriba
+        mano = pesos.get(k_mano, 0.0) + pesos.get(k_dedo, 0.0)
+        resto = sum(x for k, x in pesos.items() if k not in (k_mano, k_dedo))
+        if t < 1.0 and mano + resto > 0:
+            objetivo = 1.0 - t          # la parte de la mano que tiene que ir rígida
+            if mano < objetivo:
+                f = (1.0 - objetivo) / max(resto, 1e-6)
+                for k in list(pesos):
+                    if k not in (k_mano, k_dedo):
+                        pesos[k] *= f
+                pesos[k_mano] = pesos.get(k_mano, 0.0) + (objetivo - mano)
     # Muslo y brazo solo toman la piel de la pata: entre la rodilla (o el codo) y la cadera
     # (o el hombro) su peso baja suave a 0 y lo que sobra pasa a la pelvis o la escápula,
     # que siguen al cuerpo. Sin esto, la grupa y el flanco giraban con la pata y en el toon

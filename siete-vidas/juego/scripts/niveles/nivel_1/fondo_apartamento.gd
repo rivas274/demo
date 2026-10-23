@@ -5,7 +5,7 @@ extends Node2D
 ## ventanas recortadas (Nivel1.VENTANAS); por los huecos y el balcón se ve la ciudad.
 ## Arte provisional: cada estilo de pared se reemplaza por su textura final sin tocar el resto.
 
-## nombre -> [cuánto sigue a la cámara (1 = igual que el juego), z_index, función que la dibuja]
+## nombre -> [cuánto sigue a la cámara (1 = igual que el juego), z de la tabla Capas (FONDO_LEJANO + su orden), función que la dibuja]
 const CAPAS := {
 	"Cielo": [0.05, -40, "_dibujar_cielo"],
 	"CiudadLejana": [0.2, -35, "_dibujar_ciudad_lejana"],
@@ -78,7 +78,7 @@ func _ready() -> void:
 		var capa := Parallax2D.new()
 		capa.name = nombre
 		capa.scroll_scale = Vector2(datos[0], datos[0])
-		capa.z_index = datos[1]
+		Profundidad.poner(capa, Capas.Rol.FONDO, PackedStringArray(), datos[1] - Capas.FONDO_LEJANO)
 		var lienzo := _lienzo(datos[2])
 		lienzo.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 		capa.add_child(lienzo)
@@ -86,12 +86,12 @@ func _ready() -> void:
 	_textura_pared = ImageTexture.create_from_image(_crear_pared())
 	var pared := _lienzo("_dibujar_pared")
 	pared.name = "Pared"
-	pared.z_index = Capas.PARED
+	Profundidad.poner(pared, Capas.Rol.PARED)
 	pared.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	add_child(pared)
 	_luz = _lienzo("_dibujar_luz")
 	_luz.name = "Luz"
-	_luz.z_index = Capas.LUZ
+	Profundidad.poner(_luz, Capas.Rol.LUZ)
 	add_child(_luz)
 
 

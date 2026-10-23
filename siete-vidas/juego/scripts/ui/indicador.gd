@@ -37,6 +37,7 @@ var objeto: Node2D
 var verbo := ""
 var _vistos := {}
 var _contorno: Node2D
+var _profundidad_contorno: Profundidad
 var _material: ShaderMaterial
 var _aparecer := 0.0
 
@@ -75,11 +76,11 @@ func _ready() -> void:
 	_material.set_shader_parameter("color", Estilo.color(&"indicador_contorno"))
 	_contorno = Node2D.new()
 	_contorno.name = "Contorno"
-	_contorno.z_as_relative = false
-	_contorno.z_index = Capas.ARTE_PARED
 	_contorno.material = _material
 	_contorno.draw.connect(_dibujar_contorno)
 	add_child(_contorno)
+	# El contorno va en la capa que le pida el objeto (detrás de él; por defecto, la de lo colgado en la pared).
+	_profundidad_contorno = Profundidad.poner(_contorno, Capas.Rol.CONTORNO)
 
 
 ## La presentación de un jefe lo esconde (M4): ni contorno ni burbuja durante la entrada.
@@ -106,7 +107,8 @@ func _physics_process(delta: float) -> void:
 			if frase != "":
 				primera_vez.emit(objeto, frase)
 		if objeto and tiene_arte(objeto):
-			_contorno.z_index = int((objeto.call("arte_indicador") as Dictionary).get("z", Capas.ARTE_PARED))
+			_profundidad_contorno.z = int((objeto.call("arte_indicador") as Dictionary).get("z", Capas.ARTE_PARED))
+			_profundidad_contorno.aplicar()
 	verbo = ""
 	if objeto:
 		verbo = tr(String(objeto.call("verbo", felipe))) if objeto.has_method("verbo") else tr("VERBO_USAR")

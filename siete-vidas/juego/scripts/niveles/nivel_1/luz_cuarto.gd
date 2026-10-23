@@ -101,9 +101,9 @@ func _ready() -> void:
 		_luces[datos[0]] = luz
 	var sin_sombrear := CanvasItemMaterial.new()
 	sin_sombrear.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
-	_brillo_pared = _lienzo("Brillo de la ventana", Capas.ARTE_PARED, _dibujar_brillo_pared, sin_sombrear)
-	_brillo_mueble = _lienzo("Brillo de la lámpara", Capas.MUEBLES, _dibujar_brillo_mueble, sin_sombrear)
-	_polvo = _lienzo("Polvo del rayo", Capas.LUZ, _dibujar_polvo, sin_sombrear)
+	_brillo_pared = _lienzo("Brillo de la ventana", Capas.Rol.ARTE_PARED, _dibujar_brillo_pared, sin_sombrear)
+	_brillo_mueble = _lienzo("Brillo de la lámpara", Capas.Rol.DECORADO, _dibujar_brillo_mueble, sin_sombrear)
+	_polvo = _lienzo("Polvo del rayo", Capas.Rol.LUZ, _dibujar_polvo, sin_sombrear)
 	# Lámparas: la luz suma (se ve como luz, no como pintura) y no la oscurece el ambiente.
 	var suma := CanvasItemMaterial.new()
 	suma.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
@@ -111,11 +111,11 @@ func _ready() -> void:
 	_armar_lamparas()
 	# El cono va detrás de los muebles y los personajes (sobre la pared); la franja del piso, encima del piso y debajo
 	# de los muebles; la del tablero y la pantalla, sobre el mueble.
-	_conos = _lienzo("Conos de las lámparas", Capas.ARTE_PARED, _dibujar_conos, suma)
-	_apoyos_piso = _lienzo("Luz de las lámparas en el piso", Capas.ARTE_PARED, _dibujar_apoyos.bind(false), suma)
-	_apoyos_mueble = _lienzo("Luz de las lámparas en el tablero", Capas.MUEBLES, _dibujar_apoyos.bind(true), suma)
-	_pantallas = _lienzo("Pantallas encendidas", Capas.MUEBLES, _dibujar_pantallas, sin_sombrear)
-	_pantallas_suma = _lienzo("Pantallas encendidas (brillo)", Capas.MUEBLES, _dibujar_pantallas_suma, suma)
+	_conos = _lienzo("Conos de las lámparas", Capas.Rol.ARTE_PARED, _dibujar_conos, suma)
+	_apoyos_piso = _lienzo("Luz de las lámparas en el piso", Capas.Rol.ARTE_PARED, _dibujar_apoyos.bind(false), suma)
+	_apoyos_mueble = _lienzo("Luz de las lámparas en el tablero", Capas.Rol.DECORADO, _dibujar_apoyos.bind(true), suma)
+	_pantallas = _lienzo("Pantallas encendidas", Capas.Rol.DECORADO, _dibujar_pantallas, sin_sombrear)
+	_pantallas_suma = _lienzo("Pantallas encendidas (brillo)", Capas.Rol.DECORADO, _dibujar_pantallas_suma, suma)
 	# El Indicador está en el mundo (burbuja y contorno): no recibe ni el ambiente ni las luces.
 	if sala.travesuras and sala.travesuras.indicador:
 		_sin_sombrear(sala.travesuras.indicador, sin_sombrear)
@@ -125,11 +125,11 @@ func _ready() -> void:
 	_al_cambiar_cuarto(sala.habitacion)
 
 
-func _lienzo(nombre: String, z: int, dibujo: Callable, material_lienzo: Material) -> Node2D:
+func _lienzo(nombre: String, rol: int, dibujo: Callable, material_lienzo: Material) -> Node2D:
 	var lienzo := Node2D.new()
 	lienzo.name = nombre
 	lienzo.material = material_lienzo
-	Capas.usar(lienzo, z)
+	Profundidad.poner(lienzo, rol)
 	lienzo.draw.connect(dibujo)
 	add_child(lienzo)
 	return lienzo

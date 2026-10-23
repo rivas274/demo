@@ -13,7 +13,8 @@ import anima_acciones as A
 
 B.preparar()
 acciones = [L.caminar(), L.quieto(), A.aranar_entrada(), A.aranar(), A.aranar_salida(),
-            A.pedir_entrada(), A.pedir(), A.saltar()]
+            A.pedir_entrada(), A.pedir(), A.saltar(),
+            A.sentarse(), A.sentado_mira(), A.sentado_pelota(), A.levantarse()]
 
 
 def medir_patinaje(accion, n):
@@ -62,6 +63,16 @@ info = {
     "saltar": {"despegue_s": round(A.DESPEGUE / B.FPS, 4), "aterrizaje_s": round(A.ATERRIZA / B.FPS, 4)},
     "aranar": {"zarpazos_s": [round(3 / B.FPS, 4), round((3 + A.N_AR / 2) / B.FPS, 4)]},
 }
+# Pelota (la mueve Godot): tiempos de contacto de la pata y posición de la punta de la mano
+# en ese momento, en coordenadas del modelo glTF a escala 1 (x izquierda, y arriba, z adelante).
+acc_p = [x for x, _ in acciones if x.name == "sentado_pelota"][0]
+B.arm.animation_data.action = acc_p
+contactos = []
+for f in A.CONTACTOS_PELOTA:
+    p = B.posicion("f_toe.R", f, cola_=True)
+    contactos.append({"t_s": round(f / B.FPS, 4), "pie_m": [round(p.x, 4), round(p.z, 4), round(-p.y, 4)]})
+info["sentado_pelota"] = {"contactos": contactos, "pata": "delantera derecha"}
+print("pelota:", contactos)
 B.exportar(acciones)
 with open(os.path.join(C.RIG, "felipe_rig.json"), "w") as fh:
     json.dump(info, fh, indent=2, ensure_ascii=False)

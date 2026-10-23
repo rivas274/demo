@@ -65,6 +65,8 @@ Hornea el color desde la malla alta con «Selected to Active» (ver [02-texturas
 - Engrosar una parte: empuja desde el eje del miembro, no por la normal (con normales ruidosas la piel se arruga), y suaviza.
 - QuadriFlow da una malla pareja, no bucles pensados por articulación: funciona si es densa; un modelador la mejoraría.
 - **Cabeza grande vista desde una cámara alta:** si la caminata lleva la cabeza baja, la cámara ve sobre todo la coronilla ("cerebro gigante"). La técnica estándar de los juegos de vista lateral es que la cabeza gire hacia la cámara (~30°, con suavizado) y suba un poco al caminar, como capa en el motor. Ayuda mucho más que achicar la cabeza. Retoques de forma mínimos (cráneo 8 % más chico y hocico 3 mm afuera) completan el arreglo sin cambiar la expresión.
+- **La mirada a cámara es un gesto, no una regla:** de espaldas o dándose vuelta la cabeza sigue al cuerpo; al caminar, un giro sutil (~12°); en quieto, miradas ocasionales de 1 a 2 s. Mirar siempre a la cámara se ve raro.
+- **Objetos que el personaje toca** (una pelota): no van en el modelo. Exporta los tiempos de contacto y la posición del pie en ese momento, y que el motor mueva el objeto.
 - **No simetrizar la cara de un modelo de IA:** el cuerpo sí, pero la cara se proyecta sobre la original con más densidad. Espejarla la aplana y hunde los ojos.
 
 ## Errores típicos

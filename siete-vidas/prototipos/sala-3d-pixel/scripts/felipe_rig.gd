@@ -19,7 +19,7 @@ extends Node3D
 const RUTA := "res://assets/meshy_prueba/felipe_rig/felipe_rig.glb"
 const RUTA_INFO := "res://assets/meshy_prueba/felipe_rig/felipe_rig.json"
 const MEZCLA := 0.2
-const BUCLES := ["caminar", "quieto", "aranar", "pedir"]
+const BUCLES := ["caminar", "quieto", "aranar", "pedir", "sentado_mira", "sentado_pelota"]
 const COLA := ["tail.001", "tail.002", "tail.003", "tail.004", "tail.005"]
 ## Resorte de la cola por hueso: frecuencia (Hz, la punta más lenta = más retraso),
 ## ganancia (grados por m/s²) y amortiguación. Tope de ±25°.
@@ -259,8 +259,8 @@ func _cabeza(delta: float, giro_vel: float = 0.0) -> void:
 	var tope := 0.0
 	if anim == "caminar":
 		tope = giro_cabeza
-	elif anim.begins_with("pedir"):
-		tope = giro_pedir
+	elif anim.begins_with("pedir") or anim == "sentado_mira":
+		tope = giro_pedir   # mira a la persona / al jugador
 	elif anim == "quieto" and _gesto_t > 0.0:
 		tope = giro_gesto
 	# De espaldas: nada (se desvanece de 100° a 130° de la cámara); dándose vuelta: nada.

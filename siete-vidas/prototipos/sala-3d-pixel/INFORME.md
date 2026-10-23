@@ -477,3 +477,16 @@ El creador: «cuando se voltea de espaldas, se ve raro que mire la cámara; se v
 - **Quieto:** una mirada ocasional a la cámara de 1 a 2 s, cada 4 a 8 s al azar (semilla fija), de hasta 35°, y vuelve.
 - **Pidiendo:** mira a la persona (hacia la cámara, 25° como máximo).
 - Todo con suavizado. Entregables: `felipe-v6b-mirada.png` (v6 contra v6b) y `felipe-rig-acciones-v6b.mp4`.
+
+### Quieto largo: sentarse, mirar y jugar con la pelota (2026-10-23, cierre de la etapa de animación)
+El creador: con Felipe «ya estamos bien; seguir insistiendo podría entorpecer». Esta es la última tarea de animación: si el jugador no toca nada un rato, Felipe se sienta, mira al jugador y juega con una pelota. **Las otras animaciones no cambiaron** (mismas medidas al exportar).
+
+**Animaciones nuevas** (`anima_acciones.py`, poses clave como las demás, en el mismo GLB):
+- **`sentarse`** (0,83 s): de quieto a sentado. Usa la base de `pedir_entrada`, con la cabeza al frente.
+- **`sentado_mira`** (3 s, bucle): sentado, respira, una oreja da un respingo y la cola barre el piso lento. Godot gira la cabeza hacia el jugador (25° como máximo, con suavizado).
+- **`sentado_pelota`** (2 s, bucle): la pata delantera derecha da 2 manotazos a una pelota en el piso, con las garras abajo en el contacto. La cabeza baja y sigue la pelota, y la punta de la cola se sacude.
+- **`levantarse`** (0,83 s): de sentado a quieto. Son las mismas claves de `sentarse`, invertidas.
+
+**La pelota no va en el modelo.** `felipe_rig.json` → `sentado_pelota.contactos` trae, por cada contacto, `t_s` (segundos dentro del bucle) y `pie_m`: la punta de la pata en coordenadas del modelo glTF a escala 1 (x izquierda, y arriba, z adelante). Godot la convierte con la escala y la transformación del nodo.
+
+**Prueba en Godot** (`pruebas/felipe_rig_pelota.gd`): quieto → sentarse → mira → pelota (3 bucles) → mira → levantarse. La pelota es una esfera roja con el toon. En cada contacto sale rodando adelante y al costado, gira según lo que avanza y vuelve sola al lugar del siguiente manotazo. Entregable: `felipe-rig-sentado-pelota.mp4`.

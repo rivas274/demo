@@ -12,7 +12,11 @@
     "aranar_salida": 0.5,
     "pedir_entrada": 0.75,
     "pedir": 1.5,
-    "saltar": 1.4167
+    "saltar": 1.4167,
+    "sentarse": 0.8333,
+    "sentado_mira": 3.0,
+    "sentado_pelota": 2.0,
+    "levantarse": 0.8333
   },
   "saltar": {
     "despegue_s": 0.5,
@@ -23,5 +27,26 @@
       0.125,
       0.4583
     ]
+  },
+  "sentado_pelota": {
+    "contactos": [
+      {
+        "t_s": 0.5833,
+        "pie_m": [
+          -0.0591,
+          -0.0004,
+          0.3253
+        ]
+      },
+      {
+        "t_s": 1.3333,
+        "pie_m": [
+          -0.0371,
+          -0.0014,
+          0.33
+        ]
+      }
+    ],
+    "pata": "delantera derecha"
   }
 }

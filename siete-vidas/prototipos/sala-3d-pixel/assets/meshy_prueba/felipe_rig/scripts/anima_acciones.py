@@ -295,3 +295,122 @@ def saltar():
     B.suavizar(a, ciclo=False)
     B.completar(a, n)
     return a, n
+
+
+# ------------------------------------------------------------------ quieto largo: sentado
+# Si el jugador no toca nada un rato: se sienta, mira al jugador y juega con una pelota.
+# La pelota NO va en el modelo: felipe_rig.json trae los cuadros de contacto de la pata y la
+# posición del pie en ese momento; Godot mueve una pelota aparte.
+N_SENTARSE, N_SENT_MIRA, N_SENT_PELOTA = 20, 72, 48
+CONTACTOS_PELOTA = [14, 32]   # cuadros en que la pata derecha toca la pelota (en el piso)
+
+
+def _sentarse_claves(f_de):
+    """Claves de quieto -> sentado; f_de(t) mapea el tiempo (para levantarse se invierte)."""
+    n = N_SENTARSE
+    _torso(f_de(0)); B.lomo(f_de(0)); B.cabeza(f_de(0)); B.orejas(f_de(0)); B.patas_quietas(f_de(0))
+    _torso(f_de(7), sube=-0.014, adelante=0.002, cabeceo=5)
+    B.cabeza(f_de(7), cuello=4, cab=-2)
+    for lado in ("L", "R"):
+        B.pata(f_de(7), "tras", lado, desp=(0, 0.002, 0), rot=-22, dedo=14)
+        B.pata(f_de(7), "del", lado, escapula=0)
+    _torso(f_de(13), sube=SENTADO["sube"] - 0.006, adelante=SENTADO["adelante"], cabeceo=SENTADO["cabeceo"] + 3)
+    B.cabeza(f_de(13), cuello=-2, cab=-4, ladeo=3)
+    for lado in ("L", "R"):
+        B.pata(f_de(13), "tras", lado, desp=(0, 0.004, 0), rot=-60, dedo=40)
+    _manos_sentado(f_de(13))
+    _sentado_quieto(f_de(n))
+    for f, k in ((0, 0.0), (7, 0.25), (13, 0.8), (n, 1.0)):
+        _cola_forma(f_de(f), COLA_SENTADO, k)
+
+
+def _sentado_quieto(f, cuello=-4.0, cab=-4.0, giro=0.0, ladeo=4.0):
+    """Sentado, mirando al frente (la capa de Godot gira la cabeza hacia el jugador)."""
+    _torso(f, sube=SENTADO["sube"], adelante=SENTADO["adelante"], cabeceo=SENTADO["cabeceo"])
+    B.lomo(f, arco=2, cabeceo=4)
+    B.cabeza(f, cuello=cuello, cab=cab, giro_lat=giro, ladeo=ladeo)
+    B.orejas(f, atras=0)
+    for lado in ("L", "R"):
+        B.pata(f, "tras", lado, desp=(0, 0.004, 0), rot=-60, dedo=40)
+    _manos_sentado(f)
+
+
+def sentarse():
+    _ajustar_sentado()
+    a = B.nueva_accion("sentarse")
+    _sentarse_claves(lambda t: t)
+    B.suavizar(a, ciclo=False)
+    B.completar(a, N_SENTARSE)
+    return a, N_SENTARSE
+
+
+def levantarse():
+    a = B.nueva_accion("levantarse")
+    n = N_SENTARSE
+    _sentarse_claves(lambda t: n - t)
+    B.suavizar(a, ciclo=False)
+    B.completar(a, n)
+    return a, n
+
+
+def sentado_mira():
+    """Bucle de 3 s: sentado, mira al jugador con desdén (párpados de reojo, cabeza algo ladeada;
+    el giro hacia la cámara lo pone Godot), respira y la cola barre el piso lento."""
+    a = B.nueva_accion("sentado_mira")
+    n = N_SENT_MIRA
+    resp = lambda f: math.sin(2 * math.pi * 2 * f / n)
+    lade = B.curva([(0, 4), (20, 7), (40, 7), (56, 3), (72, 4)])
+    for f in range(0, n + 1, 6):
+        _sentado_quieto(f, cuello=-4 + 0.6 * resp(f), cab=-6, ladeo=lade(f))
+        _torso(f, sube=SENTADO["sube"] + 0.002 * resp(f), adelante=SENTADO["adelante"], cabeceo=SENTADO["cabeceo"])
+    for f, g in ((0, 0), (30, 0), (33, 16), (37, 2), (n, 0)):
+        B.orejas(f, atras=0, izq=g)
+    # Cola: barre de lado a lado por el piso, lento, con la punta retrasada.
+    B.cola(n, estatica=COLA_SENTADO, onda=lambda t: (0.0, 9 * B.seno(t, n, 1)),
+           punta=lambda t, i: (4 * B.seno(t, n, 2, 0.3) if i >= 3 else 0.0, 0.0), retraso=4)
+    B.suavizar(a)
+    B.completar(a, n)
+    return a, n
+
+
+def sentado_pelota():
+    """Bucle de 2 s: desde sentado, la pata delantera derecha da 2 manotazos a una pelota en el
+    piso, delante y algo a su derecha (garras abajo en el contacto); la cabeza la sigue."""
+    a = B.nueva_accion("sentado_pelota")
+    n = N_SENT_PELOTA
+    base = B.natural("del", "R", **SENTADO)
+    piso = lambda p: _en_piso(p)
+    # (cuadro, desp desde la mano en reposo, giro de la mano, dedos)
+    golpes = [(0, None, 0, 0), (5, (0, -0.010, 0.045), -35, -10), (10, (-0.006, -0.040, 0.070), -60, -20),
+              (CONTACTOS_PELOTA[0], (-0.010, -0.062, 0.0), 12, 28), (18, (-0.008, -0.045, 0.030), -25, 0),
+              (23, None, 0, 0), (27, (0.004, -0.020, 0.050), -45, -14),
+              (CONTACTOS_PELOTA[1], (0.012, -0.068, 0.0), 14, 30), (36, (0.010, -0.050, 0.030), -25, 0),
+              (42, None, 0, 0), (n, None, 0, 0)]
+    for f, d, r, dd in golpes:
+        if d is None:
+            pos = piso(base + V((0, -0.004, 0)))
+        elif d[2] == 0.0:
+            pos = piso(base + V(d))      # contacto: la mano en el piso
+        else:
+            pos = base + V(d)
+        B.pata(f, "del", "R", pos=pos, rot=r, dedo=dd, escapula=-12 if d and d[2] > 0.03 else 4)
+    for f in (0, n):
+        _manos_sentado(f, salvo="R")
+        for lado in ("L", "R"):
+            B.pata(f, "tras", lado, desp=(0, 0.004, 0), rot=-60, dedo=40)
+    # La cabeza baja a mirar la pelota y la sigue (va y vuelve tras cada golpe).
+    sigue = B.curva([(0, 0), (12, 2), (16, -8), (22, -3), (30, 4), (34, 9), (40, 3), (48, 0)])
+    baja = B.curva([(0, 12), (10, 14), (15, 18), (24, 12), (33, 18), (42, 13), (48, 12)])
+    for f in range(0, n + 1, 3):
+        golpe = 1.0 if any(abs(f - c) <= 3 for c in CONTACTOS_PELOTA) else 0.0
+        _torso(f, sube=SENTADO["sube"], adelante=SENTADO["adelante"] + 0.004 * golpe,
+               cabeceo=SENTADO["cabeceo"] - 2 * golpe, balanceo=-4)
+        B.lomo(f, arco=2, cabeceo=4)
+        B.cabeza(f, cuello=baja(f) * 0.5, cab=baja(f), giro_lat=sigue(f), ladeo=5)
+        B.orejas(f, atras=-6)
+    # Cola: alerta, la punta se sacude rápido.
+    B.cola(n, estatica=COLA_SENTADO, onda=lambda t: (0.0, 4 * B.seno(t, n, 2)),
+           punta=lambda t, i: (0.0, 6 * max(0, i - 2) * B.seno(t, n, 4)))
+    B.suavizar(a)
+    B.completar(a, n)
+    return a, n

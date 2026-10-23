@@ -30,6 +30,11 @@ func _correr() -> void:
 	root.add_child(sala)
 	felipe = sala.get_node("Felipe")
 	await _esperar(30)
+	# La presentación del nivel (la meta) pausa el árbol unos segundos: se espera a que se juegue.
+	for i in 900:
+		if not paused:
+			break
+		await process_frame
 	_todo_con_rol()
 	_reglas()
 	await _caso_real()
@@ -180,13 +185,10 @@ func _caso_real() -> void:
 	felipe.velocity = Vector2.ZERO
 	await _esperar(20)
 	var mueble := _saltable_de(_con_rol(Capas.Rol.SALTABLE), "Escritorio")
-	print("DBG ", Profundidad.superficie_felipe, " vaso ", vaso.z_index, " felipe ", felipe.z_index, " mueble ", _z(mueble) if mueble else 999, " ", mueble.puede_subir if mueble else null, " pos ", felipe.global_position)
 	_comprobar(Profundidad.superficie_felipe == "Escritorio" and vaso.z_index > felipe.z_index and mueble and _z(mueble) == Capas.SALTABLE_ACTIVO, "Felipe sobre el escritorio junto al vaso: el vaso queda apenas delante (Felipe pasa por detrás) y el escritorio sube un escalón")
 	felipe.global_position = Vector2(vaso.global_position.x, escritorio.position.y + 30.0)
 	felipe.velocity = Vector2(0, -200)
 	await _esperar(2)
-	print("DBG3 ", sala.find_children("*", "VigiaSuperficie", true, false), " ", felipe.is_on_floor(), " ", felipe.get_slide_collision_count())
-	print("DBG2 ", Profundidad.superficie_felipe, " vaso ", vaso.z_index, " felipe ", felipe.z_index, " pos ", felipe.global_position)
 	_comprobar(Profundidad.superficie_felipe == "aire" and vaso.z_index < felipe.z_index, "Saltando delante del escritorio, el vaso queda detrás de Felipe (el cambio es inmediato)")
 	await _esperar(60)
 	_comprobar(Profundidad.superficie_felipe == "piso" and vaso.z_index < felipe.z_index and _z(mueble) == Capas.MUEBLES, "En el piso, el vaso detrás de Felipe y el escritorio en su capa de siempre")

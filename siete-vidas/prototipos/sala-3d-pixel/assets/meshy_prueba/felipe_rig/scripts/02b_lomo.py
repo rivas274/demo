@@ -87,6 +87,9 @@ cola = ndimage.binary_dilation(cola, iterations=4)
 # atrás de la grupa también es cola.
 fy, fx = np.mgrid[0:1024, 0:1024]
 cola |= (fx < 400) & (fy < 520)
+# Bajo la raíz de la cola (py >= 600) es grupa: se pinta como cuerpo (si no, quedaba un óvalo
+# con el color viejo, sin pintar, alrededor de la base de la cola).
+cola &= fy < 600
 zoff = C.CENTRO_ORIGINAL[2] - C.Z_PISO_ORIGINAL
 px = np.clip(np.round(512 - pos[..., 1] / C.PX).astype(int), 0, 1023)
 py = np.clip(np.round(512 - (pos[..., 2] - zoff) / C.PX).astype(int), 0, 1023)
@@ -102,7 +105,9 @@ zona = cubre & (~cabeza[py, px] | nuca) & ~cola[py, px]
 # La distancia se mide solo contra los bordes reales de la zona (cabeza, cola): los texels
 # fuera de las islas UV cuentan como zona. Si no, junto a cada costura UV volvía la textura
 # vieja (líneas dentadas en escalera).
-borde = ndimage.distance_transform_edt(zona | ~cubre)
+# La cola también cuenta: en la unión con la grupa no hay fundido con la textura vieja (ahí
+# quedaba un óvalo blanco alrededor de la base de la cola).
+borde = ndimage.distance_transform_edt(zona | ~cubre | (cubre & cola[py, px]))
 peso_zona = np.clip(borde / 10.0, 0, 1)
 
 # Mapa cilíndrico: largo (px de perfil) y ángulo alrededor del eje del cuerpo.
@@ -207,7 +212,7 @@ def param_cola(pxs, pys):
     return mejor_s
 
 
-en_cola = cubre & cola[py, px] & (py < 610)
+en_cola = cubre & cola[py, px]
 s_cola = np.zeros(px.shape)
 s_cola[en_cola] = param_cola(px[en_cola], py[en_cola])
 # Cola: café oscuro atigrado, con el interior más claro y pardo (video 6).
@@ -219,6 +224,10 @@ def aplicar(params):
     LAT = np.degrees(np.abs(ang - math.pi / 2))
     LAT = np.minimum(LAT, 360 - LAT)
     a = campo(T, LAT, *params)
+    # La montura cubre también la parte de atrás de la grupa, bajo la raíz de la cola (el mapa
+    # del cuerpo la cuenta como "abajo"): sin franja blanca entre la grupa y la cola.
+    atras = np.clip((700 - py) / 45.0, 0, 1) * np.clip((345 - px) / 35.0, 0, 1)
+    a = np.maximum(a, atras)
     # Rayas atigradas finas: de la columna hacia abajo (líneas a lo largo del costado), con
     # una leve ondulación; oscuras y angostas.
     largo = (px - Y0) / (Y1 - Y0)
@@ -236,14 +245,30 @@ def aplicar(params):
     centro = 1 + 0.35 * np.exp(-((sc - 0.55) / 0.25) ** 2)
     oscuro = GRIS_COLA[None, None, :] * centro[..., None]
     col = gris[None, None, :] * base[..., None] + oscuro * (1 - base[..., None])
-    wc = (en_cola * np.clip((sc - 0.0) / 0.02, 0, 1))[..., None]
+    wc = en_cola.astype(np.float32)[..., None]
     out = out * (1 - wc) + col * wc
+    # Líneas de pliegue (trazo de dibujo): el borde de las patas que marcó el creador, solo
+    # donde la pata entra al cuerpo (arriba), en el costado. Así se lee dónde empieza la pata.
+    if PLIEGUE > 0:
+        lin = pliegue_px[py, px]
+        lado = np.clip((np.abs(pos[..., 0]) - 0.10) / 0.06, 0, 1)
+        k = (np.clip(1.2 - lin / 1.6, 0, 1) * lado * PLIEGUE)[..., None] * cubre[..., None]
+        out = out * (1 - k) + (out * 0.42) * k
     out[~cubre] = tex[~cubre]
     # Padding: los texels fuera de las islas UV copian el texel cubierto más cercano.
     idx = ndimage.distance_transform_edt(~cubre, return_distances=False, return_indices=True)
     out = out[idx[0], idx[1]]
     return np.clip(out, 0, 1)
 
+
+# Pliegues: distancia (px de perfil) al borde de los contornos de las patas del creador, solo
+# en su parte de arriba (de donde la pata se separa del cuerpo hacia arriba).
+PLIEGUE = float(os.environ.get("FELIPE_PLIEGUE", "0.8"))
+patas_m = (((mp >> 3) & 1) | ((mp >> 4) & 1)).astype(bool)
+borde_p = patas_m & ~ndimage.binary_erosion(patas_m)
+fy2, fx2 = np.mgrid[0:1024, 0:1024]
+borde_p &= (fy2 < 770) & (fy2 > 560) & (fx2 > 345)   # sin el borde de atrás del muslo (visto desde atrás eran rayitas sueltas)
+pliegue_px = ndimage.distance_transform_edt(~borde_p)
 
 resultados = {}
 mapas = {}

@@ -69,11 +69,13 @@ for et, blend, pref in (("antes\n(Meshy tal cual)", tex_antes, "a"), ("después\
 hoja("felipe-simetrico-antes-despues.png", ["frente", "espalda", "arriba", "alambre: frente", "alambre: arriba"], filas)
 
 LOMO = [((0, 1, 0.45), CUERPO, 2.0), ((-1, 0, 0.1), CUERPO, 2.0), ((-0.75, 0.6, 0.5), CUERPO, 2.0),
-        ((0, 0.35, 1), (0, 0.15, 0.5), 1.3)]
+        ((0, 0.35, 1), (0, 0.15, 0.5), 1.3), ((-0.55, 0.85, 0.05), (0, 0.42, 0.45), 0.85)]
+ANTES, DESPUES = os.environ.get("FELIPE_ANTES", "antes (v2)"), os.environ.get("FELIPE_DESPUES", "después (v3)")
 filas = []
-for et, blend, pref in (("antes (v2)", tex_antes, "a"), ("después (v3)", C.BLEND_TEXTURA, "d")):
+for et, blend, pref in ((ANTES, tex_antes, "a"), (DESPUES, C.BLEND_TEXTURA, "d")):
     filas.append((et, malla_textura(blend, "lomo" + pref, LOMO)))
-hoja("felipe-rig-lomo-antes-despues.png", ["espalda", "perfil", "3/4 de atrás", "lomo de cerca, desde arriba"], filas)
+hoja("felipe-rig-lomo-antes-despues.png", ["espalda", "perfil", "3/4 de atrás", "lomo de cerca, desde arriba",
+                                           "unión cola, grupa y pata"], filas)
 
 
 def patas(blend, pref):
@@ -109,7 +111,7 @@ def patas(blend, pref):
 
 
 filas = []
-for et, blend, pref in (("antes (v2)", anim_antes, "a"), ("después (v3)", C.BLEND_ANIM, "d")):
+for et, blend, pref in ((ANTES, anim_antes, "a"), (DESPUES, C.BLEND_ANIM, "d")):
     for vista, rutas in patas(blend, pref):
         filas.append(("%s\n%s" % (et, vista), rutas))
 hoja("felipe-rig-patas-antes-despues.png", ["cuadro 1/4 del ciclo", "2/4", "3/4", "4/4"], filas)

@@ -47,18 +47,23 @@ PUNTOS = {
     "tail.003": (pf(228, 405), pf(222, 305)),
     "tail.004": (pf(222, 305), pf(196, 243)),
     "tail.005": (pf(196, 243), pf(110, 195)),
-    # Pata delantera: perfil (y, z) y frente (x).
-    "shoulder.L": (pf(675, 600, 0.13), pf(690, 683, -X(378))),
-    "upper_arm.L": (pf(690, 683, -X(378)), pf(745, 770, -X(380))),
-    "forearm.L": (pf(745, 770, -X(380)), pf(745, 860, -X(445))),
-    "hand.L": (pf(745, 860, -X(445)), pf(800, 868, -X(445))),
-    "f_toe.L": (pf(800, 868, -X(445)), pf(832, 872, -X(445))),
-    # Pata trasera: perfil del creador; x medida en la malla.
-    "pelvis.L": (pf(400, 600, 0.06), pf(420, 625, xt + 0.05)),
-    "thigh.L": (pf(420, 625, xt + 0.05), pf(470, 712, xt + 0.03)),
-    "shin.L": (pf(470, 712, xt + 0.03), pf(385, 800, xt)),
-    "foot.L": (pf(385, 800, xt), pf(430, 865, xt)),
-    "r_toe.L": (pf(430, 865, xt), pf(468, 872, xt)),
+    # v4: anatomía de cuadrúpedo digitígrado dentro del pelo (pedido del creador).
+    # Delantera: escápula arriba, cerca de la columna detrás del cuello, que baja hacia adelante
+    # hasta el hombro (punta del pecho); húmero hacia ATRÁS y abajo hasta el codo (bajo el
+    # pecho); antebrazo casi vertical hasta la muñeca; mano y dedos.
+    "shoulder.L": (pf(720, 590, 0.12), pf(770, 665, -X(378))),
+    "upper_arm.L": (pf(770, 665, -X(378)), pf(728, 760, -X(380))),
+    "forearm.L": (pf(728, 760, -X(380)), pf(745, 852, -X(445))),
+    "hand.L": (pf(745, 852, -X(445)), pf(800, 866, -X(445))),
+    "f_toe.L": (pf(800, 866, -X(445)), pf(832, 872, -X(445))),
+    # Trasera: cadera arriba en la grupa, cerca de la columna; fémur largo hacia ADELANTE y
+    # abajo dentro del flanco hasta la rodilla (a la altura de la panza); tibia hacia atrás
+    # hasta el corvejón (el talón alto); metatarso casi vertical hasta el pie; dedos.
+    "pelvis.L": (pf(395, 560, 0.06), pf(425, 575, xt + 0.06)),
+    "thigh.L": (pf(425, 575, xt + 0.06), pf(490, 705, xt + 0.03)),
+    "shin.L": (pf(490, 705, xt + 0.03), pf(415, 815, xt)),
+    "foot.L": (pf(415, 815, xt), pf(425, 862, xt)),
+    "r_toe.L": (pf(425, 862, xt), pf(462, 872, xt)),
 }
 PADRE = {
     "spine": "root", "spine.001": "spine", "spine.002": "spine.001", "spine.003": "spine.002",

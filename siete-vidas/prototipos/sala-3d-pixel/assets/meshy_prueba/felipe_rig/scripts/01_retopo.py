@@ -16,7 +16,7 @@ import simetria as S
 MITAD = "NEGATIVE_X"
 SOLDADURA = 0.005
 RELAJAR = int(os.environ.get("FELIPE_RELAJAR", "6"))   # pasadas de suavizado del cuerpo
-PIERNA = float(os.environ.get("FELIPE_PIERNA", "0.06"))  # cuánto se inflan las patas traseras (u)
+PIERNA = float(os.environ.get("FELIPE_PIERNA", "0.07"))  # cuánto se inflan las patas traseras (u; elegido entre 0 y 0,09)
 
 CARAS = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
 

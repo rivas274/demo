@@ -50,12 +50,12 @@ def _pose_aranar(f, t):
         u = ((t - desfase) % n) / n
         if u < 0.375:      # baja contra el respaldo
             k = u / 0.375
-            alto = 0.020 - 0.045 * (k * k * (3 - 2 * k))
+            alto = 0.020 - 0.034 * (k * k * (3 - 2 * k))   # v4: con el hombro anatómico la mano no llega tan abajo
             separa = 0.0
             fuerte = math.sin(math.pi * k)
         else:              # vuelve arriba despegada
             k = (u - 0.375) / 0.625
-            alto = -0.025 + 0.045 * (k * k * (3 - 2 * k))
+            alto = -0.014 + 0.034 * (k * k * (3 - 2 * k))
             separa = 0.012 * math.sin(math.pi * k)
             fuerte = 0.0
         pos = _mano_en_pared(lado, PARADO, SUBE_PARADO, alto, separa)

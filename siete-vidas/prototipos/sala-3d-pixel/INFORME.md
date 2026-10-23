@@ -336,3 +336,54 @@ El creador vio la v2: «mete mucho una de las patas delanteras; se ve mal pintad
 - La pata delantera sigue inclinada hacia adentro en reposo: es la anatomía chibi de Meshy. Ya no se cruza, pero de frente se ve "patizamba".
 - La cara venía casi simétrica y quedó espejada de la mitad derecha.
 - El pelo esponjado del pecho conserva el relieve de Meshy.
+
+### v4: una sola montura, patas traseras gruesas, anatomía de gato y contorno (2026-10-23)
+El creador vio la v3 (simetría, pata y caminata, bien) y pidió varios cambios.
+
+**1. Una sola mancha tipo montura** (`02b_lomo.py`):
+- Va desde detrás de los hombros hasta la grupa, llega a la base de la cola y baja por los costados.
+- Es pardo oscuro atigrado con rayas finas y simétrica. La gorra y la cara siguen igual.
+- El borde tiene mechones: puntas agudas en dos frecuencias, como pelo, no un recorte geométrico.
+- **7 variantes** de tamaño, mechones y forma. Elegida **`b_montura_grande`**: la más legible a ×3, cubre la grupa y no deja franja blanca. Las de mechones largos se ven como sierra y las chicas dejan el anca blanca.
+
+**2. Unión de la cola, la grupa y la pata:**
+- **El anillo blanco tenía dos causas:**
+  - el anillo blanco que la v3 pintaba a propósito;
+  - un óvalo que no se pintaba: la base de la cola quedaba fuera de la zona del cuerpo y también de la zona de la cola, y ahí se fundía con la textura vieja de Meshy.
+- **Arreglo:** la cola nace del color de la montura y la montura cubre la parte de atrás de la grupa, bajo la raíz de la cola.
+- En la malla no había pliegue ni hueco en esa unión: la grieta central ya se había soldado en la v3.
+
+**3. Patas traseras gruesas** (`01_retopo.py`, `PIERNA`):
+- Cada vértice del muslo y la canilla se empuja en horizontal, alejándose del eje de la pata a su altura.
+- La caída es suave hacia la grupa y hacia el pie, el lado de adentro crece poco y la zona se suaviza después. Es simétrico.
+- **Inflar por la normal no sirvió:** las normales de esta malla son ruidosas y la superficie se arrugaba desde 0,06.
+- **5 grosores** (0 a 0,09 u). Elegido **0,07 u** (unos 2,4 cm): se ve el "pantalón" de persa desde atrás y las patas no se tocan.
+
+**A. Grupa más alta que los hombros** (`anima_locomocion.py`): al caminar y en quieto, la cadera sube 1,2 cm y el frente baja 4°. Las traseras van más estiradas y se ven más largas.
+
+**B. Anatomía de cuadrúpedo digitígrado dentro del pelo** (`03_rig.py`; ver `felipe-v4-esqueleto.png`):
+- **Trasera:** cadera arriba en la grupa → fémur hacia adelante y abajo hasta la rodilla → tibia hacia atrás hasta el corvejón → metatarso casi vertical → dedos.
+- **Delantera:** escápula arriba, detrás del cuello → hombro en la punta del pecho → húmero hacia atrás hasta el codo, bajo el pecho → antebrazo casi vertical hasta la muñeca → mano y dedos.
+- **Proporciones** (Felipe frente a un gato real):
+  - fémur : tibia : metatarso = 1 : 0,92 : 0,33 (real 1 : 1,09 : 0,59);
+  - escápula : húmero : radio = 1,15 : 1 : 1,10 (real 0,70 : 1 : 0,95).
+  - El pie y la mano son cortos, y la escápula queda algo larga porque baja desde el centro del lomo hasta el hombro. Es la anatomía escalada a un cuerpo chibi.
+- **Pesos:** la piel del flanco y del anca sigue al fémur con caída suave desde la cadera hasta la rodilla; la del hombro sigue a la escápula y al húmero.
+- **Caminata:** la cadera y el hombro barren, la rodilla y el codo se doblan, y la escápula se desliza con cada paso. El pie no patina (0,02 mm).
+- **El estirar y aplastar** ya no se hereda en patas, cuello ni cola (`inherit_scale`). Antes encogía las patas, que no llegaban al piso: hasta 18 mm al saltar. Ahora llegan siempre, salvo una mano al pedir (7 mm).
+- Arañar baja un poco menos la mano, porque con el hombro nuevo no alcanzaba.
+
+**Contorno de dibujo** (`felipe_rig.gd`; ver `felipe-v4-contorno-opciones.png`):
+- **Casco invertido** de 1 px de render (café `#2b140e`), como segunda pasada del material toon.
+- **Umbrales del post-proceso de la sala** bajados a 4 cm de profundidad y 0,30 de normales en el modo `--felipe-rig`, para que salga la línea entre la pata y el cuerpo.
+- **Líneas de pliegue** pintadas en la textura, en el borde de las patas que marcó el creador, donde la pata entra al cuerpo.
+- **5 combinaciones** probadas. Elegida: **casco 1 px + bordes 0,04/0,30 + pliegues**. Con casco de 2 px y bordes de 0,03 la sala se llena de manchas oscuras.
+- **Límite:** la línea de pliegue se ve de cerca y en Blender, pero a ×3 en la sala casi no se nota. Lo que más ayuda allí es el casco.
+
+**Entregables** (en `proto3d/`):
+- `felipe-v4-antes-despues.png`: espalda, perfil, 3/4 de atrás, lomo y la unión de la cola y la pata;
+- `felipe-v4-esqueleto.png`: huesos dentro de la malla, de perfil y de frente, con el esquema de un gato real y la tabla de largos;
+- `felipe-v4-esqueleto-ciclo.png`: 8 cuadros del ciclo con los huesos;
+- `felipe-v4-contorno-opciones.png`;
+- `felipe-rig-camina-v4.gif`: v3 arriba y v4 abajo;
+- `felipe-rig-acciones-v4.mp4`.

@@ -41,6 +41,16 @@ const ALTO_ARCO := 0.12
 ## Si es mayor que 0, reemplaza la velocidad del paso de felipe_rig.json (para comparar un GLB viejo).
 @export var velocidad_m_s := 0.0
 @export var resorte_cola := true
+## Contorno de dibujo (técnica estándar toon / cel shading):
+## - casco invertido (segunda pasada, caras traseras empujadas en pantalla), en píxeles de render;
+## - umbrales del post-proceso de bordes de la sala (profundidad en m y normales), que dibujan la
+##   línea interior donde la pata se superpone al cuerpo.
+## Elegido entre 5 combinaciones (pruebas/felipe_rig_contorno.gd). Con -- --contorno=px y
+## -- --bordes=prof,normal se prueban otras.
+@export var contorno_px := 1.0
+@export var umbral_profundidad := 0.04
+@export var umbral_normal := 0.30
+const COLOR_CONTORNO := Color("2b140e")
 
 var ap: AnimationPlayer
 var sk: Skeleton3D
@@ -88,11 +98,39 @@ func _ready() -> void:
 			mt.set_shader_parameter("usar_textura", true)
 			mt.set_shader_parameter("textura", src.albedo_texture if src else null)
 			m.material_override = mt
+			if contorno_px > 0.0:
+				var casco := ShaderMaterial.new()
+				casco.shader = Toon.SHADER_CONTORNO
+				casco.set_shader_parameter("color", COLOR_CONTORNO)
+				casco.set_shader_parameter("grosor_px", contorno_px)
+				mt.next_pass = casco
+	_ajustar_bordes.call_deferred()
 	ap.play("quieto")
 	if rutina:
 		_armar_rutina()
 	_pos_antes = global_position
 	_giro_antes = rotation.y
+
+
+## Lee las opciones de contorno de la línea de comandos y las aplica después de que la sala
+## arma su post-proceso (principal.gd fija el casco a 1 px al empezar).
+func _ajustar_bordes() -> void:
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--contorno="):
+			contorno_px = float(arg.get_slice("=", 1))
+		elif arg.begins_with("--bordes="):
+			var v := arg.get_slice("=", 1).split(",")
+			umbral_profundidad = float(v[0])
+			umbral_normal = float(v[1])
+	for mi in find_children("*", "MeshInstance3D", true, false):
+		var mt := (mi as MeshInstance3D).material_override as ShaderMaterial
+		if mt and mt.next_pass:
+			(mt.next_pass as ShaderMaterial).set_shader_parameter("grosor_px", contorno_px)
+	var principal := get_parent().get_parent() if get_parent() else null
+	var bordes = principal.get("bordes") if principal else null
+	if bordes is ShaderMaterial:
+		bordes.set_shader_parameter("umbral_profundidad", umbral_profundidad)
+		bordes.set_shader_parameter("umbral_normal", umbral_normal)
 
 
 func _leer_info() -> void:

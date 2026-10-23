@@ -13,7 +13,7 @@ COLA = ["tail.001", "tail.002", "tail.003", "tail.004", "tail.005"]
 # Amplitud de la onda de la cola por hueso: base casi quieta, punta con el mayor movimiento.
 AMP_COLA = [0.25, 0.5, 0.8, 1.15, 1.5]
 RETRASO_COLA = 3  # cuadros de retraso de cada hueso respecto del anterior
-DEF_MAX = 0.08    # estirar y aplastar: como mucho ±8 %
+DEF_MAX = float(os.environ.get("FELIPE_DEF", "0.08"))    # estirar y aplastar: como mucho ±8 %
 POLO_M = float(os.environ.get("FELIPE_POLO", "0.25"))  # distancia del polo de rodilla y codo
 
 arm = None
@@ -56,6 +56,10 @@ def preparar():
     arm.select_set(True)
     bpy.ops.object.mode_set(mode="EDIT")
     eb = arm.data.edit_bones
+    # El estirar y aplastar va en el torso; patas, cuello (y cabeza) y cola no heredan su
+    # escala: si no, las patas se encogían y no llegaban al piso, y la cabeza se deformaba.
+    for nb in ("pelvis.L", "pelvis.R", "shoulder.L", "shoulder.R", "spine.004", "tail.001"):
+        eb[nb].inherit_scale = "NONE"
     PIVOTE = eb["spine"].head.copy()
     CADERA = (eb["thigh.L"].head + eb["thigh.R"].head) / 2
     for lado in ("L", "R"):

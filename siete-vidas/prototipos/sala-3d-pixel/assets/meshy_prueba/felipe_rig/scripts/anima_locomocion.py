@@ -7,6 +7,10 @@ N_QUIETO = 144        # 6 s: el quieto con pausas irregulares no debe verse como
 DUTY = 0.6            # fracción del ciclo con el pie apoyado (las patas en el aire van más rápido)
 ZANCADA_U = 0.34      # largo del paso en unidades de Meshy (se pasa a metros con K)
 ALZA_U = {"tras": 0.06, "del": 0.075}   # levanta poco pero con decisión (video 6)
+# v4: postura del Felipe real (felipe-lomo-costado.jpg, video 6): la grupa más alta que los
+# hombros, el lomo baja suave hacia adelante y las traseras van más estiradas (más largas).
+POSTURA_SUBE = 0.012   # m que sube la cadera
+POSTURA_CAB = -4.0     # grados: el frente baja
 MANO_X = float(__import__("os").environ.get("FELIPE_MANO_X", "0.018"))  # m hacia afuera (elegido entre 0 y 0,024)
 VUELO_X = float(__import__("os").environ.get("FELIPE_VUELO_X", "0.04"))  # m más afuera en el vuelo (elegido entre 0 y 0,04)
 # Secuencia lateral de gato: trasera izq., delantera izq., trasera der., delantera der.
@@ -77,12 +81,12 @@ def caminar():
         rol_pecho = -2.5 * s(0.25)
         giro = 2.0 * s(0.05)
         pecho_cab = math.degrees((hombro - grupa) / lomo_largo)
-        B.torso(f, sube=grupa, lado=lado, balanceo=rol_grupa, giro_lat=giro)
+        B.torso(f, sube=POSTURA_SUBE + grupa, lado=lado, cabeceo=POSTURA_CAB, balanceo=rol_grupa, giro_lat=giro)
         # Torsión: el pecho gira y rola distinto de la grupa.
         B.lomo(f, cabeceo=pecho_cab, giro_lat=-2.0 * s(0.15), balanceo=rol_pecho - rol_grupa)
         # Cabeza estabilizada: mira adelante y compensa el cabeceo, el balanceo y el giro del
         # cuerpo; solo un cabeceo mínimo y atrasado.
-        B.cabeza(f, cuello=20 + pecho_cab + 0.6 * s(0.55, 2), cab=-8 - 0.4 * s(0.65, 2),
+        B.cabeza(f, cuello=20 + POSTURA_CAB + pecho_cab + 0.6 * s(0.55, 2), cab=-8 - 0.4 * s(0.65, 2),
                  giro_lat=-giro + 1.5 * s(0.4), ladeo=-rol_pecho * 0.9)
         B.orejas(f, atras=4)
     # Cola alta, en arco hacia adelante sobre la grupa, con la punta suelta (video 6). La onda
@@ -104,9 +108,9 @@ def quieto():
     mira = B.curva([(0, 0), (30, 0), (46, 6), (80, 6), (96, -3), (126, -3), (144, 0)])
     for i in range(0, n + 1, 6):
         f = i
-        B.torso(f, sube=0.004 * B.K * resp(f))
+        B.torso(f, sube=POSTURA_SUBE + 0.004 * B.K * resp(f), cabeceo=POSTURA_CAB)
         B.lomo(f, cabeceo=-0.8 * resp(f))
-        B.cabeza(f, cuello=0.8 * math.sin(2 * math.pi * 2 * f / n + 0.6), cab=1.0 * math.sin(2 * math.pi * f / n),
+        B.cabeza(f, cuello=POSTURA_CAB + 0.8 * math.sin(2 * math.pi * 2 * f / n + 0.6), cab=1.0 * math.sin(2 * math.pi * f / n),
                  giro_lat=mira(f), ladeo=0.4 * mira(f))
     # Orejas: un respingo de la izquierda a los 2 s y otro chico de la derecha a los 4,5 s.
     for f, g in ((0, 0), (44, 0), (47, 22), (50, 4), (54, 16), (60, 0), (n, 0)):

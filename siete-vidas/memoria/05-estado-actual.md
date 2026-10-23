@@ -12,6 +12,7 @@ Actualizado: 2026-10-21 (estudio v3: la pelea en todo el cuarto; antes, plan de 
   - **Siguiente paso:** una **sala 3D jugable** (`jugable.tscn`) para probar controles, salto e interacciones (arañar el sofá, tirar un vaso, pedir a Valeria, la pelota), con Valeria de Mixamo.
   - Es un proyecto **independiente** del juego 2D: no toca `siete-vidas/juego/`.
   - **Regla del creador (2026-10-23):** aunque todo esté en 3D, la jugabilidad es 2D (2.5D lateral). Felipe solo se mueve a la izquierda y a la derecha y salta, sin profundidad. Todo lo que se toca vive en un solo plano de juego.
+  - **Por qué 3D, según el creador:** los gráficos se ven mejor, y las colisiones con los objetos son más fáciles de calcular porque son objetos reales.
 - **Prototipo de sala en 3D pixel (`prototipos/sala-3d-pixel/`), con plazo hasta el domingo 2026-10-25 (plan aprobado por el creador el 2026-10-22).**
   - **Lo ya probado:** Felipe y Valeria generados con IA a partir de imágenes de Gemini, con Hunyuan3D-2 mini en la PC del creador (gratis). La forma de Felipe g03 está aprobada y pintada.
   - **Por qué se descartó animarlo con fórmulas:** al animarlo así se veía «rígido, tenía más vida el pixel art». El modelo de patas estiradas se descartó por amorfo.

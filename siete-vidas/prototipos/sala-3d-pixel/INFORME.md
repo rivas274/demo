@@ -490,3 +490,12 @@ El creador: con Felipe «ya estamos bien; seguir insistiendo podría entorpecer�
 **La pelota no va en el modelo.** `felipe_rig.json` → `sentado_pelota.contactos` trae, por cada contacto, `t_s` (segundos dentro del bucle) y `pie_m`: la punta de la pata en coordenadas del modelo glTF a escala 1 (x izquierda, y arriba, z adelante). Godot la convierte con la escala y la transformación del nodo.
 
 **Prueba en Godot** (`pruebas/felipe_rig_pelota.gd`): quieto → sentarse → mira → pelota (3 bucles) → mira → levantarse. La pelota es una esfera roja con el toon. En cada contacto sale rodando adelante y al costado, gira según lo que avanza y vuelve sola al lugar del siguiente manotazo. Entregable: `felipe-rig-sentado-pelota.mp4`.
+
+### v6c: la zona bajo la cola, blanca y limpia (2026-10-23, solo textura)
+El creador: «tiene como el ano negro… difuminado». **Causa:** en la v4 se agregó una rampa de 45 px con el color de la montura bajo la raíz de la cola, para tapar un anillo blanco. De atrás se veía como una mancha oscura y borrosa entre las nalgas.
+- **Arreglo** (`02b_lomo.py`): se quitó esa rampa. La grupa queda blanca y nítida, como en la vista de atrás de la v2/v3 que el creador marcó como buena.
+- **Efecto lateral y su arreglo:** sin la rampa apareció un óvalo blanco en la cara de abajo de la raíz de la cola. Esos texels caen sobre la grupa en el mapa de perfil y se pintaban como cuerpo. Ahora se reclasifican en 3D: si la vecindad de un texel (5 cm) es en su mayoría cola, pasa a ser cola. Se repite hasta que deja de crecer (6 pasos). Los anillos de la cola y el lomo no cambian.
+- **Otras zonas revisadas:** pecho, axilas, entre las patas y panza. No había otras manchas borrosas.
+- **Sin cambios** en malla, rig ni animaciones: `felipe_rig.glb` se reexportó con la textura nueva, y `felipe_rig.json` quedó idéntico.
+- **Entregable:** `felipe-v6c-bajo-cola.png`, con la meta del creador, antes y después desde atrás, atrás y abajo, 3/4 desde abajo y desde abajo, con la cola levantada 40°. También trae la sala a ×3 y las otras zonas revisadas.
+

@@ -54,6 +54,8 @@ Cuando cambias la malla (retopología), el color se pasa de la malla vieja (alta
 | Manchas con escalones en las costuras | Pintar directo en la imagen UV | Pintar en un mapa del cuerpo y evaluar por texel |
 | Lomo «recargado» | Copiar el patrón real exacto | Una mancha simple y legible |
 | Parches negros al achicar una parte de la malla | Los rayos del horneado salen por dentro de la original | Aplicar la misma deformación a la malla de alta antes de hornear |
+| Mancha oscura y borrosa bajo la cola («ano negro») | Una rampa de color ancha para tapar la unión cola-grupa, pintada en el mapa 2D: de atrás se ve como un difuminado | Quitar la rampa; la grupa queda blanca y la unión la resuelve la cola, que nace del color del lomo |
+| Óvalo blanco bajo la raíz de la cola | En el mapa de perfil la cara de abajo de la cola cae sobre la grupa y se pinta como cuerpo | Reclasificar en 3D: el texel cuya vecindad (5 cm) es en su mayoría cola pasa a ser cola, repetido hasta que no crece (scipy `cKDTree`). Lo de fondo: una cola aparte con su propio UV |
 | Se pierde el relieve fino del pelo | La malla nueva es más lisa que la de IA | Aceptarlo o hornear también un mapa de normales |
 
 ## Fuente o ejemplo

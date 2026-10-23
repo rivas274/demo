@@ -550,6 +550,34 @@ static func rect_sagrado(pie: Vector2) -> Rect2:
 
 
 ## Rectángulo de una pieza de PIEZAS por su nombre (vacío si no está).
+## Rectángulo que ocupa en el mundo una entrada de ARTE ([imagen, (x izquierda, base), espejo, capa]).
+static func rect_del_arte(datos: Array) -> Rect2:
+	var t := ArteNivel.textura(datos[0])
+	var tam := t.get_size() if t else Vector2.ZERO
+	return Rect2(Vector2(datos[1].x, datos[1].y - tam.y), tam)
+
+
+## Las superficies (nombres de PIEZAS) que dibuja una entrada de ARTE: las que calzan con su imagen y caen dentro de
+## su ancho. Vacío si no es un mueble donde se sube (Profundidad: SALTABLE).
+static func superficies_del_arte(datos: Array) -> PackedStringArray:
+	var lista := PackedStringArray()
+	var rect := rect_del_arte(datos)
+	for pieza: Array in PIEZAS:
+		var r: Rect2 = pieza[0]
+		if pieza[4] == datos[0] and r.position.x < rect.end.x and r.end.x > rect.position.x:
+			lista.append(pieza[2])
+	return lista
+
+
+## El mueble (nombre de PIEZAS) cuya cubierta sostiene `punto` (la base de un objeto), o "piso".
+static func superficie_en(punto: Vector2) -> String:
+	for pieza: Array in PIEZAS:
+		var r: Rect2 = pieza[0]
+		if punto.x >= r.position.x - 2.0 and punto.x <= r.end.x + 2.0 and absf(punto.y - r.position.y) <= 14.0:
+			return pieza[2]
+	return "piso"
+
+
 static func rect_pieza(nombre: String) -> Rect2:
 	for pieza: Array in PIEZAS:
 		if pieza[2] == nombre:

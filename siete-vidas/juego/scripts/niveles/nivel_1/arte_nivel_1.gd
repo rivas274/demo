@@ -9,6 +9,9 @@ extends RefCounted
 
 ## Lienzos del arte por capa ("pared", "escalera", "mueble"): se redibujan cuando algo cambia de imagen (G4).
 var lienzos := {}
+## Los muebles donde se sube, cada uno en su nodo SALTABLE (y su entrada de Nivel1.ARTE, que el lienzo ya no dibuja).
+var muebles: Array[Node2D] = []
+var separados: Array = []
 ## Nodos de dibujo que se crean en su lugar del orden de dibujo.
 var decorado: Node2D
 var ambiente: Node2D
@@ -34,36 +37,57 @@ func _init(de: Nivel, con_guion: GuionNivel1) -> void:
 	guion = con_guion
 
 
-## Antes de las piezas: el fondo en capas y los tres lienzos del arte (pared, escalera, muebles).
+## Antes de las piezas: el fondo en capas, los tres lienzos del arte (pared, escalera, muebles) y un nodo SALTABLE
+## por cada mueble donde se puede subir (su arte y sus superficies: así sube un escalón con Felipe encima).
 func crear_fondo() -> void:
 	nivel.add_child(FondoApartamento.new(Nivel1.ANCHO, Nivel1.ALTO))
-	for capa: Array in [["pared", Capas.ARTE_PARED], ["escalera", Capas.ESCALERA], ["mueble", Capas.MUEBLES]]:
+	for capa: Array in [["pared", Capas.Rol.ARTE_PARED], ["escalera", Capas.Rol.ESCALERA], ["mueble", Capas.Rol.SALTABLE]]:
 		var lienzo := Node2D.new()
 		lienzo.name = "Arte (%s)" % capa[0]
-		lienzo.z_index = capa[1]
+		Profundidad.poner(lienzo, capa[1])
 		lienzo.draw.connect(_dibujar_arte.bind(lienzo, capa[0]))
 		nivel.add_child(lienzo)
 		lienzos[capa[0]] = lienzo
+	var anteriores: Array[Rect2] = []
+	var nodos: Array[Profundidad] = []
+	for datos: Array in Nivel1.ARTE:
+		var superficies := Nivel1.superficies_del_arte(datos)
+		if datos[3] != "mueble" or superficies.is_empty():
+			continue
+		var mueble := Node2D.new()
+		mueble.name = "Mueble %s %d" % [datos[0], int(datos[1].x)]
+		mueble.draw.connect(func() -> void: ArteNivel.dibujar_capa(mueble, [datos], "mueble", Nivel1.APOYADOS, {"baranda": _dibujar_baranda}))
+		nivel.add_child(mueble)
+		separados.append(datos)
+		muebles.append(mueble)
+		var pieza := Profundidad.poner(mueble, Capas.Rol.SALTABLE, superficies)
+		# Sube un escalón con Felipe encima solo si ningún saltable que va DELANTE (después) se le cruza.
+		var rect := Nivel1.rect_del_arte(datos)
+		for i in nodos.size():
+			if anteriores[i].intersects(rect):
+				nodos[i].puede_subir = false
+		anteriores.append(rect)
+		nodos.append(pieza)
 
 
 ## Después de la ropa y el oído de la cocina: fachada, decorado, ambiente, grifo, sombras en vivo y nido.
 func crear_decorado() -> void:
 	# Bajo el balcón: la fachada y el toldo de la panadería (solo se ven en el salto final, G1).
-	var fachada := _nodo("Fachada", Capas.FACHADA)
+	var fachada := _nodo("Fachada", Capas.Rol.FACHADA)
 	fachada.draw.connect(guion.decorado.dibujar_fachada.bind(fachada))
-	decorado = _nodo("Decorado", Capas.MUEBLES)
+	decorado = _nodo("Decorado", Capas.Rol.DECORADO)
 	decorado.draw.connect(func() -> void: guion.decorado.dibujar_decorado(decorado))
-	ambiente = _nodo("Ambiente", Capas.MUEBLES)
+	ambiente = _nodo("Ambiente", Capas.Rol.DECORADO)
 	ambiente.draw.connect(func() -> void: guion.decorado.dibujar_ambiente(ambiente))
-	grifo = _nodo("Grifo", Capas.MARCAS)
+	grifo = _nodo("Grifo", Capas.Rol.MARCA)
 	grifo.draw.connect(_dibujar_grifo)
 	# Sombras de contacto de lo que se mueve (Felipe, Valeria, A.S.P.I., ratones, caja, comida): debajo de ellos y
 	# encima de los muebles (se apoyan también arriba de un mueble).
 	sombras = SombrasVivas.new(nivel.felipe)
 	sombras.name = "Sombras"
-	sombras.z_index = Capas.MUEBLES
+	Profundidad.poner(sombras, Capas.Rol.SOMBRA)
 	nivel.add_child(sombras)
-	nido = _nodo("Nido", Capas.MUEBLES)
+	nido = _nodo("Nido", Capas.Rol.DECORADO)
 	nido.draw.connect(func() -> void: guion.decorado.dibujar_nido(nido))
 
 
@@ -71,7 +95,7 @@ func crear_decorado() -> void:
 func crear_pasamanos() -> void:
 	pasamanos = Node2D.new()
 	pasamanos.name = "Pasamanos"
-	pasamanos.z_index = Capas.PRIMER_PLANO
+	Profundidad.poner(pasamanos, Capas.Rol.PRIMER_PLANO)
 	pasamanos.draw.connect(func() -> void:
 		var datos: Array = Nivel1.PASAMANOS
 		var textura := ArteNivel.textura(datos[0])
@@ -82,10 +106,10 @@ func crear_pasamanos() -> void:
 	nivel.add_child(pasamanos)
 
 
-func _nodo(nombre: String, z: int) -> Node2D:
+func _nodo(nombre: String, rol: int) -> Node2D:
 	var nodo := Node2D.new()
 	nodo.name = nombre
-	nodo.z_index = z
+	Profundidad.poner(nodo, rol)
 	nivel.add_child(nodo)
 	return nodo
 
@@ -121,6 +145,8 @@ func cada_cuadro(delta: float) -> void:
 ## El sofá cambió de imagen (G4) o algo se mece: se redibuja la capa de los muebles.
 func redibujar_muebles() -> void:
 	(lienzos["mueble"] as Node2D).queue_redraw()
+	for mueble in muebles:
+		mueble.queue_redraw()
 
 
 ## Los jirones del plástico del sofá salen volando (G4).
@@ -140,7 +166,8 @@ func _dibujar_arte(c: Node2D, capa: String) -> void:
 		ArteNivel.sombras_de_pared(c, Nivel1.ARTE, Nivel1.SOMBRA_PARED)
 		# La vista del pasillo va detrás de su marco (que es arte de esta capa).
 		_dibujar_vista_pasillo(c)
-	ArteNivel.dibujar_capa(c, Nivel1.ARTE, capa, Nivel1.APOYADOS, {"baranda": _dibujar_baranda})
+	var arte: Array = Nivel1.ARTE.filter(func(datos: Array) -> bool: return not datos in separados) if capa == "mueble" else Nivel1.ARTE
+	ArteNivel.dibujar_capa(c, arte, capa, Nivel1.APOYADOS, {"baranda": _dibujar_baranda})
 	if capa == "escalera":
 		_dibujar_armario_escalera(c)
 	elif capa == "pared":

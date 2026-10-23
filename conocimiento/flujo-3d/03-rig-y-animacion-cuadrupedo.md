@@ -86,3 +86,15 @@ Hornea el color desde la malla alta con «Selected to Active» (ver [02-texturas
 - Plantillas para marcar huesos: `siete-vidas/prototipos/sala-3d-pixel/assets/meshy_prueba/plantilla_esqueleto/`.
 - Uso en Godot (resorte de la cola): `siete-vidas/prototipos/sala-3d-pixel/scripts/felipe_rig.gd`.
 - Detalle de las versiones v1 a v6: `siete-vidas/prototipos/sala-3d-pixel/INFORME.md` («Felipe con rig hecho en Blender»); lecciones: `siete-vidas/memoria/01-decisiones.md` («Pilar de trabajo»).
+
+## Cola gruesa como tubo articulado (lecciones de Felipe v7, 2026-10-23)
+- **Problema:** una cola pegada a la malla del cuerpo, con pesos de calor, se deforma feo al sentarse o agacharse. La grupa se mueve con la cola y los anillos se pliegan.
+- **Receta estándar:** malla de tubo aparte con anillos regulares, base metida en la grupa, a lo sumo 2 huesos por anillo con mezcla suave en cada junta y UV continuo a lo largo. La grupa no lleva peso de cola.
+- **Línea central desde la cola vieja:** usa el eje medio (`skimage.morphology.skeletonize`) de su silueta de perfil y el camino más corto entre la base y la punta. Los extremos del esqueleto se doblan hacia las esquinas: recórtalos y suaviza.
+  - El radio sacado de la distancia al borde mide de menos cuando el eje no queda centrado. Compáralo por área con la silueta vieja.
+- **Pliegues:** si el radio de curvatura es menor que el grosor, el lado de adentro se pliega. Suaviza la línea hasta que el radio supere el grosor y achica solo el lado de adentro.
+  - Mídelo con el paso entre anillos del lado de adentro, dividido por el paso del centro. Si es negativo, los anillos se cruzan.
+- **Cantidad de huesos:** con una cola tan gruesa como el largo de sus huesos, 5 huesos no alcanzan para enrollarla (cada junta dobla más de 40° y se pliega). Usa 8 o más y reparte la curva. Para apoyarla en el piso y rodear las patas, usa spline IK horneado a los huesos, con el camino tomado de la envolvente del cuerpo desplazada en el radio del tubo.
+- **Tapar el agujero** de la cola vieja: rellenar, subdividir, relajar con el borde fijo e inflar un poco. Un relleno plano se ve como una faceta.
+- **Blender (bmesh):** `subdivide_edges` y agregar capas invalidan las referencias de Python a los vértices. Marca lo que necesites en capas `int` creadas antes de operar.
+

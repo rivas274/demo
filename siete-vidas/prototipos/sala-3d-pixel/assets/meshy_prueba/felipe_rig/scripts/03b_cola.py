@@ -1,4 +1,7 @@
 # Paso 3b (v7): la cola como un tubo articulado aparte.
+# ESTADO (2026-10-23): EN PAUSA, fuera del flujo. El creador decidió seguir en 2D. El tubo en
+# reposo está listo (ver INFORME.md, «v7»), pero faltan los 8 huesos, la cola sentada y la
+# revisión de las animaciones. felipe_rig.glb sigue siendo la v6c, hecha sin este paso.
 # Pedido del creador (2026-10-23): «cuando se agachó para jugar y se sentó, la cola se deformó
 # horrible». La cola venía pegada a la malla del cuerpo, con pesos de calor que se mezclaban con
 # la grupa. La receta estándar de colas de personaje es otra:

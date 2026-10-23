@@ -573,3 +573,28 @@ El creador: «tiene como el ano negro… difuminado». **Causa:** en la v4 se ag
 - En `--headless` (sin pantalla) Godot imprime `Parameter "m" is null`: es el renderizador vacío, no aparece al jugar.
 
 **Veredicto:** pendiente de que el creador la juegue y la compare con el demo 2D (no se marca SEGUIR ni CAMBIAR sin eso). Mi lectura está en la entrega al creador.
+
+### v7: la cola como tubo articulado (2026-10-23, EN PAUSA)
+El creador: «cuando se agachó para jugar y se sentó, la cola se deformó horrible». Se empezó con la receta estándar: una malla de tubo aparte con anillos regulares, pesos de a 2 huesos por anillo y UV continuo. **Quedó en pausa** porque el creador decidió que el juego sigue en 2D. **`felipe_rig.glb` no cambió:** sigue siendo la v6c, la última que funciona.
+
+**Hecho** (`scripts/03b_cola.py`, corre después de `03_rig.py` y aún no está en el flujo):
+- **Línea central:** sale del eje medio (esqueleto, con scikit-image) de la silueta de perfil de la cola vieja. Se recortan los extremos, donde el esqueleto se dobla. La base es recta desde la cabeza de `tail.001` y entra 0,08 u en la grupa. Todo se suaviza junto.
+- **Sección elíptica:**
+  - de perfil, la distancia al borde ×1,15, porque el eje medio no queda centrado;
+  - de lado, el ancho real en X;
+  - en total, el 97 % del área de perfil de la cola vieja;
+  - base angosta (0,13 u) que crece hasta la pluma (0,23 u), con la punta redonda.
+- **Pliegues en la curva:** solo se achica el lado de adentro, y la línea se suaviza lo bastante para que el radio de curvatura supere el grosor. Se probaron 5 variantes, medidas por el paso mínimo del lado de adentro y el área. La elegida (suavizado 48, adentro 0,8) no se pliega.
+- **Malla:** 23 anillos × 14 lados, unida a la malla de Felipe (un objeto, un material).
+  - La cola vieja se borra y el agujero se tapa con un domo: relleno, subdividido, relajado e inflado.
+  - Los restos de peso de cola en la grupa pasan a `spine`.
+- **Textura:** el tubo usa el rectángulo libre más grande del atlas. Se pinta con el gris y la raya de la gorra (`colores_lomo.json`, que ahora escribe `02b_lomo.py`), con anillos y más oscuro hacia la punta.
+- `anima_base.preparar()` usa el alto guardado (`alto_u`), así la cola nueva no cambia la escala.
+- **Medidor** de la cola en todas las acciones: piso, cuerpo atravesado, diámetro y paso entre anillos. Mostró que con 5 huesos, las curvas de sentado actuales pliegan el tubo grueso (paso negativo).
+
+**Pendiente** (si se retoma):
+1. Pasar a 8 huesos de cola. Repartir las formas de 5 valores por ángulo acumulado. Actualizar `COLA` en `felipe_rig.gd` (resorte).
+2. La cola sentada como spline IK horneado: que baje al piso y rodee las patas por el lado derecho. El camino se toma de la envolvente del cuerpo a ras del piso, desplazada en el radio del tubo.
+3. Rehacer las curvas de cola de todas las acciones. Medir y revisar las poses extremas.
+4. Entregables: `felipe-v7-cola.png`, `felipe-rig-sentado-pelota-v7.mp4` y `felipe-rig-acciones-v7.mp4`. Avisar el cambio del GLB en el commit.
+

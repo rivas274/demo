@@ -30,7 +30,13 @@ Actualizado: 2026-10-23 (kit final de la interfaz v2 «A + C»; antes, pelea con
     - **De IA, retocadas a mano:** huella (Gemini 4; 15 variantes), huella del sello (ChatGPT; 18), pescadito (ChatGPT; 15), orejita (Gemini 2; 30) y cola con huellita (Gemini 3; 15). Variantes y puntajes en `capturas/interfaz-rediseno/kit-v2-variantes.png`; herramientas `herramientas/interfaz_v2_kit{,_ia,_lamina}.py`.
     - Las cajas tienen los lados en diagonal de arriba abajo: **se estiran solo a lo ancho** (alto fijo, una pieza por alto normal y grande).
     - Hueco retrato-texto medido: 13 px en normal y 12 px con texto grande (mínimo 6). Las orejitas pasan a oscuras con el interior ámbar (como 4 de las 5 hojas) y la cola sale por abajo hacia Felipe.
-  - **Sigue:** que el creador revise `kit-v2.png`; revisar con el diseñador la salud de 9 huellas; programar la interfaz con el kit (tema, `BarraVida` con huellas, diálogo, globito, cartel, logro, pausa y Ficha) y borrar el kit «Decreto real» cuando quede reemplazado.
+  - **APROBADO por el creador (2026-10-23): el kit v2 y la salud de 9 huellas** (`diseno/salud-9-huellas.md`, las 5 recomendaciones):
+    - 1 huella por golpe (por dentro, 18 medias huellas; 2 por golpe) y 1,2 s de protección;
+    - el snack cura 1 huella y el descanso las llena todas; la pelusa no cura;
+    - en 0: las 9 huellas suben como gatitos fantasma y vuelven; Felipe reaparece en el último descanso («Siesta táctica.») sin perder nada; el Collar de la Vergüenza, al tercer desmayo del mismo nivel;
+    - aviso con 3 huellas o menos (laten; «Esto es un empate técnico.»); A.S.P.I. no cambia;
+    - opción de accesibilidad «Golpes»: Normal, Suaves (½ huella) y Ninguno; no bloquea logros.
+  - **Sigue:** programar la interfaz con el kit y la salud de 9 huellas, y borrar el kit «Decreto real» cuando quede reemplazado.
 
 - **Pelea con A.S.P.I. v5 (hecha 2026-10-23, 0 créditos; lo que vio el creador en la v4). Revisión: `diseno/revisiones/2026-10-23-pelea-aspi-v5.md`.**
   - **Acción nueva «Aplastar»** (`AplastarAspi`): con A.S.P.I. vulnerable y al alcance (piso 120 px; desde un mueble del estudio 190 px de lado), el botón de acción hace un salto dirigido que siempre cae sobre ella y la apaga. Le gana a cualquier otra acción cercana. El aviso amarillo dice «[E] ¡APLASTA!». El salto manual sigue valiendo. Prueba nueva `prueba_aplastar.gd` (piso y los 6 muebles); el bot la usa.

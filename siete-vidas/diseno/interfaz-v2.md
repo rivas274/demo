@@ -274,7 +274,19 @@ Con «9 huellas = salud», ese sistema doble desaparece. **Antes de implementar 
 
 Hasta que eso se decida, el arte trae los 5 estados de la huella, y el HUD de las láminas muestra 6 huellas y media de 9.
 
-## Dirección de arte: opciones (v2, sobre el layout aprobado; el creador elige A, B o C)
+## Dirección de arte: ELEGIDA la A con el toque de la C (creador, 2026-10-23)
+
+**Elegida: «A + C».** Es la A (Corte diagonal) con la sombra de color de la C. Lámina: `revisiones/capturas/interfaz-rediseno/direccion-arte-AC-v2.png` (y `-x2`), generada con la mezcla `AC` de `herramientas/interfaz_v2_laminas_layout.py`.
+
+- **De la A:** diagonal 1:3 (18°), dos esquinas cortadas, líneas crema de 1 px arriba y abajo, franja del nombre como bloque del color, fondo del retrato liso con triángulos, sello en rombo, huellas en una fila de 9 con la cara de Felipe, paleta de la A y movimiento de barrido de 140 ms con rebote de 4 px.
+- **De la C:** la **sombra dura de 3 px del color del personaje** en las cajas que tienen acento: el diálogo (magenta con Valeria, ámbar con Felipe), la barra del jefe (rojo), la pausa y la Ficha (ámbar).
+- **El cartel de travesura mantiene la sombra oscura,** porque el magenta es de Valeria (un color, un significado).
+- **Colores:** Felipe en oro ámbar #E8913A; la oportunidad en amarillo limón #FFE066, solo como borde y texto con flecha.
+- **A corregir en los assets:** con texto grande, el texto del diálogo tiene que dejar al menos 6 px libres después del retrato. En la C quedaba pegado.
+
+Lo que sigue es el registro de las tres opciones que se compararon.
+
+### Las tres opciones comparadas (v2, sobre el layout aprobado)
 
 **Láminas v2:** `revisiones/capturas/interfaz-rediseno/direccion-arte-{A,B,C}-v2.png`, de 1280×990, y `-x2.png`. Las genera `herramientas/interfaz_v2_laminas_layout.py`. Cada lámina junta 4 pantallas reales de 640×360 a escala 1, sacadas del juego **sin interfaz** (`base-sala.png`, `base-sala-2.png` y `base-pelea-2.png`, de `herramientas/capturas_sin_interfaz.gd`):
 
@@ -340,7 +352,8 @@ Las dibuja `siete-vidas/herramientas/interfaz_v2_laminas.py`, que dibuja por có
 | Texto | #FFF0D5 | #F4E2BB | #FFF6E0 |
 | Apagado (etiquetas, vacío) | #8A7480 | #7C7488 | #8C6F86 |
 | Contorno | #120C12 | #0E0D16 | #0A0608 |
-| **Felipe** (dorado, rey) | #E8B04A | #F0C04E | #FFC53D |
+| **Felipe** (oro ámbar, rey; v2) | #E8913A | #E0A848 | #FF9F2E |
+| **Oportunidad** (solo borde y texto con flecha) | #FFE066 | #FFE066 | #F2F05A |
 | **Valeria** (magenta) | #D8336B | #B8325E | #FF4F9A |
 | **A.S.P.I.** | #E04848 (rojo) | #4CC9E0 (cian máquina) | #FF5A3C (rojo) |
 | Segundo color de A.S.P.I. | #4CC9E0 | #E04848 | #3FD8E8 |
@@ -359,7 +372,7 @@ La paleta sale de la sección 3.7 de ChatGPT: carbón ciruela #30242C, crema per
   - Nombres y números: **Pixel Operator Bold 16**.
   - Texto del diálogo y del globito: **Pixel Operator 16**.
   - Carteles: **Silkscreen 16** (o 24 en el título de una travesura grande).
-  - Etiquetas cortas, como «FASE II», «SNACKS» y los botones del menú: **Silkscreen 8**.
+  - Etiquetas cortas, como «FASE II» y los botones del menú: **Silkscreen 16** (en la v2 no queda nada de 8 px en lo que se lee).
   - Todo se dibuja a su tamaño de diseño o a un múltiplo, sin suavizado.
   - Se cumple la lección 38: 16 px o más en carteles y palabras, y una sola línea por cartel.
   - ChatGPT sugería Press Start 2P, y Gemini, Silver o VT323. No hacen falta: Pixel Operator y Silkscreen ya cubren la ñ, las tildes, ¿ y ¡ (lo revisa `prueba_zonas_texto`).
@@ -452,13 +465,13 @@ Las memorias que hay que tocar al implementar son:
 - `07-arquitectura.md`: la interfaz y las zonas;
 - `05-estado-actual.md`.
 
-## Encargos para Gemini y ChatGPT (uno por opción; se pega el de la opción elegida)
+## Encargos para Gemini y ChatGPT (se pega el texto común más el de la «A + C», la elegida)
 
 **Cómo usarlos:**
 
 - Se pega el texto común más el de la opción elegida.
 - Se adjuntan las referencias:
-  - `direccion-arte-<letra>-x2.png`, que manda en forma y color;
+  - `direccion-arte-AC-v2-x2.png`, que manda en forma y color;
   - `elegido-dialogo-moderno.png`;
   - `actual-hud-dialogo.png`, para el estilo del mundo.
 - **Mínimo 5 intentos** por imagen (regla del proyecto): otras semillas o un chat nuevo. Se comparan con la lámina y se elige el mejor. El plan gratis de ChatGPT tiene un tope de imágenes y adjuntos por día, así que conviene repartir las piezas entre los dos y entre días.
@@ -482,7 +495,7 @@ Reglas:
   para poder cortarlas en 9 partes.
 Piezas (proporciones a escala del juego, en píxeles del juego):
 1. Marco del cuadro de diálogo, para cortar en 9 partes: caja ancha de 300x40, con los lados izquierdo y derecho en diagonal.
-2. Franja del nombre: 64x13, en diagonal, en 3 colores (dorado, magenta y el color de A.S.P.I.).
+2. Franja del nombre: 64x13, en diagonal, en 3 colores (oro ámbar, magenta y el color de A.S.P.I.).
 3. Fondo del retrato: 58x50, inclinado, en los mismos 3 colores, con sus fragmentos alrededor.
 4. Huella de gato de 13x12 (almohadilla grande y 4 deditos) en 5 estados, en fila: llena, media (mitad izquierda llena),
    vacía, golpe (blanca) y curando (más clara, con un brillo).
@@ -491,16 +504,35 @@ Piezas (proporciones a escala del juego, en píxeles del juego):
    Aparte: el marco chico del retrato del jefe, de 30x26, inclinado.
 6. Globito de pensamiento de gato: caja de 120x18 para cortar en 9 partes, con 2 orejitas de gato arriba, y aparte
    su cola corta, que termina en una huellita.
-7. Cartel de travesura: franja diagonal grande de 220x22 color dorado y, aparte, el sello: una huella dentro de
+7. Cartel de travesura: franja diagonal grande de 220x22 color oro ámbar y, aparte, el sello: una huella dentro de
    su forma (ver la opción).
 8. Etiqueta de logro: 220x20, en diagonal, con un ícono de huella en un rombo a la izquierda.
 9. Menú de pausa: panel de 68x84 para 9 partes; botón de 64x13 en 3 estados (normal, resaltado y apretado);
    franja de título de 60x12.
 10. Ficha: panel de 82x84 para 9 partes y barra de estadística de 30x7 con puntas en diagonal (marco vacío y
     relleno en 3 colores).
-11. Contador: marco de 80x18 para 9 partes e ícono de snack (pescadito de croqueta) de 12x7.
+11. Ícono de snack (pescadito de croqueta) de 12x7, para la lista del bolsillo en la pausa (ya no hay contador en el HUD).
+13. Aviso de oportunidad: marco de 120x18 para 9 partes, solo borde amarillo limón #FFE066 sobre panel oscuro (el centro
+    oscuro, nunca un bloque amarillo), y aparte una flecha de 7x5 del mismo limón que apunta abajo.
 12. Fragmentos sueltos de 2 a 7 px en los 3 colores de personaje.
 ```
+
+### Elegida · A + C (va después del texto común)
+
+```
+Estilo: moderno y expresivo, como un cuadro de diálogo de juego de acción indie. Cajas oscuras con
+dos esquinas cortadas en diagonal (arriba a la izquierda y abajo a la derecha), una línea clara de 1 px
+arriba y otra abajo, a 2 px del borde. Diagonales de 1 px de corrimiento por cada 3 px de alto (unos 18 grados).
+Sombra dura de 3 px abajo a la derecha, DEL COLOR del personaje (no gris): en el marco del diálogo, haz 3 copias,
+con sombra oro ámbar, magenta y roja. El cartel de travesura lleva sombra oscura.
+Fragmentos: triángulos chicos del color del personaje. Franjas de nombre: bloque sólido del color del personaje.
+Sello del cartel: rombo oscuro con la huella oro ámbar.
+Paleta: fondo #241A26, panel #30242C, línea #F4E2BB, texto #FFF0D5, apagado #8A7480, contorno #120C12,
+Felipe oro ámbar #E8913A, Valeria magenta #D8336B, A.S.P.I. rojo #E04848, segundo color #4CC9E0,
+oportunidad amarillo limón #FFE066 (solo en el aviso de oportunidad, nunca como relleno).
+```
+
+Las opciones de abajo quedan como registro; ya no se pegan.
 
 ### Opción A · Corte diagonal
 

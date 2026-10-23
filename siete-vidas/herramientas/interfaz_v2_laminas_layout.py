@@ -41,8 +41,23 @@ AJUSTES = {
     "C": {"felipe": "#FF9F2E", "oportunidad": "#F2F05A"},
 }
 
+# Elegida por el creador (2026-10-23): la A con el toque de la C, la sombra dura de 3 px del color del personaje en
+# las cajas con acento (diálogo, barra del jefe, pausa). El cartel de Felipe mantiene la sombra oscura: el magenta
+# es de Valeria. El resto (cortes, líneas, paleta, huellas) es la A.
+MEZCLAS = {
+    "AC": ("A", {"titulo": "A + C · ELEGIDA", "sombra_color": True, "sombra_px": 3,
+                 "corta": "La A (cortes y líneas) con la sombra de color de la C.",
+                 "forma": ["Caja oscura + línea clara de 1 px arriba", "y abajo. Contorno 1 px; sombra dura 3 px DEL COLOR",
+                           "del personaje (de la C). Esquinas: dos cortadas.", "Fragmentos: triángulos de 2-5 px."]}),
+}
+
 
 def opcion(letra):
+    if letra in MEZCLAS:
+        base_letra, cambios = MEZCLAS[letra]
+        o = opcion(base_letra)
+        o.update(cambios)
+        return o
     o = copy.deepcopy(k.OPCIONES[letra])
     o.update(AJUSTES[letra])
     return o
@@ -407,7 +422,7 @@ def main():
         "aspi": base_caras["aspi"],
         "aspi_alerta": base_caras["aspi_alerta"],
     }
-    for letra in ("A", "B", "C"):
+    for letra in ("A", "B", "C", "AC"):
         img = lamina(letra, caras)
         ruta = os.path.join(CAPTURAS, f"direccion-arte-{letra}-v2.png")
         img.save(ruta)

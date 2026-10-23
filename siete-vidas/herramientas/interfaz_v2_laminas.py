@@ -267,7 +267,7 @@ def caja(img, o, x, y, w, h, color_fondo=None, acento=None, k=None):
     cont = hexa(o["contorno"])
     sp = o["sombra_px"]
     pts = contorno_caja(o, x, y, w, h, s)
-    sombra_c = hexa(acento) if (o["borde"] == "grueso" and acento) else hexa(o["sombra"])
+    sombra_c = hexa(acento) if ((o["borde"] == "grueso" or o.get("sombra_color")) and acento) else hexa(o["sombra"])
     poligono(img, [(px + sp, py + sp) for px, py in pts], sombra_c)
     poligono(img, pts, cont)
     d = ImageDraw.Draw(img)

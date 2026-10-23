@@ -23,7 +23,8 @@ Actualizado: 2026-10-23 (pelea con A.S.P.I. v5: acción «Aplastar» y un solo f
     - Íconos de botón según el mando.
     - HUD mínimo: 9 huellas; la barra del jefe solo en la pelea; snacks, agenda, calcetines, fotos y collar en la pausa.
     - **El diálogo va siempre arriba**, también con texto grande.
-  - **Sigue:** retomar la dirección de arte (A, B, C o mezcla) sobre este layout; luego los assets con Gemini y ChatGPT; después, revisar con el diseñador la salud de 9 huellas y programar.
+  - **Dirección de arte ELEGIDA (2026-10-23): la A con el toque de la C.** Es la A (cortes en diagonal de 18°, líneas crema, paleta de la A) con la sombra dura de 3 px del color del personaje de la C en el diálogo, la barra del jefe y la pausa. Felipe en oro ámbar #E8913A; la oportunidad en limón #FFE066, solo borde y texto con flecha. Lámina `capturas/interfaz-rediseno/direccion-arte-AC-v2.png`; detalle y encargo en `diseno/interfaz-v2.md`.
+  - **Sigue:** generar los assets con Gemini y ChatGPT desde la PC del creador (encargo «A + C», 5 intentos por hoja); Claude los retoca; después, revisar con el diseñador la salud de 9 huellas y programar.
 
 - **Pelea con A.S.P.I. v5 (hecha 2026-10-23, 0 créditos; lo que vio el creador en la v4). Revisión: `diseno/revisiones/2026-10-23-pelea-aspi-v5.md`.**
   - **Acción nueva «Aplastar»** (`AplastarAspi`): con A.S.P.I. vulnerable y al alcance (piso 120 px; desde un mueble del estudio 190 px de lado), el botón de acción hace un salto dirigido que siempre cae sobre ella y la apaga. Le gana a cualquier otra acción cercana. El aviso amarillo dice «[E] ¡APLASTA!». El salto manual sigue valiendo. Prueba nueva `prueba_aplastar.gd` (piso y los 6 muebles); el bot la usa.

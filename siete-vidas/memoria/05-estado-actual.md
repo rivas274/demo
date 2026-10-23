@@ -8,6 +8,12 @@ Actualizado: 2026-10-23 (pelea con A.S.P.I. v3: avisos sobre ella, globito, cám
 
 ## En curso
 
+- **Pelea con A.S.P.I. v3.1 (hecha 2026-10-23, 0 créditos; lo que vio el creador en la v3):**
+  - **La pantalla ahora tiembla de verdad:** la sacudida duraba un solo cuadro, porque el cuadro en que empieza un congelado traía el tiempo sin escalar y se comía el reloj. Ahora es un temblor estándar en píxeles enteros que decae: golpe 3 px y 0,2 s; golpe final 6 px y 0,35 s; embestida que frena 2 px; cortocircuito 4 px (`datos/jefes/aspi_jugo.tres`). Va en el offset de la cámara del mundo, no en el HUD. Hay opción nueva **«Reducir sacudida»** (divide por 3). `prueba_jefe` mide el desplazamiento.
+  - **Libros:** ahora son de canto, con la base plana y 14 px de grosor (pilas de 28 px), del libro acostado de `librero-gato.png`; quedan apoyados, también en el piso (lección 47).
+  - **Estación de carga:** está en el piso (la levantaba 10 px el enchufe tirado de su arte). Tiene un cable de 2 px con contorno que va por el piso con su curva hasta una toma de pared legible (placa, dos agujeros y clavija) y, tras el cortocircuito, la toma queda chamuscada con chispitas (lecciones 48 y 49).
+  - **Sigue:** el creador juega el `.zip` y ve `pelea-aspi-v3b.mp4` y `pelea-aspi-v3b-detalles.png`.
+
 - **Pelea con A.S.P.I. v3 (hecha 2026-10-23, 0 créditos; el creador aprobó las ideas de Gemini, `diseno/revisiones/2026-10-23-gemini-pelea-aspi.md`). Revisión: `diseno/revisiones/2026-10-23-pelea-aspi-v3.md`.**
   - **Lectura:** «¡DEPÓSITO LLENO!» y «¡EN CORTO!» nacen sobre A.S.P.I. (no en la franja de arriba). La embestida marca una línea roja en el piso. Durante la pelea, Felipe piensa en un **globito** sobre su cabeza (`GloboDialogo`). La **cámara se corre** hacia ella cuando viene de lejos o está fuera de pantalla (`CamaraPelea`), con flecha en el borde; sin zoom, porque un zoom no entero rompe el pixel art.
   - **Fase 3 «Cortocircuito y apagón»:** choca contra el enchufe, el cuarto queda en penumbra con su luz roja de emergencia (`ApagonEstudio`), los charcos de agua y café la dejan **en corto** (vulnerable) y maullar la atrae. Siempre hay un charco. Las bolas salen cada 3,4 s. La luz vuelve de golpe al ganar.

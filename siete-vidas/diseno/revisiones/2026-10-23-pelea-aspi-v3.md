@@ -65,6 +65,14 @@ De los 5 pasos del video (avisar con un círculo, abrir un portal, dejar caer, h
 - **Datos:** `datos/jefes/aspi_jugo.tres` (`DatosJugoJefe`): radio, escalones y duración de la onda, sacudida, brinco, polvo, multiplicador del golpe final, pausa del despertar y radio de las marcas.
 - **Felipe alegre y juguetón** (nota del creador): celebra cada apagado con un maullido al aterrizar, si el jugador no lo está moviendo, y al ganar juega con el estambre (animaciones que ya existían). Las frases de la pelea suenan a que se divierte: «¡Confeti!» al esparcir, «¡Ja! Baile eléctrico.» en el charco, «¡Se fue la luz! Hora de las escondidas.» y, según la nota, «¡Mi obra maestra! Firmada con pelos.» o «¿Ya? Era el calentamiento. ¡Quiero revancha!».
 
-## 9. Encargo opcional a Gemini (no hace falta)
+## 9. v3.1: lo que vio el creador
+
+| Problema | Causa | Arreglo |
+| --- | --- | --- |
+| «La pantalla no tiembla» | El temblor se aplicaba un solo cuadro: el cuadro en que empieza el congelado del «¡CLIC!» trae el tiempo sin escalar, y al dividirlo por la escala nueva (0,03) se comía el reloj de golpe | `Jugo.temblar`: temblor estándar en píxeles enteros que decae al cuadrado. Golpe 3 px y 0,2 s; final 6 px y 0,35 s; embestida 2 px; cortocircuito 4 px. Va en el offset de la cámara del mundo (el HUD es otra capa). El tiempo se topa a 1/20 s por cuadro. Hay opción «Reducir sacudida». La prueba mide el desplazamiento de la cámara |
+| Libros raros, flotando y delgados | Eran libros en perspectiva de 3/4 de 12 px, montados en diagonal | Libros de canto, base plana, 14 px de grosor (pilas de 28 px), con la paleta del libro de `librero-gato.png` |
+| Base, enchufe y cable raros | El arte de la estación traía su cable y el enchufe tirados debajo, lo que la levantaba 10 px; la toma de la pared era un punto blanco | La estación sin el cable suelto (apoyada), el cable de 2 px con contorno por el piso hasta una toma de 10 × 12 px con dos agujeros y la clavija; chamuscada tras el cortocircuito |
+
+## 10. Encargo opcional a Gemini (no hace falta)
 
 «Una regleta/enchufe de pared quemado con marca negra de hollín y una chispa, pixel art del mismo estilo de `estudio-v2.png`, 16 × 16 px en el juego, sobre fondo blanco». Hoy el choque se ve con chispas y destello, sin marca que quede.

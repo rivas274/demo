@@ -132,8 +132,9 @@ Nada nuevo pedido: piezas de Gemini recombinadas a su misma escala con `python3 
 
 | Pieza | Tamaño | De dónde | Para qué |
 | --- | --- | --- | --- |
-| `libro_b.png`, `libro_c.png` | 42 × 12 | `libro.png` (`objetos.png`) con la tapa verde o azul | Libros que caen |
-| `libros_pila.png`, `libros_pila_b.png` | 45 × 30 | Tres libros apilados, en otro orden de tonos (sin clones) | Se tiran (repisa del gato y caja de la mudanza) |
+| `libro_lado.png`, `libro_lado_b.png`, `libro_lado_c.png` | 44 × 14 | El libro acostado del estante de `librero-gato.png`, de canto, redibujado con su paleta (v3.1: los de perspectiva se veían finos y flotando) | Libros que caen (quedan apoyados) |
+| `libros_pila.png`, `libros_pila_b.png` | 47 × 28 | Dos libros de canto apilados, otro tono y otro corrimiento (sin clones) | Se tiran (repisa del gato y caja de la mudanza) |
+| `base_carga_sin_cable.png` | 70 × 39 | `base_carga.png` sin el cable y el enchufe sueltos (que la levantaban 10 px del piso) | Estación de carga de A.S.P.I.; el cable a la toma lo dibuja `DecoradoNivel1` |
 | `pizarra_1.png`, `pizarra_2.png` | 120 × 86 | `pizarra.png` sin la nota rosa / sin las dos (corcho de la misma pizarra) | El corcho después de despegar |
 | `nota_rosa.png`, `nota_amarilla.png` | 20 × 21, 23 × 18 | Recortes de `pizarra.png` | Las notas que caen |
 | `librero_bajo_1.png`, `librero_bajo_2.png`, `libro_estante_1.png`, `libro_estante_2.png` | 113 × 97, 12 × 19 | `librero_bajo.png` sin uno y dos libros del estante de arriba (fondo del mismo estante); los libros parados | El estante después de desordenar y el contorno del Indicador |

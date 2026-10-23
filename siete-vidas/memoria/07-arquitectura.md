@@ -248,7 +248,8 @@ múltiplo); `Estilo.escribir` dibuja con ellas y `Estilo.recortar` corta con «�
 **Pelea v3 (2026-10-23):** piezas comunes a toda pelea en `PeleaJefe`: `GloboDialogo` (`scripts/ui/`: lo que dice
 Felipe durante la pelea va en un globito; `Dialogo.globo`) y `CamaraPelea` (`scripts/jefes/`: corre la cámara de Felipe
 hacia el jefe si está fuera de pantalla o `amenaza()`, sin zoom, con flecha de borde). Lo de A.S.P.I.:
-`ReaccionesAspi` (el piso tiembla al apagarla, despertar con «!» y pausa, marcas de aviso en el piso; números en
+`Jugo.temblar(px, segundos, vertical)` (temblor de pantalla en píxeles enteros que decae, en el offset de la cámara del mundo;
+respeta `Opciones.reducir_sacudida`), `ReaccionesAspi` (el piso tiembla al apagarla, despertar con «!» y pausa, marcas de aviso en el piso; números en
 `DatosJugoJefe`, `datos/jefes/aspi_jugo.tres`, que cuelga de `DatosJefe.jugo`), `ConductaCortocircuito` (fase 3: corre al enchufe, apagón, charcos que la dejan en corto), `ApagonEstudio` (penumbra y
 luces), `PelusaAspi` (sobrecarga y montañas), `Charco` (`scripts/entidades/objetos/`), `NotaArteGatuno` y los ganchos de
 sonido `DatosJefe.sonidos` → `BatallaAspi.sonar_evento(evento, tono)`. Vulnerable por motivo:

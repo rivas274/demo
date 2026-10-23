@@ -92,6 +92,8 @@ func golpear(dir: Vector3) -> void:
 	freeze = false
 	_volando = true
 	sleeping = false
+	# En el aire no choca con Felipe (si le cae encima, lo hundiría en el piso).
+	collision_mask = 1 | 8
 	apply_central_impulse((dir.normalized() * 1.25 + Vector3.UP * 0.7) * mass)
 	apply_torque_impulse(dir.cross(Vector3.UP) * -0.02)
 
@@ -101,6 +103,7 @@ func _al_tocar(_cuerpo: Node) -> void:
 		return
 	_volando = false
 	_caido = true
+	set_deferred("collision_mask", 1 | 2 | 8)
 	if rompible and _vel_antes.length() > 0.8:
 		_romper()
 	caido.emit(self, global_position)
@@ -143,6 +146,7 @@ func recoger() -> void:
 			p.queue_free()
 	pedazos.clear()
 	visible = false
+	_forma.set_deferred("disabled", true)
 	set_deferred("freeze", true)
 	get_tree().create_timer(2.5).timeout.connect(reponer)
 
@@ -156,6 +160,7 @@ func reponer() -> void:
 	visible = true
 	_caido = false
 	_volando = false
+	collision_mask = 1 | 2 | 8
 
 
 func esta_caido() -> bool:

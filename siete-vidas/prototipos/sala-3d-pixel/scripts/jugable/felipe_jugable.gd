@@ -35,7 +35,9 @@ const CAJA := Vector3(0.5, 0.48, 0.3)
 @export var anticipacion := 0.1
 ## Al saltar pegado al frente de un mueble, el salto se corre hacia el fondo para caer encima.
 @export var ayuda_profundidad := true
-@export var espera_ocio := 9.0
+@export var espera_ocio := 8.5
+## Cuánto mira al jugador sentado antes de jugar con la pelota (s).
+@export var mira_antes_de_jugar := 1.5
 ## Empuje sobre la pelota (y otros cuerpos sueltos) al caminar contra ella.
 @export var empuje := 1.3
 @export var giro_caminar := 20.0
@@ -368,6 +370,8 @@ func adelante() -> Vector3:
 
 func _usar(obj: Node) -> void:
 	var verbo: String = obj.call("verbo", self)
+	if "--bot-log" in OS.get_cmdline_user_args():
+		print("  [felipe] %s %s en %s" % [verbo, obj.name, str(global_position)])
 	match verbo:
 		"Arañar":
 			_obj_accion = obj
@@ -590,7 +594,7 @@ func _ocio(delta: float) -> void:
 					_fase_t = 0.0
 					_tocar("sentado_mira", 0.2, 1.0, 0.0)
 		"mira":
-			if _fase_t >= ap.get_animation("sentado_mira").length and _pelota_cerca() and tiene("sentado_pelota"):
+			if _fase_t >= mira_antes_de_jugar and _pelota_cerca() and tiene("sentado_pelota"):
 				_fase = "pelota"
 				_fase_t = 0.0
 				_pos_clip_antes = 0.0
@@ -634,5 +638,5 @@ func _tocar_pelota() -> void:
 	var izquierda := rig.global_transform.basis.x.normalized()
 	var frente := adelante()
 	_contacto_lado = -_contacto_lado
-	var v := izquierda * 0.28 * _contacto_lado + frente * 0.06 + Vector3.UP * 0.25
+	var v := izquierda * 0.38 * _contacto_lado + frente * 0.06 + Vector3.UP * 0.25
 	pelota.apply_central_impulse(v * pelota.mass)

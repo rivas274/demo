@@ -2,8 +2,8 @@ class_name Anuncios
 extends Node
 ## UNA sola cola para todo lo que se anuncia en pantalla (G5 y M3 de la revisión 3): carteles de travesura, avisos de
 ## logro, franjas de fase del jefe («¡DEPÓSITO LLENO!») y «PODER NUEVO».
-## Plan de estabilización (2026-10-20, decisión 3): todos salen en la ZONA C (ZonasTexto.CARTELES, arriba al centro,
-## y 30–90), la misma franja que el diálogo:
+## Plan de estabilización (2026-10-20, decisión 3): todos salen en la ZONA C (ZonasTexto.CARTELES, arriba al centro
+## desde y 44; el logro, a la derecha: layout v2), la misma franja que el diálogo:
 ## - Uno a la vez; nada se monta sobre otro ni sobre el HUD.
 ## - Si hay diálogo, el anuncio espera su turno. Si espera más de ESPERA_MAXIMA s, sale igual y la frase cede (vuelve
 ##   a la cola del diálogo). Si llega una frase urgente mientras se ve un anuncio, el anuncio se acorta.
@@ -105,7 +105,8 @@ func _process(delta: float) -> void:
 	if _hay_dialogo():
 		dialogo.ceder()
 	_cola.pop_front()
-	var rect := ZonasTexto.cartel(siguiente["tamano"])
+	# El logro va a la derecha de la zona C; lo demás, centrado (layout v2).
+	var rect := ZonasTexto.logro(siguiente["tamano"]) if siguiente["tipo"] == "logro" else ZonasTexto.cartel(siguiente["tamano"])
 	actual = siguiente
 	actual["rect"] = rect
 	mostrados.append([siguiente["tipo"], siguiente["texto"], rect])

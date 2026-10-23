@@ -119,14 +119,14 @@ func _probar_hace_dano() -> void:
 	cosa.position = felipe.global_position + Vector2(20, 0)
 	mundo.add_child(cosa)
 	await _esperar(3)
-	_comprobar(felipe.corazones == Felipe.CORAZONES_MAX, "HaceDano inactivo no lastima")
+	_comprobar(felipe.medias == Felipe.MEDIAS_MAX, "HaceDano inactivo no lastima")
 	dano.activo = true
 	await _esperar(3)
-	_comprobar(felipe.corazones == Felipe.CORAZONES_MAX - 1, "HaceDano quita un corazón al tocar a Felipe")
+	_comprobar(felipe.medias == Felipe.MEDIAS_MAX - 2, "HaceDano quita una huella (2 medias) al tocar a Felipe")
 	felipe.vida.restante_invulnerable = 0.0
 	dano.pausar(1.0)
 	await _esperar(3)
-	_comprobar(felipe.corazones == Felipe.CORAZONES_MAX - 1, "HaceDano en pausa (aturdido) no lastima")
+	_comprobar(felipe.medias == Felipe.MEDIAS_MAX - 2, "HaceDano en pausa (aturdido) no lastima")
 	cosa.queue_free()
 	await _esperar(2)
 	felipe.vida.llenar()
@@ -281,7 +281,7 @@ func _probar_enemigo_solo_con_datos() -> void:
 	felipe.global_position = pelusa.global_position + Vector2(10, 0)
 	felipe.velocity = Vector2.ZERO
 	await _esperar(3)
-	_comprobar(felipe.corazones < Felipe.CORAZONES_MAX, "Enemigo nuevo: lastima a Felipe al tocarlo")
+	_comprobar(felipe.medias < Felipe.MEDIAS_MAX, "Enemigo nuevo: lastima a Felipe al tocarlo")
 	felipe.global_position = Vector2(1400, PISO)
 	pelusa.recibe_golpes.recibir_zarpazo(felipe)
 	_comprobar(not vencido[0] and pelusa.vida.actual == 1, "Enemigo nuevo: el primer zarpazo le quita uno de 2")

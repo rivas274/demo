@@ -1,54 +1,45 @@
 class_name FichaSuMajestad
 extends Control
-## La «Ficha de Su Majestad» del menú de pausa (pilar 4): el retrato de Felipe en su marco (MarcoFicha), sus kilos y
-## su humor, y una BarraEstadistica por estadística (defensa, carisma, ataque y peso) más el chiste de la velocidad.
-## Es el único lugar donde se ve el peso (nunca en el HUD).
+## La «Ficha de Su Majestad» del menú de pausa (pilar 4), en el lenguaje de la interfaz v2 («A + C», kit
+## assets/ui/v2/): el panel con la sombra ámbar, el retrato presumido sobre su fondo inclinado con fragmentos,
+## «SU MAJESTAD · 8,2 kg» y su humor, y una BarraEstadistica por estadística (carisma, defensa, ataque y peso, con
+## puntas en diagonal) más el chiste de la velocidad. Es el único lugar donde se ve el peso (nunca en el HUD).
 ## Solo escucha: se conecta a Felipe.peso_cambiado, calcula las estadísticas con DatosFicha (datos/ui/ficha.tres) y
 ## avisa con `estadisticas_cambiadas`; cada barra escucha esa señal y toma lo suyo. Las estadísticas son solo de
 ## chiste: nada del juego las lee (decisión del creador, 2026-10-20).
-## Escena: escenas/ui/ficha_su_majestad.tscn (las barras y sus íconos se arman ahí).
+## Escena: escenas/ui/ficha_su_majestad.tscn (las barras se arman ahí).
 
 signal estadisticas_cambiadas(estadisticas: Dictionary)
 
 const DATOS := "res://datos/ui/ficha.tres"
-const RETRATOS := "res://assets/felipe/felipe-retratos.png"
-## Cara del retrato (felipe-retratos.png, 3 × 3; 0 = de reojo) y su lado en la hoja.
-const CARA := 0
-const LADO_CARA := 66.0
+## Medidas de la lámina: panel de 394×166; texto desde x 74.
+const TAM := Vector2(394, 166)
+const X_TEXTO := 74.0
 
 @export var datos: DatosFicha
 
 var felipe: Felipe
 var kilos := Felipe.PESO_INICIAL
 var ultimas := {}
+## 0 a 1: el destello al elegir «Ficha» en la pausa.
+var resalto := 0.0:
+	set(valor):
+		resalto = valor
+		queue_redraw()
 
-@onready var marco: MarcoFicha = %Marco
-@onready var retrato: TextureRect = %Retrato
 @onready var barras: Container = %Barras
-## Capa encima del marco donde se escriben los kilos y el humor.
-@onready var placa: Control = %Placa
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	size = TAM
 	if datos == null:
 		datos = load(DATOS)
-	var cara := AtlasTexture.new()
-	cara.atlas = load(RETRATOS)
-	cara.region = Rect2((CARA % 3) * LADO_CARA, (CARA / 3) * LADO_CARA, LADO_CARA, LADO_CARA)
-	retrato.texture = cara
-	var ventana := marco.ventana()
-	retrato.position = marco.position + Vector2(ventana.position.x + 4.0, ventana.position.y + roundf((ventana.size.y - LADO_CARA) / 2.0))
-	retrato.size = Vector2(LADO_CARA, LADO_CARA)
-	var cuerpo := marco.cuerpo()
-	barras.position = marco.position + cuerpo.position + Vector2(6, 6)
-	barras.size = Vector2(cuerpo.size.x - 12.0, cuerpo.size.y - 12.0)
 	for barra in lista_barras():
 		barra.escuchar(estadisticas_cambiadas)
 		if not barra.con_barra:
 			barra.frase = datos.frase_velocidad
-	placa.draw.connect(_dibujar_placa)
 	visibility_changed.connect(_al_mostrarse)
 	_al_cambiar_peso(kilos)
 
@@ -75,8 +66,7 @@ func _al_cambiar_peso(kg: float) -> void:
 	kilos = kg
 	ultimas = datos.estadisticas(kg)
 	estadisticas_cambiadas.emit(ultimas)
-	if placa:
-		placa.queue_redraw()
+	queue_redraw()
 
 
 ## Al abrir la pausa, las barras se vuelven a llenar desde cero (un detalle de Balatro: los números se ganan).
@@ -87,11 +77,20 @@ func _al_mostrarse() -> void:
 				barra.rellenar()
 
 
-## A la derecha del retrato, dentro de la ventana: «Su Majestad», los kilos y el humor.
-func _dibujar_placa() -> void:
-	var ventana := marco.ventana()
-	var x := marco.position.x + ventana.position.x + LADO_CARA + 10.0
-	var y := marco.position.y + ventana.position.y
-	Estilo.escribir(placa, Vector2(x, y + 20), tr("FICHA_SU_MAJESTAD"), &"ficha_nombre", Estilo.color(&"lacre"))
-	Estilo.escribir(placa, Vector2(x, y + 40), DatosFicha.texto_kilos(kilos), &"ficha_peso", Estilo.color(&"tinta_decreto"))
-	Estilo.escribir(placa, Vector2(x, y + 56), tr(datos.humor(kilos)), &"ficha_frase", Estilo.color(&"tinta_decreto_suave"))
+## Un destello corto del borde (al elegir «Ficha» en la pausa).
+func resaltar() -> void:
+	resalto = 1.0
+	create_tween().tween_property(self, "resalto", 0.0, 0.5)
+
+
+func _draw() -> void:
+	KitUI.pieza(self, "ficha-panel", Rect2(Vector2.ZERO, TAM), Color.WHITE.lerp(Estilo.color(&"personaje_felipe"), resalto * 0.5))
+	KitUI.icono(self, "ficha-retrato-fondo", Vector2(8, 8))
+	KitUI.fragmentos(self, &"ficha", Vector2(12, 10))
+	var cara := KitUI.textura("cara-ficha-felipe")
+	if cara:
+		draw_texture(cara, Vector2(12, 60 - cara.get_height()))
+	var titulo := "%s · %s" % [tr("FICHA_SU_MAJESTAD").to_upper(), DatosFicha.texto_kilos(kilos)]
+	KitUI.escribir(self, X_TEXTO, 10, titulo, &"ficha_nombre", Estilo.color(&"personaje_felipe"))
+	var x_humor := X_TEXTO + Estilo.ancho(titulo, &"ficha_nombre") + 8.0
+	KitUI.escribir(self, x_humor, 10, Estilo.recortar(tr(datos.humor(kilos)), &"ficha_frase", TAM.x - x_humor - 12.0), &"ficha_frase", Estilo.color(&"ui_apagado"))

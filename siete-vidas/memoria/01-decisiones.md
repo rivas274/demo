@@ -72,7 +72,7 @@ Actualizado: 2026-10-19 (PARTE B del nivel 1 v4). Detalle completo en la biblia 
 - **Peso (2026-10-18):** no cambia el dibujo ni el movimiento de Felipe (para mantenerlo simple). **Las formas (Flaco, Gordito, Modo Buda) se descartan.** El peso sube de verdad la **defensa, el carisma y el ataque**; la velocidad aparece solo como chiste y no cambia. Se ve en la **"Ficha de Su Majestad"** del menú de pausa (retrato, barras y una frase satírica por estadística, como "Así se ve un rey"); no hay báscula en la interfaz.
 - **Diálogos con retratos (2026-10-18):** los pensamientos y ocurrencias de Felipe salen en un cuadro con su retrato (las 9 caras); en las conversaciones sale también el del otro personaje. Es el gancho del humor (pilar 5).
 - **Estilo épico (2026-10-18):** todo se ve y se siente épico como Broforce y Balatro (carteles, cámara lenta, palabras y números que saltan, sacudidas): Felipe es el más pro en su cabeza.
-- **Nueve vidas** por partida (2026-10-18; antes 7: se pasa a 9 para que sea internacional, como en inglés).; al perderlas, Felipe despierta en casa con el **Collar de la Vergüenza** (baja el respeto hasta reconquistar a Valeria).
+- **Nueve vidas** (2026-10-18; antes 7: se pasa a 9 para que sea internacional, como en inglés). **Desde el 2026-10-23, las 9 vidas SON la salud: 9 huellas** (ver «Salud de 9 huellas»). El **Collar de la Vergüenza** llega al tercer desmayo de un nivel (baja el respeto hasta reconquistar a Valeria).
 - **Poderes (moverse y pelear), en orden:** Zarpazo, Caer de Pie (apartamento), Afilar Garras (Barrio Viejo), Doble Salto (Neón), Zoomies (Downtown), Licuado (Muelle). La puerta final pide respeto y afecto altos.
 - **Mañas:** 17 equipables con ventaja y precio; 2 ranuras al inicio, hasta 6 (10 calcetines = 1 ranura).
 - **Acciones de gato:** pedir comida, infiltrarse, popo táctico, tirar cosas de la mesa, meterse en cajas, peleas en los techos, casas paralelas.
@@ -103,11 +103,25 @@ Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md` (recorrido, agenda
 - Pantallas de título, introducción (el video viral; "Me voy de esta casa") y pausa. Logros de la demo: La Gravedad Funciona, Atajo de Gato, Coleccionista de Calcetines, Galería Viral, Desenchufada, Caer de Pie.
 - **Peso con personalidad:** humor de Felipe según los kilos (Atlético, Esponjoso, Modo Invierno, Modo Buda). La báscula de la interfaz se quitó (2026-10-18: "se ve mal").
 
-## Prototipo jugable (2026-10-18)
+## Salud de 9 huellas (aprobada por el creador el 2026-10-23; diseño en `siete-vidas/diseno/salud-9-huellas.md`)
 
-- **Vida:** 5 corazones por vida y 9 vidas; al perderlas todas, vuelven las 9 con el Collar de la Vergüenza. Comer cura 1 corazón y suma 0,3 kg.
-- **A.S.P.I.** es el primer enemigo: patrulla, persigue a Felipe si lo ve a su altura, quita 1 corazón al tocarlo y se apaga con 3 zarpazos.
-- **Interfaz** con estilo de red social: corazones como "me gusta", vidas y logros como notificaciones.
+Reemplaza a los 5 corazones por vida y las 9 vidas aparte del prototipo (2026-10-18).
+
+- **Las 9 vidas son la salud:** 9 huellas en el HUD; por dentro, 18 medias (`SaludFelipe`). **Cada golpe quita 1 huella** (`HaceDano.dano` = 2 medias) y deja **1,2 s** invulnerable.
+- **Curar:** el snack y el plato curan 1 huella; **el descanso las llena todas**; la pelusa no cura.
+- **Al llegar a 0:** las 9 huellas suben como 9 gatitos fantasma y vuelven a bajar; Felipe reaparece en el último descanso con todo lleno, **sin perder nada**, diciendo «Siesta táctica.». **El Collar de la Vergüenza llega al tercer desmayo del mismo nivel.** El resumen del día cuenta las «siestas tácticas».
+- **Pocas huellas:** con 3 o menos, las que quedan laten y Felipe dice una vez «Esto es un empate técnico.». A.S.P.I. no cambia (se mide con personas: si la mayoría termina la pelea con 7 huellas o más, la embestida pasa a quitar 2).
+- **Accesibilidad «Golpes»** (opciones): normal (1 huella), suaves (media huella: se ve el estado «media»), ninguno (empuja, pero no quita). No bloquea logros.
+- **A.S.P.I.** quita 1 huella al tocar a Felipe y se apaga con 3 zarpazos.
+
+## Interfaz v2 «A + C» (aprobada por el creador el 2026-10-23; programada el mismo día)
+
+- **Un solo lenguaje dinámico, sin pergamino:** cajas oscuras con dos esquinas cortadas en diagonal (1:3), líneas crema, sombra dura de 3 px del color del personaje (Felipe ámbar #E8913A, Valeria magenta, A.S.P.I. rojo) y fragmentos. Oportunidad = borde y texto limón #FFE066 con flecha, nunca un bloque. Kit `juego/assets/ui/v2/` (68 piezas) en el tema por nombre.
+- **HUD mínimo:** fija solo la salud (cara de Felipe y 9 huellas, arriba a la izquierda). La barra del jefe, solo en la pelea (arriba a la derecha, 3 segmentos I-II-III y daño reciente). Snacks, vidas, agenda, calcetines y fotos **fuera del HUD**: «+1» sobre Felipe al recoger y el bolsillo en la pausa.
+- **Diálogo siempre arriba** (también con texto grande), con el retrato sobre su fondo del color del personaje y la franja del nombre; se pagina si no cabe en 2 líneas.
+- **Legibilidad multiplataforma:** todo dentro de la zona segura del 90 % (de 32, 18 a 608, 342); letra mínima de 11 px de cuerpo (Pixel Operator 16, su negrita, Silkscreen 16; las de 8 px solo en marcas del mundo); **texto grande (200 %)** para la salud, el diálogo y los logros.
+- **Pausa:** Continuar, Bolsillo, Ficha, Opciones, Reiniciar y Salir; el bolsillo y la Ficha de Su Majestad juntos a la derecha. **Sin pergamino, sin cojín, sin sello** (el kit «Decreto real» se borró).
+- **Movimiento:** barrido de 140 ms con rebote de 4 px (carteles, logro, botones), huellas en cascada de 60 ms; «Reducir movimiento» lo apaga.
 
 ## Forma de construir (2026-10-17)
 
@@ -124,7 +138,7 @@ Documento vigente: `siete-vidas/diseno/nivel-01-gran-fuga.md` (recorrido, agenda
   - **Valeria en videollamada:** al caer la caja dice «¡¿Qué fue ESO?! …(a la cámara) Perdón, era el gato. ¡FELIPE, MIS CAJAS!».
   - **Recarga de snacks (bolsillo de 5):** además de las recompensas, el plato de comida de Felipe suma 1 al comerlo y los puntos de descanso (cojín y caja de arena) rellenan hasta 3. Por datos: `DatosObjeto.recarga_snacks` y `DatosNivel.snacks_en_descanso`.
   - **Estadísticas de la Ficha de Su Majestad, solo de chiste:** cambian con el peso (barras y frases) pero no afectan al juego por ahora (ni defensa, ni daño, ni perdón). Queda así en `DatosFicha`.
-  - **Menú de pausa «Decreto real»** (idea 1 de `arte/referencias/gemini/menu-ideas/`, con el sello estampado y los destellos de la idea 2): Ficha de Su Majestad a la izquierda, pergamino «Decretos de Su Majestad» con Felipe en su cojín y la corona al centro, y botones de pergamino que estampan un sello de lacre al elegir. Toda la interfaz usa el mismo kit (HUD, diálogo, libreta, resumen, logro, barra del jefe y carteles), una sola familia visual (G6/G7).
+  - **Una sola familia visual en toda la interfaz (G6/G7):** desde el 2026-10-23 es la interfaz v2 «A + C» (ver arriba); el menú «Decreto real» de esta ronda quedó reemplazado y se borró.
   - **El peso se ve solo en la Ficha de la pausa** (kilos, humor y barra de peso), nunca en el HUD.
 - **Profundidad con parallax en capas (como Silksong):** cada escena tiene capas lejanas que se mueven menos que la cámara, la capa de juego, y un primer plano de siluetas oscuras que se mueve más. La cámara se mueve en horizontal y en vertical.
 

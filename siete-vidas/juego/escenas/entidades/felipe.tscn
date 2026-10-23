@@ -44,5 +44,5 @@ position_smoothing_speed = 7.0
 
 [node name="Vida" type="Node" parent="."]
 script = ExtResource("2_vida")
-maximo = 5
+maximo = 18
 tiempo_invulnerable = 1.2

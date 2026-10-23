@@ -1,83 +1,51 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/ficha_su_majestad.gd" id="1_ficha"]
-[ext_resource type="PackedScene" path="res://escenas/ui/marco_ficha.tscn" id="2_marco"]
-[ext_resource type="PackedScene" path="res://escenas/ui/barra_estadistica.tscn" id="3_barra"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/icono_defensa.png" id="4_icono_defensa"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/relleno_azul.png" id="5_relleno_azul"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/icono_carisma.png" id="6_icono_carisma"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/relleno_rojo.png" id="7_relleno_rojo"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/icono_ataque.png" id="8_icono_ataque"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/relleno_dorado.png" id="9_relleno_dorado"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/icono_peso.png" id="10_icono_peso"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/relleno_verde.png" id="11_relleno_verde"]
+[ext_resource type="PackedScene" path="res://escenas/ui/barra_estadistica.tscn" id="2_barra"]
 
 [node name="FichaSuMajestad" type="Control"]
 layout_mode = 3
 anchors_preset = 0
-offset_right = 212.0
-offset_bottom = 292.0
+offset_right = 394.0
+offset_bottom = 166.0
 mouse_filter = 2
 script = ExtResource("1_ficha")
-
-[node name="Marco" parent="." instance=ExtResource("2_marco")]
-unique_name_in_owner = true
-layout_mode = 0
-offset_right = 212.0
-offset_bottom = 292.0
-
-[node name="Retrato" type="TextureRect" parent="."]
-unique_name_in_owner = true
-layout_mode = 0
-offset_right = 66.0
-offset_bottom = 66.0
-mouse_filter = 2
-
-[node name="Placa" type="Control" parent="."]
-unique_name_in_owner = true
-layout_mode = 0
-offset_right = 212.0
-offset_bottom = 292.0
-mouse_filter = 2
 
 [node name="Barras" type="VBoxContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_right = 176.0
-offset_bottom = 165.0
+offset_left = 74.0
+offset_top = 28.0
+offset_right = 384.0
+offset_bottom = 113.0
 mouse_filter = 2
 theme_override_constants/separation = 0
 
-[node name="Defensa" parent="Barras" instance=ExtResource("3_barra")]
-layout_mode = 2
-estadistica = &"defensa"
-nombre = "FICHA_DEFENSA"
-icono = ExtResource("4_icono_defensa")
-relleno = ExtResource("5_relleno_azul")
-
-[node name="Carisma" parent="Barras" instance=ExtResource("3_barra")]
+[node name="Carisma" parent="Barras" instance=ExtResource("2_barra")]
 layout_mode = 2
 estadistica = &"carisma"
 nombre = "FICHA_CARISMA"
-icono = ExtResource("6_icono_carisma")
-relleno = ExtResource("7_relleno_rojo")
+relleno = "felipe"
 
-[node name="Ataque" parent="Barras" instance=ExtResource("3_barra")]
+[node name="Defensa" parent="Barras" instance=ExtResource("2_barra")]
+layout_mode = 2
+estadistica = &"defensa"
+nombre = "FICHA_DEFENSA"
+relleno = "maquina"
+
+[node name="Ataque" parent="Barras" instance=ExtResource("2_barra")]
 layout_mode = 2
 estadistica = &"ataque"
 nombre = "FICHA_ATAQUE"
-icono = ExtResource("8_icono_ataque")
-relleno = ExtResource("9_relleno_dorado")
+relleno = "aspi"
 
-[node name="Peso" parent="Barras" instance=ExtResource("3_barra")]
+[node name="Peso" parent="Barras" instance=ExtResource("2_barra")]
 layout_mode = 2
 estadistica = &"peso"
 nombre = "FICHA_PESO"
-icono = ExtResource("10_icono_peso")
-relleno = ExtResource("11_relleno_verde")
+relleno = "felipe"
 
-[node name="Velocidad" parent="Barras" instance=ExtResource("3_barra")]
-custom_minimum_size = Vector2(176, 22)
+[node name="Velocidad" parent="Barras" instance=ExtResource("2_barra")]
 layout_mode = 2
 estadistica = &"velocidad"
 nombre = "FICHA_VELOCIDAD"

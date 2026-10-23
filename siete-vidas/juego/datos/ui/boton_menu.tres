@@ -5,15 +5,15 @@
 [resource]
 script = ExtResource("1_datos")
 variacion = &"BotonMenu"
-escala_apretado = 0.9
-tiempo_apretar = 0.07
-tiempo_soltar = 0.2
-brillo_foco = 1.2
-vaiven_grados = 6.0
+escala_apretado = 0.94
+tiempo_apretar = 0.06
+tiempo_soltar = 0.16
+brillo_foco = 1.0
+vaiven_grados = 0.0
 vaiven_periodo = 2.2
 vaiven_rampa = 0.4
 tiempo_brillo = 0.15
-tiempo_entrada = 0.9
-escalon_entrada = 0.08
-pulso_principal = 0.1
+tiempo_entrada = 0.14
+escalon_entrada = 0.04
+pulso_principal = 0.0
 periodo_pulso = 1.6

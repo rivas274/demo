@@ -275,8 +275,6 @@ func _crear_aspi() -> void:
 		(aspi.apariencia as AparienciaAspi).lado_base = 1.0
 	if batalla_con_jefe:
 		batalla = BatallaAspi.new(aspi, felipe, nivel)
-		# En la pelea, el contador de snacks queda fijo en el HUD (comer es una decisión de la pelea).
-		travesuras.hud.snacks_fijos = func() -> bool: return batalla != null and batalla.fase == PeleaJefe.Fase.PELEA
 		nivel.add_child(batalla)
 		batalla.presentacion.anuncios = travesuras.anuncios
 		for objeto in tirables:

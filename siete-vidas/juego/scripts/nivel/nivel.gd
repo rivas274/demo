@@ -164,7 +164,8 @@ func _physics_process(delta: float) -> void:
 		return
 	tiempo += delta
 	_actualizar_camara()
-	# Puntos de descanso: ahí reaparece Felipe si pierde una vida, y al llegar rellenan el bolsillo hasta 3 snacks.
+	# Puntos de descanso: ahí reaparece Felipe si se desmaya, y al llegar le llenan las 9 huellas y rellenan el
+	# bolsillo hasta 3 snacks.
 	var en_descanso := false
 	for descanso: Rect2 in datos.descansos:
 		if descanso.has_point(felipe.global_position) and felipe.is_on_floor():
@@ -175,6 +176,7 @@ func _physics_process(delta: float) -> void:
 				sonar("logro")
 			if not _en_descanso:
 				felipe.recargar_snacks(datos.snacks_en_descanso)
+				felipe.salud.descansar()
 	_en_descanso = en_descanso
 	_actualizar_lecciones()
 	guion.cada_cuadro(delta)

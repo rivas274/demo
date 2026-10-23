@@ -1,8 +1,9 @@
 class_name Medidores
 extends Control
-## Arriba a la izquierda, con estilo de red social: los corazones de Felipe (pieza BarraVida conectada a su Vida), sus
-## vidas restantes, el Collar de la Vergüenza y el aviso de logro. Solo escucha señales (Vida.cambio,
-## Felipe.vidas_cambiadas y collar_cambiado, Pantallas.modo_cambiado): no pregunta nada en cada cuadro.
+## Arriba a la izquierda (zona A del layout v2, dentro de la zona segura): la salud de Felipe, que es la pieza
+## BarraVida en forma HUELLAS (la cara y las 9 huellas) conectada a su Vida, y el aviso de logro (la etiqueta del kit
+## v2, a la derecha de la zona C). HUD mínimo: nada más; lo que se lleva se mira en la pausa. Solo escucha señales
+## (Vida.cambio, Pantallas.modo_cambiado): no pregunta nada al juego.
 
 const ESCENA_BARRA := "res://escenas/ui/barra_vida.tscn"
 
@@ -19,8 +20,8 @@ var pantallas: Pantallas:
 		_al_cambiar_modo(pantallas.modo if pantallas else Pantallas.Modo.JUGANDO)
 ## El cuadro de diálogo (si hay): el aviso de logro nunca queda debajo ni encima de él (M3).
 var dialogo: Dialogo
-## Los corazones (pieza BarraVida).
-var corazones: BarraVida
+## La salud: 9 huellas (pieza BarraVida).
+var huellas: BarraVida
 var _presentando := false
 var _notificacion := ""
 var _tiempo_notificacion := 0.0
@@ -28,25 +29,21 @@ var _aviso: Control
 ## La cola única de anuncios (G5): el logro espera su turno y su lugar (nunca al mismo tiempo que un cartel).
 var anuncios: Anuncios
 var _rect_aviso := Rect2()
+var _entrada_logro := 0.0
 const DURACION_LOGRO := 2.2
+## El logro entra deslizando desde la derecha en 140 ms y rebota 4 px.
+const ENTRADA_LOGRO := 0.14
+const REBOTE := 4.0
 
 ## Capa del aviso de logro: por encima del diálogo (capa 7) y del HUD (capa 6).
 const CAPA_AVISO := Capas.CAPA_AVISOS
-const TAM_AVISO := Vector2(300, 44)
-## Panel de los corazones y las vidas, en una sola fila dentro de la zona A del HUD (ZonasTexto.HUD, y 0–26).
-const PANEL := Rect2(6, 4, 84, 22)
-const POS_CORAZONES := Vector2(15, 15)
-const PASO_CORAZONES := 14.0
-## Donde empieza el texto en la etiqueta de logro (después del sello).
-const X_TEXTO_LOGRO := 52.0
 
 
 func _ready() -> void:
 	name = "Medidores"
-	corazones = (load(ESCENA_BARRA) as PackedScene).instantiate()
-	corazones.position = POS_CORAZONES
-	corazones.paso = PASO_CORAZONES
-	add_child(corazones)
+	huellas = (load(ESCENA_BARRA) as PackedScene).instantiate()
+	huellas.position = ZonasTexto.SALUD.position
+	add_child(huellas)
 	_conectar_felipe()
 	add_to_group(PresentacionJefe.GRUPO_OCULTAR)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -64,39 +61,46 @@ func _ready() -> void:
 	capa.add_child(_aviso)
 
 
+## Medida de la etiqueta de un logro (normal o grande): ícono de 16 (32) px, el nombre y sus márgenes.
+static func tam_logro(titulo: String, grande := Opciones.texto_grande) -> Vector2:
+	var g := 2.0 if grande else 1.0
+	var estilo := &"logro_nombre_grande" if grande else &"logro_nombre"
+	return Vector2(12.0 + 16.0 * g + 10.0 + roundf(Estilo.ancho(TranslationServer.translate(titulo), estilo)) + 18.0, 16.0 * g + 8.0)
+
+
 func mostrar_logro(titulo: String) -> void:
 	if anuncios:
-		anuncios.anunciar("logro", titulo, TAM_AVISO, func(rect: Rect2) -> float:
+		anuncios.anunciar("logro", titulo, tam_logro(titulo), func(rect: Rect2) -> float:
 			_notificacion = titulo
 			_rect_aviso = rect
 			_tiempo_notificacion = DURACION_LOGRO
+			_entrada_logro = 0.0
 			return DURACION_LOGRO, func() -> void: _tiempo_notificacion = 0.0)
 		return
 	_notificacion = titulo
+	_rect_aviso = Rect2()
+	_entrada_logro = 0.0
 	_tiempo_notificacion = 3.5
 
 
 func _process(delta: float) -> void:
 	# En tiempo real (la cámara lenta de una derrota no estira el aviso).
-	_tiempo_notificacion = maxf(0.0, _tiempo_notificacion - delta / maxf(Engine.time_scale, 0.001))
+	var real := delta / maxf(Engine.time_scale, 0.001)
+	_tiempo_notificacion = maxf(0.0, _tiempo_notificacion - real)
+	_entrada_logro = minf(1.0, _entrada_logro + real / ENTRADA_LOGRO)
+	# Texto grande (opción de accesibilidad): la salud al doble.
+	if huellas and huellas.grande != Opciones.texto_grande:
+		huellas.grande = Opciones.texto_grande
 	_aviso.queue_redraw()
 
 
 func _conectar_felipe() -> void:
-	if felipe == null or corazones == null:
+	if felipe == null or huellas == null:
 		return
-	corazones.conectar(felipe.vida)
-	for senal: Signal in [felipe.vidas_cambiadas, felipe.collar_cambiado]:
-		if not senal.is_connected(_redibujar):
-			senal.connect(_redibujar)
-	queue_redraw()
+	huellas.conectar(felipe.vida)
 
 
-func _redibujar(_valor: Variant = null) -> void:
-	queue_redraw()
-
-
-## Mientras se presenta un jefe, los corazones y las vidas no se ven (M4).
+## Mientras se presenta un jefe, la salud no se ve (M4).
 func al_presentar_jefe(presentando: bool) -> void:
 	_presentando = presentando
 	_al_cambiar_modo(pantallas.modo if pantallas else Pantallas.Modo.JUGANDO)
@@ -112,26 +116,26 @@ func mostrando_logro() -> bool:
 	return _tiempo_notificacion > 0.0 and felipe != null and (pantallas == null or pantallas.modo == Pantallas.Modo.JUGANDO)
 
 
-## Dónde va el aviso: en la zona C de ZonasTexto (arriba al centro), donde lo puso la cola de anuncios.
+## Dónde va el aviso: en la zona C de ZonasTexto, a la derecha, donde lo puso la cola de anuncios.
 func rect_logro() -> Rect2:
-	return _rect_aviso if _rect_aviso.has_area() else ZonasTexto.cartel(TAM_AVISO)
-
-
-func _draw() -> void:
-	if not felipe:
-		return
-	# HUD limpio (2026-10-21): solo los corazones. Las 9 vidas se ven en la pausa (panel del bolsillo) y en el momento
-	# en que se pierde una (la vida fantasma).
-	Estilo.panel(self, PANEL, &"panel")
+	return _rect_aviso if _rect_aviso.has_area() else ZonasTexto.logro(tam_logro(_notificacion))
 
 
 func _dibujar_aviso() -> void:
 	if not mostrando_logro():
 		return
 	var caja := rect_logro()
-	# La etiqueta de logro del kit: el sello de la huella a la izquierda y el texto en la cinta de pergamino.
-	Estilo.panel(_aviso, caja, &"etiqueta_logro")
-	var x := caja.position.x + X_TEXTO_LOGRO
-	var ancho := caja.size.x - X_TEXTO_LOGRO - 30.0
-	# Una sola línea (zonas de texto, 2026-10-20): el sello ya dice «logro»; el nombre, a 16 px, centrado en la cinta.
-	Estilo.escribir(_aviso, Vector2(x, caja.position.y + 27), Estilo.recortar(tr(_notificacion), &"logro_nombre", ancho), &"logro_nombre", Estilo.color(&"tinta_decreto"))
+	var grande := caja.size.y > 30.0
+	var g := 2.0 if grande else 1.0
+	var sufijo := "-grande" if grande else ""
+	# Entra deslizando desde la derecha y rebota 4 px (con «Reducir movimiento», aparece).
+	var k := _entrada_logro
+	var dx := 0.0 if Opciones.reducir_movimiento else (roundf((1.0 - k / 0.7) * (caja.size.x + 40.0)) if k < 0.7 else -roundf(REBOTE * sin(PI * (k - 0.7) / 0.3)))
+	caja.position.x += dx
+	KitUI.pieza(_aviso, "logro-etiqueta" + sufijo, caja)
+	var icono := 16.0 * g
+	var radio := icono / 2.0 + 2.0
+	var centro := Vector2(caja.position.x + 10.0 + icono / 2.0, caja.position.y + caja.size.y / 2.0)
+	KitUI.icono(_aviso, "logro-icono" + sufijo, (centro - Vector2(radio, radio)).floor())
+	var estilo := &"logro_nombre_grande" if grande else &"logro_nombre"
+	KitUI.escribir(_aviso, caja.position.x + 14.0 + icono + 8.0, caja.position.y + floorf((caja.size.y - KitUI.alto_mayuscula(estilo)) / 2.0), tr(_notificacion), estilo, Estilo.color(&"ui_texto"))

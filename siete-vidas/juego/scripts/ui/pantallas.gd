@@ -25,19 +25,17 @@ var aviso := ""
 ## Aviso que manda sobre el del tutorial (por ejemplo, al mostrar la meta).
 var aviso_fijo := ""
 var datos_fin := {}
-## La pausa «Decreto real» (escenas/ui/menu_pausa.tscn): la Ficha de Su Majestad a la izquierda, el pergamino con
-## Felipe en su cojín al centro y los decretos (botones de pergamino) a la derecha.
+## La pausa de la interfaz v2 (escenas/ui/menu_pausa.tscn): el panel en toda la zona segura, la franja «PAUSA» y la
+## lista a la izquierda; a la derecha, el bolsillo y la Ficha de Su Majestad (sin pergamino ni cojín).
 var pausa: Control
-## Menú de la pausa (Continuar, Opciones, Reiniciar, Salir): BotonPergamino que estampan su sello al elegirlos.
+## Menú de la pausa (Continuar, Bolsillo, Ficha, Opciones, Reiniciar, Salir): botones del kit v2.
 var menu_pausa: MenuUI
 ## La Ficha de Su Majestad (el único lugar donde se ve el peso).
 var ficha: FichaSuMajestad
-## El bolsillo de la pausa: vidas, calcetines, fotos y snacks (el HUD del juego solo deja los corazones).
+## El bolsillo de la pausa: salud, snacks, calcetines y fotos (el HUD del juego solo deja la salud).
 var bolsillo: PanelBolsillo
-## Dónde va el bolsillo en la pausa: abajo a la derecha, bajo los decretos.
-const POS_BOLSILLO := Vector2(456, 292)
-## Mientras se estampa el sello de lo elegido, no se elige otra cosa.
-var _eligiendo := false
+## Dónde va el bolsillo en la pausa: arriba a la derecha, sobre la Ficha.
+const POS_BOLSILLO := Vector2(200, 28)
 ## Opciones (controles, reducir movimiento, volumen), encima de la pausa.
 var opciones: PantallaOpciones
 
@@ -131,18 +129,15 @@ func _process(_delta: float) -> void:
 	queue_redraw()
 
 
-## Lo elegido se sella primero (el lacre cae sobre el pergamino y saltan destellos) y después se hace.
+## Lo elegido en la pausa. «Bolsillo» y «Ficha» se ven siempre a la derecha: elegirlos los hace destellar.
 func _al_elegir(opcion: StringName) -> void:
-	if _eligiendo:
-		return
-	_eligiendo = true
-	var boton := menu_pausa.get_node_or_null(NodePath(opcion))
-	if boton is BotonMenu:
-		await (boton as BotonMenu).estampar()
-	_eligiendo = false
 	match opcion:
 		&"Continuar":
 			modo = Modo.JUGANDO
+		&"Bolsillo":
+			bolsillo.resaltar()
+		&"Ficha":
+			ficha.resaltar()
 		&"Opciones":
 			pausa.visible = false
 			opciones.abrir()
@@ -185,7 +180,7 @@ func _draw() -> void:
 				tr("FIN_TIEMPO") % datos_fin.get("tiempo", "—"),
 				tr("FIN_CALCETINES") % datos_fin.get("calcetines", "—"),
 				tr("FIN_LOGROS") % datos_fin.get("logros", "—"),
-				tr("FIN_VIDAS") % datos_fin.get("vidas", "—"),
+				tr("FIN_SIESTAS") % datos_fin.get("siestas", "—"),
 			]
 			for i in lineas.size():
 				Estilo.texto_centrado(self, lineas[i], 160 + i * 20, &"texto_chico", claro)

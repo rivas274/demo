@@ -1,43 +1,80 @@
 class_name ZonasTexto
 extends RefCounted
-## Zonas FIJAS de la pantalla de 640×360 para todo lo que se lee (plan de estabilización 2026-10-20, decisión 3).
-## Tabla única, como Capas: nadie inventa dónde poner un texto; lo pide aquí. prueba_zonas_texto la comprueba.
+## Zonas FIJAS de la pantalla de 640×360 para todo lo que se lee. Tabla única, como Capas: nadie inventa dónde poner un
+## texto; lo pide aquí. prueba_zonas_texto la comprueba. Interfaz v2 (layout aprobado por el creador, 2026-10-23,
+## `siete-vidas/diseno/interfaz-v2.md`): todo lo que se lee va dentro de la ZONA SEGURA de títulos (el 90 % del
+## centro: de (32, 18) a (608, 342), la de las guías de consola).
 ##
-##   A  HUD                 y 0–26    corazones, agenda, contadores y barra del jefe (a la derecha). Nada más entra.
-##   B  Diálogo             y 30–80   cuadro de diálogo con retrato.
-##   C  Carteles            y 30–90   logros, «¡TRAVESURA CUMPLIDA!», fases del jefe, «¡DEPÓSITO LLENO!», «PODER NUEVO».
-##                                    La MISMA franja que el diálogo: uno a la vez por la cola de Anuncios, y si hay
-##                                    diálogo, espera su turno (la fase del jefe, urgente, corta la frase).
-##   D  Palabras del mundo  sobre Felipe o el objeto, fuera de A, B y C y dentro de la pantalla; 1 a la vez, 0,9 s.
-##   E  Avisos de botón     la burbuja del Indicador sobre Felipe; si D coincide con ella, D sube.
+##   A   Salud              arriba a la izquierda, desde (32, 18): cara de Felipe y 9 huellas, 152×20 (grande 304×40).
+##   A2  Jefe               arriba a la derecha, hasta (608, 18): retrato, nombre y barra con fases I-II-III, 250×44.
+##                          Solo en la pelea (`jefe_visible`): mientras se ve, B y C empiezan debajo de ella.
+##   B   Diálogo            arriba, de y 44 a 103 (grande, de 64 a 163); abajo solo si Felipe está muy arriba.
+##   C   Carteles           desde y 44 (`techo`): travesura, fase del jefe, «PODER NUEVO» centrados; el LOGRO, a la
+##                          derecha (`logro`). La MISMA franja que el diálogo: uno a la vez por la cola de Anuncios.
+##   D   Palabras del mundo sobre Felipe o el objeto, dentro de la zona segura y fuera de A, B y C; 1 a la vez, 0,9 s.
+##   E   Avisos de botón    la burbuja del Indicador sobre Felipe; si D coincide con ella, D sube.
 ##
-## Letra: todo lo de C y D se escribe con un estilo de 16 px o más (Pixel Operator 16 o Silkscreen 16/24: 9 a 15 px de
-## alto de mayúscula). Los estilos de 8 px (Pixel Operator 8, Silkscreen 8) quedan para el HUD y la libreta.
+## Letra: lo que se lee va con 11 px de cuerpo o más (Pixel Operator 16, su negrita o Silkscreen 16; con texto grande,
+## 32). Las letras de 8 px quedan solo para marcas del mundo que no hace falta leer (`ESTILOS_DECORATIVOS`).
 
 const PANTALLA := Rect2(0, 0, 640, 360)
-const HUD := Rect2(0, 0, 640, 27)
-const DIALOGO := Rect2(0, 30, 640, 51)
-const CARTELES := Rect2(0, 30, 640, 61)
+## Zona segura de títulos (90 %) y de acción (95 %).
+const SEGURA := Rect2(32, 18, 576, 324)
+const ACCION := Rect2(16, 9, 608, 342)
+## Franja de arriba donde va la salud (y 0–40; grande, 0–60): nada más entra ahí.
+const HUD := Rect2(0, 0, 640, 40)
+const SALUD := Rect2(32, 18, 152, 20)
+const SALUD_GRANDE := Rect2(32, 18, 304, 40)
+const JEFE := Rect2(358, 18, 250, 44)
+const DIALOGO := Rect2(0, 44, 640, 60)
+const CARTELES := Rect2(0, 44, 640, 60)
 ## Margen de las palabras con el borde de la pantalla.
 const BORDE := 2.0
-## Tamaño mínimo de letra (estilo del tema) para carteles y palabras.
+## Tamaño mínimo de letra (estilo del tema) para todo lo que se lee.
 const LETRA_MINIMA := 16
+## Estilos de 8 px que se permiten: marcas del mundo que no hace falta leer (rótulos de cajas, «REC» del celular) y
+## la letra dentro de las teclas dibujadas (es parte del ícono).
+const ESTILOS_DECORATIVOS := [&"etiqueta", &"rec", &"tecla"]
 ## Una palabra del mundo dura esto, en total (entra, rebota y se va).
 const DURACION_PALABRA := 0.9
 ## Estilos que pueden usar los carteles (zona C) y las palabras (zona D): la prueba exige LETRA_MINIMA en todos.
-const ESTILOS_C_Y_D := [&"cartel_titulo", &"cartel_nombre", &"logro_nombre", &"jefe_cartel",
+const ESTILOS_C_Y_D := [&"cartel_kit", &"cartel_nombre", &"logro_nombre", &"jefe_cartel",
 	&"jefe_pista", &"palabra", &"palabra_grande", &"censura"]
 
+## Se ve la barra del jefe (la pone PresentacionJefe): el diálogo y los carteles bajan para no taparla.
+static var jefe_visible := false
 
-## Lugar de un cartel de ese tamaño: centrado, arriba en la zona C (la altura se recorta a la de la zona).
+
+## Dónde empiezan el diálogo y los carteles (y): bajo la salud (grande: bajo la salud grande) y, en la pelea, bajo la
+## barra del jefe.
+static func techo(grande := false) -> float:
+	var bajo_salud := SEGURA.position.y + (40.0 if grande else 20.0) + 6.0
+	return maxf(bajo_salud, JEFE.end.y + 2.0) if jefe_visible else bajo_salud
+
+
+## Rectángulo de la salud (normal o grande).
+static func salud(grande := false) -> Rect2:
+	return SALUD_GRANDE if grande else SALUD
+
+
+## Lugar de un cartel de ese tamaño: centrado, arriba en la zona C (el ancho, como mucho el de la zona segura).
 static func cartel(tamano: Vector2) -> Rect2:
-	var t := Vector2(minf(tamano.x, CARTELES.size.x), minf(tamano.y, CARTELES.size.y))
-	return Rect2(Vector2(roundf((PANTALLA.size.x - t.x) / 2.0), CARTELES.position.y), t)
+	var t := Vector2(minf(tamano.x, SEGURA.size.x), minf(tamano.y, CARTELES.size.y))
+	return Rect2(Vector2(roundf((PANTALLA.size.x - t.x) / 2.0), techo(Opciones.texto_grande)), t)
 
 
-## Zonas que una palabra del mundo no pisa (A, B y C juntas: de y 0 a 90 en todo el ancho).
+## Lugar de un logro de ese tamaño: en la zona C, alineado a la derecha de la zona segura.
+static func logro(tamano: Vector2) -> Rect2:
+	var t := Vector2(minf(tamano.x, SEGURA.size.x), tamano.y)
+	return Rect2(Vector2(SEGURA.end.x - t.x, techo(Opciones.texto_grande)), t)
+
+
+## Zonas que una palabra del mundo no pisa (A, B y C juntas, y la barra del jefe si se ve).
 static func prohibidas_palabra() -> Array[Rect2]:
-	return [HUD, DIALOGO, CARTELES]
+	var zonas: Array[Rect2] = [HUD, DIALOGO, CARTELES]
+	if jefe_visible:
+		zonas.append(JEFE)
+	return zonas
 
 
 ## Recoloca la caja de una palabra: dentro de la pantalla y fuera de A, B y C, sin pisar nada de `evitar` (Felipe, la
@@ -68,19 +105,20 @@ static func colocar_palabra(caja: Rect2, evitar: Array[Rect2] = []) -> Rect2:
 
 
 static func _dentro(caja: Rect2, piso: float) -> Rect2:
-	var x := clampf(caja.position.x, BORDE, PANTALLA.size.x - BORDE - caja.size.x)
-	var y := clampf(caja.position.y, piso, PANTALLA.size.y - BORDE - caja.size.y)
+	var x := clampf(caja.position.x, SEGURA.position.x, SEGURA.end.x - caja.size.x)
+	var y := clampf(caja.position.y, piso, SEGURA.end.y - caja.size.y)
 	return Rect2(Vector2(x, y), caja.size)
 
 
-## ¿La caja respeta la zona C (dentro de ella y de la pantalla, sin tocar el HUD)?
+## ¿La caja respeta la zona C (dentro de la zona segura, desde el techo y sin tocar la salud ni la barra del jefe)?
 static func en_zona_c(caja: Rect2) -> bool:
-	return CARTELES.encloses(caja) and not caja.intersects(HUD)
+	var zona := Rect2(SEGURA.position.x, techo(Opciones.texto_grande), SEGURA.size.x, 60.0 * (2.0 if Opciones.texto_grande else 1.0))
+	return zona.encloses(caja) and not caja.intersects(HUD) and not (jefe_visible and caja.intersects(JEFE))
 
 
 ## ¿La caja de una palabra queda fuera de A, B y C y dentro de la pantalla?
 static func palabra_valida(caja: Rect2) -> bool:
-	if not PANTALLA.encloses(caja):
+	if not SEGURA.encloses(caja):
 		return false
 	for zona in prohibidas_palabra():
 		if caja.intersects(zona):

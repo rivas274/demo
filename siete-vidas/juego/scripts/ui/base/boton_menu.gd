@@ -5,20 +5,14 @@ extends Button
 ## - al apretar se encoge un instante y vuelve con rebote;
 ## - con foco (teclado, mando) o con el mouse encima brilla y, si los datos lo piden, se mece como un péndulo colgado
 ##   de arriba al centro; la amplitud sube y baja con un tween (nunca de golpe);
-## - entrada opcional: cae desde fuera del borde de arriba hasta su sitio, con rebote (MenuUI la escalona);
-## - `principal`: un pulso de brillo sutil para destacarlo;
-## - estampar(): si los datos traen un sello (SelloHuella), lo estampa encima con sus destellos; quien elige espera a
-##   que termine y después hace lo elegido.
-## Variantes por datos y tema, sin herencia: BotonPergamino es este botón con datos/ui/boton_pergamino.tres (el
-## pergamino del Decreto real, a su tamaño de pixel, sin vaivén y con sello de lacre). Escena:
-## escenas/ui/boton_pergamino.tscn.
-## Con Opciones.reducir_movimiento no se mece ni entra cayendo.
+## - entrada opcional: barre desde la izquierda hasta su sitio en 140 ms y se pasa 4 px con rebote (el movimiento de la
+##   interfaz v2; MenuUI la escalona);
+## - `principal`: un pulso de brillo sutil para destacarlo (en la v2, apagado: el foco es el bloque ámbar del kit).
+## Variantes por datos y tema, sin herencia: otro tipo de botón es otro .tres de DatosBoton y su variación del tema.
+## Con Opciones.reducir_movimiento no se mece ni entra barriendo.
 ##
 ## Pixel art: el juego se dibuja a 640×360 con snap a píxel, así que un giro se ve con dientes. Por eso el vaivén es
 ## chico (6°), solo existe en los menús (con el juego en pausa) y el pivote cae en un píxel entero.
-
-## El sello del botón terminó de estamparse.
-signal estampado
 
 const DATOS := "res://datos/ui/boton_menu.tres"
 
@@ -31,8 +25,6 @@ const DATOS := "res://datos/ui/boton_menu.tres"
 
 ## Grados de vaivén que se permiten ahora (0 sin foco; sube a vaiven_grados con foco).
 var amplitud := 0.0
-## El último sello estampado (o null).
-var sello: SelloHuella
 
 static var _datos: DatosBoton
 
@@ -60,7 +52,6 @@ func _ready() -> void:
 	focus_exited.connect(_resaltar_si_no_hay_mouse)
 	mouse_entered.connect(_resaltar.bind(true))
 	mouse_exited.connect(_resaltar_si_no_hay_foco)
-	visibility_changed.connect(_al_cambiar_visibilidad)
 	resized.connect(_poner_pivote)
 	_poner_pivote()
 
@@ -114,39 +105,15 @@ func _resaltar_si_no_hay_foco() -> void:
 		_resaltar(false)
 
 
-## ¿Estampa un sello al elegirlo?
-func sella() -> bool:
-	return datos != null and datos.sello != null
-
-
-## Estampa el sello de los datos sobre el botón (cae, se aplasta en lacre y suelta destellos) y espera a que termine.
-## Sin sello en los datos, vuelve enseguida. El sello se borra cuando el botón se esconde.
-func estampar() -> void:
-	if not sella():
-		return
-	if is_instance_valid(sello):
-		sello.queue_free()
-	sello = datos.sello.instantiate() as SelloHuella
-	sello.position = (size * datos.lugar_sello).round()
-	add_child(sello)
-	await sello.estampar()
-	estampado.emit()
-
-
-func _al_cambiar_visibilidad() -> void:
-	if not is_visible_in_tree() and is_instance_valid(sello):
-		sello.queue_free()
-		sello = null
-
-
-## Cae desde fuera del borde de arriba hasta su sitio (después de `retraso` s). Sin efecto con reducir movimiento.
+## Barre desde la izquierda hasta su sitio (después de `retraso` s) y se pasa unos px con rebote. Sin efecto con
+## reducir movimiento.
 func entrar(retraso := 0.0) -> void:
 	if Opciones.reducir_movimiento:
 		return
-	var destino := position.y
-	position.y = -get_global_rect().end.y + position.y - 1.0
+	var destino := position.x
+	position.x = destino - size.x - 16.0
 	var t := create_tween()
-	t.tween_property(self, "position:y", destino, datos.tiempo_entrada).set_delay(retraso).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	t.tween_property(self, "position:x", destino, datos.tiempo_entrada).set_delay(retraso).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _nuevo(anterior: Tween) -> Tween:

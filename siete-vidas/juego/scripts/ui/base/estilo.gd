@@ -39,8 +39,8 @@ static func medida(nombre: StringName) -> int:
 
 
 ## Fuente pixel del estilo con ese nombre (la misma clave que su tamaño en letra()); sin nombre, la de por defecto
-## del tema. Letras (fuentes/, sin suavizado): Pixel Operator 8 a 8 px (chica), Pixel Operator a 16 px (textos) y
-## Silkscreen a 16, 24 o 32 px (títulos y carteles). Siempre a su tamaño de diseño o un múltiplo: nítidas a 640×360.
+## del tema. Letras (fuentes/, sin suavizado): Pixel Operator y su negrita a 16 px (textos; 32 con texto grande),
+## Silkscreen a 16, 24 o 32 px (títulos y carteles) y Pixel Operator 8 solo en marcas del mundo. Siempre a su tamaño de diseño o un múltiplo: nítidas a 640×360.
 static func fuente(nombre: StringName = &"") -> Font:
 	if nombre != &"" and tema().has_font(nombre, TIPO):
 		return tema().get_font(nombre, TIPO)
@@ -85,8 +85,8 @@ static func recortar(texto: String, nombre: StringName, ancho_maximo: float) -> 
 	return corto.strip_edges() + "…"
 
 
-## Dibuja un panel del kit «Decreto real» (pergamino, cinta, etiqueta, marcos de barra y de retrato): un StyleBox del
-## tema (tipo "Felipe", styles/<nombre>) estirado en 9 partes al rectángulo, con las esquinas a su tamaño de pixel.
+## Dibuja un estilo del tema (tipo "Felipe", styles/<nombre>) en el rectángulo: el panel oscuro de la interfaz v2
+## («panel») o una pieza del kit v2 («v2_<pieza>», mejor con KitUI.pieza, que la nombra como el README del kit).
 static func panel(c: CanvasItem, rect: Rect2, nombre: StringName = &"panel") -> void:
 	var caja := tema().get_stylebox(nombre, TIPO)
 	if caja:
@@ -98,22 +98,6 @@ static func caja(nombre: StringName) -> StyleBox:
 	return tema().get_stylebox(nombre, TIPO)
 
 
-## Ícono del kit con nombre ("hud_corazon", "hud_libreta"...), a 1 pixel por pixel del juego.
+## Ícono del tema con nombre ("foto_unicornio", "v2_huella_llena"...), a 1 pixel por pixel del juego.
 static func icono(nombre: StringName) -> Texture2D:
 	return tema().get_icon(nombre, TIPO)
-
-
-## Dibuja un relleno de barra del kit (assets/ui/decreto/relleno_*.png) al ancho pedido sin deformar el pixel: el
-## borde izquierdo una vez, el color parejo del medio estirado solo a lo ancho y el mismo borde para cerrar. Se toma
-## la franja del medio de la textura si el rectángulo es más bajo que ella.
-static func relleno(c: CanvasItem, textura: Texture2D, r: Rect2) -> void:
-	if textura == null or r.size.x < 1.0:
-		return
-	r = Rect2(r.position.round(), r.size.round())
-	var alto := minf(r.size.y, textura.get_height())
-	var y := roundf((textura.get_height() - alto) / 2.0)
-	var borde := minf(2.0, r.size.x)
-	c.draw_texture_rect_region(textura, Rect2(r.position, Vector2(borde, r.size.y)), Rect2(0, y, borde, alto))
-	if r.size.x > borde * 2.0:
-		c.draw_texture_rect_region(textura, Rect2(r.position + Vector2(borde, 0), Vector2(r.size.x - borde * 2.0, r.size.y)), Rect2(6, y, 40, alto))
-		c.draw_texture_rect_region(textura, Rect2(r.position + Vector2(r.size.x - borde, 0), Vector2(borde, r.size.y)), Rect2(0, y, borde, alto))

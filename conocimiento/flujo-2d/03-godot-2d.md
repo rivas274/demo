@@ -17,6 +17,21 @@ Que el código de un juego hecho con IA no se vuelva un archivo gigante imposibl
 9. **Ningún archivo de más de ~600 líneas.** Si crece, se parte.
 10. **Una tabla única de capas** (z_index): nada inventa su número.
 
+## Receta: llevar un kit de interfaz pixel art al tema de Godot (2026-10-23)
+
+1. **Cada pieza en el tema, por nombre:** las que se estiran como `StyleBoxTexture` (`texture_margin_left/right` = sus
+   cortes; arriba y abajo 0 si los lados son diagonales y el alto es fijo), las demás como íconos. Un script las genera
+   desde la tabla del kit (tamaño, medida lógica, ancla, cortes): nadie las escribe a mano.
+2. **La sombra y el contorno van como `expand_margin_*`:** así el código dibuja la caja con la medida del layout (la de
+   la lámina) y el PNG, con su sombra de 3 px, cae solo en su lugar. Sin esto, cada pantalla suma y resta sombras.
+3. **Escribir el texto por la parte de arriba de las mayúsculas** (como la lámina), no por la base: se mide una vez el
+   alto de mayúscula de cada letra pixel (Pixel Operator 16: 9 px; Silkscreen 16: 10 px).
+4. **Caras y retratos chicos, achicados antes** (caja + alfa de corte duro, con contorno), no escalados en el juego.
+5. **Zonas con números de las guías públicas:** zona segura de títulos del 90 % (Xbox), letra de 26 px a 1080p en
+   consola (en base 640×360 escalada ×3, 9 px de cuerpo: usar 11), texto grande ×2 con letras pixel a múltiplos de su
+   tamaño. Una prueba revisa que ningún estilo del tema baje del mínimo y que toda pieza pedida exista.
+6. **Comparar con capturas reales** del juego al lado de la lámina, no con la lámina sola.
+
 **Trampa de Godot 4.3:** no hagas `preload()` de un `.tres` con script en una constante de un script compartido; deja dos copias de la clase y los tipos fallan. Usa `load()`.
 
 ## Receta: sensación de juego del plataformas

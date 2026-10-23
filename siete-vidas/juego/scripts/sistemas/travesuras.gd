@@ -44,8 +44,6 @@ func _ready() -> void:
 	add_child(anuncios)
 	hud = Hud.new()
 	hud.name = "Hud"
-	hud.agenda = agenda
-	hud.recompensas = recompensas
 	add_child(hud)
 	dialogo = Dialogo.new()
 	dialogo.name = "Dialogo"
@@ -63,7 +61,7 @@ func _ready() -> void:
 	add_child(indicador)
 	indicador.primera_vez.connect(func(_objeto: Node2D, frase: String) -> void: dialogo.decir("felipe", frase, 0))
 	agenda.cumplida.connect(_al_cumplir)
-	recompensas.cambio.connect(hud.golpear)
+	recompensas.cambio.connect(_al_sumar)
 	recompensas.bolsillo_lleno.connect(func() -> void: decir_felipe("bolsillo_lleno"))
 	recompensas.ranura_ganada.connect(_al_ganar_ranura)
 	if felipe:
@@ -76,7 +74,11 @@ func _ready() -> void:
 		felipe.aranazo.connect(_al_aranar)
 		felipe.snack_comido.connect(_al_comer_snack)
 		felipe.sin_snacks.connect(func() -> void: decir_felipe("sin_snacks", true))
-		felipe.snacks_cambiados.connect(func(_n: int) -> void: hud.golpear("snack"))
+		felipe.salud.reaparecio.connect(func() -> void: decir_felipe("siesta", true))
+		felipe.salud.pocas_huellas.connect(func() -> void: decir_felipe("pocas_huellas"))
+		felipe.collar_cambiado.connect(func(tiene: bool) -> void:
+			if tiene:
+				jugo.palabra_en_mundo("PALABRA_COLLAR", felipe.global_position + Vector2(0, -90), Color(1.0, 0.55, 0.5), 16, 1.2))
 
 
 ## El nivel avisa que pasó una travesura. `donde`: dónde aparece la recompensa (sobre algo pisable) para que
@@ -204,6 +206,13 @@ func _al_aranar(_objetivo: Node2D, critico: bool) -> void:
 	decir_felipe("aranar_critico", true)
 
 
+## HUD mínimo (interfaz v2): lo que se recoge ya no tiene contador en pantalla; sale «+1» sobre Felipe y el total se
+## mira en la pausa (el bolsillo).
+func _al_sumar(tipo: String) -> void:
+	if felipe and tipo in ["calcetin", "foto", "snack"]:
+		jugo.palabra_en_mundo("PALABRA_MAS_UNO", felipe.global_position + Vector2(0, -84), Color(1.0, 0.94, 0.84), 16)
+
+
 func _al_comer_snack() -> void:
 	if felipe:
 		jugo.palabra_en_mundo("PALABRA_NAM", felipe.global_position + Vector2(0, -80), Color(1.0, 0.8, 0.5), 15)
@@ -229,7 +238,7 @@ func mostrar_resumen(frase_final: Array = []) -> ResumenDia:
 	libreta.habilitada = false
 	var frase := frase_final if not frase_final.is_empty() else (Frases.FELIPE["agenda_completa"][0] if agenda.completa() else ["FELIPE_MANANA_MAS_HOY_YA", 0])
 	var resumen := ResumenDia.new()
-	resumen.mostrar(ResumenDia.filas_de(agenda, recompensas, perdones), frase)
+	resumen.mostrar(ResumenDia.filas_de(agenda, recompensas, perdones, felipe.salud.desmayos if felipe else 0), frase)
 	resumen.cerrado.connect(func() -> void:
 		libreta.habilitada = true
 		resumen_cerrado.emit())

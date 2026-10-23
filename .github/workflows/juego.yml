@@ -36,7 +36,7 @@ jobs:
       - name: Pruebas del escenario
         run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_escenario.gd
 
-      - name: Pruebas de mecánicas
+      - name: Pruebas de mecánicas (incluye la salud de 9 huellas)
         run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_mecanicas.gd
 
       - name: Prueba del primer nivel (tutorial)
@@ -63,8 +63,11 @@ jobs:
       - name: Piezas del juego (componentes y un enemigo armado solo con datos)
         run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_componentes.gd
 
-      - name: Piezas de la interfaz (barra de vida, pila de pantallas, menú, textos, controles y tema)
+      - name: Piezas de la interfaz (huellas, barra del jefe, pausa v2, opciones, textos, controles, tema y kit v2)
         run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_interfaz.gd
+
+      - name: Zonas de texto del layout v2 (zona segura, salud, diálogo, carteles, logro, palabras y HUD mínimo)
+        run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_zonas_texto.gd
 
       - name: Partida completa (un bot termina el nivel 1 sin doble salto, Zoomies ni trepar)
         run: godot --headless --path siete-vidas/juego --fixed-fps 60 --script res://pruebas/partida.gd

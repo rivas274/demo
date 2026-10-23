@@ -47,8 +47,8 @@ extends Resource
 ## Distancia a la que ve (y persigue) a Felipe; 0 = nunca persigue.
 @export var vision := 170.0
 @export_group("Daño")
-## Corazones que quita al tocar a Felipe (0 = inofensivo).
-@export var dano := 1
+## Medias huellas que quita al tocar a Felipe (2 = 1 huella; 0 = inofensivo).
+@export var dano := 2
 ## Px de más, a cada lado de su medio ancho, en que alcanza a Felipe.
 @export var alcance_dano := 18.0
 @export_group("Mañas que le afectan")

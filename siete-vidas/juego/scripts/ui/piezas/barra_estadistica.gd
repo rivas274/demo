@@ -1,9 +1,10 @@
 class_name BarraEstadistica
 extends Control
-## Pieza de interfaz: una estadística de la Ficha de Su Majestad. Ícono, nombre, barra (marco del kit «Decreto real»
-## con su relleno de color) y una frase satírica de una línea debajo. Solo escucha: escuchar(señal) la conecta a una
-## fuente que avisa {estadistica: [valor 0 a 1, clave de la frase]} (FichaSuMajestad.estadisticas_cambiadas) y toma
-## lo suyo. Al cambiar, la barra se llena de a poco (de golpe con Opciones.reducir_movimiento).
+## Pieza de interfaz: una estadística de la Ficha de Su Majestad, en una fila de 17 px (interfaz v2, kit
+## assets/ui/v2/): el nombre apagado, la barra con puntas en diagonal (marco del kit y su relleno de color) y una
+## frase satírica de una línea a la derecha. Solo escucha: escuchar(señal) la conecta a una fuente que avisa
+## {estadistica: [valor 0 a 1, clave de la frase]} (FichaSuMajestad.estadisticas_cambiadas) y toma lo suyo. Al
+## cambiar, la barra se llena de a poco (de golpe con Opciones.reducir_movimiento).
 ## Sin barra (`con_barra` falso) es solo nombre y frase fija: la velocidad, que es un chiste y no cambia.
 ## Escena: escenas/ui/barra_estadistica.tscn.
 
@@ -11,13 +12,11 @@ extends Control
 @export var estadistica := &"defensa"
 ## Nombre en pantalla (clave de traducción).
 @export var nombre := "FICHA_DEFENSA"
-@export var icono: Texture2D
-@export var relleno: Texture2D
+## Color del relleno (el del kit: «felipe», «maquina» o «aspi»).
+@export var relleno := "felipe"
 @export var con_barra := true
 ## Frase fija (para la que no tiene barra).
 @export var frase := ""
-## Ancho del marco de la barra (8:1 con su alto de 12 px) y lo que tarda en llenarse.
-@export var ancho_barra := 96.0
 @export var tiempo_llenar := 0.45
 
 ## Lo que vale ahora (0 a 1) y lo que se ve (sube de a poco hasta `valor`).
@@ -25,8 +24,11 @@ var valor := 0.0
 var mostrado := 0.0
 var _tween: Tween
 
-const ALTO_MARCO := 12.0
-const LADO_ICONO := 24.0
+## Medidas de la lámina: marco de 60×9 a 66 px del nombre; relleno de 58 px adentro; frase a 134 px.
+const X_BARRA := 66.0
+const MARCO := Vector2(60, 9)
+const ANCHO_RELLENO := 58.0
+const X_FRASE := 134.0
 
 
 func _ready() -> void:
@@ -72,29 +74,16 @@ func _poner_mostrado(v: float) -> void:
 	queue_redraw()
 
 
-## Dónde va la barra (el marco) dentro de la pieza.
-func rect_barra() -> Rect2:
-	return Rect2(LADO_ICONO + 4.0, 12.0, ancho_barra, ALTO_MARCO)
-
-
-## Ancho disponible para la frase (toda la pieza).
+## Ancho disponible para la frase (desde X_FRASE hasta el borde de la fila).
 func ancho_frase() -> float:
-	return size.x
+	return size.x - X_FRASE
 
 
 func _draw() -> void:
-	var tinta := Estilo.color(&"tinta_decreto")
-	var x_texto := LADO_ICONO + 4.0 if icono else 0.0
-	if icono:
-		draw_texture(icono, Vector2.ZERO)
-	Estilo.escribir(self, Vector2(x_texto, 9), tr(nombre), &"ficha_nombre", tinta)
+	KitUI.escribir(self, 0, 0, tr(nombre), &"ficha_frase", Estilo.color(&"ui_apagado"))
 	if con_barra:
-		var marco := rect_barra()
-		Estilo.panel(self, marco, &"marco_barra")
-		if relleno and mostrado > 0.0:
-			var caja := Estilo.caja(&"marco_barra")
-			var dentro := Rect2(marco.position + Vector2(caja.content_margin_left, caja.content_margin_top), marco.size - Vector2(caja.content_margin_left + caja.content_margin_right, caja.content_margin_top + caja.content_margin_bottom))
-			Estilo.relleno(self, relleno, Rect2(dentro.position, Vector2(roundf(dentro.size.x * mostrado), dentro.size.y)))
-	var y_frase := LADO_ICONO + 9.0 if icono else 19.0
-	Estilo.escribir(self, Vector2(0, y_frase), Estilo.recortar(tr(frase), &"ficha_frase", ancho_frase()), &"ficha_frase", Estilo.color(&"tinta_decreto_suave"))
-
+		KitUI.pieza(self, "ficha-barra-marco", Rect2(Vector2(X_BARRA, 0), MARCO))
+		var ancho := roundf(ANCHO_RELLENO * mostrado)
+		if ancho >= 1.0:
+			KitUI.pieza(self, "ficha-barra-relleno-" + relleno, Rect2(Vector2(X_BARRA + 1.0, 1.0), Vector2(maxf(ancho, 7.0), 7.0)))
+	KitUI.escribir(self, X_FRASE, 0, Estilo.recortar(tr(frase), &"ficha_frase", ancho_frase()), &"ficha_frase", Estilo.color(&"ui_texto"))

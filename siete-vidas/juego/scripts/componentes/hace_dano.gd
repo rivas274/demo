@@ -2,13 +2,15 @@ class_name HaceDano
 extends Node
 ## Pieza para lo que lastima a Felipe al tocarlo (hitbox): A.S.P.I., los ratones de cuerda y las bolas de pelo que
 ## escupe en la pelea (el láser del pasillo no lastima: solo se escapa). Cada cuadro mira si Felipe está dentro de su
-## zona (relativa a la entidad) y le quita `dano` corazones; Felipe decide el resto (parpadeo, empujón, desmayo). Se apaga sola mientras la entidad está aturdida o vencida (se lo dicen
-## con `pausar` y `apagar`); quien manda en la entidad la puede volver inofensiva con `activo = false`.
+## zona (relativa a la entidad) y le quita `dano` MEDIAS huellas (2 = 1 huella; salud de 9 huellas, 2026-10-23); Felipe
+## decide el resto (la opción «Golpes», parpadeo, empujón, desmayo). Se apaga sola mientras la entidad está aturdida o
+## vencida (se lo dicen con `pausar` y `apagar`); quien manda en la entidad la puede volver inofensiva con `activo = false`.
 
 ## Tocó a Felipe y le hizo daño.
 signal toco(felipe: Felipe)
 
-@export var dano := 1
+## Medias huellas que quita (2 = 1 huella, el golpe normal).
+@export var dano := 2
 ## Zona rectangular, medida desde los pies de la entidad hasta los pies de Felipe: hasta `medio_ancho` px a cada lado,
 ## hasta `arriba` px más arriba y hasta `abajo` px más abajo.
 @export var medio_ancho := 54.0

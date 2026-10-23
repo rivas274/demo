@@ -1,7 +1,10 @@
 # Kit de interfaz v2 («A + C»)
 
 Piezas finales de la interfaz v2, estilo **A + C** (la A, Corte diagonal, con la sombra de color de la C), a la escala
-real del juego (base 640×360). Todavía **no están programadas** en el juego: son el material para hacerlo.
+real del juego (base 640×360). **Están programadas** (2026-10-23): `herramientas/interfaz_v2_tema.py` las pone en el tema
+(`datos/ui/tema.tres`: `styles/v2_<pieza>` las que se estiran, con sus cortes y la sombra como `expand_margin_*`;
+`icons/v2_<pieza>` las demás) y el juego las dibuja con `KitUI` (`scripts/ui/base/kit_ui.gd`). Las caras chicas
+(salud, jefe, diálogo y Ficha) están en `caras/` y las hace `herramientas/interfaz_v2_caras.py`.
 
 - Las genera `siete-vidas/herramientas/interfaz_v2_kit.py` (no editar los PNG a mano: se rehacen con el script).
 - Dirección y medidas: `siete-vidas/diseno/interfaz-v2.md` (sección «Dirección de arte: ELEGIDA la A con el toque de la C»).

@@ -244,7 +244,7 @@ func _correr() -> void:
 	# Contra el que acampa (G12): quieto en la repisa, A.S.P.I. lo saca en 4 s o menos, sin daño.
 	aspi.global_position = Vector2(arena.position.x + 70, Nivel1.SUELO)
 	var repisa := sala.pieza("Repisa de las macetas")
-	var corazones := felipe.corazones
+	var medias := felipe.medias
 	await _poner_en(Vector2(repisa.position.x + 30, repisa.position.y), 2)
 	var cuadros := 0
 	var aviso_amarillo := false
@@ -255,7 +255,7 @@ func _correr() -> void:
 	await _esperar_que(func() -> bool: return felipe.is_on_floor() and felipe.global_position.y > Nivel1.SUELO - 2.0, 120)
 	_comprobar(batalla.soplidos >= 1 and felipe.global_position.y > Nivel1.SUELO - 2.0 and cuadros <= 240, "Quieto en la repisa, A.S.P.I. lo saca de un soplido en %.1f s (≤ 4 s)" % (cuadros / 60.0))
 	_comprobar(aviso_amarillo, "Antes del soplido avisa 0,6 s: vibra con luz roja (rojo = peligro, v4)")
-	_comprobar(felipe.corazones == corazones, "El soplido no hace daño")
+	_comprobar(felipe.medias == medias, "El soplido no hace daño")
 	# Segundo apagado cayendo a la velocidad máxima (~12 px por cuadro): no atraviesa la franja de su tapa.
 	await _llenar(batalla, aspi)
 	var caida := await _caerle_encima_rapido(aspi)
@@ -310,7 +310,7 @@ func _correr() -> void:
 	aspi.global_position = Vector2(arena.position.x + 40, Nivel1.SUELO)
 	await _poner_en(Vector2(arena.position.x + 380, Nivel1.SUELO - 98), 2)
 	felipe.vida.restante_invulnerable = 0.0
-	corazones = felipe.corazones
+	medias = felipe.medias
 	var tosio := false
 	var alta := false
 	var mareo_bola := false
@@ -320,13 +320,13 @@ func _correr() -> void:
 		mareo_bola = mareo_bola or (batalla.reacciones.mareada > 0.0 and not batalla.bolas.is_empty())
 		for bola in batalla.bolas:
 			alta = alta or bola.global_position.y < Nivel1.SUELO - 110.0
-		if felipe.corazones < corazones:
+		if felipe.medias < medias:
 			break
 	_comprobar(tosio and alta, "En furia tose y la bola de pelo va en arco hasta arriba")
 	_comprobar(mareo_bola and not "¡COF!" in sala.travesuras.jugo.palabras, "v4 Sin «¡COF!»; después de escupir queda mareada (recuperación)")
 	var bola_datos := batalla.conducta("bola") as AtaqueBolaPelo
 	_comprobar(bola_datos.objetivo.distance_to(Vector2(arena.position.x + 380, Nivel1.SUELO - 98)) < 4.0, "La bola apunta a la marca del piso (donde estaba Felipe al toser)")
-	_comprobar(felipe.corazones < corazones, "La bola de pelo quita un corazón aunque esté en el escritorio")
+	_comprobar(felipe.medias < medias, "La bola de pelo quita una huella aunque esté en el escritorio")
 	felipe.vida.restante_invulnerable = 999.0
 
 	# Perder una vida: reaparece en el cojín, A.S.P.I. conserva la fase y al volver la entrada es corta (1 s).

@@ -235,13 +235,13 @@ func _correr() -> void:
 	await _tocar("interactuar")
 	await _esperar(30)
 	_comprobar(sala.habitacion == "cocina", "Se entra a la cocina")
-	var corazones := felipe.corazones
+	var medias := felipe.medias
 	felipe.recibir_dano(1, felipe.global_position.x - 10.0)
 	await _esperar(90)
 	await _poner_en(Vector2(2975, Nivel1.SUELO))
 	await _tocar("interactuar")
 	await _esperar(40)
-	_comprobar(felipe.corazones == corazones and _dijo("felipe", "croquetas"), "El tazón se come (cura) y Felipe se queja de las tres croquetas")
+	_comprobar(felipe.medias == medias and _dijo("felipe", "croquetas"), "El tazón se come (cura) y Felipe se queja de las tres croquetas")
 	var raton := _raton_en("cocina", Nivel1.SUELO)
 	await _zarpazo_a(raton)
 	_comprobar(raton.vida.muerto, "Un zarpazo voltea al ratón de cuerda")
@@ -408,13 +408,13 @@ func _correr() -> void:
 	await _tocar("interactuar")
 	await _esperar_que(func() -> bool: return guion.ensayo.paso == EnsayoAspi.Paso.LIMPIA, 600)
 	_comprobar(guion.ensayo.paso == EnsayoAspi.Paso.LIMPIA, "Al tirar el vaso de la consola, sale A.S.P.I. del estudio a limpiar")
-	corazones = felipe.corazones
+	medias = felipe.medias
 	felipe.global_position = guion.ensayo.aspi.global_position + Vector2(150, 0)
 	felipe.velocity = Vector2.ZERO
 	await _esperar(5)
 	var antes := felipe.global_position.x
 	await _esperar(15)
-	_comprobar(antes - felipe.global_position.x > 10.0 and felipe.corazones == corazones, "Su succión arrastra a Felipe, sin hacer daño (ensayo)")
+	_comprobar(antes - felipe.global_position.x > 10.0 and felipe.medias == medias, "Su succión arrastra a Felipe, sin hacer daño (ensayo)")
 	_comprobar(_dijo("felipe", "Uñas: modo ancla"), "Felipe enseña a aferrarse: «Mantén {agacharse}. Uñas: modo ancla.»")
 	await _esperar_que(func() -> bool: return guion.ensayo.paso == EnsayoAspi.Paso.LISTO, 900)
 	_comprobar(guion.ensayo.paso == EnsayoAspi.Paso.LISTO and _dijo("aspi", "registrado"), "Vuelve a su cuarto: «Suciedad eliminada. Gato… registrado.»")
@@ -851,10 +851,8 @@ func _se_ve(quien: Node2D) -> bool:
 ## El cartel del HUD cuyo título es ese (null si no está en pantalla).
 func _cartel_de(titulo: String) -> Control:
 	for hijo in sala.travesuras.hud.get_children():
-		if hijo is Control and String(hijo.name).begins_with("Cartel"):
-			for etiqueta in hijo.get_children():
-				if etiqueta is Label and etiqueta.text == titulo:
-					return hijo
+		if hijo is Cartel and (hijo as Cartel).titulo == titulo and not hijo.is_queued_for_deletion():
+			return hijo
 	return null
 
 

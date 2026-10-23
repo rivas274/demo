@@ -1,13 +1,16 @@
 class_name Libreta
 extends CanvasLayer
-## La Agenda de Su Majestad en un pergamino del kit «Decreto real», con la letra de Felipe, agrupada por cuarto.
+## La Agenda de Su Majestad en la hoja de la libreta, con la letra de Felipe, en dos columnas (letra de 16 px).
 ## Tab (mando: View/Select) la abre y la cierra; abierta, el juego queda en pausa. Las secretas dicen "???"
 ## hasta cumplirlas; las cumplidas se tachan con una palomita roja y muestran su recompensa.
 
 signal abierta_cambio(abierta: bool)
 
-const HOJA := Rect2(92, 20, 456, 322)
-const ALTO_RENGLON := 29.0
+## La hoja, dentro de la zona segura; dos columnas de renglones de 40 px (nombre y recompensa).
+const HOJA := Rect2(92, 22, 456, 316)
+const ALTO_RENGLON := 40.0
+const COLUMNAS := 2
+const ANCHO_COLUMNA := 214.0
 
 var agenda: Agenda
 var abierta := false
@@ -75,36 +78,33 @@ func cerrar() -> void:
 func _dibujar() -> void:
 	var c := _hoja
 	c.draw_rect(Rect2(0, 0, 640, 360), Estilo.color(&"libreta_velo"))
-	# Hoja de la agenda en el pergamino del kit «Decreto real» (la misma familia que la pausa): renglones suaves,
-	# margen de lacre y la foto vergonzosa del unicornio prendida en la esquina.
+	# La hoja de la libreta (dibujo de Felipe, no un panel de la interfaz): papel con contorno oscuro, renglones suaves,
+	# margen rojo y la foto vergonzosa del unicornio prendida en la esquina. Letra de 16 px (layout v2: nada de 8).
 	var hoja := HOJA
-	Estilo.panel(c, hoja.grow(4), &"panel")
-	for y in range(int(hoja.position.y) + 58, int(hoja.end.y) - 4, 16):
+	c.draw_rect(hoja.grow(5), Estilo.color(&"ui_contorno"))
+	c.draw_rect(hoja.grow(4), Estilo.color(&"libreta_papel"))
+	for y in range(int(hoja.position.y) + 58, int(hoja.end.y) - 4, 20):
 		c.draw_line(Vector2(hoja.position.x + 4, y), Vector2(hoja.end.x - 4, y), Estilo.color(&"libreta_renglon"), 1.0)
-	var margen := hoja.position.x + 78
-	c.draw_line(Vector2(margen, hoja.position.y + 4), Vector2(margen, hoja.end.y - 4), Estilo.color(&"libreta_margen"), 1.0)
-	Estilo.escribir(c, Vector2(margen + 8, hoja.position.y + 30), tr("LIBRETA_TITULO"), &"libreta_titulo", Estilo.color(&"libreta_tinta"))
-	Estilo.escribir(c, Vector2(margen + 10, hoja.position.y + 44), tr("LIBRETA_SUBTITULO"), &"libreta_subtitulo", Estilo.color(&"libreta_tinta").lightened(0.3))
+	c.draw_line(Vector2(hoja.position.x + 8, hoja.position.y + 4), Vector2(hoja.position.x + 8, hoja.end.y - 4), Estilo.color(&"libreta_margen"), 1.0)
+	Estilo.escribir(c, Vector2(hoja.position.x + 18, hoja.position.y + 22), tr("LIBRETA_TITULO"), &"libreta_titulo", Estilo.color(&"libreta_tinta"))
+	Estilo.escribir(c, Vector2(hoja.position.x + 18, hoja.position.y + 40), tr("LIBRETA_SUBTITULO"), &"libreta_subtitulo", Estilo.color(&"libreta_tinta").lightened(0.3))
 	var foto := Estilo.icono(&"foto_unicornio")
 	c.draw_texture(foto, Vector2(hoja.end.x - foto.get_width() + 14, hoja.position.y - 12))
 	if agenda == null:
 		return
-	var y := hoja.position.y + 56
-	var cuarto_anterior := ""
-	for t: Dictionary in agenda.travesuras:
-		var id: String = t["id"]
-		var cuarto := String(t.get("cuarto", ""))
-		if cuarto != cuarto_anterior:
-			cuarto_anterior = cuarto
-			Estilo.escribir(c, Vector2(hoja.position.x + 8, y + 15), _nombre_cuarto(cuarto), &"libreta_cuarto", Estilo.color(&"libreta_cuarto"), HORIZONTAL_ALIGNMENT_LEFT, 72)
-		_renglon(c, agenda, id, margen + 6, y)
-		y += ALTO_RENGLON
+	# Dos columnas de renglones (nombre y, debajo, la recompensa o «???»).
+	var por_columna := ceili(agenda.travesuras.size() / float(COLUMNAS))
+	for i in agenda.travesuras.size():
+		var t: Dictionary = agenda.travesuras[i]
+		var x := hoja.position.x + 18.0 + (i / por_columna) * ANCHO_COLUMNA
+		var y := hoja.position.y + 54.0 + (i % por_columna) * ALTO_RENGLON
+		_renglon(c, agenda, String(t["id"]), x, y)
 	# Pie: cómo se cierra y cuántas van.
-	var x_pie := margen + 8
-	IconosBotones.dibujar(c, "agenda", Vector2(x_pie, hoja.end.y - 22), 14.0)
-	Estilo.escribir(c, Vector2(x_pie + IconosBotones.ancho("agenda", 14.0) + 4, hoja.end.y - 11), tr("LIBRETA_CERRAR"), &"libreta_pie", Estilo.color(&"libreta_pie"))
+	var x_pie := hoja.position.x + 18
+	IconosBotones.dibujar(c, "agenda", Vector2(x_pie, hoja.end.y - 20), 14.0)
+	Estilo.escribir(c, Vector2(x_pie + IconosBotones.ancho("agenda", 14.0) + 4, hoja.end.y - 8), tr("LIBRETA_CERRAR"), &"libreta_pie", Estilo.color(&"libreta_pie"))
 	var cuenta := tr("LIBRETA_CUENTA") % [agenda.cumplidas(), agenda.total()]
-	Estilo.escribir(c, Vector2(hoja.end.x - 12 - Estilo.ancho(cuenta, &"libreta_cuenta"), hoja.end.y - 10), cuenta, &"libreta_cuenta", Estilo.color(&"libreta_rojo"))
+	Estilo.escribir(c, Vector2(hoja.end.x - 12 - Estilo.ancho(cuenta, &"libreta_cuenta"), hoja.end.y - 8), cuenta, &"libreta_cuenta", Estilo.color(&"libreta_rojo"))
 
 
 func _renglon(c: Control, datos: Agenda, id: String, x0: float, y: float) -> void:
@@ -116,15 +116,16 @@ func _renglon(c: Control, datos: Agenda, id: String, x0: float, y: float) -> voi
 	var nombre := datos.nombre_visible(id)
 	if datos.meta(id) > 1 and not hecha:
 		nombre += "  (%d/%d)" % [datos.avance[id], datos.meta(id)]
-	var ancho_max := HOJA.end.x - x0 - 30
-	Estilo.escribir(c, Vector2(x0 + 20, y + 16), nombre, &"libreta_renglon", Estilo.color(&"libreta_oculta") if oculta else Estilo.color(&"libreta_tinta"), HORIZONTAL_ALIGNMENT_LEFT, ancho_max)
+	var ancho_max := ANCHO_COLUMNA - 30.0
+	nombre = Estilo.recortar(nombre, &"libreta_renglon", ancho_max)
+	Estilo.escribir(c, Vector2(x0 + 18, y + 15), nombre, &"libreta_renglon", Estilo.color(&"libreta_oculta") if oculta else Estilo.color(&"libreta_tinta"))
 	var segunda := ""
 	var color_segunda := Estilo.color(&"libreta_tinta").lightened(0.35)
 	if hecha:
 		# Palomita roja y tachado.
 		c.draw_polyline(PackedVector2Array([casilla.position + Vector2(1, 6), casilla.position + Vector2(5, 11), casilla.position + Vector2(14, -3)]), Estilo.color(&"libreta_rojo"), 2.5)
-		var ancho := minf(Estilo.ancho(nombre, &"libreta_renglon"), ancho_max)
-		c.draw_line(Vector2(x0 + 18, y + 12), Vector2(x0 + 22 + ancho, y + 11), Estilo.color(&"libreta_tachado"), 2.0)
+		var ancho := Estilo.ancho(nombre, &"libreta_renglon")
+		c.draw_line(Vector2(x0 + 16, y + 11), Vector2(x0 + 20 + ancho, y + 10), Estilo.color(&"libreta_tachado"), 2.0)
 		segunda = tr("LIBRETA_HECHO") % datos.texto_recompensa(id)
 		color_segunda = Estilo.color(&"libreta_hecho")
 	elif oculta:
@@ -132,14 +133,4 @@ func _renglon(c: Control, datos: Agenda, id: String, x0: float, y: float) -> voi
 		color_segunda = Estilo.color(&"libreta_secreta")
 	else:
 		segunda = tr("LIBRETA_RECOMPENSA") % datos.texto_recompensa(id)
-		var nota := tr(String(datos.datos(id).get("nota", "")))
-		if nota != "":
-			segunda = "(" + nota + ")   " + segunda
-	Estilo.escribir(c, Vector2(x0 + 24, y + 26), segunda, &"libreta_detalle", color_segunda, HORIZONTAL_ALIGNMENT_LEFT, ancho_max)
-
-
-## Nombre del cuarto en pantalla (clave CUARTO_<id> en la traducción; si no hay, el id con mayúscula).
-func _nombre_cuarto(cuarto: String) -> String:
-	var clave := "CUARTO_" + cuarto
-	var nombre := tr(clave)
-	return nombre if nombre != clave else cuarto.capitalize()
+	Estilo.escribir(c, Vector2(x0 + 22, y + 32), Estilo.recortar(segunda, &"libreta_detalle", ancho_max - 4.0), &"libreta_detalle", color_segunda)

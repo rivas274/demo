@@ -39,11 +39,11 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 - [x] Arquitectura por piezas y datos (2026-10-20, `07-arquitectura.md`).
 - [x] Partir `valeria.gd` y `batalla_aspi.gd` bajo ~600, Felipe con estados, jefes con conductas en datos e interfaz con piezas, tema, pila de pantallas y textos traducibles (2026-10-20, `07-arquitectura.md`).
 - [x] Frases de Felipe y Valeria, agenda, primeras frases, palabras, logros, verbos y textos del jefe por clave en `traducciones/textos.csv` (2026-10-20; una prueba revisa que ninguna clave falte).
-- [x] Pantalla de opciones desde la pausa: remapear controles (teclado y mando), reducir movimiento y volumen (2026-10-20; el aspecto llega con el menú Decreto real).
+- [x] Pantalla de opciones desde la pausa: remapear controles (teclado y mando), reducir movimiento y volumen (2026-10-20; aspecto de la interfaz v2 desde el 2026-10-23, con «Golpes» y «Texto grande»).
 - [x] Letra pixel en toda la interfaz (2026-10-20): Pixel Operator (CC0) y Silkscreen (OFL), sin suavizado, con los tamaños en el tema.
 - [ ] Opcional: animación `sentarse` desde Felipe A (SpriteCook, 20 créditos) para la baranda del balcón (M6; hoy se queda quieto y se acicala).
 - [ ] Sonidos finales (hoy sintetizados con `sonidos_demo.py`, incluidos maullido, arañar, ronroneo y resorte) y sonido de casa (G13); música de la pelea.
-- [ ] Ajustar la dificultad de la fase 3 con una persona (el bot llega con 1 a 5 corazones).
+- [ ] Ajustar la dificultad de la fase 3 con una persona (con 9 huellas: ver «Interfaz v2 y salud de 9 huellas»).
 
 ## Diseñar después (de los pilares)
 
@@ -112,11 +112,16 @@ Idea tomada de un video sobre cómo hacer que un dash se sienta bien (5 pasos). 
 - [x] **Arte de Gemini (hecho 2026-10-20):** `herramientas/preparar_arte_nivel.py derrotas` recorta `arte/referencias/gemini/derrotas.png` a la escala del ratón y sin blanco puro: `derrota_carcasa`, `derrota_llave_1` a `_5`, `derrota_resorte`, `derrota_resorte_alma` (sin la sombra ovalada), `derrota_tornillo`, `derrota_engranaje`, `derrota_pelusa`. Se quitaron los provisionales de `PiezaSuelta`. Las nubes de pelusa de la hoja no se usan (la nube son partículas).
 - [ ] **Mostrar al creador:** `derrota-raton.gif` y `derrota-aspi.gif`.
 
-## Menú «Decreto real» (elegido por el creador, 2026-10-20)
+## Interfaz v2 «A + C» y salud de 9 huellas (programadas 2026-10-23)
 
-- [x] **Pausa «Decreto real» (hecha 2026-10-20):** Ficha de Su Majestad a la izquierda (retrato, kilos, humor y barras de defensa, carisma, ataque y peso con su frase; la velocidad, solo chiste), pergamino «Decretos de Su Majestad» con Felipe en su cojín y la corona al centro, y 4 botones de pergamino a la derecha que estampan el sello de lacre con destellos al elegir.
-- [x] **Toda la interfaz con el kit (G6/G7, hecha 2026-10-20):** HUD (pergaminos e íconos del kit), diálogo (pergamino y marco de retrato), libreta (pergamino con la foto del unicornio), resumen del día (pergamino con la cinta), aviso de logro (etiqueta con sello), barra del jefe (marco de madera y oro con relleno rojo y escudo azul) y carteles (cinta y pergamino).
-- [ ] **Mostrar al creador:** capturas antes y después de la pausa, la ficha, el HUD, el diálogo, los carteles, la libreta, el resumen y la barra del jefe, y el GIF del sello.
+- [x] **Interfaz v2 con el kit** (tema, `KitUI`, salud en huellas, barra del jefe con fases y daño reciente, diálogo con sombra de color, globito, cartel, logro, aviso limón, pausa con bolsillo y Ficha, opciones, libreta y resumen con letra de 16), zona segura del 90 %, letra mínima de 11 px y texto grande. Kit «Decreto real» borrado.
+- [x] **Salud de 9 huellas** (`SaludFelipe`): medias, curar, descanso, desmayo sin pérdida, Collar al tercero, pocas huellas y la opción «Golpes». Pruebas en `prueba_mecanicas.gd`, `prueba_interfaz.gd` y `prueba_zonas_texto.gd`.
+- [ ] **Mostrar al creador:** `diseno/revisiones/capturas/interfaz-rediseno/juego-v2.png`, el video `interfaz-v2.mp4` y el ejecutable de Windows.
+- [ ] **Publicar la ficha en línea** (la local ya menciona las 9 huellas y la siesta táctica).
+- [ ] Texto grande en el resto de las pantallas (pausa en pestañas, opciones, carteles, globito, indicador): hoy cubre la salud, el diálogo y los logros, que es lo que pide la lámina.
+- [ ] Opciones que el layout aprobó y todavía no están: velocidad del texto y avance del diálogo con botón, contraste alto, zona segura de 80 a 100 %, íconos de botón por mando (manual), sacudida en tres pasos.
+- [ ] Libreta y título/intro/final con el lenguaje v2 (hoy: libreta de papel con letra de 16; título en el panel oscuro).
+- [ ] Medir con personas la pelea con 9 huellas (objetivo: terminar con 2 a 5 huellas y como mucho un desmayo; si la mayoría termina con 7 o más, la embestida quita 2).
 
 ## Prototipo pendiente: luz dinámica con mapas de normales (después de cerrar el nivel 1)
 

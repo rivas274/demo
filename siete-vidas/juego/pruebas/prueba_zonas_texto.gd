@@ -1,6 +1,6 @@
 extends SceneTree
-## Zonas de texto (plan de estabilización 2026-10-20, decisión 3; tabla en ZonasTexto): recorre todos los anuncios,
-## carteles y palabras posibles y comprueba que sus rectángulos no pisen las zonas prohibidas ni se salgan de 640×360,
+## Zonas de texto (tabla en ZonasTexto; layout v2 aprobado el 2026-10-23): recorre todos los anuncios, carteles y
+## palabras posibles y comprueba que sus rectángulos no pisen las zonas prohibidas ni se salgan de la zona segura (90 %),
 ## que el HUD quepa en su franja, que el nombre del jefe no se corte y que todos los caracteres de textos.csv existan
 ## en las letras del tema. Sin ventana:
 ##   godot --headless --path siete-vidas/juego --script res://pruebas/prueba_zonas_texto.gd
@@ -35,8 +35,16 @@ func _correr() -> void:
 
 
 func _probar_tabla() -> void:
-	_comprobar(ZonasTexto.HUD.end.y <= 27.0 and ZonasTexto.DIALOGO.position.y >= 30.0 and ZonasTexto.DIALOGO.end.y <= 81.0 and ZonasTexto.CARTELES.end.y <= 91.0, "Tabla: A y 0–26, B y 30–80, C y 30–90")
-	_comprobar(ZonasTexto.en_zona_c(ZonasTexto.cartel(Hud.TAM_CARTEL)) and ZonasTexto.en_zona_c(ZonasTexto.cartel(Medidores.TAM_AVISO)), "Tabla: el cartel de travesura y el aviso de logro caben en la zona C")
+	_comprobar(ZonasTexto.SEGURA == Rect2(32, 18, 576, 324), "Tabla: zona segura de títulos del 90 % (de 32, 18 a 608, 342)")
+	_comprobar(ZonasTexto.SEGURA.encloses(ZonasTexto.SALUD) and ZonasTexto.SEGURA.encloses(ZonasTexto.SALUD_GRANDE) and ZonasTexto.SEGURA.encloses(ZonasTexto.JEFE) and ZonasTexto.SALUD.end.x < ZonasTexto.JEFE.position.x and ZonasTexto.SALUD_GRANDE.end.x < ZonasTexto.JEFE.position.x, "Tabla: la salud (A) y la barra del jefe (A2) dentro de la zona segura y sin tocarse, también con texto grande")
+	_comprobar(ZonasTexto.techo() == 44.0 and ZonasTexto.techo(true) == 64.0, "Tabla: diálogo y carteles desde y 44 (texto grande: 64)")
+	ZonasTexto.jefe_visible = true
+	var bajo_jefe := ZonasTexto.techo()
+	ZonasTexto.jefe_visible = false
+	_comprobar(bajo_jefe >= ZonasTexto.JEFE.end.y, "Tabla: con la barra del jefe a la vista, diálogo y carteles bajan (y %.0f)" % bajo_jefe)
+	_comprobar(ZonasTexto.en_zona_c(ZonasTexto.cartel(Cartel.medida("¡TRAVESURA CUMPLIDA!", "Robar el almuerzo de Valeria"))) and ZonasTexto.en_zona_c(ZonasTexto.logro(Medidores.tam_logro("Coleccionista de Calcetines"))), "Tabla: el cartel de travesura y el logro caben en la zona C")
+	var logro := ZonasTexto.logro(Medidores.tam_logro("Coleccionista de Calcetines"))
+	_comprobar(logro.end.x == ZonasTexto.SEGURA.end.x, "Tabla: el logro va a la derecha (hasta x 608)")
 	_comprobar(ZonasTexto.en_zona_c(ZonasTexto.cartel(Vector2(640, 52))), "Tabla: la franja de fase del jefe con su pista cabe en la zona C")
 
 
@@ -78,60 +86,30 @@ func _probar_caracteres() -> void:
 
 
 func _probar_hud(sala: Nivel) -> void:
-	var t := sala.travesuras
-	var fuera := []
 	var medidores := sala.get_node("Interfaz/Medidores") as Medidores
-	if not ZonasTexto.HUD.encloses(Medidores.PANEL):
-		fuera.append("corazones")
-	var corazones := Rect2(medidores.corazones.position + Vector2(-7, -7), Vector2(Medidores.PASO_CORAZONES * 5.0, 15))
-	if not ZonasTexto.HUD.encloses(corazones):
-		fuera.append("corazones dibujados")
-	if not ZonasTexto.HUD.encloses(Rect2(Hud.X0, Hud.Y0, Hud.ANCHO_AGENDA, Estilo.medida(&"alto_hud"))):
-		fuera.append("agenda")
-	var ultimo := 0.0
-	for clave: String in t.hud.contadores:
-		var c: ContadorRecurso = t.hud.contadores[clave]
-		# Mostrado (como cuando cambia): dentro de la franja.
-		var r := Rect2(Vector2(c.position.x, Hud.Y0), c.size)
-		ultimo = maxf(ultimo, r.end.x)
-		if not ZonasTexto.HUD.encloses(r):
-			fuera.append(clave)
-	var barra := Rect2(PresentacionJefe.POS_BARRA, Vector2(_ancho_barra_jefe(), BarraVida.ALTO_MARCO))
-	if not ZonasTexto.HUD.encloses(barra):
-		fuera.append("barra del jefe")
-	_comprobar(fuera.is_empty(), "Zona A: corazones, agenda, contadores y barra del jefe caben en y 0–26 %s" % [fuera])
-	_comprobar(ultimo < barra.position.x and Medidores.PANEL.end.x < Hud.X0, "Zona A: nada se monta (corazones < agenda; contadores hasta %.0f < barra del jefe en %.0f)" % [ultimo, barra.position.x])
+	var salud := Rect2(medidores.huellas.position, medidores.huellas.medida())
+	_comprobar(salud == ZonasTexto.SALUD and ZonasTexto.HUD.encloses(salud), "Zona A: la salud (cara y 9 huellas) en su lugar, de (32, 18), 152×20 (%s)" % salud)
+	var barra := Rect2(PresentacionJefe.POS_BARRA, Vector2(BarraVida.ANCHO_JEFE, 44))
+	_comprobar(ZonasTexto.JEFE.encloses(barra) and barra.end.x == ZonasTexto.SEGURA.end.x, "Zona A2: la barra del jefe arriba a la derecha, hasta x 608 (%s)" % barra)
 
 
-## HUD limpio (2026-10-21): fijos solo los corazones; la agenda y los contadores aparecen al cambiar y se van; en la
-## pelea, el de snacks queda fijo; sin el texto «N vidas».
+## HUD mínimo (interfaz v2, decisión del creador del 2026-10-23): en pantalla solo la salud. Los snacks, las vidas, la
+## agenda, los calcetines y las fotos NO están en el HUD; al recoger sale «+1» y se ven en la pausa (el bolsillo).
 func _probar_hud_limpio(sala: Nivel) -> void:
 	var hud := sala.travesuras.hud
-	await _esperar(150)
-	var nada := true
-	for clave: String in ["agenda", "calcetin", "foto", "snack"]:
-		nada = nada and not hud.mostrando(clave)
-	_comprobar(nada, "HUD limpio: sin cambios, solo los corazones (agenda y contadores fuera)")
-	hud.golpear("calcetin")
-	await _esperar(15)
-	var c: ContadorRecurso = hud.contadores["calcetin"]
-	_comprobar(hud.mostrando("calcetin") and ZonasTexto.HUD.encloses(Rect2(c.position, c.size)) and not hud.mostrando("foto"), "HUD limpio: al cambiar, el contador entra deslizando a la franja (solo el que cambió)")
-	await _esperar(int((Hud.MOSTRAR + 0.4) * 60.0))
-	_comprobar(not hud.mostrando("calcetin"), "HUD limpio: a los %.0f s se va" % Hud.MOSTRAR)
-	hud.snacks_fijos = func() -> bool: return true
 	await _esperar(30)
-	_comprobar(hud.mostrando("snack"), "HUD limpio: en la pelea, el contador de snacks queda fijo")
-	hud.snacks_fijos = Callable()
-	await _esperar(30)
+	var visibles := []
+	for hijo in hud.get_children():
+		if hijo is Control and (hijo as Control).visible:
+			visibles.append(hijo.name)
+	_comprobar(visibles.is_empty(), "HUD mínimo: sin carteles, el HUD no muestra nada fijo (ni snacks ni vidas) %s" % [visibles])
+	var palabras := sala.travesuras.jugo.palabras.size()
+	sala.travesuras.recompensas.dar({"tipo": "calcetin", "cantidad": 1})
+	await _esperar(2)
+	_comprobar(sala.travesuras.jugo.palabras.size() > palabras and sala.travesuras.jugo.palabras[-1] == "+1", "HUD mínimo: al recoger algo sale «+1» sobre Felipe")
 	var bolsillo := sala.pantallas.bolsillo
-	_comprobar(bolsillo != null and bolsillo.contadores.size() == 4 and tr("UI_VIDAS") % sala.felipe.vidas == (bolsillo.contadores["vidas"] as ContadorRecurso).texto, "HUD limpio: las vidas, calcetines, fotos y snacks están en el bolsillo de la pausa")
-
-
-func _ancho_barra_jefe() -> float:
-	var barra: BarraVida = (load(PresentacionJefe.ESCENA_BARRA) as PackedScene).instantiate()
-	var ancho := barra.tam_barra.x + BarraVida.HUECO_LADO * 2.0
-	barra.free()
-	return ancho
+	bolsillo.actualizar()
+	_comprobar(bolsillo != null and bolsillo.valores.has("snack") and bolsillo.valores["salud"] == "9 de 9" and bolsillo.valores["calcetin"] == str(sala.travesuras.recompensas.calcetines), "HUD mínimo: la salud, los snacks, los calcetines y las fotos están en el bolsillo de la pausa (%s)" % bolsillo.valores)
 
 
 func _probar_dialogo(sala: Nivel) -> void:
@@ -141,8 +119,33 @@ func _probar_dialogo(sala: Nivel) -> void:
 	await _esperar(20)
 	d.decir("felipe", "Una frase de prueba para la zona B, de dos líneas si hace falta: así se ve dónde cae el cuadro.", 0, true)
 	await _esperar(2)
-	_comprobar(ZonasTexto.DIALOGO.encloses(d.rect_en_pantalla()), "Zona B: el cuadro de diálogo cabe en y 30–80 (%s)" % d.rect_en_pantalla())
+	var cuadro := d.rect_en_pantalla()
+	_comprobar(cuadro.position.y >= 44.0 and cuadro.end.y <= 103.0 and ZonasTexto.SEGURA.encloses(cuadro), "Zona B: el cuadro de diálogo va de y 44 a 103 (más su sombra), dentro de la zona segura (%s)" % cuadro)
+	var caja: CuadroDialogo = d._caja
+	_comprobar(caja.texto.position.x - caja.rect_caja().position.x == 24.0 and caja.ancho_texto() == 480.0, "Zona B: el texto empieza a 24 px del borde de la caja (13 px libres después del retrato)")
 	d.limpiar()
+	# Texto grande: diálogo de y 64 a 163, letra de 32 y la frase larga paginada.
+	Opciones.texto_grande = true
+	d.decir("valeria", "¿Quién dejó abierta la puerta del balcón? Felipe, si fuiste tú, hoy no hay atún para nadie.", 1, true)
+	await _esperar(2)
+	cuadro = d.rect_en_pantalla()
+	_comprobar(cuadro.position.y >= 64.0 and cuadro.end.y <= 163.0 and d.paginas.size() == 2 and Estilo.letra(caja.estilo_texto()) == 32, "Texto grande: el diálogo va de y 64 a 163, con letra de 32 y paginado en 2 (%s, %d páginas)" % [cuadro, d.paginas.size()])
+	d.saltar()
+	d.saltar()
+	_comprobar(d.ocupado() and d.pagina == 1, "Texto grande: saltar pasa a la página 2")
+	d.limpiar()
+	Opciones.texto_grande = false
+	# Felipe arriba (repisa alta): el cuadro sale abajo, hasta el borde de la zona segura.
+	sala.felipe.global_position = Vector2(300, Nivel1.SUELO - 250)
+	await _esperar(3)
+	if d.va_abajo():
+		d.decir("felipe", "Desde aquí arriba se ve todo mi reino.", 0, true)
+		await _esperar(2)
+		cuadro = d.rect_en_pantalla()
+		_comprobar(cuadro.end.y <= ZonasTexto.SEGURA.end.y and cuadro.position.y > 200.0, "Zona B: con Felipe arriba, el cuadro sale abajo dentro de la zona segura (%s)" % cuadro)
+		d.limpiar()
+	sala.felipe.global_position = Vector2(300, Nivel1.SUELO)
+	await _esperar(10)
 
 
 func _probar_anuncios(sala: Nivel) -> void:
@@ -190,7 +193,7 @@ func _probar_anuncios(sala: Nivel) -> void:
 		tipos[m[0]] = true
 		if not ZonasTexto.en_zona_c(m[2]):
 			malos.append("%s %s" % [m[1], m[2]])
-	_comprobar(malos.is_empty() and tipos.size() == 3, "Zona C: carteles, logro y fase (%s) salen todos en y 30–90, sin tocar el HUD %s" % [tipos.keys(), malos])
+	_comprobar(malos.is_empty() and tipos.size() == 3, "Zona C: carteles, logro y fase (%s) salen todos desde y 44, dentro de la zona segura y sin tocar la salud %s" % [tipos.keys(), malos])
 	_comprobar(a_la_vez <= 1, "Zona C: uno a la vez (máximo visto: %d)" % a_la_vez)
 	# El final de un jefe (lo que se vio mal en el video): franja de fase urgente («¡APAGADA!») con cámara lenta y una
 	# frase urgente de Felipe al mismo tiempo, y después un cartel de travesura. Nunca dos textos en la franja a la vez y
@@ -223,18 +226,10 @@ func _probar_anuncios(sala: Nivel) -> void:
 	_comprobar(dijo_despues, "Zona C: la frase urgente que llegó durante la franja sale después (no se pierde)")
 	t.dialogo.limpiar()
 	a.limpiar()
-	# El cartel dibujado (cinta, pergamino y letras) queda dentro de su rectángulo.
-	var cartel := Cartel.crear("¡TRAVESURA CUMPLIDA!", "Coleccionista de calcetines", false, ZonasTexto.cartel(Hud.TAM_CARTEL))
-	var dentro := true
-	for hijo in cartel.get_children():
-		var c := hijo as Control
-		var r := Rect2(cartel.position + c.position, c.size)
-		if hijo is Label:
-			# Lo que se ve de la letra: su alto de línea (no la caja con aire de abajo).
-			r.size.y = (hijo as Label).get_line_height()
-		dentro = dentro and ZonasTexto.en_zona_c(r)
-	cartel.free()
-	_comprobar(dentro, "Zona C: la cinta, el pergamino y las letras del cartel no se salen de y 30–90")
+	# El cartel (franja, sello, fragmentos y línea) queda dentro de su rectángulo de la zona C.
+	var rect := ZonasTexto.cartel(Cartel.medida("¡TRAVESURA CUMPLIDA!", "Coleccionista de calcetines"))
+	var sello := Rect2(rect.get_center().x - Cartel.ancho_franja("¡TRAVESURA CUMPLIDA!") / 2.0 - 6.0, rect.position.y - 4.0, 29, 31)
+	_comprobar(rect.size.x >= Cartel.ancho_franja("¡TRAVESURA CUMPLIDA!") + 12.0 and rect.size.y >= Cartel.ALTO_FRANJA + 2.0 + Cartel.ALTO_LINEA and ZonasTexto.en_zona_c(rect) and sello.position.y >= ZonasTexto.SALUD.end.y and sello.position.x >= ZonasTexto.SEGURA.position.x, "Zona C: la franja, el sello y la línea del cartel caben en su lugar de la zona C sin tocar la salud")
 
 
 func _probar_palabras(sala: Nivel) -> void:
@@ -304,7 +299,7 @@ func _probar_barra_jefe() -> void:
 	barra.titulo = "A.S.P.I. — Devoradora de Pelos · Nivel 99"
 	barra.titulo_corto = "A.S.P.I."
 	var texto := barra.titulo_visible()
-	_comprobar(not texto.ends_with("…") and Estilo.ancho(texto, &"jefe_barra") <= barra.tam_barra.x, "Zona A: el nombre del jefe se abrevia hasta caber entero («%s», nunca «N…»)" % texto)
+	_comprobar(not texto.ends_with("…") and Estilo.ancho(texto, &"jefe_barra") <= BarraVida.ANCHO_JEFE - BarraVida.X_BARRA - 16.0, "Zona A2: el nombre del jefe se abrevia hasta caber entero («%s», nunca «N…»)" % texto)
 	barra.free()
 
 

@@ -45,8 +45,8 @@ const TEXTO_INICIO := "JEFE_BATALLA_INICIADA"
 ## Lo que se esconde durante la presentación (cada nodo implementa al_presentar_jefe(presentando: bool)).
 const GRUPO_OCULTAR := "ocultar_en_presentacion"
 const ESCENA_BARRA := "res://escenas/ui/barra_jefe.tscn"
-## Barra del jefe arriba a la derecha, lejos de los corazones y del HUD de la Agenda.
-const POS_BARRA := Vector2(436, 1)
+## Barra del jefe arriba a la derecha (zona A2 del layout v2: 250×44 hasta el borde de la zona segura).
+const POS_BARRA := Vector2(358, 18)
 
 ## Datos del jefe.
 var nombre := ""
@@ -129,6 +129,10 @@ func _init(nombre_jefe: String, titulo_jefe: String) -> void:
 	_azar.seed = 7
 
 
+func _exit_tree() -> void:
+	ZonasTexto.jefe_visible = false
+
+
 func _ready() -> void:
 	_camara = Camera2D.new()
 	_camara.name = "Camara del jefe"
@@ -141,7 +145,8 @@ func _ready() -> void:
 	_interfaz.draw.connect(_dibujar)
 	capa.add_child(_interfaz)
 	barra = (load(ESCENA_BARRA) as PackedScene).instantiate()
-	barra.titulo = "%s — %s" % [nombre, titulo]
+	# En la franja de la barra va el nombre (el título se lee en la entrada).
+	barra.titulo = nombre
 	barra.titulo_corto = nombre
 	barra.position = POS_BARRA
 	barra.visible = false
@@ -267,6 +272,8 @@ func _process(delta: float) -> void:
 func _actualizar_barra() -> void:
 	var en_entrada := presentando and (_en("barra") or _en("musica") or _en("tamano") or _en("rugido")) and pasos == PASOS
 	barra.visible = en_entrada or (mostrar_barra and not presentando)
+	# Mientras se ve la barra, el diálogo y los carteles bajan para no taparla (ZonasTexto.techo).
+	ZonasTexto.jefe_visible = barra.visible and is_visible_in_tree()
 	var forzada := -1.0
 	if en_entrada:
 		forzada = _llenado if not (_en("tamano") or _en("rugido")) else 1.0
@@ -465,10 +472,11 @@ func _dibujar() -> void:
 	if _cartel > 0.0 and _texto_cartel != "":
 		var alfa := minf(_cartel * 2.0, 1.0)
 		var ancho := Estilo.ancho(_texto_cartel, &"jefe_cartel")
-		# La franja de fase va en la zona C (ZonasTexto: y 30–90), nunca sobre el HUD ni la barra del jefe (M4).
-		var arriba := maxf(_y_cartel, ZonasTexto.CARTELES.position.y)
+		# La franja de fase va en la zona C (bajo la barra del jefe: ZonasTexto.techo), dentro de la zona segura (M4).
+		var arriba := maxf(_y_cartel, ZonasTexto.techo())
 		var y := arriba + 24.0
-		c.draw_rect(Rect2(0, arriba, tam.x, _alto_cartel(_pista)), Estilo.color(&"jefe_cartel_fondo", 0.8 * alfa))
+		var segura := ZonasTexto.SEGURA
+		c.draw_rect(Rect2(segura.position.x, arriba, segura.size.x, _alto_cartel(_pista)), Estilo.color(&"jefe_cartel_fondo", 0.8 * alfa))
 		Estilo.escribir(c, Vector2((tam.x - ancho) / 2.0, y), _texto_cartel, &"jefe_cartel", Estilo.color(&"jefe_amarillo", alfa))
 		if _pista != "":
 			var texto := _etiquetar(_pista)

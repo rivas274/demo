@@ -52,9 +52,9 @@ func _correr() -> void:
 	var resumen := _resumen()
 	var termino := resumen != null and agenda.cumplidas() >= 6 and sala.calcetines >= 3
 	_paso("Resumen del día" if resumen else "No llegó al resumen")
-	print("Agenda %d de %d (secretas %d) · calcetines %d · fotos %d · snacks %d · perdones %d · logros: %s · corazones %d · vidas %d · %.0f s" % [
+	print("Agenda %d de %d (secretas %d) · calcetines %d · fotos %d · snacks %d · perdones %d · logros: %s · huellas %s · siestas %d · %.0f s" % [
 		agenda.cumplidas(), agenda.total(), agenda.secretas_cumplidas(), sala.calcetines, sala.travesuras.recompensas.fotos,
-		felipe.snacks, sala.travesuras.perdones, ", ".join(sala.logros), felipe.corazones, felipe.vidas, _cuadros / _fps])
+		felipe.snacks, sala.travesuras.perdones, ", ".join(sala.logros), PanelBolsillo.texto_huellas(felipe.medias), felipe.salud.desmayos, _cuadros / _fps])
 	if resumen:
 		# Deja ver el resumen y lo cierra (vuelve al título).
 		await _segundos_reales(7.0)
@@ -502,15 +502,15 @@ func _segundos(segundos: float) -> void:
 		await _cuadro()
 
 
-var _corazones_antes := 5
+var _medias_antes := Felipe.MEDIAS_MAX
 
 
 func _cuadro() -> void:
 	_cuadros += 1
 	_reflejos()
-	if felipe.corazones < _corazones_antes and OS.get_cmdline_user_args().has("--detalle"):
+	if felipe.medias < _medias_antes and OS.get_cmdline_user_args().has("--detalle"):
 		print("        ¡golpe! %.1f s en (%.0f, %.0f)" % [_cuadros / _fps, felipe.global_position.x, felipe.global_position.y])
-	_corazones_antes = felipe.corazones
+	_medias_antes = felipe.medias
 	if _cuadros > LIMITE_SEGUNDOS * _fps:
 		print("Se acabó el tiempo")
 		quit(1)
@@ -556,4 +556,4 @@ func _dijo_felipe(texto: String) -> bool:
 
 func _paso(texto: String) -> void:
 	_pasos.append(texto)
-	print("%5.1f s  %s  (x %.0f, y %.0f, corazones %d, agenda %d)" % [_cuadros / _fps, texto, felipe.global_position.x, felipe.global_position.y, felipe.corazones, sala.travesuras.agenda.cumplidas()])
+	print("%5.1f s  %s  (x %.0f, y %.0f, medias %d, agenda %d)" % [_cuadros / _fps, texto, felipe.global_position.x, felipe.global_position.y, felipe.medias, sala.travesuras.agenda.cumplidas()])

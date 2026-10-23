@@ -7,19 +7,23 @@ extends CanvasLayer
 ## diálogo (pantalla): la luz del cuarto (el apagón) no lo oscurece.
 ## Lo conecta PeleaJefe al Dialogo (`Dialogo.globo`) mientras dura la pelea; fuera de la pelea, el diálogo es el de siempre.
 ## v4 (Gemini y ChatGPT): nunca en pleno peligro (`peligro`: la frase espera hasta ESPERA_MAXIMA s a que pase; si no,
-## se descarta; y si el peligro empieza, el globito se va), y se lee mejor: letra negrita y contorno oscuro de 2 px.
+## se descarta; y si el peligro empieza, el globito se va).
+## Interfaz v2 («A + C», kit assets/ui/v2/): caja oscura de una línea con las esquinas cortadas, línea crema, sombra
+## ámbar (el color de Felipe), dos orejitas de gato arriba y la cola con huellita que baja hacia él. Salta 3 px al
+## aparecer (con «Reducir movimiento», no). Siempre dentro de la zona segura y fuera de la salud y la barra del jefe.
 
 ## Segundos que dura una frase: base más un poco por letra.
 const DURA_BASE := 1.6
 const DURA_POR_LETRA := 0.02
-## Ancho máximo del texto, margen interior y altura sobre los pies de Felipe (encima de la burbuja del Indicador).
-const ANCHO_MAXIMO := 240.0
-const MARGEN := Vector2(6, 4)
+## Ancho máximo del texto (una línea, dentro de la zona segura), alto de la caja y altura sobre los pies de Felipe
+## (encima de la burbuja del Indicador).
+const ANCHO_MAXIMO := 420.0
+const ALTO_CAJA := 18.0
+const MARGEN_TEXTO := 8.0
 const ALTURA := 104.0
 const LETRA := &"globo_texto"
 ## Segundos que una frase espera a que pase el peligro antes de descartarse.
 const ESPERA_MAXIMA := 2.5
-const ALTO_LINEA := 14.0
 
 var felipe: Node2D
 var texto := ""
@@ -66,7 +70,9 @@ func _mostrar(frase: String) -> void:
 	# {acción} → [tecla] (en el globito no van íconos).
 	for accion: String in Controles.ACCIONES:
 		texto = texto.replace("{%s}" % accion, "[%s]" % IconosBotones.texto(accion))
-	_lineas = _partir(texto)
+	# Una sola línea (layout v2): lo que no cabe se corta con «…» (las frases de la pelea son cortas).
+	texto = Estilo.recortar(texto, LETRA, ANCHO_MAXIMO)
+	_lineas = [texto]
 	_queda = DURA_BASE + DURA_POR_LETRA * texto.length()
 	_aparecer = 0.0
 	_lienzo.queue_redraw()
@@ -80,14 +86,13 @@ func visible_ahora() -> bool:
 func rect_en_pantalla() -> Rect2:
 	if not visible_ahora() or felipe == null or not is_instance_valid(felipe) or not felipe.is_inside_tree():
 		return Rect2()
-	var ancho := 0.0
-	for linea in _lineas:
-		ancho = maxf(ancho, Estilo.ancho(linea, LETRA))
-	var tam := Vector2(ancho, _lineas.size() * ALTO_LINEA) + MARGEN * 2.0
+	var tam := Vector2(roundf(Estilo.ancho(texto, LETRA)) + MARGEN_TEXTO * 2.0, ALTO_CAJA)
 	var pies := felipe.get_viewport().get_canvas_transform() * felipe.global_position
-	var caja := Rect2((pies + Vector2(-tam.x / 2.0, -ALTURA - tam.y)).round(), tam.round())
-	caja.position.x = clampf(caja.position.x, ZonasTexto.BORDE, ZonasTexto.PANTALLA.size.x - ZonasTexto.BORDE - caja.size.x)
-	caja.position.y = maxf(caja.position.y, ZonasTexto.HUD.end.y + 2.0)
+	var caja := Rect2((pies + Vector2(-tam.x / 2.0, -ALTURA - tam.y)).round(), tam)
+	var segura := ZonasTexto.SEGURA
+	caja.position.x = clampf(caja.position.x, segura.position.x, segura.end.x - caja.size.x)
+	# Las orejitas suben 7 px: la caja queda bajo la salud y bajo la barra del jefe (si se ve).
+	caja.position.y = maxf(caja.position.y, ZonasTexto.techo(Opciones.texto_grande) + 8.0)
 	return caja
 
 
@@ -115,39 +120,18 @@ func _process(delta: float) -> void:
 	_lienzo.queue_redraw()
 
 
-## Parte la frase en líneas de ANCHO_MAXIMO como mucho (por palabras).
-func _partir(frase: String) -> PackedStringArray:
-	var lineas: PackedStringArray = []
-	var actual := ""
-	for palabra in frase.split(" ", false):
-		var prueba := palabra if actual == "" else actual + " " + palabra
-		if actual != "" and Estilo.ancho(prueba, LETRA) > ANCHO_MAXIMO:
-			lineas.append(actual)
-			actual = palabra
-		else:
-			actual = prueba
-	if actual != "":
-		lineas.append(actual)
-	return lineas
-
-
 func _dibujar() -> void:
 	var caja := rect_en_pantalla()
 	if not caja.has_area():
 		return
 	var c := _lienzo
-	caja.position.y += roundf((1.0 - _aparecer) * 3.0)
+	if not Opciones.reducir_movimiento:
+		caja.position.y += roundf((1.0 - _aparecer) * 3.0)
 	var pies := felipe.get_viewport().get_canvas_transform() * felipe.global_position
-	var punta := Vector2(clampf(roundf(pies.x), caja.position.x + 8.0, caja.end.x - 8.0), caja.end.y)
-	var trazo := Estilo.color(&"indicador_trazo")
-	var fondo := Estilo.color(&"globo_fondo")
-	# Sombra dura, contorno oscuro de 2 px con esquinas recortadas, papel crema y el piquito hacia Felipe.
-	c.draw_rect(Rect2(caja.position + Vector2(3, 3), caja.size), Estilo.color(&"indicador_sombra"))
-	c.draw_rect(Rect2(caja.position.x, caja.position.y - 2, caja.size.x, caja.size.y + 4), trazo)
-	c.draw_rect(Rect2(caja.position.x - 2, caja.position.y, caja.size.x + 4, caja.size.y), trazo)
-	c.draw_rect(Rect2(caja.position.x - 1, caja.position.y - 1, caja.size.x + 2, caja.size.y + 2), trazo)
-	c.draw_rect(caja, fondo)
-	c.draw_colored_polygon(PackedVector2Array([punta + Vector2(-6, -1), punta + Vector2(4, -1), punta + Vector2(-5, 8)]), trazo)
-	c.draw_colored_polygon(PackedVector2Array([punta + Vector2(-4, -1), punta + Vector2(2, -1), punta + Vector2(-3, 4)]), fondo)
-	for i in _lineas.size():
-		Estilo.escribir(c, caja.position + MARGEN + Vector2(0, ALTO_LINEA * (i + 1) - 3.0), _lineas[i], LETRA, Estilo.color(&"texto_oscuro"))
+	var cola_x := clampf(roundf(pies.x), caja.position.x + 10.0, caja.end.x - 14.0)
+	KitUI.pieza(c, "globito-caja", caja)
+	KitUI.icono(c, "globito-cola", Vector2(cola_x - 5.0, caja.end.y))
+	KitUI.icono(c, "globito-oreja-izq", Vector2(caja.position.x + 6.0, caja.position.y - 7.0))
+	KitUI.icono(c, "globito-oreja-der", Vector2(caja.end.x - 18.0, caja.position.y - 7.0))
+	var y := caja.position.y + ceilf((ALTO_CAJA - KitUI.alto_mayuscula(LETRA)) / 2.0)
+	KitUI.escribir(c, caja.position.x + MARGEN_TEXTO + KitUI.inclinacion(ALTO_CAJA) / 2.0, y, texto, LETRA, Estilo.color(&"ui_texto"))

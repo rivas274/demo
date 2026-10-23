@@ -182,12 +182,12 @@ func _probar_manotazo() -> void:
 	_comprobar(vaso.tirable.roto and "La Gravedad Funciona" in sala.logros, "El vaso cae, se rompe y da el logro")
 
 
-## Mantener la acción 0,6 s sin nada cerca come un snack del bolsillo: cura 1 corazón y suma 0,3 kg.
+## Mantener la acción 0,6 s sin nada cerca come un snack del bolsillo: cura 1 huella y suma 0,3 kg.
 func _probar_snacks() -> void:
 	await _poner_en(Vector2(120, Nivel1.SUELO))
 	_comprobar(felipe.objeto_cercano() == null, "Lejos de todo no hay nada que usar")
 	felipe.snacks = 3
-	felipe.corazones = 3
+	felipe.medias = 6
 	var peso := felipe.peso
 	Input.action_press("interactuar")
 	await _esperar(18)
@@ -201,7 +201,7 @@ func _probar_snacks() -> void:
 	_comprobar(felipe.snacks == 3, "El snack se descuenta cuando la boca llega, no antes")
 	Input.action_release("interactuar")
 	await _esperar_que(func() -> bool: return felipe.estado != Felipe.Estado.COMIENDO, 120)
-	_comprobar(felipe.snacks == 2 and felipe.corazones == 4 and is_equal_approx(felipe.peso, peso + Felipe.PESO_POR_COMIDA), "El snack cura 1 corazón y suma 0,3 kg (snacks %d, corazones %d)" % [felipe.snacks, felipe.corazones])
+	_comprobar(felipe.snacks == 2 and felipe.medias == 8 and is_equal_approx(felipe.peso, peso + Felipe.PESO_POR_COMIDA), "El snack cura 1 huella y suma 0,3 kg (snacks %d, medias %d)" % [felipe.snacks, felipe.medias])
 	_comprobar("¡ÑAM!" in sala.travesuras.jugo.palabras, "Comer el snack hace saltar ¡ÑAM!")
 	felipe.snacks = 0
 	var avisos := [0]
@@ -381,7 +381,7 @@ func _probar_agenda() -> void:
 	# Resumen del día tipo Balatro.
 	var resumen := travesuras.mostrar_resumen()
 	await process_frame
-	_comprobar(paused and resumen.filas.size() == 6 and int(resumen.filas[0][1]) == travesuras.agenda.cumplidas(), "El resumen del día cuenta travesuras, secretas, calcetines, fotos, snacks y perdones")
+	_comprobar(paused and resumen.filas.size() == 7 and int(resumen.filas[0][1]) == travesuras.agenda.cumplidas(), "El resumen del día cuenta travesuras, secretas, calcetines, fotos, snacks, perdones y siestas tácticas")
 	resumen.cerrar()
 	await process_frame
 	_comprobar(not paused, "Al cerrar el resumen sigue el juego")
@@ -397,7 +397,7 @@ func _probar_dialogo() -> void:
 	dialogo.saltar()
 	dialogo.saltar()
 	_comprobar(dialogo.hablando == "valeria" and dialogo.texto_actual == "Prueba dos.", "Saltar pasa a la frase de la cola (Valeria, con su retrato)")
-	_comprobar(dialogo._retrato.visible and dialogo._retrato.texture != null, "Valeria usa su retrato de la hoja de Gemini")
+	_comprobar(dialogo._caja.cara != null and dialogo._caja.quien == "valeria" and dialogo._caja.cara.get_height() == 54, "Valeria usa su cara de 52 px (de la hoja de Gemini) en el cuadro v2")
 	var caducidad := dialogo.caducidad_cola
 	dialogo.caducidad_cola = 0.1
 	dialogo.decir("felipe", "Frase vieja.")

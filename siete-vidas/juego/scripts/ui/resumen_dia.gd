@@ -2,11 +2,18 @@ class_name ResumenDia
 extends CanvasLayer
 ## Resumen del día al terminar un nivel, tipo Balatro: las filas aparecen una a una y sus números suben contando
 ## con un golpe; al final, una frase de Felipe con su retrato. Pausa el juego; Enter (o A, o Tab) cierra.
+## Interfaz v2 («A + C»): el panel de la pausa en toda la zona segura, la franja del título, una fila del bolsillo por
+## dato (nombre y nota a la izquierda, número a la derecha) y la frase con el retrato sobre su fondo inclinado.
 
 signal cerrado
 
-const RETRATOS := preload("res://assets/felipe/felipe-retratos.png")
-const LADO_RETRATO := 200.0 / 3.0
+## Filas: dónde empieza la primera, cuánto mide cada una y su paso.
+const X_FILA := 118.0
+const ANCHO_FILA := 404.0
+const Y_FILAS := 66.0
+const PASO_FILA := 26.0
+## La frase final, abajo.
+const Y_FRASE := 258.0
 
 @export var pausa_entre_filas := 0.5
 @export var duracion_conteo := 0.5
@@ -24,7 +31,8 @@ var _frase_visible := 0.0
 
 
 ## Filas a partir de la agenda y las recompensas (más los perdones de Valeria, que cuenta el nivel).
-static func filas_de(agenda: Agenda, recompensas: Recompensas, perdones := 0) -> Array:
+## `siestas`: los desmayos del nivel (salud de 9 huellas: un chiste, no un castigo).
+static func filas_de(agenda: Agenda, recompensas: Recompensas, perdones := 0, siestas := 0) -> Array:
 	return [
 		[TranslationServer.translate("RESUMEN_AGENDA"), agenda.cumplidas(), agenda.total(), ""],
 		[TranslationServer.translate("RESUMEN_SECRETAS"), agenda.secretas_cumplidas(), agenda.total_secretas(), ""],
@@ -32,6 +40,7 @@ static func filas_de(agenda: Agenda, recompensas: Recompensas, perdones := 0) ->
 		[TranslationServer.translate("RESUMEN_FOTOS"), recompensas.fotos, -1, TranslationServer.translate("RESUMEN_FOTOS_NOTA")],
 		[TranslationServer.translate("RESUMEN_SNACKS"), recompensas.snacks(), Felipe.SNACKS_MAX, ""],
 		[TranslationServer.translate("RESUMEN_PERDONES"), perdones, -1, TranslationServer.translate("RESUMEN_PERDONES_NOTA")],
+		[TranslationServer.translate("RESUMEN_SIESTAS"), siestas, -1, TranslationServer.translate("RESUMEN_SIESTAS_NOTA")],
 	]
 
 
@@ -94,53 +103,39 @@ func _dibujar() -> void:
 	var c := _lienzo
 	var entrada := minf(_tiempo * 4.0, 1.0)
 	c.draw_rect(Rect2(0, 0, 640, 360), Estilo.color(&"resumen_velo", Estilo.color(&"resumen_velo").a * entrada))
-	# Pergamino del kit «Decreto real» con el título en la cinta de terciopelo (la misma familia que la pausa).
-	var panel := Rect2(110, 14, 420, 334)
-	Estilo.panel(c, panel, &"panel")
-	Estilo.panel(c, Rect2(150, 10, 340, 42), &"cinta")
-	_texto(c, Vector2(320, 38), tr("RESUMEN_TITULO"), &"resumen_titulo", Estilo.color(&"resumen_titulo"), true)
-	_texto(c, Vector2(320, 64), tr("RESUMEN_SUBTITULO"), &"resumen_subtitulo", Estilo.color(&"resumen_subtitulo"), true, false)
-	var y := 70.0
+	KitUI.pieza(c, "pausa-panel", ZonasTexto.SEGURA)
+	var x0 := ZonasTexto.SEGURA.position.x + 14.0
+	var y0 := ZonasTexto.SEGURA.position.y
+	var ancho := KitUI.franja_texto(c, "titulo-franja", Vector2(x0, y0 + 10.0), 18.0, tr("RESUMEN_TITULO"), &"cartel_kit", Estilo.color(&"ui_contorno"))
+	KitUI.escribir(c, x0 + ancho + 10.0, y0 + 14.0, tr("RESUMEN_SUBTITULO"), &"resumen_subtitulo", Estilo.color(&"resumen_subtitulo"))
+	var y := Y_FILAS
 	for i in _mostradas:
 		var fila: Array = filas[i]
 		var g := _golpes[i]
-		var caja := Rect2(126, y, 388, 30)
-		c.draw_rect(caja, Estilo.color(&"resumen_fila"))
-		c.draw_rect(Rect2(caja.position, Vector2(5, caja.size.y)), Estilo.color(&"resumen_marca_a") if i % 2 == 0 else Estilo.color(&"resumen_marca_b"))
-		_texto(c, Vector2(138, y + 15), String(fila[0]), &"resumen_fila", Estilo.color(&"resumen_texto"), false, false)
+		KitUI.pieza(c, "bolsillo-fila", Rect2(X_FILA, y, ANCHO_FILA, 22.0))
+		KitUI.escribir(c, X_FILA + 14.0, y + 7.0, String(fila[0]), &"resumen_fila", Estilo.color(&"resumen_texto"))
 		var nota := String(fila[3]) if fila.size() > 3 else ""
 		if nota != "":
-			_texto(c, Vector2(138, y + 26), nota, &"resumen_nota", Estilo.color(&"resumen_nota"), false, false)
+			var x_nota := X_FILA + 22.0 + Estilo.ancho(String(fila[0]), &"resumen_fila")
+			KitUI.escribir(c, x_nota, y + 7.0, nota, &"resumen_nota", Estilo.color(&"resumen_nota"))
 		var numero := str(int(_valores[i]))
 		if int(fila[2]) >= 0:
 			numero += "/%d" % fila[2]
 		var completo := int(fila[2]) >= 0 and int(_valores[i]) >= int(fila[2])
-		# El golpe pasa el número a la letra grande (24 px) un instante: la letra pixel va siempre a su tamaño.
-		var estilo := &"resumen_numero_golpe" if g > 0.5 else &"resumen_numero"
-		var ancho := Estilo.ancho(numero, estilo)
-		_texto(c, Vector2(504 - ancho, y + 22 - roundf(3.0 * g)), numero, estilo, Estilo.color(&"lacre") if completo else Estilo.color(&"tinta_decreto"), false, false)
-		y += 33.0
+		# El golpe hace saltar el número 2 px (la letra pixel va siempre a su tamaño).
+		var x_num := X_FILA + ANCHO_FILA - 16.0 - Estilo.ancho(numero, &"resumen_numero")
+		KitUI.escribir(c, x_num, y + 6.0 - roundf(2.0 * g), numero, &"resumen_numero", Estilo.color(&"resumen_titulo") if completo or g > 0.5 else Estilo.color(&"resumen_texto"))
+		y += PASO_FILA
 	if _frase_visible > 0.0:
 		var a := _frase_visible
-		var caja := Rect2(126, 274, 388, 50)
-		c.draw_rect(caja, Estilo.color(&"resumen_frase_fondo", Estilo.color(&"resumen_frase_fondo").a * a))
-		var animo := int(frase[1])
-		var cara := Rect2(animo % 3 * LADO_RETRATO, animo / 3 * LADO_RETRATO, LADO_RETRATO, LADO_RETRATO)
-		c.draw_texture_rect_region(RETRATOS, Rect2(133, 280, 38, 38), cara, Estilo.color(&"blanco", a))
-		Estilo.panel(c, Rect2(129, 276, 46, 46), &"marco_retrato")
-		Estilo.escribir(c, Vector2(182, 288), tr("NOMBRE_felipe"), &"resumen_nombre", Estilo.color(&"lacre", a))
-		c.draw_multiline_string(Estilo.fuente(&"resumen_frase"), Vector2(182, 302), tr(String(frase[0])), HORIZONTAL_ALIGNMENT_LEFT, 326, Estilo.letra(&"resumen_frase"), 2, Estilo.color(&"tinta_decreto", a))
+		var fondo := Vector2(X_FILA, Y_FRASE)
+		KitUI.icono(c, "retrato-fondo-felipe", fondo, Estilo.color(&"blanco", a))
+		var cara := KitUI.textura("cara-dialogo-felipe-%d" % clampi(int(frase[1]), 0, 8))
+		if cara:
+			c.draw_texture(cara, Vector2(fondo.x + 3.0, fondo.y + 58.0 - cara.get_height()), Estilo.color(&"blanco", a))
+		var x_texto := X_FILA + 72.0
+		KitUI.franja_texto(c, "nombre-franja-felipe", Vector2(x_texto, Y_FRASE), 15.0, tr("NOMBRE_felipe"), &"dialogo_nombre", Estilo.color(&"ui_contorno"))
+		c.draw_multiline_string(Estilo.fuente(&"resumen_frase"), Vector2(x_texto, Y_FRASE + 32.0), tr(String(frase[0])), HORIZONTAL_ALIGNMENT_LEFT, ANCHO_FILA - 72.0, Estilo.letra(&"resumen_frase"), 2, Estilo.color(&"resumen_texto", a))
 		if terminado and fmod(_tiempo, 1.0) < 0.7:
-			IconosBotones.dibujar(c, "saltar_dialogo", Vector2(268, 330), 12.0)
-			_texto(c, Vector2(286, 340), tr("RESUMEN_SEGUIR"), &"resumen_pista", Estilo.color(&"resumen_pista"), false)
-
-
-## Texto con contorno (sobre la cinta) o tinta sola (sobre el pergamino).
-func _texto(c: Control, pos: Vector2, texto: String, estilo: StringName, color: Color, centrado: bool, contorno := true) -> void:
-	var p := pos
-	if centrado:
-		p.x -= roundf(Estilo.ancho(texto, estilo) / 2.0)
-	if contorno:
-		Estilo.texto_con_contorno(c, p, texto, estilo, color, &"resumen_contorno")
-	else:
-		Estilo.escribir(c, p, texto, estilo, color)
+			IconosBotones.dibujar(c, "saltar_dialogo", Vector2(X_FILA + ANCHO_FILA - 70.0, 322), 14.0)
+			KitUI.escribir(c, X_FILA + ANCHO_FILA - 52.0, 324.0, tr("RESUMEN_SEGUIR"), &"resumen_pista", Estilo.color(&"resumen_pista"))

@@ -101,7 +101,7 @@ func _marcar_impacto() -> void:
 
 
 func _tragar() -> void:
-	felipe.vida.curar(1)
+	felipe.salud.comer()
 	felipe.peso += Felipe.PESO_POR_COMIDA
 	felipe.sonido.emit("comer")
 	if comiendo_snack:

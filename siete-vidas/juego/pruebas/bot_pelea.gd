@@ -275,13 +275,13 @@ func _esperar_en_el_piso() -> void:
 		await p._hasta(func() -> bool: return not batalla.succionando or batalla.llena, 4.0)
 		Input.action_release("agacharse")
 		return
-	if felipe.corazones <= 2 and felipe.snacks > 0 and felipe.is_on_floor() and absf(dx) > 140.0 and batalla.ataque == BatallaAspi.Ataque.NINGUNO:
+	if felipe.medias <= 6 and felipe.snacks > 0 and felipe.is_on_floor() and absf(dx) > 140.0 and batalla.ataque == BatallaAspi.Ataque.NINGUNO:
 		# Come un snack del bolsillo (mantener la acción 0,6 s): cura, pero queda quieto.
 		Input.action_press("interactuar")
 		await p._segundos(0.75)
 		Input.action_release("interactuar")
 		await p._segundos(0.5)
-		p._paso("Come un snack del bolsillo (corazones %d, snacks %d)" % [felipe.corazones, felipe.snacks])
+		p._paso("Come un snack del bolsillo (huellas %s, snacks %d)" % [PanelBolsillo.texto_huellas(felipe.medias), felipe.snacks])
 		return
 	if not batalla.limpiando and absf(dx) < 90.0 and felipe.is_on_floor():
 		var lejos := clampf(aspi.global_position.x + (140.0 if dx > 0.0 else -140.0), 6880.0, 7696.0)

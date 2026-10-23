@@ -14,7 +14,7 @@ Demo jugable de **Felipe: Nueve Vidas, Cero Disculpas**: el primer nivel, **"La 
 | Trepar (en la cortina; **apagado en el nivel 1**, se gana con Afilar Garras) | W o ↑ | Palanca arriba o cruceta arriba |
 | Aferrarse (cuando A.S.P.I. aspira) | Mantener S o ↓ | Palanca abajo o cruceta abajo |
 | Entrar por una puerta o subir la escalera de fondo (escalón por escalón) | E o W/↑ junto a la puerta o al pie de la escalera | Y o arriba |
-| Pausa (menú: Continuar, Reiniciar, Salir; se elige con flechas o W/S y Enter) | Esc | Menu (Start); cruceta y A en el menú |
+| Pausa (menú: Continuar, Bolsillo, Ficha, Opciones, Reiniciar, Salir; se elige con flechas o W/S y Enter). En Opciones, la accesibilidad: «Golpes» (normal, suaves, ninguno) y «Texto grande» | Esc | Menu (Start); cruceta y A en el menú |
 | Agacharse y gatear (agachado + saltar = bajar de una repisa) | S o ↓ | Palanca abajo o cruceta abajo |
 | Saltar (dos veces = Doble Salto, **apagado en el nivel 1**) | Espacio | A |
 | Correr (mantener); Zoomies al tocar (**apagado en el nivel 1**) | Shift | RB |
@@ -35,7 +35,7 @@ Arquitectura por piezas y datos (2026-10-20): mapa completo, lista de piezas y r
 | --- | --- |
 | `escenas/` | `nivel_1.tscn` (escena principal: raíz `Nivel`, `Felipe`, `Interfaz` y el `Guion` del nivel 1) |
 | `escenas/entidades/` | `felipe.tscn` (con su pieza `Vida`), `raton.tscn`, `aspi.tscn`, `caja_carton.tscn`, `comida.tscn`, `objeto_tirable.tscn` |
-| `escenas/ui/` | Piezas de interfaz: `barra_vida.tscn`, `barra_jefe.tscn`, `contador_recurso.tscn`, `menu_pausa.tscn`, `cuadro_dialogo.tscn` |
+| `escenas/ui/` | Piezas de interfaz v2 («A + C»): `barra_vida.tscn` (9 huellas), `barra_jefe.tscn`, `cuadro_dialogo.tscn`, `menu_pausa.tscn`, `pantalla_opciones.tscn`, `ficha_su_majestad.tscn`, `barra_estadistica.tscn` |
 | `datos/` | Recursos `.tres`: `enemigos/`, `objetos/`, `jefes/` (`aspi.tres`: fases y ataques) y `ui/tema.tres` (colores, letras y estilos de la interfaz) |
 | `traducciones/` | `textos.csv`: textos de la interfaz por clave (español de base) |
 | `scripts/componentes/` | Piezas con un solo trabajo: `Vida`, `RecibeGolpes`, `HaceDano`, `MovimientoPatrulla`, `Tirable`, `Aranable`, `OyeMaullido`, `Asustable`, `SueltaRecompensa`, `SombraContacto`, `Interactivo` y el ayudante `Componentes` |
@@ -45,8 +45,8 @@ Arquitectura por piezas y datos (2026-10-20): mapa completo, lista de piezas y r
 | `scripts/nivel/` | Lo común a todo nivel: `Nivel`, `DatosNivel`, `GuionNivel`, `Puerta`, `ArteNivel`, `SombrasVivas` |
 | `scripts/niveles/nivel_1/` | Nivel 1: datos, guion, `ValeriaPorLaCasa`, `FinalBalcon`, arte, decorado, fondo y luz |
 | `scripts/sistemas/` | `Capas`, `Controles` (InputMap y remapeo), `Particulas`, `Travesuras`, `Agenda`, `Recompensas`, `Frases`, `Jugo` |
-| `scripts/ui/` | Pantallas, HUD, medidores, diálogo, anuncios, libreta, resumen, indicador, íconos y `PresentacionJefe`; `base/` (`Estilo`, `GestorPantallas`, `MenuUI`) y `piezas/` (`BarraVida`, `ContadorRecurso`, `Cartel`) |
-| `assets/` | Sonidos provisionales, hojas de Felipe, arte del nivel 1 (`nivel1/`), personajes, luz y Kenney (créditos en `assets/CREDITOS.md`) |
+| `scripts/ui/` | Pantallas, HUD, medidores, diálogo, globito, anuncios, libreta, resumen, indicador, íconos, Ficha, opciones y `PresentacionJefe`; `base/` (`Estilo`, `KitUI`, `ZonasTexto`, `GestorPantallas`, `MenuUI`, `BotonMenu`) y `piezas/` (`BarraVida`, `CuadroDialogo`, `Cartel`, `PanelBolsillo`, `BarraEstadistica`, `PiezaKit`) |
+| `assets/` | Sonidos provisionales, hojas de Felipe, arte del nivel 1 (`nivel1/`), personajes, luz, el kit de interfaz v2 (`ui/v2/`, con su `README.md`) y Kenney (créditos en `assets/CREDITOS.md`) |
 | `pruebas/` | Pruebas automáticas (movimiento, escenario, mecánicas, nivel, reglas de diseño, jefe, acciones, componentes, interfaz), el bot `partida.gd` (la pelea la juega `bot_pelea.gd`), `demo_salto.gd` y capturas (`capturas.gd`, `capturas_sistemas.gd`, `capturas_nivel.gd`, `capturas_luz.gd`) |
 
 ## Comandos
@@ -55,7 +55,7 @@ Arquitectura por piezas y datos (2026-10-20): mapa completo, lista de piezas y r
 godot --headless --path siete-vidas/juego --import
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_movimiento.gd
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_escenario.gd
-godot --headless --path siete-vidas/juego --script res://pruebas/prueba_mecanicas.gd
+godot --headless --path siete-vidas/juego --script res://pruebas/prueba_mecanicas.gd  # incluye la salud de 9 huellas (golpes, curar, desmayo, collar, descanso)
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_nivel.gd
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_reglas_nivel.gd  # reglas de siete-vidas/diseno/reglas-de-niveles.md
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_jefe.gd  # pelea con A.S.P.I.
@@ -64,10 +64,12 @@ godot --headless --path siete-vidas/juego --fixed-fps 60 --script res://pruebas/
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_capas.gd  # capas por rol (Profundidad): nadie fija z_index a mano, reglas en cada superficie
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_acciones.gd  # maullar, arañar, snacks, escalera, rascador, agenda, diálogo, indicador
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_componentes.gd  # las piezas por separado, estados de Felipe, conductas de jefe y un enemigo armado solo con datos
-godot --headless --path siete-vidas/juego --script res://pruebas/prueba_interfaz.gd  # barra de vida, pila de pantallas, menú, textos, controles y tema
+godot --headless --path siete-vidas/juego --script res://pruebas/prueba_interfaz.gd  # huellas, barra del jefe, pausa v2, opciones (golpes, texto grande), textos, controles, tema y kit v2
 godot --headless --path siete-vidas/juego --script res://pruebas/prueba_zonas_texto.gd  # zonas fijas de texto (HUD, diálogo, carteles, palabras) y caracteres de las letras
 # Capturas de los cruces Felipe–Valeria y el balcón; con «textos», cada texto en su zona; con «luces», las lámparas:
 xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/capturas_estabilizacion.gd -- /tmp/estab [textos|luces]
+# Capturas de la interfaz v2 y la salud de 9 huellas (diálogo, golpe, cartel, logro, pausa, opciones, texto grande, desmayo, libreta, resumen y pelea):
+xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --resolution 640x360 --script res://pruebas/capturas_interfaz_v2.gd -- /tmp/v2
 # Capturas a 640×360 del Indicador, el diálogo, la libreta, los carteles y el resumen:
 xvfb-run -a godot --path siete-vidas/juego --rendering-driver opengl3 --script res://pruebas/capturas_sistemas.gd -- /tmp/capturas
 # Capturas de la pelea con A.S.P.I.: el estudio entero, cada fase, la montaña de pelusa y el estudio destruido al final:

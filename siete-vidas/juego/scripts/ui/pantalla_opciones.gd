@@ -1,10 +1,10 @@
 class_name PantallaOpciones
 extends Control
-## Pantalla de opciones (se abre desde la pausa): cambiar la tecla o el botón de cada acción, «reducir movimiento», la
-## vibración del mando y
-## el volumen general. Va en la pila de pantallas (GestorPantallas): encima de la pausa y la tapa; al cerrarse vuelve
-## a la pausa. Solo arma la lógica y la navegación con las piezas de siempre (MenuUI y botones del tema); su aspecto
-## se cambia con el rediseño del menú (Decreto real).
+## Pantalla de opciones (se abre desde la pausa): primero la accesibilidad («Golpes»: normal, suaves o ninguno; «Texto
+## grande»; «reducir movimiento» y «reducir sacudida»), el volumen, la vibración del mando y después la tecla o el
+## botón de cada acción. Va en la pila de pantallas (GestorPantallas): encima de la pausa y la tapa; al cerrarse
+## vuelve a la pausa. Aspecto de la interfaz v2 (el panel de la pausa y los botones del kit); la lista se desplaza en
+## un solo eje y sigue al foco.
 ##
 ## Remapear: elegir una acción y apretar la tecla o el botón nuevo (Esc cancela). Se guarda solo (Controles.guardar)
 ## y los textos e íconos de toda la interfaz siguen el cambio.
@@ -28,7 +28,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	# Tapa toda la pantalla (Pantallas, su padre, no tiene tamaño propio: dibuja con el de la vista).
 	size = get_viewport_rect().size
-	(get_node("Fondo") as Control).size = size
+	(get_node("Fondo") as ColorRect).color = Estilo.color(&"ui_fondo")
 	menu = get_node("%Menu")
 	var muestra: Button = menu.get_node("Volver")
 	for accion: String in Controles.ACCIONES:
@@ -36,7 +36,8 @@ func _ready() -> void:
 		boton.name = accion
 		boton.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 		menu.add_child(boton)
-		menu.move_child(boton, menu.get_child_count() - 5)
+		# Las acciones van después de las opciones y antes de «Volver».
+		menu.move_child(boton, menu.get_child_count() - 2)
 		_botones[accion] = boton
 	menu.preparar()
 	menu.elegido.connect(_al_elegir)
@@ -65,6 +66,13 @@ func _al_elegir(opcion: StringName) -> void:
 	match opcion:
 		&"Volver":
 			cerrar()
+		&"Golpes":
+			# Normal → suaves → ninguno → normal (no bloquea logros).
+			Opciones.golpes = ((Opciones.golpes + 1) % Opciones.Golpes.size()) as Opciones.Golpes
+			Opciones.guardar()
+		&"TextoGrande":
+			Opciones.texto_grande = not Opciones.texto_grande
+			Opciones.guardar()
 		&"ReducirMovimiento":
 			Opciones.reducir_movimiento = not Opciones.reducir_movimiento
 			Opciones.guardar()
@@ -134,6 +142,9 @@ func _actualizar_textos() -> void:
 		var boton: Button = _botones[accion]
 		var tecla := tr("OPCIONES_PULSA") if esperando == accion else "%s / %s" % [Controles.texto(accion, false), Controles.texto(accion, true)]
 		boton.text = "%s: %s" % [tr("ACCION_" + accion.to_upper()), tecla]
+	var golpes: String = ["OPCIONES_GOLPES_NORMAL", "OPCIONES_GOLPES_SUAVES", "OPCIONES_GOLPES_NINGUNO"][Opciones.golpes]
+	(menu.get_node("Golpes") as Button).text = tr("OPCIONES_GOLPES") % tr(golpes)
+	(menu.get_node("TextoGrande") as Button).text = tr("OPCIONES_TEXTO_GRANDE") % (tr("OPCIONES_SI") if Opciones.texto_grande else tr("OPCIONES_NO"))
 	(menu.get_node("ReducirMovimiento") as Button).text = tr("OPCIONES_REDUCIR") % (tr("OPCIONES_SI") if Opciones.reducir_movimiento else tr("OPCIONES_NO"))
 	(menu.get_node("ReducirSacudida") as Button).text = tr("OPCIONES_REDUCIR_SACUDIDA") % (tr("OPCIONES_SI") if Opciones.reducir_sacudida else tr("OPCIONES_NO"))
 	(menu.get_node("Volumen") as Button).text = tr("OPCIONES_VOLUMEN") % roundi(Opciones.volumen * 100.0)

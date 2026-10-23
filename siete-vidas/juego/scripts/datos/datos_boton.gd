@@ -1,19 +1,13 @@
 class_name DatosBoton
 extends Resource
 ## Números y aspecto de un tipo de botón de menú (BotonMenu): golpe al apretar, brillo y vaivén con foco, entrada
-## desde arriba, pulso del principal y, si trae `sello`, el sello que se estampa al elegirlo. Cada tipo es un .tres:
-## datos/ui/boton_menu.tres (el botón de siempre) y datos/ui/boton_pergamino.tres (el pergamino del Decreto real).
+## barriendo (interfaz v2) y pulso del principal. Cada tipo es un .tres: datos/ui/boton_menu.tres (el botón del kit v2).
 
 @export_group("Aspecto")
-## Variación del tema que lo dibuja (BotonMenu, BotonPergamino...).
+## Variación del tema que lo dibuja (BotonMenu, BotonOpcion...).
 @export var variacion := &"BotonMenu"
-## Tamaño fijo del dibujo (0 = el que pida el texto): el pergamino va a su tamaño de pixel, no se estira.
+## Tamaño fijo del dibujo (0 = el que pida el texto).
 @export var tamano := Vector2.ZERO
-@export_group("Al elegir")
-## Escena SelloHuella que se estampa sobre el botón al elegirlo (sin escena, no hay sello) y dónde, como fracción del
-## tamaño del botón.
-@export var sello: PackedScene
-@export var lugar_sello := Vector2(0.84, 0.5)
 @export_group("Al apretar")
 ## Escala a la que se encoge y cuánto tarda en encogerse y en volver (con rebote).
 @export var escala_apretado := 0.9
@@ -30,7 +24,7 @@ extends Resource
 ## Lo que tarda el brillo en subir o bajar.
 @export var tiempo_brillo := 0.15
 @export_group("Entrada")
-## Cae desde fuera del borde de arriba hasta su sitio (rebote), escalonado entre botones.
+## Barre desde la izquierda hasta su sitio (rebote), escalonado entre botones.
 @export var tiempo_entrada := 0.9
 @export var escalon_entrada := 0.08
 @export_group("Principal")

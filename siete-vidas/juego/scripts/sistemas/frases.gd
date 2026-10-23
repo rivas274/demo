@@ -39,6 +39,13 @@ const FELIPE := {
 		["FELIPE_COMER_1", 3],
 		["FELIPE_COMER_2", 0],
 	],
+	## Salud de 9 huellas (2026-10-23): vuelve del desmayo ofendido, no derrotado; y el aviso de pocas huellas.
+	"siesta": [
+		["FELIPE_SIESTA_TACTICA", 0],
+	],
+	"pocas_huellas": [
+		["FELIPE_EMPATE_TECNICO", 1],
+	],
 	"snack": [
 		["FELIPE_SNACK_1", 6],
 		["FELIPE_SNACK_2", 3],

@@ -123,13 +123,13 @@ func _saltar(texto: String, posicion: Vector2, color: Color, tamano: int, pegati
 	etiqueta.add_theme_color_override("font_outline_color", Estilo.color(&"contorno_palabra"))
 	etiqueta.add_theme_constant_override("outline_size", 2)
 	etiqueta.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	# Con pegatina, la palabra va dentro de una etiqueta de pergamino del kit (6 px de margen), en tinta.
+	# Con pegatina, la palabra va dentro de un panel oscuro de la interfaz v2 (6 px de margen), en letra clara.
 	var nodo: Control = etiqueta
 	if pegatina:
 		var panel := Panel.new()
 		panel.add_theme_stylebox_override("panel", Estilo.caja(&"panel"))
 		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		etiqueta.add_theme_color_override("font_color", Estilo.color(&"tinta_decreto"))
+		etiqueta.add_theme_color_override("font_color", Estilo.color(&"ui_texto"))
 		etiqueta.add_theme_constant_override("outline_size", 0)
 		etiqueta.position = Vector2(6, 4)
 		panel.add_child(etiqueta)

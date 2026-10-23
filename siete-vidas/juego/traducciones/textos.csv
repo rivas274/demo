@@ -8,7 +8,6 @@ TECLA_Left,Izq.
 TECLA_Right,Der.
 TECLA_Up,Arriba
 TECLA_Down,Abajo
-UI_VIDAS,%d vidas
 UI_COLLAR,Collar de la Vergüenza
 UI_AGENDA_CONTADOR,AGENDA %d/%d
 UI_TRAVESURA_CUMPLIDA,¡TRAVESURA CUMPLIDA!
@@ -21,7 +20,7 @@ UI_CONTINUAR_TECLA,[%s] Continuar
 INTRO_1,Valeria subió a internet el video de Su Majestad atorado en una caja de zapatos.
 INTRO_2,Doce millones de vistas. Cero disculpas.
 INTRO_3,"""Me voy de esta casa."" — Felipe Ron con Pasas I"
-PAUSA_TITULO,Decretos de Su Majestad
+PAUSA_TITULO,PAUSA
 MENU_CONTINUAR,Continuar
 MENU_REINICIAR,Reiniciar
 MENU_SALIR,Salir
@@ -30,7 +29,7 @@ FIN_FRASE,"""No me caí. Aterricé con estilo."" — Poder nuevo: Caer de Pie"
 FIN_TIEMPO,Tiempo: %s
 FIN_CALCETINES,Calcetines: %s
 FIN_LOGROS,Logros: %s
-FIN_VIDAS,Vidas perdidas: %s
+FIN_SIESTAS,Siestas tácticas: %s
 FIN_CONTINUARA,Continuará en La Cuadra...   [%s] Jugar de nuevo
 LIBRETA_TITULO,Agenda de Su Majestad
 LIBRETA_SUBTITULO,Cosas por hacer hoy (en orden de importancia: todas)
@@ -309,3 +308,23 @@ ARTE_GATUNO_DECORADOR,Decorador
 ARTE_GATUNO_OBRA_MAESTRA,O B R A   M A E S T R A
 VALERIA_GRITO_ESTUDIO_1,¡¡FELIPE!!
 LOGRO_REESTRUCTURACION_INMOBILIARIA,Reestructuración Inmobiliaria
+FELIPE_SIESTA_TACTICA,Siesta táctica.
+FELIPE_EMPATE_TECNICO,Esto es un empate técnico.
+PALABRA_MAS_UNO,+1
+MENU_BOLSILLO,Bolsillo
+MENU_FICHA,Ficha
+BOLSILLO_TITULO,BOLSILLO
+BOLSILLO_SALUD,Salud
+BOLSILLO_SNACKS,Snacks
+BOLSILLO_CALCETINES,Calcetines
+BOLSILLO_FOTOS,Fotos
+BOLSILLO_DE,%s de %s
+BOLSILLO_Y_MEDIA,%d y media
+OPCIONES_GOLPES,Golpes: %s
+OPCIONES_GOLPES_NORMAL,normal (1 huella)
+OPCIONES_GOLPES_SUAVES,suaves (media huella)
+OPCIONES_GOLPES_NINGUNO,ninguno (solo empujan)
+OPCIONES_TEXTO_GRANDE,Texto grande: %s
+RESUMEN_SIESTAS,Siestas tácticas
+RESUMEN_SIESTAS_NOTA,eso no contó
+PALABRA_COLLAR,¡COLLAR DE LA VERGÜENZA!

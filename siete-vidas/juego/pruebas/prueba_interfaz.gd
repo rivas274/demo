@@ -30,6 +30,7 @@ func _correr() -> void:
 	_probar_controles()
 	await _probar_mandos()
 	_probar_tema()
+	_probar_kit_v2()
 	_probar_letras()
 	_probar_claves()
 
@@ -64,23 +65,63 @@ func _probar_barra_vida() -> void:
 	vida.queue_free()
 	otra.queue_free()
 	await _esperar(1)
+	await _probar_huellas()
+	await _probar_barra_jefe()
+
+
+## HUELLAS (salud de 9 huellas, interfaz v2): 18 medias = 9 huellas en sus estados; al perder, destello blanco 60 ms y
+## rebote; al curar, se llena de abajo arriba; varias, en cascada de 60 ms; con 3 o menos, laten.
+func _probar_huellas() -> void:
+	var vida := Vida.new(SaludFelipe.MEDIAS_MAX)
+	mundo.add_child(vida)
+	var barra: BarraVida = (load("res://escenas/ui/barra_vida.tscn") as PackedScene).instantiate()
+	mundo.add_child(barra)
+	barra.conectar(vida)
+	_comprobar(barra.forma == BarraVida.Forma.HUELLAS and barra.huellas() == 9 and barra.medida() == Vector2(152, 20), "Huellas: 9 huellas en la caja de 152×20 del layout")
+	_comprobar(BarraVida.estado_de(0, 13) == BarraVida.Huella.LLENA and BarraVida.estado_de(6, 13) == BarraVida.Huella.MEDIA and BarraVida.estado_de(7, 13) == BarraVida.Huella.VACIA, "Huellas: con 13 medias, 6 llenas, 1 media y el resto vacías")
+	for estado in BarraVida.Huella.values():
+		_comprobar(barra.textura_huella(estado) != null and barra.textura_huella(estado).get_size() == Vector2(13, 12), "Huellas: la huella «%s» del kit mide 13×12" % BarraVida.NOMBRES_HUELLA[estado])
+	vida.danar(4)
+	_comprobar(barra.animando.size() == 2 and barra.animando[8][0] == BarraVida.Huella.GOLPE and is_equal_approx(barra.animando[7][1], -BarraVida.CASCADA), "Huellas: dos huellas perdidas hacen el golpe en cascada (60 ms)")
+	await _segundos(0.4)
+	_comprobar(barra.animando.is_empty(), "Huellas: la animación del golpe termina (240 ms más la cascada)")
+	vida.curar(2)
+	_comprobar(barra.animando.has(7) and barra.animando[7][0] == BarraVida.Huella.CURANDO, "Huellas: al curar, la huella se llena (estado «curando»)")
+	vida.fijar(6)
+	_comprobar(barra.latiendo(), "Huellas: con 3 huellas o menos, laten")
+	vida.fijar(8)
+	_comprobar(not barra.latiendo(), "Huellas: con 4, no laten")
+	barra.grande = true
+	_comprobar(barra.medida() == Vector2(304, 40) and barra.textura_huella(BarraVida.Huella.LLENA).get_size() == Vector2(26, 24), "Huellas: con texto grande, todo al doble (304×40, huellas de 26×24)")
+	barra.queue_free()
+	vida.queue_free()
+	await _esperar(1)
+
+
+## Barra del jefe v2: 3 segmentos (I, II y III, la fase activa en su color) y la capa de daño reciente que baja 300 ms
+## después.
+func _probar_barra_jefe() -> void:
+	var vida := Vida.new(3)
+	mundo.add_child(vida)
+	var barra: BarraVida = (load("res://escenas/ui/barra_jefe.tscn") as PackedScene).instantiate()
+	barra.titulo = "A.S.P.I."
+	mundo.add_child(barra)
+	barra.conectar(vida)
+	_comprobar(barra.forma == BarraVida.Forma.BARRA and barra.medida() == Vector2(250, 40) and barra.fase_activa() == 0 and BarraVida.FASES == ["I", "II", "III"], "Barra del jefe: 250×40, fases I, II y III; empieza en la I")
+	vida.danar(1)
+	await _esperar(2)
+	_comprobar(barra.fase_activa() == 1 and is_equal_approx(barra.reciente, 1.0) and is_equal_approx(barra.fraccion, 2.0 / 3.0), "Barra del jefe: al bajar, la capa de daño reciente se queda un momento (fase II activa)")
+	await _segundos(BarraVida.ESPERA_RECIENTE + BarraVida.BAJADA + 0.2)
+	_comprobar(is_equal_approx(barra.reciente, barra.fraccion), "Barra del jefe: el daño reciente baja después de 300 ms")
+	barra.queue_free()
+	vida.queue_free()
+	await _esperar(1)
 
 
 func _probar_contador_y_cartel() -> void:
-	var contador: ContadorRecurso = (load("res://escenas/ui/contador_recurso.tscn") as PackedScene).instantiate()
-	contador.clave = "calcetin"
-	mundo.add_child(contador)
-	contador.fijar("3", true)
-	_comprobar(contador.texto == "3" and contador.tiene and contador.golpe == 1.0, "ContadorRecurso: muestra el valor y salta al cambiar")
-	contador.fijar("0", false, false)
-	_comprobar(not contador.tiene and contador.golpe == 1.0, "ContadorRecurso: sin golpe al armar la interfaz")
-	contador.queue_free()
-	var cartel := Cartel.crear("TÍTULO", "nombre", false, ZonasTexto.cartel(Hud.TAM_CARTEL))
-	var textos: Array[String] = []
-	for hijo in cartel.get_children():
-		if hijo is Label:
-			textos.append((hijo as Label).text)
-	_comprobar(textos == ["TÍTULO", "NOMBRE"], "Cartel: franja con título y una sola línea (sin «RECOMPENSA: …»)")
+	var cartel := Cartel.crear("TÍTULO", "nombre", false, ZonasTexto.cartel(Cartel.medida("TÍTULO", "nombre")))
+	_comprobar(cartel.titulo == "TÍTULO" and cartel.nombre == "nombre" and cartel.get_child_count() == 0, "Cartel: franja con título y una sola línea (sin «RECOMPENSA: …»)")
+	_comprobar(KitUI.textura("cartel-sello") != null and Estilo.caja(&"v2_cartel_franja") != null and Estilo.caja(&"v2_cartel_linea") != null, "Cartel: usa la franja, el sello y la línea del kit v2")
 	cartel.free()
 
 
@@ -127,38 +168,31 @@ func _probar_menu_y_pausa() -> void:
 	_comprobar(menu.enfocado() != null and menu.enfocado().name == &"Continuar", "MenuUI: al mostrarse, el foco va a la primera opción")
 	var abajo := menu.enfocado().find_valid_focus_neighbor(SIDE_BOTTOM)
 	var arriba := menu.get_node("Continuar").find_valid_focus_neighbor(SIDE_TOP) as Control
-	_comprobar(abajo != null and abajo.name == &"Opciones" and arriba != null and arriba.name == &"Salir", "MenuUI: se recorre hacia abajo y da la vuelta hacia arriba")
+	_comprobar(abajo != null and abajo.name == &"Bolsillo" and arriba != null and arriba.name == &"Salir", "MenuUI: se recorre hacia abajo y da la vuelta hacia arriba")
 	_comprobar((menu.get_node("Continuar") as Button).text == "MENU_CONTINUAR" and (menu.get_node("Continuar") as Button).auto_translate_mode != Node.AUTO_TRANSLATE_MODE_DISABLED, "MenuUI: el texto del botón es una clave que se traduce sola")
 	var elegidos: Array[StringName] = []
 	menu.elegido.connect(func(opcion: StringName) -> void: elegidos.append(opcion))
-	# Decreto real: la pausa trae la ficha, el pergamino con su sello y Felipe en su cojín con la corona.
-	_comprobar(pantallas.pausa.visible and pantallas.ficha != null and pantallas.ficha.is_visible_in_tree(), "Pausa «Decreto real»: la Ficha de Su Majestad se ve en la pausa")
-	var cojin := pantallas.pausa.get_node("%FelipeEnCojin") as FelipeEnCojin
-	_comprobar(cojin != null and cojin.felipe.is_playing() and cojin.felipe.scale == Vector2.ONE * Felipe.ESCALA_SPRITE and cojin.sprite_corona.texture != null, "FelipeEnCojin: Felipe A a su escala de siempre (0,72), animado, con la corona aparte")
-	var cabeza_y := cojin.felipe.position.y
-	_comprobar(cojin.sprite_corona.position.y > cabeza_y - 12.0 and cojin.sprite_corona.position.y < cabeza_y + 40.0, "FelipeEnCojin: la corona va sobre la cabeza (entre las orejas)")
-	var sello_pergamino := pantallas.pausa.get_node("Pergamino/Sello") as SelloHuella
-	_comprobar(sello_pergamino.listo() and sello_pergamino.visible, "Pergamino: el sello de lacre ya está estampado")
+	# Interfaz v2: la pausa trae la lista, el bolsillo y la Ficha (sin pergamino, sin cojín, sin sello).
+	_comprobar(pantallas.pausa.visible and pantallas.ficha != null and pantallas.ficha.is_visible_in_tree() and pantallas.bolsillo.is_visible_in_tree(), "Pausa v2: la Ficha de Su Majestad y el bolsillo se ven en la pausa")
+	var nombres: Array[String] = []
+	for b in menu.get_children():
+		nombres.append(String(b.name))
+	_comprobar(nombres == ["Continuar", "Bolsillo", "Ficha", "Opciones", "Reiniciar", "Salir"], "Pausa v2: Continuar, Bolsillo, Ficha, Opciones, Reiniciar y Salir %s" % [nombres])
 	var continuar := menu.get_node("Continuar") as BotonMenu
-	_comprobar(continuar.theme_type_variation == &"BotonPergamino" and continuar.size == Vector2(112, 44) and continuar.sella(), "BotonPergamino: el pergamino del tema a su tamaño de pixel (112×44), con sello")
+	_comprobar(continuar.theme_type_variation == &"BotonMenu" and continuar.size.y == 19.0 and Estilo.tema().get_stylebox(&"focus", &"BotonMenu") is StyleBoxTexture, "Pausa v2: botones del kit (19 px de alto; con foco, el bloque ámbar)")
+	_comprobar(ZonasTexto.SEGURA.encloses(Rect2(pantallas.bolsillo.position, pantallas.bolsillo.size)) and ZonasTexto.SEGURA.encloses(Rect2(pantallas.ficha.position, pantallas.ficha.size)) and not Rect2(pantallas.bolsillo.position, pantallas.bolsillo.size).intersects(Rect2(pantallas.ficha.position, pantallas.ficha.size)), "Pausa v2: bolsillo y Ficha dentro de la zona segura, sin montarse")
+	menu.get_node("Bolsillo").pressed.emit()
+	await _esperar(2)
+	_comprobar(pantallas.modo == Pantallas.Modo.PAUSA and pantallas.bolsillo.resalto > 0.0, "Pausa v2: «Bolsillo» lo hace destellar y la pausa sigue")
 	continuar.pressed.emit()
 	await _esperar(2)
-	_comprobar(continuar.sello != null and pantallas.modo == Pantallas.Modo.PAUSA, "Decreto: al elegir, primero cae el sello (todavía no se hace lo elegido)")
-	var destellos := [0]
-	while continuar.sello != null and not continuar.sello.listo():
-		await process_frame
-	if continuar.sello:
-		destellos[0] = continuar.sello.vivos.size()
-	_comprobar(destellos[0] == 3, "Decreto: el sello se aplasta en lacre y suelta 3 destellos")
-	await _segundos(0.6)
-	_comprobar(elegidos == [&"Continuar"] and pantallas.modo == Pantallas.Modo.JUGANDO and not paused and not pantallas.pausa.visible, "Pausa: «Continuar» vuelve al juego después del sello")
-	_comprobar(continuar.sello == null, "Decreto: el sello se borra cuando el menú se esconde")
+	_comprobar(elegidos == [&"Bolsillo", &"Continuar"] and pantallas.modo == Pantallas.Modo.JUGANDO and not paused and not pantallas.pausa.visible, "Pausa: «Continuar» vuelve al juego")
 	pantallas.queue_free()
 	await _esperar(1)
 
 
-## BotonMenu: el golpe al apretar vuelve a escala 1; el vaivén sube con foco y vuelve a 0 sin foco; con «reducir
-## movimiento» no se mece ni entra cayendo.
+## BotonMenu (datos/ui/boton_menu.tres, interfaz v2): el golpe al apretar vuelve a escala 1; sin vaivén (el foco es el
+## bloque ámbar del kit); entra barriendo desde la izquierda con rebote; con «reducir movimiento» no entra barriendo.
 func _probar_boton() -> void:
 	var menu := VBoxContainer.new()
 	mundo.add_child(menu)
@@ -167,65 +201,33 @@ func _probar_boton() -> void:
 	menu.add_child(boton)
 	await _esperar(2)
 	var d := boton.datos
-	_comprobar(d != null and d.escala_apretado == 0.9 and d.vaiven_grados == 6.0, "BotonMenu: sus números salen de datos/ui/boton_menu.tres")
+	_comprobar(d != null and d.escala_apretado == 0.94 and d.vaiven_grados == 0.0, "BotonMenu: sus números salen de datos/ui/boton_menu.tres (sin vaivén)")
 	boton.button_down.emit()
-	# Se mira cuadro a cuadro (sin depender del reloj de la máquina): la escala llega a 0,9 y no baja de ahí.
+	# Se mira cuadro a cuadro (sin depender del reloj de la máquina): la escala llega a la de apretado y no baja de ahí.
 	var minima := 1.0
 	var reloj := 0.0
 	while reloj < d.tiempo_apretar + 0.15:
 		await process_frame
 		reloj += get_root().get_process_delta_time()
 		minima = minf(minima, boton.scale.x)
-	_comprobar(is_equal_approx(minima, d.escala_apretado) and is_equal_approx(boton.scale.x, d.escala_apretado), "BotonMenu: al apretar se encoge a 0,9")
+	_comprobar(is_equal_approx(minima, d.escala_apretado) and is_equal_approx(boton.scale.x, d.escala_apretado), "BotonMenu: al apretar se encoge")
 	boton.button_up.emit()
 	await _segundos(d.tiempo_soltar + 0.1)
 	_comprobar(is_equal_approx(boton.scale.x, 1.0), "BotonMenu: al soltar vuelve a escala 1")
 	boton.grab_focus()
-	await _segundos(0.1)
-	_comprobar(boton.amplitud > 0.0 and boton.amplitud < d.vaiven_grados, "BotonMenu: con foco el vaivén sube de a poco (nunca de golpe)")
-	await _segundos(d.vaiven_rampa)
-	_comprobar(is_equal_approx(boton.amplitud, d.vaiven_grados) and boton.modulate.r > 1.1, "BotonMenu: con foco se mece hasta 6° y brilla")
-	boton.release_focus()
 	await _segundos(d.vaiven_rampa + 0.1)
-	_comprobar(is_equal_approx(boton.amplitud, 0.0), "BotonMenu: sin foco la amplitud vuelve a 0")
-	_comprobar(boton.theme_type_variation == &"BotonMenu" and not boton.sella(), "BotonMenu: sin datos propios es el botón de siempre (sin sello)")
-	var pergamino: BotonMenu = (load("res://escenas/ui/boton_pergamino.tscn") as PackedScene).instantiate()
-	pergamino.text = "MENU_SALIR"
-	menu.add_child(pergamino)
-	await _esperar(2)
-	pergamino.grab_focus()
-	await _segundos(pergamino.datos.vaiven_rampa + 0.1)
-	_comprobar(pergamino.rotation == 0.0 and pergamino.modulate.r > 1.0, "BotonPergamino: con foco brilla pero no se mece (vaivén 0 en sus datos)")
-	var avisos := [0]
-	pergamino.estampado.connect(func() -> void: avisos[0] += 1)
-	await pergamino.estampar()
-	_comprobar(avisos[0] == 1 and pergamino.sello != null and pergamino.sello.sprite.texture == pergamino.sello.lacre and pergamino.sello.sprite.scale == Vector2.ONE, "BotonPergamino: estampar() deja el lacre a escala 1 y avisa «estampado»")
-	await _segundos(0.6)
-	_comprobar(pergamino.sello.vivos.is_empty() and pergamino.sello.get_children().size() == 1, "SelloHuella: los destellos se apagan y se borran solos")
+	_comprobar(boton.rotation == 0.0 and boton.theme_type_variation == &"BotonMenu", "BotonMenu: con foco no se mece (el foco es el bloque del kit)")
 	Opciones.reducir_movimiento = true
-	var otro: SelloHuella = (load("res://escenas/ui/sello_huella.tscn") as PackedScene).instantiate()
-	mundo.add_child(otro)
-	await otro.estampar()
-	_comprobar(otro.sprite.scale == Vector2.ONE and otro.listo(), "SelloHuella: con «reducir movimiento» se estampa sin caer")
-	otro.queue_free()
-	Opciones.reducir_movimiento = false
-	pergamino.visible = false
-	await _esperar(1)
-	_comprobar(pergamino.sello == null, "BotonPergamino: el sello se borra al esconderse")
-	pergamino.queue_free()
-	Opciones.reducir_movimiento = true
-	boton.grab_focus()
-	await _segundos(d.vaiven_rampa + 0.1)
-	var y := boton.position.y
+	var x := boton.position.x
 	boton.entrar()
 	await _esperar(2)
-	_comprobar(boton.rotation == 0.0 and boton.position.y == y, "BotonMenu: con «reducir movimiento» no se mece ni entra cayendo")
+	_comprobar(boton.position.x == x, "BotonMenu: con «reducir movimiento» no entra barriendo")
 	Opciones.reducir_movimiento = false
 	boton.entrar()
 	await _esperar(1)
-	_comprobar(boton.position.y < 0.0, "BotonMenu: la entrada empieza fuera del borde de arriba")
+	_comprobar(boton.position.x < x, "BotonMenu: la entrada empieza a la izquierda de su sitio")
 	await _segundos(d.tiempo_entrada + 0.1)
-	_comprobar(is_equal_approx(boton.position.y, y), "BotonMenu: y cae hasta su sitio")
+	_comprobar(is_equal_approx(boton.position.x, x), "BotonMenu: y barre hasta su sitio")
 	menu.queue_free()
 	await _esperar(1)
 
@@ -249,8 +251,8 @@ func _probar_ficha() -> void:
 	felipe.peso = 11.6
 	await _segundos(0.6)
 	var barras := ficha.lista_barras()
-	var defensa := barras[0]
-	_comprobar(barras.size() == 5 and defensa.estadistica == &"defensa" and is_equal_approx(defensa.valor, datos.valor(&"defensa", 11.6)) and is_equal_approx(defensa.mostrado, defensa.valor), "FichaSuMajestad: Felipe.peso_cambiado llega a cada barra (escuchan la señal de la ficha)")
+	var defensa := barras[1]
+	_comprobar(barras.size() == 5 and barras[0].estadistica == &"carisma" and defensa.estadistica == &"defensa" and is_equal_approx(defensa.valor, datos.valor(&"defensa", 11.6)) and is_equal_approx(defensa.mostrado, defensa.valor), "FichaSuMajestad: Felipe.peso_cambiado llega a cada barra (escuchan la señal de la ficha)")
 	_comprobar(ficha.kilos == 11.6 and defensa.frase == datos.frase(&"defensa", 11.6), "FichaSuMajestad: muestra los kilos y la frase que toca")
 	var velocidad := barras[4]
 	_comprobar(not velocidad.con_barra and velocidad.frase == datos.frase_velocidad and tr(velocidad.frase) == "Un rey no corre: lo esperan", "Ficha: la velocidad es solo un chiste fijo («Un rey no corre: lo esperan»)")
@@ -290,7 +292,24 @@ func _probar_opciones() -> void:
 	var op := pantallas.opciones
 	_comprobar(gestor.arriba() == op and paused and op.visible, "Opciones: se abre encima de la pausa (pila de pantallas) y el juego sigue en pausa")
 	_comprobar(op.menu.enfocado() != null, "Opciones: se navega con foco (teclado y mando)")
-	_comprobar(op.menu.has_node("zarpazo") and op.menu.get_child_count() == Controles.ACCIONES.size() + 5 and op.menu.has_node("Vibracion") and op.menu.has_node("ReducirSacudida"), "Opciones: una fila por acción, más reducir movimiento, reducir sacudida, volumen, vibración y volver")
+	_comprobar(op.menu.has_node("zarpazo") and op.menu.get_child_count() == Controles.ACCIONES.size() + 7 and op.menu.has_node("Vibracion") and op.menu.has_node("ReducirSacudida"), "Opciones: una fila por acción, más golpes, texto grande, reducir movimiento, reducir sacudida, volumen, vibración y volver")
+	_comprobar(op.menu.get_child(0).name == &"Golpes" and op.menu.get_child(1).name == &"TextoGrande" and op.menu.get_child(op.menu.get_child_count() - 1).name == &"Volver", "Opciones: la accesibilidad va primero y «Volver» al final")
+	# «Golpes» (salud de 9 huellas): normal → suaves → ninguno → normal, guardado.
+	Opciones.golpes = Opciones.Golpes.NORMAL
+	var golpes := op.menu.get_node("Golpes") as Button
+	golpes.pressed.emit()
+	_comprobar(Opciones.golpes == Opciones.Golpes.SUAVES and "suaves" in golpes.text and SaludFelipe.medias_del_golpe(2) == 1, "Opciones: «Golpes» pasa a suaves (½ huella por golpe)")
+	golpes.pressed.emit()
+	_comprobar(Opciones.golpes == Opciones.Golpes.NINGUNO and SaludFelipe.medias_del_golpe(2) == 0, "Opciones: «Golpes» pasa a ninguno (no quita)")
+	var archivo := ConfigFile.new()
+	archivo.load(Opciones.ARCHIVO)
+	_comprobar(int(archivo.get_value("accesibilidad", "golpes", -1)) == Opciones.Golpes.NINGUNO, "Opciones: «Golpes» se guarda")
+	golpes.pressed.emit()
+	_comprobar(Opciones.golpes == Opciones.Golpes.NORMAL and SaludFelipe.medias_del_golpe(2) == 2, "Opciones: y vuelve a normal (1 huella)")
+	(op.menu.get_node("TextoGrande") as Button).pressed.emit()
+	_comprobar(Opciones.texto_grande, "Opciones: «Texto grande» se prende")
+	(op.menu.get_node("TextoGrande") as Button).pressed.emit()
+	_comprobar(not Opciones.texto_grande, "Opciones: y se apaga")
 	var antes := InputMap.action_get_events("zarpazo").duplicate()
 	op.empezar_remapeo("zarpazo")
 	var tecla := InputEventKey.new()
@@ -334,7 +353,8 @@ func _probar_opciones() -> void:
 
 func _probar_textos() -> void:
 	_comprobar(TranslationServer.translate("UI_TRAVESURA_CUMPLIDA") == "¡TRAVESURA CUMPLIDA!", "tr: la clave UI_TRAVESURA_CUMPLIDA da el texto en español")
-	_comprobar(TranslationServer.translate("PAUSA_TITULO") == "Decretos de Su Majestad" and TranslationServer.translate("UI_VIDAS") % 9 == "9 vidas", "tr: títulos y textos con números")
+	_comprobar(TranslationServer.translate("PAUSA_TITULO") == "PAUSA" and TranslationServer.translate("BOLSILLO_DE") % ["3", "5"] == "3 de 5", "tr: títulos y textos con números")
+	_comprobar(PanelBolsillo.texto_huellas(13) == "6 y media" and PanelBolsillo.texto_huellas(18) == "9", "tr: la salud se lee «6 y media» o «9»")
 	_comprobar(TranslationServer.translate("CLAVE_QUE_NO_EXISTE") == "CLAVE_QUE_NO_EXISTE", "tr: una clave sin traducción se ve tal cual (fácil de notar)")
 	# Toda clave del archivo tiene su texto en español.
 	var archivo := FileAccess.open("res://traducciones/textos.csv", FileAccess.READ)
@@ -450,11 +470,52 @@ func _probar_tema() -> void:
 	_comprobar(ProjectSettings.get_setting("gui/theme/custom") == Estilo.RUTA_TEMA, "Tema: es el tema del proyecto (los Control lo toman solos)")
 	var sueltos: Array[String] = []
 	for ruta in _scripts("res://scripts/ui"):
-		if ruta.ends_with("retrato_valeria.gd"):
-			continue
 		if "Color(" in FileAccess.get_file_as_string(ruta):
 			sueltos.append(ruta.get_file())
 	_comprobar(sueltos.is_empty(), "Tema: ningún script de la interfaz tiene colores sueltos %s" % [sueltos])
+
+
+## Interfaz v2 («A + C»): toda pieza del kit que pide el código existe en el tema; los colores con nombre de la
+## paleta; nada de letra de 8 px en lo que se lee (layout: 11 px de cuerpo o más; las de 8, solo en marcas del mundo);
+## el kit viejo «Decreto real» ya no existe.
+func _probar_kit_v2() -> void:
+	var faltan: Array[String] = []
+	var piezas := RegEx.create_from_string("KitUI\\.(pieza|icono|textura|franja_texto|icono_desde_abajo)\\([^\"\\n]*\"([a-z0-9-]+)\"")
+	var usadas := 0
+	for ruta in _scripts("res://scripts"):
+		for m in piezas.search_all(FileAccess.get_file_as_string(ruta)):
+			var nombre := m.get_string(2)
+			var id := StringName("v2_" + nombre.replace("-", "_"))
+			usadas += 1
+			# Los nombres armados con «%s» o con sufijo se prueban con sus variantes (felipe, valeria, aspi; -grande).
+			if not (Estilo.tema().has_stylebox(id, Estilo.TIPO) or Estilo.tema().has_icon(id, Estilo.TIPO)):
+				var hay := false
+				for sufijo in ["-felipe", "-valeria", "-aspi", "-grande", "-felipe-0", "-llena", "felipe", "llena"]:
+					var otro := StringName("v2_" + (nombre + sufijo).replace("-", "_"))
+					hay = hay or Estilo.tema().has_stylebox(otro, Estilo.TIPO) or Estilo.tema().has_icon(otro, Estilo.TIPO)
+				if not hay:
+					faltan.append(nombre)
+	_comprobar(usadas > 30 and faltan.is_empty(), "Kit v2: las %d piezas que pide el código están en el tema %s" % [usadas, faltan])
+	var caja := Estilo.caja(&"v2_dialogo_marco_valeria") as StyleBoxTexture
+	_comprobar(caja != null and caja.texture.get_size() == Vector2(68, 54) and caja.expand_margin_right == 4.0 and caja.expand_margin_bottom == 4.0 and caja.texture_margin_left == 12.0, "Kit v2: la caja del diálogo se dibuja con su medida lógica (la sombra y el contorno, afuera) y sus cortes del README")
+	var paleta := {&"ui_fondo": "241a26", &"ui_panel": "30242c", &"ui_linea": "f4e2bb", &"ui_texto": "fff0d5", &"personaje_felipe": "e8913a", &"personaje_valeria": "d8336b", &"personaje_aspi": "e04848", &"oportunidad": "ffe066"}
+	var mal: Array[String] = []
+	for nombre: StringName in paleta:
+		if not Estilo.tiene_color(nombre) or Estilo.color(nombre).to_html(false) != paleta[nombre]:
+			mal.append(String(nombre))
+	_comprobar(mal.is_empty(), "Kit v2: la paleta A + C con nombre en el tema (Felipe en oro ámbar, oportunidad en limón) %s" % [mal])
+	var chicas: Array[String] = []
+	for estilo in Estilo.tema().get_font_size_list(Estilo.TIPO):
+		if Estilo.letra(estilo) < ZonasTexto.LETRA_MINIMA and not ZonasTexto.ESTILOS_DECORATIVOS.has(estilo):
+			chicas.append(String(estilo))
+	_comprobar(chicas.is_empty(), "Letra mínima: nada de 8 px en lo que se lee (11 px de cuerpo o más) %s" % [chicas])
+	_comprobar(not DirAccess.dir_exists_absolute("res://assets/ui/decreto") and not ResourceLoader.exists("res://escenas/ui/sello_huella.tscn") and not ResourceLoader.exists("res://escenas/ui/boton_pergamino.tscn"), "Kit viejo: «Decreto real» se borró (lo descartado no se guarda)")
+	var codigo := ""
+	for ruta in ["res://scripts/ui/hud.gd", "res://scripts/ui/medidores.gd"]:
+		for linea in FileAccess.get_file_as_string(ruta).split("\n"):
+			if not linea.strip_edges().begins_with("#"):
+				codigo += linea + "\n"
+	_comprobar(not codigo.contains("snack") and not codigo.contains("ContadorRecurso") and not codigo.contains("vidas"), "HUD mínimo: el HUD no tiene contador de snacks ni de vidas")
 
 
 ## B1: letras pixel de licencia libre, sin suavizado, con tildes, eñe y signos de apertura, a su tamaño de diseño.

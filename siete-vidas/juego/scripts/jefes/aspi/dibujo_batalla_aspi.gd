@@ -112,28 +112,31 @@ func encima(c: Node2D) -> void:
 			c.draw_line(Vector2(x, y), Vector2(x + lado * 18.0, y), Color(Color("dff3ff"), 0.7 * avance), 1.5)
 
 
-## Oportunidad (v4: amarillo = oportunidad; v5: el aviso dice el botón): «[E] ¡APLASTA!» con borde amarillo sobre
-## ella, la flecha hacia abajo y un punto amarillo que late sobre su botón. Es el único aviso mientras dura.
+## Oportunidad (v4: amarillo = oportunidad; v5: el aviso dice el botón): «[E] ¡APLASTA!» sobre ella, en el aviso del
+## kit v2 (panel oscuro con borde y sombra limón: nunca un bloque amarillo) y la flecha limón hacia abajo, más un punto
+## que late sobre su botón. Es el único aviso mientras dura.
 func _aviso_oportunidad(c: Node2D, tiempo: float) -> void:
-	var amarillo := Estilo.color(&"oportunidad")
-	var arriba := b.aspi.global_position + Vector2(0, -BatallaAspi.ALTO_ARRIBA - 52)
-	if int(tiempo * 4.0) % 2 == 0:
-		c.draw_rect(Rect2((b.aspi.global_position + Vector2(-3, -BatallaAspi.ALTO_ARRIBA - 7)).round(), Vector2(6, 6)), amarillo)
+	var limon := Estilo.color(&"oportunidad")
+	var late := int(tiempo * 4.0) % 2 == 0
+	if late:
+		c.draw_rect(Rect2((b.aspi.global_position + Vector2(-3, -BatallaAspi.ALTO_ARRIBA - 7)).round(), Vector2(6, 6)), limon)
 	var texto := tr("JEFE_APLASTA")
 	var icono := IconosBotones.ancho("interactuar", 14.0)
-	var ancho := roundf(icono + 4.0 + Estilo.ancho(texto, &"jefe_pista"))
-	# El cartelito no se corta en el borde de la pantalla (lección 23): se corre adentro; la flecha sigue sobre ella.
-	var vista := c.get_viewport().get_canvas_transform().affine_inverse() * Rect2(ZonasTexto.PANTALLA)
-	var centro_x := roundf(clampf(arriba.x, vista.position.x + ancho / 2.0 + 8.0, vista.end.x - ancho / 2.0 - 8.0))
-	var izquierda := centro_x - roundf(ancho / 2.0)
-	var caja := Rect2(izquierda - 6, roundf(arriba.y) - 13, ancho + 12, 18)
-	c.draw_rect(caja.grow(1), amarillo)
-	c.draw_rect(caja, Estilo.color(&"oportunidad_fondo"))
-	IconosBotones.dibujar(c, "interactuar", Vector2(izquierda, roundf(arriba.y) - 11), 14.0)
-	Estilo.escribir(c, Vector2(izquierda + icono + 4.0, roundf(arriba.y) + 1), texto, &"jefe_pista", amarillo)
-	# Flecha hacia abajo: hay que caerle encima (salta 2 px con el pulso).
-	var punta := arriba.round() + Vector2(0, 2.0 if int(tiempo * 4.0) % 2 == 0 else 0.0)
-	c.draw_colored_polygon(PackedVector2Array([punta + Vector2(-6, 8), punta + Vector2(6, 8), punta + Vector2(0, 16)]), amarillo)
+	var alto := 20.0
+	var ancho := roundf(icono + 4.0 + Estilo.ancho(texto, &"cartel_kit")) + 20.0
+	var base := b.aspi.global_position + Vector2(0, -BatallaAspi.ALTO_ARRIBA - 36)
+	# El aviso no se corta en el borde de la pantalla (lección 23): se corre adentro de la zona segura; la flecha sigue
+	# sobre ella.
+	var vista := c.get_viewport().get_canvas_transform().affine_inverse() * Rect2(ZonasTexto.SEGURA)
+	var centro_x := roundf(clampf(base.x, vista.position.x + ancho / 2.0, vista.end.x - ancho / 2.0))
+	var caja := Rect2(centro_x - roundf(ancho / 2.0), roundf(base.y) - alto - 8.0, ancho, alto)
+	KitUI.pieza(c, "aviso-marco", caja)
+	var x := caja.position.x + 10.0 + KitUI.inclinacion(alto) / 2
+	IconosBotones.dibujar(c, "interactuar", Vector2(x, caja.position.y + 3.0), 14.0)
+	KitUI.escribir(c, x + icono + 4.0, caja.position.y + 5.0, texto, &"cartel_kit", limon)
+	# Flecha hacia abajo: hay que caerle encima (salta 2 px con el pulso; con «Reducir movimiento», quieta).
+	var salto := 2.0 if late and not Opciones.reducir_movimiento else 0.0
+	KitUI.icono(c, "aviso-flecha", Vector2(roundf(base.x) - 5.0, caja.end.y + 1.0 + salto))
 
 
 ## Lo que todavía se puede tirar (v4, Gemini: se confundía con los restos del piso): un destello chico e intermitente

@@ -1,6 +1,6 @@
 # Créditos de recursos de terceros
 
-Recursos libres que usa el juego, con su licencia. Lo que no está aquí es propio (arte de SpriteCook y Gemini hecho para el juego, sonidos sintetizados con `siete-vidas/herramientas/sonidos_demo.py`).
+Recursos libres que usa el juego, con su licencia. Lo que no está aquí es propio (arte de SpriteCook, Gemini y ChatGPT hecho para el juego, como el kit de interfaz v2 de `assets/ui/v2/`, sonidos sintetizados con `siete-vidas/herramientas/sonidos_demo.py`).
 
 | Paquete | Autor | Enlace | Licencia | Archivos |
 | --- | --- | --- | --- | --- |

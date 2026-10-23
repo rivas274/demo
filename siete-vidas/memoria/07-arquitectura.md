@@ -1,6 +1,7 @@
 # Arquitectura del juego: piezas y datos
 
-Actualizado: 2026-10-20 (plan de estabilización: capas de humanos y zonas de texto; antes, segunda ronda: Felipe con estados, jefes con conductas en datos, Valeria en partes, carpetas
+Actualizado: 2026-10-23 (interfaz v2 «A + C» con el kit en el tema (`KitUI`), zonas del layout con zona segura, salud de 9 huellas
+(`SaludFelipe`); antes, 2026-10-20: plan de estabilización: capas de humanos y zonas de texto; antes, segunda ronda: Felipe con estados, jefes con conductas en datos, Valeria en partes, carpetas
 por responsabilidad y la interfaz con piezas, tema, pila de pantallas, textos traducibles y controles remapeables;
 decisión en `01-decisiones.md`, «Forma de construir»).
 
@@ -22,10 +23,10 @@ El juego se arma como con **piezas de LEGO**:
   piezas: un jefe nuevo usa los ataques que ya existen y agrega solo los suyos.
 - **Felipe** tiene un archivo por cada cosa que puede estar haciendo (en el piso, arañando, en Zoomies, desmayado...):
   para cambiar cómo come, se abre `estado_accion.gd`, no un archivo de 900 líneas.
-- **La interfaz** también son piezas: la barra de vida (corazones de Felipe y barra del jefe) se conecta a la vida y se
-  mueve sola; los contadores, carteles, menús y el cuadro de diálogo son piezas con su escena. Los colores y letras
-  están en **un solo tema** y los textos en **un archivo de traducción** (hoy en español): cambiar «Pausa» o un color
-  no toca código.
+- **La interfaz** también son piezas: la barra de vida (las 9 huellas de Felipe y la barra del jefe) se conecta a la
+  vida y se mueve sola; los carteles, menús, el bolsillo y el cuadro de diálogo son piezas con su escena. Los colores,
+  letras y **las piezas del kit v2** están en **un solo tema** y los textos en **un archivo de traducción** (hoy en
+  español): cambiar «Pausa», un color o una pieza del kit no toca código.
 
 Por qué importa (pilar 2, «cada maña es llave y travesura»): cuando exista una maña nueva, funcionará con **todo lo
 que lleve la pieza**. Intimidar asustará a cualquier cosa con «se asusta»; un coletazo tirará cualquier cosa con «se
@@ -36,7 +37,7 @@ puede tirar».
 | Patrón | Dónde | Por qué |
 | --- | --- | --- |
 | **Composición con componentes** (nodos hijos con `class_name`, un trabajo cada uno) | `scripts/componentes/` | Una entidad nueva es juntar piezas que ya funcionan; sin herencia frágil |
-| **Observador (señales)** | Las piezas avisan (`Vida.cambio`, `Vida.murio`, `Tirable.caido`, `OyeMaullido.oyo`); el Nivel avisa al guion; Felipe avisa a la interfaz (`vidas_cambiadas`, `collar_cambiado`, `snacks_cambiados`) | Nadie busca a nadie: quien junta las piezas conecta lo que le importa. La interfaz no pregunta en cada cuadro |
+| **Observador (señales)** | Las piezas avisan (`Vida.cambio`, `Vida.murio`, `Tirable.caido`, `OyeMaullido.oyo`); el Nivel avisa al guion; Felipe avisa a la interfaz (`collar_cambiado`, `snacks_cambiados`; su salud: `SaludFelipe.reaparecio`, `pocas_huellas`, `desmayado`) | Nadie busca a nadie: quien junta las piezas conecta lo que le importa. La interfaz no pregunta en cada cuadro |
 | **Datos en recursos** (`.tres`) | `DatosEnemigo`, `DatosObjeto`, `DatosJefe` en `datos/`; el tema en `datos/ui/tema.tres` | Cambiar un número, un color o crear una variante no toca código |
 | **Escenas reutilizables** (`.tscn`) + **fábricas** | `escenas/entidades/`, `escenas/ui/`; `Enemigo.desde_escena`, `Objeto.crear`, `Cartel.crear` | Se arman en el editor o se crean con una línea |
 | **Constructor + guion** (ganchos con nombre) | `Nivel` llama a `GuionNivel` en un orden fijo | Lo común se escribe una vez; lo propio de cada nivel queda aparte |
@@ -51,10 +52,11 @@ Decisiones de criterio (sin sobreingeniería):
   nivel que se encuentra por grupo (`GestorPantallas.de(nodo)`).
 - **Nunca `preload()` de un `.tres` con script en una constante** de un script que otros usan: Godot 4.3 deja dos
   copias de la clase y los tipos fallan. Se carga con `load()` (ver `Nivel1.RUTA_RATON`, `BatallaAspi.DATOS`).
-- **La interfaz dibujada con código** (corazones, libreta, resumen, barra del jefe) pide sus colores y letras por
-  nombre a `Estilo` (`Estilo.color(&"rojo")`); los nodos `Control` (botones, cuadro de diálogo) toman el tema solos
-  porque es el tema del proyecto. Única excepción: el retrato provisional de Valeria dibujado por código
-  (`retrato_valeria.gd`), que es ilustración y desaparece cuando esté su hoja de retratos.
+- **La interfaz dibujada con código** (huellas, diálogo, carteles, libreta, resumen, barra del jefe) pide sus colores
+  y letras por nombre a `Estilo` (`Estilo.color(&"ui_texto")`) y sus piezas del kit v2 a `KitUI` (`KitUI.pieza(c,
+  "dialogo-marco-valeria", rect)`, con el nombre del PNG); los nodos `Control` (botones) toman el tema solos porque es
+  el tema del proyecto. Sin excepciones: el retrato de Valeria dibujado por código se borró (las caras salen de las
+  hojas, achicadas a su tamaño por `herramientas/interfaz_v2_caras.py`).
 
 ## Mapa de carpetas (`siete-vidas/juego/`)
 
@@ -62,12 +64,12 @@ Decisiones de criterio (sin sobreingeniería):
 | --- | --- |
 | `escenas/nivel_1.tscn` | El nivel 1 (escena principal): `Nivel` + `Felipe` + `Interfaz` + `Guion` (`GuionNivel1`) |
 | `escenas/entidades/` | `felipe.tscn` (con su `Vida`), `raton.tscn`, `aspi.tscn`, `caja_carton.tscn`, `comida.tscn`, `objeto_tirable.tscn` |
-| `escenas/ui/` | `barra_vida.tscn` (corazones), `barra_jefe.tscn`, `contador_recurso.tscn`, `menu_pausa.tscn`, `cuadro_dialogo.tscn` |
+| `escenas/ui/` | `barra_vida.tscn` (9 huellas), `barra_jefe.tscn`, `menu_pausa.tscn`, `cuadro_dialogo.tscn`, `pantalla_opciones.tscn`, `ficha_su_majestad.tscn`, `barra_estadistica.tscn` |
 | `datos/enemigos/`, `datos/objetos/`, `datos/jefes/` | `DatosEnemigo` (ratón, A.S.P.I.), `DatosObjeto` (vaso, taza...), `DatosJefe` (`aspi.tres`: fases, carteles, números por fase y sus conductas) |
-| `datos/ui/tema.tres` | El tema: colores, tamaños de letra y medidas con nombre (tipo `Felipe`) y estilos de `BotonMenu`, `CuadroDialogo`, `NombreDialogo`, `TextoDialogo` |
+| `datos/ui/tema.tres` | El tema: colores (paleta v2: `ui_fondo`, `ui_panel`, `ui_linea`, `ui_texto`, `ui_apagado`, `ui_contorno`, `personaje_felipe`, `personaje_valeria`, `personaje_aspi`, `oportunidad`...), tamaños de letra y medidas con nombre (tipo `Felipe`), **las piezas del kit v2** (`styles/v2_<pieza>` las que se estiran, `icons/v2_<pieza>` las demás y las caras `v2_cara_*`; las pone `herramientas/interfaz_v2_tema.py` desde el README del kit) y los botones `BotonMenu`/`BotonOpcion` |
 | `traducciones/textos.csv` | Textos de la interfaz por clave (columna `es`); Godot genera `textos.es.translation` al importar |
 | `scripts/componentes/` | Las piezas y el ayudante `Componentes` (tabla abajo) |
-| `scripts/entidades/felipe/` | `Felipe` (movimiento, entrada y el inicio de cada acción) y sus partes: `estados/` (un archivo por estado), `AgachadoFelipe`, `TreparFelipe`, `EfectosFelipe`, `AnimadorFelipe`, `ManasFelipe`, `AnimacionesFelipe`, `Chispas` |
+| `scripts/entidades/felipe/` | `Felipe` (movimiento, entrada y el inicio de cada acción) y sus partes: `estados/` (un archivo por estado), `SaludFelipe` (las 9 huellas), `AgachadoFelipe`, `TreparFelipe`, `EfectosFelipe`, `AnimadorFelipe`, `ManasFelipe`, `AnimacionesFelipe`, `Chispas` |
 | `scripts/entidades/valeria/` | `Valeria` (qué hace y cómo reacciona: actividades, regañar, perdonar, grabar), `AspectoValeria` (poses, fundidos, giro, accesorios) y `RutaValeria` (cruzar puertas, dónde pararse) |
 | `scripts/entidades/enemigos/` | `Enemigo` (ratón y A.S.P.I.), `Apariencia` |
 | `scripts/entidades/objetos/` | `Objeto` (lo que se tira), `CajaCarton`, `CajasMudanza`, `Comida`, `Rascador`, `Laser`, `Recogible`, `Calcetin` |
@@ -75,13 +77,13 @@ Decisiones de criterio (sin sobreingeniería):
 | `scripts/nivel/` | Lo común a todo nivel: `Nivel`, `DatosNivel`, `GuionNivel`, `Puerta`, `ArteNivel`, `SombrasVivas` |
 | `scripts/niveles/nivel_1/` | Lo propio del nivel 1: `Nivel1` (datos), `GuionNivel1`, `ValeriaPorLaCasa`, `FinalBalcon`, `ArteNivel1`, `DecoradoNivel1`, `FondoApartamento`, `LuzCuarto` |
 | `scripts/sistemas/` | Lo que no se ve pero ordena el juego: `Capas` (tabla única de capas), `Controles` (InputMap, remapeo), `Particulas` (fábrica de polvo), `Travesuras`, `Agenda`, `Recompensas`, `Frases`, `Jugo` |
-| `scripts/ui/` | Pantallas y avisos: `Pantallas`, `Hud`, `Medidores`, `Dialogo`, `Anuncios`, `Libreta`, `ResumenDia`, `Indicador`, `IconosBotones`, `PresentacionJefe`, `RetratoValeria` |
-| `scripts/ui/base/` | `Estilo` (acceso al tema), `ZonasTexto` (zonas fijas de texto), `GestorPantallas` (pila), `MenuUI` (menú navegable) |
-| `scripts/ui/piezas/` | `BarraVida`, `ContadorRecurso`, `Cartel` |
+| `scripts/ui/` | Pantallas y avisos: `Pantallas`, `Hud` (carteles), `Medidores` (salud y logro), `Dialogo`, `GloboDialogo`, `Anuncios`, `Libreta`, `ResumenDia`, `Indicador`, `IconosBotones`, `PresentacionJefe`, `FichaSuMajestad`, `PantallaOpciones` |
+| `scripts/ui/base/` | `Estilo` (acceso al tema), `KitUI` (dibuja las piezas del kit v2 con su medida lógica), `ZonasTexto` (zonas del layout y zona segura), `GestorPantallas` (pila), `MenuUI` (menú navegable), `BotonMenu` |
+| `scripts/ui/piezas/` | `BarraVida`, `CuadroDialogo`, `Cartel`, `PanelBolsillo`, `BarraEstadistica`, `PiezaKit` |
 | `scripts/datos/` | Las clases de los recursos: `DatosEnemigo`, `DatosObjeto`, `DatosJefe` |
 | `pruebas/` | Pruebas automáticas (`prueba_componentes.gd` para las piezas del juego, `prueba_interfaz.gd` para las de la interfaz), el bot `partida.gd` y las capturas |
 
-Tamaños: el más grande es `felipe.gd` (603 líneas), luego `guion_nivel_1.gd` (572), `presentacion_jefe.gd` (507),
+Tamaños: el más grande es `felipe.gd` (≈620 líneas; pendiente partirlo), luego `guion_nivel_1.gd` (572), `presentacion_jefe.gd` (507),
 `valeria.gd` (494) y `batalla_aspi.gd` (433). Todo lo demás, menos de 500.
 
 ## Capas y zonas de texto (plan de estabilización 2026-10-20)
@@ -100,30 +102,36 @@ pasamanos), luz, estela, imaginación, efectos, censura e Indicador.
   `Nivel1.ESTADOS_DELANTE_DE_HUMANOS`). La pelea con A.S.P.I. solo toca su capa mientras imagina.
 - Las palabras del mundo no tapan la cara de Valeria (`Jugo.testigos`).
 
-**Zonas de texto** (`scripts/ui/base/zonas_texto.gd`, tabla única como `Capas`; pantalla de 640×360):
+**Zonas de texto** (`scripts/ui/base/zonas_texto.gd`, tabla única como `Capas`; pantalla de 640×360; layout v2 aprobado
+el 2026-10-23, `diseno/interfaz-v2.md`). **Todo lo que se lee va dentro de la zona segura de títulos** (`ZonasTexto.SEGURA`:
+el 90 % del centro, de (32, 18) a (608, 342)):
 
 | Zona | Lugar | Qué va | Quién la usa |
 | --- | --- | --- | --- |
-| A. HUD | y 0–26 | Corazones y vidas, agenda, contadores, barra del jefe (nombre dentro, abreviado si no cabe: `BarraVida.titulo_corto`) | `Medidores`, `Hud`, `PresentacionJefe.POS_BARRA` |
-| B. Diálogo | y 30–80 | Cuadro con retrato (abajo solo si Felipe está tan arriba que lo taparía) | `Dialogo` |
-| C. Carteles | y 30–90 (misma franja) | Travesura, logro, fase del jefe, «PODER NUEVO»: título y una línea | `Anuncios` (cola única): `ZonasTexto.cartel(tamaño)` |
-| D. Palabras | sobre Felipe u objeto, fuera de A–C | «¡CRÍTICO!», «¡POP!»…: 1 a la vez, 0,9 s, Silkscreen 16/24 con contorno de 1 px; `pegatina` = sobre pergamino | `Jugo.palabra` → `ZonasTexto.colocar_palabra` |
+| A. Salud | desde (32, 18), 152×20 (grande 304×40) | Cara de Felipe y 9 huellas. Nada más fijo | `Medidores` (`BarraVida` HUELLAS) |
+| A2. Jefe | hasta (608, 18), 250×44 | Retrato, nombre en franja (abreviado si no cabe: `BarraVida.titulo_corto`), barra con fases I-II-III y daño reciente. Solo en la pelea; mientras se ve (`ZonasTexto.jefe_visible`), B y C bajan | `PresentacionJefe.POS_BARRA` |
+| B. Diálogo | arriba, y 44–103 (grande 64–163); abajo solo si Felipe está muy arriba | Caja de 528 px con retrato de 52 px y franja del nombre; 2 líneas por página | `Dialogo` → `CuadroDialogo` |
+| C. Carteles | desde `ZonasTexto.techo()` (y 44; en la pelea, bajo la barra del jefe) | Travesura, fase del jefe, «PODER NUEVO» centrados; el logro, a la derecha (`ZonasTexto.logro`) | `Anuncios` (cola única) |
+| D. Palabras | sobre Felipe u objeto, dentro de la zona segura y fuera de A–C | «¡CRÍTICO!», «+1»…: 1 a la vez, 0,9 s, Silkscreen 16/24 con contorno de 1 px; `pegatina` = sobre el panel oscuro | `Jugo.palabra` → `ZonasTexto.colocar_palabra` |
 | E. Avisos de botón | burbuja sobre Felipe | «E Degustar» | `Indicador.rect_burbuja()` (D la esquiva) |
+| F. Globito y avisos del jefe | sobre el personaje, bajo A y A2 | Globito de Felipe (una línea), «[E] ¡APLASTA!» con borde limón y flecha | `GloboDialogo`, `DibujoBatallaAspi` |
 
 - **Diálogo y carteles se turnan:** un anuncio espera a que termine la frase (hasta `Anuncios.ESPERA_MAXIMA`); mientras se
   ve un anuncio, las frases nuevas esperan en la cola sin envejecer (`Dialogo.esperar`); la fase del jefe (urgente) hace
   ceder la frase (`Dialogo.ceder`), que vuelve después; mientras dura la franja de fase, ni las frases urgentes salen
   (`Dialogo.esperar_urgente`).
 - **En tiempo real:** carteles, logro, franja de fase y palabras no se estiran con la cámara lenta de una derrota.
-- **Letra:** los estilos de carteles y palabras (`ZonasTexto.ESTILOS_C_Y_D`) son de 16 px o más.
+- **Letra:** todo estilo del tema es de 16 px o más (11 px de cuerpo; con texto grande, 32), salvo las marcas del mundo
+  que no hace falta leer (`ZonasTexto.ESTILOS_DECORATIVOS`: rótulos, «REC», letra dentro de las teclas). Lo comprueba
+  `prueba_interfaz.gd`.
 - **Prueba:** `pruebas/prueba_zonas_texto.gd` (rectángulos de todos los anuncios y palabras, HUD, diálogo, nombre del
   jefe, letras y que cada carácter de `textos.csv` exista en las letras del tema). Capturas:
   `pruebas/capturas_estabilizacion.gd -- <carpeta> [textos|luces]`.
 
-**HUD limpio (2026-10-21):** zona A fija solo con los corazones (`Medidores`) y, en la pelea, la barra del jefe y el
-contador de snacks (`Hud.snacks_fijos`). La agenda y los contadores entran deslizando 2 s al cambiar (`Hud.golpear` →
-`Hud.mostrando`). Lo que se lleva se mira en la pausa: `PanelBolsillo` (vidas, calcetines, fotos, snacks). La burbuja
-del Indicador esquiva caras (`Indicador.testigos`, misma regla que `ZonasTexto.colocar_palabra`).
+**HUD mínimo (interfaz v2, 2026-10-23):** fija solo la salud (`Medidores`); en la pelea, la barra del jefe. Sin
+contadores en el HUD (ni snacks, ni vidas, ni agenda): al recoger algo sale «+1» sobre Felipe (`Travesuras._al_sumar`)
+y lo que se lleva se mira en la pausa: `PanelBolsillo` (salud, snacks, calcetines, fotos y el collar). La burbuja del
+Indicador esquiva caras (`Indicador.testigos`, misma regla que `ZonasTexto.colocar_palabra`).
 
 **Lo roto y lo comido (por datos, `DatosObjeto`):** `piezas_rotura` (PiezaSuelta), `charco_*` y `queda` para lo que se
 rompe; `vacio` para el recipiente que queda al comer. Arte: `herramientas/preparar_arte_nivel.py rotos|vacios`.
@@ -141,7 +149,7 @@ rompe; `vacio` para el recipiente que queda al comer. Arte: `herramientas/prepar
 | Pieza | Qué hace | La llevan |
 | --- | --- | --- |
 | `Componentes` | Ayudante: `Componentes.de(nodo, Vida)` devuelve la pieza o null; `Componentes.nivel(nodo)` da el nivel; grupos `INTERACTUABLES` y `ENEMIGOS` | — |
-| `Vida` | Máximo, actual, `danar`, `curar`, `llenar`, `morir`, `fijar`, invulnerable; señales `cambio`, `danado`, `murio` | Felipe (5 corazones), A.S.P.I. (3 fases), ratón (1), caja (1) |
+| `Vida` | Máximo, actual, `danar`, `curar`, `llenar`, `morir`, `fijar`, invulnerable; señales `cambio`, `danado`, `murio` | Felipe (18 medias = 9 huellas; las reglas en `SaludFelipe`), A.S.P.I. (3 fases), ratón (1), caja (1) |
 | `RecibeGolpes` | Recibe `recibir_zarpazo` y pasa el daño a la Vida; rebota con escudo; `aturdir(segundos)` | Ratón, A.S.P.I., caja |
 | `HaceDano` | Lastima a Felipe al tocarlo (rectángulo o círculo) | Ratón, A.S.P.I., bolas de pelo |
 | `MovimientoPatrulla` | Va y viene, persigue si ve a Felipe, va a un destino, retrocede, huye | Ratón, A.S.P.I. |
@@ -168,7 +176,7 @@ objeto por estado (`EstadoFelipe`, en `scripts/entidades/felipe/estados/`):
 | `estado_accion.gd` | `ZARPAZO`, `COMIENDO`, `ARANANDO`, `MAULLANDO` | Frena, su animación desde el cuadro 0, vuelve al terminar (un estado por dato) |
 | `estado_zoomies.gd` | `ZOOMIES` | La carrera en tres fases (anticipa, corre, derrapa) con su receta de jugo (datos `{"direccion"}`) |
 | `estado_ronroneando.gd` | `RONRONEANDO` | Frotarse con Valeria (datos `{"objetivo"}`; al salir lo suelta) |
-| `estado_desmayado.gd` | `DESMAYADO` | Pierde una vida y reaparece |
+| `estado_desmayado.gd` | `DESMAYADO` | «Siesta táctica»: 9 gatitos fantasma suben y vuelven; reaparece en el descanso con todo lleno, sin perder nada (`SaludFelipe.desmayarse` / `volver`) |
 | `estado_ocio.gd` | `OCIO` | Se lame o juega con el estambre (datos `{"nombre"}`; al salir quita el estambre) |
 | `estado_escalera.gd` | `SUBIENDO_ESCALON` | Sube peldaño a peldaño (datos `{"peldanos", "duracion"}`) |
 
@@ -184,21 +192,21 @@ pantallas o avisar lo que eligió el jugador en un menú (señal `elegido`).
 
 | Pieza | Qué hace | Se usa en |
 | --- | --- | --- |
-| `BarraVida` (`escenas/ui/barra_vida.tscn`, `barra_jefe.tscn`) | Muestra una `Vida`: `conectar(vida)` y se mueve sola con `Vida.cambio`. Forma `CORAZONES` o `BARRA` (con título, divisiones por punto y franja de escudo) | Corazones de Felipe (`Medidores`), barra del jefe (`PresentacionJefe`: la pelea pone en la Vida del jefe las fases que le quedan) |
-| `ContadorRecurso` (`contador_recurso.tscn`) | Ícono + número; `fijar(texto, tiene)` con golpe al cambiar | Calcetines, fotos y snacks del HUD |
-| `Cartel` (`Cartel.crear`) | Franja o tarjeta con título, nombre y recompensa; entra, espera y sale | Carteles de travesura y «PODER NUEVO» (la cola es `Anuncios`) |
-| `MenuUI` (nodo `%Menu` de `menu_pausa.tscn`) | Columna de botones `BotonMenu` con foco: flechas, W/S, cruceta o palanca; Enter o A elige; el foco da la vuelta. Avisa `elegido(nombre)` | Menú de pausa (Continuar, Opciones, Reiniciar, Salir), opciones |
-| Cuadro de diálogo (`cuadro_dialogo.tscn`) | Pergamino del kit con el marco de retrato encima del retrato, nombre en lacre y texto en tinta; `Dialogo` pone las frases | Diálogos de Felipe, Valeria y A.S.P.I. |
-| `BotonMenu` (`scripts/ui/base/boton_menu.gd`; tipos en `datos/ui/*.tres`, `DatosBoton`) | Botón de menú: al apretar se encoge y vuelve con rebote; con foco o el mouse encima brilla y, si sus datos lo piden, se mece (vaivén con tween, nunca de golpe); entrada opcional cayendo desde arriba, escalonada por `MenuUI`; `principal` con pulso sutil; `estampar()` estampa el sello de sus datos y avisa `estampado`. **Variantes por datos y tema, sin herencia:** `boton_menu.tres` (el de siempre, variación `BotonMenu`) y `boton_pergamino.tres` (variación `BotonPergamino`, 112 × 44, sin vaivén, con sello; escena `escenas/ui/boton_pergamino.tscn`) | Menú de pausa (pergamino), opciones (el de siempre) |
-| `SelloHuella` (`escenas/ui/sello_huella.tscn`) | Sello de lacre: `estampar()` lo deja caer en escalas enteras (3×, 2×, 1×), lo cambia por el lacre aplastado, suelta 3 destellos y espera; con `estampado_de_entrada` aparece ya puesto. Con «reducir movimiento» no cae ni vuelan los destellos | Botones de pergamino, pergamino de la pausa |
-| `MarcoFicha` (`escenas/ui/marco_ficha.tscn`) | Marco de madera y oro en 9 partes con ventana de retrato y cuerpo de pergamino; `ventana()` y `cuerpo()` dicen dónde poner el contenido | `FichaSuMajestad` |
-| `BarraEstadistica` (`escenas/ui/barra_estadistica.tscn`) | Ícono, nombre, barra (marco del kit y relleno de color, se llena de a poco) y frase de una línea; `escuchar(señal)` la conecta a una fuente que avisa `{estadistica: [valor, frase]}` | `FichaSuMajestad` |
-| `FichaSuMajestad` (`escenas/ui/ficha_su_majestad.tscn`, datos en `datos/ui/ficha.tres`, `DatosFicha`) | Retrato, kilos y humor; escucha `Felipe.peso_cambiado`, calcula las estadísticas con la tabla del peso y avisa `estadisticas_cambiadas` a sus barras. **Solo de chiste:** nada del juego lee las estadísticas. Único lugar donde se ve el peso | Pausa |
-| `FelipeEnCojin` (`escenas/ui/felipe_en_cojin.tscn`) | Felipe A a 0,72 con sus animaciones sobre el cojín y la corona aparte: mide el tope del cráneo de cada cuadro de la hoja y la apoya ahí | Pausa |
+| `BarraVida` (`escenas/ui/barra_vida.tscn`, `barra_jefe.tscn`) | Muestra una `Vida`: `conectar(vida)` y se mueve sola con `Vida.cambio`. Forma `HUELLAS`: la caja de la salud con la cara de Felipe (mueca al golpe) y una huella cada 2 medias en 5 estados (llena, media, vacía, golpe y curando), golpe con destello de 60 ms y rebote, cura de abajo arriba, cascada de 60 ms, latido con 3 o menos, `grande` al doble. Forma `BARRA`: retrato, franja del nombre, 3 segmentos I-II-III (la fase activa en su color), capa de daño reciente que baja 300 ms después, temblor al cambiar de fase y franja de escudo | Salud de Felipe (`Medidores`), barra del jefe (`PresentacionJefe`: la pelea pone en la Vida del jefe las fases que le quedan) |
+| `KitUI` (`scripts/ui/base/kit_ui.gd`) | Dibuja las piezas del kit v2 con las medidas de la lámina: `pieza(c, "nombre", rect)` (las que se estiran, con su medida lógica: sombra y contorno caen afuera), `icono`, `textura`, `franja_texto`, `fragmentos`, `escribir(c, x, y_mayus, ...)` (como la lámina: arriba de las mayúsculas) | Todo lo dibujado de la interfaz v2 |
+| `PiezaKit` (`scripts/ui/piezas/pieza_kit.gd`) | Una pieza del kit en una escena, al tamaño del nodo, con un texto opcional (franja de título) | Pausa y opciones (panel y franjas) |
+| `CuadroDialogo` (`cuadro_dialogo.tscn`) | Caja oscura con la sombra del color del personaje, retrato de 52 px sobre su fondo inclinado con fragmentos, franja del nombre y flecha que late; el texto (%Texto) a 24 px del borde; entra subiendo 10 px; normal o grande, arriba o abajo. `Dialogo` pone las frases y las pagina de a 2 líneas | Diálogos de Felipe, Valeria y A.S.P.I. |
+| `GloboDialogo` | Globito de una línea con orejitas, cola con huellita y sombra ámbar sobre Felipe, dentro de la zona segura | Lo que dice Felipe en la pelea |
+| `Cartel` (`Cartel.crear`, `Cartel.medida`) | Franja diagonal ámbar con sello en rombo y título en Silkscreen 16, y una segunda línea oscura con el nombre; barrido de 140 ms con rebote de 4 px | Carteles de travesura y «PODER NUEVO» (la cola es `Anuncios`) |
+| `MenuUI` (nodo `%Menu` de `menu_pausa.tscn`) | Columna de botones `BotonMenu` con foco: flechas, W/S, cruceta o palanca; Enter o A elige; el foco da la vuelta. Avisa `elegido(nombre)` | Menú de pausa (Continuar, Bolsillo, Ficha, Opciones, Reiniciar, Salir), opciones |
+| `BotonMenu` (`scripts/ui/base/boton_menu.gd`; tipo en `datos/ui/boton_menu.tres`, `DatosBoton`) | Botón de menú del kit v2 (19 px; con foco, el bloque diagonal ámbar): al apretar se encoge y vuelve con rebote; entrada opcional barriendo desde la izquierda, escalonada por `MenuUI`. Un tipo nuevo es otro `.tres` y su variación del tema, sin herencia | Pausa y opciones |
+| `PanelBolsillo` | Filas del kit con ícono, nombre y valor: salud («6 y media de 9»), snacks, calcetines y fotos; el collar junto al título | Pausa |
+| `BarraEstadistica` (`escenas/ui/barra_estadistica.tscn`) | Fila de 17 px: nombre, barra con puntas en diagonal (se llena de a poco) y frase de una línea; `escuchar(señal)` la conecta a una fuente que avisa `{estadistica: [valor, frase]}` | `FichaSuMajestad` |
+| `FichaSuMajestad` (`escenas/ui/ficha_su_majestad.tscn`, datos en `datos/ui/ficha.tres`, `DatosFicha`) | Panel del kit con el retrato presumido, «SU MAJESTAD · kilos» y el humor; escucha `Felipe.peso_cambiado`, calcula las estadísticas con la tabla del peso y avisa `estadisticas_cambiadas` a sus barras. **Solo de chiste:** nada del juego lee las estadísticas. Único lugar donde se ve el peso | Pausa |
 | `GestorPantallas` | Pila: `abrir(pantalla, pausa)`, `cerrar(pantalla)`, `arriba()`, `es_la_de_arriba(pantalla)`; pausa mientras haya una que pausa | `Pantallas` (título, intro, pausa, fin), `Libreta`, `ResumenDia` |
-| `Estilo` | `color(&"nombre", alfa)`, `letra(&"nombre")`, `medida(&"nombre")`, `fuente()`, `texto_con_contorno`, `texto_centrado`; kit «Decreto real»: `panel(c, rect, &"panel")` (9 partes), `caja(&"nombre")`, `icono(&"hud_libreta")`, `relleno(c, textura, rect)` (barra sin deformar el pixel) | Todo lo que se dibuja con código |
+| `Estilo` | `color(&"nombre", alfa)`, `letra(&"nombre")`, `medida(&"nombre")`, `fuente()`, `texto_con_contorno`, `texto_centrado`, `recortar`; `panel(c, rect, &"panel")` (el panel oscuro genérico o un estilo del tema), `caja(&"nombre")`, `icono(&"nombre")` | Todo lo que se dibuja con código |
 | `RecetaJugo` (`scripts/sistemas/receta_jugo.gd`, datos en `datos/jugo/`) | Jugo de una acción con datos: anticipación, líneas de velocidad (`LineasVelocidad`), cámara adelantada, pausa de impacto y sacudida, polvo, pelos, derrape y marca (`MarcaDerrape`) | Zoomies; pausa de impacto de zarpazo, manotazo y arañazo |
-| `PantallaOpciones` (`escenas/ui/pantalla_opciones.tscn`) | Opciones desde la pausa, en la pila de pantallas: una fila por acción para remapear (teclado y mando, Esc cancela), reducir movimiento y volumen (`Opciones`) | Pausa |
+| `PantallaOpciones` (`escenas/ui/pantalla_opciones.tscn`) | Opciones desde la pausa, en la pila de pantallas, en una lista que se desplaza y sigue al foco: primero la accesibilidad («Golpes»: normal, suaves o ninguno; «Texto grande»; reducir movimiento y sacudida), volumen, vibración y una fila por acción para remapear (teclado y mando, Esc cancela) (`Opciones`) | Pausa |
 | `Controles` | Qué tecla o botón tiene cada acción (leído del InputMap), `etiquetar("{saltar}")`, `remapear`, `guardar`, `cargar` (`user://controles.cfg`, se carga al empezar el nivel) | Avisos, pistas de jefe, íconos (`IconosBotones` busca el ícono por tecla, así sigue al remapeo) |
 
 Textos: todo lo que se lee es una clave de `traducciones/textos.csv` (interfaz `UI_`, frases `FELIPE_`/`VALERIA_`, agenda
@@ -208,6 +216,15 @@ indicador, agenda, presentación del jefe). `prueba_interfaz.gd` revisa que ning
 
 Letra: `Estilo.fuente(&"estilo")` y `Estilo.letra(&"estilo")` dan la fuente pixel y su tamaño (siempre de diseño o
 múltiplo); `Estilo.escribir` dibuja con ellas y `Estilo.recortar` corta con «…» lo que no cabe.
+
+## Receta: una pieza nueva del kit v2
+
+1. El PNG va en `assets/ui/v2/` con su fila en el `README.md` del kit (tamaño, medida lógica, ancla y cortes de 3 partes).
+2. `python3 siete-vidas/herramientas/interfaz_v2_tema.py`: la pone en el tema (`styles/v2_<pieza>` si se estira; si no,
+   `icons/v2_<pieza>`). Las caras: `interfaz_v2_caras.py`.
+3. En el código: `KitUI.pieza(c, "<pieza>", Rect2(x, y, ancho_logico, alto))` o `KitUI.icono(c, "<pieza>", pos)`. Nunca un
+   color suelto: `Estilo.color(&"ui_texto")`.
+4. `prueba_interfaz.gd` (`_probar_kit_v2`) revisa que toda pieza que pide el código exista en el tema.
 
 ## Recetas
 
@@ -348,22 +365,23 @@ al apagarla (`DatosJefe.devuelve`) o al vaciar el depósito; se esparce con el m
 
 ### Cómo agregar una pantalla de menú
 
-1. **Escena:** en `escenas/ui/`, un `VBoxContainer` con el script `scripts/ui/base/menu_ui.gd` y, por opción, una
-   instancia de `boton_pergamino.tscn` (o un `Button` con `boton_menu.gd`, el de siempre) con una clave como texto
-   (`MENU_OPCIONES`); `principal = true` en el principal. Un tipo de botón nuevo es un `.tres` de `DatosBoton` (y su
-   variación del tema), no un script nuevo. Copia `menu_pausa.tscn`.
+1. **Escena:** en `escenas/ui/`, el panel del kit (`PiezaKit` con `pieza = "pausa-panel"` en la zona segura), una
+   franja de título (`PiezaKit` con `texto`) y un `VBoxContainer` con el script `scripts/ui/base/menu_ui.gd` y, por
+   opción, un `Button` con `boton_menu.gd` y una clave como texto (`MENU_OPCIONES`); `principal = true` en el
+   principal. Un tipo de botón nuevo es un `.tres` de `DatosBoton` (y su variación del tema), no un script nuevo.
+   Copia `menu_pausa.tscn`. Si la lista es larga, va en un `ScrollContainer` con `follow_focus` (como las opciones).
 2. **Textos:** agrega las claves a `traducciones/textos.csv` (columna `es`).
 3. **Pantalla:** el nodo que la muestra (un `Control` en una capa de `Capas`) la instancia, conecta `elegido(opcion)` a
    lo que haga cada opción y, al abrirse y cerrarse, llama `GestorPantallas.de(self).abrir(self)` y `.cerrar(self)`.
    Solo responde a teclas propias si `GestorPantallas.de(self).es_la_de_arriba(self)`.
-4. **Colores y letras:** del tema (`Estilo.color(&"...")`); si falta uno, se agrega a `datos/ui/tema.tres`.
-5. **Elegir:** si los botones sellan, la pantalla espera `await boton.estampar()` antes de hacer lo elegido (`Pantallas._al_elegir`).
-6. Prueba: como `_probar_menu_y_pausa` en `prueba_interfaz.gd` (foco en la primera opción, elegir, el sello, la pausa).
+4. **Colores, letras y piezas:** del tema (`Estilo.color(&"...")`, `KitUI.pieza(...)`); si falta uno, se agrega a
+   `datos/ui/tema.tres`. Todo dentro de `ZonasTexto.SEGURA` y con letra de 16 px o más.
+5. Prueba: como `_probar_menu_y_pausa` en `prueba_interfaz.gd` (foco en la primera opción, elegir, la pausa).
 
 ### Cómo traducir un texto
 
 1. En el código, nunca el texto: una clave. `tr("UI_MI_TEXTO")` (en un `Control`, basta poner la clave como texto:
-   se traduce solo). Con números: `tr("UI_VIDAS") % vidas` y en el archivo `%d vidas`.
+   se traduce solo). Con números: `tr("BOLSILLO_DE") % [snacks, maximo]` y en el archivo `%s de %s`.
 2. En `traducciones/textos.csv`, una fila `UI_MI_TEXTO,"Mi texto"` (comillas si lleva comas).
 3. Otro idioma: una columna nueva (`en`) con cada texto; Godot genera `textos.en.translation` al importar y hay que
    agregarlo en *Proyecto → Configuración → Localización*. El español es el de respaldo (`locale/fallback="es"`).

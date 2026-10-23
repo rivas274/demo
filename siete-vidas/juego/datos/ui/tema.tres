@@ -1,184 +1,448 @@
-[gd_resource type="Theme" load_steps=32 format=3]
+[gd_resource type="Theme" load_steps=132 format=3]
 
 [ext_resource type="FontFile" path="res://fuentes/PixelOperator8.ttf" id="4_chica"]
 [ext_resource type="FontFile" path="res://fuentes/PixelOperator.ttf" id="5_media"]
 [ext_resource type="FontFile" path="res://fuentes/Silkscreen-Regular.ttf" id="6_titulo"]
 [ext_resource type="FontFile" path="res://fuentes/PixelOperator-Bold.ttf" id="7_negrita"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/boton.png" id="8_pergamino"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/boton_resaltado.png" id="9_pergamino_resaltado"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/boton_apretado.png" id="10_pergamino_apretado"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/panel.png" id="11_panel"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/cinta.png" id="12_cinta"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/etiqueta_logro.png" id="13_etiqueta"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/marco_retrato.png" id="14_marco_retrato"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/hud_corazon.png" id="15_hud_corazon"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/hud_libreta.png" id="16_hud_libreta"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/hud_calcetin.png" id="17_hud_calcetin"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/hud_foto.png" id="18_hud_foto"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/marco_barra.png" id="19_marco_barra"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/marco_barra_jefe.png" id="20_marco_barra_jefe"]
-[ext_resource type="Texture2D" path="res://assets/ui/decreto/foto_unicornio.png" id="21_unicornio"]
+[ext_resource type="Texture2D" path="res://assets/ui/libreta/foto_unicornio.png" id="21_unicornio"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/dialogo-marco-felipe.png" id="v2_dialogo_marco_felipe"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/dialogo-marco-felipe-grande.png" id="v2_dialogo_marco_felipe_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/dialogo-marco-valeria.png" id="v2_dialogo_marco_valeria"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/dialogo-marco-valeria-grande.png" id="v2_dialogo_marco_valeria_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/dialogo-marco-aspi.png" id="v2_dialogo_marco_aspi"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/dialogo-marco-aspi-grande.png" id="v2_dialogo_marco_aspi_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/dialogo-flecha.png" id="v2_dialogo_flecha"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/nombre-franja-felipe.png" id="v2_nombre_franja_felipe"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/nombre-franja-felipe-grande.png" id="v2_nombre_franja_felipe_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/nombre-franja-valeria.png" id="v2_nombre_franja_valeria"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/nombre-franja-valeria-grande.png" id="v2_nombre_franja_valeria_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/nombre-franja-aspi.png" id="v2_nombre_franja_aspi"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/nombre-franja-aspi-grande.png" id="v2_nombre_franja_aspi_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/retrato-fondo-felipe.png" id="v2_retrato_fondo_felipe"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/retrato-fondo-felipe-grande.png" id="v2_retrato_fondo_felipe_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/retrato-fondo-valeria.png" id="v2_retrato_fondo_valeria"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/retrato-fondo-valeria-grande.png" id="v2_retrato_fondo_valeria_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/retrato-fondo-aspi.png" id="v2_retrato_fondo_aspi"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/retrato-fondo-aspi-grande.png" id="v2_retrato_fondo_aspi_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/fragmentos-felipe.png" id="v2_fragmentos_felipe"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/fragmentos-valeria.png" id="v2_fragmentos_valeria"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/fragmentos-aspi.png" id="v2_fragmentos_aspi"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/jefe-retrato-marco.png" id="v2_jefe_retrato_marco"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/jefe-barra-marco.png" id="v2_jefe_barra_marco"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/jefe-barra-cortes.png" id="v2_jefe_barra_cortes"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/jefe-barra-relleno.png" id="v2_jefe_barra_relleno"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/jefe-barra-dano.png" id="v2_jefe_barra_dano"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/jefe-nombre-franja.png" id="v2_jefe_nombre_franja"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/hud-caja.png" id="v2_hud_caja"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/hud-caja-grande.png" id="v2_hud_caja_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/huella-llena.png" id="v2_huella_llena"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/huella-llena-grande.png" id="v2_huella_llena_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/huella-media.png" id="v2_huella_media"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/huella-media-grande.png" id="v2_huella_media_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/huella-vacia.png" id="v2_huella_vacia"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/huella-vacia-grande.png" id="v2_huella_vacia_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/huella-golpe.png" id="v2_huella_golpe"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/huella-golpe-grande.png" id="v2_huella_golpe_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/huella-curando.png" id="v2_huella_curando"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/huella-curando-grande.png" id="v2_huella_curando_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/cartel-franja.png" id="v2_cartel_franja"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/cartel-sello.png" id="v2_cartel_sello"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/cartel-linea.png" id="v2_cartel_linea"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/logro-etiqueta.png" id="v2_logro_etiqueta"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/logro-icono.png" id="v2_logro_icono"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/logro-etiqueta-grande.png" id="v2_logro_etiqueta_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/logro-icono-grande.png" id="v2_logro_icono_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/aviso-marco.png" id="v2_aviso_marco"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/aviso-flecha.png" id="v2_aviso_flecha"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/globito-caja.png" id="v2_globito_caja"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/globito-oreja-izq.png" id="v2_globito_oreja_izq"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/globito-oreja-der.png" id="v2_globito_oreja_der"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/globito-cola.png" id="v2_globito_cola"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/pausa-panel.png" id="v2_pausa_panel"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/titulo-franja.png" id="v2_titulo_franja"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/boton-normal.png" id="v2_boton_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/boton-resaltado.png" id="v2_boton_resaltado"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/boton-apretado.png" id="v2_boton_apretado"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/bolsillo-fila.png" id="v2_bolsillo_fila"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/icono-snack.png" id="v2_icono_snack"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/icono-calcetin.png" id="v2_icono_calcetin"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/icono-foto.png" id="v2_icono_foto"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/ficha-panel.png" id="v2_ficha_panel"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/ficha-retrato-fondo.png" id="v2_ficha_retrato_fondo"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/ficha-barra-marco.png" id="v2_ficha_barra_marco"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/ficha-barra-relleno-felipe.png" id="v2_ficha_barra_relleno_felipe"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/ficha-barra-relleno-maquina.png" id="v2_ficha_barra_relleno_maquina"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/ficha-barra-relleno-aspi.png" id="v2_ficha_barra_relleno_aspi"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/dialogo-aspi-0.png" id="v2_cara_dialogo_aspi_0"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/dialogo-aspi-1.png" id="v2_cara_dialogo_aspi_1"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/dialogo-felipe-0.png" id="v2_cara_dialogo_felipe_0"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/dialogo-felipe-1.png" id="v2_cara_dialogo_felipe_1"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/dialogo-felipe-2.png" id="v2_cara_dialogo_felipe_2"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/dialogo-felipe-3.png" id="v2_cara_dialogo_felipe_3"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/dialogo-felipe-4.png" id="v2_cara_dialogo_felipe_4"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/dialogo-felipe-5.png" id="v2_cara_dialogo_felipe_5"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/dialogo-felipe-6.png" id="v2_cara_dialogo_felipe_6"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/dialogo-felipe-7.png" id="v2_cara_dialogo_felipe_7"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/dialogo-felipe-8.png" id="v2_cara_dialogo_felipe_8"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/dialogo-valeria-0.png" id="v2_cara_dialogo_valeria_0"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/dialogo-valeria-1.png" id="v2_cara_dialogo_valeria_1"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/dialogo-valeria-2.png" id="v2_cara_dialogo_valeria_2"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/dialogo-valeria-3.png" id="v2_cara_dialogo_valeria_3"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/ficha-felipe.png" id="v2_cara_ficha_felipe"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/hud-felipe.png" id="v2_cara_hud_felipe"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/hud-felipe-golpe.png" id="v2_cara_hud_felipe_golpe"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/hud-felipe-golpe-grande.png" id="v2_cara_hud_felipe_golpe_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/hud-felipe-grande.png" id="v2_cara_hud_felipe_grande"]
+[ext_resource type="Texture2D" path="res://assets/ui/v2/caras/jefe-aspi.png" id="v2_cara_jefe_aspi"]
 
-[sub_resource type="StyleBoxFlat" id="boton_normal"]
-bg_color = Color(0.13, 0.09, 0.1, 0)
-content_margin_left = 10.0
-content_margin_top = 2.0
-content_margin_right = 10.0
-content_margin_bottom = 2.0
+[sub_resource type="StyleBoxTexture" id="v2_dialogo_marco_felipe_estilo"]
+texture = ExtResource("v2_dialogo_marco_felipe")
+texture_margin_left = 12.0
+texture_margin_right = 16.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
 
-[sub_resource type="StyleBoxFlat" id="boton_foco"]
-bg_color = Color(1, 0.835, 0.541, 0.18)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(1, 0.835294, 0.541176, 1)
-content_margin_left = 10.0
-content_margin_top = 2.0
-content_margin_right = 10.0
-content_margin_bottom = 2.0
+[sub_resource type="StyleBoxTexture" id="v2_dialogo_marco_felipe_grande_estilo"]
+texture = ExtResource("v2_dialogo_marco_felipe_grande")
+texture_margin_left = 12.0
+texture_margin_right = 16.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
 
-[sub_resource type="StyleBoxTexture" id="pergamino"]
-content_margin_left = 14.0
-content_margin_top = 2.0
-content_margin_right = 14.0
-content_margin_bottom = 6.0
-texture = ExtResource("8_pergamino")
-texture_margin_left = 14.0
-texture_margin_top = 8.0
+[sub_resource type="StyleBoxTexture" id="v2_dialogo_marco_valeria_estilo"]
+texture = ExtResource("v2_dialogo_marco_valeria")
+texture_margin_left = 12.0
+texture_margin_right = 16.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxTexture" id="v2_dialogo_marco_valeria_grande_estilo"]
+texture = ExtResource("v2_dialogo_marco_valeria_grande")
+texture_margin_left = 12.0
+texture_margin_right = 16.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxTexture" id="v2_dialogo_marco_aspi_estilo"]
+texture = ExtResource("v2_dialogo_marco_aspi")
+texture_margin_left = 12.0
+texture_margin_right = 16.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxTexture" id="v2_dialogo_marco_aspi_grande_estilo"]
+texture = ExtResource("v2_dialogo_marco_aspi_grande")
+texture_margin_left = 12.0
+texture_margin_right = 16.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxTexture" id="v2_nombre_franja_felipe_estilo"]
+texture = ExtResource("v2_nombre_franja_felipe")
+texture_margin_left = 7.0
+texture_margin_right = 6.0
+expand_margin_left = 1.0
+expand_margin_top = 0.0
+expand_margin_right = 1.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="v2_nombre_franja_felipe_grande_estilo"]
+texture = ExtResource("v2_nombre_franja_felipe_grande")
+texture_margin_left = 10.0
+texture_margin_right = 9.0
+expand_margin_left = 1.0
+expand_margin_top = 0.0
+expand_margin_right = 1.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="v2_nombre_franja_valeria_estilo"]
+texture = ExtResource("v2_nombre_franja_valeria")
+texture_margin_left = 7.0
+texture_margin_right = 6.0
+expand_margin_left = 1.0
+expand_margin_top = 0.0
+expand_margin_right = 1.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="v2_nombre_franja_valeria_grande_estilo"]
+texture = ExtResource("v2_nombre_franja_valeria_grande")
+texture_margin_left = 10.0
+texture_margin_right = 9.0
+expand_margin_left = 1.0
+expand_margin_top = 0.0
+expand_margin_right = 1.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="v2_nombre_franja_aspi_estilo"]
+texture = ExtResource("v2_nombre_franja_aspi")
+texture_margin_left = 7.0
+texture_margin_right = 6.0
+expand_margin_left = 1.0
+expand_margin_top = 0.0
+expand_margin_right = 1.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="v2_nombre_franja_aspi_grande_estilo"]
+texture = ExtResource("v2_nombre_franja_aspi_grande")
+texture_margin_left = 10.0
+texture_margin_right = 9.0
+expand_margin_left = 1.0
+expand_margin_top = 0.0
+expand_margin_right = 1.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="v2_jefe_barra_marco_estilo"]
+texture = ExtResource("v2_jefe_barra_marco")
+texture_margin_left = 7.0
+texture_margin_right = 10.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxTexture" id="v2_jefe_nombre_franja_estilo"]
+texture = ExtResource("v2_jefe_nombre_franja")
+texture_margin_left = 6.0
+texture_margin_right = 5.0
+expand_margin_left = 1.0
+expand_margin_top = 0.0
+expand_margin_right = 1.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="v2_hud_caja_estilo"]
+texture = ExtResource("v2_hud_caja")
+texture_margin_left = 7.0
+texture_margin_right = 11.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxTexture" id="v2_hud_caja_grande_estilo"]
+texture = ExtResource("v2_hud_caja_grande")
+texture_margin_left = 12.0
+texture_margin_right = 16.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxTexture" id="v2_cartel_franja_estilo"]
+texture = ExtResource("v2_cartel_franja")
+texture_margin_left = 13.0
+texture_margin_right = 15.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 5.0
+expand_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxTexture" id="v2_cartel_linea_estilo"]
+texture = ExtResource("v2_cartel_linea")
+texture_margin_left = 8.0
+texture_margin_right = 12.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxTexture" id="v2_logro_etiqueta_estilo"]
+texture = ExtResource("v2_logro_etiqueta")
+texture_margin_left = 10.0
 texture_margin_right = 14.0
-texture_margin_bottom = 8.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
 
-[sub_resource type="StyleBoxTexture" id="pergamino_resaltado"]
-content_margin_left = 14.0
-content_margin_top = 2.0
-content_margin_right = 14.0
-content_margin_bottom = 6.0
-texture = ExtResource("9_pergamino_resaltado")
-texture_margin_left = 14.0
-texture_margin_top = 8.0
-texture_margin_right = 14.0
-texture_margin_bottom = 8.0
+[sub_resource type="StyleBoxTexture" id="v2_logro_etiqueta_grande_estilo"]
+texture = ExtResource("v2_logro_etiqueta_grande")
+texture_margin_left = 12.0
+texture_margin_right = 16.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
 
-[sub_resource type="StyleBoxTexture" id="pergamino_apretado"]
-content_margin_left = 14.0
-content_margin_top = 4.0
-content_margin_right = 14.0
-content_margin_bottom = 4.0
-texture = ExtResource("10_pergamino_apretado")
-texture_margin_left = 14.0
-texture_margin_top = 8.0
-texture_margin_right = 14.0
-texture_margin_bottom = 8.0
+[sub_resource type="StyleBoxTexture" id="v2_aviso_marco_estilo"]
+texture = ExtResource("v2_aviso_marco")
+texture_margin_left = 8.0
+texture_margin_right = 12.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
 
-[sub_resource type="StyleBoxTexture" id="panel_decreto"]
+[sub_resource type="StyleBoxTexture" id="v2_globito_caja_estilo"]
+texture = ExtResource("v2_globito_caja")
+texture_margin_left = 8.0
+texture_margin_right = 12.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxTexture" id="v2_pausa_panel_estilo"]
+texture = ExtResource("v2_pausa_panel")
+texture_margin_left = 12.0
+texture_margin_right = 16.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxTexture" id="v2_titulo_franja_estilo"]
+texture = ExtResource("v2_titulo_franja")
+texture_margin_left = 8.0
+texture_margin_right = 7.0
+expand_margin_left = 1.0
+expand_margin_top = 0.0
+expand_margin_right = 1.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="v2_boton_normal_estilo"]
+texture = ExtResource("v2_boton_normal")
+texture_margin_left = 6.0
+texture_margin_right = 6.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 1.0
+expand_margin_bottom = 1.0
+
+[sub_resource type="StyleBoxTexture" id="v2_boton_resaltado_estilo"]
+texture = ExtResource("v2_boton_resaltado")
+texture_margin_left = 7.0
+texture_margin_right = 7.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 1.0
+expand_margin_bottom = 1.0
+
+[sub_resource type="StyleBoxTexture" id="v2_boton_apretado_estilo"]
+texture = ExtResource("v2_boton_apretado")
+texture_margin_left = 7.0
+texture_margin_right = 7.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 1.0
+expand_margin_bottom = 1.0
+
+[sub_resource type="StyleBoxTexture" id="v2_bolsillo_fila_estilo"]
+texture = ExtResource("v2_bolsillo_fila")
+texture_margin_left = 7.0
+texture_margin_right = 11.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxTexture" id="v2_ficha_panel_estilo"]
+texture = ExtResource("v2_ficha_panel")
+texture_margin_left = 12.0
+texture_margin_right = 16.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxTexture" id="v2_ficha_barra_marco_estilo"]
+texture = ExtResource("v2_ficha_barra_marco")
+texture_margin_left = 4.0
+texture_margin_right = 4.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 1.0
+expand_margin_bottom = 1.0
+
+[sub_resource type="StyleBoxTexture" id="v2_ficha_barra_relleno_felipe_estilo"]
+texture = ExtResource("v2_ficha_barra_relleno_felipe")
+texture_margin_left = 3.0
+texture_margin_right = 3.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 1.0
+expand_margin_bottom = 1.0
+
+[sub_resource type="StyleBoxTexture" id="v2_ficha_barra_relleno_maquina_estilo"]
+texture = ExtResource("v2_ficha_barra_relleno_maquina")
+texture_margin_left = 3.0
+texture_margin_right = 3.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 1.0
+expand_margin_bottom = 1.0
+
+[sub_resource type="StyleBoxTexture" id="v2_ficha_barra_relleno_aspi_estilo"]
+texture = ExtResource("v2_ficha_barra_relleno_aspi")
+texture_margin_left = 3.0
+texture_margin_right = 3.0
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 1.0
+expand_margin_bottom = 1.0
+
+[sub_resource type="StyleBoxTexture" id="boton_v2_normal"]
+content_margin_left = 12.0
+content_margin_top = 1.5
+content_margin_right = 12.0
+content_margin_bottom = 1.5
+texture = ExtResource("v2_boton_normal")
+texture_margin_left = 6.0
+texture_margin_right = 6.0
+expand_margin_right = 1.0
+expand_margin_bottom = 1.0
+
+[sub_resource type="StyleBoxTexture" id="boton_v2_resaltado"]
+content_margin_left = 12.0
+content_margin_top = 1.5
+content_margin_right = 12.0
+content_margin_bottom = 1.5
+texture = ExtResource("v2_boton_resaltado")
+texture_margin_left = 7.0
+texture_margin_right = 7.0
+expand_margin_right = 1.0
+expand_margin_bottom = 1.0
+
+[sub_resource type="StyleBoxTexture" id="boton_v2_apretado"]
+content_margin_left = 12.0
+content_margin_top = 1.5
+content_margin_right = 12.0
+content_margin_bottom = 1.5
+texture = ExtResource("v2_boton_apretado")
+texture_margin_left = 7.0
+texture_margin_right = 7.0
+expand_margin_right = 1.0
+expand_margin_bottom = 1.0
+
+[sub_resource type="StyleBoxFlat" id="panel_v2"]
 content_margin_left = 8.0
 content_margin_top = 6.0
 content_margin_right = 8.0
 content_margin_bottom = 6.0
-texture = ExtResource("11_panel")
-texture_margin_left = 8.0
-texture_margin_top = 8.0
-texture_margin_right = 8.0
-texture_margin_bottom = 8.0
-
-[sub_resource type="StyleBoxTexture" id="cinta"]
-content_margin_left = 32.0
-content_margin_top = 4.0
-content_margin_right = 32.0
-content_margin_bottom = 10.0
-texture = ExtResource("12_cinta")
-texture_margin_left = 32.0
-texture_margin_top = 0.0
-texture_margin_right = 32.0
-texture_margin_bottom = 0.0
-
-[sub_resource type="StyleBoxTexture" id="etiqueta_logro"]
-content_margin_left = 52.0
-content_margin_top = 8.0
-content_margin_right = 34.0
-content_margin_bottom = 8.0
-texture = ExtResource("13_etiqueta")
-texture_margin_left = 52.0
-texture_margin_top = 0.0
-texture_margin_right = 34.0
-texture_margin_bottom = 0.0
-
-[sub_resource type="StyleBoxTexture" id="marco_retrato"]
-content_margin_left = 7.0
-content_margin_top = 7.0
-content_margin_right = 7.0
-content_margin_bottom = 7.0
-texture = ExtResource("14_marco_retrato")
-texture_margin_left = 8.0
-texture_margin_top = 8.0
-texture_margin_right = 8.0
-texture_margin_bottom = 8.0
-
-[sub_resource type="StyleBoxTexture" id="marco_barra"]
-content_margin_left = 3.0
-content_margin_top = 2.0
-content_margin_right = 3.0
-content_margin_bottom = 2.0
-texture = ExtResource("19_marco_barra")
-texture_margin_left = 4.0
-texture_margin_top = 3.0
-texture_margin_right = 4.0
-texture_margin_bottom = 3.0
-
-[sub_resource type="StyleBoxTexture" id="marco_barra_jefe"]
-content_margin_left = 24.0
-content_margin_top = 6.0
-content_margin_right = 24.0
-content_margin_bottom = 6.0
-texture = ExtResource("20_marco_barra_jefe")
-texture_margin_left = 24.0
-texture_margin_top = 0.0
-texture_margin_right = 24.0
-texture_margin_bottom = 0.0
-
-[sub_resource type="StyleBoxFlat" id="opcion_normal"]
-bg_color = Color(0.13, 0.09, 0.1, 0)
-content_margin_left = 10.0
-content_margin_top = 1.0
-content_margin_right = 10.0
-content_margin_bottom = 1.0
-
-[sub_resource type="StyleBoxFlat" id="opcion_foco"]
-bg_color = Color(1, 0.835, 0.541, 0.18)
+bg_color = Color(0.188235, 0.141176, 0.172549, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(1, 0.835294, 0.541176, 1)
-content_margin_left = 10.0
-content_margin_top = 1.0
-content_margin_right = 10.0
-content_margin_bottom = 1.0
+border_color = Color(0.0705882, 0.0470588, 0.0705882, 1)
+corner_radius_top_left = 4
+corner_radius_bottom_right = 4
+corner_detail = 1
 
 [resource]
 default_font = ExtResource("5_media")
 default_font_size = 16
-BotonMenu/base_type = &"Button"
-BotonMenu/colors/font_color = Color(0.952941, 0.937255, 0.909804, 1)
-BotonMenu/colors/font_focus_color = Color(1, 0.835294, 0.541176, 1)
-BotonMenu/colors/font_hover_color = Color(1, 0.835294, 0.541176, 1)
-BotonMenu/colors/font_pressed_color = Color(1, 0.835294, 0.541176, 1)
-BotonMenu/font_sizes/font_size = 16
-BotonMenu/styles/normal = SubResource("boton_normal")
-BotonMenu/styles/hover = SubResource("boton_foco")
-BotonMenu/styles/pressed = SubResource("boton_foco")
-BotonMenu/styles/focus = SubResource("boton_foco")
-CuadroDialogo/base_type = &"Panel"
-CuadroDialogo/styles/panel = SubResource("panel_decreto")
-NombreDialogo/base_type = &"Label"
-NombreDialogo/colors/font_color = Color(0.635294, 0.12549, 0.152941, 1)
-NombreDialogo/font_sizes/font_size = 8
-NombreDialogo/fonts/font = ExtResource("4_chica")
-TextoDialogo/base_type = &"RichTextLabel"
-TextoDialogo/colors/default_color = Color(0.231373, 0.137255, 0.0980392, 1)
-TextoDialogo/constants/line_separation = -3
-TextoDialogo/font_sizes/normal_font_size = 16
 Felipe/colors/texto_claro = Color(1, 0.97, 0.92, 1)
 Felipe/colors/borde_dorado = Color(0.95, 0.85, 0.6, 1)
 Felipe/colors/nombre_hablante = Color(1, 0.8, 0.4, 1)
@@ -189,10 +453,6 @@ Felipe/colors/corazon_vacio = Color(0.25, 0.18, 0.18, 0.55)
 Felipe/colors/texto_oscuro = Color(0.168627, 0.141176, 0.129412, 1)
 Felipe/colors/texto_apagado = Color(0.435294, 0.384314, 0.356863, 1)
 Felipe/colors/fondo_medidor = Color(1, 0.98, 0.95, 0.85)
-Felipe/colors/fondo_pantalla = Color(0.13, 0.09, 0.1, 0.88)
-Felipe/colors/fondo_aviso = Color(0.13, 0.09, 0.1, 0.75)
-Felipe/colors/pantalla_texto = Color(0.952941, 0.937255, 0.909804, 1)
-Felipe/colors/pantalla_acento = Color(1, 0.835294, 0.541176, 1)
 Felipe/colors/fondo_hud = Color(0.1, 0.07, 0.09, 0.78)
 Felipe/colors/contorno_palabra = Color(0.08, 0.04, 0.07, 1)
 Felipe/colors/censura_fondo = Color(0.2, 0.42, 0.72, 1)
@@ -237,19 +497,8 @@ Felipe/colors/sombra_texto = Color(0, 0, 0, 1)
 Felipe/colors/blanco = Color(1, 1, 1, 1)
 Felipe/colors/destello = Color(1, 1, 1, 0.8)
 Felipe/colors/negro = Color(0, 0, 0, 1)
-Felipe/colors/resumen_velo = Color(0.08, 0.05, 0.05, 0.82)
 Felipe/colors/resumen_borde = Color(0.85, 0.65, 0.25, 1)
 Felipe/colors/resumen_pano = Color(0.12, 0.3, 0.24, 1)
-Felipe/colors/resumen_fila = Color(0.62, 0.45, 0.28, 0.22)
-Felipe/colors/resumen_titulo = Color(1, 0.85, 0.3, 1)
-Felipe/colors/resumen_subtitulo = Color(0.462745, 0.313726, 0.215686, 1)
-Felipe/colors/resumen_marca_a = Color(0.635294, 0.12549, 0.152941, 1)
-Felipe/colors/resumen_marca_b = Color(0.35, 0.65, 1, 1)
-Felipe/colors/resumen_texto = Color(0.231373, 0.137255, 0.0980392, 1)
-Felipe/colors/resumen_nota = Color(0.462745, 0.313726, 0.215686, 1)
-Felipe/colors/resumen_contorno = Color(0.03, 0.05, 0.04, 1)
-Felipe/colors/resumen_pista = Color(0.462745, 0.313726, 0.215686, 1)
-Felipe/colors/resumen_frase_fondo = Color(0.62, 0.45, 0.28, 0.22)
 Felipe/colors/indicador_contorno = Color(1, 0.86, 0.56, 1)
 Felipe/colors/indicador_fondo = Color(0.13, 0.09, 0.12, 0.9)
 Felipe/colors/madera = Color(0.541176, 0.352941, 0.235294, 1)
@@ -266,7 +515,6 @@ Felipe/colors/libreta_papel = Color(0.98, 0.95, 0.85, 1)
 Felipe/colors/globo_fondo = Color(0.98, 0.95, 0.85, 1)
 Felipe/colors/peligro = Color(0.878, 0.282, 0.231, 1)
 Felipe/colors/peligro_claro = Color(1, 0.604, 0.478, 1)
-Felipe/colors/oportunidad = Color(1, 0.878, 0.4, 1)
 Felipe/colors/oportunidad_fondo = Color(0.06, 0.12, 0.05, 0.9)
 Felipe/colors/libreta_renglon = Color(0.46, 0.31, 0.21, 0.22)
 Felipe/colors/libreta_margen = Color(0.635294, 0.12549, 0.152941, 0.55)
@@ -303,20 +551,10 @@ Felipe/font_sizes/texto = 16
 Felipe/fonts/texto = ExtResource("5_media")
 Felipe/font_sizes/texto_chico = 16
 Felipe/fonts/texto_chico = ExtResource("5_media")
-Felipe/font_sizes/nota = 8
-Felipe/fonts/nota = ExtResource("4_chica")
-Felipe/font_sizes/mini = 8
-Felipe/fonts/mini = ExtResource("4_chica")
 Felipe/font_sizes/pausa = 16
 Felipe/fonts/pausa = ExtResource("6_titulo")
 Felipe/font_sizes/fin = 24
 Felipe/fonts/fin = ExtResource("6_titulo")
-Felipe/font_sizes/medidor_vidas = 8
-Felipe/fonts/medidor_vidas = ExtResource("4_chica")
-Felipe/font_sizes/medidor_collar = 8
-Felipe/fonts/medidor_collar = ExtResource("4_chica")
-Felipe/font_sizes/logro_nombre = 16
-Felipe/fonts/logro_nombre = ExtResource("5_media")
 Felipe/font_sizes/hud = 16
 Felipe/fonts/hud = ExtResource("5_media")
 Felipe/font_sizes/cartel_titulo = 24
@@ -327,52 +565,24 @@ Felipe/font_sizes/cartel_recompensa = 16
 Felipe/fonts/cartel_recompensa = ExtResource("5_media")
 Felipe/font_sizes/tarjeta_titulo = 16
 Felipe/fonts/tarjeta_titulo = ExtResource("6_titulo")
-Felipe/font_sizes/tarjeta_texto = 8
-Felipe/fonts/tarjeta_texto = ExtResource("4_chica")
-Felipe/font_sizes/dialogo_nombre = 8
-Felipe/fonts/dialogo_nombre = ExtResource("4_chica")
-Felipe/font_sizes/dialogo_texto = 16
-Felipe/font_sizes/globo_texto = 16
-Felipe/fonts/dialogo_texto = ExtResource("5_media")
-Felipe/fonts/globo_texto = ExtResource("7_negrita")
 Felipe/font_sizes/boton = 16
 Felipe/fonts/boton = ExtResource("5_media")
-Felipe/font_sizes/jefe_barra = 8
-Felipe/fonts/jefe_barra = ExtResource("4_chica")
 Felipe/font_sizes/libreta_titulo = 16
 Felipe/fonts/libreta_titulo = ExtResource("5_media")
-Felipe/font_sizes/libreta_subtitulo = 8
-Felipe/fonts/libreta_subtitulo = ExtResource("4_chica")
-Felipe/font_sizes/libreta_cuarto = 8
-Felipe/fonts/libreta_cuarto = ExtResource("4_chica")
 Felipe/font_sizes/libreta_renglon = 16
 Felipe/fonts/libreta_renglon = ExtResource("5_media")
-Felipe/font_sizes/libreta_detalle = 8
-Felipe/fonts/libreta_detalle = ExtResource("4_chica")
-Felipe/font_sizes/libreta_pie = 8
-Felipe/fonts/libreta_pie = ExtResource("4_chica")
 Felipe/font_sizes/libreta_cuenta = 16
 Felipe/fonts/libreta_cuenta = ExtResource("5_media")
 Felipe/font_sizes/resumen_titulo = 24
 Felipe/fonts/resumen_titulo = ExtResource("6_titulo")
-Felipe/font_sizes/resumen_subtitulo = 8
-Felipe/fonts/resumen_subtitulo = ExtResource("4_chica")
 Felipe/font_sizes/resumen_fila = 16
 Felipe/fonts/resumen_fila = ExtResource("5_media")
-Felipe/font_sizes/resumen_nota = 8
-Felipe/fonts/resumen_nota = ExtResource("4_chica")
 Felipe/font_sizes/resumen_numero = 16
 Felipe/fonts/resumen_numero = ExtResource("6_titulo")
 Felipe/font_sizes/resumen_numero_golpe = 24
 Felipe/fonts/resumen_numero_golpe = ExtResource("6_titulo")
 Felipe/font_sizes/resumen_frase = 16
 Felipe/fonts/resumen_frase = ExtResource("5_media")
-Felipe/font_sizes/resumen_nombre = 8
-Felipe/fonts/resumen_nombre = ExtResource("4_chica")
-Felipe/font_sizes/resumen_pista = 8
-Felipe/fonts/resumen_pista = ExtResource("4_chica")
-Felipe/font_sizes/indicador = 8
-Felipe/fonts/indicador = ExtResource("4_chica")
 Felipe/font_sizes/jefe_subtitulo = 16
 Felipe/fonts/jefe_subtitulo = ExtResource("5_media")
 Felipe/font_sizes/jefe_inicio = 32
@@ -403,49 +613,186 @@ Felipe/font_sizes/tecla = 8
 Felipe/fonts/tecla = ExtResource("4_chica")
 Felipe/font_sizes/letrero = 16
 Felipe/fonts/letrero = ExtResource("6_titulo")
-BotonOpcion/base_type = &"BotonMenu"
-BotonOpcion/font_sizes/font_size = 16
-BotonOpcion/styles/normal = SubResource("opcion_normal")
-BotonOpcion/styles/hover = SubResource("opcion_foco")
-BotonOpcion/styles/pressed = SubResource("opcion_foco")
-BotonOpcion/styles/focus = SubResource("opcion_foco")
-BotonPergamino/base_type = &"BotonMenu"
-BotonPergamino/colors/font_color = Color(0.231373, 0.137255, 0.0980392, 1)
-BotonPergamino/colors/font_focus_color = Color(0.231373, 0.137255, 0.0980392, 1)
-BotonPergamino/colors/font_hover_color = Color(0.231373, 0.137255, 0.0980392, 1)
-BotonPergamino/colors/font_pressed_color = Color(0.231373, 0.137255, 0.0980392, 1)
-BotonPergamino/fonts/font = ExtResource("7_negrita")
-BotonPergamino/font_sizes/font_size = 16
-BotonPergamino/styles/normal = SubResource("pergamino")
-BotonPergamino/styles/hover = SubResource("pergamino_resaltado")
-BotonPergamino/styles/focus = SubResource("pergamino_resaltado")
-BotonPergamino/styles/pressed = SubResource("pergamino_apretado")
-Felipe/styles/panel = SubResource("panel_decreto")
-Felipe/styles/cinta = SubResource("cinta")
-Felipe/styles/etiqueta_logro = SubResource("etiqueta_logro")
-Felipe/styles/marco_retrato = SubResource("marco_retrato")
-Felipe/styles/marco_barra = SubResource("marco_barra")
-Felipe/styles/marco_barra_jefe = SubResource("marco_barra_jefe")
-Felipe/icons/hud_corazon = ExtResource("15_hud_corazon")
-Felipe/icons/hud_libreta = ExtResource("16_hud_libreta")
-Felipe/icons/hud_calcetin = ExtResource("17_hud_calcetin")
-Felipe/icons/hud_foto = ExtResource("18_hud_foto")
-Felipe/colors/tinta_decreto = Color(0.231373, 0.137255, 0.0980392, 1)
-Felipe/colors/tinta_decreto_suave = Color(0.462745, 0.313726, 0.215686, 1)
-Felipe/colors/lacre = Color(0.635294, 0.12549, 0.152941, 1)
-Felipe/font_sizes/decreto_titulo = 16
-Felipe/fonts/decreto_titulo = ExtResource("6_titulo")
-Felipe/font_sizes/ficha_nombre = 8
-Felipe/fonts/ficha_nombre = ExtResource("4_chica")
-Felipe/font_sizes/ficha_frase = 8
-Felipe/fonts/ficha_frase = ExtResource("4_chica")
-Felipe/font_sizes/ficha_peso = 16
-Felipe/fonts/ficha_peso = ExtResource("7_negrita")
-TituloDecreto/base_type = &"Label"
-TituloDecreto/colors/font_color = Color(0.231373, 0.137255, 0.0980392, 1)
-TituloDecreto/constants/line_spacing = 0
-TituloDecreto/fonts/font = ExtResource("6_titulo")
-TituloDecreto/font_sizes/font_size = 16
 Felipe/icons/foto_unicornio = ExtResource("21_unicornio")
-MarcoRetrato/base_type = &"Panel"
-MarcoRetrato/styles/panel = SubResource("marco_retrato")
+Felipe/styles/v2_dialogo_marco_felipe = SubResource("v2_dialogo_marco_felipe_estilo")
+Felipe/styles/v2_dialogo_marco_felipe_grande = SubResource("v2_dialogo_marco_felipe_grande_estilo")
+Felipe/styles/v2_dialogo_marco_valeria = SubResource("v2_dialogo_marco_valeria_estilo")
+Felipe/styles/v2_dialogo_marco_valeria_grande = SubResource("v2_dialogo_marco_valeria_grande_estilo")
+Felipe/styles/v2_dialogo_marco_aspi = SubResource("v2_dialogo_marco_aspi_estilo")
+Felipe/styles/v2_dialogo_marco_aspi_grande = SubResource("v2_dialogo_marco_aspi_grande_estilo")
+Felipe/icons/v2_dialogo_flecha = ExtResource("v2_dialogo_flecha")
+Felipe/styles/v2_nombre_franja_felipe = SubResource("v2_nombre_franja_felipe_estilo")
+Felipe/styles/v2_nombre_franja_felipe_grande = SubResource("v2_nombre_franja_felipe_grande_estilo")
+Felipe/styles/v2_nombre_franja_valeria = SubResource("v2_nombre_franja_valeria_estilo")
+Felipe/styles/v2_nombre_franja_valeria_grande = SubResource("v2_nombre_franja_valeria_grande_estilo")
+Felipe/styles/v2_nombre_franja_aspi = SubResource("v2_nombre_franja_aspi_estilo")
+Felipe/styles/v2_nombre_franja_aspi_grande = SubResource("v2_nombre_franja_aspi_grande_estilo")
+Felipe/icons/v2_retrato_fondo_felipe = ExtResource("v2_retrato_fondo_felipe")
+Felipe/icons/v2_retrato_fondo_felipe_grande = ExtResource("v2_retrato_fondo_felipe_grande")
+Felipe/icons/v2_retrato_fondo_valeria = ExtResource("v2_retrato_fondo_valeria")
+Felipe/icons/v2_retrato_fondo_valeria_grande = ExtResource("v2_retrato_fondo_valeria_grande")
+Felipe/icons/v2_retrato_fondo_aspi = ExtResource("v2_retrato_fondo_aspi")
+Felipe/icons/v2_retrato_fondo_aspi_grande = ExtResource("v2_retrato_fondo_aspi_grande")
+Felipe/icons/v2_fragmentos_felipe = ExtResource("v2_fragmentos_felipe")
+Felipe/icons/v2_fragmentos_valeria = ExtResource("v2_fragmentos_valeria")
+Felipe/icons/v2_fragmentos_aspi = ExtResource("v2_fragmentos_aspi")
+Felipe/icons/v2_jefe_retrato_marco = ExtResource("v2_jefe_retrato_marco")
+Felipe/styles/v2_jefe_barra_marco = SubResource("v2_jefe_barra_marco_estilo")
+Felipe/icons/v2_jefe_barra_cortes = ExtResource("v2_jefe_barra_cortes")
+Felipe/icons/v2_jefe_barra_relleno = ExtResource("v2_jefe_barra_relleno")
+Felipe/icons/v2_jefe_barra_dano = ExtResource("v2_jefe_barra_dano")
+Felipe/styles/v2_jefe_nombre_franja = SubResource("v2_jefe_nombre_franja_estilo")
+Felipe/styles/v2_hud_caja = SubResource("v2_hud_caja_estilo")
+Felipe/styles/v2_hud_caja_grande = SubResource("v2_hud_caja_grande_estilo")
+Felipe/icons/v2_huella_llena = ExtResource("v2_huella_llena")
+Felipe/icons/v2_huella_llena_grande = ExtResource("v2_huella_llena_grande")
+Felipe/icons/v2_huella_media = ExtResource("v2_huella_media")
+Felipe/icons/v2_huella_media_grande = ExtResource("v2_huella_media_grande")
+Felipe/icons/v2_huella_vacia = ExtResource("v2_huella_vacia")
+Felipe/icons/v2_huella_vacia_grande = ExtResource("v2_huella_vacia_grande")
+Felipe/icons/v2_huella_golpe = ExtResource("v2_huella_golpe")
+Felipe/icons/v2_huella_golpe_grande = ExtResource("v2_huella_golpe_grande")
+Felipe/icons/v2_huella_curando = ExtResource("v2_huella_curando")
+Felipe/icons/v2_huella_curando_grande = ExtResource("v2_huella_curando_grande")
+Felipe/styles/v2_cartel_franja = SubResource("v2_cartel_franja_estilo")
+Felipe/icons/v2_cartel_sello = ExtResource("v2_cartel_sello")
+Felipe/styles/v2_cartel_linea = SubResource("v2_cartel_linea_estilo")
+Felipe/styles/v2_logro_etiqueta = SubResource("v2_logro_etiqueta_estilo")
+Felipe/icons/v2_logro_icono = ExtResource("v2_logro_icono")
+Felipe/styles/v2_logro_etiqueta_grande = SubResource("v2_logro_etiqueta_grande_estilo")
+Felipe/icons/v2_logro_icono_grande = ExtResource("v2_logro_icono_grande")
+Felipe/styles/v2_aviso_marco = SubResource("v2_aviso_marco_estilo")
+Felipe/icons/v2_aviso_flecha = ExtResource("v2_aviso_flecha")
+Felipe/styles/v2_globito_caja = SubResource("v2_globito_caja_estilo")
+Felipe/icons/v2_globito_oreja_izq = ExtResource("v2_globito_oreja_izq")
+Felipe/icons/v2_globito_oreja_der = ExtResource("v2_globito_oreja_der")
+Felipe/icons/v2_globito_cola = ExtResource("v2_globito_cola")
+Felipe/styles/v2_pausa_panel = SubResource("v2_pausa_panel_estilo")
+Felipe/styles/v2_titulo_franja = SubResource("v2_titulo_franja_estilo")
+Felipe/styles/v2_boton_normal = SubResource("v2_boton_normal_estilo")
+Felipe/styles/v2_boton_resaltado = SubResource("v2_boton_resaltado_estilo")
+Felipe/styles/v2_boton_apretado = SubResource("v2_boton_apretado_estilo")
+Felipe/styles/v2_bolsillo_fila = SubResource("v2_bolsillo_fila_estilo")
+Felipe/icons/v2_icono_snack = ExtResource("v2_icono_snack")
+Felipe/icons/v2_icono_calcetin = ExtResource("v2_icono_calcetin")
+Felipe/icons/v2_icono_foto = ExtResource("v2_icono_foto")
+Felipe/styles/v2_ficha_panel = SubResource("v2_ficha_panel_estilo")
+Felipe/icons/v2_ficha_retrato_fondo = ExtResource("v2_ficha_retrato_fondo")
+Felipe/styles/v2_ficha_barra_marco = SubResource("v2_ficha_barra_marco_estilo")
+Felipe/styles/v2_ficha_barra_relleno_felipe = SubResource("v2_ficha_barra_relleno_felipe_estilo")
+Felipe/styles/v2_ficha_barra_relleno_maquina = SubResource("v2_ficha_barra_relleno_maquina_estilo")
+Felipe/styles/v2_ficha_barra_relleno_aspi = SubResource("v2_ficha_barra_relleno_aspi_estilo")
+Felipe/icons/v2_cara_dialogo_aspi_0 = ExtResource("v2_cara_dialogo_aspi_0")
+Felipe/icons/v2_cara_dialogo_aspi_1 = ExtResource("v2_cara_dialogo_aspi_1")
+Felipe/icons/v2_cara_dialogo_felipe_0 = ExtResource("v2_cara_dialogo_felipe_0")
+Felipe/icons/v2_cara_dialogo_felipe_1 = ExtResource("v2_cara_dialogo_felipe_1")
+Felipe/icons/v2_cara_dialogo_felipe_2 = ExtResource("v2_cara_dialogo_felipe_2")
+Felipe/icons/v2_cara_dialogo_felipe_3 = ExtResource("v2_cara_dialogo_felipe_3")
+Felipe/icons/v2_cara_dialogo_felipe_4 = ExtResource("v2_cara_dialogo_felipe_4")
+Felipe/icons/v2_cara_dialogo_felipe_5 = ExtResource("v2_cara_dialogo_felipe_5")
+Felipe/icons/v2_cara_dialogo_felipe_6 = ExtResource("v2_cara_dialogo_felipe_6")
+Felipe/icons/v2_cara_dialogo_felipe_7 = ExtResource("v2_cara_dialogo_felipe_7")
+Felipe/icons/v2_cara_dialogo_felipe_8 = ExtResource("v2_cara_dialogo_felipe_8")
+Felipe/icons/v2_cara_dialogo_valeria_0 = ExtResource("v2_cara_dialogo_valeria_0")
+Felipe/icons/v2_cara_dialogo_valeria_1 = ExtResource("v2_cara_dialogo_valeria_1")
+Felipe/icons/v2_cara_dialogo_valeria_2 = ExtResource("v2_cara_dialogo_valeria_2")
+Felipe/icons/v2_cara_dialogo_valeria_3 = ExtResource("v2_cara_dialogo_valeria_3")
+Felipe/icons/v2_cara_ficha_felipe = ExtResource("v2_cara_ficha_felipe")
+Felipe/icons/v2_cara_hud_felipe = ExtResource("v2_cara_hud_felipe")
+Felipe/icons/v2_cara_hud_felipe_golpe = ExtResource("v2_cara_hud_felipe_golpe")
+Felipe/icons/v2_cara_hud_felipe_golpe_grande = ExtResource("v2_cara_hud_felipe_golpe_grande")
+Felipe/icons/v2_cara_hud_felipe_grande = ExtResource("v2_cara_hud_felipe_grande")
+Felipe/icons/v2_cara_jefe_aspi = ExtResource("v2_cara_jefe_aspi")
+Felipe/colors/ui_fondo = Color(0.141176, 0.101961, 0.14902, 1)
+Felipe/colors/ui_panel = Color(0.188235, 0.141176, 0.172549, 1)
+Felipe/colors/ui_linea = Color(0.956863, 0.886275, 0.733333, 1)
+Felipe/colors/ui_texto = Color(1, 0.941176, 0.835294, 1)
+Felipe/colors/ui_apagado = Color(0.541176, 0.454902, 0.501961, 1)
+Felipe/colors/ui_contorno = Color(0.0705882, 0.0470588, 0.0705882, 1)
+Felipe/colors/ui_sombra = Color(0.0431373, 0.027451, 0.0431373, 1)
+Felipe/colors/personaje_felipe = Color(0.909804, 0.568627, 0.227451, 1)
+Felipe/colors/oportunidad = Color(1, 0.878431, 0.4, 1)
+Felipe/colors/personaje_valeria = Color(0.847059, 0.2, 0.419608, 1)
+Felipe/colors/personaje_aspi = Color(0.878431, 0.282353, 0.282353, 1)
+Felipe/colors/ui_maquina = Color(0.298039, 0.788235, 0.878431, 1)
+Felipe/colors/felipe_luz = Color(0.956863, 0.784314, 0.611765, 1)
+Felipe/colors/felipe_oscuro = Color(0.615686, 0.384314, 0.172549, 1)
+Felipe/colors/ui_vacio = Color(0.313725, 0.25098, 0.286275, 1)
+Felipe/colors/aspi_luz = Color(0.933333, 0.603922, 0.603922, 1)
+BotonMenu/base_type = &"Button"
+BotonMenu/colors/font_color = Color(1, 0.941176, 0.835294, 1)
+BotonMenu/colors/font_focus_color = Color(0.0705882, 0.0470588, 0.0705882, 1)
+BotonMenu/colors/font_hover_color = Color(0.0705882, 0.0470588, 0.0705882, 1)
+BotonMenu/colors/font_pressed_color = Color(0.0705882, 0.0470588, 0.0705882, 1)
+BotonMenu/colors/font_hover_pressed_color = Color(0.0705882, 0.0470588, 0.0705882, 1)
+BotonMenu/font_sizes/font_size = 16
+BotonMenu/fonts/font = ExtResource("5_media")
+BotonMenu/styles/normal = SubResource("boton_v2_normal")
+BotonMenu/styles/hover = SubResource("boton_v2_resaltado")
+BotonMenu/styles/focus = SubResource("boton_v2_resaltado")
+BotonMenu/styles/pressed = SubResource("boton_v2_apretado")
+BotonMenu/styles/hover_pressed = SubResource("boton_v2_apretado")
+BotonOpcion/base_type = &"BotonMenu"
+BotonOpcion/constants/align_to_largest_stylebox = 1
+Felipe/styles/panel = SubResource("panel_v2")
+Felipe/font_sizes/nota = 16
+Felipe/fonts/nota = ExtResource("5_media")
+Felipe/font_sizes/medidor_collar = 16
+Felipe/fonts/medidor_collar = ExtResource("5_media")
+Felipe/font_sizes/libreta_subtitulo = 16
+Felipe/fonts/libreta_subtitulo = ExtResource("5_media")
+Felipe/font_sizes/libreta_cuarto = 16
+Felipe/fonts/libreta_cuarto = ExtResource("5_media")
+Felipe/font_sizes/libreta_detalle = 16
+Felipe/fonts/libreta_detalle = ExtResource("5_media")
+Felipe/font_sizes/libreta_pie = 16
+Felipe/fonts/libreta_pie = ExtResource("5_media")
+Felipe/font_sizes/resumen_subtitulo = 16
+Felipe/fonts/resumen_subtitulo = ExtResource("5_media")
+Felipe/font_sizes/resumen_nota = 16
+Felipe/fonts/resumen_nota = ExtResource("5_media")
+Felipe/font_sizes/resumen_pista = 16
+Felipe/fonts/resumen_pista = ExtResource("5_media")
+Felipe/font_sizes/indicador = 16
+Felipe/fonts/indicador = ExtResource("5_media")
+Felipe/font_sizes/ficha_frase = 16
+Felipe/fonts/ficha_frase = ExtResource("5_media")
+Felipe/font_sizes/globo_texto = 16
+Felipe/fonts/globo_texto = ExtResource("5_media")
+Felipe/font_sizes/dialogo_texto = 16
+Felipe/fonts/dialogo_texto = ExtResource("5_media")
+Felipe/font_sizes/logro_nombre = 16
+Felipe/fonts/logro_nombre = ExtResource("5_media")
+Felipe/font_sizes/dialogo_nombre = 16
+Felipe/fonts/dialogo_nombre = ExtResource("7_negrita")
+Felipe/font_sizes/jefe_barra = 16
+Felipe/fonts/jefe_barra = ExtResource("7_negrita")
+Felipe/font_sizes/resumen_nombre = 16
+Felipe/fonts/resumen_nombre = ExtResource("7_negrita")
+Felipe/font_sizes/ficha_nombre = 16
+Felipe/fonts/ficha_nombre = ExtResource("7_negrita")
+Felipe/font_sizes/bolsillo_valor = 16
+Felipe/fonts/bolsillo_valor = ExtResource("7_negrita")
+Felipe/font_sizes/dialogo_texto_grande = 32
+Felipe/fonts/dialogo_texto_grande = ExtResource("5_media")
+Felipe/font_sizes/logro_nombre_grande = 32
+Felipe/fonts/logro_nombre_grande = ExtResource("5_media")
+Felipe/font_sizes/dialogo_nombre_grande = 32
+Felipe/fonts/dialogo_nombre_grande = ExtResource("7_negrita")
+Felipe/font_sizes/cartel_kit = 16
+Felipe/fonts/cartel_kit = ExtResource("6_titulo")
+Felipe/colors/pantalla_texto = Color(1, 0.941176, 0.835294, 1)
+Felipe/colors/pantalla_acento = Color(0.909804, 0.568627, 0.227451, 1)
+Felipe/colors/fondo_pantalla = Color(0.141176, 0.101961, 0.14902, 0.784314)
+Felipe/colors/fondo_aviso = Color(0.188235, 0.141176, 0.172549, 0.92)
+Felipe/colors/resumen_velo = Color(0.141176, 0.101961, 0.14902, 0.88)
+Felipe/colors/resumen_titulo = Color(0.909804, 0.568627, 0.227451, 1)
+Felipe/colors/resumen_texto = Color(1, 0.941176, 0.835294, 1)
+Felipe/colors/resumen_subtitulo = Color(0.541176, 0.454902, 0.501961, 1)
+Felipe/colors/resumen_nota = Color(0.541176, 0.454902, 0.501961, 1)
+Felipe/colors/resumen_pista = Color(0.541176, 0.454902, 0.501961, 1)
+Felipe/colors/resumen_fila = Color(0.141176, 0.101961, 0.14902, 1)
+Felipe/colors/resumen_frase_fondo = Color(0.141176, 0.101961, 0.14902, 1)
+Felipe/colors/resumen_marca_a = Color(0.909804, 0.568627, 0.227451, 1)
+Felipe/colors/resumen_marca_b = Color(0.298039, 0.788235, 0.878431, 1)
+Felipe/colors/resumen_contorno = Color(0.0705882, 0.0470588, 0.0705882, 1)

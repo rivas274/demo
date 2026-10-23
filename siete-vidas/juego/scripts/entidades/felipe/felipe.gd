@@ -23,8 +23,7 @@ signal peso_cambiado(kilos: float)
 signal snacks_cambiados(cantidad: int)
 ## Mantuvo el botón de acción para comer, pero el bolsillo está vacío.
 signal sin_snacks
-## Cambiaron sus intentos (las nueve vidas) o se puso el Collar de la Vergüenza (para la interfaz).
-signal vidas_cambiadas(vidas: int)
+## Se puso el Collar de la Vergüenza (al tercer desmayo del nivel; para la interfaz).
 signal collar_cambiado(tiene: bool)
 ## Escalera: terminó un escalón (contando desde 1) y terminó todos los pedidos.
 signal escalon_subido(numero: int)
@@ -71,10 +70,10 @@ const BOLA_ESTAMBRE := preload("res://assets/felipe/estambre-bola.png")
 const DISTANCIA_ESTAMBRE := 28.0
 ## Acciones que, presionadas, cuentan como "estar jugando" (cortan el ocio y reinician la espera).
 const ACCIONES := ["mover_izquierda", "mover_derecha", "saltar", "zoomies", "zarpazo", "interactuar", "agacharse", "maullar"]
-## Vida: corazones por vida y vidas por partida. Al perder la última, despierta en casa con el Collar de la Vergüenza.
-## Los corazones los lleva su pieza Vida (nodo hijo «Vida» de felipe.tscn); las nueve vidas, este script.
-const CORAZONES_MAX := 5
-const VIDAS_MAX := 9
+## Salud: las 9 huellas (las 9 vidas del título SON la salud). Su pieza Vida (nodo hijo «Vida» de felipe.tscn) cuenta
+## 18 medias huellas; las reglas (golpes, curar, desmayo, collar) están en SaludFelipe.
+const HUELLAS_MAX := SaludFelipe.HUELLAS
+const MEDIAS_MAX := SaludFelipe.MEDIAS_MAX
 ## Segundos sin recibir más daño después de un golpe (parpadea).
 const TIEMPO_INVULNERABLE := 1.2
 ## Segundos desmayado antes de reaparecer.
@@ -161,17 +160,12 @@ var doble_salto_disponible := true
 ## Posturas que conviven con los estados (se puede estar en SUELO y agachado): las manejan AgachadoFelipe y TreparFelipe.
 var agachado := false
 var trepando := false
-## Corazones que le quedan (atajo a su pieza Vida).
-var corazones: int:
+## Medias huellas que le quedan (atajo a su pieza Vida: 18 = las 9 huellas llenas).
+var medias: int:
 	get:
-		return vida.actual if vida else CORAZONES_MAX
+		return vida.actual if vida else MEDIAS_MAX
 	set(valor):
 		vida.fijar(valor)
-## Intentos que le quedan (las nueve vidas del título; no confundir con la pieza Vida, que son los corazones).
-var vidas := VIDAS_MAX:
-	set(valor):
-		vidas = valor
-		vidas_cambiadas.emit(vidas)
 ## Kilos: solo los muestra la Ficha de Su Majestad (pausa), que escucha `peso_cambiado`.
 var peso := PESO_INICIAL:
 	set(valor):
@@ -205,6 +199,8 @@ var animador: AnimadorFelipe
 var manas: ManasFelipe
 var agachado_felipe: AgachadoFelipe
 var trepar: TreparFelipe
+## Sus 9 huellas: golpes, curar, desmayos y el Collar de la Vergüenza.
+var salud: SaludFelipe
 
 var _estado: EstadoFelipe
 var _estados := {}
@@ -221,7 +217,7 @@ var _chispas: Chispas
 @onready var sprite: AnimatedSprite2D = $Sprite
 @onready var polvo: CPUParticles2D = $Polvo
 @onready var cuerpo: CollisionShape2D = $Cuerpo
-## Sus corazones: 5, con 1,2 s invulnerable después de cada golpe.
+## Sus 9 huellas (18 medias), con 1,2 s invulnerable después de cada golpe.
 @onready var vida: Vida = $Vida
 
 
@@ -234,6 +230,7 @@ func _ready() -> void:
 	manas = ManasFelipe.new(self)
 	agachado_felipe = AgachadoFelipe.new(self)
 	trepar = TreparFelipe.new(self)
+	salud = SaludFelipe.new(self)
 	_crear_estados()
 	cuerpo.shape = cuerpo.shape.duplicate()
 	# El tiempo invulnerable lo descuenta Felipe al empezar su cuadro (_actualizar_invulnerable): así se congela mientras
@@ -587,8 +584,9 @@ func terminar_escalera() -> void:
 
 # --- Daño ----------------------------------------------------------------------------------------------------------
 
-## Daño (lo llaman las piezas HaceDano): quita corazones de su Vida, empuja lejos de quien golpea y deja un rato
-## invulnerable (parpadea). Sin corazones, se desmaya y pierde una vida (EstadoDesmayado).
+## Daño (lo llaman las piezas HaceDano, en medias huellas): quita de su Vida lo que diga la opción «Golpes», empuja
+## lejos de quien golpea y deja un rato invulnerable (parpadea), aunque no quite nada. Sin huellas, se desmaya
+## (EstadoDesmayado) y vuelve al último descanso sin perder nada.
 func recibir_dano(cantidad: int, desde_x: float) -> void:
 	if not vida.puede_recibir() or estado == Estado.DESMAYADO:
 		return
@@ -598,7 +596,7 @@ func recibir_dano(cantidad: int, desde_x: float) -> void:
 		cambiar_estado(Estado.SUELO if is_on_floor() else Estado.AIRE)
 	if agachado:
 		agachado_felipe.poner(false)
-	vida.danar(cantidad)
+	vida.danar(SaludFelipe.medias_del_golpe(cantidad))
 	trepando = false
 	sonido.emit("golpe")
 	if vida.muerto:

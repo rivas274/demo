@@ -1,47 +1,41 @@
 class_name Dialogo
 extends CanvasLayer
-## Cuadro de diálogo abajo, con retrato (pilar 5): los pensamientos de Felipe (sus 9 caras de
-## felipe-retratos.png) y lo que dicen los otros personajes (Valeria, A.S.P.I.).
+## Diálogo con retrato (pilar 5): los pensamientos de Felipe (sus 9 caras) y lo que dicen los otros personajes
+## (Valeria, A.S.P.I.). El cuadro es la pieza CuadroDialogo (interfaz v2 «A + C»: caja oscura con la sombra del color
+## del personaje, franja del nombre y fondo del retrato).
 ## - Una sola cola para todos: nadie contesta tarde ni se pisan (en el prototipo Felipe respondía a Valeria
 ##   cuando ella ya se había ido).
-## - Frases de 1 o 2 líneas; se escriben letra a letra, se cierran solas y se saltan (Enter o LB).
+## - 2 líneas por página; si una frase no cabe (sobre todo con texto grande), se pagina: cada página se escribe letra a
+##   letra y se cierra sola o se salta (Enter o LB).
 ## - No repite la misma frase seguida y descarta las que esperaron demasiado en la cola.
 ## - {acción} dentro del texto se cambia por el ícono del botón en uso (por ejemplo "{maullar} Servidumbre: abran.").
-## - Nunca tapa a Felipe: con la cámara del juego, en el piso queda abajo de la pantalla, así que el cuadro sale
-##   arriba (bajo el HUD); si Felipe está arriba (librero, repisa), sale abajo.
+## - Va SIEMPRE arriba (zona B, bajo la salud), también con texto grande; solo si Felipe está tan arriba en la pantalla
+##   que el cuadro lo taparía, sale abajo (hasta el borde de la zona segura).
 
 signal dicho(quien: String, texto: String)
 
 const ESCENA := "res://escenas/ui/cuadro_dialogo.tscn"
-const RETRATOS_FELIPE := "res://assets/felipe/felipe-retratos.png"
-## Hoja de Valeria y A.S.P.I. (Gemini, tanda 3B; la recorta herramientas/preparar_retratos.py): 3 x 2 cuadros.
-## Si falta, se usa el retrato provisional dibujado por código (RetratoValeria).
-const RETRATOS_OTROS := "res://assets/personajes/retratos-valeria-aspi.png"
-## Personajes: nombre en pantalla, hoja, columnas y cuadro de la hoja para cada ánimo.
-## Felipe (3 x 3): 0 de reojo, 1 orejas planas, 2 sorprendido, 3 ojos cerrados, 4 sonrisa leve, 5 asqueado,
-## 6 feliz, 7 presumido, 8 bufando. Valeria: 0 neutra, 1 enojada, 2 derretida, 3 grabando. A.S.P.I.: 0 normal, 1 alerta.
+## Personajes: el ánimo es el número de su cara (ícono del kit `cara-dialogo-<quien>-<n>`).
+## Felipe: 0 de reojo, 1 orejas planas, 2 sorprendido, 3 ojos cerrados, 4 sonrisa leve, 5 asqueado, 6 feliz,
+## 7 presumido, 8 bufando. Valeria: 0 neutra, 1 enojada, 2 derretida, 3 grabando. A.S.P.I.: 0 normal, 1 alerta.
 const PERSONAJES := {
-	"felipe": {"nombre": "FELIPE", "hoja": RETRATOS_FELIPE, "columnas": 3, "cuadros": [0, 1, 2, 3, 4, 5, 6, 7, 8]},
-	"valeria": {"nombre": "VALERIA", "hoja": RETRATOS_OTROS, "columnas": 3, "cuadros": [0, 1, 2, 3]},
-	"aspi": {"nombre": "A.S.P.I.", "hoja": RETRATOS_OTROS, "columnas": 3, "cuadros": [4, 5]},
+	"felipe": {"caras": 9},
+	"valeria": {"caras": 4},
+	"aspi": {"caras": 2},
 }
 const VALERIA_NEUTRA := 0
 const VALERIA_ENOJADA := 1
 const VALERIA_DERRETIDA := 2
 const VALERIA_GRABANDO := 3
-## Ancho del texto: con letra de 14 px caben unas 70 letras por línea; más de 2 líneas no se aceptan.
-const ANCHO_TEXTO := 548.0
+## Líneas por página (normal y grande). Una frase del juego cabe en una página con texto normal (la prueba lo mide).
 const MAX_LINEAS := 2
 const MAX_COLA := 3
-## Posición del cuadro: arriba, en la zona B de ZonasTexto (y 30–80, bajo el HUD). Solo si Felipe está tan arriba en
-## la pantalla que el cuadro lo taparía (su cabeza dentro de la zona), sale abajo.
-const Y_ARRIBA := 30.0
-const Y_ABAJO := 304.0
+## Si los pies de Felipe quedan por encima de esta y en pantalla, el cuadro sale abajo.
 const FELIPE_ABAJO_DESDE := 160.0
 
 ## Letras por segundo.
 @export var velocidad_texto := 55.0
-## Segundos que queda la frase completa antes de cerrarse sola (más un poco por letra).
+## Segundos que queda la página completa antes de seguir sola (más un poco por letra).
 @export var espera_base := 1.3
 @export var espera_por_letra := 0.035
 ## Una frase que espera en la cola más que esto se descarta (ya no viene al caso).
@@ -60,21 +54,20 @@ var esperar_urgente := Callable()
 var globo: GloboDialogo
 var hablando := ""
 var texto_actual := ""
+## Páginas de la frase que se dice y cuál se ve.
+var paginas: PackedStringArray = []
+var pagina := 0
 ## Frases que se mostraron, en orden: [quien, texto] (para las pruebas y el resumen).
 var historial: Array = []
 var _cola: Array = []
-var _caja: Panel
-var _nombre: Label
+var _caja: CuadroDialogo
 var _texto: RichTextLabel
-var _retrato: TextureRect
-var _retrato_codigo: RetratoValeria
 var _visibles := 0.0
 var _largo := 0
 var _espera := 0.0
 var _reloj := 0.0
 var _ultima := ""
 var _animo := 0
-var _hojas := {}
 var _en_presentacion := false
 
 
@@ -82,18 +75,13 @@ func _ready() -> void:
 	layer = Capas.CAPA_DIALOGO
 	add_to_group(PresentacionJefe.GRUPO_OCULTAR)
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	# El cuadro (panel, marco, retrato, nombre y texto) se arma en el editor: escenas/ui/cuadro_dialogo.tscn; su
-	# aspecto sale del tema (variaciones CuadroDialogo, NombreDialogo y TextoDialogo).
 	_caja = (load(ESCENA) as PackedScene).instantiate()
 	add_child(_caja)
-	_retrato = _caja.get_node("%Retrato")
-	_retrato_codigo = _caja.get_node("%RetratoCodigo")
-	_nombre = _caja.get_node("%Nombre")
-	_texto = _caja.get_node("%Texto")
+	_texto = _caja.texto
 	_caja.visible = false
 
 
-## Pone una frase en la cola. `animo` es el cuadro del retrato (ver PERSONAJES). Urgente: corta lo que se dice.
+## Pone una frase en la cola. `animo` es la cara del retrato (ver PERSONAJES). Urgente: corta lo que se dice.
 ## No repite la misma frase seguida. Devuelve false si se descartó.
 func decir(quien: String, texto: String, animo := 0, urgente := false) -> bool:
 	# Las frases llegan como claves de traducciones/textos.csv (FELIPE_..., VALERIA_...): aquí pasan a texto.
@@ -159,27 +147,51 @@ func al_presentar_jefe(presentando: bool) -> void:
 
 ## Rectángulo del cuadro en pantalla (vacío si no se ve): para que los avisos no queden debajo (M3).
 func rect_en_pantalla() -> Rect2:
-	return Rect2(_caja.position, _caja.size) if _caja.visible else Rect2()
+	return _caja.rect_en_pantalla() if _caja.visible else Rect2()
 
 
-## Dónde va el cuadro (y en pantalla) para no tapar a Felipe. Se decide al empezar cada frase.
-func lugar() -> float:
+## ¿El cuadro va abajo para no tapar a Felipe? Se decide al empezar cada frase.
+func va_abajo() -> bool:
 	if seguir == null or not is_instance_valid(seguir) or not seguir.is_inside_tree():
-		return Y_ARRIBA
+		return false
 	var pies := seguir.get_viewport().get_canvas_transform() * seguir.global_position
-	return Y_ARRIBA if pies.y > FELIPE_ABAJO_DESDE else Y_ABAJO
+	return pies.y <= FELIPE_ABAJO_DESDE
 
 
-## Cuántas líneas ocupa la frase en el cuadro (las frases deben caber en 1 o 2).
-static func lineas_de(texto: String) -> int:
+## Parte un texto en líneas del ancho del cuadro (con texto normal o grande). Cada {acción} cuenta como un ícono.
+static func partir(texto: String, grande := false) -> PackedStringArray:
 	var limpio := TranslationServer.translate(texto)
+	var estilo := &"dialogo_texto_grande" if grande else &"dialogo_texto"
+	var ancho := ancho_texto(grande)
+	var lineas: PackedStringArray = []
+	var actual := ""
+	for palabra in limpio.split(" ", false):
+		var prueba := palabra if actual == "" else actual + " " + palabra
+		if actual != "" and _ancho_con_iconos(prueba, estilo) > ancho:
+			lineas.append(actual)
+			actual = palabra
+		else:
+			actual = prueba
+	if actual != "":
+		lineas.append(actual)
+	return lineas
+
+
+## Ancho del texto en el cuadro v2 (528 px menos la sangría tras la diagonal y el margen derecho).
+static func ancho_texto(grande := false) -> float:
+	var alto := 16.0 + MAX_LINEAS * float(CuadroDialogo.LINEA[2 if grande else 1])
+	return CuadroDialogo.ANCHO_CAJA - KitUI.inclinacion(alto) - CuadroDialogo.SANGRIA_EXTRA - CuadroDialogo.MARGEN_DERECHO
+
+
+static func _ancho_con_iconos(texto: String, estilo: StringName) -> float:
 	for accion: String in Controles.ACCIONES:
-		limpio = limpio.replace("{%s}" % accion, "MM")
-	var parrafo := TextParagraph.new()
-	parrafo.add_string(limpio, Estilo.fuente(&"dialogo_texto"), Estilo.letra(&"dialogo_texto"))
-	parrafo.width = ANCHO_TEXTO
-	parrafo.break_flags = TextServer.BREAK_MANDATORY | TextServer.BREAK_WORD_BOUND | TextServer.BREAK_ADAPTIVE
-	return parrafo.get_line_count()
+		texto = texto.replace("{%s}" % accion, "MM")
+	return Estilo.ancho(texto, estilo)
+
+
+## Cuántas líneas ocupa la frase en el cuadro con texto normal (las frases deben caber en 1 o 2).
+static func lineas_de(texto: String) -> int:
+	return partir(texto).size()
 
 
 func _mostrar(quien: String, texto: String, animo: int) -> void:
@@ -188,42 +200,35 @@ func _mostrar(quien: String, texto: String, animo: int) -> void:
 	_ultima = texto
 	_animo = animo
 	historial.append([quien, texto])
+	var datos: Dictionary = PERSONAJES.get(quien, PERSONAJES["felipe"])
+	var de := quien if PERSONAJES.has(quien) else "felipe"
+	var cara := KitUI.textura("cara-dialogo-%s-%d" % [de, clampi(animo, 0, int(datos["caras"]) - 1)])
+	_caja.armar(de, cara, tr("NOMBRE_" + quien) if PERSONAJES.has(quien) else quien.to_upper(), Opciones.texto_grande, va_abajo())
 	_caja.visible = true
-	# Las frases pasan por la traducción (hoy en español; mañana, una clave por frase en traducciones/).
-	_escribir(texto)
+	# Páginas de 2 líneas.
+	var lineas := partir(texto, Opciones.texto_grande)
+	paginas = []
+	for i in range(0, lineas.size(), MAX_LINEAS):
+		paginas.append(" ".join(lineas.slice(i, i + MAX_LINEAS)))
+	if paginas.is_empty():
+		paginas.append(texto)
+	_mostrar_pagina(0)
+	dicho.emit(quien, texto)
+
+
+func _mostrar_pagina(n: int) -> void:
+	pagina = n
+	_escribir(paginas[n])
 	_visibles = 0.0
 	_texto.visible_characters = 0
-	_espera = espera_base + espera_por_letra * texto.length()
-	var datos: Dictionary = PERSONAJES.get(quien, PERSONAJES["felipe"])
-	_nombre.text = tr("NOMBRE_" + quien) if PERSONAJES.has(quien) else String(datos["nombre"])
-	var hoja := _hoja(String(datos["hoja"]))
-	var cuadros: Array = datos["cuadros"]
-	_retrato.visible = hoja != null
-	_retrato_codigo.visible = hoja == null
-	if hoja:
-		var cuadro: int = cuadros[clampi(animo, 0, cuadros.size() - 1)]
-		var columnas: int = datos["columnas"]
-		var lado := hoja.get_width() / float(columnas)
-		var cara := AtlasTexture.new()
-		cara.atlas = hoja
-		cara.region = Rect2((cuadro % columnas) * lado, (cuadro / columnas) * lado, lado, lado)
-		_retrato.texture = cara
-	else:
-		_retrato_codigo.personaje = quien
-		_retrato_codigo.animo = animo
-		_retrato_codigo.queue_redraw()
-	_caja.position.y = lugar()
-	# Pequeño golpe al aparecer.
-	_caja.pivot_offset = Vector2(30, 28)
-	_caja.scale = Vector2(1.0, 0.7)
-	create_tween().tween_property(_caja, "scale", Vector2.ONE, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	dicho.emit(quien, texto)
+	_espera = espera_base + espera_por_letra * paginas[n].length()
 
 
 ## Escribe el texto cambiando cada {acción} por el ícono de su botón.
 func _escribir(texto: String) -> void:
 	_texto.clear()
 	_largo = 0
+	var lado := Estilo.letra(_caja.estilo_texto()) - 2
 	var resto := texto
 	while resto != "":
 		var inicio := resto.find("{")
@@ -238,7 +243,7 @@ func _escribir(texto: String) -> void:
 		var accion := resto.substr(inicio + 1, fin - inicio - 1)
 		var icono := IconosBotones.textura(accion)
 		if icono:
-			_texto.add_image(icono, int(icono.get_size().x * 14.0 / IconosBotones.LADO), 14)
+			_texto.add_image(icono, int(icono.get_size().x * lado / IconosBotones.LADO), lado)
 			_largo += 1
 		else:
 			var etiqueta := "[%s]" % IconosBotones.texto(accion)
@@ -247,19 +252,20 @@ func _escribir(texto: String) -> void:
 		resto = resto.substr(fin + 1)
 
 
-func _hoja(ruta: String) -> Texture2D:
-	if not _hojas.has(ruta):
-		_hojas[ruta] = load(ruta) if ResourceLoader.exists(ruta) else null
-	return _hojas[ruta]
-
-
-## Enter / LB: primero completa el texto; si ya está completo, pasa a la siguiente frase.
+## Enter / LB: primero completa el texto; si ya está completo, pasa a la página o a la frase siguiente.
 func saltar() -> void:
 	if not _caja.visible:
 		return
 	if _texto.visible_characters >= 0 and _texto.visible_characters < _largo:
 		_texto.visible_characters = -1
 		_visibles = _largo
+	else:
+		_seguir()
+
+
+func _seguir() -> void:
+	if pagina + 1 < paginas.size():
+		_mostrar_pagina(pagina + 1)
 	else:
 		_cerrar()
 
@@ -304,4 +310,4 @@ func _process(delta: float) -> void:
 	_texto.visible_characters = -1
 	_espera -= delta
 	if _espera <= 0.0:
-		_cerrar()
+		_seguir()

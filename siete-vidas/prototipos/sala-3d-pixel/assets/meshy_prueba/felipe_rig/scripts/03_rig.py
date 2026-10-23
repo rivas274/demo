@@ -202,7 +202,7 @@ for lado in ("L", "R"):
     RAMPA["thigh." + lado] = (th.head_local.z + 0.02, th.tail_local.z + 0.02)
     RAMPA["upper_arm." + lado] = (ua.head_local.z + 0.04, ua.tail_local.z + 0.02)
 print("rampas:", {k: (round(x, 3), round(y, 3)) for k, (x, y) in RAMPA.items()})
-MUNECA_Z = arm.data.bones["hand.L"].head_local.z + float(os.environ.get("FELIPE_MANO_ALTO", "0.03"))  # la bola de la mano empieza sobre la articulación
+MUNECA_Z = arm.data.bones["hand.L"].head_local.z + float(os.environ.get("FELIPE_MANO_ALTO", "0.045"))  # la bola de la mano empieza sobre la articulación
 MUNECA_U = 0.06
 grupos = {g.name: g for g in malla.vertex_groups}
 idx_nombre = {g.index: g.name for g in malla.vertex_groups}
@@ -252,8 +252,8 @@ for v in malla.data.vertices:
     # mano y dedos; la mezcla con el antebrazo va en una franja de MUÑECA_U por encima.
     for lado in ("L", "R"):
         k_ante, k_mano, k_dedo = "forearm." + lado, "hand." + lado, "f_toe." + lado
-        if not any(k in pesos for k in (k_ante, k_mano, k_dedo)):
-            continue
+        if pesos.get(k_ante, 0) + pesos.get(k_mano, 0) + pesos.get(k_dedo, 0) < 0.5:
+            continue   # solo la piel que ya es de la pata (no el pecho)
         if (v.co.x > 0) != (lado == "L"):
             continue
         z_mu = MUNECA_Z

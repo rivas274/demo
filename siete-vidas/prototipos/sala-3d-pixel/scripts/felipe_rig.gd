@@ -45,11 +45,13 @@ const ALTO_ARCO := 0.12
 ## - casco invertido (segunda pasada, caras traseras empujadas en pantalla), en píxeles de render;
 ## - umbrales del post-proceso de bordes de la sala (profundidad en m y normales), que dibujan la
 ##   línea interior donde la pata se superpone al cuerpo.
-## Elegido entre 5 combinaciones (pruebas/felipe_rig_contorno.gd). Con -- --contorno=px y
-## -- --bordes=prof,normal se prueban otras.
+## v5: el post-proceso global de la sala vuelve a sus valores de siempre (los umbrales bajos de
+## la v4 ensuciaban la imagen a ×3); a Felipe solo se le agrega su casco de 1 px. Con
+## -- --contorno=px y -- --bordes=prof,normal se prueban otras combinaciones.
 @export var contorno_px := 1.0
-@export var umbral_profundidad := 0.04
-@export var umbral_normal := 0.30
+var _bordes_cmd := false
+var umbral_profundidad := 0.12
+var umbral_normal := 0.45
 const COLOR_CONTORNO := Color("2b140e")
 
 var ap: AnimationPlayer
@@ -122,13 +124,14 @@ func _ajustar_bordes() -> void:
 			var v := arg.get_slice("=", 1).split(",")
 			umbral_profundidad = float(v[0])
 			umbral_normal = float(v[1])
+			_bordes_cmd = true
 	for mi in find_children("*", "MeshInstance3D", true, false):
 		var mt := (mi as MeshInstance3D).material_override as ShaderMaterial
 		if mt and mt.next_pass:
 			(mt.next_pass as ShaderMaterial).set_shader_parameter("grosor_px", contorno_px)
 	var principal := get_parent().get_parent() if get_parent() else null
 	var bordes = principal.get("bordes") if principal else null
-	if bordes is ShaderMaterial:
+	if bordes is ShaderMaterial and _bordes_cmd:
 		bordes.set_shader_parameter("umbral_profundidad", umbral_profundidad)
 		bordes.set_shader_parameter("umbral_normal", umbral_normal)
 

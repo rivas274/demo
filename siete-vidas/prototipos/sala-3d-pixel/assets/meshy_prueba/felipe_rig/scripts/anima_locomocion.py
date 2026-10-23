@@ -11,6 +11,7 @@ ALZA_U = {"tras": 0.06, "del": 0.075}   # levanta poco pero con decisión (video
 # hombros, el lomo baja suave hacia adelante y las traseras van más estiradas (más largas).
 MUNECA_K = float(__import__("os").environ.get("FELIPE_MUNECA", "0.7"))
 DEDOS_K = float(__import__("os").environ.get("FELIPE_DEDOS", "0.0"))
+ALZA_DEL_K = float(__import__("os").environ.get("FELIPE_ALZA_DEL", "0.65"))
 POSTURA_SUBE = 0.012   # m que sube la cadera
 POSTURA_CAB = -4.0     # grados: el frente baja
 MANO_X = float(__import__("os").environ.get("FELIPE_MANO_X", "0.018"))  # m hacia afuera (elegido entre 0 y 0,024)
@@ -65,6 +66,11 @@ def caminar():
             # vuelo (doblada a 75° con los dedos a -20° la mano perdía hasta 12 % de volumen).
             if pata == "del":
                 g, gd = g * MUNECA_K, gd * DEDOS_K
+                # En el vuelo, la mano sube menos y va menos atrás: si no, se metía dentro del
+                # pelo del pecho y se veía aplastada y más chica (v4).
+                if fase > DUTY:
+                    al *= ALZA_DEL_K
+                    av = av * 0.6 if av > 0 else av
             B.pata(f, pata, lado, desp=(afuera, av * Z / 2 + centro, al * alza), rot=g, dedo=gd,
                    escapula=20 * av if pata == "del" else None)
             if fase < DUTY - 1e-6:

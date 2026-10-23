@@ -112,6 +112,10 @@ func _ready() -> void:
 	medidores.anuncios = travesuras.anuncios
 	pantallas.bolsillo.conectar(felipe, travesuras.recompensas)
 	_crear_puertas()
+	# Profundidad (capas por rol): Felipe es el JUGADOR y el vigía avisa en qué superficie está.
+	Profundidad.superficie_felipe = "piso"
+	Profundidad.poner(felipe, Capas.Rol.JUGADOR)
+	add_child(VigiaSuperficie.new(self, felipe))
 	guion.preparar()
 	_fundido = ColorRect.new()
 	_fundido.name = "Fundido"
@@ -433,7 +437,8 @@ func _crear_pieza(rect: Rect2, atravesable: bool, nombre: String, estilo: String
 	cuerpo.add_child(forma)
 	if estilo in ["repisa", "lugar_visto"]:
 		var dibujo := Node2D.new()
-		dibujo.z_index = Capas.MUEBLES
+		dibujo.name = "Dibujo"
+		Profundidad.poner(dibujo, Capas.Rol.SALTABLE, PackedStringArray([nombre]))
 		var adorno: String = datos.adornos_de_piezas.get(nombre, "")
 		dibujo.draw.connect(func() -> void: ArteNivel.dibujar_repisa(dibujo, rect.size, FONDO_PISO, adorno))
 		cuerpo.add_child(dibujo)

@@ -64,7 +64,7 @@ void fragment() {
 
 func _ready() -> void:
 	name = "Indicador"
-	z_index = Capas.INDICADOR
+	Profundidad.poner(self, Capas.Rol.INDICADOR)
 	add_to_group(PresentacionJefe.GRUPO_OCULTAR)
 	top_level = true
 	global_position = Vector2.ZERO

@@ -134,7 +134,7 @@ func _ready() -> void:
 	oido.oyo.connect(oir_maullido)
 	add_child(oido)
 	add_to_group(Componentes.INTERACTUABLES)
-	z_index = Capas.PERSONAJES
+	Profundidad.poner(self, Capas.Rol.HUMANO)
 	aspecto.cargar()
 	_felipe = get_tree().get_first_node_in_group("felipe")
 	_poner_silueta.call_deferred()

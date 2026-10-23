@@ -1,5 +1,7 @@
 # Flujo 3D: personajes de IA animados y render tipo pixel art
 
+> **Estado (2026-10-23):** el creador descartó el 3D para el juego de Felipe; sigue en 2D. El prototipo `siete-vidas/prototipos/sala-3d-pixel/` que citan estas guías se borró del repositorio. Se recupera con `git checkout 8cc2445 -- siete-vidas/prototipos/sala-3d-pixel`. Las recetas y lecciones de esta carpeta siguen valiendo para otros proyectos. La lista completa de lecciones del rig está en `08-lecciones-rig-felipe.md`.
+
 Cómo pasar de una imagen de un personaje a un modelo 3D animado y mostrarlo en Godot con aspecto de pixel art, sin presupuesto. Sale del prototipo `sala-3d-pixel` de Felipe (2026-10-21 a 2026-10-23).
 
 **Estado en Felipe:** prototipo en evaluación. El plazo para decidir entre 3D y 2D es el domingo 2026-10-25. La sala 3D se ve bien; los personajes llegaron a «aceptable, lo mejor que tenemos» solo con la receta estándar de Blender.

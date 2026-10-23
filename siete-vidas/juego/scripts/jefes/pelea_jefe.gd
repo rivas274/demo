@@ -18,6 +18,7 @@ var fase := Fase.ESPERANDO:
 		# La barra del jefe se ve solo durante la pelea.
 		if presentacion:
 			presentacion.mostrar_barra = fase == Fase.PELEA
+		_usar_globo()
 var datos: DatosJefe
 var jefe: Enemigo
 var felipe: Felipe
@@ -34,7 +35,14 @@ var vencidas := 0:
 ## Entrada de 8 pasos, carteles y barra de vida (componente reutilizable para cualquier jefe).
 var presentacion: PresentacionJefe
 ## Felipe salió de la arena (perdió una vida): el jefe espera y al volver hay entrada corta.
-var ausente := false
+var ausente := false:
+	set(valor):
+		ausente = valor
+		_usar_globo()
+## Lo que piensa Felipe en la pelea va en un globito sobre él (no en el cuadro de arriba) y la cámara mira hacia el
+## jefe cuando se acerca desde lejos (crítica de Gemini, 2026-10-23).
+var globo: GloboDialogo
+var camara: CamaraPelea
 ## Copias de las conductas de los datos para esta pelea, y el ataque en curso.
 var conductas: Array[ConductaJefe] = []
 var activa: ConductaJefe
@@ -64,6 +72,25 @@ func _ready() -> void:
 	presentacion.alto_jefe = jefe.datos.alto + datos.alto_extra
 	presentacion.terminada.connect(_al_terminar_presentacion)
 	add_child(presentacion)
+	globo = GloboDialogo.new(felipe)
+	add_child(globo)
+	camara = CamaraPelea.new(self)
+	add_child(camara)
+
+
+## Durante la pelea (con Felipe en la arena) lo que dice Felipe va al globito; fuera de ella, al cuadro de siempre.
+func _usar_globo() -> void:
+	if nivel == null or nivel.travesuras == null or nivel.travesuras.dialogo == null:
+		return
+	var en_pelea := fase == Fase.PELEA and not ausente and globo != null
+	nivel.travesuras.dialogo.globo = globo if en_pelea else null
+	if not en_pelea and camara:
+		camara.soltar()
+
+
+## ¿El jefe avisa un ataque (para que la cámara lo mire si viene de lejos)? Cada jefe dice cuándo.
+func amenaza() -> bool:
+	return false
 
 
 ## La conducta con ese nombre (por ejemplo, "embestida"), o null.

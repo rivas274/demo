@@ -33,6 +33,9 @@ func jugar() -> void:
 		if batalla.llena:
 			await _apagar_de_un_salto()
 			continue
+		if _conviene_charco():
+			await _atraer_al_charco()
+			continue
 		if batalla.manchas.is_empty() and not batalla.limpiando:
 			await _ensuciar()
 			continue
@@ -41,6 +44,37 @@ func jugar() -> void:
 	# Como una persona: mira su obra (el estudio destruido) antes de salir al balcón.
 	await p._hasta(func() -> bool: return p._dijo_felipe("Estudio redecorado"), 9.0)
 	await p._segundos(1.5)
+
+
+## En el apagón (fase 3): si hay un charco y ella no ataca, se la lleva al charco maullando (cada tanto).
+var _ultimo_charco := -1000
+
+
+func _conviene_charco() -> bool:
+	var corto := batalla.conducta("cortocircuito") as ConductaCortocircuito
+	return corto != null and corto.hecho and batalla.apagon.activo and not corto.charcos().is_empty() and batalla.reinicio <= 0.0 \
+		and batalla.ataque == BatallaAspi.Ataque.NINGUNO and corto.reloj_charco <= 0.0 and p._cuadros - _ultimo_charco > int(6.0 * p._fps)
+
+
+## Se para del otro lado del charco más cercano a ella y maúlla: ella gira hacia él y pasa por encima.
+func _atraer_al_charco() -> void:
+	_ultimo_charco = p._cuadros
+	var corto := batalla.conducta("cortocircuito") as ConductaCortocircuito
+	var aspi := guion.aspi
+	var mejor := Vector2.INF
+	for charco in corto.charcos():
+		if mejor == Vector2.INF or absf(charco.x - aspi.global_position.x) < absf(mejor.x - aspi.global_position.x):
+			mejor = charco
+	var lado := 1.0 if mejor.x >= aspi.global_position.x else -1.0
+	await _bajar_al_piso()
+	await p._ir_a(clampf(mejor.x + lado * 70.0, 6880.0, 7700.0), 3.0)
+	if fuera_de_pelea():
+		return
+	await p._tocar("maullar")
+	p._paso("Maúlla para llevarla al charco (x %.0f)" % mejor.x)
+	await p._hasta(func() -> bool: return batalla.llena or batalla.ataque != BatallaAspi.Ataque.NINGUNO, 3.0)
+	if batalla.llena and batalla.motivo == "charco":
+		p._paso("¡En corto! Pasó por el charco")
 
 
 func fuera_de_pelea() -> bool:

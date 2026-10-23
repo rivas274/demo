@@ -245,6 +245,14 @@ múltiplo); `Estilo.escribir` dibuja con ellas y `Estilo.recortar` corta con «�
 3. Una línea en `Nivel1.FUENTES`; `DesordenEstudio` la crea y la conecta a la pelea (`BatallaAspi.agregar_fuente`).
 4. Corre `prueba_municion.gd` (la cuenta de manchas cambia) y mira una captura (`capturas_pelea.gd`).
 
+**Pelea v3 (2026-10-23):** piezas comunes a toda pelea en `PeleaJefe`: `GloboDialogo` (`scripts/ui/`: lo que dice
+Felipe durante la pelea va en un globito; `Dialogo.globo`) y `CamaraPelea` (`scripts/jefes/`: corre la cámara de Felipe
+hacia el jefe si está fuera de pantalla o `amenaza()`, sin zoom, con flecha de borde). Lo de A.S.P.I.:
+`ConductaCortocircuito` (fase 3: corre al enchufe, apagón, charcos que la dejan en corto), `ApagonEstudio` (penumbra y
+luces), `PelusaAspi` (sobrecarga y montañas), `Charco` (`scripts/entidades/objetos/`), `NotaArteGatuno` y los ganchos de
+sonido `DatosJefe.sonidos` → `BatallaAspi.sonar_evento(evento, tono)`. Vulnerable por motivo:
+`BatallaAspi.quedar_vulnerable("deposito" | "charco")`.
+
 **Montaña de pelusa (`MontanaPelusa`, `scripts/entidades/objetos/`):** la escupe la pelea (`BatallaAspi.escupir_pelusa`)
 al apagarla (`DatosJefe.devuelve`) o al vaciar el depósito; se esparce con el manotazo («Esparcir») y cada mota avisa
 `mota_en_piso`. La pelea lleva la cuenta de toda la suciedad (`suciedad_total`): solo baja al apagarla.

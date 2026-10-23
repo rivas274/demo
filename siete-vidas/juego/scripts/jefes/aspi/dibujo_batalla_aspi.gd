@@ -82,7 +82,7 @@ func encima(c: Node2D) -> void:
 		var barra := Rect2(b.aspi.global_position + Vector2(-18, -BatallaAspi.ALTO_ARRIBA - 12), Vector2(36, 4))
 		c.draw_rect(barra.grow(1), Color(0.05, 0.1, 0.15, 0.9))
 		c.draw_rect(Rect2(barra.position, Vector2(barra.size.x * (1.0 - b.reinicio / b.datos.reinicio), barra.size.y)), Color("9fd8ff"))
-		if tiempo - b.tiempo_clic > BatallaAspi.DURA_CLIC:
+		if tiempo - b.tiempo_clic > BatallaAspi.DURA_CLIC and b.pelusa.en_camino == 0 and tiempo - b.pelusa.ultimo > 1.0:
 			# Zonas de texto (2026-10-20): letra de 16 px con contorno de 1 px, no la chica de 8.
 			var texto_reinicio := tr("JEFE_REINICIANDO") + ".".repeat(int(tiempo * 3.0) % 4)
 			var punto := b.aspi.global_position + Vector2(-roundf(Estilo.ancho(tr("JEFE_REINICIANDO"), &"jefe_pista") / 2.0), -BatallaAspi.ALTO_ARRIBA - 18)
@@ -93,15 +93,20 @@ func encima(c: Node2D) -> void:
 			var angulo := tiempo * 18.0 + i * TAU / 6.0
 			var centro := b.aspi.global_position + Vector2(0, -6)
 			c.draw_line(centro, centro + Vector2(cos(angulo), sin(angulo) * 0.4) * 14.0, Color(0.9, 0.95, 1.0, 0.8), 1.0)
+	_aviso_embestida(c, tiempo)
+	_charcos(c, tiempo)
 	if b.llena:
 		# Por encima de la tapa abierta (que sube unos 32 px).
 		var arriba := b.aspi.global_position + Vector2(0, -BatallaAspi.ALTO_ARRIBA - 52)
 		if int(tiempo * 4.0) % 2 == 0:
 			c.draw_circle(b.aspi.global_position + Vector2(0, -BatallaAspi.ALTO_ARRIBA - 4), 5.0, Color("e0483b"))
-		var texto := tr("JEFE_LLENO")
+		var texto := tr("JEFE_DEPOSITO_LLENO") if b.motivo != "charco" else tr("JEFE_EN_CORTO")
 		var ancho := roundf(Estilo.ancho(texto, &"jefe_pista"))
-		c.draw_rect(Rect2(arriba.x - ancho / 2.0 - 6, arriba.y - 13, ancho + 12, 18), Color(0.1, 0.05, 0.07, 0.85))
-		Estilo.escribir(c, Vector2(arriba.x - ancho / 2.0, arriba.y + 1), texto, &"jefe_pista", Color("ffe066"))
+		# El cartelito no se corta en el borde de la pantalla (lección 23): se corre adentro; la flecha sigue sobre ella.
+		var vista := c.get_viewport().get_canvas_transform().affine_inverse() * Rect2(ZonasTexto.PANTALLA)
+		var centro_x := clampf(arriba.x, vista.position.x + ancho / 2.0 + 8.0, vista.end.x - ancho / 2.0 - 8.0)
+		c.draw_rect(Rect2(centro_x - ancho / 2.0 - 6, arriba.y - 13, ancho + 12, 18), Color(0.1, 0.05, 0.07, 0.85))
+		Estilo.escribir(c, Vector2(centro_x - ancho / 2.0, arriba.y + 1), texto, &"jefe_pista", Color("ffe066"))
 		# Flecha hacia abajo: hay que caerle encima.
 		c.draw_colored_polygon(PackedVector2Array([arriba + Vector2(-6, 8), arriba + Vector2(6, 8), arriba + Vector2(0, 16)]), Color("ffe066"))
 	if b.ataque == BatallaAspi.Ataque.SOPLIDO or b.ataque == BatallaAspi.Ataque.AVISO_SOPLIDO:
@@ -120,3 +125,40 @@ func encima(c: Node2D) -> void:
 		var y := Nivel1.SUELO - 6.0 - fmod(i * 23.0, 70.0)
 		if b.arena.has_point(Vector2(x, y)):
 			c.draw_line(Vector2(x, y), Vector2(x + lado * 18.0, y), Color(Color("dff3ff"), 0.7 * avance), 1.5)
+
+
+## Aviso de embestida en el piso (crítica de Gemini): una línea roja de puntos desde A.S.P.I. hasta donde va a cargar,
+## que parpadea mientras retrocede. Así se lee aunque ella esté lejos o el cuarto esté a oscuras.
+func _aviso_embestida(c: Node2D, tiempo: float) -> void:
+	if b.ataque != BatallaAspi.Ataque.AVISO_EMBESTIDA:
+		return
+	var embestida := b.conducta("embestida") as AtaqueEmbestida
+	var y := b.aspi.global_position.y + b.aspi.datos.profundidad + 2.0
+	var desde := b.aspi.global_position.x
+	var hasta := embestida.destino
+	var paso := 6.0 * signf(hasta - desde)
+	if paso == 0.0:
+		return
+	var color := Color("e0483b") if int(tiempo * 8.0) % 2 == 0 else Color("ff9a7a")
+	var x := desde + paso * 3.0
+	while (hasta - x) * signf(paso) > 0.0:
+		c.draw_rect(Rect2(roundf(x) - 1.0, y, 3.0, 2.0), color)
+		x += paso
+	# La punta de la flecha al final.
+	var fin := Vector2(roundf(hasta), y)
+	var hacia := signf(paso)
+	c.draw_colored_polygon(PackedVector2Array([fin + Vector2(hacia * 4.0, 0.5), fin + Vector2(-hacia * 2.0, -3.0), fin + Vector2(-hacia * 2.0, 4.0)]), color)
+
+
+## En el apagón, los charcos de agua y café brillan (1 px de reflejo que titila): son la clave de la fase 3.
+func _charcos(c: Node2D, tiempo: float) -> void:
+	if not b.apagon.activo:
+		return
+	var corto := b.conducta("cortocircuito") as ConductaCortocircuito
+	if corto == null:
+		return
+	for charco in corto.charcos():
+		var ancho := roundf(charco.y * 0.6)
+		var x := roundf(charco.x - ancho / 2.0 + (int(tiempo * 3.0) % 3) * 2.0)
+		c.draw_rect(Rect2(x, Nivel1.SUELO - 1.0, ancho, 1.0), Color(0.75, 0.95, 1.0, 0.85))
+		c.draw_rect(Rect2(x + 3.0, Nivel1.SUELO, maxf(ancho - 8.0, 2.0), 1.0), Color(0.55, 0.85, 1.0, 0.6))

@@ -167,10 +167,13 @@ func _montana() -> MontanaPelusa:
 func _esparcir(montana: MontanaPelusa) -> void:
 	await _poner_en(montana.global_position + Vector2(-22, 0), 40)
 	felipe.mirando = 1.0
-	if felipe.manas.objeto_cercano() != montana:
-		_comprobar(false, "Junto a la montaña se ofrece «Esparcir» (había otra cosa más cerca)")
+	var cercano := felipe.manas.objeto_cercano()
+	if not cercano is MontanaPelusa:
+		_comprobar(false, "Junto a la montaña se ofrece «Esparcir» (había otra cosa más cerca: %s)" % (cercano.name if cercano else "nada"))
 		montana.esparcir()
 	else:
+		# Si hay dos montañas juntas, esparce la más cercana: también sirve.
+		montana = cercano as MontanaPelusa
 		await _tocar("interactuar")
 	await _esperar_que(func() -> bool: return montana.esparcida and montana.motas_en_vuelo == 0, 120)
 	await _esperar(10)

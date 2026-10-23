@@ -20,7 +20,9 @@ Orden acordado: un tema a la vez, con propuesta y aprobación.
 ## Nivel 1 v4 (Fase 3)
 
 - [x] **Pelea con A.S.P.I. sin reposición (2026-10-23):** nada reaparece, 14 manchas en 11 fuentes, montaña de pelusa que se esparce, todo se conserva al perder una vida (`revisiones/2026-10-23-pelea-aspi-sin-reposicion.md`).
-- [ ] **Publicar la ficha en línea** (https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe) con los verbos «Desordenar», «Despegar» y «Esparcir» de la fila «Acción» (la copia local ya está regenerada).
+- [ ] **Publicar la ficha en línea** (https://claude.ai/artifact/K5fwEzUpr1sNjAggysCmPe) con los verbos «Desordenar», «Despegar» y «Esparcir» de la fila «Acción» y la fila «Maullar» (charco y globito, v3) (la copia local ya está regenerada).
+- [x] **Pelea con A.S.P.I. v3 (2026-10-23):** avisos sobre ella, globito, cámara que la mira, apagón con charcos, sobrecarga, «Arte gatuno» (`revisiones/2026-10-23-pelea-aspi-v3.md`).
+- [ ] **Música y sonidos finales de la pelea** (encargo en `05-estado-actual.md`).
 - [ ] Prueba de juego del creador con la pelea nueva (`/prueba-juego`): ¿esparcir se siente bien o pide más jugo? ¿la fase 3 es clímax o trámite?
 - [ ] Opcional (Gemini): libro abierto caído y hoja suelta (hoy los libros caen cerrados).
 

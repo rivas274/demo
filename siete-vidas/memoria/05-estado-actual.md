@@ -1,12 +1,41 @@
 # Estado actual: dónde vamos
 
-Actualizado: 2026-10-23 (pelea con A.S.P.I. sin reposición mágica; antes, 3D descartado; antes, estudio v3: la pelea en todo el cuarto; antes, plan de estabilización del nivel 1 aplicado; antes, tercera ronda terminada: jugo, letra, claves, opciones, menú Decreto real, kit de interfaz, arte de la casa y 3 animaciones nuevas de Felipe). **Léelo al empezar un chat nuevo** para retomar sin repetir conversaciones. Al cerrar cada tema, actualiza este archivo (qué se cerró, qué sigue).
+Actualizado: 2026-10-23 (pelea con A.S.P.I. v3: avisos sobre ella, globito, cámara, apagón con charcos, «Arte gatuno»; antes, sin reposición mágica; antes, 3D descartado; antes, estudio v3: la pelea en todo el cuarto; antes, plan de estabilización del nivel 1 aplicado; antes, tercera ronda terminada: jugo, letra, claves, opciones, menú Decreto real, kit de interfaz, arte de la casa y 3 animaciones nuevas de Felipe). **Léelo al empezar un chat nuevo** para retomar sin repetir conversaciones. Al cerrar cada tema, actualiza este archivo (qué se cerró, qué sigue).
 
 ## Fase del proyecto
 
 **Fase 3: vertical slice — el nivel 1 tutorial con calidad final** (desde el 2026-10-19). Fases 1 y 2 cerradas. Fases: 1 Concepto y pilares → 2 Prototipo de concepto → 3 Vertical slice → 4 Producción → 5 Pulido y lanzamiento (Steam). Para pasar de fase: `/puerta-fase`.
 
 ## En curso
+
+- **Pelea con A.S.P.I. v3 (hecha 2026-10-23, 0 créditos; el creador aprobó las ideas de Gemini, `diseno/revisiones/2026-10-23-gemini-pelea-aspi.md`). Revisión: `diseno/revisiones/2026-10-23-pelea-aspi-v3.md`.**
+  - **Lectura:** «¡DEPÓSITO LLENO!» y «¡EN CORTO!» nacen sobre A.S.P.I. (no en la franja de arriba). La embestida marca una línea roja en el piso. Durante la pelea, Felipe piensa en un **globito** sobre su cabeza (`GloboDialogo`). La **cámara se corre** hacia ella cuando viene de lejos o está fuera de pantalla (`CamaraPelea`), con flecha en el borde; sin zoom, porque un zoom no entero rompe el pixel art.
+  - **Fase 3 «Cortocircuito y apagón»:** choca contra el enchufe, el cuarto queda en penumbra con su luz roja de emergencia (`ApagonEstudio`), los charcos de agua y café la dejan **en corto** (vulnerable) y maullar la atrae. Siempre hay un charco. Las bolas salen cada 3,4 s. La luz vuelve de golpe al ganar.
+  - **Sobrecarga** de 0,6 s antes del «¡BLORP!» (humo, chispas, atragantamiento) y la montaña sale con más fuerza.
+  - **«Arte gatuno»:** nota al final (Aficionado / Decorador / O B R A   M A E S T R A). Con más del 85 %, Valeria grita «¡¡FELIPE!!» desde abajo y sale el logro «Reestructuración Inmobiliaria».
+  - **Sonido:** ganchos en `DatosJefe.sonidos` y provisionales sintetizados (motor que sube de tono, reversa, atragantar, cortocircuito).
+  - **Tres lugares:** fila «Maullar» de la tabla de Acciones (lleva a A.S.P.I. al charco; globito en la pelea) en `02-guia-felipe.md` y en la ficha local regenerada; **falta publicar la ficha en línea**. Juego con pruebas (`prueba_jefe`: avisos, globito, cámara, apagón, charco, luz que vuelve, nota).
+  - **Sigue:** que el creador juegue el `.exe` y vea `pelea-aspi-v3.mp4`; el encargo de música y sonidos (abajo).
+
+- **Encargo de música y sonidos de la pelea con A.S.P.I.** (propuesta de Gemini; los ganchos ya están en `datos/jefes/aspi.tres`, `sonidos`):
+  - **Música, con la misma melodía en las 3 fases:**
+    - **Fase 1:** vals barroco pomposo (clavecín, violines dramáticos) con bajo chiptune cómico.
+    - **Fase 2:** la misma, a 1,2× con batería de rock o synthwave y guitarras distorsionadas sobre las cuerdas.
+    - **Fase 3 (apagón):** metal ridículamente épico (doble bombo, riff pesado) con coro en latín exagerado, al estilo Broforce o Doom.
+  - **Efectos:**
+    - **motor:** succión grave que sube de tono con cada mancha.
+    - **reversa:** pitido de camión retrocediendo y un acelerón.
+    - **atragantar:** atragantamiento mecánico con un resorte suelto.
+    - **blorp:** disparo neumático.
+    - **cortocircuito:** chispazo con zumbido eléctrico que se apaga.
+    - **Felipe:** pisadas de almohadilla y un maullido despectivo al apagarla.
+  - **Fuentes gratis con licencia para uso comercial:**
+    - Kenney (kenney.nl, CC0: Interface, Impact y Digital Audio).
+    - OpenGameArt.org (filtrar CC0 o CC-BY; por ejemplo, packs de chiptune y «boss battle»).
+    - Freesound.org (filtrar CC0; buscar «robot vacuum», «short circuit», «truck reverse beep»).
+    - Sonniss GDC Game Audio Bundle (licencia libre de regalías).
+    - Para hacerlos uno mismo: jsfxr (efectos 8 bits), BeepBox o Furnace (chiptune) y LMMS.
+  - **Regla:** anotar autor y licencia en `juego/assets/CREDITOS.md`. CC-BY obliga a dar crédito en el juego; CC-BY-NC no sirve para Steam.
 
 - **Pelea con A.S.P.I. sin reposición (hecha 2026-10-23, 0 créditos; pedido del creador: «es el gancho del juego»; lo que se rompía volvía cada 6 s «por arte de magia»). Revisión: `diseno/revisiones/2026-10-23-pelea-aspi-sin-reposicion.md`.**
   - **Nada reaparece:** lo que cae queda en el piso con su sombra hasta el final; al ganar, el estudio queda destruido y Felipe lo comenta («Estudio redecorado. Estilo: Su Majestad.»).

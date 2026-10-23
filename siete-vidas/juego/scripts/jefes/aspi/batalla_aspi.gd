@@ -24,9 +24,7 @@ const DATOS := "res://datos/jefes/aspi.tres"
 ## La gigante se desvanece en el rugido.
 const DESVANECER := 0.8
 ## Segundos después del «¡CLIC!» en que escupe la montaña (cuando ya se fue la palabra: una a la vez).
-const ESPERA_ESCUPIR := 1.0
-## La montaña cae a este lado de A.S.P.I. (hacia el piso libre).
-const DISTANCIA_MONTANA := 58.0
+const ESPERA_ESCUPIR := 0.7
 ## Al apagarla, Felipe rebota hacia arriba.
 const REBOTE := -420.0
 ## Lleno bajo la repisa: sale disparada hacia adelante (nunca queda justo bajo la repisa).
@@ -61,7 +59,17 @@ var gigante := 0.0
 ## Lo que se puede tirar en el estudio (queda donde cae), lo que suelta cosas de a una y las montañas de pelusa.
 var municion: Array[Objeto] = []
 var fuentes: Array[FuenteDesorden] = []
-var montanas: Array[MontanaPelusa] = []
+## La pelusa que devuelve (sobrecarga y montañas), el apagón de la fase 3 y el material para lo que se lee a oscuras.
+var pelusa: PelusaAspi
+var apagon: ApagonEstudio
+var sin_sombrear := CanvasItemMaterial.new()
+## Por qué está vulnerable: "deposito" (lleno) o "charco" (electrocutada en el apagón).
+var motivo := ""
+## Nota de «Arte gatuno» al terminar (porcentaje de desorden; -1 = todavía no).
+var nota := -1
+var montanas: Array[MontanaPelusa]:
+	get:
+		return pelusa.montanas
 ## Para el dibujo: rayos de la imaginación, segundos de reinicio, papeles que vuelan, cuándo fue el último «¡CLIC!».
 var rayo := 0.0
 var desvaneciendo := false
@@ -130,6 +138,13 @@ func _ready() -> void:
 	_imaginacion = _lienzo("Imaginacion", Capas.IMAGINACION, func() -> void: dibujo.imaginacion(_imaginacion))
 	_manchas_dibujo = _lienzo("Manchas", Capas.MUEBLES, func() -> void: dibujo.manchas(_manchas_dibujo))
 	_encima = _lienzo("Viento y depósito", Capas.EFECTOS, func() -> void: dibujo.encima(_encima))
+	# Avisos, chispas y bolas se leen también en el apagón (sin sombrear).
+	sin_sombrear.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+	_encima.material = sin_sombrear
+	pelusa = PelusaAspi.new(self)
+	add_child(pelusa)
+	apagon = ApagonEstudio.new(nivel, jefe, felipe)
+	add_child(apagon)
 	_polvo = Particulas.polvo(24, 0.7, Vector2(0, 220), Vector2(50, 140), Vector2(2, 4), Color(0.86, 0.82, 0.75))
 	_polvo.name = "Polvo"
 	Capas.usar(_polvo, Capas.EFECTOS)
@@ -196,42 +211,39 @@ func suciedad_total() -> int:
 	for fuente in fuentes:
 		if is_instance_valid(fuente):
 			total += fuente.restantes() + fuente.en_vuelo
-	for montana in montanas:
-		if is_instance_valid(montana):
-			total += montana.pendientes()
-	return total
+	return total + pelusa.pendientes()
 
 
-## Vacía el depósito en el piso: se le abre la tapa y escupe una montaña de pelusa con `motas` manchas («¡BLORP!» y
-## nube). La montaña cae hacia el lado con más piso libre.
-func escupir_pelusa(motas: int) -> MontanaPelusa:
-	if motas <= 0:
-		return null
-	var montana := MontanaPelusa.crear(motas, nivel.datos.suelo)
-	montanas.append(montana)
-	montana.mota_en_piso.connect(func(mota: PiezaSuelta) -> void: agregar_mancha(mota.global_position, "nodo", mota))
-	montana.tree_exiting.connect(func() -> void: montanas.erase(montana))
-	nivel.add_child(montana)
-	var x := jefe.global_position.x
-	var hacia := 1.0 if x < arena.get_center().x else -1.0
-	var destino := clampf(x + hacia * DISTANCIA_MONTANA, jefe.patrulla.limite_izquierdo, jefe.patrulla.limite_derecho)
-	montana.escupir(jefe.global_position + Vector2(0, -ALTO_ARRIBA), destino)
-	apariencia.abrir_tapa()
-	var tapa := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_STOP)
-	tapa.tween_interval(0.6)
-	tapa.tween_callback(func() -> void:
-		if not llena:
-			apariencia.cerrar_tapa())
-	_soltar_polvo(jefe.global_position + Vector2(0, -24))
-	nivel.travesuras.jugo.palabra_en_mundo("PALABRA_BLORP", jefe.global_position + Vector2(0, -66), Color(0.86, 0.84, 0.8), 18)
-	nivel.travesuras.jugo.sacudir(0.12, 0.5)
-	nivel.sonar("succion")
-	# Felipe lo comenta (la primera vez con su frase de siempre).
-	if nivel.ya_dijo("devolucion"):
-		nivel.travesuras.decir_felipe("devolucion_otra")
-	else:
-		nivel.decir("devolucion")
-	return montana
+## Vacía el depósito en el piso: se sobrecarga y escupe una montaña de pelusa con `motas` manchas (PelusaAspi).
+func escupir_pelusa(motas: int) -> void:
+	pelusa.escupir(motas)
+
+
+## Chispas eléctricas (amarillas y celestes), que se ven también en el apagón.
+func chispas(donde: Vector2, cantidad := 16) -> void:
+	for color: Color in [Color(1.0, 0.92, 0.4), Color(0.6, 0.9, 1.0)]:
+		var chispa := Particulas.polvo(cantidad, 0.45, Vector2(0, 260), Vector2(80, 200), Vector2(1, 2), color, 160.0)
+		chispa.material = sin_sombrear
+		Capas.usar(chispa, Capas.EFECTOS)
+		chispa.global_position = donde
+		add_child(chispa)
+		chispa.restart()
+		chispa.emitting = true
+		chispa.finished.connect(chispa.queue_free)
+
+
+## Sonido de un momento de la pelea (DatosJefe.sonidos: el motor, la reversa, el atragantamiento, el cortocircuito...).
+## Si el sonido final no está todavía, suena el provisional que diga el dato (o nada).
+func sonar_evento(evento: String, tono := 1.0) -> void:
+	var nombre: String = datos.sonidos.get(evento, "")
+	if nombre != "":
+		nivel.sonar(nombre, tono)
+
+
+## Para la cámara (CamaraPelea): avisa una embestida, tose una bola o corre contra el enchufe.
+func amenaza() -> bool:
+	var corto := conducta("cortocircuito") as ConductaCortocircuito
+	return ataque in [Ataque.AVISO_EMBESTIDA, Ataque.EMBESTIDA, Ataque.AVISO_BOLA] or (corto != null and corto.corriendo)
 
 
 func _process(delta: float) -> void:
@@ -246,11 +258,11 @@ func _process(delta: float) -> void:
 	var habia_gigante := not jefe.visible
 	if not habia_gigante and gigante > 0.0:
 		# Nace la bestia: «¡puf!» y destello, para que el cambio de la aspiradora a la gigante no sea un corte seco.
-		_soltar_polvo(jefe.global_position + Vector2(0, -20))
+		soltar_polvo(jefe.global_position + Vector2(0, -20))
 		presentacion.destello(0.45)
 	jefe.visible = gigante <= 0.0
 	if habia_gigante and jefe.visible and fase != Fase.ESPERANDO:
-		_soltar_polvo(jefe.global_position + Vector2(0, -20))
+		soltar_polvo(jefe.global_position + Vector2(0, -20))
 	# Felipe queda delante de su propia imaginación; el escenario, detrás.
 	# Solo toca la capa de Felipe mientras imagina (y para devolverla): el resto del tiempo la decide el nivel (delante
 	# o detrás de Valeria según dónde está parado).
@@ -267,7 +279,7 @@ func _process(delta: float) -> void:
 	_manchas_dibujo.queue_redraw()
 
 
-func _soltar_polvo(donde: Vector2) -> void:
+func soltar_polvo(donde: Vector2) -> void:
 	_polvo.global_position = donde
 	_polvo.restart()
 	_polvo.emitting = true
@@ -298,7 +310,7 @@ func _al_paso(paso: String) -> void:
 				puerta.apertura = 0.0
 				puerta.queue_redraw()
 			nivel.sonar("golpe")
-			_soltar_polvo(puerta.global_position if puerta else felipe.global_position)
+			soltar_polvo(puerta.global_position if puerta else felipe.global_position)
 			# La frase la muestra la presentación como subtítulo (el diálogo se esconde durante la entrada, M4).
 		"espera":
 			apariencia.luz_aviso = Color("e0483b")
@@ -399,6 +411,8 @@ func terminar_ataque() -> void:
 ## se llena, solo «¡LLENO!».
 func llenar_deposito() -> void:
 	deposito += 1
+	# El motor sube de tono con cada mancha (gancho de sonido).
+	sonar_evento("motor", 1.0 + deposito * datos.tono_por_mancha)
 	if deposito >= DatosJefe.por_fase(datos.capacidad, vencidas):
 		_llenar()
 	else:
@@ -407,15 +421,26 @@ func llenar_deposito() -> void:
 
 ## Depósito lleno: se detiene pitando, inofensiva, y espera a que se lo vacíen... o a que Felipe la apague.
 func _llenar() -> void:
+	quedar_vulnerable("deposito")
+
+
+## Queda quieta, inofensiva y vulnerable (Felipe le salta encima): con el depósito lleno («¡DEPÓSITO LLENO!», tapa
+## abierta) o electrocutada por un charco en el apagón («¡EN CORTO!»). El aviso nace sobre ella (zona D), no en la
+## franja de arriba (crítica de Gemini, 2026-10-23).
+func quedar_vulnerable(por: String) -> void:
+	motivo = por
 	llena = true
 	_reloj_llena = 0.0
 	terminar_ataque()
 	jefe.patrulla.destino = INF
 	jefe.patrulla.quieta = true
 	jefe.dano.activo = false
-	apariencia.abrir_tapa()
-	nivel.sonar("logro")
-	presentacion.cartel("JEFE_DEPOSITO_LLENO", 1.6, datos.pista_vulnerable)
+	if por == "deposito":
+		apariencia.abrir_tapa()
+		nivel.sonar("logro")
+	else:
+		# Electrocutada: vibra con chispas; el cartelito «¡EN CORTO!» va sobre ella (DibujoBatallaAspi).
+		apariencia.vibrando = true
 	# Nunca queda justo bajo la repisa ni bajo la isla del librero (estudio v3: desde arriba Felipe caería en la caja o
 	# en el librero, no en su botón): sale disparada hacia adelante, al piso libre más cercano.
 	var x := jefe.global_position.x
@@ -463,13 +488,17 @@ func _actualizar_llena(delta: float) -> void:
 		_apagar()
 		return
 	if _reloj_llena >= DatosJefe.por_fase(datos.tiempo_vulnerable, vencidas):
+		llena = false
+		jefe.patrulla.quieta = false
+		apariencia.vibrando = false
+		if motivo == "charco":
+			# Se le pasó el corto: sigue con lo que tenía en el depósito.
+			return
 		# Nadie la apagó: vacía el depósito EN EL PISO (montaña de pelusa con todo lo que tenía) y sigue.
 		var tenia := deposito
 		deposito = 0
-		llena = false
-		jefe.patrulla.quieta = false
 		escupir_pelusa(tenia)
-		presentacion.cartel("JEFE_LO_VACIO", 1.2, DatosJefe.por_fase(datos.pistas, vencidas))
+		nivel.travesuras.jugo.palabra_en_mundo("JEFE_LO_VACIO", jefe.global_position + Vector2(0, -96), Color(1.0, 0.88, 0.4), 16)
 
 
 ## ¡CLIC!: congelado, destello, sacudida, polvo y sonido en capas.
@@ -481,12 +510,15 @@ func _apagar() -> void:
 	presentacion.sacudir(0.2)
 	nivel.travesuras.jugo.palabra_en_mundo("PALABRA_CLIC", jefe.global_position + Vector2(0, -70), Color(1.0, 0.95, 0.5), 22)
 	tiempo_clic = Time.get_ticks_msec() / 1000.0
-	_soltar_polvo(jefe.global_position + Vector2(0, -20))
+	soltar_polvo(jefe.global_position + Vector2(0, -20))
 	nivel.sonar("golpe")
 	nivel.sonar("caja")
 	# Lo que quedó en el piso sigue ahí (la fase siguiente lo limpia).
 	limpiar.limpiando = false
+	apariencia.vibrando = false
 	if vencidas >= datos.fases:
+		# Vuelve la luz de golpe con el «¡APAGADA!» y la cámara lenta de su derrota.
+		apagon.encender()
 		jefe.vida.morir()
 		return
 	var motas: int = DatosJefe.por_fase(datos.devuelve, vencidas - 1) if not datos.devuelve.is_empty() else 0
@@ -551,3 +583,5 @@ func _terminar() -> void:
 		await get_tree().physics_frame
 	if Nivel1.habitacion_de(felipe.global_position) == "estudio":
 		nivel.travesuras.decir_felipe("estudio_destruido", true)
+	# La nota de «Arte gatuno» (opcional: se ve, no obliga).
+	nota = NotaArteGatuno.mostrar(self)

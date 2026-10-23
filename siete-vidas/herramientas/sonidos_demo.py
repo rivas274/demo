@@ -1,6 +1,6 @@
 """Genera los sonidos provisionales de la demo (WAV 22 kHz, mono) con síntesis simple, sin dependencias.
 
-Uso: python3 sonidos_demo.py <carpeta_salida>
+Uso: python3 sonidos_demo.py <carpeta_salida> [nombre ...]
 Se reemplazarán por sonidos finales (jsfxr o grabados) más adelante.
 """
 import math
@@ -60,11 +60,19 @@ SONIDOS = {
     "ronroneo": lambda: tono(55, 60, 0.45, "cuadrada", 0.18, ruido=0.4) + tono(60, 55, 0.45, "cuadrada", 0.18, ruido=0.4),
     "goteo": lambda: tono(1900, 1100, 0.05, "seno", 0.28) + tono(1100, 700, 0.06, "seno", 0.12),  # «plic» de la llave y del baño
     "resorte": lambda: tono(300, 900, 0.08, "seno", 0.3) + tono(900, 250, 0.18, "seno", 0.3),
+    # Pelea con A.S.P.I. v3 (2026-10-23): ganchos de sonido provisionales (los finales, en el encargo de 05).
+    "motor": lambda: tono(70, 90, 0.5, "cuadrada", 0.18, ruido=0.5),  # sube de tono con cada mancha (pitch en el juego)
+    "reversa": lambda: tono(1000, 1000, 0.12, "cuadrada", 0.2) + [0.0] * 1800 + tono(1000, 1000, 0.12, "cuadrada", 0.2),
+    "atragantar": lambda: tono(180, 90, 0.2, "cuadrada", 0.3, ruido=0.5) + tono(220, 60, 0.35, "cuadrada", 0.3, ruido=0.6),
+    "cortocircuito": lambda: tono(2600, 300, 0.12, "cuadrada", 0.3, ruido=0.9) + tono(1800, 200, 0.18, "cuadrada", 0.3, ruido=0.9)
+    + tono(120, 40, 0.4, "cuadrada", 0.35, ruido=0.5),
 }
 
 if __name__ == "__main__":
     random.seed(7)
     salida = Path(sys.argv[1])
     salida.mkdir(parents=True, exist_ok=True)
-    for nombre, generar in SONIDOS.items():
-        guardar(salida / f"{nombre}.wav", generar())
+    # Con nombres después de la carpeta, solo esos (los demás no se tocan).
+    pedidos = sys.argv[2:] or list(SONIDOS)
+    for nombre in pedidos:
+        guardar(salida / f"{nombre}.wav", SONIDOS[nombre]())

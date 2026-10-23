@@ -15,7 +15,8 @@ extends ConductaJefe
 var reloj_espera := 0.0
 var cargando := false
 var _reloj := 0.0
-var _destino := 0.0
+## Hasta dónde va a cargar (lo marca la línea roja del piso durante el aviso).
+var destino := 0.0
 
 
 func nombre() -> String:
@@ -46,8 +47,9 @@ func intentar(_delta: float) -> bool:
 	var hacia := signf(felipe.global_position.x - b.jefe.global_position.x)
 	var atras := b.create_tween()
 	atras.tween_property(b.jefe, "position:x", b.jefe.position.x - hacia * 10.0, 0.15)
-	_destino = clampf(felipe.global_position.x + hacia * 70.0, b.jefe.patrulla.limite_izquierdo, b.jefe.patrulla.limite_derecho)
-	b.nivel.sonar("zarpazo")
+	destino = clampf(felipe.global_position.x + hacia * 70.0, b.jefe.patrulla.limite_izquierdo, b.jefe.patrulla.limite_derecho)
+	# Pitido de reversa de camión (gancho de sonido) mientras se echa atrás.
+	b.sonar_evento("reversa")
 	return true
 
 
@@ -61,9 +63,9 @@ func actualizar(delta: float) -> bool:
 			b.jefe.patrulla.quieta = false
 			b.jefe.dano.activo = true
 			b.jefe.patrulla.velocidad_persecucion = DatosJefe.por_fase(b.datos.velocidad, b.vencidas) * multiplicador_velocidad
-			b.jefe.patrulla.destino = _destino
+			b.jefe.patrulla.destino = destino
 		return true
-	if _reloj >= duracion or absf(b.jefe.global_position.x - _destino) < 6.0:
+	if _reloj >= duracion or absf(b.jefe.global_position.x - destino) < 6.0:
 		b.terminar_ataque()
 		reloj_espera = DatosJefe.por_fase(espera, b.vencidas)
 		return false

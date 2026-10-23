@@ -56,6 +56,7 @@ Léelas **antes** de diseñar, construir o revisar cualquier escenario. Cada una
 | 43 | Un HUD lleno de contadores fijos tapaba la pantalla | Fijo solo lo que se decide a cada segundo (corazones; en la pelea, snacks); lo demás aparece al cambiar y vive en la pausa |
 | 44 | La pizarra «diminuta y lejos» no cabía al lado de la ventana | Antes de achicar algo que cuenta la historia, ensancha el cuarto (lección 31) y mide con el marco real, no con el vidrio |
 | 45 | Lo roto volvía entero a su lugar cada 6 s para que no faltara munición: «reaparece por arte de magia» y rompe la inmersión | Nada reaparece. Si un recurso de juego se acaba, se resuelve **dentro del mundo** (más fuentes que tienen sentido en el cuarto; el jefe devuelve lo que tragó, como Birdo con sus huevos) y lo que cae queda en el piso con su sombra hasta el final |
+| 46 | En la pelea, los avisos («¡DEPÓSITO LLENO!») y los pensamientos de Felipe salían en la franja de arriba, lejos de la acción, y tapaban el escenario (Gemini) | Lo que pasa en el mundo se avisa **donde pasa**: cartelito sobre el jefe, marca en el piso para la embestida; en una pelea Felipe piensa en un globito sobre él. La franja de arriba queda para los carteles de fase, cortos |
 | 41 | Felipe sentado encima de una maceta de la baranda | Donde un personaje se sienta o se para, no hay decorado sin colisión debajo: el punto se limita a un tramo libre (`Nivel1.ASIENTO_BARANDA`) y la prueba lo mide con el arte |
 
 ## Antes de dar por terminado un escenario

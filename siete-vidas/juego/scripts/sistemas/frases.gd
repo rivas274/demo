@@ -115,11 +115,15 @@ const FELIPE := {
 	## A.S.P.I. escupe la montaña de pelusa (revisión 2026-10-23): la primera vez, la frase de siempre.
 	"devolucion": [["FELIPE_DEVOLUCION_1", 7]],
 	"devolucion_otra": [["FELIPE_DEVOLUCION_2", 4], ["FELIPE_DEVOLUCION_3", 7]],
+	## Se corta la luz en la fase 3 (cortocircuito de A.S.P.I.).
+	"apagon": [["FELIPE_APAGON_1", 7]],
 	## Al ganar, mira el estudio destruido con orgullo.
 	"estudio_destruido": [["FELIPE_ESTUDIO_DESTRUIDO_1", 0]],
 }
 
 const VALERIA := {
+	## Desde abajo, al oír el estudio destruido (más del 85 % de «Arte gatuno»). Fuera de cuadro.
+	"grito_estudio": [["VALERIA_GRITO_ESTUDIO_1", 1]],
 	## Rascador con público: perdón al instante (y graba en silencio).
 	"rascador": [["VALERIA_RASCADOR_1", 3]],
 	## Rascador otra vez en la misma visita (el bis no se cobra).

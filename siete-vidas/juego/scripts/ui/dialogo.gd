@@ -55,6 +55,9 @@ var esperar := Callable()
 ## Mientras devuelva true (una franja de fase del jefe, urgente, ocupa la zona C), ni las frases urgentes salen: van
 ## primeras en la cola. Lo pone Anuncios.
 var esperar_urgente := Callable()
+## Durante una pelea (PeleaJefe), lo que dice Felipe va a este globito sobre su cabeza (GloboDialogo) y no al cuadro
+## de arriba, que tapaba la acción (crítica de Gemini, 2026-10-23). null = el cuadro de siempre.
+var globo: GloboDialogo
 var hablando := ""
 var texto_actual := ""
 ## Frases que se mostraron, en orden: [quien, texto] (para las pruebas y el resumen).
@@ -97,6 +100,12 @@ func decir(quien: String, texto: String, animo := 0, urgente := false) -> bool:
 	texto = tr(texto)
 	if _en_presentacion or texto == "" or texto == _ultima or (_caja.visible and texto == texto_actual):
 		return false
+	if quien == "felipe" and globo != null and is_instance_valid(globo):
+		_ultima = texto
+		historial.append([quien, texto])
+		globo.decir(texto)
+		dicho.emit(quien, texto)
+		return true
 	for pendiente: Array in _cola:
 		if pendiente[1] == texto:
 			return false

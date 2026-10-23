@@ -13,3 +13,4 @@ charco_ancho = 44.0
 charco_alto = 4.0
 charco_claro = Color(0.68, 0.84, 0.94, 1)
 charco_oscuro = Color(0.4, 0.6, 0.78, 1)
+conduce = true

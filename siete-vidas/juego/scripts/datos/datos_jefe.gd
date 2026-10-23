@@ -31,6 +31,12 @@ extends Resource
 @export var devuelve: PackedInt32Array = []
 ## Segundos quieta e inofensiva al empezar una fase nueva (Felipe alcanza a alejarse).
 @export var reinicio := 1.5
+@export_group("Sonidos")
+## Sonido de cada momento de la pelea: evento -> nombre del sonido del nivel (assets/sonidos/). Ganchos para los sonidos
+## finales (encargo en memoria/05): A.S.P.I. usa motor, reversa, atragantar, blorp y cortocircuito.
+@export var sonidos := {}
+## Cuánto sube el tono del motor con cada mancha que traga (0 = no cambia).
+@export var tono_por_mancha := 0.0
 @export_group("Conductas")
 ## Ataques y conductas en orden de prioridad (ConductaJefe).
 @export var conductas: Array[ConductaJefe] = []

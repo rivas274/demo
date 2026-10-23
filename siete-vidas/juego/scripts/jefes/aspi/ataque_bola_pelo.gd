@@ -61,6 +61,8 @@ func _escupir() -> void:
 	bola.set_meta("velocidad", velocidad)
 	bola.global_position = desde
 	bola.draw.connect(b.dibujo.bola.bind(bola))
+	# Se ve también en el apagón.
+	bola.material = b.sin_sombrear
 	# Lastima al tocar a Felipe (HaceDano, circular); la revisa mover() a mano para mirar antes que el piso.
 	var dano := HaceDano.new()
 	dano.radio = radio

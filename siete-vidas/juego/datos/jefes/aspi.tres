@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="DatosJefe" load_steps=7 format=3]
+[gd_resource type="Resource" script_class="DatosJefe" load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/datos/datos_jefe.gd" id="1_datos"]
 [ext_resource type="Script" path="res://scripts/jefes/conducta_jefe.gd" id="2_conducta"]
@@ -6,11 +6,22 @@
 [ext_resource type="Script" path="res://scripts/jefes/aspi/ataque_soplido.gd" id="4_soplido"]
 [ext_resource type="Script" path="res://scripts/jefes/aspi/conducta_limpiar.gd" id="5_limpiar"]
 [ext_resource type="Script" path="res://scripts/jefes/aspi/ataque_embestida.gd" id="6_embestida"]
+[ext_resource type="Script" path="res://scripts/jefes/aspi/conducta_cortocircuito.gd" id="7_corto"]
+
+[sub_resource type="Resource" id="Resource_corto"]
+script = ExtResource("7_corto")
+desde_fase = 2
+enchufe_x = 7330.0
+antes_del_enchufe = 30.0
+multiplicador_velocidad = 3.5
+tiempo_maximo = 2.5
+espera_charco = 3.5
+margen_charco = 4.0
 
 [sub_resource type="Resource" id="Resource_bola"]
 script = ExtResource("3_bola")
 desde_fase = 2
-espera = 2.2
+espera = 3.4
 aviso = 0.5
 gravedad = 600.0
 vuelo = 0.9
@@ -51,12 +62,20 @@ titulo = "JEFE_ASPI_DEVORADORA_DE_PELOS_NIVEL"
 rugido = "JEFE_ASPI_DETECTANDO_SUCIEDAD_DETECTANDO_GATO"
 alto_extra = 20.0
 fases = 3
-carteles = PackedStringArray("JEFE_ASPI_FASE_1_LLENALE_EL", "JEFE_ASPI_FASE_2_SE_REINICIO", "JEFE_ASPI_FASE_3_FURIA")
-pistas = PackedStringArray("JEFE_ASPI_TIRA_COSAS_AL_PISO", "JEFE_ASPI_SI_TE_ASPIRA_MANTEN", "JEFE_ASPI_BOLAS_DE_PELO_SALTA")
+carteles = PackedStringArray("JEFE_ASPI_FASE_1_LLENALE_EL", "JEFE_ASPI_FASE_2_SE_REINICIO", "JEFE_ASPI_FASE_3_APAGON")
+pistas = PackedStringArray("JEFE_ASPI_TIRA_COSAS_AL_PISO", "JEFE_ASPI_SI_TE_ASPIRA_MANTEN", "JEFE_ASPI_LLEVALA_A_UN_CHARCO")
 velocidad = PackedFloat32Array(55, 70, 85)
 capacidad = PackedInt32Array(2, 3, 3)
 tiempo_vulnerable = PackedFloat32Array(4, 3.5, 3)
 pista_vulnerable = "JEFE_ASPI_SALTALE_ENCIMA_Y_APRIETA"
 devuelve = PackedInt32Array(2, 2)
+sonidos = {
+"atragantar": "atragantar",
+"blorp": "puf",
+"cortocircuito": "cortocircuito",
+"motor": "motor",
+"reversa": "reversa"
+}
+tono_por_mancha = 0.12
 reinicio = 1.5
-conductas = Array[ExtResource("2_conducta")]([SubResource("Resource_bola"), SubResource("Resource_soplido"), SubResource("Resource_limpiar"), SubResource("Resource_embestida")])
+conductas = Array[ExtResource("2_conducta")]([SubResource("Resource_corto"), SubResource("Resource_bola"), SubResource("Resource_soplido"), SubResource("Resource_limpiar"), SubResource("Resource_embestida")])

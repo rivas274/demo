@@ -161,10 +161,12 @@ func _correr() -> void:
 
 	# Lleno: se detiene inofensiva; si nadie la apaga, lo vacía.
 	await _llenar(batalla, aspi)
-	_comprobar(batalla.llena and not aspi.dano.activo and "encima" in batalla.presentacion.pista_actual(), "Con el depósito lleno se detiene, inofensiva, y la pista dice que le salte encima")
+	_comprobar(batalla.llena and batalla.motivo == "deposito" and not aspi.dano.activo and batalla.presentacion.pista_actual() == "", "Con el depósito lleno se detiene, inofensiva, y el aviso nace sobre ella (no en la franja de arriba)")
 	var tenia := batalla.deposito
 	await _esperar_que(func() -> bool: return not batalla.llena, 400)
 	_comprobar(not batalla.llena and batalla.deposito == 0 and batalla.apagados == 0, "Si nadie la apaga a tiempo, vacía el depósito y sigue")
+	_comprobar(batalla.montanas.is_empty() and batalla.pelusa.en_camino == tenia and batalla.apariencia.vibrando, "Antes de escupir se sobrecarga 0,6 s (vibra, humo y chispas)")
+	await _esperar_que(func() -> bool: return not batalla.montanas.is_empty(), 60)
 	_comprobar(batalla.montanas.size() == 1 and batalla.montanas[0].cantidad == tenia and "¡BLORP!" in sala.travesuras.jugo.palabras, "…y lo vacía EN EL PISO: «¡BLORP!» y una montaña de pelusa con lo que tenía (%d)" % tenia)
 	await _esperar_que(func() -> bool: return batalla.montanas.is_empty() or batalla.montanas[0].en_piso, 60)
 	for vieja in batalla.montanas.duplicate():
@@ -176,13 +178,23 @@ func _correr() -> void:
 	await _caerle_encima(aspi)
 	_comprobar(batalla.apagados == 1 and not batalla.llena, "Caerle encima le aprieta el botón: fase 2")
 	_comprobar("¡CLIC!" in sala.travesuras.jugo.palabras, "Al apagarla: congelado, destello, sacudida y «¡CLIC!»")
-	await _esperar(100)
+	await _esperar(130)
 	_comprobar(batalla.montanas.size() == 1 and batalla.montanas[0].cantidad == batalla.datos.devuelve[0] and batalla.montanas[0].en_piso, "Al terminar la fase se le abre el depósito y escupe una montaña de pelusa (%d motas)" % batalla.datos.devuelve[0])
 	_comprobar(sala.ya_dijo("devolucion"), "Felipe la comenta: «Devolución aceptada.»")
+	var dialogo: Dialogo = sala.travesuras.dialogo
+	_comprobar(dialogo.globo == batalla.globo and not dialogo.ocupado() and _dijo("felipe", "Devolución aceptada"), "En la pelea, lo que piensa Felipe va en un globito sobre él (no en el cuadro de arriba)")
+	var caja_globo := batalla.globo.rect_en_pantalla()
+	_comprobar(not batalla.globo.visible_ahora() or (caja_globo.position.y >= ZonasTexto.HUD.end.y and ZonasTexto.PANTALLA.encloses(caja_globo)), "El globito no entra al HUD ni se sale de la pantalla (%s)" % caja_globo)
 	# Esparcirla: el manotazo de siempre (burbuja «Esparcir») la deshace en motas que quedan como manchas.
 	var montana: MontanaPelusa = batalla.montanas[0]
 	var manchas_antes := batalla.manchas.size()
 	(batalla.conducta("embestida") as AtaqueEmbestida).reloj_espera = 99.0
+	# Cámara: con A.S.P.I. al otro lado del cuarto (fuera de pantalla), se corre hacia ella o marca el borde.
+	var x_aspi := aspi.global_position.x
+	aspi.global_position.x = arena.end.x - 60.0
+	await _poner_en(Vector2(arena.position.x + 60.0, Nivel1.SUELO), 50)
+	_comprobar(batalla.camara.corrida > 40.0, "Con A.S.P.I. fuera de pantalla, la cámara se corre hacia ella (%.0f px, sin zoom: pixel art entero)" % batalla.camara.corrida)
+	aspi.global_position.x = x_aspi
 	await _poner_en(montana.global_position + Vector2(-20, 0))
 	felipe.mirando = 1.0
 	_comprobar(felipe.manas.objeto_cercano() == montana and tr(montana.verbo(felipe)) == "Esparcir", "Junto a la montaña, la burbuja dice «Esparcir»")
@@ -220,6 +232,25 @@ func _correr() -> void:
 	# Fase 3: tose y escupe bolas de pelo en arco que llegan arriba (al escritorio).
 	# M8: sin azar ni carreras. Felipe queda en el escritorio, lejos del teclado (pisarlo suelta papeles en lugares al
 	# azar) y A.S.P.I. lejos; se espera el ESTADO (tos y bola alta), no un tiempo fijo.
+	# Clímax de la fase 3: corre contra el enchufe, cortocircuito y apagón; siempre queda al menos un charco.
+	var corto := batalla.conducta("cortocircuito") as ConductaCortocircuito
+	await _esperar_que(func() -> bool: return corto.corriendo, 300)
+	_comprobar(corto.corriendo and batalla.amenaza(), "Fase 3: A.S.P.I. arranca contra el enchufe (la cámara la mira: amenaza)")
+	await _esperar_que(func() -> bool: return corto.hecho, 300)
+	await _esperar(60)
+	_comprobar(corto.hecho and batalla.apagon.activo and not corto.charcos().is_empty() and "¡BZZZT!" in sala.travesuras.jugo.palabras, "Cortocircuito: «¡BZZZT!», se corta la luz y hay al menos un charco (%d)" % corto.charcos().size())
+	var ambiente: CanvasModulate = sala.find_children("*", "CanvasModulate", true, false)[0]
+	_comprobar(ambiente.color.v < 0.7, "En el apagón el cuarto queda en penumbra (no negro: %.2f)" % ambiente.color.v)
+	# Pasar por un charco la deja en corto: vulnerable como con el depósito lleno.
+	await _esperar_que(func() -> bool: return batalla.reinicio <= 0.0 and not batalla.llena, 300)
+	var charco: Vector2 = corto.charcos()[0]
+	corto.reloj_charco = 0.0
+	aspi.global_position = Vector2(charco.x - 80.0, Nivel1.SUELO)
+	aspi.patrulla.destino = charco.x + 60.0
+	await _esperar_que(func() -> bool: return batalla.llena, 200)
+	_comprobar(batalla.llena and batalla.motivo == "charco" and not aspi.dano.activo, "Pasar por un charco la electrocuta: queda en corto, vulnerable")
+	await _esperar_que(func() -> bool: return not batalla.llena, 400)
+	_comprobar(not batalla.llena and batalla.apagados == 2 and batalla.montanas.size() <= 1, "Si nadie la apaga, se le pasa el corto (no escupe pelusa)")
 	await _esperar_que(func() -> bool: return batalla.reinicio <= 0.0 and batalla.ataque == BatallaAspi.Ataque.NINGUNO, 300)
 	batalla.manchas.clear()
 	batalla.tipos_mancha.clear()
@@ -275,9 +306,13 @@ func _correr() -> void:
 	_comprobar(aspi.vida.muerto and batalla.fase == BatallaAspi.Fase.FIN, "Al tercer apagado, A.S.P.I. se apaga del todo")
 	_comprobar(not sala.puertas[Nivel1.PUERTA_BALCON].cerrada and "Desenchufada" in sala.logros and sala.travesuras.agenda.esta_cumplida("desenchufar"), "Se abre la puerta del balcón (travesura «desenchufar» y logro)")
 	_comprobar(Engine.time_scale == 1.0 and not sala.puertas["estudio<pasillo"].cerrada, "Todo vuelve de golpe a la normalidad")
+	_comprobar(not batalla.apagon.activo and ambiente.color.v > 0.9, "Al apagarla por última vez vuelve la luz de golpe")
+	_comprobar(sala.travesuras.dialogo.globo == null, "Terminada la pelea, Felipe vuelve a hablar en el cuadro de siempre")
+	await _esperar_que(func() -> bool: return batalla.nota >= 0, 60 * 15)
+	_comprobar(batalla.nota >= 0 and batalla.nota <= 100, "Al final sale la nota de «Arte gatuno» (%d %%: %s)" % [batalla.nota, tr(NotaArteGatuno.rango(batalla.nota))])
 	await _poner_en(Vector2(arena.position.x + 330, Nivel1.SUELO))
 	await _esperar(70)
-	_comprobar(batalla.bolas.is_empty() and batalla.presentacion.pista_actual() == "", "No quedan bolas ni pistas")
+	_comprobar(batalla.bolas.is_empty() and batalla.presentacion.pista_actual() in ["", tr(NotaArteGatuno.rango(batalla.nota))], "No quedan bolas ni pistas de pelea (solo la nota de «Arte gatuno»)")
 
 	# La presentación es reutilizable: sirve igual para otro jefe cualquiera (cada uno solo da sus datos).
 	var otro := Node2D.new()

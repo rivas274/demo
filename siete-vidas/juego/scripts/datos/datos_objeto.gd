@@ -34,6 +34,8 @@ extends Resource
 @export var charco_alto := 3.0
 @export var charco_claro := Color(0.62, 0.8, 0.92)
 @export var charco_oscuro := Color(0.38, 0.6, 0.78)
+## El charco es agua o café: en el apagón de A.S.P.I. (fase 3) la electrocuta si pasa por encima.
+@export var conduce := false
 ## Imagen que queda apoyada en el charco (la planta tirada de la maceta; "" = ninguna).
 @export var queda := ""
 

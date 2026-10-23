@@ -43,14 +43,14 @@ func _ready() -> void:
 	Capas.usar(self, Capas.JUEGO)
 
 
-## Sale de `desde` (la tapa de A.S.P.I.) y cae en arco hasta `x` sobre el piso.
-func escupir(desde: Vector2, x: float) -> void:
+## Sale de `desde` (la tapa de A.S.P.I.) y cae en arco (de `arco` px de alto) hasta `x` sobre el piso.
+func escupir(desde: Vector2, x: float, arco := ARCO) -> void:
 	global_position = desde
 	scale = Vector2(0.4, 0.4)
 	var vuelo := create_tween().set_parallel()
 	vuelo.tween_property(self, "global_position:x", x, VUELO)
 	vuelo.tween_method(func(t: float) -> void:
-		global_position.y = lerpf(desde.y, piso, t) - sin(t * PI) * ARCO, 0.0, 1.0, VUELO)
+		global_position.y = lerpf(desde.y, piso, t) - sin(t * PI) * arco, 0.0, 1.0, VUELO)
 	vuelo.tween_property(self, "scale", Vector2.ONE, VUELO).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	vuelo.chain().tween_callback(_apoyar)
 

@@ -219,10 +219,8 @@ JEFE_ASPI_DETECTANDO_SUCIEDAD_DETECTANDO_GATO,DETECTANDO SUCIEDAD. DETECTANDO…
 JEFE_ASPI_SALTALE_ENCIMA_Y_APRIETA,Sáltale encima y aprieta el botón
 JEFE_ASPI_FASE_1_LLENALE_EL,FASE 1: ¡LLÉNALE EL DEPÓSITO!
 JEFE_ASPI_FASE_2_SE_REINICIO,FASE 2: ¡SE REINICIÓ!
-JEFE_ASPI_FASE_3_FURIA,FASE 3: ¡FURIA!
-JEFE_ASPI_TIRA_COSAS_AL_PISO,Tira cosas al piso: limpiar le llena el depósito
-JEFE_ASPI_SI_TE_ASPIRA_MANTEN,"Si te aspira, mantén {agacharse}. Y no acampes arriba"
-JEFE_ASPI_BOLAS_DE_PELO_SALTA,¡Bolas de pelo! Salta y no te quedes quieto
+JEFE_ASPI_TIRA_COSAS_AL_PISO,Tira cosas: limpiar le llena el depósito
+JEFE_ASPI_SI_TE_ASPIRA_MANTEN,"Si te aspira, mantén {agacharse}"
 VERBO_TIRAR,Tirar
 VERBO_EMPUJAR,Empujar
 VERBO_ASCENDER,Ascender
@@ -298,3 +296,15 @@ FELIPE_DEVOLUCION_1,Devolución aceptada.
 FELIPE_DEVOLUCION_2,¿Me lo devuelves? Qué detalle.
 FELIPE_DEVOLUCION_3,"Reciclaje: lo inventé yo, hace dos minutos."
 FELIPE_ESTUDIO_DESTRUIDO_1,Estudio redecorado. Estilo: Su Majestad.
+JEFE_ASPI_FASE_3_APAGON,FASE 3: ¡APAGÓN!
+JEFE_ASPI_LLEVALA_A_UN_CHARCO,Los charcos la fríen. {maullar} la atrae
+JEFE_EN_CORTO,¡EN CORTO!
+PALABRA_ERROR,¡ERROR!
+PALABRA_BZZZT,¡BZZZT!
+FELIPE_APAGON_1,Se fue la luz. Por fin: ambiente.
+ARTE_GATUNO_NOTA,ARTE GATUNO: %d %%
+ARTE_GATUNO_AFICIONADO,Aficionado
+ARTE_GATUNO_DECORADOR,Decorador
+ARTE_GATUNO_OBRA_MAESTRA,O B R A   M A E S T R A
+VALERIA_GRITO_ESTUDIO_1,¡¡FELIPE!!
+LOGRO_REESTRUCTURACION_INMOBILIARIA,Reestructuración Inmobiliaria

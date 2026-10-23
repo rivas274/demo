@@ -77,12 +77,36 @@ El creador dijo: «La batalla es confusa, mucho ruido visual». Las referencias 
 - **Pantalla que cambia por cuadro, en el momento 2:** 15–17 % en la v4 y 3–4 % en la v5. En el momento 3 las dos versiones dan alrededor de 50 %, porque ahí se mueve la cámara de la pelea; no es ruido del dibujo.
 - **Contraste del fondo:** baja de 56 a 47–49 en los momentos con luz.
 
-## 3. Lo que no se hizo
+## 3. Capas por rol (`Profundidad`), pedido del creador
+
+- **Problemas que vio el creador:**
+  - al saltar frente a la mesa, el vaso quedó delante de Felipe;
+  - A.S.P.I. pasó detrás de un mueble.
+- **Causas:**
+  - El vaso y Felipe estaban los dos en `JUEGO` (0) y decidía el orden del árbol (el vaso se crea después).
+  - Con Felipe encima, A.S.P.I. bajaba a `TRAS_FELIPE` (-1), que es el mismo número que `MUEBLES`, así que también decidía el orden del árbol.
+- **Receta estándar:** capas por plano, como las sorting layers de Unity o el z_index por plano de Godot.
+  - Cada nodo lleva un **rol** y una sola función, `Capas.z_para`, resuelve su z.
+  - Un evento central (`VigiaSuperficie` → `Profundidad.felipe_cambio`) recalcula solo lo que depende de Felipe cuando aterriza o despega.
+- **Regla del creador para lo apoyado:** con Felipe en la misma superficie, el objeto queda apenas delante de él (Felipe pasa por detrás). Si no, queda detrás.
+- **Migración del nivel 1:**
+  - Fondo, pared, arte de pared, escalera y puertas.
+  - Cada mueble donde se sube va en su nodo `SALTABLE` (32).
+  - Objetos y comida (`APOYADO`, 13), restos, A.S.P.I. y ratones (`ENEMIGO_PISO`), Felipe, Valeria, decorado, luces, efectos e Indicador.
+  - Ya no queda ningún `z_index` suelto en los scripts ni en las escenas.
+- **Prueba nueva** `prueba_capas.gd`:
+  - ningún archivo fija `z` a mano;
+  - todo lo que se dibuja tiene rol;
+  - las reglas se cumplen en 43 estados de Felipe (piso, aire y cada superficie);
+  - el caso real del escritorio con el vaso: arriba y saltando delante.
+- **Capturas ampliadas ×3, v4 contra v5:** `capturas/pelea-aspi/v5-capas.png`. Muestran sobre el escritorio junto al vaso, saltando delante del escritorio, A.S.P.I. bajo la silla, el escritorio y el librero, y Felipe arriba con A.S.P.I. debajo.
+
+## 4. Lo que no se hizo
 
 - **Juntar los restos en 2 o 3 montoncitos:** habría que mover piezas que ya cayeron (lo que cae queda donde cae, regla de la v2). En su lugar: 2 pedazos como mucho y tinte oscuro.
 - **Que los textos del mundo esperen en una cola general:** cada caso se resolvió en su lugar (montaña tras el cartel, globito que espera, sin burbuja del Indicador).
 
-## 4. Crítica honesta
+## 5. Crítica honesta
 
 - «Aplastar» quita la frustración de caer en la silla. Puede sentirse demasiado fácil en la fase 3; si pasa, se achica el alcance desde los muebles (`alcance_mueble`).
 - A ×1 el velo es sutil a propósito. Se nota más en conjunto que en una captura sola. Si el creador lo quiere más marcado, 0,3 sigue sin tapar lo jugable.

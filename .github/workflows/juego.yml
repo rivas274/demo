@@ -51,6 +51,9 @@ jobs:
       - name: Aplastar a A.S.P.I. (desde el piso y desde cada mueble del estudio)
         run: godot --headless --path siete-vidas/juego --fixed-fps 60 --script res://pruebas/prueba_aplastar.gd
 
+      - name: Capas por rol (Profundidad; nadie fija z_index a mano)
+        run: godot --headless --path siete-vidas/juego --script res://pruebas/prueba_capas.gd
+
       - name: Munición de la pelea (nada reaparece, la suciedad nunca se pierde, peor caso)
         run: godot --headless --path siete-vidas/juego --fixed-fps 60 --script res://pruebas/prueba_municion.gd
 

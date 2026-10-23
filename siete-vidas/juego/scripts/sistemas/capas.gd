@@ -156,7 +156,8 @@ static func z_para(rol: int, contexto := {}) -> int:
 			return SALTABLE_ACTIVO if donde in mias and contexto.get("puede_subir", true) else MUEBLES
 		Rol.APOYADO:
 			# Con Felipe en su misma superficie, apenas delante de él (esté en la capa que esté).
-			return maxi(APOYADO_DELANTE, int(contexto.get("z_felipe", JUEGO)) + 1) if donde in mias else APOYADO
+			# (Lo que está en el piso no: en el piso Felipe siempre va delante.)
+			return maxi(APOYADO_DELANTE, int(contexto.get("z_felipe", JUEGO)) + 1) if donde in mias and donde != "piso" else APOYADO
 		Rol.ENEMIGO_PISO:
 			return JUEGO_CERCA if donde == "piso" and contexto.get("delante", false) else ENEMIGO_DETRAS
 		Rol.JUGADOR:

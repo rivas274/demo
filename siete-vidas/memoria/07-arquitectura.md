@@ -262,6 +262,39 @@ ataque), `GloboDialogo.peligro` (la frase espera si hay amenaza), `Nivel.retener
 apagón) y los colores `peligro` / `oportunidad` del tema. Números nuevos en `DatosJugoJefe` (grupos «Remate» y
 «Recuperación»).
 
+## Profundidad: capas por rol (regla, v5, decisión del creador del 2026-10-23)
+
+«Clasificar todo y definir bien las capas, como el ratón y A.S.P.I.»: **ningún nodo del mundo pone su `z_index` a
+mano**. Cada nodo que se dibuja con capa propia lleva la pieza `Profundidad` (`scripts/componentes/profundidad.gd`) con
+un **rol** (`Capas.Rol`), y su z sale de **una sola función**, `Capas.z_para(rol, contexto)`, con la tabla de
+`capas.gd` como única fuente de verdad. `prueba_capas.gd` lo comprueba (nadie escribe `z_index`, `z_as_relative` ni
+`Capas.usar`; todo lo que se dibuja colgado del nivel tiene rol; las reglas se cumplen con Felipe en el piso, en el aire
+y sobre cada superficie del nivel).
+
+- **El evento central:** `VigiaSuperficie` (lo crea el Nivel) mira lo que hay bajo las patas de Felipe después de que
+  se movió y, solo si cambió, llama a `Profundidad.felipe_cambio(arbol, superficie)` ("piso", el nombre del mueble o
+  "aire"). Se recalculan solo los roles que dependen de Felipe (SALTABLE, APOYADO, ENEMIGO_PISO, JUGADOR); nadie
+  pregunta cada cuadro.
+- **Roles y reglas** (detalle en el encabezado de `capas.gd`):
+  - `SALTABLE`: cada mueble donde se sube va en su nodo (`ArteNivel1.crear_fondo`, `Nivel1.superficies_del_arte`) y sube un
+    escalón con Felipe encima, salvo que un saltable de delante se le cruce.
+  - `APOYADO`: sabe su superficie (`Nivel.superficie_en`). Va delante de Felipe solo si él está en esa misma
+    superficie; si no, detrás. Al caer pasa a `OBJETO_JUEGO` y en el piso a `RESTO_PISO`.
+  - `ENEMIGO_PISO`: delante de todo mueble; contra Felipe en el piso, según `DatosEnemigo.delante_de_felipe`; con
+    Felipe subido o en el aire, detrás de él.
+  - `JUGADOR`: Felipe (delante de los humanos e imaginando, como contexto). `HUMANO`: Valeria.
+  - Fijos: `FONDO` (con orden), `PARED`, `FACHADA`, `ARTE_PARED`, `ESCALERA`, `PUERTA`, `DECORADO`, `SOMBRA`, `VELO`,
+    `TRAS_FELIPE`, `OBJETO_JUEGO`, `MARCA`, `PRIMER_PLANO`, `LUZ`, `ESTELA`, `IMAGINACION`, `EFECTO`, `CENSURA`,
+    `INDICADOR`, `CONTORNO` (el z que pide el objeto contorneado), `JUEGO`.
+- **Los datos traen el rol:** `DatosObjeto.rol` (APOYADO por defecto) y `DatosEnemigo.rol` (ENEMIGO_PISO).
+- Roles nuevos siempre **al final** del enum (los `.tres` guardan el número).
+
+### Cómo agregar algo nuevo al mundo
+1. Elige su rol en `Capas.Rol` (¿se sube encima? `SALTABLE`; ¿está apoyado en un mueble? `APOYADO` con su superficie;
+   ¿se toca? `OBJETO_JUEGO`; ¿efecto? `EFECTO`...).
+2. `Profundidad.poner(nodo, Capas.Rol.<ROL>, superficies)` en su `_ready` o al crearlo (o el rol en sus datos).
+3. Nada más: no escribas `z_index`. Corre `prueba_capas.gd`.
+
 **Pelea v5 (2026-10-23):** `AplastarAspi` (acción «Aplastar»: un interactuable con `prioritario(felipe)`, que
 `ManasFelipe.objeto_cercano` mira antes que todo lo demás y con su propio alcance; salto dirigido por un arco de Bézier
 que corre en `process_physics_priority` alto, después de Felipe, con la máscara de colisión apagada mientras vuela) y

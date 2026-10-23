@@ -35,6 +35,8 @@ func _correr() -> void:
 		if not paused:
 			break
 		await process_frame
+	print("Árbol en pausa tras la espera: %s" % paused)
+	paused = false
 	_todo_con_rol()
 	_reglas()
 	await _caso_real()
@@ -140,9 +142,9 @@ func _reglas() -> void:
 			var mueble := _saltable_de(saltables, suyo)
 			if mueble and _z(a) <= _z(mueble):
 				errores.append("%s no queda sobre su mueble (%s)" % [a.get_parent().name, suyo])
-			if suyo == donde and _z(a) <= z_felipe:
+			if suyo == donde and donde != "piso" and _z(a) <= z_felipe:
 				errores.append("Felipe en %s: %s debería quedar apenas delante de él" % [donde, a.get_parent().name])
-			if suyo != donde and _z(a) >= z_felipe:
+			if (suyo != donde or donde == "piso") and _z(a) >= z_felipe:
 				errores.append("Felipe en %s: %s debería quedar detrás de él" % [donde, a.get_parent().name])
 		for e in enemigos:
 			if _z(e) <= z_muebles:
@@ -186,11 +188,15 @@ func _caso_real() -> void:
 	await _esperar(20)
 	var mueble := _saltable_de(_con_rol(Capas.Rol.SALTABLE), "Escritorio")
 	_comprobar(Profundidad.superficie_felipe == "Escritorio" and vaso.z_index > felipe.z_index and mueble and _z(mueble) == Capas.SALTABLE_ACTIVO, "Felipe sobre el escritorio junto al vaso: el vaso queda apenas delante (Felipe pasa por detrás) y el escritorio sube un escalón")
+	# Un diálogo puede pausar el juego: la prueba sigue jugando.
+	paused = false
 	felipe.global_position = Vector2(vaso.global_position.x, escritorio.position.y + 30.0)
 	felipe.velocity = Vector2(0, -200)
 	await _esperar(2)
 	_comprobar(Profundidad.superficie_felipe == "aire" and vaso.z_index < felipe.z_index, "Saltando delante del escritorio, el vaso queda detrás de Felipe (el cambio es inmediato)")
-	await _esperar(60)
+	for i in 60:
+		paused = false
+		await physics_frame
 	_comprobar(Profundidad.superficie_felipe == "piso" and vaso.z_index < felipe.z_index and _z(mueble) == Capas.MUEBLES, "En el piso, el vaso detrás de Felipe y el escritorio en su capa de siempre")
 
 

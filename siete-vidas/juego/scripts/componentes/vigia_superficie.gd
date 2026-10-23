@@ -33,14 +33,19 @@ func actual() -> String:
 		return "piso"
 	if not felipe.is_on_floor():
 		return "aire"
-	for i in felipe.get_slide_collision_count():
-		var choque := felipe.get_slide_collision(i)
-		if choque.get_normal().y < -0.7 and choque.get_collider() is Node:
-			var nombre := String((choque.get_collider() as Node).name)
-			var cuerpo := nivel.pieza(nombre)
-			# El piso del nivel (y lo que está a su altura) es "piso", no un mueble.
-			if cuerpo != null and cuerpo.global_position.y < nivel.datos.suelo - 1.0:
-				return nombre
+	# Lo que hay justo bajo sus patas (con la misma máscara con que choca): funciona también quieto, sin choques del
+	# cuadro (move_and_slide no los registra si no se movió).
+	var consulta := PhysicsPointQueryParameters2D.new()
+	consulta.position = felipe.global_position + Vector2(0, 2)
+	consulta.collision_mask = felipe.collision_mask
+	for choque in felipe.get_world_2d().direct_space_state.intersect_point(consulta, 8):
+		var cuerpo := choque["collider"] as Node2D
+		if cuerpo == null:
+			continue
+		var pieza := nivel.pieza(String(cuerpo.name))
+		# El piso del nivel (y lo que está a su altura) es "piso", no un mueble.
+		if pieza != null and pieza == cuerpo and pieza.global_position.y < nivel.datos.suelo - 1.0:
+			return String(cuerpo.name)
 	return "piso"
 
 

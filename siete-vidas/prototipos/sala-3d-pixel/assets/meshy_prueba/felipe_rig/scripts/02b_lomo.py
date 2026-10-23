@@ -154,6 +154,10 @@ raya = np.median(tex[gorra][lg <= np.percentile(lg, 15)], axis=0)  # <=: con val
 RAYAS_CUERPO = float(os.environ.get("FELIPE_RAYAS", "8"))   # rayas a lo largo del lomo
 RAYAS_COLA = float(os.environ.get("FELIPE_RAYAS_COLA", "7"))
 print("blanco", blanco_ref, "gris de la gorra", gris)
+# v7: la cola es un tubo aparte (03b_cola.py) y se pinta con estos mismos colores.
+with open(os.path.join(C.TRABAJO, "colores_lomo.json"), "w") as f:
+    json.dump({"gris": [float(x) for x in gris], "raya": [float(x) for x in raya],
+               "blanco": [float(x) for x in blanco_ref], "rayas_cola": RAYAS_COLA}, f)
 
 
 A_ESPEJO = None

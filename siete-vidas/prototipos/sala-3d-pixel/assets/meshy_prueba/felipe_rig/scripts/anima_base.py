@@ -36,7 +36,9 @@ def preparar():
     arm = bpy.data.objects["FelipeRig"]
     if "Original" in bpy.data.objects:
         bpy.data.objects.remove(bpy.data.objects["Original"])
-    alto_u = max((malla.matrix_world @ v.co).z for v in malla.data.vertices)
+    # v7: con la cola de tubo, el alto se mide antes de cambiar la cola (03b_cola.py lo guarda),
+    # así la escala a metros no cambia.
+    alto_u = malla.get("alto_u") or max((malla.matrix_world @ v.co).z for v in malla.data.vertices)
     K = C.ALTO_M / alto_u
     bpy.ops.object.select_all(action="DESELECT")
     malla.select_set(True)

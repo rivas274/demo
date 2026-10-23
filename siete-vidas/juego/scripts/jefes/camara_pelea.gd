@@ -79,4 +79,4 @@ func _dibujar() -> void:
 	var forma := PackedVector2Array([punta, atras + Vector2(0, -8), atras + Vector2(0, 8)])
 	var borde := PackedVector2Array([punta + Vector2(flecha, 0), atras + Vector2(-flecha, -10), atras + Vector2(-flecha, 10)])
 	_lienzo.draw_colored_polygon(borde, Estilo.color(&"indicador_trazo"))
-	_lienzo.draw_colored_polygon(forma, Color("e0483b") if parpadeo else Color("ffd23f"))
+	_lienzo.draw_colored_polygon(forma, Estilo.color(&"peligro") if parpadeo else Estilo.color(&"peligro_claro"))

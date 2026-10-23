@@ -64,7 +64,7 @@ func _draw() -> void:
 			var arte := ArteNivel.textura(tipo)
 			if arte:
 				ArteNivel.sombra(self, Vector2(0, 1), arte.get_width() * 0.9 + 2.0, 0.45)
-		ArteNivel.dibujar(self, tipo, 0.0, 0.0)
+		ArteNivel.dibujar(self, tipo, 0.0, 0.0, false, PiezaSuelta.RESTO if roto else Color.WHITE)
 		return
 	# Roto: el charco (o la tierra) en escalones de 2 tonos que se extiende, y lo que queda apoyado. Los pedazos son
 	# PiezaSuelta (rebotan y quedan quietos).
@@ -73,7 +73,7 @@ func _draw() -> void:
 		var queda := ArteNivel.textura(datos.queda)
 		if queda:
 			ArteNivel.sombra(self, Vector2(4, 2), queda.get_width() * 0.8 + 2.0, 0.4)
-		ArteNivel.dibujar(self, datos.queda, 4.0, 1.0)
+		ArteNivel.dibujar(self, datos.queda, 4.0, 1.0, false, PiezaSuelta.RESTO)
 
 
 ## Charco tendido en el piso: 3 filas (atrás más angosta, adelante más ancha), borde oscuro y el medio claro, sin

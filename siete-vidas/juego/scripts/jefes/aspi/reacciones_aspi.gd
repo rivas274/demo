@@ -8,6 +8,9 @@ extends Node2D
 ##   apaga del todo) es más fuerte.
 ## - **Despertar:** al entrar y al volver de cada fase, pitido, la luz pasa a roja, «!» sobre ella y una pausa antes de
 ##   moverse; mientras, una marca roja en el piso hacia donde va a ir (Felipe).
+## - **Mareo (v4, ataques en 4 tiempos: preparación, peligro, impacto y recuperación):** después de chocar con la
+##   embestida o de escupir una bola queda mareada `mareo` s, quieta e inofensiva, con estrellitas girando. Si Felipe le
+##   cae encima, rebota como en un trampolín.
 ## - **Celebración:** Felipe, alegre y juguetón, maúlla de gusto al aterrizar después de apagarla (si no está moviéndose).
 
 var b: BatallaAspi
@@ -18,6 +21,9 @@ var _onda_t := -1.0
 var _onda_fuerza := 1.0
 ## Despertar en curso (segundos que faltan; 0 = no) y adónde mira.
 var despertando := 0.0
+## Mareo en curso (segundos que faltan; 0 = no) y rebotes de Felipe sobre ella mareada (para las pruebas).
+var mareada := 0.0
+var rebotes := 0
 var _celebrar := false
 ## Para las pruebas: cuántos golpes y despertares hubo, y si el último golpe fue el final.
 var golpes := 0
@@ -71,11 +77,28 @@ func despertar() -> void:
 	despertando = datos.pausa_despertar
 	despertares += 1
 	b.jefe.patrulla.quieta = true
-	b.apariencia.luz_aviso = Color("e0483b")
+	b.apariencia.luz_aviso = Estilo.color(&"peligro")
 	b.sonar_evento("despertar")
 
 
+## Cuarto tiempo de un ataque: queda mareada, quieta e inofensiva.
+func marear() -> void:
+	mareada = datos.mareo
+	b.jefe.patrulla.quieta = true
+	b.jefe.patrulla.destino = INF
+	b.jefe.dano.activo = false
+	b.apariencia.mareada = true
+
+
 func _process(delta: float) -> void:
+	if mareada > 0.0:
+		mareada -= delta
+		_rebotar_encima()
+		if mareada <= 0.0:
+			mareada = 0.0
+			b.apariencia.mareada = false
+			if not b.llena:
+				b.jefe.patrulla.quieta = false
 	if _onda_t >= 0.0:
 		_onda_t += delta / maxf(Engine.time_scale, 0.001)
 		if _onda_t > datos.onda_paso * (datos.onda_escalones + 1):
@@ -116,18 +139,34 @@ func _draw() -> void:
 		var salto := -2.0 if despertando > datos.pausa_despertar * 0.6 else 0.0
 		var caja := Rect2(arriba + Vector2(-6, -16 + salto), Vector2(12, 16))
 		draw_rect(caja.grow(1), Color(0.12, 0.05, 0.05))
-		draw_rect(caja, Color("e0483b"))
+		draw_rect(caja, Estilo.color(&"peligro"))
 		var signo := tr("PALABRA_ALERTA")
 		var x := roundf((caja.size.x - Estilo.ancho(signo, &"jefe_pista")) / 2.0)
 		Estilo.escribir(self, caja.position + Vector2(x, 13), signo, &"jefe_pista", Color(1, 0.97, 0.92))
 	if despertando > 0.0 and is_instance_valid(b.felipe):
-		marca(self, Vector2(b.felipe.global_position.x, b.nivel.datos.suelo + 2.0), datos.radio_marca, Color("e0483b"))
+		marca(self, Vector2(b.felipe.global_position.x, b.nivel.datos.suelo + 2.0), datos.radio_marca, Estilo.color(&"peligro"))
+
+
+## Felipe le cae encima mientras está mareada: rebota (trampolín), sin apagarla.
+func _rebotar_encima() -> void:
+	var felipe := b.felipe
+	var distancia := felipe.global_position - b.jefe.global_position - Vector2(0, b.jefe.datos.profundidad)
+	if felipe.velocity.y > 0.0 and absf(distancia.x) < b.jefe.datos.ancho / 2.0 + 4.0 and distancia.y > -BatallaAspi.ALTO_ARRIBA - 14.0 and distancia.y < -BatallaAspi.ALTO_ARRIBA + 18.0:
+		felipe.velocity.y = datos.rebote_mareada
+		rebotes += 1
+		b.nivel.sonar("resorte")
 
 
 ## Marca de aviso en el piso: un óvalo de pixel tendido que parpadea (la carga, la bola que va a caer, el despertar).
+## v4: trazo de 3 × 2 px con borde oscuro, para que se lea sobre cualquier piso y en el apagón.
 static func marca(c: CanvasItem, centro: Vector2, radio: float, color: Color) -> void:
 	var parpadeo := int(Time.get_ticks_msec() / 120) % 2 == 0
 	var tono := color if parpadeo else color.lightened(0.35)
-	for i in 12:
-		var a := TAU * i / 12.0
-		c.draw_rect(Rect2((centro + Vector2(cos(a) * radio, sin(a) * radio * 0.3)).round() - Vector2(1, 0), Vector2(2, 1)), tono)
+	var puntos: Array[Vector2] = []
+	for i in 14:
+		var a := TAU * i / 14.0
+		puntos.append((centro + Vector2(cos(a) * radio, sin(a) * radio * 0.3)).round() - Vector2(1, 1))
+	for p in puntos:
+		c.draw_rect(Rect2(p - Vector2(1, 1), Vector2(5, 4)), Color(0.08, 0.04, 0.05, 0.85))
+	for p in puntos:
+		c.draw_rect(Rect2(p, Vector2(3, 2)), tono)

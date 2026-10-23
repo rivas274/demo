@@ -7,13 +7,16 @@ extends PeleaJefe
 ## datos/jefes/aspi.tres. Aquí queda lo único de A.S.P.I.:
 ## - Su momento en la entrada: en la imaginación de Felipe crece hasta ser una bestia gigante en un estudio en llamas.
 ## - El depósito: todo lo que se rompe en el piso deja una mancha; ella la limpia (ConductaLimpiar) y se le llena el
-##   depósito. Lleno, se detiene pitando, inofensiva, y Felipe le salta encima para apretarle el botón (congelado,
-##   destello, sacudida, «¡CLIC!» y polvo). Tres apagados la apagan del todo.
+##   depósito (3 LED en su lomo). Lleno, se detiene, inofensiva, y Felipe le salta encima para apretarle el botón: el
+##   momento estrella (RemateAspi: el motor falla, se hincha, silencio, pausa de impacto, destello, estrellas, onda y
+##   temblor). Tres apagados la apagan del todo.
 ## - Nada vuelve a su lugar (revisión del 2026-10-23, `diseno/revisiones/2026-10-23-pelea-aspi-sin-reposicion.md`): lo
 ##   que cae queda en el piso como desorden hasta el final. Hay 14 manchas en 11 fuentes (objetos y FuenteDesorden) y
 ##   la suciedad nunca se pierde: al apagarla escupe una montaña de pelusa (MontanaPelusa, `datos.devuelve`) que Felipe
 ##   esparce; si nadie la apaga a tiempo, vacía el depósito en el piso; si Felipe pierde una vida, todo se conserva.
-## Ataques (conductas, siempre anunciados): embestida, soplido contra el que acampa (fase 2) y bolas de pelo (fase 3).
+## Ataques (conductas, siempre anunciados, en 4 tiempos: preparación, peligro, impacto y recuperación): embestida,
+## soplido contra el que acampa (fase 2) y bolas de pelo (fase 3). Rojo = peligro; amarillo = oportunidad (v4).
+## Las instrucciones van como íconos sobre Felipe la primera vez que sirven (AyudaAspi), no como subtítulos.
 ## Si Felipe pierde una vida, reaparece en el cojín y al volver conserva la fase (entrada corta de 1 s).
 
 ## Lo que ve quien mira la pelea (las pruebas y el dibujo): qué ataque está haciendo y en qué parte.
@@ -23,14 +26,6 @@ enum Ataque { NINGUNO, AVISO_EMBESTIDA, EMBESTIDA, AVISO_SOPLIDO, SOPLIDO, AVISO
 const DATOS := "res://datos/jefes/aspi.tres"
 ## La gigante se desvanece en el rugido.
 const DESVANECER := 0.8
-## Segundos después del «¡CLIC!» en que escupe la montaña (cuando ya se fue la palabra: una a la vez).
-const ESPERA_ESCUPIR := 0.7
-## Al apagarla, Felipe rebota hacia arriba.
-const REBOTE := -420.0
-## Lleno bajo la repisa: sale disparada hacia adelante (nunca queda justo bajo la repisa).
-const EMPUJE_LLENA := 80.0
-## Margen a cada lado de los muebles bajo los que no se queda llena (medio cuerpo de A.S.P.I. y un poco).
-const MARGEN_LLENA := 44.0
 ## Alto del dibujo de A.S.P.I.: Felipe la apaga si cae sobre esa franja.
 const ALTO_ARRIBA := 40.0
 ## Mientras se ve el «¡CLIC!» no hay otro rótulo sobre A.S.P.I. (M3).
@@ -43,8 +38,12 @@ var dibujo: DibujoBatallaAspi
 var deposito := 0:
 	set(valor):
 		deposito = valor
+		var capacidad: int = DatosJefe.por_fase(datos.capacidad, vencidas)
 		if presentacion:
-			presentacion.escudo = float(deposito) / DatosJefe.por_fase(datos.capacidad, vencidas)
+			presentacion.escudo = float(deposito) / capacidad
+		# Medidor en su lomo: 3 LED que se encienden por mancha, reescalados a la capacidad de la fase (2/3/3).
+		if apariencia:
+			apariencia.leds = mini(3, int(deposito * 3 / maxi(capacidad, 1)))
 var llena := false
 ## x de cada mancha en el piso, qué es ("mancha", "papel", "pelusa" o "nodo": la pieza misma, como la nota o la mota)
 ## y su nodo (la pieza que se lleva al limpiarla; null si solo es dibujo).
@@ -63,6 +62,8 @@ var fuentes: Array[FuenteDesorden] = []
 var pelusa: PelusaAspi
 var apagon: ApagonEstudio
 var reacciones: ReaccionesAspi
+var remate: RemateAspi
+var ayuda: AyudaAspi
 var sin_sombrear := CanvasItemMaterial.new()
 ## Por qué está vulnerable: "deposito" (lleno) o "charco" (electrocutada en el apagón).
 var motivo := ""
@@ -79,7 +80,6 @@ var papeles: Array[Vector3] = []
 var tiempo_clic := -10.0
 var centro_gigante := Vector2.ZERO
 
-var _reloj_llena := 0.0
 var _encima: Node2D
 var _imaginacion: Node2D
 var _manchas_dibujo: Node2D
@@ -133,6 +133,8 @@ func _ready() -> void:
 	jefe.vida.invulnerable = true
 	super()
 	presentacion.encuadre_momento = centro_gigante + Vector2(0, 40)
+	# El globito tampoco tapa el aviso de oportunidad («¡LLENA! ¡SALTA!»): la frase espera a después del golpe.
+	globo.peligro = func() -> bool: return amenaza() or llena
 	presentacion.paso_empezado.connect(_al_paso)
 	presentacion.empujon.connect(_al_empujon)
 	# La imaginación de Felipe tapa TODO el escenario (muebles, puertas, repisa); solo Felipe va delante (B1).
@@ -145,9 +147,18 @@ func _ready() -> void:
 	pelusa = PelusaAspi.new(self)
 	add_child(pelusa)
 	apagon = ApagonEstudio.new(nivel, jefe, felipe)
+	apagon.charcos = func() -> Array[Vector2]:
+		var corto := conducta("cortocircuito") as ConductaCortocircuito
+		return corto.charcos() if corto else ([] as Array[Vector2])
 	add_child(apagon)
+	# El pergamino de un logro no aparece en el apagón: espera a que vuelva la luz (v4, Gemini).
+	nivel.retener_logros = func() -> bool: return is_instance_valid(apagon) and apagon.activo and fase == Fase.PELEA
 	reacciones = ReaccionesAspi.new(self)
 	add_child(reacciones)
+	remate = RemateAspi.new(self)
+	add_child(remate)
+	ayuda = AyudaAspi.new(self)
+	add_child(ayuda)
 	_polvo = Particulas.polvo(24, 0.7, Vector2(0, 220), Vector2(50, 140), Vector2(2, 4), Color(0.86, 0.82, 0.75))
 	_polvo.name = "Polvo"
 	Capas.usar(_polvo, Capas.EFECTOS)
@@ -246,7 +257,7 @@ func sonar_evento(evento: String, tono := 1.0) -> void:
 ## Para la cámara (CamaraPelea): avisa una embestida, tose una bola o corre contra el enchufe.
 func amenaza() -> bool:
 	var corto := conducta("cortocircuito") as ConductaCortocircuito
-	return ataque in [Ataque.AVISO_EMBESTIDA, Ataque.EMBESTIDA, Ataque.AVISO_BOLA] or (corto != null and corto.corriendo)
+	return ataque in [Ataque.AVISO_EMBESTIDA, Ataque.EMBESTIDA, Ataque.AVISO_BOLA] or not bolas.is_empty() or (corto != null and corto.corriendo)
 
 
 func _process(delta: float) -> void:
@@ -316,7 +327,7 @@ func _al_paso(paso: String) -> void:
 			soltar_polvo(puerta.global_position if puerta else felipe.global_position)
 			# La frase la muestra la presentación como subtítulo (el diálogo se esconde durante la entrada, M4).
 		"espera":
-			apariencia.luz_aviso = Color("e0483b")
+			apariencia.luz_aviso = Estilo.color(&"peligro")
 		"musica":
 			nivel.sonar("batalla")
 		"rugido":
@@ -352,6 +363,7 @@ func _al_salir_felipe() -> void:
 		escupir_pelusa(deposito)
 		deposito = 0
 	apariencia.cerrar_tapa()
+	apariencia.inflado = 0.0
 	jefe.patrulla.quieta = true
 	jefe.dano.activo = false
 	jefe.global_position = Nivel1.ASPI[0]
@@ -361,8 +373,8 @@ func _al_salir_felipe() -> void:
 func _al_cambiar_fase() -> void:
 	# Fase 3 (dos apagadas): el ojo queda enojado.
 	apariencia.furia = vencidas >= 2
-	_reloj_llena = 0.0
 	deposito = 0
+	apariencia.inflado = 0.0
 	llena = false
 	terminar_ataque()
 	reinicio = datos.reinicio if vencidas > 0 else 0.0
@@ -390,7 +402,9 @@ func _actualizar_pelea(delta: float) -> void:
 	if reacciones.despertando > 0.0:
 		return
 	if llena:
-		_actualizar_llena(delta)
+		remate.actualizar(delta)
+		return
+	if reacciones.mareada > 0.0:
 		return
 	if jefe.recibe_golpes.esta_aturdido():
 		terminar_ataque()
@@ -428,117 +442,14 @@ func llenar_deposito() -> void:
 		nivel.travesuras.jugo.palabra_en_mundo("PALABRA_1_GLUP", jefe.global_position + Vector2(0, -60), Color(0.5, 0.85, 1.0), 14)
 
 
-## Depósito lleno: se detiene pitando, inofensiva, y espera a que se lo vacíen... o a que Felipe la apague.
+## Depósito lleno: queda vulnerable (RemateAspi: la anticipación y el golpe).
 func _llenar() -> void:
 	quedar_vulnerable("deposito")
 
 
-## Queda quieta, inofensiva y vulnerable (Felipe le salta encima): con el depósito lleno («¡DEPÓSITO LLENO!», tapa
-## abierta) o electrocutada por un charco en el apagón («¡EN CORTO!»). El aviso nace sobre ella (zona D), no en la
-## franja de arriba (crítica de Gemini, 2026-10-23).
+## Queda quieta, inofensiva y vulnerable: con el depósito lleno o electrocutada por un charco (RemateAspi).
 func quedar_vulnerable(por: String) -> void:
-	motivo = por
-	llena = true
-	_reloj_llena = 0.0
-	terminar_ataque()
-	jefe.patrulla.destino = INF
-	jefe.patrulla.quieta = true
-	jefe.dano.activo = false
-	if por == "deposito":
-		apariencia.abrir_tapa()
-		nivel.sonar("logro")
-	else:
-		# Electrocutada: vibra con chispas; el cartelito «¡EN CORTO!» va sobre ella (DibujoBatallaAspi).
-		apariencia.vibrando = true
-	# Nunca queda justo bajo la repisa ni bajo la isla del librero (estudio v3: desde arriba Felipe caería en la caja o
-	# en el librero, no en su botón): sale disparada hacia adelante, al piso libre más cercano.
-	var x := jefe.global_position.x
-	var libre := _piso_libre(x)
-	if absf(libre - x) > 0.5:
-		var sale := create_tween()
-		sale.tween_property(jefe, "position:x", jefe.position.x + (libre - x), 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-
-
-## La x libre más cercana para quedarse llena: fuera de lo que tapa su botón desde arriba (Nivel1.ASPI_NO_SE_LLENA_BAJO,
-## con medio cuerpo de margen) y dentro de su patrulla. La repisa conserva su regla de siempre (80 px hacia adelante).
-func _piso_libre(x: float) -> float:
-	var patrulla := jefe.patrulla
-	var zonas: Array[Vector2] = []
-	for nombre: String in Nivel1.ASPI_NO_SE_LLENA_BAJO:
-		var pieza := Nivel1.rect_pieza(nombre)
-		if pieza.has_area():
-			zonas.append(Vector2(pieza.position.x - MARGEN_LLENA, pieza.end.x + MARGEN_LLENA))
-	var repisa := nivel.pieza("Repisa de las macetas")
-	if repisa and absf(x - (repisa.position.x + 30.0)) < 70.0:
-		var hacia := 1.0 if x + EMPUJE_LLENA < patrulla.limite_derecho else -1.0
-		x = clampf(x + hacia * EMPUJE_LLENA, patrulla.limite_izquierdo, patrulla.limite_derecho)
-	# Las zonas se tocan (la caja va delante del librero): se sale por la derecha, hacia la puerta del balcón (piso
-	# libre); si no cabe en su patrulla, por la izquierda.
-	for zona in zonas:
-		if x > zona.x and x < zona.y:
-			var desde := zona.x
-			var hasta := zona.y
-			for otra in zonas:
-				if otra.x <= hasta and otra.y >= desde:
-					desde = minf(desde, otra.x)
-					hasta = maxf(hasta, otra.y)
-			x = hasta if hasta <= patrulla.limite_derecho else desde
-			break
-	return x
-
-
-func _actualizar_llena(delta: float) -> void:
-	_reloj_llena += delta
-	# Felipe cae sobre ella: le aprieta el botón de apagado con las patas.
-	# El botón está arriba del dibujo, que va `profundidad` px más abajo que los pies (más cerca de la cámara).
-	var distancia := felipe.global_position - jefe.global_position - Vector2(0, jefe.datos.profundidad)
-	if felipe.velocity.y > 0.0 and absf(distancia.x) < jefe.datos.ancho / 2.0 + 4.0 and distancia.y > -ALTO_ARRIBA - 14.0 and distancia.y < -ALTO_ARRIBA + 18.0:
-		felipe.velocity.y = REBOTE
-		_apagar()
-		return
-	if _reloj_llena >= DatosJefe.por_fase(datos.tiempo_vulnerable, vencidas):
-		llena = false
-		jefe.patrulla.quieta = false
-		apariencia.vibrando = false
-		if motivo == "charco":
-			# Se le pasó el corto: sigue con lo que tenía en el depósito.
-			return
-		# Nadie la apagó: vacía el depósito EN EL PISO (montaña de pelusa con todo lo que tenía) y sigue.
-		var tenia := deposito
-		deposito = 0
-		escupir_pelusa(tenia)
-		nivel.travesuras.jugo.palabra_en_mundo("JEFE_LO_VACIO", jefe.global_position + Vector2(0, -96), Color(1.0, 0.88, 0.4), 16)
-
-
-## ¡CLIC!: congelado, destello, sacudida, polvo y sonido en capas.
-func _apagar() -> void:
-	vencidas += 1
-	apariencia.cerrar_tapa()
-	nivel.travesuras.jugo.congelar(0.1)
-	presentacion.destello(0.7)
-	nivel.travesuras.jugo.palabra_en_mundo("PALABRA_CLIC", jefe.global_position + Vector2(0, -70), Color(1.0, 0.95, 0.5), 22)
-	tiempo_clic = Time.get_ticks_msec() / 1000.0
-	soltar_polvo(jefe.global_position + Vector2(0, -20))
-	nivel.sonar("golpe")
-	nivel.sonar("caja")
-	# El piso tiembla: onda de choque, polvo, lo tirado brinca y sacudida vertical (más fuerte el último golpe).
-	reacciones.golpe(jefe.global_position, vencidas >= datos.fases)
-	# Lo que quedó en el piso sigue ahí (la fase siguiente lo limpia).
-	limpiar.limpiando = false
-	apariencia.vibrando = false
-	if vencidas >= datos.fases:
-		# Vuelve la luz de golpe con el «¡APAGADA!» y la cámara lenta de su derrota.
-		apagon.encender()
-		jefe.vida.morir()
-		return
-	var motas: int = DatosJefe.por_fase(datos.devuelve, vencidas - 1) if not datos.devuelve.is_empty() else 0
-	cambiar_fase()
-	# Se le abre el depósito y escupe la pelusa: lo que limpió vuelve al piso (cuando ya se fue el «¡CLIC!»).
-	var escupe := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_STOP)
-	escupe.tween_interval(ESPERA_ESCUPIR)
-	escupe.tween_callback(func() -> void:
-		if fase == Fase.PELEA:
-			escupir_pelusa(motas))
+	remate.quedar_vulnerable(por)
 
 
 ## Maullar: gira hacia Felipe ("¿Gato detectado?") y se le puede llevar a una mancha o debajo de un salto.

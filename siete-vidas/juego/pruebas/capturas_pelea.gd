@@ -46,6 +46,10 @@ func _correr() -> void:
 	felipe.vida.restante_invulnerable = 0.0
 	await _parar(Vector2(7620, Nivel1.SUELO), 60)
 	_capturar("02-principio-derecha")
+	# v4: lo que se puede tirar destella (cada uno a su ritmo): varias capturas para ver los destellos.
+	for i in 6:
+		await _esperar(12)
+		_capturar("02b-brillo-%d" % i, Rect2(7300, Nivel1.SUELO - 190, 330, 200))
 	# Aviso de embestida (v3): la línea roja en el piso hasta donde va a cargar.
 	var embestida := batalla.conducta("embestida") as AtaqueEmbestida
 	embestida.espera = PackedFloat32Array([0.0])
@@ -58,6 +62,10 @@ func _correr() -> void:
 		await physics_frame
 	await _esperar(12)
 	_capturar("04b-aviso-embestida")
+	# v4: 4.º tiempo, la recuperación: mareada después de frenar.
+	await _esperar_que(func() -> bool: return batalla.reacciones.mareada > 0.0, 120)
+	await _esperar(8)
+	_capturar("04c-mareada", Rect2(aspi.global_position.x - 80, Nivel1.SUELO - 110, 160, 120))
 	felipe.vida.restante_invulnerable = 99999.0
 	embestida.espera = PackedFloat32Array([9999.0])
 	embestida.reloj_espera = 9999.0
@@ -73,10 +81,20 @@ func _correr() -> void:
 	await _esperar_que(func() -> bool: return batalla.limpiando, 600)
 	await _esperar(40)
 	_capturar("04-fase1-limpia")
+	# v4: la succión lo arrastra de pie y aparece el ícono de agacharse (la primera vez).
+	await _parar(aspi.global_position + Vector2(-150, 0), 12)
+	_capturar("04d-icono-agacharse")
+	Input.action_press("agacharse")
+	await _esperar_que(func() -> bool: return batalla.deposito >= 1 or batalla.llena, 600)
+	Input.action_release("agacharse")
+	await _esperar(4)
+	_capturar("04e-led-1", Rect2(aspi.global_position.x - 50, Nivel1.SUELO - 70, 100, 80))
 
 	await _esperar_que(func() -> bool: return batalla.llena, 900)
 	await _esperar(30)
 	_capturar("05-fase1-llena")
+	await _esperar(20)
+	_capturar("05b-llena-de-cerca", Rect2(aspi.global_position.x - 80, Nivel1.SUELO - 120, 160, 130))
 	await _caerle_encima()
 	# 3. ¡BLORP!: se le abre el depósito y escupe la montaña.
 	await _esperar_que(func() -> bool: return not batalla.montanas.is_empty(), 120)
@@ -111,10 +129,15 @@ func _correr() -> void:
 	await _esperar(20)
 	_capturar("10b-corre-al-enchufe")
 	await _esperar_que(func() -> bool: return corto.hecho, 300)
-	await _esperar(3)
-	_capturar("10c-bzzzt")
+	# v4: sin destello blanco, 3 parpadeos con ritmo.
+	for i in 5:
+		await _esperar(3)
+		_capturar("10c-parpadeo-%d" % i)
 	await _esperar(60)
 	_capturar("10d-apagon")
+	if not corto.charcos().is_empty():
+		await _parar(Vector2(corto.charcos()[0].x - 40.0, Nivel1.SUELO), 12)
+		_capturar("10e-icono-maullar")
 	# Todo lo demás al piso.
 	for objeto in batalla.municion:
 		if not objeto.tirable.roto:
@@ -149,7 +172,7 @@ func _correr() -> void:
 	felipe.vida.restante_invulnerable = 0.0
 	await _esperar_que(func() -> bool: return batalla.llena, 300)
 	await _esperar(6)
-	_capturar("12b-charco-en-corto")
+	_capturar("12b-charco-en-corto", Rect2(aspi.global_position.x - 80, Nivel1.SUELO - 120, 160, 130))
 	for vuelta in 6:
 		if batalla.fase != PeleaJefe.Fase.PELEA:
 			break
@@ -186,7 +209,7 @@ func _caerle_encima() -> void:
 	# El piso tiembla: onda de choque, polvo y lo tirado que brinca (2 o 3 cuadros). Secuencia cuadro a cuadro.
 	for cuadro in 4:
 		await process_frame
-		_capturar("golpe-%d-%d" % [batalla.apagados, cuadro])
+		_capturar("golpe-%d-%d" % [batalla.apagados, cuadro], Rect2(aspi.global_position.x - 80, Nivel1.SUELO - 130, 160, 140))
 	await _esperar(1)
 	_capturar("golpe-%d" % batalla.apagados)
 	await _esperar(30)

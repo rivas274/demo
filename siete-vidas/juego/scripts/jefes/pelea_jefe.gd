@@ -73,6 +73,8 @@ func _ready() -> void:
 	presentacion.terminada.connect(_al_terminar_presentacion)
 	add_child(presentacion)
 	globo = GloboDialogo.new(felipe)
+	# Nada de globito en pleno peligro (v4): la frase espera a que pase o se descarta.
+	globo.peligro = amenaza
 	add_child(globo)
 	camara = CamaraPelea.new(self)
 	add_child(camara)
@@ -162,7 +164,9 @@ func cambiar_fase() -> void:
 	for c in conductas:
 		c.al_cambiar_fase(vencidas)
 	_al_cambiar_fase()
-	presentacion.cartel(DatosJefe.por_fase(datos.carteles, vencidas), 2.4, DatosJefe.por_fase(datos.pistas, vencidas))
+	# Sin pistas (A.S.P.I. v4: cartel de una línea; las instrucciones van como íconos donde sirven), solo el cartel.
+	var pista: String = DatosJefe.por_fase(datos.pistas, vencidas) if not datos.pistas.is_empty() else ""
+	presentacion.cartel(DatosJefe.por_fase(datos.carteles, vencidas), 2.4, pista)
 	presentacion.destello(0.4)
 	presentacion.sacudir(0.25)
 	fase_cambiada.emit(fase)

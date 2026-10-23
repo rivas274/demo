@@ -26,6 +26,29 @@ extends Resource
 ## El golpe final es más fuerte: multiplica onda, brinco y polvo (el temblor tiene su propio valor).
 @export var multiplicador_final := 1.6
 
+@export_group("Remate: el salto estrella (v4)")
+## Pausa de impacto (hitstop) al caerle encima: segundos de juego congelado (3 a 4 cuadros a 60 fps); el final, más.
+@export var congelado_golpe := 0.067
+@export var congelado_final := 0.2
+## Destello blanco de su silueta (s) y estrellas que saltan del golpe.
+@export var destello_golpe := 0.08
+@export var destello_final := 0.2
+@export var estrellas := 6
+@export var estrellas_final := 10
+## Anticipación con el depósito lleno: se hincha (tope ±8 %, como Felipe), echa humo y el motor falla.
+@export_range(0.0, 0.08) var inflado := 0.08
+@export var humo_cada := 0.3
+@export var falla_cada := 0.6
+## Silencio antes del impacto: si Felipe cae sobre ella y está a menos de estos px, se callan los sonidos.
+@export var silencio_distancia := 90.0
+
+@export_group("Recuperación (el cuarto tiempo de cada ataque)")
+## Después de chocar con la embestida o de escupir una bola queda mareada: quieta e inofensiva (ventana para pasarla o
+## usarla de trampolín).
+@export var mareo := 0.6
+## Si Felipe le cae encima mientras está mareada, rebota (velocidad hacia arriba).
+@export var rebote_mareada := -380.0
+
 @export_group("Despertar (al entrar y al volver de cada fase)")
 ## Pausa (s) con la luz roja y el «!» antes de moverse.
 @export var pausa_despertar := 0.4

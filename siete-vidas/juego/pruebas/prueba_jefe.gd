@@ -103,7 +103,7 @@ func _correr() -> void:
 	_comprobar(batalla.fase == BatallaAspi.Fase.PELEA and not paused and aspi.visible, "Tras la entrada sigue el juego con la A.S.P.I. real")
 	await _esperar(70)
 	_comprobar(batalla.gigante == 0.0 and batalla.transformacion == 0.0, "La imaginación se desvanece: el resto de la pelea se ve el estudio normal")
-	_comprobar("Tira" in batalla.presentacion.pista_actual(), "El cartel de la fase 1 trae su pista de una línea")
+	_comprobar(batalla.presentacion.pista_actual() == "", "v4 El cartel de la fase 1 va en una línea, sin subtítulo (las instrucciones son íconos)")
 	_comprobar(batalla.presentacion.vida == 1.0, "La barra de la jefa aparece llena")
 
 	# Los zarpazos rebotan en la carcasa.
@@ -122,7 +122,10 @@ func _correr() -> void:
 	await _esperar_que(func() -> bool: return batalla.ataque == BatallaAspi.Ataque.EMBESTIDA, 60)
 	_comprobar(batalla.ataque == BatallaAspi.Ataque.EMBESTIDA and aspi.dano.activo, "Después de 0,5 s carga y ahí sí duele")
 	felipe.vida.restante_invulnerable = 999.0
+	await _esperar_que(func() -> bool: return batalla.ataque == BatallaAspi.Ataque.NINGUNO, 90)
+	_comprobar(batalla.reacciones.mareada > 0.0 and not aspi.dano.activo and aspi.patrulla.quieta and batalla.apariencia.mareada, "v4 Recuperación: al frenar queda mareada %.1f s, quieta e inofensiva (4.º tiempo)" % batalla.reacciones.datos.mareo)
 	await _esperar(60)
+	_comprobar(batalla.reacciones.mareada == 0.0 and not batalla.apariencia.mareada, "v4 …y se le pasa el mareo")
 
 	# Ensuciar: una maceta rota deja una mancha y A.S.P.I. va a limpiarla (antes gira el cepillo).
 	aspi.global_position = Vector2(arena.position.x + 80, Nivel1.SUELO)
@@ -145,6 +148,7 @@ func _correr() -> void:
 	var antes := felipe.global_position.x
 	await _esperar(15)
 	_comprobar(felipe.global_position.x - antes > 15.0, "De pie, la succión arrastra a Felipe (%.0f px)" % (felipe.global_position.x - antes))
+	_comprobar(batalla.ayuda.accion == "agacharse", "v4 Mientras lo arrastra, sobre Felipe aparece el botón de agacharse (ícono, sin texto)")
 	felipe.global_position = aspi.global_position + Vector2(-150, 0)
 	Input.action_press("agacharse")
 	await _esperar(5)
@@ -152,9 +156,11 @@ func _correr() -> void:
 	await _esperar(15)
 	Input.action_release("agacharse")
 	_comprobar(not batalla.limpiando or absf(felipe.global_position.x - antes) < 3.0, "Agachado se aferra y no lo arrastra")
+	_comprobar(batalla.ayuda.accion == "" and "agacharse" in batalla.ayuda.vistos, "v4 Al agacharse, el ícono se va y no vuelve (solo la primera vez)")
 	await _poner_en(Vector2(arena.position.x + 60, Nivel1.SUELO))
 	await _esperar_que(func() -> bool: return batalla.deposito == 1, 300)
 	_comprobar(batalla.deposito == 1 and batalla.presentacion.escudo > 0.0 and "+1 · Glup." in sala.travesuras.jugo.palabras, "Limpiar le llena el depósito (barra azul, «+1» y «Glup.»)")
+	_comprobar(batalla.apariencia.leds == 1, "v4 En su lomo se enciende 1 de los 3 LED (capacidad 2 en la fase 1: reescalado)")
 	var pedazos := maceta.get_children().filter(func(n: Node) -> bool: return n is PiezaSuelta).size()
 	await _esperar(8 * 60)
 	_comprobar(maceta.visible and maceta.tirable.roto and maceta.position.y == Nivel1.SUELO and pedazos > 0 and maceta.get_children().filter(func(n: Node) -> bool: return n is PiezaSuelta).size() == pedazos, "Nada reaparece: 8 s después la maceta sigue rota en el piso, con sus %d pedazos" % pedazos)
@@ -162,6 +168,9 @@ func _correr() -> void:
 	# Lleno: se detiene inofensiva; si nadie la apaga, lo vacía.
 	await _llenar(batalla, aspi)
 	_comprobar(batalla.llena and batalla.motivo == "deposito" and not aspi.dano.activo and batalla.presentacion.pista_actual() == "", "Con el depósito lleno se detiene, inofensiva, y el aviso nace sobre ella (no en la franja de arriba)")
+	await _esperar(50)
+	var inflado := batalla.apariencia.inflado
+	_comprobar(inflado > 0.0 and inflado <= 0.0801 and batalla.apariencia.vibrando and batalla.apariencia.tapa > 0.5, "v4 Lleno: el depósito se hincha (%.3f, tope 8 %%), vibra, echa humo y el motor falla" % inflado)
 	var tenia := batalla.deposito
 	await _esperar_que(func() -> bool: return not batalla.llena, 400)
 	_comprobar(not batalla.llena and batalla.deposito == 0 and batalla.apagados == 0, "Si nadie la apaga a tiempo, vacía el depósito y sigue")
@@ -177,6 +186,7 @@ func _correr() -> void:
 	await _llenar(batalla, aspi)
 	await _caerle_encima(aspi)
 	_comprobar(batalla.apagados == 1 and not batalla.llena, "Caerle encima le aprieta el botón: fase 2")
+	_comprobar(batalla.remate.congelados == 1 and batalla.remate.hubo_silencio and batalla.apariencia.inflado == 0.0, "v4 El salto estrella: silencio justo antes, pausa de impacto de 4 cuadros, destello y estrellas")
 	_comprobar(batalla.reacciones.golpes == 1 and not batalla.reacciones.ultimo_final, "El piso tiembla: onda de choque, polvo, lo tirado brinca y sacudida vertical")
 	var jugo: Jugo = sala.travesuras.jugo
 	_comprobar(jugo.temblor_maximo >= 3.0, "La pantalla tiembla de verdad: la cámara se movió %.0f px (golpe normal: 3 px)" % jugo.temblor_maximo)
@@ -192,6 +202,16 @@ func _correr() -> void:
 	_comprobar(sala.ya_dijo("devolucion"), "Felipe la comenta: «Devolución aceptada.»")
 	var dialogo: Dialogo = sala.travesuras.dialogo
 	_comprobar(dialogo.globo == batalla.globo and not dialogo.ocupado() and _dijo("felipe", "Devolución aceptada"), "En la pelea, lo que piensa Felipe va en un globito sobre él (no en el cuadro de arriba)")
+	# v4: en pleno peligro no hay globito; la frase espera y sale cuando pasa (o se descarta).
+	var hay_peligro := [true]
+	batalla.globo.peligro = func() -> bool: return hay_peligro[0]
+	batalla.globo.decir("Prueba de globito.")
+	await _esperar(5)
+	_comprobar(not batalla.globo.visible_ahora() and batalla.globo.pendiente != "", "v4 En pleno peligro el globito de Felipe no sale: la frase espera")
+	hay_peligro[0] = false
+	await _esperar(3)
+	_comprobar(batalla.globo.visible_ahora() and batalla.globo.texto == "Prueba de globito.", "v4 …y sale cuando pasa el peligro")
+	batalla.globo.peligro = batalla.amenaza
 	var caja_globo := batalla.globo.rect_en_pantalla()
 	_comprobar(not batalla.globo.visible_ahora() or (caja_globo.position.y >= ZonasTexto.HUD.end.y and ZonasTexto.PANTALLA.encloses(caja_globo)), "El globito no entra al HUD ni se sale de la pantalla (%s)" % caja_globo)
 	# Esparcirla: el manotazo de siempre (burbuja «Esparcir») la deshace en motas que quedan como manchas.
@@ -230,7 +250,7 @@ func _correr() -> void:
 		aviso_amarillo = aviso_amarillo or (batalla.ataque == BatallaAspi.Ataque.AVISO_SOPLIDO and batalla.apariencia.vibrando)
 	await _esperar_que(func() -> bool: return felipe.is_on_floor() and felipe.global_position.y > Nivel1.SUELO - 2.0, 120)
 	_comprobar(batalla.soplidos >= 1 and felipe.global_position.y > Nivel1.SUELO - 2.0 and cuadros <= 240, "Quieto en la repisa, A.S.P.I. lo saca de un soplido en %.1f s (≤ 4 s)" % (cuadros / 60.0))
-	_comprobar(aviso_amarillo, "Antes del soplido avisa 0,6 s: vibra con luz amarilla")
+	_comprobar(aviso_amarillo, "Antes del soplido avisa 0,6 s: vibra con luz roja (rojo = peligro, v4)")
 	_comprobar(felipe.corazones == corazones, "El soplido no hace daño")
 	# Segundo apagado cayendo a la velocidad máxima (~12 px por cuadro): no atraviesa la franja de su tapa.
 	await _llenar(batalla, aspi)
@@ -246,10 +266,25 @@ func _correr() -> void:
 	await _esperar_que(func() -> bool: return corto.corriendo, 300)
 	_comprobar(corto.corriendo and batalla.amenaza(), "Fase 3: A.S.P.I. arranca contra el enchufe (la cámara la mira: amenaza)")
 	await _esperar_que(func() -> bool: return corto.hecho, 300)
-	await _esperar(60)
+	# v4: sin destello blanco; la luz parpadea 3 veces con ritmo y queda a oscuras.
+	var ambiente_apagon: CanvasModulate = sala.find_children("*", "CanvasModulate", true, false)[0]
+	var luces := 0
+	var prendida := false
+	for i in 60:
+		await physics_frame
+		var ahora := ambiente_apagon.color.v > 0.8
+		if ahora and not prendida:
+			luces += 1
+		prendida = ahora
+	_comprobar(luces == 3 and not prendida, "v4 Al cortarse, la luz parpadea 3 veces con ritmo y queda a oscuras (%d parpadeos)" % luces)
+	sala.desbloquear_logro("Logro de prueba v4")
+	_comprobar("Logro de prueba v4" in sala.logros_retenidos, "v4 En el apagón el pergamino de un logro espera (no tapa la penumbra)")
 	_comprobar(corto.hecho and batalla.apagon.activo and not corto.charcos().is_empty() and "¡BZZZT!" in sala.travesuras.jugo.palabras, "Cortocircuito: «¡BZZZT!», se corta la luz y hay al menos un charco (%d)" % corto.charcos().size())
 	var ambiente: CanvasModulate = sala.find_children("*", "CanvasModulate", true, false)[0]
 	_comprobar(ambiente.color.v < 0.7, "En el apagón el cuarto queda en penumbra (no negro: %.2f)" % ambiente.color.v)
+	_comprobar(batalla.apagon.charcos_alumbrados() == corto.charcos().size(), "v4 Luz selectiva: cada charco tiene su brillo (%d)" % batalla.apagon.charcos_alumbrados())
+	await _poner_en(Vector2(corto.charcos()[0].x - 40.0, Nivel1.SUELO), 10)
+	_comprobar(batalla.ayuda.accion == "maullar" or "maullar" in batalla.ayuda.vistos or batalla.llena, "v4 Cerca de un charco, sobre Felipe aparece el botón de maullar (la primera vez)")
 	# Pasar por un charco la deja en corto: vulnerable como con el depósito lleno.
 	await _esperar_que(func() -> bool: return batalla.reinicio <= 0.0 and not batalla.llena, 300)
 	var charco: Vector2 = corto.charcos()[0]
@@ -260,6 +295,7 @@ func _correr() -> void:
 	_comprobar(batalla.llena and batalla.motivo == "charco" and not aspi.dano.activo, "Pasar por un charco la electrocuta: queda en corto, vulnerable")
 	await _esperar_que(func() -> bool: return not batalla.llena, 400)
 	_comprobar(not batalla.llena and batalla.apagados == 2 and batalla.montanas.size() <= 1, "Si nadie la apaga, se le pasa el corto (no escupe pelusa)")
+	_comprobar(sala.logros_retenidos.has("Logro de prueba v4") == batalla.apagon.activo, "v4 El logro sale recién cuando vuelve la luz")
 	await _esperar_que(func() -> bool: return batalla.reinicio <= 0.0 and batalla.ataque == BatallaAspi.Ataque.NINGUNO, 300)
 	batalla.manchas.clear()
 	batalla.tipos_mancha.clear()
@@ -273,14 +309,17 @@ func _correr() -> void:
 	corazones = felipe.corazones
 	var tosio := false
 	var alta := false
+	var mareo_bola := false
 	for i in 600:
 		await physics_frame
 		tosio = tosio or batalla.ataque == BatallaAspi.Ataque.AVISO_BOLA
+		mareo_bola = mareo_bola or (batalla.reacciones.mareada > 0.0 and not batalla.bolas.is_empty())
 		for bola in batalla.bolas:
 			alta = alta or bola.global_position.y < Nivel1.SUELO - 110.0
 		if felipe.corazones < corazones:
 			break
 	_comprobar(tosio and alta, "En furia tose y la bola de pelo va en arco hasta arriba")
+	_comprobar(mareo_bola and not "¡COF!" in sala.travesuras.jugo.palabras, "v4 Sin «¡COF!»; después de escupir queda mareada (recuperación)")
 	var bola_datos := batalla.conducta("bola") as AtaqueBolaPelo
 	_comprobar(bola_datos.objetivo.distance_to(Vector2(arena.position.x + 380, Nivel1.SUELO - 98)) < 4.0, "La bola apunta a la marca del piso (donde estaba Felipe al toser)")
 	_comprobar(felipe.corazones < corazones, "La bola de pelo quita un corazón aunque esté en el escritorio")
@@ -313,6 +352,7 @@ func _correr() -> void:
 	await _llenar(batalla, aspi)
 	await _caerle_encima(aspi)
 	_comprobar(sala.travesuras.jugo.temblor_maximo >= 6.0, "El golpe final hace temblar más la pantalla (%.0f px)" % sala.travesuras.jugo.temblor_maximo)
+	_comprobar(batalla.remate.congelados == 3 and batalla.reacciones.datos.congelado_final > batalla.reacciones.datos.congelado_golpe, "v4 El golpe final dura más (pausa de impacto de %.2f s contra %.2f)" % [batalla.reacciones.datos.congelado_final, batalla.reacciones.datos.congelado_golpe])
 	await _esperar_que(func() -> bool: return felipe.estado == Felipe.Estado.OCIO, 200)
 	_comprobar(felipe.estado == Felipe.Estado.OCIO and felipe.sprite.animation == "jugar", "Felipe celebra jugando con el estambre (alegre y juguetón)")
 	_comprobar(aspi.vida.muerto and batalla.fase == BatallaAspi.Fase.FIN, "Al tercer apagado, A.S.P.I. se apaga del todo")

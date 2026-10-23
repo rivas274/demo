@@ -33,11 +33,15 @@ var lado_base := 1.0
 @export var acercamiento_base := 36.0
 
 const CUADROS_CEPILLO := 6
+## Medidor del depósito (v4, idea de Gemini): 3 LED en el lomo, a esta altura sobre el pie del cuerpo y estas x
+## (mirando a la derecha). Verdes al encenderse; con el depósito lleno, los 3 parpadean en amarillo (oportunidad).
+const LEDS_ALTO := 29.0
+const LEDS_X: Array[float] = [-15.0, -8.0, -1.0]
 ## La franja verde de la LED en el arte del cuerpo (aspi_lado, mirando a la derecha) y la franja gris de la apagada.
 const FRANJA_LED := Rect2(29, 27, 19, 5)
 const FRANJA_LED_APAGADA := Rect2(1, 2, 22, 4)
 
-## Anticipación de un ataque: luz que parpadea (roja: embestida; amarilla: soplido) y vibración.
+## Anticipación de un ataque: luz que parpadea (roja: peligro, v4) y vibración.
 var luz_aviso := Color(0, 0, 0, 0)
 var vibrando := false
 ## Fase 3 (la pone la pelea): el ojo queda enojado.
@@ -46,6 +50,11 @@ var furia := false
 var tapa := 0.0
 ## Saltito del cuerpo al abrirse la tapa (px hacia arriba, negativo).
 var salto := 0.0
+## v4: el depósito hinchado (0 a 0,08: tope ±8 %, como el estirar y aplastar de Felipe), cuántos de los 3 LED del
+## medidor de su lomo están encendidos y si está mareada (estrellitas que giran).
+var inflado := 0.0
+var leds := 0
+var mareada := false
 var _tween_tapa: Tween
 var _enemigo: Enemigo
 var _avance := 0.0
@@ -153,21 +162,47 @@ func _draw() -> void:
 	# Rueda (detrás del cuerpo: asoma abajo), con su cuadro según lo que avanzó.
 	var rueda := "aspi_rueda_%d" % (int(_avance / px_por_cuadro_rueda) % 2 + 1)
 	ArteNivel.dibujar(self, rueda, lugar_rueda.x * lado + temblor.x, lugar_rueda.y + hondo, espejo)
+	# Hinchado desde el pie del cuerpo (no se despega del piso).
+	if inflado > 0.0:
+		var k := 1.0 + minf(inflado, 0.08)
+		draw_set_transform(base * (1.0 - k), 0.0, Vector2(k, k))
 	ArteNivel.dibujar(self, cuerpo_actual(), base.x, base.y, espejo)
+	if prendida:
+		_dibujar_led(base, lado, espejo)
+		_dibujar_medidor(base, lado)
+	draw_set_transform(Vector2.ZERO)
 	# Cepillo lateral adelante, girando mientras está encendida.
 	var cuadro := int(Time.get_ticks_msec() / 1000.0 * fps_cepillo) % CUADROS_CEPILLO + 1 if prendida else 1
 	ArteNivel.dibujar(self, "aspi_cepillo_%d" % cuadro, lugar_cepillo.x * lado + temblor.x, lugar_cepillo.y + roundf(bote) + hondo, espejo)
-	if prendida:
-		_dibujar_led(base, lado, espejo)
-	else:
+	if not prendida:
 		_dibujar_espirales(base)
-	if _enemigo.recibe_golpes.esta_aturdido():
+	if _enemigo.recibe_golpes.esta_aturdido() or mareada:
+		# Estrellitas de mareo que giran sobre la tapa (cruces de pixel con borde oscuro).
 		for i in 3:
 			var angulo := Time.get_ticks_msec() * 0.006 + i * TAU / 3.0
-			draw_circle(Vector2(cos(angulo) * 22.0, -48.0 + sin(angulo) * 4.0), 3.0, Color("f2d36b"))
+			var punto := Vector2(cos(angulo) * 20.0, -46.0 + roundf(profundidad_actual()) + sin(angulo) * 4.0).round()
+			draw_rect(Rect2(punto + Vector2(-3, -1), Vector2(7, 3)), Color(0.15, 0.08, 0.05, 0.8))
+			draw_rect(Rect2(punto + Vector2(-1, -3), Vector2(3, 7)), Color(0.15, 0.08, 0.05, 0.8))
+			draw_rect(Rect2(punto + Vector2(-2, 0), Vector2(5, 1)), Color("f2d36b"))
+			draw_rect(Rect2(punto + Vector2(0, -2), Vector2(1, 5)), Color("f2d36b"))
 	if _enemigo.patrulla.retroceso > 0.0:
 		var r := rect_dibujado()
 		draw_rect(Rect2(r.position - global_position, r.size), Color(1, 1, 1, 0.5))
+
+
+## Los 3 LED del depósito en el lomo: hueco oscuro de 5 × 4 y luz de 3 × 2.
+func _dibujar_medidor(base: Vector2, lado: float) -> void:
+	var lleno := tapa > 0.5
+	var brilla := int(Time.get_ticks_msec() / 150) % 2 == 0
+	for i in LEDS_X.size():
+		var punto := (base + Vector2(LEDS_X[i] * lado - (2.0 if lado < 0.0 else 0.0), -LEDS_ALTO)).round()
+		draw_rect(Rect2(punto - Vector2(1, 1), Vector2(5, 4)), Color(0.08, 0.08, 0.1))
+		var color := Color(0.18, 0.3, 0.2)
+		if lleno:
+			color = Estilo.color(&"oportunidad") if brilla else Color(1, 1, 1)
+		elif i < leds:
+			color = Color(0.45, 1.0, 0.5)
+		draw_rect(Rect2(punto, Vector2(3, 2)), color)
 
 
 ## La franja verde parpadea: cada tanto se tapa con la franja de la LED apagada del arte (`aspi_led_off`), puesta justo

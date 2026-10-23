@@ -255,6 +255,13 @@ luces), `PelusaAspi` (sobrecarga y montañas), `Charco` (`scripts/entidades/obje
 sonido `DatosJefe.sonidos` → `BatallaAspi.sonar_evento(evento, tono)`. Vulnerable por motivo:
 `BatallaAspi.quedar_vulnerable("deposito" | "charco")`.
 
+**Pelea v4 (2026-10-23):** `RemateAspi` (el momento estrella: quedar vulnerable, anticipación con el motor que falla,
+`inflado` y humo, silencio con `Nivel.callar()`, pausa de impacto, destello de silueta, estrellas y `apagar()`),
+`AyudaAspi` (íconos de botón sobre Felipe la primera vez que sirven), `ReaccionesAspi.marear()` (el 4.º tiempo de cada
+ataque), `GloboDialogo.peligro` (la frase espera si hay amenaza), `Nivel.retener_logros` (los logros esperan; lo usa el
+apagón) y los colores `peligro` / `oportunidad` del tema. Números nuevos en `DatosJugoJefe` (grupos «Remate» y
+«Recuperación»).
+
 **Montaña de pelusa (`MontanaPelusa`, `scripts/entidades/objetos/`):** la escupe la pelea (`BatallaAspi.escupir_pelusa`)
 al apagarla (`DatosJefe.devuelve`) o al vaciar el depósito; se esparce con el manotazo («Esparcir») y cada mota avisa
 `mota_en_piso`. La pelea lleva la cuenta de toda la suciedad (`suciedad_total`): solo baja al apagarla.

@@ -6,6 +6,8 @@ extends CanvasLayer
 ## (ZonasTexto.HUD) ni se sale de la pantalla, y queda más arriba que la burbuja del Indicador. Va en la capa del
 ## diálogo (pantalla): la luz del cuarto (el apagón) no lo oscurece.
 ## Lo conecta PeleaJefe al Dialogo (`Dialogo.globo`) mientras dura la pelea; fuera de la pelea, el diálogo es el de siempre.
+## v4 (Gemini y ChatGPT): nunca en pleno peligro (`peligro`: la frase espera hasta ESPERA_MAXIMA s a que pase; si no,
+## se descarta; y si el peligro empieza, el globito se va), y se lee mejor: letra negrita y contorno oscuro de 2 px.
 
 ## Segundos que dura una frase: base más un poco por letra.
 const DURA_BASE := 1.6
@@ -14,7 +16,9 @@ const DURA_POR_LETRA := 0.02
 const ANCHO_MAXIMO := 240.0
 const MARGEN := Vector2(6, 4)
 const ALTURA := 104.0
-const LETRA := &"dialogo_texto"
+const LETRA := &"globo_texto"
+## Segundos que una frase espera a que pase el peligro antes de descartarse.
+const ESPERA_MAXIMA := 2.5
 const ALTO_LINEA := 14.0
 
 var felipe: Node2D
@@ -23,6 +27,11 @@ var _lineas: PackedStringArray = []
 var _queda := 0.0
 var _aparecer := 0.0
 var _lienzo: Node2D
+## Si devuelve true hay peligro en curso (un ataque anunciado): no se muestra nada.
+var peligro: Callable
+## Frase que espera a que pase el peligro y cuánto lleva esperando.
+var pendiente := ""
+var _espera := 0.0
 
 
 func _init(de_felipe: Node2D = null) -> void:
@@ -40,6 +49,19 @@ func _ready() -> void:
 
 ## Muestra la frase (ya traducida o como clave) en el globito; reemplaza la que hubiera.
 func decir(frase: String) -> void:
+	if _hay_peligro():
+		pendiente = frase
+		_espera = 0.0
+		return
+	_mostrar(frase)
+
+
+func _hay_peligro() -> bool:
+	return peligro.is_valid() and peligro.call()
+
+
+func _mostrar(frase: String) -> void:
+	pendiente = ""
 	texto = tr(frase)
 	# {acción} → [tecla] (en el globito no van íconos).
 	for accion: String in Controles.ACCIONES:
@@ -70,10 +92,22 @@ func rect_en_pantalla() -> Rect2:
 
 
 func _process(delta: float) -> void:
-	if _queda <= 0.0:
-		return
 	# Tiempo real (sin el congelado ni la cámara lenta).
 	delta = delta / maxf(Engine.time_scale, 0.001)
+	if pendiente != "":
+		_espera += delta
+		if not _hay_peligro():
+			_mostrar(pendiente)
+		elif _espera >= ESPERA_MAXIMA:
+			pendiente = ""
+	if _queda <= 0.0:
+		return
+	if _hay_peligro():
+		# Empezó un peligro: el globito se va.
+		_queda = 0.0
+		texto = ""
+		_lienzo.queue_redraw()
+		return
 	_queda -= delta
 	_aparecer = minf(1.0, _aparecer + delta * 8.0)
 	if _queda <= 0.0:
@@ -107,12 +141,13 @@ func _dibujar() -> void:
 	var punta := Vector2(clampf(roundf(pies.x), caja.position.x + 8.0, caja.end.x - 8.0), caja.end.y)
 	var trazo := Estilo.color(&"indicador_trazo")
 	var fondo := Estilo.color(&"globo_fondo")
-	# Sombra dura, contorno de 1 px con esquinas recortadas, papel crema y el piquito hacia Felipe.
-	c.draw_rect(Rect2(caja.position + Vector2(2, 2), caja.size), Estilo.color(&"indicador_sombra"))
-	c.draw_rect(Rect2(caja.position.x + 1, caja.position.y - 1, caja.size.x - 2, caja.size.y + 2), trazo)
-	c.draw_rect(Rect2(caja.position.x - 1, caja.position.y + 1, caja.size.x + 2, caja.size.y - 2), trazo)
+	# Sombra dura, contorno oscuro de 2 px con esquinas recortadas, papel crema y el piquito hacia Felipe.
+	c.draw_rect(Rect2(caja.position + Vector2(3, 3), caja.size), Estilo.color(&"indicador_sombra"))
+	c.draw_rect(Rect2(caja.position.x, caja.position.y - 2, caja.size.x, caja.size.y + 4), trazo)
+	c.draw_rect(Rect2(caja.position.x - 2, caja.position.y, caja.size.x + 4, caja.size.y), trazo)
+	c.draw_rect(Rect2(caja.position.x - 1, caja.position.y - 1, caja.size.x + 2, caja.size.y + 2), trazo)
 	c.draw_rect(caja, fondo)
-	c.draw_colored_polygon(PackedVector2Array([punta + Vector2(-5, -1), punta + Vector2(3, -1), punta + Vector2(-4, 6)]), trazo)
+	c.draw_colored_polygon(PackedVector2Array([punta + Vector2(-6, -1), punta + Vector2(4, -1), punta + Vector2(-5, 8)]), trazo)
 	c.draw_colored_polygon(PackedVector2Array([punta + Vector2(-4, -1), punta + Vector2(2, -1), punta + Vector2(-3, 4)]), fondo)
 	for i in _lineas.size():
 		Estilo.escribir(c, caja.position + MARGEN + Vector2(0, ALTO_LINEA * (i + 1) - 3.0), _lineas[i], LETRA, Estilo.color(&"texto_oscuro"))

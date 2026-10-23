@@ -372,7 +372,7 @@ const COMIDA := [[Vector2(3010, SUELO), "tazon"], [POLLO, "pollo"]]
 ## lo que se rompe en cualquier lado le deja una mancha que limpiar (BatallaAspi.agregar_mancha).
 const ASPI := [Vector2(7200, SUELO), 6870.0, 7706.0]
 ## Muebles bajo los que A.S.P.I. no se queda con el depósito lleno (Felipe no podría caerle encima: caería en ellos).
-## Si se llena debajo, sale disparada al piso libre más cercano (BatallaAspi._piso_libre).
+## Si se llena debajo, sale disparada al piso libre más cercano (RemateAspi.piso_libre).
 const ASPI_NO_SE_LLENA_BAJO := ["Caja de los libros", "Librero bajo"]
 ## Puntos de descanso: la caja de arena (recibidor) y el cojín (pasillo, a 2 px del rectángulo de la puerta del jefe).
 const DESCANSOS := [Rect2(1852, SUELO - 60, 71, 70), Rect2(5364, SUELO - 40, 70, 50)]

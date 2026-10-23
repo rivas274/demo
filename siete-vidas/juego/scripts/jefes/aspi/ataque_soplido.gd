@@ -1,7 +1,7 @@
 class_name AtaqueSoplido
 extends ConductaJefe
 ## Soplido contra el que acampa (G12): si Felipe pasa más de unos segundos arriba de algo alto, va debajo, vibra con la
-## luz amarilla (anticipación) y lo saca de un soplido hacia algo bajo, sin daño. Las macetas caen y se rompen (más desorden).
+## luz roja (anticipación; rojo = peligro, v4) y lo saca de un soplido hacia algo bajo, sin daño. Las macetas caen y se rompen (más desorden).
 
 ## Altura que cuenta como «arriba» y segundos que tolera por fase (en la fase 0 no se usa: desde_fase = 1).
 @export var altura_acampar := 90.0
@@ -72,9 +72,9 @@ func intentar(_delta: float) -> bool:
 		b.jefe.patrulla.quieta = true
 		b.jefe.patrulla.destino = INF
 		b.apariencia.vibrando = true
-		b.apariencia.luz_aviso = Color("ffd23f")
+		b.apariencia.luz_aviso = Estilo.color(&"peligro")
 		b.nivel.sonar("succion")
-		b.nivel.travesuras.jugo.palabra_en_mundo("PALABRA_FUUU", b.jefe.global_position + Vector2(0, -60), Color(1.0, 0.9, 0.4), 14)
+		b.nivel.travesuras.jugo.palabra_en_mundo("PALABRA_FUUU", b.jefe.global_position + Vector2(0, -60), Estilo.color(&"peligro_claro"), 14)
 	return true
 
 

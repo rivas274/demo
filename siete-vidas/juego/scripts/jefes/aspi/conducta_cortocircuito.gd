@@ -23,6 +23,8 @@ extends ConductaJefe
 var hecho := false
 var corriendo := false
 var reloj_charco := 0.0
+## x del charco donde se electrocutó (las chispas animadas siguen ahí mientras está en corto).
+var charco_en_corto := INF
 ## Charcos sueltos que dejó el choque.
 var sueltos: Array[Charco] = []
 var _pendiente := false
@@ -72,7 +74,7 @@ func intentar(_delta: float) -> bool:
 	corriendo = true
 	_reloj = 0.0
 	b.empezar_ataque(self)
-	b.apariencia.luz_aviso = Color("e0483b")
+	b.apariencia.luz_aviso = Estilo.color(&"peligro")
 	b.apariencia.vibrando = true
 	b.jefe.patrulla.quieta = false
 	b.jefe.patrulla.velocidad_persecucion = DatosJefe.por_fase(b.datos.velocidad, b.vencidas) * multiplicador_velocidad
@@ -100,7 +102,7 @@ func _chocar() -> void:
 	b.terminar_ataque()
 	var enchufe := Vector2(enchufe_x, b.nivel.datos.suelo - 24.0)
 	b.chispas(enchufe, 30)
-	b.presentacion.destello(0.8)
+	# Sin destello blanco (v4): la luz parpadea 3 veces con ritmo y se apaga (ApagonEstudio).
 	b.nivel.travesuras.jugo.temblar(b.reacciones.datos.temblor_corto, b.reacciones.datos.temblor_corto_s)
 	b.sonar_evento("cortocircuito")
 	b.nivel.travesuras.jugo.palabra_en_mundo("PALABRA_BZZZT", enchufe + Vector2(0, -50), Color(0.7, 0.9, 1.0), 24)
@@ -122,6 +124,7 @@ func _electrocutar(donde: Vector2) -> void:
 	var b := pelea as BatallaAspi
 	reloj_charco = espera_charco
 	b.chispas(donde + Vector2(0, -6), 22)
+	charco_en_corto = donde.x
 	b.sonar_evento("cortocircuito")
 	b.quedar_vulnerable("charco")
 	b.nivel.travesuras.decir_felipe("en_corto")

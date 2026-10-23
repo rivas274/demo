@@ -1,7 +1,9 @@
 class_name AtaqueEmbestida
 extends ConductaJefe
-## Embestida: si Felipe está en el piso, a su altura y cerca, se echa atrás 10 px con la luz roja que parpadea y un
-## chirrido (anticipación), y después carga hasta pasarlo. Solo durante la carga lastima.
+## Embestida en 4 tiempos (v4): **preparación** (si Felipe está en el piso, a su altura y cerca, se echa atrás 10 px con
+## la luz roja, el pitido de reversa y la línea roja en el piso hasta la marca), **peligro** (carga hasta pasarlo; solo
+## entonces lastima), **impacto** (frena de golpe: polvo y temblor) y **recuperación** (queda mareada, quieta e
+## inofensiva: ReaccionesAspi.marear).
 
 ## Anticipación, carrera y espera entre una y otra (por fase).
 @export var aviso := 0.5
@@ -43,7 +45,7 @@ func intentar(_delta: float) -> bool:
 	_reloj = 0.0
 	b.jefe.patrulla.quieta = true
 	b.jefe.patrulla.destino = INF
-	b.apariencia.luz_aviso = Color("e0483b")
+	b.apariencia.luz_aviso = Estilo.color(&"peligro")
 	var hacia := signf(felipe.global_position.x - b.jefe.global_position.x)
 	var atras := b.create_tween()
 	atras.tween_property(b.jefe, "position:x", b.jefe.position.x - hacia * 10.0, 0.15)
@@ -66,9 +68,11 @@ func actualizar(delta: float) -> bool:
 			b.jefe.patrulla.destino = destino
 		return true
 	if _reloj >= duracion or absf(b.jefe.global_position.x - destino) < 6.0:
-		# Frena de golpe: la pantalla tiembla un poco (v3.1).
+		# Frena de golpe: polvo y la pantalla tiembla un poco (v3.1); después, mareada (v4).
 		b.nivel.travesuras.jugo.temblar(b.reacciones.datos.temblor_embestida, b.reacciones.datos.temblor_embestida_s)
+		b.soltar_polvo(b.jefe.global_position + Vector2(0, -8))
 		b.terminar_ataque()
+		b.reacciones.marear()
 		reloj_espera = DatosJefe.por_fase(espera, b.vencidas)
 		return false
 	return true

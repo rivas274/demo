@@ -42,6 +42,9 @@ var travesuras: Travesuras
 var _en_descanso := false
 var _piezas := {}
 var _sonidos: Array[AudioStreamPlayer] = []
+## Si devuelve true, los logros nuevos esperan (no se muestran) hasta que deje de hacerlo; los que esperan.
+var retener_logros: Callable
+var logros_retenidos: PackedStringArray = []
 var _lecciones_vistas := {}
 var _fundido: ColorRect
 var _cruzando := false
@@ -151,6 +154,7 @@ func _crear_puertas() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_soltar_logros()
 	if terminado:
 		return
 	tiempo += delta
@@ -352,12 +356,33 @@ func sonar(nombre: String, tono := 1.0) -> void:
 			return
 
 
+## Silencio de golpe (v4: contraste justo antes del golpe estrella): corta los sonidos que estén sonando.
+func callar() -> void:
+	for reproductor in _sonidos:
+		reproductor.stop()
+
+
 func desbloquear_logro(titulo: String) -> void:
 	titulo = tr(titulo)
 	if titulo in logros:
 		return
 	logros.append(titulo)
+	# Mientras algo pide la pantalla limpia (el apagón de A.S.P.I., v4) el pergamino del logro espera su turno.
+	if retener_logros.is_valid() and retener_logros.call():
+		logros_retenidos.append(titulo)
+		return
 	logro_desbloqueado.emit(titulo)
+	sonar("logro")
+
+
+## Muestra los logros que esperaban, cuando ya nada los retiene.
+func _soltar_logros() -> void:
+	if logros_retenidos.is_empty() or (retener_logros.is_valid() and retener_logros.call()):
+		return
+	var pendientes := logros_retenidos
+	logros_retenidos = []
+	for titulo in pendientes:
+		logro_desbloqueado.emit(titulo)
 	sonar("logro")
 
 

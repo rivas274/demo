@@ -61,7 +61,9 @@ SONIDOS = {
     "goteo": lambda: tono(1900, 1100, 0.05, "seno", 0.28) + tono(1100, 700, 0.06, "seno", 0.12),  # «plic» de la llave y del baño
     "resorte": lambda: tono(300, 900, 0.08, "seno", 0.3) + tono(900, 250, 0.18, "seno", 0.3),
     # Pelea con A.S.P.I. v3 (2026-10-23): ganchos de sonido provisionales (los finales, en el encargo de 05).
-    "motor": lambda: tono(70, 90, 0.5, "cuadrada", 0.18, ruido=0.5),  # sube de tono con cada mancha (pitch en el juego)
+    "motor": lambda: tono(70, 90, 0.5, "cuadrada", 0.18, ruido=0.5),
+    # El motor falla con el depósito lleno (v4): dos tosidos que caen de tono, con un silencio entre medio.
+    "falla": lambda: tono(110, 60, 0.09, "cuadrada", 0.22, ruido=0.6) + [0.0] * 1500 + tono(90, 40, 0.14, "cuadrada", 0.22, ruido=0.7),  # sube de tono con cada mancha (pitch en el juego)
     "reversa": lambda: tono(1000, 1000, 0.12, "cuadrada", 0.2) + [0.0] * 1800 + tono(1000, 1000, 0.12, "cuadrada", 0.2),
     "atragantar": lambda: tono(180, 90, 0.2, "cuadrada", 0.3, ruido=0.5) + tono(220, 60, 0.35, "cuadrada", 0.3, ruido=0.6),
     "pitido": lambda: tono(1400, 1400, 0.08, "cuadrada", 0.22) + tono(1900, 1900, 0.12, "cuadrada", 0.22),  # se despierta

@@ -93,23 +93,12 @@ func encima(c: Node2D) -> void:
 			var angulo := tiempo * 18.0 + i * TAU / 6.0
 			var centro := b.aspi.global_position + Vector2(0, -6)
 			c.draw_line(centro, centro + Vector2(cos(angulo), sin(angulo) * 0.4) * 14.0, Color(0.9, 0.95, 1.0, 0.8), 1.0)
+	_brillo_tirables(c, tiempo)
 	_aviso_embestida(c, tiempo)
 	_aviso_bolas(c)
 	_charcos(c, tiempo)
 	if b.llena:
-		# Por encima de la tapa abierta (que sube unos 32 px).
-		var arriba := b.aspi.global_position + Vector2(0, -BatallaAspi.ALTO_ARRIBA - 52)
-		if int(tiempo * 4.0) % 2 == 0:
-			c.draw_circle(b.aspi.global_position + Vector2(0, -BatallaAspi.ALTO_ARRIBA - 4), 5.0, Color("e0483b"))
-		var texto := tr("JEFE_DEPOSITO_LLENO") if b.motivo != "charco" else tr("JEFE_EN_CORTO")
-		var ancho := roundf(Estilo.ancho(texto, &"jefe_pista"))
-		# El cartelito no se corta en el borde de la pantalla (lección 23): se corre adentro; la flecha sigue sobre ella.
-		var vista := c.get_viewport().get_canvas_transform().affine_inverse() * Rect2(ZonasTexto.PANTALLA)
-		var centro_x := clampf(arriba.x, vista.position.x + ancho / 2.0 + 8.0, vista.end.x - ancho / 2.0 - 8.0)
-		c.draw_rect(Rect2(centro_x - ancho / 2.0 - 6, arriba.y - 13, ancho + 12, 18), Color(0.1, 0.05, 0.07, 0.85))
-		Estilo.escribir(c, Vector2(centro_x - ancho / 2.0, arriba.y + 1), texto, &"jefe_pista", Color("ffe066"))
-		# Flecha hacia abajo: hay que caerle encima.
-		c.draw_colored_polygon(PackedVector2Array([arriba + Vector2(-6, 8), arriba + Vector2(6, 8), arriba + Vector2(0, 16)]), Color("ffe066"))
+		_aviso_oportunidad(c, tiempo)
 	if b.ataque == BatallaAspi.Ataque.SOPLIDO or b.ataque == BatallaAspi.Ataque.AVISO_SOPLIDO:
 		for i in 8:
 			var avance := fmod(tiempo * 2.0 + i * 0.13, 1.0)
@@ -128,6 +117,54 @@ func encima(c: Node2D) -> void:
 			c.draw_line(Vector2(x, y), Vector2(x + lado * 18.0, y), Color(Color("dff3ff"), 0.7 * avance), 1.5)
 
 
+## Oportunidad (v4, colores con significado: amarillo = oportunidad, rojo = peligro): el cartelito dice la acción
+## («¡LLENA! ¡SALTA!», «¡EN CORTO! ¡AHORA!») en amarillo con borde amarillo, sobre la tapa abierta, con la flecha hacia
+## abajo y un punto amarillo que late sobre su botón.
+func _aviso_oportunidad(c: Node2D, tiempo: float) -> void:
+	var amarillo := Estilo.color(&"oportunidad")
+	var arriba := b.aspi.global_position + Vector2(0, -BatallaAspi.ALTO_ARRIBA - 52)
+	if int(tiempo * 4.0) % 2 == 0:
+		c.draw_rect(Rect2((b.aspi.global_position + Vector2(-3, -BatallaAspi.ALTO_ARRIBA - 7)).round(), Vector2(6, 6)), amarillo)
+	var texto := tr("JEFE_LLENA_SALTA") if b.motivo != "charco" else tr("JEFE_EN_CORTO_AHORA")
+	var ancho := roundf(Estilo.ancho(texto, &"jefe_pista"))
+	# El cartelito no se corta en el borde de la pantalla (lección 23): se corre adentro; la flecha sigue sobre ella.
+	var vista := c.get_viewport().get_canvas_transform().affine_inverse() * Rect2(ZonasTexto.PANTALLA)
+	var centro_x := roundf(clampf(arriba.x, vista.position.x + ancho / 2.0 + 8.0, vista.end.x - ancho / 2.0 - 8.0))
+	var caja := Rect2(centro_x - ancho / 2.0 - 6, roundf(arriba.y) - 13, ancho + 12, 18)
+	c.draw_rect(caja.grow(1), amarillo)
+	c.draw_rect(caja, Estilo.color(&"oportunidad_fondo"))
+	Estilo.escribir(c, Vector2(centro_x - ancho / 2.0, roundf(arriba.y) + 1), texto, &"jefe_pista", amarillo)
+	# Flecha hacia abajo: hay que caerle encima (salta 2 px con el pulso).
+	var punta := arriba.round() + Vector2(0, 2.0 if int(tiempo * 4.0) % 2 == 0 else 0.0)
+	c.draw_colored_polygon(PackedVector2Array([punta + Vector2(-6, 8), punta + Vector2(6, 8), punta + Vector2(0, 16)]), amarillo)
+
+
+## Lo que todavía se puede tirar (v4, Gemini: se confundía con los restos del piso): un destello chico e intermitente
+## (cruz de pixel blanca) en la esquina de arriba de cada objeto entero y de lo que les queda a las fuentes. Cada uno a
+## su ritmo, para que no titilen todos juntos.
+func _brillo_tirables(c: Node2D, tiempo: float) -> void:
+	if b.fase != BatallaAspi.Fase.PELEA:
+		return
+	var rects: Array[Rect2] = []
+	for objeto in b.municion:
+		if is_instance_valid(objeto) and not objeto.tirable.roto and not objeto.tirable.cayendo:
+			var t := ArteNivel.textura(objeto.tipo)
+			if t:
+				rects.append(Rect2(objeto.global_position + Vector2(-t.get_width() / 2.0, objeto.tirable.hundido - t.get_height()), t.get_size()))
+	for fuente in b.fuentes:
+		if is_instance_valid(fuente) and fuente.restantes() > 0:
+			rects.append(fuente.rect_indicador())
+	for i in rects.size():
+		var fase := fmod(tiempo + i * 0.37, 2.2)
+		if fase > 0.4:
+			continue
+		var punto := (rects[i].position + Vector2(rects[i].size.x - 3.0, 2.0)).round()
+		var largo := 1.0 if fase < 0.1 or fase > 0.3 else 2.0
+		var color := Color(1, 1, 0.92, 0.95)
+		c.draw_rect(Rect2(punto + Vector2(-largo, 0), Vector2(largo * 2 + 1, 1)), color)
+		c.draw_rect(Rect2(punto + Vector2(0, -largo), Vector2(1, largo * 2 + 1)), color)
+
+
 ## Aviso de embestida en el piso (crítica de Gemini): una línea roja de puntos desde A.S.P.I. hasta donde va a cargar,
 ## que parpadea mientras retrocede. Así se lee aunque ella esté lejos o el cuarto esté a oscuras.
 func _aviso_embestida(c: Node2D, tiempo: float) -> void:
@@ -140,13 +177,13 @@ func _aviso_embestida(c: Node2D, tiempo: float) -> void:
 	var paso := 6.0 * signf(hasta - desde)
 	if paso == 0.0:
 		return
-	var color := Color("e0483b") if int(tiempo * 8.0) % 2 == 0 else Color("ff9a7a")
+	var color := Estilo.color(&"peligro") if int(tiempo * 8.0) % 2 == 0 else Estilo.color(&"peligro_claro")
 	var x := desde + paso * 3.0
 	while (hasta - x) * signf(paso) > 0.0:
 		c.draw_rect(Rect2(roundf(x) - 1.0, y, 3.0, 2.0), color)
 		x += paso
 	# Y el círculo donde termina la carga (el tramo «telegrafiado», que se lee también en la penumbra).
-	ReaccionesAspi.marca(c, Vector2(roundf(hasta), y), b.reacciones.datos.radio_marca, Color("e0483b"))
+	ReaccionesAspi.marca(c, Vector2(roundf(hasta), y), b.reacciones.datos.radio_marca, Estilo.color(&"peligro"))
 
 
 ## Donde va a caer la bola de pelo (fase 3): la marca aparece con la tos y sigue hasta que la bola llega.
@@ -154,7 +191,7 @@ func _aviso_bolas(c: Node2D) -> void:
 	var bola := b.conducta("bola") as AtaqueBolaPelo
 	if bola == null or (b.ataque != BatallaAspi.Ataque.AVISO_BOLA and b.bolas.is_empty()):
 		return
-	ReaccionesAspi.marca(c, bola.objetivo + Vector2(0, 2), b.reacciones.datos.radio_marca, Color("ffd23f"))
+	ReaccionesAspi.marca(c, bola.objetivo + Vector2(0, 2), b.reacciones.datos.radio_marca, Estilo.color(&"peligro"))
 
 
 ## En el apagón, los charcos de agua y café brillan (1 px de reflejo que titila): son la clave de la fase 3.
@@ -169,3 +206,16 @@ func _charcos(c: Node2D, tiempo: float) -> void:
 		var x := roundf(charco.x - ancho / 2.0 + (int(tiempo * 3.0) % 3) * 2.0)
 		c.draw_rect(Rect2(x, Nivel1.SUELO - 1.0, ancho, 1.0), Color(0.75, 0.95, 1.0, 0.85))
 		c.draw_rect(Rect2(x + 3.0, Nivel1.SUELO, maxf(ancho - 8.0, 2.0), 1.0), Color(0.55, 0.85, 1.0, 0.6))
+	# En corto (v4, Gemini): rayitos de pixel que saltan sobre el charco, amarillos y celestes, cambiando 12 veces por
+	# segundo, mientras dure.
+	if b.llena and b.motivo == "charco" and corto.charco_en_corto != INF:
+		var cuadro := int(tiempo * 12.0)
+		for i in 4:
+			var semilla := (cuadro * 7 + i * 13) % 17
+			var x0 := roundf(corto.charco_en_corto - 20.0 + semilla * 2.5)
+			var color := Color(1.0, 0.92, 0.4) if (cuadro + i) % 2 == 0 else Color(0.6, 0.9, 1.0)
+			var punto := Vector2(x0, Nivel1.SUELO - 1.0)
+			for paso in 3:
+				var siguiente := punto + Vector2(2.0 if (semilla + paso) % 2 == 0 else -2.0, -3.0)
+				c.draw_rect(Rect2(Vector2(minf(punto.x, siguiente.x), siguiente.y), Vector2(absf(siguiente.x - punto.x) + 1.0, 3.0)), color)
+				punto = siguiente

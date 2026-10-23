@@ -1,7 +1,9 @@
 class_name AtaqueBolaPelo
 extends ConductaJefe
-## Bolas de pelo en arco (furia): tose (anticipación, «¡COF!») y escupe una bola hacia donde está Felipe; llega a la
-## repisa y al escritorio, así que acampar arriba no salva. La bola lastima al tocar (pieza HaceDano).
+## Bolas de pelo en arco (furia), en 4 tiempos (v4): **preparación** (tose: vibra, se hincha y aparece la marca roja
+## donde va a caer, sin «¡COF!»), **peligro** (la bola vuela en arco hacia la marca; llega a la repisa y al escritorio,
+## así que acampar arriba no salva; lastima al tocar, pieza HaceDano), **impacto** (cae: polvo de pelusa y un temblor
+## chico) y **recuperación** (queda mareada, quieta e inofensiva: ReaccionesAspi.marear).
 
 @export var espera := 2.2
 @export var aviso := 0.5
@@ -39,16 +41,21 @@ func intentar(delta: float) -> bool:
 	b.jefe.patrulla.quieta = true
 	b.jefe.patrulla.destino = INF
 	b.apariencia.vibrando = true
-	b.nivel.travesuras.jugo.palabra_en_mundo("PALABRA_COF", b.jefe.global_position + Vector2(0, -58), Color(0.9, 0.9, 0.9), 13)
+	b.sonar_evento("atragantar")
 	return true
 
 
 func actualizar(delta: float) -> bool:
+	var b := pelea as BatallaAspi
 	_reloj += delta
 	if _reloj < aviso:
+		# Se hincha para toser (tope ±8 %).
+		b.apariencia.inflado = b.reacciones.datos.inflado * _reloj / aviso
 		return true
-	pelea.terminar_ataque()
+	b.apariencia.inflado = 0.0
+	b.terminar_ataque()
 	_escupir()
+	b.reacciones.marear()
 	reloj_espera = espera
 	return false
 
@@ -90,7 +97,12 @@ func mover(delta: float) -> void:
 		bola.queue_redraw()
 		if (Componentes.de(bola, HaceDano) as HaceDano).revisar():
 			quitar(bola)
-		elif bola.global_position.y > b.nivel.datos.suelo - 6.0 or not b.arena.grow(20).has_point(bola.global_position) or b.fase == PeleaJefe.Fase.FIN:
+		elif bola.global_position.y > b.nivel.datos.suelo - 6.0:
+			# Impacto en el piso: polvo de pelusa y un temblor chico.
+			b.soltar_polvo(Vector2(bola.global_position.x, b.nivel.datos.suelo - 4.0))
+			b.nivel.travesuras.jugo.temblar(1, 0.1)
+			quitar(bola)
+		elif not b.arena.grow(20).has_point(bola.global_position) or b.fase == PeleaJefe.Fase.FIN:
 			quitar(bola)
 
 

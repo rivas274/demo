@@ -1,6 +1,6 @@
 # Estado actual: dónde vamos
 
-Actualizado: 2026-10-23 (pelea con A.S.P.I. v3: avisos sobre ella, globito, cámara, apagón con charcos, «Arte gatuno»; antes, sin reposición mágica; antes, 3D descartado; antes, estudio v3: la pelea en todo el cuarto; antes, plan de estabilización del nivel 1 aplicado; antes, tercera ronda terminada: jugo, letra, claves, opciones, menú Decreto real, kit de interfaz, arte de la casa y 3 animaciones nuevas de Felipe). **Léelo al empezar un chat nuevo** para retomar sin repetir conversaciones. Al cerrar cada tema, actualiza este archivo (qué se cerró, qué sigue).
+Actualizado: 2026-10-23 (pelea con A.S.P.I. v4: el salto estrella, LED del depósito, rojo = peligro y amarillo = oportunidad, apagón legible, menos texto, ataques en 4 tiempos; antes, v3: avisos sobre ella, globito, cámara, apagón con charcos, «Arte gatuno»; antes, sin reposición mágica; antes, 3D descartado; antes, estudio v3: la pelea en todo el cuarto; antes, plan de estabilización del nivel 1 aplicado; antes, tercera ronda terminada: jugo, letra, claves, opciones, menú Decreto real, kit de interfaz, arte de la casa y 3 animaciones nuevas de Felipe). **Léelo al empezar un chat nuevo** para retomar sin repetir conversaciones. Al cerrar cada tema, actualiza este archivo (qué se cerró, qué sigue).
 
 ## Fase del proyecto
 
@@ -8,11 +8,23 @@ Actualizado: 2026-10-23 (pelea con A.S.P.I. v3: avisos sobre ella, globito, cám
 
 ## En curso
 
+- **Pelea con A.S.P.I. v4 (hecha 2026-10-23, 0 créditos; incluye la v3.1). El creador aprobó 6 mejoras de las respuestas de ChatGPT y Gemini a la v3. Revisión: `diseno/revisiones/2026-10-23-pelea-aspi-v4.md`.**
+  - **El salto estrella** (`RemateAspi`): con el depósito lleno el motor falla (tosidos cada vez más graves), el depósito se hincha (tope ±8 %), echa humo y vibra. Si Felipe le cae encima, se hace silencio justo antes. En el golpe hay pausa de impacto de 4 cuadros (el final, 12), destello blanco de su silueta, estrellas, la onda, el temblor y «¡CLIC!».
+  - **Medidor del depósito:** 3 LED en su lomo que se encienden por mancha (reescalados a 2/3/3). Lleno, parpadean en amarillo.
+  - **Colores con significado** (en el tema: `peligro`, `oportunidad`): rojo para la carga, las bolas, el soplido y la luz de furia; amarillo para la oportunidad. Los avisos dicen la acción: «¡LLENA! ¡SALTA!» y «¡EN CORTO! ¡AHORA!».
+  - **Apagón legible:** sin destello blanco, la luz parpadea 3 veces con ritmo. Hay luz selectiva: los ojos de Felipe más fuertes, un brillo celeste en cada charco y la luz roja de A.S.P.I. En corto saltan rayitos sobre el charco. Las marcas del piso son más gruesas y llevan borde oscuro. El pergamino de un logro espera a que vuelva la luz (`Nivel.retener_logros`).
+  - **Menos texto:** los carteles de fase van en una línea, sin subtítulo. Las instrucciones son íconos sobre Felipe, solo la primera vez (`AyudaAspi`: agacharse mientras lo arrastra, maullar cerca de un charco). El globito no sale en pleno peligro (la frase espera hasta 2,5 s), tiene letra negrita y contorno de 2 px. Se quitó «¡COF!».
+  - **Lo que se puede tirar destella** (cruz de pixel intermitente, cada objeto a su ritmo) y **los restos del piso se ven más apagados** (`PiezaSuelta.RESTO`).
+  - **Ataques en 4 tiempos:** preparación, peligro, impacto y recuperación. Tras la embestida o la bola, A.S.P.I. queda **mareada 0,6 s**: quieta, inofensiva y con estrellitas. Si Felipe le cae encima, rebota como en un trampolín (no la apaga).
+  - **Tres lugares:** filas «Aferrarse» y «Maullar» de la tabla de Acciones (ícono la primera vez, globito que espera el peligro, rebote en A.S.P.I. mareada) en `02-guia-felipe.md` y en la ficha local regenerada; **falta publicar la ficha en línea**. Juego con pruebas (`prueba_jefe`, 18 comprobaciones nuevas «v4»).
+  - **Pedido pendiente de aprobación (SpriteCook, cuesta créditos):** animaciones nuevas de Felipe, todas desde Felipe A con `animate_game_art`, unos **26 créditos cada una** (5 intentos por regla: avisar el costo total antes). Son *lamerse* (en reposo), *posar* (pose de campeón antes del salto estrella), *pirueta al esparcir* la pelusa, *clavar las uñas al ser arrastrado* por la succión y *alisarse el pelaje* (después de un golpe). En la v4 no se hizo ninguna: se usaron las que ya existen.
+  - **Sigue:** el creador juega el `.zip` y ve `pelea-aspi-v4.mp4`, `pelea-aspi-v4-capturas.png` y `pelea-aspi-v4-detalles.png`. Decide si pide las animaciones de arriba.
+
 - **Pelea con A.S.P.I. v3.1 (hecha 2026-10-23, 0 créditos; lo que vio el creador en la v3):**
   - **La pantalla ahora tiembla de verdad:** la sacudida duraba un solo cuadro, porque el cuadro en que empieza un congelado traía el tiempo sin escalar y se comía el reloj. Ahora es un temblor estándar en píxeles enteros que decae: golpe 3 px y 0,2 s; golpe final 6 px y 0,35 s; embestida que frena 2 px; cortocircuito 4 px (`datos/jefes/aspi_jugo.tres`). Va en el offset de la cámara del mundo, no en el HUD. Hay opción nueva **«Reducir sacudida»** (divide por 3). `prueba_jefe` mide el desplazamiento.
   - **Libros:** ahora son de canto, con la base plana y 14 px de grosor (pilas de 28 px), del libro acostado de `librero-gato.png`; quedan apoyados, también en el piso (lección 47).
   - **Estación de carga:** está en el piso (la levantaba 10 px el enchufe tirado de su arte). Tiene un cable de 2 px con contorno que va por el piso con su curva hasta una toma de pared legible (placa, dos agujeros y clavija) y, tras el cortocircuito, la toma queda chamuscada con chispitas (lecciones 48 y 49).
-  - **Sigue:** el creador juega el `.zip` y ve `pelea-aspi-v3b.mp4` y `pelea-aspi-v3b-detalles.png`.
+  - Entregada dentro de la v4 (arriba).
 
 - **Pelea con A.S.P.I. v3 (hecha 2026-10-23, 0 créditos; el creador aprobó las ideas de Gemini, `diseno/revisiones/2026-10-23-gemini-pelea-aspi.md`). Revisión: `diseno/revisiones/2026-10-23-pelea-aspi-v3.md`.**
   - **Lectura:** «¡DEPÓSITO LLENO!» y «¡EN CORTO!» nacen sobre A.S.P.I. (no en la franja de arriba). La embestida marca una línea roja en el piso. Durante la pelea, Felipe piensa en un **globito** sobre su cabeza (`GloboDialogo`). La **cámara se corre** hacia ella cuando viene de lejos o está fuera de pantalla (`CamaraPelea`), con flecha en el borde; sin zoom, porque un zoom no entero rompe el pixel art.

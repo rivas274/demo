@@ -64,17 +64,17 @@ rugido = "JEFE_ASPI_DETECTANDO_SUCIEDAD_DETECTANDO_GATO"
 alto_extra = 20.0
 fases = 3
 carteles = PackedStringArray("JEFE_ASPI_FASE_1_LLENALE_EL", "JEFE_ASPI_FASE_2_SE_REINICIO", "JEFE_ASPI_FASE_3_APAGON")
-pistas = PackedStringArray("JEFE_ASPI_TIRA_COSAS_AL_PISO", "JEFE_ASPI_SI_TE_ASPIRA_MANTEN", "JEFE_ASPI_LLEVALA_A_UN_CHARCO")
+pistas = PackedStringArray()
 velocidad = PackedFloat32Array(55, 70, 85)
 capacidad = PackedInt32Array(2, 3, 3)
 tiempo_vulnerable = PackedFloat32Array(4, 3.5, 3)
-pista_vulnerable = "JEFE_ASPI_SALTALE_ENCIMA_Y_APRIETA"
 devuelve = PackedInt32Array(2, 2)
 sonidos = {
 "atragantar": "atragantar",
 "blorp": "puf",
 "cortocircuito": "cortocircuito",
 "despertar": "pitido",
+"falla": "falla",
 "motor": "motor",
 "reversa": "reversa"
 }
